@@ -1,5 +1,8 @@
 {
-  "dotnet.defaultSolution": "Backend/Healan/Healan.sln",
+  "dotnet.defaultSolution": "Healan.Doctor.sln",
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\Program Files\\dotnet;C:\\Program Files (x86)\\dotnet;${env:PATH}"
+  },
   "files.exclude": {
     "**/bin": true,
     "**/obj": true,

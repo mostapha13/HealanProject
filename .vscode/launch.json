@@ -1,12 +1,10 @@
 {
   "version": "0.2.0",
   "configurations": [
-    
     {
       "name": "Identity Server",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-identity-server",
       "program": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer/bin/Debug/net9.0/IdentityServer.dll",
       "cwd": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer",
       "console": "integratedTerminal",
@@ -19,7 +17,6 @@
       "name": "Identity gRPC",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-identity-grpc",
       "program": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer.GrpcServer/bin/Debug/net9.0/IdentityServer.GrpcServer.dll",
       "cwd": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer.GrpcServer",
       "console": "integratedTerminal",
@@ -32,7 +29,6 @@
       "name": "FileManager gRPC",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-filemanager-grpc",
       "program": "${workspaceFolder}/Backend/FileManager/src/FileManager.GrpcServer/bin/Debug/net9.0/FileManager.GrpcServer.dll",
       "cwd": "${workspaceFolder}/Backend/FileManager/src/FileManager.GrpcServer",
       "console": "integratedTerminal",
@@ -45,7 +41,6 @@
       "name": "FileManager Web",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-filemanager-web",
       "program": "${workspaceFolder}/Backend/FileManager/src/FileManager.WebUI/bin/Debug/net9.0/FileManager.WebUI.dll",
       "cwd": "${workspaceFolder}/Backend/FileManager/src/FileManager.WebUI",
       "console": "integratedTerminal",
@@ -58,7 +53,6 @@
       "name": "Healan WebApi",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-healan-webapi",
       "program": "${workspaceFolder}/Backend/Healan/src/Healan.WebApi/bin/Debug/net9.0/Healan.WebApi.dll",
       "cwd": "${workspaceFolder}/Backend/Healan/src/Healan.WebApi",
       "console": "integratedTerminal",
@@ -73,26 +67,23 @@
     },
     {
       "name": "Healan Frontend",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:healan"],
-      "cwd": "${workspaceFolder}/Frontend/tse_client_workspace",
-      "console": "integratedTerminal"
+      "command": "npm.cmd run start:healan",
+      "cwd": "${workspaceFolder}/Frontend/tse_client_workspace"
     },
     {
       "name": "Healan Portal (Public Site)",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:portal"],
-      "cwd": "${workspaceFolder}/Frontend/tse_client_workspace",
-      "console": "integratedTerminal"
+      "command": "npm.cmd run start:portal",
+      "cwd": "${workspaceFolder}/Frontend/tse_client_workspace"
     }
   ],
   "compounds": [
     {
-      "name": "Healan: Full Stack + Portal",
+      "name": "Healan: Full Stack",
+      "preLaunchTask": "prepare-healan-full-stack",
       "configurations": [
         "Identity Server",
         "Identity gRPC",
@@ -102,22 +93,15 @@
         "Healan Portal (Public Site)",
         "Healan Frontend"
       ],
-      "stopAll": true
-    },
-    {
-      "name": "Healan: Full Stack",
-      "configurations": [
-        "Identity Server",
-        "Identity gRPC",
-        "FileManager gRPC",
-        "FileManager Web",
-        "Healan WebApi",
-        "Healan Frontend"
-      ],
-      "stopAll": true
+      "stopAll": true,
+      "presentation": {
+        "group": "Healan",
+        "order": 1
+      }
     },
     {
       "name": "Healan: Backend Only",
+      "preLaunchTask": "prepare-healan-full-stack",
       "configurations": [
         "Identity Server",
         "Identity gRPC",
@@ -125,7 +109,24 @@
         "FileManager Web",
         "Healan WebApi"
       ],
-      "stopAll": true
+      "stopAll": true,
+      "presentation": {
+        "group": "Healan",
+        "order": 2
+      }
+    },
+    {
+      "name": "Healan: Frontend Only",
+      "preLaunchTask": "kill-healan-dev-ports",
+      "configurations": [
+        "Healan Portal (Public Site)",
+        "Healan Frontend"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "group": "Healan",
+        "order": 3
+      }
     }
   ]
 }

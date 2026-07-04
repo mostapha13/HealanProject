@@ -25,22 +25,31 @@ namespace IdentityServer.Domain.Data
 
         private static async Task AddRoles(ApplicationDbContext dbContext, RoleManager<ApplicationRole> roleManager)
         {
-            var isExistTempRole = await roleManager.RoleExistsAsync(ConstUserInfo.AdminRole);
-            if (isExistTempRole == false)
+            var allRole = EnumExtensions.GetEnumInfo<UserAccesRoleId>();
+            var existingRoles = await dbContext.Roles.ToListAsync();
+            var existingRoleNames = existingRoles.Select(r => r.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in allRole.Where(w => !existingRoleNames.Contains(w.Name)))
             {
-                var role = new ApplicationRole(ConstUserInfo.AdminRole);
+                var role = new ApplicationRole(item.Name)
+                {
+                    DisplayName = item.DisplayName
+                };
                 await roleManager.CreateAsync(role);
             }
-            var allRole = EnumExtensions.GetEnumInfo<UserAccesRoleId>();
 
-            var allExistRoleNames = await dbContext.Roles.Select(s => s.Name).ToListAsync();
-            var allNotExistRole = allRole.Where(w => !allExistRoleNames.Contains(w.Name));
-            foreach (var item in allNotExistRole)
+            var rolesMissingDisplayName = existingRoles.Where(r => string.IsNullOrEmpty(r.DisplayName)).ToList();
+            foreach (var role in rolesMissingDisplayName)
             {
-                ApplicationRole applicationRole = new ApplicationRole() { Id = Guid.NewGuid(), Name = item.Name, NormalizedName = item.Name.ToUpper(), DisplayName = item.DisplayName, ConcurrencyStamp = Guid.NewGuid().ToString() };
-                dbContext.Add(applicationRole);
+                var enumInfo = allRole.FirstOrDefault(e => e.Name == role.Name);
+                if (enumInfo != null)
+                {
+                    role.DisplayName = enumInfo.DisplayName;
+                }
             }
-            await dbContext.SaveChangesAsync();
+
+            if (rolesMissingDisplayName.Count > 0)
+                await dbContext.SaveChangesAsync();
         }
 
         private static async Task AddUser(UserManager<ApplicationUser> userManager, string roleName, string userName, string pass, string firstName, string lastName)
