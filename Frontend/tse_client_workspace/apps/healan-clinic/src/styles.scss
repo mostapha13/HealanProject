@@ -1,18 +1,40 @@
-@import '~antd/dist/antd.css';
-
-* {
-  direction: rtl;
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100vh;
-}
-
-body {
-  font-family: 'Vazirmatn', Tahoma, sans-serif;
-  background: #f0fdfa;
-}
+@import './fonts.scss';
+@import '~antd/dist/antd.css';
+
+* {
+  direction: rtl;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'IRANYekan', Tahoma, sans-serif;
+  background: #f0fdfa;
+}
+
+/* Ant Design — فونت فارسی یکسان */
+.ant-btn,
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-table,
+.ant-menu,
+.ant-form-item-label,
+.ant-modal,
+.ant-card,
+.ant-tabs,
+.ant-pagination,
+.ant-picker,
+.ant-dropdown-menu,
+.ant-notification,
+.ant-message,
+.ant-tag,
+.ant-breadcrumb {
+  font-family: 'IRANYekan', Tahoma, sans-serif;
+}

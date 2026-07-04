@@ -99,7 +99,8 @@ namespace Healan.WebApi
                     .WithOrigins(
                         Configuration["ClientBaseUrl"] ?? "http://localhost:4201",
                         "http://localhost:4200",
-                        "http://localhost:4201")
+                        "http://localhost:4201",
+                        "http://localhost:4202")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());

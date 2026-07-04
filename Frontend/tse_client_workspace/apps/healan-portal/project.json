@@ -1,6 +1,6 @@
 {
-  "root": "apps/healan-clinic",
-  "sourceRoot": "apps/healan-clinic/src",
+  "root": "apps/healan-portal",
+  "sourceRoot": "apps/healan-portal/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -9,14 +9,14 @@
       "defaultConfiguration": "production",
       "options": {
         "compiler": "swc",
-        "outputPath": "dist/apps/healan-clinic",
-        "index": "apps/healan-clinic/src/index.html",
+        "outputPath": "dist/apps/healan-portal",
+        "index": "apps/healan-portal/src/index.html",
         "baseHref": "/",
-        "main": "apps/healan-clinic/src/main.tsx",
-        "polyfills": "apps/healan-clinic/src/polyfills.ts",
-        "tsConfig": "apps/healan-clinic/tsconfig.app.json",
-        "assets": ["apps/healan-clinic/src/assets"],
-        "styles": ["apps/healan-clinic/src/styles.scss"],
+        "main": "apps/healan-portal/src/main.tsx",
+        "polyfills": "apps/healan-portal/src/polyfills.ts",
+        "tsConfig": "apps/healan-portal/tsconfig.app.json",
+        "assets": ["apps/healan-portal/src/assets"],
+        "styles": ["apps/healan-portal/src/styles.scss"],
         "scripts": [],
         "webpackConfig": "@nrwl/react/plugins/webpack"
       },
@@ -24,8 +24,8 @@
         "production": {
           "fileReplacements": [
             {
-              "replace": "apps/healan-clinic/src/environments/environment.ts",
-              "with": "apps/healan-clinic/src/environments/environment.prod.ts"
+              "replace": "apps/healan-portal/src/environments/environment.ts",
+              "with": "apps/healan-portal/src/environments/environment.prod.ts"
             }
           ],
           "optimization": true,
@@ -40,13 +40,13 @@
     "serve": {
       "executor": "@nrwl/web:dev-server",
       "options": {
-        "buildTarget": "healan-clinic:build",
-        "port": 4201,
+        "buildTarget": "healan-portal:build",
+        "port": 4202,
         "hmr": true
       },
       "configurations": {
         "production": {
-          "buildTarget": "healan-clinic:build:production",
+          "buildTarget": "healan-portal:build:production",
           "hmr": false
         }
       }
@@ -55,7 +55,7 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/healan-clinic/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["apps/healan-portal/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

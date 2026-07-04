@@ -1,0 +1,8 @@
+{
+  "dotnet.defaultSolution": "Backend/Healan/Healan.sln",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true
+  }
+}

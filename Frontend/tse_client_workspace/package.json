@@ -5,8 +5,10 @@
   "scripts": {
     "start": "nx serve --port 4200",
     "start:healan": "nx serve healan-clinic --port 4201",
+    "start:portal": "nx serve healan-portal --port 4202",
     "build": "nx build",
     "build:healan": "nx build healan-clinic",
+    "build:portal": "nx build healan-portal",
     "test": "nx test"
   },
   "private": true,
