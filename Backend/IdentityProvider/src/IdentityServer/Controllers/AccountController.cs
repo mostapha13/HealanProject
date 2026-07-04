@@ -160,6 +160,8 @@ namespace IdentityServer.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Captcha service unavailable on login page");
+                ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست.");
                 return View(model);
             }
         }
@@ -168,6 +170,9 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
+#if DEBUG
+            ModelState.Remove(nameof(model.CaptchaCode));
+#endif
 
             var rUrl = string.Empty;// _configuration["IdentityServer:MarketMakerBaseUri"];
             if (!string.IsNullOrEmpty(model.ReturnUrl))
@@ -238,9 +243,10 @@ namespace IdentityServer.Controllers
                 }
                 return model;
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                _logger.LogWarning(ex, "Captcha service unavailable while refreshing login model");
+                return model;
             }
         }
 

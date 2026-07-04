@@ -1,4 +1,4 @@
-$ports = @(4201, 4202, 6128, 44320, 6829, 5060, 6823)
+$ports = @(4201, 4202, 5254, 6128, 44320, 6829, 5060, 6823)
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 
 foreach ($port in $ports) {

@@ -50,6 +50,18 @@
       }
     },
     {
+      "name": "Captcha Provider",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Backend/CaptchaProvider/CaptchaProvider.WebUI/bin/Debug/net9.0/CaptchaProvider.WebUI.dll",
+      "cwd": "${workspaceFolder}/Backend/CaptchaProvider/CaptchaProvider.WebUI",
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5254"
+      }
+    },
+    {
       "name": "Healan WebApi",
       "type": "coreclr",
       "request": "launch",
@@ -85,6 +97,7 @@
       "name": "Healan: Full Stack",
       "preLaunchTask": "prepare-healan-full-stack",
       "configurations": [
+        "Captcha Provider",
         "Identity Server",
         "Identity gRPC",
         "FileManager gRPC",
@@ -103,6 +116,7 @@
       "name": "Healan: Backend Only",
       "preLaunchTask": "prepare-healan-full-stack",
       "configurations": [
+        "Captcha Provider",
         "Identity Server",
         "Identity gRPC",
         "FileManager gRPC",

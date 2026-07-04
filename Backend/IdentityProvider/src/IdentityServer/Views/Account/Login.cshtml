@@ -7,8 +7,10 @@
 
 @{
     ViewData["Title"] = "ورود";
-    var base64Image = Convert.ToBase64String(Model.Image);
-    var source = String.Format("data:image/png;base64,{0}", base64Image);
+    var captchaAvailable = Model?.Image != null && Model.Image.Length > 0;
+    string source = captchaAvailable
+        ? $"data:image/png;base64,{Convert.ToBase64String(Model.Image)}"
+        : null;
 }
 
 @*<p>@ViewBag.Message</p>*@
@@ -24,13 +26,15 @@
             @Html.HiddenFor(x => x.ReturnUrl)
 
             <div class="form-group">
-                <div class="input-custom relative textbox_display">
-                    @*@Html.TextBoxFor(model => model.CaptchaCode, new { @class = "form-control", placeholder = "کپچا" })*@
-                    <input asp-for="CaptchaCode" class="Captchabox" placeholder="کد امنیتی" autocomplete='off'/>
-                </div>
-                <div class="input-group-prepend textbox_display">
-                    <img src="@source" />
-                </div>
+                @if (captchaAvailable)
+                {
+                    <div class="input-custom relative textbox_display">
+                        <input asp-for="CaptchaCode" class="Captchabox" placeholder="کد امنیتی" autocomplete='off'/>
+                    </div>
+                    <div class="input-group-prepend textbox_display">
+                        <img src="@source" alt="captcha" />
+                    </div>
+                }
             </div>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
