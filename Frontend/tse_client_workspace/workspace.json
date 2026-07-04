@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "projects": {
+    "cash-market": "apps/cash-market",
+    "login": "apps/login",
+    "modern-instrumentations": "apps/modern-instrumentations",
+    "regions-hall": "apps/regions-hall",
+    "tax-front": "apps/tax-front",
+    "healan-clinic": "apps/healan-clinic",
+    "tools": "libs/tools",
+    "types": "libs/types",
+    "utils": "libs/utils"
+  }
+}

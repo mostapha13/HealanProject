@@ -1,0 +1,6 @@
+@WorkFlow.WebUI_HostAddress = http://localhost:5294
+
+GET {{WorkFlow.WebUI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

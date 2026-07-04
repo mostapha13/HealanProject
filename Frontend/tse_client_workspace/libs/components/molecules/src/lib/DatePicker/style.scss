@@ -1,0 +1,13 @@
+.DatePicker {
+  width: 100% !important;
+  z-index: unset !important;
+}
+
+.Calendar {
+  height: 30em !important;
+  min-height: unset !important ;
+}
+
+.DatePicker__calendarContainer {
+  z-index: 99 !important;
+}

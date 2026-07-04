@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewData["Title"]</title>
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/css/LoginPage/css/style.css" rel="stylesheet" />
+    <link href="~/css/Font/css/style.css" rel="stylesheet" />
+@*    <script src="~/css/LoginPage/js/jquery-2.1.4.min.js"></script>*@
+    <link rel="shortcut icon" href="~/css/Image/favicon.html">
+    <link href="~/css/AlertMessage/AlertMessage.css" rel="stylesheet" />
+</head>
+<body>
+    <img src="~/images/half-logo.png" class="body-logo" />
+    <div class="login-page">
+        <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
+            <div class="main">
+                <div class="col-md-7 col-sm-12 col-xs-12">
+                    @RenderBody()
+                </div>
+                <div class="hotel-right col-md-5 hidden-sm hidden-xs">
+                    <img src="~/images/Tower1.png" class="img-responsive" />
+                </div>
+                <div class="clear"></div>
+                <img src="~/images/half-logo.png" class="half-logo" />
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                کلیه حقوق این سامانه برای بورس اوراق بهادار تهران محفوظ است.
+            </p>
+        </div>
+    </div>
+
+    <script src="~/scripts/jquery.min.js"></script>
+    <script src="~/scripts/jquery.validate.min.js"></script>
+    <script src="~/scripts/jquery.validate.unobtrusive.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

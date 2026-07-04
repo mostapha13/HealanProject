@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  regions-halls:
+    container_name: regions-halls-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # args:
+      #   - NX_API_URL=https://webgw.tse.ir/RegionHall/api/v1/
+    ports:
+      - '80:80'
+    image: region-hall-image:v1.0.5

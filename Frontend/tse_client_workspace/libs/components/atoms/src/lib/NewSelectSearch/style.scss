@@ -1,0 +1,14 @@
+legend {
+  text-align: start !important;
+}
+
+.textfieldRtl label {
+  transform-origin: top right;
+  right: 30px;
+  top: 0px;
+  text-align: start;
+}
+.MuiFormLabel-root,
+.MuiInputLabel-formControl {
+  font-size: 0.75rem !important;
+}

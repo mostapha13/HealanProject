@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  modern-instrumentations:
+    container_name: modern-instrumentations-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NX_API_URL=http://srv-linuxtest01.tseco.net:8080/api/v1/
+    ports:
+      - '80:80'
+    image: modern-instrumentations-image

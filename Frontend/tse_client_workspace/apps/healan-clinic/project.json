@@ -1,0 +1,70 @@
+{
+  "root": "apps/healan-clinic",
+  "sourceRoot": "apps/healan-clinic/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "dist/apps/healan-clinic",
+        "index": "apps/healan-clinic/src/index.html",
+        "baseHref": "/",
+        "main": "apps/healan-clinic/src/main.tsx",
+        "polyfills": "apps/healan-clinic/src/polyfills.ts",
+        "tsConfig": "apps/healan-clinic/tsconfig.app.json",
+        "assets": [
+          "apps/healan-clinic/src/assets",
+          {
+            "input": "apps/cash-market/src/assets/fonts",
+            "glob": "**/*",
+            "output": "assets/fonts"
+          }
+        ],
+        "styles": ["apps/healan-clinic/src/styles.scss"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/healan-clinic/src/environments/environment.ts",
+              "with": "apps/healan-clinic/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "healan-clinic:build",
+        "port": 4201,
+        "hmr": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "healan-clinic:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/healan-clinic/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": ["scope:healan", "type:app"]
+}

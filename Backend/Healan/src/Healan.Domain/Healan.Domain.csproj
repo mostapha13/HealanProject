@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Share\src\Share.Domain\Share.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Enums\" />
+    <Folder Include="Companies\Events\" />
+    <Folder Include="Companies\ValueObjects\" />
+    <Folder Include="Orders\Enums\" />
+    <Folder Include="PublicInfos\Enums\" />
+    <Folder Include="ServiceTypes\Entities\" />
+    <Folder Include="ServiceTypes\Enums\" />
+    <Folder Include="Signatures\Entities\" />
+    <Folder Include="Signatures\Enums\" />
+  </ItemGroup>
+
+</Project>

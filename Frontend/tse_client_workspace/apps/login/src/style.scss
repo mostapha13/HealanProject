@@ -1,0 +1,29 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+i {
+  all: unset;
+}
+
+* {
+  direction: rtl;
+  font-family: 'iransans-regular' !important;
+}
+@font-face {
+  font-family: 'iransans-regular';
+  src: url('./assets/fonts/IRANSans.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+
+.ant-menu-item-selected span a {
+  color: #9e00ff;
+}
+.ant-menu-vertical .ant-menu-item::after,
+.ant-menu-vertical-left .ant-menu-item::after,
+.ant-menu-vertical-right .ant-menu-item::after,
+.ant-menu-inline .ant-menu-item::after {
+  border-right: 3px solid transparent !important;
+}

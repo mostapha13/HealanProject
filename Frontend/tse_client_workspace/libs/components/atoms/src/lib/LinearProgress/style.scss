@@ -1,0 +1,31 @@
+.custom-progress.low-progress .ant-progress-text {
+  @apply text-black;
+}
+
+.custom-progress.mid-progress .ant-progress-text {
+  @apply text-listingTertiaryColor;
+  @apply text-[12px];
+}
+
+.custom-progress.high-progress .ant-progress-text {
+  @apply text-green;
+  @apply text-[12px];
+}
+.custom-progress.white-progress .ant-progress-text {
+  @apply text-black;
+  @apply text-[12px];
+}
+.ltr-progress {
+  direction: ltr !important;
+}
+
+.ltr-progress .ant-progress-inner {
+  direction: ltr !important;
+  margin-right: 8px !important;
+}
+.progress-medium-size .ant-progress-inner {
+  height: 15px !important;
+}
+.progress-medium-size .ant-progress-bg {
+  height: 15px !important;
+}

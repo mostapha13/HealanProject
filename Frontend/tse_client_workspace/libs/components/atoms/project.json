@@ -1,0 +1,15 @@
+{
+  "root": "libs/components/atoms",
+  "sourceRoot": "libs/components/atoms/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/components/atoms/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  }
+}

@@ -1,0 +1,397 @@
+/*--
+Author: W3layouts
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+--*/
+
+/* reset */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, dl, dt, dd, ol, nav ul, nav li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+
+ol, ul {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+blockquote, q {
+    quotes: none;
+}
+
+    blockquote:before, blockquote:after, q:before, q:after {
+        content: '';
+        content: none;
+    }
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+/* start editing from here */
+a {
+    text-decoration: none;
+}
+
+.btn {
+    border: 0;
+    outline: 0;
+}
+
+.txt-rt {
+    text-align: right;
+}
+/* text align right */
+.txt-lt {
+    text-align: left;
+}
+/* text align left */
+.txt-center {
+    text-align: center;
+}
+/* text align center */
+.float-rt {
+    float: right;
+}
+/* float right */
+.float-lt {
+    float: left;
+}
+/* float left */
+.clear {
+    clear: both;
+}
+/* clear float */
+.pos-relative {
+    position: relative;
+}
+/* Position Relative */
+.pos-absolute {
+    position: absolute;
+}
+/* Position Absolute */
+.vertical-base {
+    vertical-align: baseline;
+}
+/* vertical align baseline */
+.vertical-top {
+    vertical-align: top;
+}
+/* vertical align top */
+nav.vertical ul li {
+    display: block;
+}
+/* vertical menu */
+nav.horizontal ul li {
+    display: inline-block;
+}
+/* horizontal menu */
+img {
+    max-width: 100%;
+}
+/*end reset*/
+
+body {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    font-family: IRANSans !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: IRANSans !important;
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+label {
+    margin: 0;
+}
+/*-- main --*/
+.content {
+    padding: 80px 0;
+}
+
+    .content h1 {
+        margin-bottom: 50px;
+        text-align: center;
+        font-size: 45px;
+        font-family: IRANSans !important;
+        color: #fff;
+    }
+
+.login-page {
+    padding: 50px 0px;
+}
+
+    .login-page input {
+        padding: 7px 40px;
+    }
+
+.btn {
+    font-size: 17px !important;
+}
+
+.main {
+    /*width: 100%;
+    height:100vh;
+    margin: 0 auto 0 auto;
+    background: url(../images/pic3.jpg) no-repeat 0px 0px;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    -ms-background-size: cover;
+    -moz-background-size: cover;
+    min-height: 416px;
+    position: relative;*/
+    flex-wrap: wrap;
+    z-index: 1;
+    background-color: #fff;
+    box-shadow: 0 0 31px -7px #191919;
+    position: relative;
+}
+
+.hotel-left {
+    border: 1px solid #debf7d;
+    border-radius: 50px;
+    padding: 1.5rem 3rem;
+    margin: 50px 10px 50px 60px;
+}
+
+.hotel-right {
+    padding: 0;
+}
+
+    .hotel-right h3 {
+        color: #fdb515;
+        font-size: 28px;
+        margin-top: 70px;
+    }
+
+        .hotel-right h3 span {
+            display: block;
+            margin-top: 8px;
+        }
+
+.body-logo {
+    position: absolute;
+    left: 0px;
+    bottom: 0;
+    opacity: 0.4;
+    height: 100%;
+}
+
+.half-logo {
+    position: absolute;
+    left: 0px;
+    bottom: 0;
+    width: 120px;
+    opacity: 0.3;
+}
+
+.pay_form form input.logo, .pay_form form input.key {
+    width: 85%;
+    padding: 0.7em 2.7em 0.7em 0.7em;
+    font-size: 15px;
+    border: none;
+    border-bottom: 2px solid #e6e6e6;
+    outline: none;
+    color: black;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.pay_form form input.logo {
+    background: url(../images/logo.png) no-repeat 97% center #fff;
+    background-size: 4.5% !important;
+}
+
+.pay_form form input.key {
+    background: url(../images/key.png) no-repeat 97% center #fff;
+    background-size: 4.5% !important;
+}
+
+.login-button {
+    width: 85%;
+}
+/*.pay_form form input[type="submit"] {
+    background: #fdb515;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 5px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    width: 37%;
+    cursor: pointer;
+    border-radius: 6px;
+    \transition: 0.5s all;
+    -webkit-transition: 0.5s all;
+    -moz-transition: 0.5s all;
+    -o-transition: 0.5s all;
+    -ms-transition: 0.5s all;
+    margin-top: 5px;
+}
+
+    .pay_form form input[type="submit"]:hover {
+        background: #d24663;
+        transition: 0.5s all;
+        -webkit-transition: 0.5s all;
+        -moz-transition: 0.5s all;
+        -o-transition: 0.5s all;
+        -ms-transition: 0.5s all;
+    }*/
+.hotel-left a {
+    text-decoration: none;
+    color: #fdb515;
+    font-size: 14px;
+    transition: 0.5s all;
+    -webkit-transition: 0.5s all;
+    -moz-transition: 0.5s all;
+    -o-transition: 0.5s all;
+    -ms-transition: 0.5s all;
+}
+
+    .hotel-left a:hover {
+        color: #fff;
+        transition: 0.5s all;
+        -webkit-transition: 0.5s all;
+        -moz-transition: 0.5s all;
+        -o-transition: 0.5s all;
+        -ms-transition: 0.5s all;
+    }
+
+.login-right {
+    float: right;
+}
+
+.pay_form h2 {
+    color: #fdb515;
+    font-size: 30px;
+    margin-bottom: 30px;
+}
+
+p.footer {
+    text-align: center;
+    margin-top: 70px;
+    color: #fff;
+    font-size: 15px;
+}
+
+    p.footer a {
+        text-decoration: none;
+        color: #fdb515;
+    }
+
+        p.footer a:hover {
+            color: #fff;
+        }
+
+.hotel-right p {
+    font-size: 22px;
+    margin-top: 8em;
+    color: #fdb515;
+}
+
+.alert-close, .alert-close1, .alert-close2, .alert-close4, .alert-close6 {
+    background: url('../images/into.png') no-repeat 0px 0px;
+    cursor: pointer;
+    height: 22px;
+    width: 22px;
+    position: absolute;
+    right: 7px;
+    top: 11px;
+    -webkit-transition: color 0.2s ease-in-out;
+    -moz-transition: color 0.2s ease-in-out;
+    -o-transition: color 0.2s ease-in-out;
+    transition: color 0.2s ease-in-out;
+    z-index: 1;
+}
+
+.validLogin {
+    color: red !important;
+}
+
+.BoxLogin {
+    text-align: right;
+    padding-bottom: 5px;
+}
+
+.password-custom {
+    margin-bottom: 10px !important;
+}
+
+.checkbox {
+    margin-bottom: 5px !important;
+}
+
+.remember-custom {
+    font-size: 15px;
+    cursor: pointer;
+    padding-right: 20px;
+}
+
+.validation-summary-errors {
+    color: red;
+    font-size: 13px;
+}
+
+.text-login {
+    text-align: right !important;
+    margin-bottom: 15px !important;
+}
+
+.BoxLogin {
+    font-size: 12px !important;
+}
+
+.pay_form .text-login {
+    color: #1072b6;
+    font-size: 25px;
+    margin-bottom: 30px;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(1, 10, 19, 0.69);
+    color: #fff;
+    text-align: center;
+    font-size: 15px;
+    padding: 10px 0;
+}
+
+.textbox_display {
+    display: inline-block;
+}
+
+.Captchabox {
+    padding: 0em !important;
+    font-size: 15px;
+    border: none;
+    border-bottom: 2px solid #e6e6e6;
+    outline: none;
+    color: black;
+    margin-bottom: 10px;
+    text-align: right;
+}

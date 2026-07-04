@@ -1,0 +1,25 @@
+.react-code-input div {
+  direction: ltr !important;
+}
+
+.react-code-input {
+  width: fit-content !important;
+  border: 1px solid #000;
+  border-radius: 6px;
+  padding: 0 0 0.3rem 0;
+}
+
+.react-code-input div input {
+  border-width: 0;
+  border-right: 0 !important;
+  border-bottom: 1px solid #000;
+  margin: 0 1rem;
+  border-bottom-left-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+.react-code-input div input:focus {
+  border: 0;
+  border-bottom: 1px solid #000;
+}

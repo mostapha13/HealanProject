@@ -1,0 +1,96 @@
+// .Final {
+//     flex: 2;
+//     background-color: rgb(228, 226, 226);
+//     min-height: 919px;
+//   }
+  
+//   .FinalData {
+//     min-height: 700px;
+  
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     width: 80%;
+//     box-shadow: 0 0 10px 10px rgba(227, 227, 233, 0.7);
+//     margin: 10px auto;
+//     border-radius: 10px;
+//     background-color: white;
+//   }
+  
+//   .StaffInfo,
+//   .StaffTransactionInfo,
+//   .StaffFamilyInfo,
+//   .StaffFamilyTransactionInfo {
+//     border: 3px solid goldenrod;
+//     width: 95%;
+//     border-left: none;
+//     min-height: 150px;
+//     margin-bottom: 15px;
+//   }
+  
+//   .StaffInfo,.StaffTransactionInfo,.StaffFamilyInfo,.StaffFamilyTransactionInfo{
+//     margin-top: 15px;
+//     min-height: 143px;
+//     position: relative;
+//   }
+  
+  
+//   .StaffSpan,.StaffDataTransactionSpan,.StaffFamilySpan,.StaffFamilyTransactionSpan {
+//     position: absolute;
+//     top: -15px;
+//     background-color: white;
+//     margin-right: 5%;
+//     padding-left: 2%;
+//     padding-right: 2%;
+//   }
+  
+//    .StaffInfo{
+//       min-height: 190px;
+//    }
+  
+  
+   .FinalTable{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+   }
+  
+   .tableRow{
+      width: 90%;
+   }
+  
+   .thead{
+      height: 15px;
+      margin-top: 20px;
+   }
+  
+  
+  
+  
+//    .FinalStaffInfo{
+//     margin: 1.2rem;
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 1;
+//    }
+  
+   .FinalStaffInfoItem{
+    display: flex;
+    flex-direction: column;
+  margin-right: 5px;
+  margin-bottom: 20px;
+    flex: 1 1 calc(24.33% - 1rem);
+  
+   }
+  
+   .FinalStaffInfoItem>input{
+    height: 30px;
+    background-color: rgb(228, 226, 226);
+    border-radius: 10px;
+    padding: 1px;
+    margin-top: 1px;
+   }
+
+

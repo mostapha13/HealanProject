@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+option csharp_namespace = "IdentityServer.GrpcServer";
+
+package IdentityProvider;
+
+// The greeting service definition.
+service UserService {
+  // Sends a greeting
+  rpc GetById (GetByIdRequest) returns (UserSummaryReply);
+    rpc GetByIds (GetByIdsRequest) returns (UserSummariesReply);
+  rpc SaveUser (SaveRequest) returns (UserSummaryReply);
+   rpc SetUserRole (SetUserRoleRequest) returns (UserSummaryReply);
+   rpc SetUserSystemRole (SetUserSystemRoleRequest) returns (UserSummaryReply);
+    rpc SetUserState (SetUserStateRequest) returns (UserSummaryReply);
+	  rpc GetAllRole (Empty) returns (RoleInfos);
+	    rpc GetUserRole (GetByIdRequest) returns (RoleInfos);
+		 rpc GetUserRoles (GetByIdsRequest) returns (UserSummaryRoles);
+		  rpc UserHasAccess (UserHasAccessRequest) returns (UserHasAccessResonse);
+		   rpc UserIsActive (GetByIdRequest) returns (UserHasAccessResonse);
+		    rpc GetRelatedUserRole (GetByRoleNameRequest) returns (UserIdsReply);
+			rpc GetRelatedUserRolePhoneNumber(GetRelatedUserRolePhoneNumberRequest) returns (UserPhoneNumberReply);
+}
+
+// The request message containing the user's name.
+message GetByIdRequest {
+  string UserId = 1;
+}
+message GetByIdsRequest {
+ repeated string UserIds = 1;
+}
+message UserSummaryRole {
+  string UserId = 1;
+  repeated RoleInfo RoleInfos = 2;
+}
+message UserSummaryRoles {
+  repeated UserSummaryRole RoleInfos = 1;
+}
+// The response message containing the greetings.
+message UserSummaryReply {
+  string UserId = 1;
+  string UserName=2;
+  string FirstName=3;
+  string LastName=4;
+  string Email=5;
+  string PhoneNumber=6;
+  bool IsActive=7;
+  int32 DepartmentId=8;
+  string DepartmentName=9;
+    string LastLoginIP=10;
+  int64 LastLoginDate=11;
+  repeated RoleInfo RoleInfos = 12;
+}
+message UserSummariesReply {
+	repeated UserSummaryReply UserSummaries = 1;
+}
+message SaveRequest {
+  string UserId = 1;
+  string FirstName=2;
+  string LastName=3;
+  string PhoneNumber=4;
+  bool IsActive=5;
+  int32 DepartmentId=6;
+  string Password=7;
+  repeated string RoleNames = 8;
+}
+message SetUserRoleRequest {
+  string UserId = 1;
+  repeated string RoleNames = 2;
+}
+message SetUserStateRequest {
+  string UserId = 1;
+  bool IsActive=2;
+}
+message RoleInfo {
+	string RoleId = 1;
+	string RoleName = 2;
+	string RoleTitle = 3;
+}
+message RoleInfos {
+  repeated RoleInfo RoleInfos = 1;
+}
+message Empty {}
+message UserHasAccessRequest {
+  string UserId = 1;
+  int32 LanguageId = 2;
+ repeated int32 AccessFormId = 3;
+}
+message UserHasAccessResonse {
+  bool HasAccess = 1;
+}
+message GetByRoleNameRequest {
+ repeated string RoleNames = 1;
+}
+message UserIdsReply {
+	repeated string UserIds = 1;
+}
+
+message SetUserSystemRoleRequest {
+  string UserId = 1;
+  int32 AccessSystemId=2;
+  repeated string RoleNames = 3;
+}
+
+message GetRelatedUserRolePhoneNumberRequest{
+	repeated string RoleNames=1;
+}
+
+message UserPhoneNumberReply{
+	repeated string PhoneNumbers=1;
+}

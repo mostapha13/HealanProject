@@ -1,0 +1,431 @@
+.healan-clinic {
+  --healan-primary: #0d9488;
+  --healan-primary-dark: #0f766e;
+  --healan-primary-light: #ccfbf1;
+  --healan-bg: #f0fdfa;
+  --healan-surface: #ffffff;
+  --healan-border: #e2e8f0;
+  --healan-text: #0f172a;
+  --healan-text-muted: #64748b;
+  --healan-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
+  --healan-radius: 12px;
+  direction: rtl;
+  font-family: 'IRANSans', 'Vazirmatn', Tahoma, sans-serif;
+  min-height: 100vh;
+  background: var(--healan-bg);
+}
+
+.healan-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 0;
+  min-height: 100vh;
+}
+
+.healan-sidebar {
+  background: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
+  color: #fff;
+  padding: 1.5rem 0;
+  box-shadow: 4px 0 24px rgba(15, 118, 110, 0.15);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.healan-sidebar nav {
+  flex: 1;
+}
+
+.healan-sidebar__brand {
+  padding: 0 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 1rem;
+}
+
+.healan-sidebar__brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.healan-sidebar__brand p {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin: 0.25rem 0 0;
+}
+
+.healan-sidebar__footer {
+  padding: 1rem 1.25rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 1rem;
+}
+
+.healan-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border-right: 3px solid transparent;
+}
+
+.healan-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.healan-nav-item.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-right-color: #5eead4;
+  font-weight: 600;
+}
+
+.healan-main {
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+.healan-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.healan-page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--healan-text);
+  margin: 0 0 0.25rem;
+}
+
+.healan-page-header p {
+  color: var(--healan-text-muted);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.healan-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.healan-stat-card {
+  background: var(--healan-surface);
+  border-radius: var(--healan-radius);
+  padding: 1.25rem;
+  box-shadow: var(--healan-shadow);
+  border: 1px solid var(--healan-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.healan-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.1);
+}
+
+.healan-stat-card__label {
+  font-size: 0.8rem;
+  color: var(--healan-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.healan-stat-card__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--healan-text);
+  line-height: 1;
+}
+
+.healan-stat-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.healan-card {
+  background: var(--healan-surface);
+  border-radius: var(--healan-radius);
+  box-shadow: var(--healan-shadow);
+  border: 1px solid var(--healan-border);
+  overflow: hidden;
+}
+
+.healan-card__header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--healan-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafafa;
+}
+
+.healan-card__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--healan-text);
+}
+
+.healan-card__body {
+  padding: 1.25rem;
+}
+
+.healan-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.healan-btn--primary {
+  background: var(--healan-primary);
+  color: #fff;
+}
+
+.healan-btn--primary:hover {
+  background: var(--healan-primary-dark);
+}
+
+.healan-btn--outline {
+  background: transparent;
+  color: var(--healan-primary);
+  border: 1.5px solid var(--healan-primary);
+}
+
+.healan-btn--outline:hover {
+  background: var(--healan-primary-light);
+}
+
+.healan-btn--ghost {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.healan-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.healan-btn--sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.healan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.healan-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--healan-text-muted);
+}
+
+.healan-queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--healan-border);
+  transition: background 0.15s;
+}
+
+.healan-queue-item:last-child {
+  border-bottom: none;
+}
+
+.healan-queue-item:hover {
+  background: #f8fafc;
+}
+
+.healan-queue-item__info h4 {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.healan-queue-item__info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--healan-text-muted);
+}
+
+.healan-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.healan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.healan-table th,
+.healan-table td {
+  padding: 0.75rem 1rem;
+  text-align: right;
+  border-bottom: 1px solid var(--healan-border);
+}
+
+.healan-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: var(--healan-text-muted);
+  font-size: 0.8rem;
+}
+
+.healan-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.healan-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.healan-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.healan-form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--healan-text-muted);
+}
+
+.healan-form-field input,
+.healan-form-field select,
+.healan-form-field textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--healan-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  background: #fff;
+}
+
+.healan-form-field input:focus,
+.healan-form-field select:focus,
+.healan-form-field textarea:focus {
+  outline: none;
+  border-color: var(--healan-primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.healan-search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.healan-search-bar input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--healan-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.healan-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--healan-border);
+  padding-bottom: 0.5rem;
+}
+
+.healan-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 8px 8px 0 0;
+  text-decoration: none;
+  color: var(--healan-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.healan-tab:hover {
+  color: var(--healan-primary);
+  background: var(--healan-primary-light);
+}
+
+.healan-tab.active {
+  color: var(--healan-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--healan-primary);
+}
+
+.healan-auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f766e 0%, #134e4a 50%, #0d9488 100%);
+  padding: 2rem;
+}
+
+.healan-auth-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.healan-auth-card h1 {
+  color: #0f766e;
+  margin: 0 0 0.5rem;
+}
+
+.healan-auth-card p {
+  color: #64748b;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .healan-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .healan-sidebar {
+    display: none;
+  }
+
+  .healan-main {
+    padding: 1rem;
+  }
+}

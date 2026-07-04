@@ -1,0 +1,35 @@
+.InsideryStaffTransactionContainer{
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 80%;
+}
+
+.InsideryStaffTransactionForm{
+box-shadow: 0 0 15px -10px rgba(0, 0, 0, 0.75);
+border-radius: 10px;
+padding: 20px;
+background-color: white;
+}
+
+.InsideryStaffTransactionTable{
+    box-shadow: 0 0 15px -10px rgba(0, 0, 0, 0.75);
+    border-radius: 20px;
+    margin-top: 10px;
+    padding: 20px;
+    background-color: white;
+    min-height: 400px;  
+}
+
+.InsideryStaffTransactionForm{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1;
+}
+
+// .InsideryStaffTransactionSubmit{
+//    display: flex;
+//    justify-content: end;
+//    width: 100%;
+// }

@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+option csharp_namespace = "FileManager.GrpcServer";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package fileManager;
+
+// The greeting service definition.
+service IFileManagerService {
+  // Sends a greeting
+  rpc GetFileInfos (FilesRequest) returns (FileReply);
+   rpc GetTopPopularReplyInfo (TopPopularRequest) returns (TopPopularFileReply);
+   rpc SearchFile (FilesSearchRequest) returns (FileSearchReply);
+
+   //Signature
+  rpc ValidateCertificate(ValidateCertificateRequest) returns (ValidateCertificateReply);
+  rpc PdfDigestForMultiSign(PdfDigestForMultiSignRequest) returns(PdfDigestForMultiSignReply);
+  rpc PutPdfDigestForMultiSign(PutPdfDigestForMultiSignRequest) returns (PutPdfDigestForMultiSignReply);
+
+
+
+}
+
+//Start signature
+
+
+
+message ValidateCertificateRequest{
+	 bytes certificate=1;
+}
+
+message ValidateCertificateReply{
+	string Error=1;
+	int32 StatusCode=2;
+	ValidateCertificateResult Result=3;
+}
+message ValidateCertificateResult{
+	int32 CertificateValidationStatus=1;
+	google.protobuf.Timestamp RevocationTime=2;
+}
+
+message PdfDigestForMultiSignRequest{
+	string AttachmentId=1;
+    bytes SignerCertificate =2;
+    google.protobuf.StringValue Reason=3;
+    google.protobuf.StringValue Location =4;
+    google.protobuf.StringValue ImageDataUrl=5;
+    google.protobuf.Int32Value Page =6;
+    google.protobuf.FloatValue LowerLeftX =7;
+    google.protobuf.FloatValue LowerLeftY =8;
+    google.protobuf.FloatValue UpperRightX =9;
+    google.protobuf.FloatValue UpperRightY =10;
+    optional HashAlgorithmType HashAlgorithm =11;
+}
+
+
+enum HashAlgorithmType {
+    SHA1 = 0;
+    SHA256 = 1;
+    SHA384 = 2;
+    SHA512 = 3;
+}
+
+message PdfDigestForMultiSignReply{
+	   string Id =1;
+       string Error =2;
+       string Result=3;      
+       int32 StatusCode=4;
+}
+
+
+message PutPdfDigestForMultiSignRequest{
+    string Id=1;
+    bytes Sign=2;
+    bytes certificate=3; 
+}
+
+message PutPdfDigestForMultiSignReply{
+    	string AttachmentId=1;
+}
+
+//End signature
+
+
+
+// The request message containing the user's name.
+message FilesRequest {
+ repeated string FileId = 1;
+}
+
+// The response message containing the greetings.
+message FileReply {
+repeated FileReplyInfo FileReplyInfos=1;
+}
+//
+message FileReplyInfo
+{
+  string FileId = 1;
+  string Link=2;
+  string FileName=3;
+  int64 UnixCreateDate=4;
+  string FileType=5;
+  string FileTypeName=6;
+  double  FileSize=7;
+}
+
+message TopPopularFileReply {
+repeated TopPopularReplyInfo TopPopularReplyInfos=1;
+}
+message TopPopularRequest {
+ int32 System = 1;
+ int32 SubSystem = 2;
+ int32 PageSize = 3;
+}
+message TopPopularReplyInfo
+{
+  string FileId = 1;
+  string Link=2;
+  string FileName=3;
+  int64 UnixCreateDate=4;
+  string FileType=5;
+  string FileTypeName=6;
+  double  FileSize=7;
+  int64 DownloadedCount=8;
+}
+
+
+
+
+
+
+message FilesSearchRequest {
+ int32 System = 1;
+ int32 SubSystem = 2;
+ string FileName = 3;
+ int64 From=4;
+ int64 To=5;
+}
+
+// The response message containing the greetings.
+message FileSearchReply {
+repeated FileSearchReplyInfo FileSearchReplyInfos=1;
+}
+//
+message FileSearchReplyInfo
+{
+  string FileId = 1;
+  string Link=2;
+  string FileName=3;
+  int64 UnixCreateDate=4;
+  string FileType=5;
+  string FileTypeName=6;
+  double  FileSize=7;
+}

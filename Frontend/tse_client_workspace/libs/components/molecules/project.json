@@ -1,0 +1,15 @@
+{
+  "root": "libs/components/molecules",
+  "sourceRoot": "libs/components/molecules/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/components/molecules/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  }
+}

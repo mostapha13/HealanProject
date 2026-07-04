@@ -1,0 +1,29 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2017", "es5", "es6", "dom", "dom.iterable"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tse/components/atoms": ["libs/components/atoms/src/index.ts"],
+      "@tse/components/molecules": ["libs/components/molecules/src/index.ts"],
+      "@tse/components/organism": ["libs/components/organism/src/index.ts"],
+      "@tse/components/templates": ["libs/components/template/src/index.ts"],
+      "@tse/tools": ["libs/tools/src"],
+      "@tse/types": ["libs/types/src"],
+      "@tse/utils": ["libs/utils/src"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

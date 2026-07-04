@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FileManager.WebUI</name>
+    </assembly>
+    <members>
+        <member name="T:FileManager.WebUI.Controllers.FileController">
+            <summary>
+            File Controller
+            </summary>
+             
+        </member>
+        <member name="M:FileManager.WebUI.Controllers.FileController.Upload(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Upload new file
+            </summary>
+            <param name="file">file to uploaded</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <response code="200">file uploaded successfully</response>
+            <response code="400">file type is invalid or file is malware.</response>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:FileManager.WebUI.Controllers.FileController.EncryptedUpload(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)" -->
+        <member name="M:FileManager.WebUI.Controllers.FileController.Download(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Download a file by it's id
+            </summary>
+            <param name="fileId">File id</param>
+            <returns></returns>
+            <response code="200">return file if it existed</response>
+            <response code="404">return notfound if file did not exist</response>         
+        </member>
+        <member name="M:FileManager.WebUI.Controllers.FileController.DownloadAll(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Download a file by it's id
+            </summary>
+            <param name="fileId">File id</param>
+            <returns></returns>
+            <response code="200">return file if it existed</response>
+            <response code="404">return notfound if file did not exist</response>         
+        </member>
+    </members>
+</doc>

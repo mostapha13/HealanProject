@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Healan RAG — تست</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <span class="logo">🏥</span>
+        <div>
+          <h1>هیلان — تست RAG</h1>
+          <p class="subtitle">پرسش از دادهٔ اکسل (۵۰ ردیف)</p>
+        </div>
+      </div>
+      <div class="status-bar" id="statusBar">
+        <span class="badge" id="docCount">— سند</span>
+        <span class="badge muted" id="llmStatus">—</span>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <button type="button" class="btn secondary" id="btnIngest">بارگذاری مجدد اکسل</button>
+      <button type="button" class="btn secondary" id="btnStatus">بروزرسانی وضعیت</button>
+    </section>
+
+    <section class="samples">
+      <span class="samples-label">نمونه سؤال:</span>
+      <button type="button" class="chip" data-q="پزشک متخصص قلب کیست و شماره تماسش چیه؟">پزشک قلب</button>
+      <button type="button" class="chip" data-q="نوبت فاطمه نوری چه وضعیتی داره؟">نوبت فاطمه نوری</button>
+      <button type="button" class="chip" data-q="هزینه آزمایش خون چقدره؟">هزینه آزمایش</button>
+      <button type="button" class="chip" data-q="قوانین لغو نوبت چیه؟">لغو نوبت</button>
+      <button type="button" class="chip" data-q="ساعت کاری پذیرش کلینیک">ساعت پذیرش</button>
+    </section>
+
+    <main class="chat" id="chat"></main>
+
+    <footer class="composer">
+      <textarea
+        id="question"
+        rows="2"
+        placeholder="سؤال خود را بنویسید… مثلاً: دکتر اطفال در سعادت‌آباد کیه؟"
+      ></textarea>
+      <button type="button" class="btn primary" id="btnAsk">ارسال</button>
+    </footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

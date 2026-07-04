@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspose.Words" Version="25.3.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
+    <PackageReference Include="DocumentFormat.OpenXml.Features" Version="3.3.0" />
+    <PackageReference Include="DocumentFormat.OpenXml.Linq" Version="3.3.0" />
+    <PackageReference Include="Haukcode.WkHtmlToPdfDotNet" Version="1.5.95" />
+    <PackageReference Include="HtmlSanitizer" Version="9.0.876" />
+    <PackageReference Include="MessagePack" Version="3.1.3" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Http" Version="9.1.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+    <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
+    <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
+    <PackageReference Include="StackExchange.Redis.Extensions.MsgPack" Version="11.0.0" />
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\IdentityProvider\src\IdentityServer.GrpcClient\IdentityServer.GrpcClient.csproj" />
+    <ProjectReference Include="..\Share.Application\Share.Application.csproj" />
+    <ProjectReference Include="..\Share.MessageBroker.RabbitMQ\Share.MessageBroker.RabbitMQ.csproj" />
+  </ItemGroup>
+
+</Project>

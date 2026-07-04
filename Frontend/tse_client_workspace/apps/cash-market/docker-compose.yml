@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  cash-market:
+    container_name: docker-image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+    image: cash-market:v1.3.3

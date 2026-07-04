@@ -1,0 +1,62 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+@import url('./assets/styles/regionshallsicon.css');
+
+i {
+  all: unset;
+}
+
+#root {
+  min-height: 100%;
+}
+
+* {
+  // direction: rtl;
+  font-family: 'iransans-regular' !important;
+}
+
+html {
+  direction: rtl;
+}
+
+@font-face {
+  font-family: 'iransans-regular';
+  src: url('./assets/fonts/IRANSans.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+
+.ant-menu-item-selected span a {
+  color: #d39e46;
+}
+.ant-menu-vertical .ant-menu-item::after,
+.ant-menu-vertical-left .ant-menu-item::after,
+.ant-menu-vertical-right .ant-menu-item::after,
+.ant-menu-inline .ant-menu-item::after {
+  border-right: 3px solid transparent !important;
+}
+
+.ant-menu-inline,
+.ant-menu-vertical,
+.ant-menu-vertical-left {
+  border-right: none !important;
+}
+
+.ant-table-thead th {
+  background-color: #f3f3f5 !important;
+}
+
+.ant-table-thead tr {
+  @apply grid grid-cols-12;
+}
+
+.ant-table {
+  border: #949599 1px solid !important;
+}
+
+.ant-pagination-item-active a {
+  background-color: #d39e46;
+}

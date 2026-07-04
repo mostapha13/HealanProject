@@ -1,0 +1,7 @@
+.symbol-table .ant-table-thead tr {
+  display: table-row;
+}
+
+.ant-table-thead > tr > th[colspan]:not([colspan='1']) {
+  background-color: hsl(238deg 78% 82%) !important;
+}

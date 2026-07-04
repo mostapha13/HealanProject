@@ -1,0 +1,14 @@
+.ant-select-selector {
+  height: 40px;
+  border-radius: 4px !important;
+  border-color: none !important;
+  border: none !important;
+}
+
+.ant-select-selection-search-input::placeholder {
+  color: red !important;
+}
+
+.ant-select-selection-placeholder {
+  direction: rtl;
+}

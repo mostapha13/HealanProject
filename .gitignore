@@ -1,0 +1,33 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.db
+*.dtbcache.v2
+PublishProfiles/*.pubxml.user
+
+# Node / frontend
+node_modules/
+dist/
+out-tsc/
+.npm/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+
+# Large archives / docker exports
+*.tar
+*.tar.gz
+*.zip

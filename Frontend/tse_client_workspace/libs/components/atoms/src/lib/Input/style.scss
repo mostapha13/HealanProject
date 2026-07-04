@@ -1,0 +1,5 @@
+.form input:focus + .label-name,
+.form input:valid + .label-name {
+  top: -25% !important;
+  transition-duration: 1s;
+}

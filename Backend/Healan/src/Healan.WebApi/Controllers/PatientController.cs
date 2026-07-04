@@ -1,0 +1,48 @@
+﻿using Healan.Application.Patients.Commands.PatientRegister;
+using Healan.Application.Patients.Queries.GetPatientInfo;
+using Healan.Application.Patients.Queries.PatientInfoByNationalCode;
+using Healan.Application.Patients.Queries.PatientList;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Healan.WebApi.Controllers;
+
+/// <summary>
+/// بیمار
+/// </summary>
+public class PatientController : ApiControllerBase
+{
+    /// <summary>
+    /// لیست بیمار
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> PatientList([FromQuery] PatientListQuery request) =>
+                                                                Ok(await Mediator.Send(request));
+
+    /// <summary>
+    /// افزودن بیمار
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Register(PatientRegisterCommand request) =>
+                                                                Ok(await Mediator.Send(request));
+
+    /// <summary>
+    /// اطلاعات بیمار
+    /// </summary>
+    /// <param name="patientId"></param>
+    /// <returns></returns>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> PatientInfo([FromQuery] int patientId) => Ok(await Mediator.Send(new GetPatientInfoQuery { PatientId = patientId }));
+
+    /// <summary>
+    /// اطلاعات بیمار با کد ملی
+    /// </summary>
+    /// <param name="nationalCode"></param>
+    /// <returns></returns>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> PatientInfoByNationalCode([FromQuery] string nationalCode) => Ok(await Mediator.Send(new PatientInfoByNationalCodeQuery { nationalCode = nationalCode }));
+
+}

@@ -1,0 +1,41 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Http
+
+@model LoginWith2faViewModel
+
+@{
+    ViewData["Title"] = "وارد کردن کد دو مرحله ای";
+}
+
+<div class="hotel-left">
+    <div class="pay_form">
+        <h1 class="text-login">ورود به سامانه جامع بورس اوراق بهادار</h1>
+        <form asp-route-returnurl="@ViewData["ReturnUrl"]" asp-controller="Account" asp-action="LoginWith2fa" asp-antiforgery="true" method="post">
+                  @Html.HiddenFor(x => x.ReturnUrl)
+            <label asp-for="TwoFactorCode"></label>
+                <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" />
+                <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+        
+           
+         <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <div class="checkbox">
+                     @*   <input asp-for="RememberMe" />
+                        @Html.LabelFor(m => m.RememberMe, new { @class = "remember-custom" })*@
+                    </div>
+                </div>
+            </div>
+            <div class="login-button text-left">
+                <input type="submit" class="btn btn-success" value="تایید" />
+            </div>
+           
+            <div asp-validation-summary="All" class="text-danger"></div>
+        </form>
+    </div>
+    <div class="clear"></div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

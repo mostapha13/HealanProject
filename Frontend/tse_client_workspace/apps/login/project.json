@@ -1,0 +1,62 @@
+{
+  "root": "apps/login",
+  "sourceRoot": "apps/login/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "dist/apps/login",
+        "index": "apps/login/src/index.html",
+        "styles": ["apps/regions-hall/src/styles.scss"],
+        "baseHref": "/",
+        "main": "apps/login/src/main.tsx",
+        "polyfills": "apps/login/src/polyfills.ts",
+        "tsConfig": "apps/login/tsconfig.app.json",
+        "assets": ["apps/login/src/favicon.png", "apps/login/src/assets"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/login/src/environments/environment.ts",
+              "with": "apps/login/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "login:build",
+        "hmr": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "login:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/login/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}

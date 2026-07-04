@@ -1,0 +1,70 @@
+{
+  "root": "apps/regions-hall",
+  "sourceRoot": "apps/regions-hall/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "apps/regions-hall/build",
+        "index": "apps/regions-hall/src/index.html",
+        "baseHref": "/",
+        "main": "apps/regions-hall/src/main.tsx",
+        "polyfills": "apps/regions-hall/src/polyfills.ts",
+        "tsConfig": "apps/regions-hall/tsconfig.app.json",
+        "assets": ["apps/regions-hall/src/favicon.png"],
+        "styles": ["apps/regions-hall/src/styles.scss"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/regions-hall/src/environments/environment.ts",
+              "with": "apps/regions-hall/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "regions-hall:build",
+        "hmr": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "regions-hall:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/regions-hall/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/regions-hall"],
+      "options": {
+        "jestConfig": "apps/regions-hall/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,20 @@
+﻿using Share.Domain.Enums;
+
+namespace WorkFlow.Application.ContextMaps.Cardboard.Queries.GetMarketMakerOrder
+{
+    public class WorkFlowOrderResponse
+    {
+        public string FormName { get; set; }
+        public string FormUrl { get; set; }
+        public string SenderGroupName { get; set; }
+        public string ReceiverGroupName { get; set; }
+        public DateTime? WorkFlowDate { get; set; }
+        public string WorkFlowTypeName { get; set; }
+        public WorkFlowTypeId WorkFlowTypeId { get; set; }
+        public string TrackingNumber { get; set; }
+        public Guid OrderId { get; set; }
+        public bool CanExtendOrCancel { get; set; }
+        public string ExtraInfo { get; set; }
+
+    }
+}

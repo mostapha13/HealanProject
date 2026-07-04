@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Healan.WebApi</name>
+    </assembly>
+    <members>
+        <member name="T:Healan.WebApi.Controllers.AppointmentController">
+            <summary>
+            ویزیت
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyList(Healan.Application.Companies.Queries.CompanyList.CompanyListQuery)">
+            <summary>
+            لیست شرکت ها
+            </summary>
+            <param name="companyList"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.CompanyController.Register(Healan.Application.Companies.Commands.CompanyRegister.CompanyRegisterCommand)">
+            <summary>
+            افزودن شرکت
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyInfo(System.Int32)">
+            <summary>
+            اطلاعات شرکت
+            </summary>
+            <param name="companyId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyRegistrationTypes">
+            <summary>
+            گرفتن انواع شرکتهای ثبتی مثل سهامی خاص یا سهامی عام
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.DashboardController">
+            <summary>
+            داشبورد مدیریتی کلینیک
+            </summary>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.DoctorController">
+            <summary>
+            پزشک
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.DoctorController.DoctorList(Healan.Application.Doctors.Queries.DoctorList.DoctorListQuery)">
+            <summary>
+            لیست پزشکان
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.DoctorController.Register(Healan.Application.Doctors.Commands.DoctorRegister.DoctorRegisterCommand)">
+            <summary>
+            افزودن پزشک
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.DoctorController.DoctorInfo(System.Int32)">
+            <summary>
+            اطلاعات پزشک
+            </summary>
+            <param name="doctorId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.DoctorController.MedicalGroupType">
+            <summary>
+            گروه پزشکان
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.InsuranceController">
+            <summary>
+            بیمه
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.InsuranceList(Healan.Application.Insurances.Queries.InsuranceList.InsuranceListQuery)">
+            <summary>
+            لیست بیمه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.Register(Healan.Application.Insurances.Commands.InsuranceRegister.InsuranceRegisterCommand)">
+            <summary>
+            افزودن بیمه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.InsuranceInfo(System.Int32)">
+            <summary>
+            اطلاعات بیمه
+            </summary>
+            <param name="insuranceId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.InsuranceType">
+            <summary>
+            نوع بیمه
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.RegisterInsuranceContract(Healan.Application.Insurances.Commands.RegisterInsuranceContract.RegisterInsuranceContractCommand)">
+            <summary>
+            ثبت قرارداد با بیمه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.InsuranceContractList(Healan.Application.Insurances.Queries.InsuranceContractList.InsuranceContractListQuery)">
+            <summary>
+            لیست قراردادها
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.InsuranceController.InsuranceContractInfo(System.Int32)">
+            <summary>
+            جزئیات قرارداد
+            </summary>
+            <param name="insuranceContractId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.MedicalFeeServicesController">
+            <summary>
+            تعرفه خدمات 
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.MedicalFeeServicesController.List(Healan.Application.MedicalFeeServices.Queries.MedicalFeeServiceList.MedicalFeeServiceListQuery)">
+            <summary>
+            لیست تعرفه ها
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.MedicalFeeServicesController.Register(Healan.Application.MedicalFeeServices.Commands.MedicalFeeServiceRegister.MedicalFeeServiceRegisterCommand)">
+            <summary>
+            افزودن تعرفه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.MedicalFeeServicesController.Info(System.Int32)">
+            <summary>
+            اطلاعات تعرفه
+            </summary>
+            <param name="medicalFeeServiceId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.OrderResultController">
+            <summary>
+            نسخه
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.OrderResultController.PrescriptionList(Healan.Application.Orders.Queries.PrescriptionList.PrescriptionListQuery)">
+            <summary>
+            لیست نسخه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.OrderResultController.Register(Healan.Application.Invoices.Commands.PrescriptionRegister.PrescriptionRegisterCommand)">
+            <summary>
+            افزودن نسخه
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.OrderResultController.PrescriptionInfo(System.Int32)">
+            <summary>
+            اطلاعات نسخه
+            </summary>
+            <param name="prescriptionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.OrderResultController.GetImageType">
+            <summary>
+            لیست تصویربرداری
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.PatientController">
+            <summary>
+            بیمار
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.PatientList(Healan.Application.Patients.Queries.PatientList.PatientListQuery)">
+            <summary>
+            لیست بیمار
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.Register(Healan.Application.Patients.Commands.PatientRegister.PatientRegisterCommand)">
+            <summary>
+            افزودن بیمار
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.PatientInfo(System.Int32)">
+            <summary>
+            اطلاعات بیمار
+            </summary>
+            <param name="patientId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.PatientInfoByNationalCode(System.String)">
+            <summary>
+            اطلاعات بیمار با کد ملی
+            </summary>
+            <param name="nationalCode"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.PublicInfoController">
+            <summary>
+            سرویس های عمومی
+            </summary>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.ServiceTypesController">
+            <summary>
+            نوع خدمات 
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ServiceTypesController.List(Healan.Application.ServiceTypes.Queries.ServiceTypeList.ServiceTypeListQuery)">
+            <summary>
+            لیست خدمات
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ServiceTypesController.Register(Healan.Application.ServiceTypes.Commands.ServiceTypeRegister.ServiceTypeRegisterCommand)">
+            <summary>
+            افزودن خدمت
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ServiceTypesController.Info(System.Int32)">
+            <summary>
+            اطلاعات خدمت
+            </summary>
+            <param name="serviceTypeId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ServiceTypesController.CategoryType">
+            <summary>
+            نوع خدمات
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.SignatureController">
+            <summary>
+            امضا دیجیتال
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.SignatureController.ValidateCertificate(Healan.Application.Signatures.Queries.ValidateCertificate.ValidateCertificateQuery)">
+            <summary>
+            معتبر بودن certificate
+            </summary>
+            <param name="validateCertificate"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.SignatureController.PdfDigestForMultiSign(Healan.Application.Signatures.Queries.PdfDigestForMultiSign.PdfDigestForMultiSignQuery)">
+            <summary>
+            بدست آورد digest برای امضاء
+            </summary>
+            <param name="digestQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.SignatureController.PutPdfDigestForMultiSign(Healan.Application.Signatures.Queries.PutPdfDigestForMultiSign.PutPdfDigestForMultiSignQuery)">
+            <summary>
+            امضاء فایل
+            </summary>
+            <param name="digestQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.UserController">
+            <summary>
+            کاربران
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.UserController.Register(Healan.Application.Users.Commands.SaveUser.UserSaveCommand)">
+            <summary>
+            ثبت کاربر
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.UserController.UserList(Healan.Application.Users.Queries.GetUsers.UserListQuery)">
+            <summary>
+            لیست کاربرها
+            </summary>
+            <param name="userRequest"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.UserController.UserInfo(System.Int32)">
+            <summary>
+            جزئیات کاربر
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

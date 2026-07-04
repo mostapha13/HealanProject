@@ -1,0 +1,20 @@
+.custom-select.ant-select {
+  // border: none !important;
+  min-height: 41px;
+
+  .ant-select-selector {
+    min-height: 40px !important;
+    padding: 6px 12px !important;
+    // border: 1px solid #d9d9d9 !important;
+    transition: all 0.2s !important;
+    display: flex;
+    align-items: center;
+  }
+
+  &.ant-select-focused .ant-select-selector,
+  &.ant-select-open .ant-select-selector {
+    border: 0px solid #4096ff !important;
+    box-shadow: 0 0 0 1px #4096ff !important;
+    min-height: 41px !important;
+  }
+}

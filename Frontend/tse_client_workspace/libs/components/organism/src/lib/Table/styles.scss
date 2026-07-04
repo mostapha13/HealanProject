@@ -1,0 +1,56 @@
+.ant-table-tbody tr:nth-child(even) {
+  background-color: #e5e5e5 !important;
+}
+.ant-table-cell-fix-left,
+.ant-table-cell-fix-right {
+  background-color: #f9f9f9 !important;
+}
+
+.ant-table-cell {
+  border: 0 !important;
+  text-align: center !important;
+  justify-content: center !important;
+  // white-space: pre !important;
+}
+.ant-pagination-item {
+  border: none !important;
+}
+
+.ant-pagination-item a {
+  font-family: 'iransans-regular' !important;
+  margin-top: 4px !important;
+}
+
+.ant-pagination-item-active a {
+  margin-top: 4px !important;
+  color: white !important;
+  border-radius: 4px !important;
+  width: 21px !important;
+  height: 21px !important;
+  display: inline-flex;
+  padding-right: 9px !important;
+}
+
+.ant-pagination-item-link {
+  border: none !important;
+}
+
+.ant-pagination-item-link {
+  border: none !important;
+}
+
+.ant-pagination-item-link {
+  transform: rotate(180deg);
+}
+
+.ant-table-column-sorters {
+  flex-direction: row-reverse;
+}
+
+.ant-tooltip-inner {
+  text-align: start;
+}
+
+.ant-table-filter-column {
+  @apply flex-1;
+}

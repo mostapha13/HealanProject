@@ -1,0 +1,101 @@
+﻿@{ 
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+@*    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous" />*@
+    <title>سامانه مدیریت کاربران بورس اوراق بهادار تهران</title>
+    <style>
+/*         @@font-face {
+            font-family: "IranSans";
+            src: url("~/wwwroot/Offline/assets/fonts/IRANSans.ttf");
+        } */
+
+        .office-image {
+            opacity: 0.2;
+            height: 100%;
+        }
+
+        .inner-office-container {
+            flex: 3;
+            min-width: 300px;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .inner-logo-image {
+            height: 60vh !important;
+            opacity: 0.2;
+        }
+
+        .height-fit {
+            height: 100% !important;
+        }
+
+        .width-fit {
+            width: 100% !important;
+        }
+
+        .logo-container {
+            opacity: 0.2;
+        }
+
+        .body-offline-style {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        .title-style {
+            width: 100vw;
+            z-index: 1;
+        }
+
+        .parent-style {
+            height: 100vh;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            color: red;
+            font-family: "IranSans";
+            direction: rtl;
+        }
+
+        .reload-btn {
+            font-family: "IranSans";
+            color: darkblue;
+        }
+    </style>
+</head>
+<body class="body-offline-style">
+    <div class="d-flex parent-style">
+        <div class="d-flex title-style justify-content-center align-items-center flex-column">
+            <span id="span-id" class="title">صفحه مورد نظر یافت نشد!</span>
+            <a href="~/Account/Login">
+                <button id="reload-btn"
+                        class="btn btn-light my-2 reload-btn">
+                    اتصال مجدد
+                </button>
+            </a>
+        </div>
+        <div class="d-flex flex-row justify-content-between width-fit position-absolute">
+            <div class="d-flex logo-container justify-content-start width-fit">
+                <img src="~/Offline/assets/Halph_Logo_.png"
+                     class="d-flex logo-image height-fit"
+                     alt="logo" />
+            </div>
+            <div class="office-container d-none d-lg-flex justify-content-end">
+                <img src="~/Offline/assets/office.png" class="office-image" alt="office" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>

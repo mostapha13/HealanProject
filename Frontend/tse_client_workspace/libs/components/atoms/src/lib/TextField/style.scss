@@ -1,0 +1,39 @@
+legend {
+  text-align: start !important;
+}
+
+.textfieldRtl label {
+  transform-origin: top right;
+  text-align: start;
+  right: 30px;
+  top: 0px;
+  width: 100%;
+}
+// .MuiFormLabel-root,
+// .MuiInputLabel-formControl {
+//   font-size: 0.75rem !important;
+// }
+
+// input[type='time']::-webkit-calendar-picker-indicator {
+//   cursor: pointer !important;
+// }
+
+// .MuiInputBase-input {
+//   display: flex !important;
+//   flex-direction: row-reverse !important;
+// }
+
+// .MuiOutlinedInput-root {
+//   .MuiInputBase-input[type='time']:disabled ~ fieldset {
+//     @apply opacity-40;
+//   }
+// }
+
+// input[type='number'],
+// input[type='numeric'],
+// input[type='float'],
+// input[type='tel'],
+// input[type='url'],
+// input[type='website'] {
+//   direction: ltr;
+// }

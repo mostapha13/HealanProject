@@ -1,0 +1,15 @@
+{
+  "root": "libs/components/template",
+  "sourceRoot": "libs/components/template/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/components/template/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  }
+}

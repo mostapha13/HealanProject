@@ -1,0 +1,55 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+* {
+  font-family: 'iransans-regular';
+  src: url('./assets/fonts/IRANSans.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  direction: rtl;
+}
+
+@font-face {
+  font-family: 'iransans-regular';
+  src: url('./assets/fonts/IRANSans.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+@import '../../../libs/components/organism/src/lib/AgTable/style.scss';
+.ant-menu-item-selected span a {
+  color: #2029ff;
+}
+.ant-menu-vertical .ant-menu-item::after,
+.ant-menu-vertical-left .ant-menu-item::after,
+.ant-menu-vertical-right .ant-menu-item::after,
+.ant-menu-inline .ant-menu-item::after {
+  border-right: 3px solid transparent !important;
+}
+
+.ant-table-thead th {
+  background-color: lightgray !important;
+}
+
+.ant-table {
+  border: lightgray 1px solid !important;
+}
+
+.ant-pagination-item-active a {
+  background-color: #0066ff;
+  color: #fff !important;
+}
+
+.ant-table-row-expand-icon-expanded {
+  color: red !important;
+  border: red 1px solid !important;
+}
+
+.ant-table-row-expand-icon-collapsed {
+  color: #2029ff !important;
+  border: #2029ff 1px solid !important;
+}

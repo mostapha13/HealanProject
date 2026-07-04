@@ -1,0 +1,66 @@
+{
+  "root": "apps/cash-market",
+  "sourceRoot": "apps/cash-market/src",
+  "projectType": "application",
+  "version": "0.1.0",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "swc",
+        "outputPath": "apps/cash-market/build",
+        "index": "apps/cash-market/src/index.html",
+        "baseHref": "/",
+        "main": "apps/cash-market/src/main.tsx",
+        "polyfills": "apps/cash-market/src/polyfills.ts",
+        "tsConfig": "apps/cash-market/tsconfig.app.json",
+        "assets": [
+          "apps/cash-market/src/favicon.png",
+          "apps/cash-market/src/assets"
+        ],
+        "styles": ["apps/cash-market/src/styles.scss"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/cash-market/src/environments/environment.ts",
+              "with": "apps/cash-market/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "cash-market:build",
+        "hmr": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "cash-market:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/cash-market/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}

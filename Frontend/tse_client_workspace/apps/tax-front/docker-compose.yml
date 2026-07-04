@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  tax-front:
+    container_name: tax-front-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - '80:80'
+    image: tax-front-image:v1.0.2

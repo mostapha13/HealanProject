@@ -1,0 +1,22 @@
+.ant-menu-submenu-title {
+  padding: 0 !important;
+}
+
+.ant-menu-item-selected {
+  width: max-content;
+  background-color: transparent !important;
+  // padding: 0 !important;
+}
+
+.ant-menu-sub.ant-menu-inline {
+  background-color: transparent;
+}
+
+.ant-menu-title-content {
+  text-align: start;
+}
+
+.ant-menu-item {
+  margin: 0 !important;
+  padding: 0 !important;
+}
