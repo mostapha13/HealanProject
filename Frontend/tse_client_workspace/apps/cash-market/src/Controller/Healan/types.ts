@@ -70,6 +70,15 @@ export interface InsuranceCompany {
   name: string;
 }
 
+export interface PrescriptionSummary {
+  prescriptionId: number;
+  appointmentId?: number;
+  issueDate?: string;
+  notes?: string;
+  patientName?: string;
+  doctorName?: string;
+}
+
 export type AppointmentStatus =
   | 'Scheduled'
   | 'InProgress'

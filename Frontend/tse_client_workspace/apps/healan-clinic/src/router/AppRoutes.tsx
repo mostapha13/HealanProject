@@ -6,6 +6,7 @@ import { Loading } from '@tse/components/atoms';
 import HealanLayout from '../layout/HealanLayout';
 import AuthGuard from '../pages/AuthGuard';
 import CallBackPage from '../pages/CallBack';
+import AccessRouteGuard from '../components/AccessRouteGuard';
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const PatientsPage = lazy(() => import('../pages/Patients'));
@@ -23,6 +24,10 @@ const UsersPage = lazy(() => import('../pages/BasicData/Users'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const WorkflowPage = lazy(() => import('../pages/Workflow'));
 const SignaturePage = lazy(() => import('../pages/Signature'));
+
+function guarded(path: string, element: React.ReactNode) {
+  return <AccessRouteGuard path={path}>{element}</AccessRouteGuard>;
+}
 
 export default function AppRoutes() {
   useEffect(() => {
@@ -51,24 +56,24 @@ export default function AppRoutes() {
             </AuthGuard>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="queue" element={<QueuePage />} />
-          <Route path="appointments" element={<AppointmentsPage />} />
-          <Route path="appointments/:id" element={<AppointmentDetailPage />} />
-          <Route path="patients" element={<PatientsPage />} />
-          <Route path="doctors" element={<DoctorsPage />} />
-          <Route path="prescriptions" element={<PrescriptionsPage />} />
-          <Route path="basic-data" element={<BasicDataLayout />}>
-            <Route index element={<CompaniesPage />} />
-            <Route path="companies" element={<CompaniesPage />} />
-            <Route path="insurance" element={<InsurancePage />} />
-            <Route path="services" element={<ServicesPage />} />
-            <Route path="fees" element={<MedicalFeesPage />} />
-            <Route path="users" element={<UsersPage />} />
+          <Route index element={guarded('/', <Dashboard />)} />
+          <Route path="queue" element={guarded('/queue', <QueuePage />)} />
+          <Route path="appointments" element={guarded('/appointments', <AppointmentsPage />)} />
+          <Route path="appointments/:id" element={guarded('/appointments', <AppointmentDetailPage />)} />
+          <Route path="patients" element={guarded('/patients', <PatientsPage />)} />
+          <Route path="doctors" element={guarded('/doctors', <DoctorsPage />)} />
+          <Route path="prescriptions" element={guarded('/prescriptions', <PrescriptionsPage />)} />
+          <Route path="basic-data" element={guarded('/basic-data', <BasicDataLayout />)}>
+            <Route index element={guarded('/basic-data/companies', <CompaniesPage />)} />
+            <Route path="companies" element={guarded('/basic-data/companies', <CompaniesPage />)} />
+            <Route path="insurance" element={guarded('/basic-data/insurance', <InsurancePage />)} />
+            <Route path="services" element={guarded('/basic-data/services', <ServicesPage />)} />
+            <Route path="fees" element={guarded('/basic-data/fees', <MedicalFeesPage />)} />
+            <Route path="users" element={guarded('/basic-data/users', <UsersPage />)} />
           </Route>
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="workflow" element={<WorkflowPage />} />
-          <Route path="signature" element={<SignaturePage />} />
+          <Route path="reports" element={guarded('/reports', <ReportsPage />)} />
+          <Route path="workflow" element={guarded('/workflow', <WorkflowPage />)} />
+          <Route path="signature" element={guarded('/signature', <SignaturePage />)} />
         </Route>
       </Routes>
     </Suspense>

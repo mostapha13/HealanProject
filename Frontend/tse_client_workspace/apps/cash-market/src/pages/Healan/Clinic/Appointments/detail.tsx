@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import withAlert from 'apps/cash-market/src/hoc/withAlert';
 import healanApi from 'apps/cash-market/src/Controller/Healan/api';
+import type { AppointmentSummary } from 'apps/cash-market/src/Controller/Healan/types';
 import { PageHeader, formatCurrency } from '../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 import { useNavigate, useParams } from '@tse/utils';
@@ -8,7 +9,7 @@ import { useNavigate, useParams } from '@tse/utils';
 function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState<Record<string, unknown> | null>(null);
+  const [data, setData] = useState<AppointmentSummary | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -19,7 +20,7 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
 
   if (!data) return <div className="healan-empty">در حال بارگذاری...</div>;
 
-  const invoice = (data.invoices as Record<string, unknown>[] | undefined)?.[0];
+  const invoice = data.invoices?.[0];
 
   return (
     <>
@@ -34,15 +35,15 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
       <div className="healan-card">
         <div className="healan-card__body">
           <div className="healan-form-grid">
-            <div><strong>بیمار:</strong> {String(data.patientName ?? '—')}</div>
-            <div><strong>پزشک:</strong> {String(data.doctorName ?? '—')}</div>
-            <div><strong>تاریخ:</strong> {convertDateAndTimeToJalali(String(data.appointmentDate))}</div>
-            <div><strong>وضعیت:</strong> {String(data.appointmentTypeName ?? data.appointmentTypeId)}</div>
+            <div><strong>بیمار:</strong> {data.patientName ?? '—'}</div>
+            <div><strong>پزشک:</strong> {data.doctorName ?? '—'}</div>
+            <div><strong>تاریخ:</strong> <span>{convertDateAndTimeToJalali(data.appointmentDate)}</span></div>
+            <div><strong>وضعیت:</strong> {data.appointmentTypeName ?? data.appointmentTypeId}</div>
             {invoice && (
               <>
-                <div><strong>مبلغ کل:</strong> {formatCurrency(Number(invoice.totalAmount))}</div>
-                <div><strong>سهم بیمه:</strong> {formatCurrency(Number(invoice.primaryInsuranceCovered) + Number(invoice.secondaryInsuranceCovered))}</div>
-                <div><strong>سهم بیمار:</strong> {formatCurrency(Number(invoice.patientPayable))}</div>
+                <div><strong>مبلغ کل:</strong> {formatCurrency(invoice.totalAmount)}</div>
+                <div><strong>سهم بیمه:</strong> {formatCurrency(invoice.primaryInsuranceCovered + invoice.secondaryInsuranceCovered)}</div>
+                <div><strong>سهم بیمار:</strong> {formatCurrency(invoice.patientPayable)}</div>
               </>
             )}
           </div>

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from '@tse/utils';
 import { userManager } from '../../store/userManager';
-import healanApi from '../../api/healanApi';
 
 function CallBackPage() {
   const navigate = useNavigate();
@@ -10,14 +9,9 @@ function CallBackPage() {
   useEffect(() => {
     userManager
       .signinRedirectCallback()
-      .then(async (user) => {
+      .then((user) => {
         if (user?.access_token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
-        }
-        try {
-          await healanApi.users.current();
-        } catch {
-          /* ignore */
         }
         navigate('/', { replace: true });
       })

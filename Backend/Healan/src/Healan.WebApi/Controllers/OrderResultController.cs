@@ -4,12 +4,15 @@ using Healan.Application.Orders.Queries.GetImageType;
 using Healan.Application.Orders.Queries.PrescriptionInfo;
 using Healan.Application.Orders.Queries.PrescriptionList;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// نسخه
 /// </summary>
+[AccessForm(HealanAccessFormIds.Prescriptions)]
 public class OrderResultController : ApiControllerBase
 {
     /// <summary>
@@ -27,8 +30,8 @@ public class OrderResultController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(PrescriptionRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] PrescriptionRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات نسخه

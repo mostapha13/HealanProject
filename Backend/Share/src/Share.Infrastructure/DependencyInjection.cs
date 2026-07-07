@@ -87,14 +87,19 @@ namespace Share.Infrastructure
 
         public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration configuration)
         {
+            if (!configuration.GetValue("Redis:Enabled", true))
+            {
+                services.AddSingleton<ICacheManager, InMemoryCacheManager>();
+                return services;
+            }
+
             services.AddScoped<IDatabase>(cfg =>
             {
                 var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>().ConfigurationOptions;
-
-                redisConfiguration.SyncTimeout = 30*60*1000;
-                redisConfiguration.ConnectTimeout = 30 * 60 *1000;
+                var connectTimeoutMs = configuration.GetValue("Redis:ConnectTimeout", 6000);
+                redisConfiguration.SyncTimeout = connectTimeoutMs;
+                redisConfiguration.ConnectTimeout = connectTimeoutMs;
                 redisConfiguration.KeepAlive = 60;
-
 
                 IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(redisConfiguration);
                 return multiplexer.GetDatabase();

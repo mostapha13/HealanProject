@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Share.Application.Common.Behaviours;
 using Share.Domain.Exceptions;
@@ -183,18 +184,23 @@ namespace Share.Application.Common.Filters
 
         private void HandleUnknownException(ExceptionContext context)
         {
-            //var details = new ProblemDetails
-            //{
-            //    Status = StatusCodes.Status500InternalServerError,
-            //    Title = "An error occurred while processing your request.",
-            //};
+            var ex = context.Exception;
+            var env = context.HttpContext.RequestServices.GetService(typeof(IHostEnvironment)) as IHostEnvironment;
+            var isDevelopment = env?.IsDevelopment() == true;
+
+            var errors = isDevelopment
+                ? BuildDevelopmentErrors(ex)
+                : new[] { "دیتای ورودی غیر معتبر است" };
+
+            _logger.LogError(ex,
+                "Unhandled API exception. Type={ExceptionType}, Message={Message}",
+                ex.GetType().FullName, ex.Message);
 
             var details = new CustomProblemDetails()
             {
                 Title = "The Request Is Not Correct.",
-                Errors = new string[] { "دیتای ورودی غیر معتبر است" }
+                Errors = errors
             };
-
 
             context.Result = new ObjectResult(details)
             {
@@ -202,7 +208,22 @@ namespace Share.Application.Common.Filters
             };
 
             context.ExceptionHandled = true;
+        }
 
+        private static string[] BuildDevelopmentErrors(Exception ex)
+        {
+            var messages = new List<string>();
+            var current = ex;
+            while (current != null)
+            {
+                if (!string.IsNullOrWhiteSpace(current.Message))
+                    messages.Add(current.Message);
+                current = current.InnerException;
+            }
+
+            return messages.Count > 0
+                ? messages.Distinct().ToArray()
+                : new[] { "خطای نامشخص سرور" };
         }
         private void HandleBadRequestException(ExceptionContext context)
         {

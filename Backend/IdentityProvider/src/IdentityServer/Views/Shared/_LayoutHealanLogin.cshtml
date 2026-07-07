@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Healan</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d9488'/%3E%3Cpath d='M16 8v16M8 16h16' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link href="~/css/Font/css/fontiran.css" rel="stylesheet" />
+    <link href="~/css/healan-login.css" rel="stylesheet" asp-append-version="true" />
+</head>
+<body class="healan-login-body">
+    <div class="healan-login-shell">
+        <main class="healan-login-main" role="main">
+            @RenderBody()
+        </main>
+        @await Html.PartialAsync("_LoginHero")
+    </div>
+
+    <script src="~/scripts/jquery.min.js"></script>
+    <script src="~/scripts/jquery.validate.min.js"></script>
+    <script src="~/scripts/jquery.validate.unobtrusive.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

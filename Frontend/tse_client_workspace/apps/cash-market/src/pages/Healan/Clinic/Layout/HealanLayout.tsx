@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet } from '@tse/utils';
+import { NavLink, Outlet } from 'react-router-dom';
 import './healan.scss';
 
 const navItems = [

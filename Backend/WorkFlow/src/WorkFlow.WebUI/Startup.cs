@@ -58,7 +58,7 @@ namespace WorkFlow.WebUI
 
             services.AddControllers(options =>
             options.Filters.Add<ApiExceptionFilterAttribute>())
-                .AddFluentValidation(x => x.AutomaticValidationEnabled = true)
+                .AddFluentValidation(x => x.AutomaticValidationEnabled = false)
                 .AddJsonOptions(opts =>
                 {
                     var enumConverter = new JsonStringEnumConverter();

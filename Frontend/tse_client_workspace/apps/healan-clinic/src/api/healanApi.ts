@@ -1,5 +1,6 @@
 import { request } from '@tse/tools';
 import { HEALAN_API_URL } from '../constants';
+import { clampPageSize, fetchAllPaginated, HEALAN_MAX_PAGE_SIZE } from '../utils/pagination';
 import type {
   AppointmentSummary,
   CompanySummary,
@@ -10,9 +11,11 @@ import type {
   MedicalFeeService,
   PaginatedResponse,
   PatientSummary,
+  PrescriptionDetail,
   PrescriptionSummary,
   ServiceType,
   UserSummary,
+  CurrentUserResponse,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -25,25 +28,47 @@ async function post<T>(url: string, data: unknown): Promise<T> {
   return request.post({ baseUrl: BASE, url, options: data }) as Promise<T>;
 }
 
+function pagedParams(params?: Record<string, unknown>): Record<string, unknown> {
+  const pageNumber = Number(params?.['pageNumber'] ?? 1) || 1;
+  const pageSize = clampPageSize(Number(params?.['pageSize'] ?? HEALAN_MAX_PAGE_SIZE));
+  return { ...params, pageNumber, pageSize };
+}
+
 export const healanApi = {
   dashboard: {
     stats: () => get<DashboardStats>('Dashboard/Stats'),
   },
 
   patients: {
-    list: (params: { filterText?: string; pageNumber?: number; pageSize?: number }) =>
-      get<PaginatedResponse<PatientSummary>>('Patient/PatientList', params),
+    list: (params: { filterText?: string; pageNumber?: number; pageSize?: number } = {}) =>
+      get<PaginatedResponse<PatientSummary>>('Patient/PatientList', pagedParams(params)),
+    listAll: (params: { filterText?: string } = {}) =>
+      fetchAllPaginated<PatientSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<PatientSummary>>('Patient/PatientList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (patientId: number) =>
-      get<PatientSummary>(`Patient/PatientInfo/?patientId=${patientId}`),
+      get<PatientSummary & { userId?: number }>(`Patient/PatientInfo/?patientId=${patientId}`),
     register: (data: Record<string, unknown>) =>
-      post<{ patientId: number }>('Patient/Register', data),
+      post<{ id: number; loginUserName?: string; initialPassword?: string }>('Patient/Register', data),
     byNationalCode: (nationalCode: string) =>
       get<PatientSummary>(`Patient/PatientInfoByNationalCode/?nationalCode=${nationalCode}`),
   },
 
   doctors: {
-    list: (params: { filterText?: string; pageNumber?: number; pageSize?: number }) =>
-      get<PaginatedResponse<DoctorSummary>>('Doctor/DoctorList', params),
+    list: (params: { filterText?: string; pageNumber?: number; pageSize?: number } = {}) =>
+      get<PaginatedResponse<DoctorSummary>>('Doctor/DoctorList', pagedParams(params)),
+    listAll: (params: { filterText?: string } = {}) =>
+      fetchAllPaginated<DoctorSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<DoctorSummary>>('Doctor/DoctorList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (doctorId: number) =>
       get<DoctorSummary>(`Doctor/DoctorInfo/?doctorId=${doctorId}`),
     register: (data: Record<string, unknown>) =>
@@ -52,10 +77,26 @@ export const healanApi = {
   },
 
   appointments: {
-    list: (params: Record<string, unknown>) =>
-      get<PaginatedResponse<AppointmentSummary>>('Appointment/AppointmentList', params),
-    today: (params: Record<string, unknown>) =>
-      get<PaginatedResponse<AppointmentSummary>>('Appointment/CurrentAppointmentList', params),
+    list: (params: Record<string, unknown> = {}) =>
+      get<PaginatedResponse<AppointmentSummary>>('Appointment/AppointmentList', pagedParams(params)),
+    listAll: (params: Record<string, unknown> = {}) =>
+      fetchAllPaginated<AppointmentSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<AppointmentSummary>>('Appointment/AppointmentList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
+    today: (params: Record<string, unknown> = {}) =>
+      get<PaginatedResponse<AppointmentSummary>>('Appointment/CurrentAppointmentList', pagedParams(params)),
+    todayAll: (params: Record<string, unknown> = {}) =>
+      fetchAllPaginated<AppointmentSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<AppointmentSummary>>('Appointment/CurrentAppointmentList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (appointmentId: number) =>
       get<AppointmentSummary>(`Appointment/AppointmentInfo/?appointmentId=${appointmentId}`),
     register: (data: Record<string, unknown>) =>
@@ -71,7 +112,15 @@ export const healanApi = {
 
   services: {
     list: (params?: { filterText?: string; pageNumber?: number; pageSize?: number }) =>
-      get<PaginatedResponse<ServiceType>>('ServiceTypes/List', { pageNumber: 1, pageSize: 200, ...params }),
+      get<PaginatedResponse<ServiceType>>('ServiceTypes/List', pagedParams(params)),
+    listAll: (params?: { filterText?: string }) =>
+      fetchAllPaginated<ServiceType>((pageNumber, pageSize) =>
+        get<PaginatedResponse<ServiceType>>('ServiceTypes/List', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (serviceTypeId: number) =>
       get<ServiceType>(`ServiceTypes/Info/?serviceTypeId=${serviceTypeId}`),
     register: (data: Record<string, unknown>) => post('ServiceTypes/Register', data),
@@ -80,11 +129,15 @@ export const healanApi = {
 
   insurance: {
     list: (params?: { pageNumber?: number; pageSize?: number; filterText?: string }) =>
-      get<PaginatedResponse<InsuranceCompany>>('Insurance/InsuranceList', {
-        pageNumber: 1,
-        pageSize: 100,
-        ...params,
-      }),
+      get<PaginatedResponse<InsuranceCompany>>('Insurance/InsuranceList', pagedParams(params)),
+    listAll: (params?: { filterText?: string }) =>
+      fetchAllPaginated<InsuranceCompany>((pageNumber, pageSize) =>
+        get<PaginatedResponse<InsuranceCompany>>('Insurance/InsuranceList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (insuranceCompanyId: number) =>
       get(`Insurance/InsuranceInfo/?insuranceCompanyId=${insuranceCompanyId}`),
     register: (data: Record<string, unknown>) => post('Insurance/Register', data),
@@ -92,43 +145,68 @@ export const healanApi = {
     registerContract: (data: Record<string, unknown>) =>
       post('Insurance/RegisterInsuranceContract', data),
     contractList: (params?: Record<string, unknown>) =>
-      get('Insurance/InsuranceContractList', params),
+      get('Insurance/InsuranceContractList', pagedParams(params)),
   },
 
   medicalFees: {
     list: (params?: Record<string, unknown>) =>
-      get<PaginatedResponse<MedicalFeeService>>('MedicalFeeServices/List', {
-        pageNumber: 1,
-        pageSize: 100,
-        ...params,
-      }),
+      get<PaginatedResponse<MedicalFeeService>>('MedicalFeeServices/List', pagedParams(params)),
+    listAll: (params?: Record<string, unknown>) =>
+      fetchAllPaginated<MedicalFeeService>((pageNumber, pageSize) =>
+        get<PaginatedResponse<MedicalFeeService>>('MedicalFeeServices/List', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     register: (data: Record<string, unknown>) => post('MedicalFeeServices/Register', data),
   },
 
   companies: {
     list: (params?: { filterText?: string; pageNumber?: number; pageSize?: number }) =>
-      get<PaginatedResponse<CompanySummary>>('Company/CompanyList', {
-        pageNumber: 1,
-        pageSize: 100,
-        ...params,
-      }),
+      get<PaginatedResponse<CompanySummary>>('Company/CompanyList', pagedParams(params)),
+    listAll: (params?: { filterText?: string }) =>
+      fetchAllPaginated<CompanySummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<CompanySummary>>('Company/CompanyList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (companyId: number) => get(`Company/CompanyInfo/?companyId=${companyId}`),
     register: (data: Record<string, unknown>) => post('Company/Register', data),
     registrationTypes: () => get<EnumItem[]>('Company/CompanyRegistrationTypes'),
   },
 
   users: {
-    list: (params?: Record<string, unknown>) => get<PaginatedResponse<UserSummary>>('User/UserList', params),
+    list: (params?: Record<string, unknown>) =>
+      get<PaginatedResponse<UserSummary>>('User/UserList', pagedParams(params)),
+    listAll: (params?: Record<string, unknown>) =>
+      fetchAllPaginated<UserSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<UserSummary>>('User/UserList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (userId: number) => get(`User/UserInfo/?userId=${userId}`),
     register: (data: Record<string, unknown>) => post('User/Register', data),
-    current: () => get('User/CurrentUser/Fa'),
+    current: () => get<CurrentUserResponse>('User/CurrentUser/Fa'),
   },
 
   prescriptions: {
-    list: (params: Record<string, unknown>) =>
-      get<PaginatedResponse<PrescriptionSummary>>('OrderResult/PrescriptionList', params),
+    list: (params: Record<string, unknown> = {}) =>
+      get<PaginatedResponse<PrescriptionSummary>>('OrderResult/PrescriptionList', pagedParams(params)),
+    listAll: (params: Record<string, unknown> = {}) =>
+      fetchAllPaginated<PrescriptionSummary>((pageNumber, pageSize) =>
+        get<PaginatedResponse<PrescriptionSummary>>('OrderResult/PrescriptionList', {
+          ...params,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (prescriptionId: number) =>
-      get(`OrderResult/PrescriptionInfo/?prescriptionId=${prescriptionId}`),
+      get<PrescriptionDetail>(`OrderResult/PrescriptionInfo/?prescriptionId=${prescriptionId}`),
     register: (data: Record<string, unknown>) => post('OrderResult/Register', data),
     imageTypes: () => get<EnumItem[]>('OrderResult/GetImageType'),
   },
@@ -140,7 +218,7 @@ export const healanApi = {
 
   workflow: {
     userCardboard: (params?: Record<string, unknown>) =>
-      get('Cardboard/UserCardboard/Fa', params),
+      get('Cardboard/UserCardboard/Fa', pagedParams(params)),
   },
 };
 

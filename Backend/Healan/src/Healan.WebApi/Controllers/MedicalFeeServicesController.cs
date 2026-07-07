@@ -2,12 +2,15 @@
 using Healan.Application.MedicalFeeServices.Queries.MedicalFeeServiceInfo;
 using Healan.Application.MedicalFeeServices.Queries.MedicalFeeServiceList;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// تعرفه خدمات 
 /// </summary>
+[AccessForm(HealanAccessFormIds.MedicalFees)]
 public class MedicalFeeServicesController : ApiControllerBase
 {
     /// <summary>
@@ -25,8 +28,8 @@ public class MedicalFeeServicesController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(MedicalFeeServiceRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] MedicalFeeServiceRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات تعرفه

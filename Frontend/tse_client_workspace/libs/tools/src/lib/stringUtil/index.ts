@@ -8,18 +8,16 @@ export const getQueryParams = (params: string, url: string) => {
   return queryString ? queryString[1] : null;
 };
 
-export const convertDateAndTimeToJalali = (date?: string) => {
-  if (date) {
-    return moment(date, 'YYYY/MM/DD HH:mm:ss').format('HH:mm  jYYYY/jMM/jDD');
-  }
-  return '';
+export const convertDateAndTimeToJalali = (date?: string | Date | null) => {
+  if (date == null || date === '') return '';
+  const m = moment(date);
+  return m.isValid() ? m.format('HH:mm  jYYYY/jMM/jDD') : '';
 };
 
-export const convertDateToJalali = (date?: string) => {
-  if (date) {
-    return moment(date, 'YYYY-MM-DD').format('jYYYY/jMM/jDD');
-  }
-  return '';
+export const convertDateToJalali = (date?: string | Date | null) => {
+  if (date == null || date === '') return '';
+  const m = moment(date);
+  return m.isValid() ? m.format('jYYYY/jMM/jDD') : '';
 };
 
 export const convertDateAndTime = (date?: string) => {

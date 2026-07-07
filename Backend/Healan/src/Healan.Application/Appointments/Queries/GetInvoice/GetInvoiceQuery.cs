@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Appointments.Dtos;
 using Healan.Application.Common.Interfaces;
+using Healan.Domain.Invoices.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -35,7 +36,11 @@ public class GetInvoiceQueryHandler : IRequestHandler<GetInvoiceQuery, InvoiceIn
             .Where(x => x.AppointmentId == request.AppointmentId)
             .AsNoTracking();
 
-        return await query.ProjectTo<InvoiceInfoResult>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+        return await query
+            .OrderBy(x => x.InvoiceStatusTypeId == InvoiceStatusTypeId.Pending ? 0 : 1)
+            .ThenByDescending(x => x.InvoiceId)
+            .ProjectTo<InvoiceInfoResult>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
 
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Share.Infrastructure.CustomAttributes
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class AccessFormAttribute : Attribute
     {
         public AccessFormAttribute(params int[] accessFormId)

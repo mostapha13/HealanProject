@@ -2,6 +2,7 @@
 using FileManager.GrpcClient.Interfaces;
 using Healan.Application.Attachments.Dtos;
 using Healan.Application.Common.Interfaces;
+using Healan.Application.Common.Helpers;
 using Healan.Application.Users.Dtos;
 using Healan.Domain.Attachments.Entities;
 using Healan.Domain.Users.Entities;
@@ -104,11 +105,7 @@ namespace Healan.Application.Users.Commands.SaveUser
 
 
 
-            Random r = new Random();
-            var x = r.Next(0, 100000000);
-            string password = x.ToString("00000000");
-            if (!isNew)
-                password = string.Empty;
+            string password = isNew ? IdentityPasswordGenerator.Generate() : string.Empty;
             var saveRequest = new IdentityServer.GrpcClient.SaveRequest()
             {
                 UserId = request != null && request.IdentityUserId != null ? request.IdentityUserId.Value.ToString() : user.IdentityUserId.ToString(),
@@ -170,18 +167,25 @@ namespace Healan.Application.Users.Commands.SaveUser
 
 
             #region Save Into Workflow
-            await _workFlowHttpProvider.Save(new WorkFlowUserSaveCommand()
+            try
             {
-                IdentityUserId = userSummary.UserId.ToGuid(),
-                IsActive = saveRequest.IsActive,
-                FirstName = saveRequest.FirstName,
-                LastName = saveRequest.LastName,
-                PhoneNumber = saveRequest.PhoneNumber,
-                WorkFlowUserGroup = new WorkFlowGroupResponse()
+                await _workFlowHttpProvider.Save(new WorkFlowUserSaveCommand()
                 {
-                    WorkFlowUserGroupId = WorkFlowUserGroupId.Healan,
-                },
-            });
+                    IdentityUserId = userSummary.UserId.ToGuid(),
+                    IsActive = saveRequest.IsActive,
+                    FirstName = saveRequest.FirstName,
+                    LastName = saveRequest.LastName,
+                    PhoneNumber = saveRequest.PhoneNumber,
+                    WorkFlowUserGroup = new WorkFlowGroupResponse()
+                    {
+                        WorkFlowUserGroupId = WorkFlowUserGroupId.Healan,
+                    },
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "WorkFlow unavailable during user registration");
+            }
             #endregion
 
             await _applicationDbContext.SaveChangesAsync(cancellationToken);

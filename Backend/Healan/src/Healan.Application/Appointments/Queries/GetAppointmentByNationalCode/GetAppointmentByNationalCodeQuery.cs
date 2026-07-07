@@ -26,7 +26,7 @@ public class GetAppointmentByNationalCodeQueryHandler : IRequestHandler<GetAppoi
        .Include(x => x.ServiceTypes)
        .Include(x => x.Patient)
        .Include(x => x.Doctor)
-       .Include(x => x.Invoices).ThenInclude(x => x.InvoiceItems)
+       .Include(x => x.Invoices).ThenInclude(x => x.InvoiceItems).ThenInclude(x => x.ServiceType)
        .Where(x => x.Patient.NationalCode == request.NationalCode)
        .AsNoTracking();
 

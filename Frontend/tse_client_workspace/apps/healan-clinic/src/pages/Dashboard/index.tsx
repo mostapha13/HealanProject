@@ -6,6 +6,7 @@ import { APPOINTMENT_STATUS_COLORS, APPOINTMENT_STATUS_LABELS } from '../../api/
 import { PageHeader, StatCard, formatCurrency, formatNumber } from '../../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 import { useNavigate } from '@tse/utils';
+import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentPatientDisplay } from '../../utils/appointmentDisplay';
 
 function Dashboard({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const navigate = useNavigate();
@@ -88,10 +89,11 @@ function Dashboard({ onAlert }: { onAlert: (msg: unknown) => void }) {
               return (
                 <div key={item.appointmentId} className="healan-queue-item">
                   <div className="healan-queue-item__info">
-                    <h4>{item.patientName ?? '—'}</h4>
+                    <h4>{appointmentPatientDisplay(item)}</h4>
                     <p>
-                      پزشک: {item.doctorName ?? '—'} · {convertDateAndTimeToJalali(item.appointmentDate)}
+                      پزشک: {appointmentDoctorName(item)} · <span>{convertDateAndTimeToJalali(item.appointmentDate)}</span>
                     </p>
+                    <p className="healan-queue-item__meta">بیمه: {appointmentInsuranceDisplay(item)}</p>
                   </div>
                   <div className="healan-actions">
                     <span

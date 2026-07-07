@@ -9,12 +9,15 @@ using Healan.Application.Appointments.Queries.GetInvoice;
 using Healan.Application.Appointments.Queries.PaymentMethodTypes;
 using Healan.Application.Invoices.Commands.InvoicePay;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// ویزیت
 /// </summary>
+[AccessForm(HealanAccessFormIds.Queue, HealanAccessFormIds.Appointments)]
 public class AppointmentController : ApiControllerBase
 {
     [HttpGet("[action]")]
@@ -26,8 +29,8 @@ public class AppointmentController : ApiControllerBase
         Ok(await Mediator.Send(request));
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(AppointmentRegisterCommand request) =>
-        Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] AppointmentRegisterCommand request) =>
+        SendCommand(request);
 
     [HttpGet("[action]")]
     public async Task<IActionResult> AppointmentInfo([FromQuery] long appointmentId) =>

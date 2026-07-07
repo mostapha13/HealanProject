@@ -2,11 +2,14 @@
 using Healan.Application.Signatures.Queries.PutPdfDigestForMultiSign;
 using Healan.Application.Signatures.Queries.ValidateCertificate;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 /// <summary>
 /// امضا دیجیتال
 /// </summary>
+[AccessForm(HealanAccessFormIds.Signature)]
 public class SignatureController : ApiControllerBase
 {
     /// <summary>

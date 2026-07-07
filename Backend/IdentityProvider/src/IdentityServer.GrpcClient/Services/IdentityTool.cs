@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using IdentityServer.GrpcClient.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,12 @@ namespace IdentityServer.GrpcClient.Services
 {
     internal class IdentityTool : IIdentityTool
     {
-        UserService.UserServiceClient client;
-        public IdentityTool(IConfiguration configuration)
+        private readonly UserService.UserServiceClient client;
+        private readonly ILogger<IdentityTool> _logger;
+
+        public IdentityTool(IConfiguration configuration, ILogger<IdentityTool> logger)
         {
+            _logger = logger;
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             var channel = GrpcChannel.ForAddress(configuration["GrpcServer:IdentityServer"], new GrpcChannelOptions { HttpHandler = httpHandler });
@@ -56,8 +60,19 @@ namespace IdentityServer.GrpcClient.Services
 
         public async Task<UserSummaryReply> SaveUser(SaveRequest request)
         {
-            var result = await client.SaveUserAsync(request);
-            return result;
+            try
+            {
+                _logger.LogInformation("gRPC SaveUser Phone={Phone}, UserId={UserId}", request.PhoneNumber, request.UserId);
+                var result = await client.SaveUserAsync(request);
+                if (string.IsNullOrWhiteSpace(result?.UserId))
+                    _logger.LogWarning("gRPC SaveUser returned empty UserId for Phone={Phone}", request.PhoneNumber);
+                return result;
+            }
+            catch (RpcException ex)
+            {
+                _logger.LogError(ex, "gRPC SaveUser failed Phone={Phone}, Status={Status}", request.PhoneNumber, ex.StatusCode);
+                throw;
+            }
         }
         public async Task<UserSummaryReply> SetUserRole(SetUserRoleRequest request)
         {
@@ -66,8 +81,21 @@ namespace IdentityServer.GrpcClient.Services
         }
         public async Task<UserSummaryReply> SetUserSystemRole(SetUserSystemRoleRequest request)
         {
-            var result = await client.SetUserSystemRoleAsync(request);
-            return result;
+            try
+            {
+                _logger.LogInformation("gRPC SetUserSystemRole UserId={UserId}, AccessSystemId={AccessSystemId}",
+                    request.UserId, request.AccessSystemId);
+                var result = await client.SetUserSystemRoleAsync(request);
+                if (string.IsNullOrWhiteSpace(result?.UserId))
+                    _logger.LogWarning("gRPC SetUserSystemRole returned empty UserId for {UserId}", request.UserId);
+                return result;
+            }
+            catch (RpcException ex)
+            {
+                _logger.LogError(ex, "gRPC SetUserSystemRole failed UserId={UserId}, Status={Status}",
+                    request.UserId, ex.StatusCode);
+                throw;
+            }
         }
         public async Task<UserSummaryReply> SetUserState(SetUserStateRequest request)
         {

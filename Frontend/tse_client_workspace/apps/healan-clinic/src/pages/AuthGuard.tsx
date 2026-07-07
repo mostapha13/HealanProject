@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { userManager } from '../store/userManager';
-import healanApi from '../api/healanApi';
+import { UserAccessProvider } from '../context/UserAccessContext';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -19,11 +19,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
         const user = await userManager.getUser();
         if (user && !user.expired) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
-          try {
-            await healanApi.users.current();
-          } catch {
-            // در Development ممکن است API بدون کاربر پاسخ دهد
-          }
           if (!cancelled) setReady(true);
           return;
         }
@@ -50,7 +45,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  return <>{children}</>;
+  return <UserAccessProvider>{children}</UserAccessProvider>;
 }
 
 export default AuthGuard;

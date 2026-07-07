@@ -3,12 +3,15 @@ using Healan.Application.ServiceTypes.Commands.ServiceTypeRegister;
 using Healan.Application.ServiceTypes.Queries.ServiceTypeInfo;
 using Healan.Application.ServiceTypes.Queries.ServiceTypeList;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// نوع خدمات 
 /// </summary>
+[AccessForm(HealanAccessFormIds.Services)]
 public class ServiceTypesController : ApiControllerBase
 {
 
@@ -28,8 +31,8 @@ public class ServiceTypesController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(ServiceTypeRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] ServiceTypeRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات خدمت

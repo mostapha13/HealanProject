@@ -62,5 +62,11 @@ namespace Share.Domain.Models.UserAccessModels
         RegionHallFieldWorker = 25,
         [Display(Name = "کارشناس روابط عمومی")]
         PublicRelationExpert = 26,
+        [Display(Name = "منشی")]
+        Secretary = 27,
+        [Display(Name = "پزشک")]
+        Doctor = 28,
+        [Display(Name = "حسابدار")]
+        Accountant = 29,
     }
 }

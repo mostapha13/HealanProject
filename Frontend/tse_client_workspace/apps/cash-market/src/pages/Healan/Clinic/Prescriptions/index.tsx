@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import withAlert from 'apps/cash-market/src/hoc/withAlert';
 import healanApi from 'apps/cash-market/src/Controller/Healan/api';
+import type { PrescriptionSummary } from 'apps/cash-market/src/Controller/Healan/types';
 import { PageHeader } from '../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
-import { useNavigate } from '@tse/utils';
 
 function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
-  const navigate = useNavigate();
-  const [items, setItems] = useState<Record<string, unknown>[]>([]);
+  const [items, setItems] = useState<PrescriptionSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     healanApi.prescriptions.list({ pageNumber: 1, pageSize: 50 })
-      .then((res: { items?: Record<string, unknown>[] }) => setItems(res.items ?? []))
+      .then((res) => setItems(res.items ?? []))
       .catch(onAlert)
       .finally(() => setLoading(false));
   }, []);
@@ -38,11 +37,11 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </thead>
               <tbody>
                 {items.map((p) => (
-                  <tr key={String(p.prescriptionId)}>
-                    <td>{p.issueDate ? convertDateAndTimeToJalali(String(p.issueDate)) : '—'}</td>
-                    <td>{String(p.patientName ?? '—')}</td>
-                    <td>{String(p.doctorName ?? '—')}</td>
-                    <td>{String(p.notes ?? '—')}</td>
+                  <tr key={p.prescriptionId}>
+                    <td>{p.issueDate ? <span>{convertDateAndTimeToJalali(p.issueDate)}</span> : '—'}</td>
+                    <td>{p.patientName ?? '—'}</td>
+                    <td>{p.doctorName ?? '—'}</td>
+                    <td>{p.notes ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>

@@ -3,12 +3,15 @@ using Healan.Application.Doctors.Queries.DoctorList;
 using Healan.Application.Doctors.Queries.GetDoctorInfo;
 using Healan.Application.PublicInfos.Queries.MedicalGroupType;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// پزشک
 /// </summary>
+[AccessForm(HealanAccessFormIds.Doctors)]
 public class DoctorController : ApiControllerBase
 {
     /// <summary>
@@ -26,8 +29,8 @@ public class DoctorController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(DoctorRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] DoctorRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات پزشک

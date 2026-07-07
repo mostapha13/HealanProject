@@ -10,19 +10,15 @@ import type {
 } from '../../api/types';
 import { PageHeader, formatCurrency } from '../../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
-import { useNavigate } from '@tse/utils';
+import { nowDateTimeLocal } from '../../utils/formatJalali';
+import { buildAppointmentPayload, toDateTimeLocalValue } from '../../utils/apiPayload';
+import { SearchableSelect } from '../../components/SearchableSelect';
+import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
+import { useNavigate, useLocation } from '@tse/utils';
+import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentInvoice, appointmentPatientName, appointmentPatientNationalCode, appointmentIsPaid } from '../../utils/appointmentDisplay';
 
-function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
-  const navigate = useNavigate();
-  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
-  const [patients, setPatients] = useState<PatientSummary[]>([]);
-  const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
-  const [services, setServices] = useState<ServiceType[]>([]);
-  const [insurances, setInsurances] = useState<InsuranceCompany[]>([]);
-  const [filter, setFilter] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
+function createInitialAppointmentForm() {
+  return {
     appointmentId: 0,
     patientId: 0,
     doctorId: 0,
@@ -33,14 +29,55 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     secondInsuranceCompanyId: null as number | null,
     confirmSecondInsuranceCompany: false,
     serviceTypeIds: [] as number[],
-    appointmentDate: new Date().toISOString().slice(0, 16),
-  });
+    appointmentDate: nowDateTimeLocal(),
+  };
+}
+
+function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [patients, setPatients] = useState<PatientSummary[]>([]);
+  const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
+  const [services, setServices] = useState<ServiceType[]>([]);
+  const [insurances, setInsurances] = useState<InsuranceCompany[]>([]);
+  const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(createInitialAppointmentForm);
+
+  const openForm = () => {
+    setForm(createInitialAppointmentForm());
+    setShowForm(true);
+  };
+
+  const openEdit = async (appointmentId: number) => {
+    try {
+      const info = await healanApi.appointments.info(appointmentId);
+      setForm({
+        appointmentId: info.appointmentId,
+        patientId: info.patientId,
+        doctorId: info.doctorId,
+        durationMinutes: info.durationMinutes ?? 30,
+        note: info.note ?? '',
+        primaryInsuranceCompanyId: info.primaryInsuranceCompany?.insuranceCompanyId ?? null,
+        confirmPrimaryInsuranceCompany: info.confirmPrimaryInsuranceCompany ?? false,
+        secondInsuranceCompanyId: info.secondInsuranceCompany?.insuranceCompanyId ?? null,
+        confirmSecondInsuranceCompany: info.confirmSecondInsuranceCompany ?? false,
+        serviceTypeIds: info.serviceTypes?.map((s) => s.serviceTypeId) ?? [],
+        appointmentDate: toDateTimeLocalValue(info.appointmentDate) || nowDateTimeLocal(),
+      });
+      setShowForm(true);
+    } catch (err) {
+      onAlert(err);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await healanApi.appointments.list({ filterText: filter, pageNumber: 1, pageSize: 50 });
-      setAppointments(res.items ?? []);
+      const res = await healanApi.appointments.listAll({ filterText: filter });
+      setAppointments(res);
     } catch (err) {
       onAlert(err);
     } finally {
@@ -49,19 +86,32 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(() => {
+      void load();
+    }, filter ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [filter]);
+
+  useEffect(() => {
     Promise.all([
-      healanApi.patients.list({ pageNumber: 1, pageSize: 200 }),
-      healanApi.doctors.list({ pageNumber: 1, pageSize: 200 }),
-      healanApi.services.list(),
-      healanApi.insurance.list(),
+      healanApi.patients.listAll(),
+      healanApi.doctors.listAll(),
+      healanApi.services.listAll(),
+      healanApi.insurance.listAll(),
     ]).then(([p, d, s, i]) => {
-      setPatients(p.items ?? []);
-      setDoctors(d.items ?? []);
-      setServices(s.items ?? []);
-      setInsurances(i.items ?? []);
+      setPatients(p);
+      setDoctors(d);
+      setServices(s);
+      setInsurances(i);
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const editId = new URLSearchParams(location.search).get('edit');
+    if (editId) {
+      void openEdit(+editId);
+    }
+  }, [location.search]);
 
   const toggleService = (id: number) => {
     setForm((prev) => ({
@@ -73,11 +123,20 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const handleSave = async () => {
+    if (form.patientId <= 0 || form.doctorId <= 0) {
+      onAlert({ type: 'error', message: 'بیمار و پزشک را انتخاب کنید' });
+      return;
+    }
+    if (form.serviceTypeIds.length === 0) {
+      onAlert({ type: 'error', message: 'حداقل یک خدمت انتخاب کنید' });
+      return;
+    }
+    if (!form.appointmentDate?.trim()) {
+      onAlert({ type: 'error', message: 'تاریخ و ساعت نوبت را انتخاب کنید' });
+      return;
+    }
     try {
-      await healanApi.appointments.register({
-        ...form,
-        appointmentDate: new Date(form.appointmentDate).toISOString(),
-      });
+      await healanApi.appointments.register(buildAppointmentPayload(form));
       setShowForm(false);
       await load();
     } catch (err) {
@@ -105,36 +164,45 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         title="پذیرش و نوبت‌دهی"
         subtitle="ثبت نوبت، محاسبه هزینه و پرداخت"
         action={
-          <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ پذیرش جدید</button>
+          <button type="button" className="healan-btn healan-btn--primary" onClick={openForm}>+ پذیرش جدید</button>
         }
       />
 
       {showForm && (
         <div className="healan-card" style={{ marginBottom: '1.5rem' }}>
-          <div className="healan-card__header"><h3>فرم پذیرش بیمار</h3></div>
+          <div className="healan-card__header"><h3>{form.appointmentId > 0 ? 'ویرایش نوبت / افزودن خدمت' : 'فرم پذیرش بیمار'}</h3></div>
           <div className="healan-card__body">
             <div className="healan-form-grid">
               <div className="healan-form-field">
                 <label>بیمار</label>
-                <select value={form.patientId} onChange={(e) => setForm({ ...form, patientId: +e.target.value })}>
-                  <option value={0}>انتخاب بیمار</option>
-                  {patients.map((p) => (
-                    <option key={p.patientId} value={p.patientId}>{p.firstName} {p.lastName} — {p.nationalCode}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  value={form.patientId}
+                  onChange={(v) => setForm({ ...form, patientId: v ?? 0 })}
+                  placeholder="انتخاب بیمار"
+                  options={patients.map((p) => ({
+                    value: p.patientId,
+                    label: `${p.firstName} ${p.lastName} — ${p.nationalCode}`,
+                  }))}
+                />
               </div>
               <div className="healan-form-field">
                 <label>پزشک</label>
-                <select value={form.doctorId} onChange={(e) => setForm({ ...form, doctorId: +e.target.value })}>
-                  <option value={0}>انتخاب پزشک</option>
-                  {doctors.map((d) => (
-                    <option key={d.doctorId} value={d.doctorId}>{d.firstName} {d.lastName}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  value={form.doctorId}
+                  onChange={(v) => setForm({ ...form, doctorId: v ?? 0 })}
+                  placeholder="انتخاب پزشک"
+                  options={doctors.map((d) => ({
+                    value: d.doctorId,
+                    label: `${d.firstName} ${d.lastName}`,
+                  }))}
+                />
               </div>
               <div className="healan-form-field">
                 <label>تاریخ و ساعت</label>
-                <input type="datetime-local" value={form.appointmentDate} onChange={(e) => setForm({ ...form, appointmentDate: e.target.value })} />
+                <JalaliDateTimeInput
+                  value={form.appointmentDate}
+                  onChange={(appointmentDate) => setForm({ ...form, appointmentDate })}
+                />
               </div>
               <div className="healan-form-field">
                 <label>مدت (دقیقه)</label>
@@ -142,12 +210,15 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
               <div className="healan-form-field">
                 <label>بیمه پایه</label>
-                <select value={form.primaryInsuranceCompanyId ?? ''} onChange={(e) => setForm({ ...form, primaryInsuranceCompanyId: e.target.value ? +e.target.value : null })}>
-                  <option value="">بدون بیمه</option>
-                  {insurances.map((ins) => (
-                    <option key={ins.insuranceCompanyId} value={ins.insuranceCompanyId}>{ins.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  value={form.primaryInsuranceCompanyId}
+                  onChange={(v) => setForm({ ...form, primaryInsuranceCompanyId: v })}
+                  placeholder="بدون بیمه"
+                  options={insurances.map((ins) => ({
+                    value: ins.insuranceCompanyId,
+                    label: ins.name,
+                  }))}
+                />
               </div>
             </div>
             <div style={{ marginTop: '1rem' }}>
@@ -165,8 +236,13 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <label>یادداشت</label>
               <textarea rows={2} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
             </div>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+              پس از پرداخت اولیه، با افزودن خدمت جدید فاکتور مکمل ایجاد می‌شود.
+            </p>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ثبت نوبت</button>
+              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>
+                {form.appointmentId > 0 ? 'ذخیره تغییرات' : 'ثبت نوبت'}
+              </button>
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
             </div>
           </div>
@@ -174,8 +250,11 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       )}
 
       <div className="healan-search-bar">
-        <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()} />
-        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>جستجو</button>
+        <input
+          placeholder="جستجو بر اساس نام، نام خانوادگی یا کد ملی..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
       </div>
 
       <div className="healan-card">
@@ -187,7 +266,9 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <thead>
                 <tr>
                   <th>بیمار</th>
+                  <th>کد ملی</th>
                   <th>پزشک</th>
+                  <th>بیمه</th>
                   <th>تاریخ</th>
                   <th>وضعیت</th>
                   <th>مبلغ</th>
@@ -196,13 +277,15 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </thead>
               <tbody>
                 {appointments.map((a) => {
-                  const inv = a.invoices?.[0];
-                  const isPaid = inv?.invoiceStatusTypeId === 'Paid' || inv?.invoiceStatusTypeId === 'Paied';
+                  const inv = appointmentInvoice(a);
+                  const isPaid = appointmentIsPaid(a);
                   return (
                     <tr key={a.appointmentId}>
-                      <td>{a.patientName ?? '—'}</td>
-                      <td>{a.doctorName ?? '—'}</td>
-                      <td>{convertDateAndTimeToJalali(a.appointmentDate)}</td>
+                      <td>{appointmentPatientName(a)}</td>
+                      <td>{appointmentPatientNationalCode(a)}</td>
+                      <td>{appointmentDoctorName(a)}</td>
+                      <td>{appointmentInsuranceDisplay(a)}</td>
+                      <td><span>{convertDateAndTimeToJalali(a.appointmentDate)}</span></td>
                       <td>{a.appointmentTypeName ?? a.appointmentTypeId}</td>
                       <td>{inv ? formatCurrency(inv.patientPayable) : '—'}</td>
                       <td>
@@ -210,7 +293,8 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                           {!isPaid && inv && (
                             <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => handlePay(a.appointmentId)}>پرداخت</button>
                           )}
-                          <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => navigate(`/appointments/${a.appointmentId}`)}>جزئیات</button>
+                          <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void openEdit(a.appointmentId)}>ویرایش</button>
+                          <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => navigate(`/appointments/${a.appointmentId}`)}>پرونده ویزیت</button>
                         </div>
                       </td>
                     </tr>

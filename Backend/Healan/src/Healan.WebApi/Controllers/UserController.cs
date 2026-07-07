@@ -3,6 +3,8 @@ using Healan.Application.Users.Queries.CurrentUser;
 using Healan.Application.Users.Queries.GetUserInfo;
 using Healan.Application.Users.Queries.GetUsers;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 using System.Net;
 
 namespace Healan.WebApi.Controllers;
@@ -17,11 +19,9 @@ public class UserController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register([FromBody] UserSaveCommand request)
-    {
-        if (request == null) return BadRequest();
-        return Ok(await Mediator.Send(request));
-    }
+    [AccessForm(HealanAccessFormIds.UserDefine)]
+    public Task<IActionResult> Register([FromBody] UserSaveCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// لیست کاربرها
@@ -29,6 +29,7 @@ public class UserController : ApiControllerBase
     /// <param name="userRequest"></param>
     /// <returns></returns>
     [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.UserDefine)]
     public async Task<IActionResult> UserList([FromQuery] UserListQuery userRequest)=>    
          Ok(await Mediator.Send(userRequest));
    
@@ -39,6 +40,7 @@ public class UserController : ApiControllerBase
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.UserDefine)]
     public async Task<IActionResult> UserInfo([FromQuery] int userId)=>   
          Ok(await Mediator.Send(new GetUserInfoQuery() { UserId = userId }));
 

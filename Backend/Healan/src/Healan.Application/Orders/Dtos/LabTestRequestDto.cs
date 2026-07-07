@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Healan.Application.Attachments.Dtos;
 using Healan.Application.Common.Mappings;
 using Healan.Domain.Orders.Entities;
 
@@ -11,9 +12,11 @@ public class LabTestRequestDto : IMapFrom<LabTestRequest>
     public string LabTestType { get; set; }
     public string Notes { get; set; }
     public Guid? AttachmentId { get; set; }
+    public AttachmentDto Attachment { get; set; }
     public void Mapping(Profile profile)
     {
 
-        profile.CreateMap<LabTestRequest, LabTestRequestDto>();
+        profile.CreateMap<LabTestRequest, LabTestRequestDto>()
+            .ForMember(a => a.Attachment, b => b.MapFrom(c => c.Attachment));
     }
 }

@@ -88,17 +88,44 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
 
         await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        var invoice = appointment.Invoices.FirstOrDefault();
-        if (invoice is not null && invoice.InvoiceStatusTypeId != InvoiceStatusTypeId.Paid)
+        var paidServiceTypeIds = appointment.Invoices
+            .Where(i => i.InvoiceStatusTypeId == InvoiceStatusTypeId.Paid)
+            .SelectMany(i => i.InvoiceItems)
+            .Select(ii => ii.ServiceTypeId)
+            .ToHashSet();
+
+        var serviceTypeIdsToBill = request.serviceTypeIds
+            .Where(id => !paidServiceTypeIds.Contains(id))
+            .ToList();
+
+        var invoice = appointment.Invoices
+            .FirstOrDefault(i => i.InvoiceStatusTypeId == InvoiceStatusTypeId.Pending);
+
+        if (invoice is not null)
         {
             _applicationDbContext.InvoiceItems.RemoveRange(invoice.InvoiceItems);
             _applicationDbContext.Payments.RemoveRange(invoice.Payments);
-            _applicationDbContext.Invoices.Remove(invoice);
+        }
+        else if (serviceTypeIdsToBill.Any())
+        {
+            invoice = new Invoice { AppointmentId = appointment.AppointmentId };
+            _applicationDbContext.Invoices.Add(invoice);
+            await _applicationDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        invoice = new Invoice { AppointmentId = appointment.AppointmentId };
-        _applicationDbContext.Invoices.Add(invoice);
-        await _applicationDbContext.SaveChangesAsync(cancellationToken);
+        if (!serviceTypeIdsToBill.Any())
+        {
+            if (invoice is not null && invoice.InvoiceStatusTypeId == InvoiceStatusTypeId.Pending)
+            {
+                _applicationDbContext.InvoiceItems.RemoveRange(invoice.InvoiceItems);
+                _applicationDbContext.Payments.RemoveRange(invoice.Payments);
+                _applicationDbContext.Invoices.Remove(invoice);
+                await _applicationDbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            await _applicationDbContext.CommitTransactionAsync();
+            return new AppointmentRegisterResult(appointment.AppointmentId);
+        }
 
         var medicalFeeServices = await _applicationDbContext.MedicalFeeServices
             .Where(x => x.IsActive)
@@ -108,7 +135,7 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
         decimal totalSecondary = 0;
         decimal totalAmount = 0;
 
-        foreach (var serviceTypeId in request.serviceTypeIds)
+        foreach (var serviceTypeId in serviceTypeIdsToBill)
         {
             var medicalService = medicalFeeServices.FirstOrDefault(x => x.ServiceTypeId == serviceTypeId);
             if (medicalService is null)
@@ -126,7 +153,7 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
                 request.ConfirmSecondInsuranceCompany,
                 cancellationToken);
 
-            invoice.InvoiceItems.Add(new InvoiceItem
+            invoice!.InvoiceItems.Add(new InvoiceItem
             {
                 ServiceTypeId = serviceTypeId,
                 UnitPrice = calc.UnitPrice,
@@ -141,7 +168,7 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
             totalSecondary += calc.SecondaryInsuranceCovered;
         }
 
-        invoice.InvoiceStatusTypeId = InvoiceStatusTypeId.Pending;
+        invoice!.InvoiceStatusTypeId = InvoiceStatusTypeId.Pending;
         invoice.TotalAmount = totalAmount;
         invoice.PrimaryInsuranceCovered = totalPrimary;
         invoice.SecondaryInsuranceCovered = totalSecondary;

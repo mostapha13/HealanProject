@@ -28,5 +28,7 @@ namespace Share.Domain.Enums
         RGNL = 9,
         [Display(Name = "امور مالیاتی")]
         TAX = 10,
+        [Display(Name = "سامانه Healan")]
+        Healan = 11,
     }
 }

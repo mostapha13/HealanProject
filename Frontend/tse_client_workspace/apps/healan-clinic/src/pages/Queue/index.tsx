@@ -9,8 +9,11 @@ import {
   AppointmentSummary,
 } from '../../api/types';
 import { convertDateAndTimeToJalali } from '@tse/tools';
+import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentCanStartVisit, appointmentPatientDisplay, appointmentPaymentColor, appointmentPaymentLabel } from '../../utils/appointmentDisplay';
+import { useNavigate } from '@tse/utils';
 
 function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const navigate = useNavigate();
   const [items, setItems] = useState<AppointmentSummary[]>([]);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
@@ -18,8 +21,8 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await healanApi.appointments.today({ filterText: filter, pageNumber: 1, pageSize: 50 });
-      setItems(res.items ?? []);
+      const res = await healanApi.appointments.todayAll({ filterText: filter });
+      setItems(res);
     } catch (err) {
       onAlert(err);
     } finally {
@@ -28,8 +31,11 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    const timer = setTimeout(() => {
+      void load();
+    }, filter ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [filter]);
 
   const changeStatus = async (appointmentId: number, status: AppointmentStatus) => {
     try {
@@ -46,12 +52,10 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <div className="healan-search-bar">
         <input
-          placeholder="جستجو با نام یا کد ملی..."
+          placeholder="جستجو بر اساس نام، نام خانوادگی یا کد ملی..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && load()}
         />
-        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>جستجو</button>
       </div>
 
       <div className="healan-card">
@@ -66,23 +70,33 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               return (
                 <div key={item.appointmentId} className="healan-queue-item">
                   <div className="healan-queue-item__info">
-                    <h4>{item.patientName ?? '—'}</h4>
-                    <p>{item.doctorName ?? '—'} · {convertDateAndTimeToJalali(item.appointmentDate)}</p>
+                    <h4>{appointmentPatientDisplay(item)}</h4>
+                    <p>{appointmentDoctorName(item)} · <span>{convertDateAndTimeToJalali(item.appointmentDate)}</span></p>
+                    <p className="healan-queue-item__meta">بیمه: {appointmentInsuranceDisplay(item)}</p>
                   </div>
                   <div className="healan-actions">
+                    <StatusBadge
+                      label={appointmentPaymentLabel(item)}
+                      color={appointmentPaymentColor(item)}
+                    />
                     <StatusBadge
                       label={APPOINTMENT_STATUS_LABELS[status] ?? status}
                       color={APPOINTMENT_STATUS_COLORS[status] ?? '#6b7280'}
                     />
                     {status === 'Scheduled' && (
                       <>
-                        <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => changeStatus(item.appointmentId, 'InProgress')}>شروع ویزیت</button>
+                        {appointmentCanStartVisit(item) ? (
+                          <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => changeStatus(item.appointmentId, 'InProgress')}>شروع ویزیت</button>
+                        ) : (
+                          <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => navigate(`/appointments/${item.appointmentId}`)}>پرداخت</button>
+                        )}
                         <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => changeStatus(item.appointmentId, 'NoShow')}>عدم حضور</button>
                       </>
                     )}
                     {status === 'InProgress' && (
                       <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => changeStatus(item.appointmentId, 'Completed')}>پایان ویزیت</button>
                     )}
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => navigate(`/appointments/${item.appointmentId}`)}>پرونده ویزیت</button>
                   </div>
                 </div>
               );

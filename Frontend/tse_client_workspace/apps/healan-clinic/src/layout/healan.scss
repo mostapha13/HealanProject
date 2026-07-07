@@ -61,6 +61,53 @@
   margin-top: 1rem;
 }
 
+.healan-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0 1rem;
+}
+
+.healan-sidebar__user-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.healan-sidebar__user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.healan-sidebar__user-label {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.healan-sidebar__user-text strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.healan-sidebar__user-meta {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .healan-nav-item {
   display: flex;
   align-items: center;
@@ -273,6 +320,110 @@
   color: var(--healan-text-muted);
 }
 
+.healan-queue-item__meta {
+  margin-top: 0.25rem !important;
+  font-size: 0.75rem !important;
+  color: #64748b !important;
+}
+
+.healan-workflow-steps {
+  margin: 0;
+  padding-right: 1.25rem;
+  color: var(--healan-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.9;
+}
+
+.healan-workflow-steps li.active {
+  color: #0d9488;
+  font-weight: 600;
+}
+
+.healan-workflow-steps li.done {
+  color: #059669;
+}
+
+.healan-list-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--healan-border);
+}
+
+.healan-list-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.healan-list-section__header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.healan-inline-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: end;
+}
+
+.healan-prescription-row {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--healan-border);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.healan-file-upload {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.healan-file-upload__label {
+  color: var(--healan-text-muted);
+  font-weight: 500;
+}
+
+.healan-file-upload__attached {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.healan-file-upload__name {
+  color: var(--healan-primary-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.healan-file-upload__name:hover {
+  text-decoration: underline;
+}
+
+.healan-file-upload__input {
+  font-size: 0.8rem;
+  max-width: 100%;
+}
+
+.healan-file-upload__status {
+  color: var(--healan-text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .healan-inline-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .healan-actions {
   display: flex;
   gap: 0.5rem;
@@ -323,7 +474,8 @@
 
 .healan-form-field input,
 .healan-form-field select,
-.healan-form-field textarea {
+.healan-form-field textarea,
+.healan-form-field .healan-searchable-select .ant-select-selector {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--healan-border);
   border-radius: 8px;
@@ -332,12 +484,56 @@
   background: #fff;
 }
 
+.healan-form-field .healan-searchable-select {
+  width: 100%;
+}
+
+.healan-form-field .healan-searchable-select .ant-select-selector {
+  min-height: 38px !important;
+  display: flex;
+  align-items: center;
+}
+
+.healan-form-field .healan-searchable-select.ant-select-focused .ant-select-selector {
+  border-color: var(--healan-primary) !important;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12) !important;
+}
+
 .healan-form-field input:focus,
 .healan-form-field select:focus,
 .healan-form-field textarea:focus {
   outline: none;
   border-color: var(--healan-primary);
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.healan-jalali-datetime {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.healan-jalali-datetime__date {
+  flex: 1;
+  min-width: 0;
+}
+
+.healan-jalali-datetime__date-input {
+  width: 100%;
+  cursor: pointer;
+}
+
+.healan-jalali-datetime__time {
+  width: 7rem;
+  flex-shrink: 0;
+}
+
+.healan-jalali-datetime .Calendar {
+  z-index: 20;
+}
+
+.healan-jalali-datetime .Calendar__calendarContainer {
+  z-index: 30 !important;
 }
 
 .healan-search-bar {

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Share.Domain.Extensions;
 using Share.Domain.Models.UserAccessModels;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Linq;
 using IdentityServer.Domain.Data;
@@ -21,6 +22,8 @@ namespace IdentityServer.Domain.Data
             var isExistAdminUser = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == ConstUserInfo.AdminUserName);
             if (isExistAdminUser == null)
                 await AddUser(userManager, ConstUserInfo.AdminRole, ConstUserInfo.AdminUserName, ConstUserInfo.AdminPass, ConstUserInfo.AdminFirstName, ConstUserInfo.AdminLastName);
+
+            await HealanClinicUserSeed.SeedAsync(dbContext, userManager, roleManager);
         }
 
         private static async Task AddRoles(ApplicationDbContext dbContext, RoleManager<ApplicationRole> roleManager)

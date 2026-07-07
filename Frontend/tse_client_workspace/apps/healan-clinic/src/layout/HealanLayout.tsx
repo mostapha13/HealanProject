@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useNavigate } from '@tse/utils';
 import { userManager } from '../store/userManager';
 import { HealanNavLink } from '../components/HealanNavLink';
+import { useUserAccess } from '../context/UserAccessContext';
 import './healan.scss';
 
 const navItems = [
@@ -19,6 +20,16 @@ const navItems = [
 
 export function HealanLayout() {
   const navigate = useNavigate();
+  const { canAccess, loading, displayName, currentUser } = useUserAccess();
+
+  const userFullName = currentUser
+    ? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim()
+    : '';
+  const userRole = currentUser?.roleTitle ?? '';
+
+  const visibleNavItems = loading
+    ? navItems
+    : navItems.filter((item) => canAccess(item.path));
 
   const handleLogout = async () => {
     await userManager.signoutRedirect();
@@ -35,7 +46,7 @@ export function HealanLayout() {
             <p>سامانه مدیریت کلینیک و مطب</p>
           </div>
           <nav>
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <HealanNavLink
                 key={item.path}
                 to={item.path}
@@ -50,6 +61,18 @@ export function HealanLayout() {
             ))}
           </nav>
           <div className="healan-sidebar__footer">
+            <div className="healan-sidebar__user">
+              <span className="healan-sidebar__user-icon" aria-hidden="true">👤</span>
+              <div className="healan-sidebar__user-text">
+                <span className="healan-sidebar__user-label">کاربر فعال</span>
+                <strong>
+                  {loading ? 'در حال بارگذاری...' : userFullName || displayName || '—'}
+                </strong>
+                {!loading && userRole && (
+                  <span className="healan-sidebar__user-meta">{userRole}</span>
+                )}
+              </div>
+            </div>
             <button type="button" className="healan-btn healan-btn--ghost" onClick={handleLogout}>
               خروج از حساب
             </button>

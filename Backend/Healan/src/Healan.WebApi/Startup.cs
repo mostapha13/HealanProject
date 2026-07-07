@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
+using Share.Domain.Constants;
+using Share.Domain.Converters;
 using Share.Application.Common.Filters;
 using Share.Application.Common.Interfaces;
 using Share.Application.Common.Services;
 using Share.Infrastructure;
+using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
 using Share.MessageBroker.RabbitMQ;
 using System.Text.Json.Serialization;
@@ -48,10 +51,12 @@ namespace Healan.WebApi
             {
                 options.Filters.Add<ApiExceptionFilterAttribute>();
             })
-                .AddFluentValidation(x => x.AutomaticValidationEnabled = true)
+                .AddFluentValidation(x => x.AutomaticValidationEnabled = false)
                 .AddJsonOptions(opts =>
                 {
                     opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    opts.JsonSerializerOptions.Converters.Add(new NullableDateTimeJsonConverter());
+                    opts.JsonSerializerOptions.Converters.Add(new NullableStringJsonConverter());
                 });
 
             services.Configure<ApiBehaviorOptions>(options =>
@@ -123,6 +128,7 @@ namespace Healan.WebApi
             app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<AccessMiddleware>(HealanAccessFormIds.SystemName);
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }

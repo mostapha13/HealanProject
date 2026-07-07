@@ -46,6 +46,16 @@ namespace IdentityServer
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
                     await context.SeedAdmin(userManager, roleManager);
+
+                    try
+                    {
+                        await HealanAccessSeed.SeedAsync(context, roleManager);
+                    }
+                    catch (Exception accessEx)
+                    {
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                        logger.LogError(accessEx, "Healan access seed failed — clinic users were still seeded.");
+                    }
                 }
                 catch (Exception ex)
                 {

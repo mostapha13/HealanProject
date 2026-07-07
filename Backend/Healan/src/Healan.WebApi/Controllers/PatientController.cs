@@ -3,12 +3,15 @@ using Healan.Application.Patients.Queries.GetPatientInfo;
 using Healan.Application.Patients.Queries.PatientInfoByNationalCode;
 using Healan.Application.Patients.Queries.PatientList;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// بیمار
 /// </summary>
+[AccessForm(HealanAccessFormIds.Patients)]
 public class PatientController : ApiControllerBase
 {
     /// <summary>
@@ -26,8 +29,8 @@ public class PatientController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(PatientRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] PatientRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات بیمار

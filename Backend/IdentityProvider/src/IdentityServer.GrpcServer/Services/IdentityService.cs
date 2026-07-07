@@ -75,7 +75,13 @@ namespace IdentityServer.GrpcServer.Services
                 user.UserName = request.PhoneNumber;
                 user.NormalizedUserName = request.PhoneNumber;
                 user.TwoFactorEnabled = true;
-                var resultxx = await _userManager.CreateAsync(user, request.Password);
+                var createResult = await _userManager.CreateAsync(user, request.Password);
+                if (!createResult.Succeeded)
+                {
+                    var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Identity SaveUser CreateAsync failed for {Phone}: {Errors}", request.PhoneNumber, errors);
+                    return new UserSummaryReply();
+                }
             }
             else
             {
@@ -258,6 +264,9 @@ namespace IdentityServer.GrpcServer.Services
         private async Task<UserSummaryReply> GetUserSummaryReply(Guid userId)
         {
             var user = _applicationDbContext.Users.FirstOrDefault(p => p.Id == userId);
+            if (user == null)
+                return new UserSummaryReply();
+
             var result = new UserSummaryReply()
             {
                 Email = user.Email ?? "",
@@ -343,8 +352,12 @@ namespace IdentityServer.GrpcServer.Services
             foreach (var item in request.RoleNames)
                 _logger.LogWarning($" Role {item}");
 
-            await UpdateUserSystemRoles(request.UserId.ToGuid().Value, request.AccessSystemId, request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
-            return await GetUserSummaryReply(request.UserId.ToGuid().Value);
+            var userId = request.UserId.ToGuid();
+            if (!userId.HasValue || userId.Value == Guid.Empty)
+                return new UserSummaryReply();
+
+            await UpdateUserSystemRoles(userId.Value, request.AccessSystemId, request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
+            return await GetUserSummaryReply(userId.Value);
         }
 
         private async Task UpdateUserSystemRoles(Guid userId, int accessSystemId, List<string> roleNames)

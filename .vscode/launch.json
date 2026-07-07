@@ -62,6 +62,30 @@
       }
     },
     {
+      "name": "UserManager API",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer.UserManagerAPI/bin/Debug/net9.0/IdentityServer.UserManagerAPI.dll",
+      "cwd": "${workspaceFolder}/Backend/IdentityProvider/src/IdentityServer.UserManagerAPI",
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5074"
+      }
+    },
+    {
+      "name": "WorkFlow API",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Backend/WorkFlow/src/WorkFlow.WebUI/bin/Debug/net9.0/WorkFlow.WebUI.dll",
+      "cwd": "${workspaceFolder}/Backend/WorkFlow/src/WorkFlow.WebUI",
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:6022"
+      }
+    },
+    {
       "name": "Healan WebApi",
       "type": "coreclr",
       "request": "launch",
@@ -102,6 +126,8 @@
         "Identity gRPC",
         "FileManager gRPC",
         "FileManager Web",
+        "UserManager API",
+        "WorkFlow API",
         "Healan WebApi",
         "Healan Portal (Public Site)",
         "Healan Frontend"
@@ -110,6 +136,26 @@
       "presentation": {
         "group": "Healan",
         "order": 1
+      }
+    },
+    {
+      "name": "Healan: Clinic",
+      "preLaunchTask": "prepare-healan-full-stack",
+      "configurations": [
+        "Captcha Provider",
+        "Identity Server",
+        "Identity gRPC",
+        "FileManager gRPC",
+        "FileManager Web",
+        "UserManager API",
+        "WorkFlow API",
+        "Healan WebApi",
+        "Healan Frontend"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "group": "Healan",
+        "order": 2
       }
     },
     {
@@ -126,7 +172,7 @@
       "stopAll": true,
       "presentation": {
         "group": "Healan",
-        "order": 2
+        "order": 3
       }
     },
     {
@@ -139,7 +185,7 @@
       "stopAll": true,
       "presentation": {
         "group": "Healan",
-        "order": 3
+        "order": 4
       }
     }
   ]

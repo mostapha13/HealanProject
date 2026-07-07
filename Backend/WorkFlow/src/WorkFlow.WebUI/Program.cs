@@ -1,5 +1,4 @@
 using WorkFlow.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,10 +30,9 @@ namespace WorkFlow.WebUI
                     //    context.Database.Migrate();
                     //}
                                         
-                        context.Database.Migrate();                 
+                        context.Database.Migrate();
 
-
-                    //await ApplicationDbContextSeed.SeedSamplePostAsync(context);
+                    await WorkFlowHealanSeed.SeedAsync(context);
                 }
                 catch (Exception ex)
                 {

@@ -18,7 +18,7 @@
         "assets": ["apps/healan-clinic/src/assets"],
         "styles": ["apps/healan-clinic/src/styles.scss"],
         "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack"
+        "webpackConfig": "apps/healan-clinic/webpack.config.js"
       },
       "configurations": {
         "production": {

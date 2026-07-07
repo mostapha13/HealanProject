@@ -13,44 +13,57 @@
         : null;
 }
 
-@*<p>@ViewBag.Message</p>*@
+<div class="healan-login-card">
+    <header class="healan-login-card__header">
+        <div class="healan-login-card__badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            ورود امن
+        </div>
+        <h1 class="healan-login-card__title">ورود به سامانه</h1>
+        <p class="healan-login-card__subtitle">برای دسترسی به سامانه مدیریت کلینیک، اطلاعات خود را وارد کنید.</p>
+    </header>
 
-<div class="hotel-left">
-    <div class="pay_form">
-        <h3 class="text-login">ورود به سامانه جامع بورس اوراق بهادار</h3>
-        <form asp-route-returnurl="@ViewData["ReturnUrl"]" asp-controller="Account" asp-action="Login" asp-antiforgery="true" method="post">
+    <form class="healan-login-form" asp-route-returnurl="@ViewData["ReturnUrl"]" asp-controller="Account" asp-action="Login" asp-antiforgery="true" method="post">
+        @Html.HiddenFor(x => x.CaptchaKey)
+        @Html.HiddenFor(x => x.ReturnUrl)
 
-            <input asp-for="UserName" class="logo" placeholder="نام کاربری" />
-            <input asp-for="Password" class="key password-custom" placeholder="رمز عبور" autocomplete='off'/>
-            @Html.HiddenFor(x => x.CaptchaKey)
-            @Html.HiddenFor(x => x.ReturnUrl)
+        <div class="healan-field">
+            <label asp-for="UserName">نام کاربری</label>
+            <input asp-for="UserName" type="text" placeholder="نام کاربری خود را وارد کنید" autocomplete="username" />
+            <span asp-validation-for="UserName" class="healan-field-error"></span>
+        </div>
 
-            <div class="form-group">
-                @if (captchaAvailable)
-                {
-                    <div class="input-custom relative textbox_display">
-                        <input asp-for="CaptchaCode" class="Captchabox" placeholder="کد امنیتی" autocomplete='off'/>
-                    </div>
-                    <div class="input-group-prepend textbox_display">
-                        <img src="@source" alt="captcha" />
-                    </div>
-                }
-            </div>
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <div class="checkbox">
-                      @*  <input asp-for="RememberMe" />*@
-                  @*      @Html.LabelFor(m => m.RememberMe, new { @class = "remember-custom" })*@
-                        @Html.ActionLink("فراموشی رمز عبور","ForgotPassword","Account", new {returnUrl=Model.ReturnUrl}, new { @class = "link" })
-                    </div>
+        <div class="healan-field">
+            <label asp-for="Password">رمز عبور</label>
+            <input asp-for="Password" type="password" placeholder="رمز عبور" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="healan-field-error"></span>
+        </div>
+
+        @if (captchaAvailable)
+        {
+            <div class="healan-captcha">
+                <div class="healan-field">
+                    <label asp-for="CaptchaCode">کد امنیتی</label>
+                    <input asp-for="CaptchaCode" type="text" placeholder="کد تصویر را وارد کنید" autocomplete="off" inputmode="numeric" />
+                    <span asp-validation-for="CaptchaCode" class="healan-field-error"></span>
+                </div>
+                <div class="healan-captcha__image">
+                    <img src="@source" alt="کد امنیتی" />
                 </div>
             </div>
-            <div class="login-button text-left">
-                <input type="submit" class="btn btn-success" value="ورود" />
-            </div>
+        }
 
-            <div asp-validation-summary="All" class="text-danger"></div>
-        </form>
-    </div>
-    <div class="clear"></div>
+        <div class="healan-login-actions">
+            @Html.ActionLink("فراموشی رمز عبور", "ForgotPassword", "Account", new { returnUrl = Model?.ReturnUrl }, new { @class = "healan-link" })
+        </div>
+
+        <button type="submit" class="healan-btn healan-btn--primary">ورود به سامانه</button>
+
+        <div asp-validation-summary="All" class="healan-validation"></div>
+    </form>
+
+    <p class="healan-login-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        اطلاعات شما با رمزنگاری امن محافظت می‌شود.
+    </p>
 </div>

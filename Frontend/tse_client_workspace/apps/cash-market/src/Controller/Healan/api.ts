@@ -7,17 +7,18 @@ import type {
   InsuranceCompany,
   PaginatedResponse,
   PatientSummary,
+  PrescriptionSummary,
   ServiceType,
 } from './types';
 
 const BASE = environment.healanApiUrl;
 
 async function get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-  return request.get({ baseUrl: BASE, url, options: params ?? {} });
+  return request.get({ baseUrl: BASE, url, options: params ?? {} }) as Promise<T>;
 }
 
 async function post<T>(url: string, data: unknown): Promise<T> {
-  return request.post({ baseUrl: BASE, url, options: data });
+  return request.post({ baseUrl: BASE, url, options: data }) as Promise<T>;
 }
 
 export const healanApi = {
@@ -83,7 +84,7 @@ export const healanApi = {
 
   prescriptions: {
     list: (params: Record<string, unknown>) =>
-      get('OrderResult/PrescriptionList', params),
+      get<PaginatedResponse<PrescriptionSummary>>('OrderResult/PrescriptionList', params),
     info: (prescriptionId: number) =>
       get(`OrderResult/PrescriptionInfo/?prescriptionId=${prescriptionId}`),
     register: (data: Record<string, unknown>) =>

@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import { PageHeader } from '../../components/Ui';
+import { buildCertificatePayload } from '../../utils/apiPayload';
 
 function SignaturePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [certificate, setCertificate] = useState('');
   const [result, setResult] = useState<string | null>(null);
 
   const validate = async () => {
+    const trimmed = certificate.trim();
+    if (!trimmed) {
+      onAlert({ type: 'error', message: 'محتوای گواهی را وارد کنید' });
+      return;
+    }
     try {
-      const res = await healanApi.signature.validateCertificate({ certificateBase64: certificate });
+      const res = await healanApi.signature.validateCertificate(buildCertificatePayload(trimmed));
       setResult(JSON.stringify(res, null, 2));
     } catch (err) {
       onAlert(err);

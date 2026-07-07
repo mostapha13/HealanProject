@@ -3,8 +3,11 @@ using Healan.Application.Companies.Queries.CompanyList;
 using Healan.Application.Companies.Queries.CompanyRegistrationTypes;
 using Healan.Application.Companies.Queries.GetCompanyInfo;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
+[AccessForm(HealanAccessFormIds.Companies)]
 public class CompanyController : ApiControllerBase
 {
     /// <summary>
@@ -22,8 +25,8 @@ public class CompanyController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(CompanyRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] CompanyRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات شرکت

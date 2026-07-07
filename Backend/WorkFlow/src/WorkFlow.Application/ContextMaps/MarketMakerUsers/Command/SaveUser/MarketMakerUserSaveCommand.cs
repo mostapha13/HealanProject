@@ -1,144 +1,145 @@
 ﻿using WorkFlow.Application.Common.Interfaces;
 using WorkFlow.Domain.Entities;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Share.Domain.Enums;
-using WorkFlow.Application.Common.Constant;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Share.Domain.Constants;
-using Share.Application.Common.Interfaces;
+using Share.Domain.Enums;
+using Share.Domain.Exceptions;
+using Share.Domain.Extensions;
 using WorkFlow.Application.ContextMaps.Funds.Queries.GetFunds;
 using WorkFlow.Application.ContextMaps.MarketMakerUserGroups.Queries.GetGroups;
 using WorkFlow.Application.ContextMaps.MarketMakerUsers.Queries.GetUsers;
-using Share.Domain.Exceptions;
 
-namespace WorkFlow.Application.ContextMaps.MarketMakerUsers.Command.SaveUser
+namespace WorkFlow.Application.ContextMaps.MarketMakerUsers.Command.SaveUser;
+
+public class WorkFlowUserSaveCommand : IRequest<WorkFlowUserResponse>
 {
-    public class WorkFlowUserSaveCommand : IRequest<WorkFlowUserResponse>
+    public Guid? WorkFlowUserId { get; set; }
+    public Guid? IdentityUserId { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string PhoneNumber { get; set; }
+    public bool IsActive { get; set; }
+    public WorkFlowGroupResponse WorkFlowUserGroup { get; set; }
+    public FundResponse Fund { get; set; }
+}
+
+public class WorkFlowUserSaveCommandHandler : IRequestHandler<WorkFlowUserSaveCommand, WorkFlowUserResponse>
+{
+    private readonly IApplicationDbContext _applicationDbContext;
+    private readonly ILogger<WorkFlowUserSaveCommandHandler> _logger;
+
+    public WorkFlowUserSaveCommandHandler(
+        IApplicationDbContext applicationDbContext,
+        ILogger<WorkFlowUserSaveCommandHandler> logger)
     {
-        public Guid? WorkFlowUserId { get; set; }
-        public Guid? IdentityUserId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-        public bool IsActive { get; set; }
-        public WorkFlowGroupResponse WorkFlowUserGroup { get; set; }
-        public FundResponse Fund { get; set; }
+        _applicationDbContext = applicationDbContext;
+        _logger = logger;
     }
-    public class WorkFlowUserSaveCommandHandler : IRequestHandler<WorkFlowUserSaveCommand, WorkFlowUserResponse>
+
+    public async Task<WorkFlowUserResponse> Handle(WorkFlowUserSaveCommand request, CancellationToken cancellationToken)
     {
-        private readonly IApplicationDbContext _applicationDbContext;
-        private readonly ILogger<WorkFlowUserSaveCommandHandler> _logger;
-        private readonly ISmsApiService _smsService;
-        public WorkFlowUserSaveCommandHandler(IApplicationDbContext applicationDbContext, ILogger<WorkFlowUserSaveCommandHandler> logger, ISmsApiService smsService)
+        if (request.WorkFlowUserGroup == null)
+            throw new BadRequestExceptions("گروه کاربری WorkFlow مشخص نشده است");
+
+        _logger.LogInformation(
+            "WorkFlowUserSave started. IdentityUserId={IdentityUserId}, GroupId={GroupId}, Phone={Phone}",
+            request.IdentityUserId, request.WorkFlowUserGroup.WorkFlowUserGroupId, request.PhoneNumber);
+
+        await EnsureWorkFlowUserGroupExistsAsync(request.WorkFlowUserGroup.WorkFlowUserGroupId, cancellationToken);
+
+        var workflowUser = await ResolveWorkFlowUserAsync(request, cancellationToken);
+
+        workflowUser.FirstName = request.FirstName;
+        workflowUser.LastName = request.LastName;
+        if (request.IdentityUserId.HasValue)
+            workflowUser.IdentityUserId = request.IdentityUserId;
+        workflowUser.PhoneNumber = request.PhoneNumber;
+        workflowUser.FundId = request.Fund != null && request.WorkFlowUserGroup.WorkFlowUserGroupId == WorkFlowUserGroupId.MarketMaker
+            ? request.Fund.FundId
+            : null;
+        workflowUser.BrokerId =
+            request.Fund != null && request.WorkFlowUserGroup.WorkFlowUserGroupId == WorkFlowUserGroupId.MarketMaker
+                ? _applicationDbContext.Funds.Where(f => f.FundId == request.Fund.FundId).Select(x => x.BrokerId).FirstOrDefault()
+                : null;
+        workflowUser.IsActive = request.IsActive;
+        workflowUser.WorkFlowUserGroupId = request.WorkFlowUserGroup.WorkFlowUserGroupId;
+        workflowUser.IsConfirmed = request.WorkFlowUserGroup.WorkFlowUserGroupId != WorkFlowUserGroupId.MarketMaker;
+
+        try
         {
-            _applicationDbContext = applicationDbContext;
-            _logger = logger;
-            _smsService = smsService;
+            await _applicationDbContext.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "WorkFlowUserSave succeeded. WorkFlowUserId={WorkFlowUserId}, IdentityUserId={IdentityUserId}",
+                workflowUser.WorkFlowUserId, workflowUser.IdentityUserId);
+
+            return new WorkFlowUserResponse
+            {
+                WorkFlowUserId = workflowUser.WorkFlowUserId,
+                FirstName = workflowUser.FirstName,
+                LastName = workflowUser.LastName,
+                Fund = request.Fund,
+                PhoneNumber = workflowUser.PhoneNumber,
+                IsActive = workflowUser.IsActive,
+                WorkFlowUserGroup = request.WorkFlowUserGroup,
+            };
         }
-        public async Task<WorkFlowUserResponse> Handle(WorkFlowUserSaveCommand request, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            var WorkFlowUserUser = _applicationDbContext.WorkFlowUsers.FirstOrDefault(x => x.WorkFlowUserId == request.WorkFlowUserId);
-            bool isNew = false;
-            if (WorkFlowUserUser == null)
-            {
-                WorkFlowUserUser = new WorkFlowUser();
-                _applicationDbContext.WorkFlowUsers.Add(WorkFlowUserUser);
-                isNew = true;
-            }
-            WorkFlowUserUser.FirstName = request.FirstName;
-            WorkFlowUserUser.LastName = request.LastName;
-            if (request.IdentityUserId.HasValue)
-                WorkFlowUserUser.IdentityUserId = request.IdentityUserId;
-            WorkFlowUserUser.PhoneNumber = request.PhoneNumber;
-            WorkFlowUserUser.FundId = request.Fund != null && request.WorkFlowUserGroup.WorkFlowUserGroupId == WorkFlowUserGroupId.MarketMaker ? request.Fund.FundId : null;
-            WorkFlowUserUser.BrokerId =
-                 request.Fund != null && request.WorkFlowUserGroup.WorkFlowUserGroupId == WorkFlowUserGroupId.MarketMaker ?
-                 _applicationDbContext.Funds.Where(f => f.FundId == request.Fund.FundId).Select(x => x.BrokerId).FirstOrDefault() :
-                 null;
-            WorkFlowUserUser.IsActive = request.IsActive;
-            WorkFlowUserUser.WorkFlowUserGroupId = request.WorkFlowUserGroup.WorkFlowUserGroupId;
+            _logger.LogError(ex,
+                "WorkFlowUserSave failed. IdentityUserId={IdentityUserId}, GroupId={GroupId}, Phone={Phone}",
+                request.IdentityUserId, request.WorkFlowUserGroup.WorkFlowUserGroupId, request.PhoneNumber);
 
-
-            if (request.WorkFlowUserGroup.WorkFlowUserGroupId == WorkFlowUserGroupId.MarketMaker)
-                WorkFlowUserUser.IsConfirmed = false;
-            else
-                WorkFlowUserUser.IsConfirmed = true;
-
-            var roleName = GetRoleName(WorkFlowUserUser.WorkFlowUserGroupId);
-            try
-            {
-
-                //Random r = new Random();
-                //var x = r.Next(0, 100000000);
-                //string password = x.ToString("00000000");
-
-                //var saveRequest = new IdentityServer.GrpcClient.SaveRequest()
-                //{
-                //    UserId = WorkFlowUserUser.IdentityUserId != null ? WorkFlowUserUser.IdentityUserId.Value.ToString() : "",
-                //    IsActive = WorkFlowUserUser.IsActive,
-                //    DepartmentId = (int)DepartmentId.WorkFlow,
-                //    FirstName = WorkFlowUserUser.FirstName,
-                //    LastName = WorkFlowUserUser.LastName,
-                //    PhoneNumber = WorkFlowUserUser.PhoneNumber,
-                //    Password = password
-
-                //};
-                //saveRequest.RoleNames.Add(roleName);
-                //var userSummary = await _identityTool.SaveUser(saveRequest);
-                //if (userSummary == null)
-                //    throw new BadRequestExceptions(ValidationMessages.LoginNotCreated);
-
-                //if (isNew)
-                //{
-                //    var smsModel = new Share.Domain.Models.SMSModelRequest()
-                //    {
-                //        Message = $"Password: {password}",
-                //        PhoneNumbers = new List<string>() { userSummary.PhoneNumber }
-                //    };
-                //    await _smsService.SendSMS(smsModel);
-                //}
-
-                //WorkFlowUserUser.IdentityUserId = userSummary.UserId.ToGuid();
-
-                await _applicationDbContext.SaveChangesAsync(cancellationToken);
-                return new WorkFlowUserResponse()
-                {
-                    WorkFlowUserId = WorkFlowUserUser.WorkFlowUserId,
-                    FirstName = WorkFlowUserUser.FirstName,
-                    LastName = WorkFlowUserUser.LastName,
-                    Fund = request.Fund,
-                    PhoneNumber = WorkFlowUserUser.PhoneNumber,
-                    IsActive = WorkFlowUserUser.IsActive,
-                    WorkFlowUserGroup = request.WorkFlowUserGroup
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Critical Error Raised In WorkFlowUserSaveCommandHandler");
-                throw new BadRequestExceptions(ValidationMessages.LoginNotCreated);
-            }
+            var detail = ex.InnerException?.Message ?? ex.Message;
+            throw new BadRequestExceptions($"خطا در ثبت کاربر WorkFlow: {detail}");
         }
-        public string GetRoleName(WorkFlowUserGroupId WorkFlowUserGroupId)
+    }
+
+    private async Task EnsureWorkFlowUserGroupExistsAsync(
+        WorkFlowUserGroupId groupId,
+        CancellationToken cancellationToken)
+    {
+        if (await _applicationDbContext.WorkFlowUserGroups
+                .AnyAsync(g => g.WorkFlowUserGroupId == groupId, cancellationToken))
+            return;
+
+        var info = EnumExtensions.GetEnumInfo<WorkFlowUserGroupId>()
+            .FirstOrDefault(e => e.Key == (int)groupId);
+
+        _logger.LogWarning("WorkFlowUserGroup {GroupId} missing — creating seed row", groupId);
+
+        _applicationDbContext.WorkFlowUserGroups.Add(new WorkFlowUserGroup
         {
-            switch (WorkFlowUserGroupId)
-            {
-                //case WorkFlowUserGroupId.WorkFlow:
-                //    return RoleNames.WorkFlowUser;
-                //case WorkFlowUserGroupId.Expert:
-                //    return RoleNames.WorkFlowExpert;
-                //case WorkFlowUserGroupId.OfficeBoss:
-                //    return RoleNames.WorkFlowOfficeBoss;
-                //case WorkFlowUserGroupId.Manager:
-                //    return RoleNames.WorkFlowManager;
-                default:
-                    return string.Empty;
-            }
+            WorkFlowUserGroupId = groupId,
+            GroupName = info?.DisplayName ?? groupId.ToString(),
+        });
+        await _applicationDbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<WorkFlowUser> ResolveWorkFlowUserAsync(
+        WorkFlowUserSaveCommand request,
+        CancellationToken cancellationToken)
+    {
+        WorkFlowUser? user = null;
+
+        if (request.WorkFlowUserId is Guid workflowUserId && workflowUserId != Guid.Empty)
+        {
+            user = await _applicationDbContext.WorkFlowUsers
+                .FirstOrDefaultAsync(x => x.WorkFlowUserId == workflowUserId, cancellationToken);
         }
+
+        if (user == null && request.IdentityUserId is Guid identityUserId && identityUserId != Guid.Empty)
+        {
+            user = await _applicationDbContext.WorkFlowUsers
+                .FirstOrDefaultAsync(x => x.IdentityUserId == identityUserId, cancellationToken);
+        }
+
+        if (user != null)
+            return user;
+
+        user = new WorkFlowUser();
+        _applicationDbContext.WorkFlowUsers.Add(user);
+        return user;
     }
 }

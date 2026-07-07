@@ -7,12 +7,15 @@ using Healan.Application.Insurances.Queries.InsuranceList;
 using Healan.Application.Insurances.Queries.InsuranceType;
 using Healan.Domain.Insurances.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
 /// <summary>
 /// بیمه
 /// </summary>
+[AccessForm(HealanAccessFormIds.Insurance)]
 public class InsuranceController : ApiControllerBase
 {
     /// <summary>
@@ -30,8 +33,8 @@ public class InsuranceController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> Register(InsuranceRegisterCommand request) =>
-                                                                Ok(await Mediator.Send(request));
+    public Task<IActionResult> Register([FromBody] InsuranceRegisterCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// اطلاعات بیمه
@@ -55,8 +58,8 @@ public class InsuranceController : ApiControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost("[action]")]
-    public async Task<IActionResult> RegisterInsuranceContract(RegisterInsuranceContractCommand request) =>
-                                                            Ok(await Mediator.Send(request));
+    public Task<IActionResult> RegisterInsuranceContract([FromBody] RegisterInsuranceContractCommand request) =>
+        SendCommand(request);
 
     /// <summary>
     /// لیست قراردادها

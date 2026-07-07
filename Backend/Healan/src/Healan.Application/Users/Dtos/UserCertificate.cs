@@ -1,5 +1,4 @@
 ﻿using Healan.Domain.Users.Enums;
-using IdentityServer.GrpcClient;
 
 namespace Healan.Application.Users.Dtos;
 
@@ -12,7 +11,7 @@ public record UserCertificate
 
 public class CurrentUserResponse
 {
-    public UserSummaryReply UserSummaryReply { get; set; }
+    public UserSummaryDto UserSummaryReply { get; set; } = new();
     public bool HasAccessToConfirmForm { get; set; }
     public bool HasConfirmed { get; set; }
     public Guid? MarketMakerAccessRequestId { get; set; }

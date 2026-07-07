@@ -18,12 +18,21 @@ namespace Share.Infrastructure.Services
 {
     public class CaptchaProviderService : ICaptchaProviderService
     {
+        private static readonly TimeSpan HttpTimeout = TimeSpan.FromSeconds(5);
+
         ILogger<CaptchaProviderService> _logger;
         private readonly IConfiguration _configuration;
         public CaptchaProviderService(ILogger<CaptchaProviderService> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;
+        }
+
+        private HttpClient CreateClient()
+        {
+            var client = new HttpClient { Timeout = HttpTimeout };
+            client.BaseAddress = new Uri(_configuration["CaptchaBaseUrl"]);
+            return client;
         }
 
         public async Task<CaptchaValidatorResponce> ValidateCaptcha(CaptchaModelRequest captchaModelRequest)
@@ -35,15 +44,7 @@ namespace Share.Infrastructure.Services
                 var requestContent = new StringContent(captcha, Encoding.UTF8, "application/json");
 
 
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(_configuration["CaptchaBaseUrl"]);
-
-                //// Add an Accept header for JSON format.
-                //client.DefaultRequestHeaders.Accept.Add(
-                //new MediaTypeWithQualityHeaderValue("application/json"));
-
-              
-                //HttpResponseMessage response = client.PostAsync("Validate").Result;
+                using HttpClient client = CreateClient();
                 HttpResponseMessage response = await client.PostAsync($"Validate", requestContent);
                 response.EnsureSuccessStatusCode();
 
@@ -53,12 +54,10 @@ namespace Share.Infrastructure.Services
                     var result =await response.Content.ReadAsStringAsync();
                     if (JsonSerializer.Deserialize<bool>(result))
                         captchaModelResponce.Result = true;
-                    client.Dispose();
                     return captchaModelResponce;
                 }
                 else
                 {
-                    client.Dispose();
                     captchaModelResponce.ErrorMessage = response.ReasonPhrase;
                     return captchaModelResponce;
                 }
@@ -75,19 +74,14 @@ namespace Share.Infrastructure.Services
         public async Task<CaptchaModelResponse> GetCaptcha()
         {
             CaptchaModelResponse captcahResponse = new CaptchaModelResponse();
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = new Uri(_configuration["CaptchaBaseUrl"]);
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            using var client = CreateClient();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                string requestUri = "Get";
-                HttpResponseMessage Res = await client.GetAsync(requestUri);
-                if (Res.IsSuccessStatusCode)
-                {
-                    var empResponse = Res.Content.ReadAsStringAsync().Result;
-                    captcahResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CaptchaModelResponse>(empResponse);
-                }
+            HttpResponseMessage response = await client.GetAsync("Get");
+            if (response.IsSuccessStatusCode)
+            {
+                var empResponse = await response.Content.ReadAsStringAsync();
+                captcahResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CaptchaModelResponse>(empResponse);
             }
 
             return captcahResponse;

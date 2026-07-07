@@ -35,7 +35,7 @@ public class GetAppointmentInfoQueryHandler : IRequestHandler<GetAppointmentInfo
             .Include(x=>x.ServiceTypes)
             .Include(x => x.Patient)
             .Include(x => x.Doctor)
-            .Include(x=>x.Invoices).ThenInclude(x=>x.InvoiceItems)
+            .Include(x=>x.Invoices).ThenInclude(x=>x.InvoiceItems).ThenInclude(x=>x.ServiceType)
             .Where(x => x.AppointmentId == request.AppointmentId)
             .AsNoTracking();
     

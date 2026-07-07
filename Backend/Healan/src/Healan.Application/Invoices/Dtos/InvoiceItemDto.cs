@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Healan.Application.Common.Mappings;
+using Healan.Application.ServiceTypes.Dtos;
 using Healan.Domain.Invoices.Entities;
 
 namespace Healan.Application.Invoices.Dtos;
@@ -38,10 +39,14 @@ public class InvoiceItemDto : IMapFrom<InvoiceItem>
     /// سهم بیمار
     /// </summary>
     public decimal PatientPayable { get; set; }
+
+    public ServiceTypeDto ServiceType { get; set; }
+
     public void Mapping(Profile profile)
     {
 
-        profile.CreateMap<InvoiceItem, InvoiceItemDto>();
+        profile.CreateMap<InvoiceItem, InvoiceItemDto>()
+            .ForMember(a => a.ServiceType, b => b.MapFrom(c => c.ServiceType));
     }
 }
 

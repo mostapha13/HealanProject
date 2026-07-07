@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from '@tse/utils';
 import { HealanNavLink } from '../../components/HealanNavLink';
 import { PageHeader } from '../../components/Ui';
+import { useUserAccess } from '../../context/UserAccessContext';
 
 const tabs = [
   { path: '/basic-data/companies', label: 'مرکز درمانی' },
@@ -12,11 +13,14 @@ const tabs = [
 ];
 
 export function BasicDataLayout() {
+  const { canAccess, loading } = useUserAccess();
+  const visibleTabs = loading ? tabs : tabs.filter((tab) => canAccess(tab.path));
+
   return (
     <>
       <PageHeader title="اطلاعات پایه" subtitle="مدیریت داده‌های مرجع سیستم" />
       <div className="healan-tabs">
-        {tabs.map((t) => (
+        {visibleTabs.map((t) => (
           <HealanNavLink key={t.path} to={t.path} className={({ isActive }: { isActive: boolean }) => `healan-tab${isActive ? ' active' : ''}`}>
             {t.label}
           </HealanNavLink>

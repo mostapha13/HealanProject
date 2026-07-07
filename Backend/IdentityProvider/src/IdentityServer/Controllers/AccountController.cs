@@ -148,14 +148,18 @@ namespace IdentityServer.Controllers
             LoginViewModel model = new LoginViewModel() { ReturnUrl = returnUrl };
             if (ModelState["ReturnUrl"] != null)
                 ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await _signInManager.SignOutAsync();
+
+#if DEBUG
+            return View(model);
+#else
             try
             {
                 var getCaptcha = await _captchaProviderService.GetCaptcha();
                 model.Image = getCaptcha.Image;
                 model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-
-                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-                await _signInManager.SignOutAsync();
                 return View(model);
             }
             catch (Exception ex)
@@ -164,6 +168,7 @@ namespace IdentityServer.Controllers
                 ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست.");
                 return View(model);
             }
+#endif
         }
 
         [HttpPost]
@@ -193,6 +198,8 @@ namespace IdentityServer.Controllers
                     return RedirectToAction(nameof(LoginWith2fa), new { rememberMe = true, returnUrl = rUrl });
                 if (result2.IsSuccess && !result2.TwoFactorEnabled && result2.IsAdmin)
                 {
+                    if (!string.IsNullOrEmpty(rUrl))
+                        return Redirect(SetCashedValue(result2.userId, rUrl));
                     return RedirectToAction("Index", "AdminPanel");
                 }
                 else if (result2.IsSuccess && !result2.TwoFactorEnabled)
@@ -276,6 +283,8 @@ namespace IdentityServer.Controllers
 
                 if (result.IsSuccess && result.IsAdmin)
                 {
+                    if (!string.IsNullOrEmpty(returnUrl))
+                        return Redirect(SetCashedValue(result.userId, returnUrl));
                     return RedirectToAction("Index", "AdminPanel");
                 }
                 else if (result.IsSuccess)
