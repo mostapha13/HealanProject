@@ -6,6 +6,24 @@
     <meta name="description" content="مطب دکتر معصومه شهرویی، متخصص قلب و عروق در شوشتر. بورد تخصصی از بیمارستان شهید رجایی تهران." />
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script>
+      (function () {
+        function isNoise(v) {
+          var t = v && v.message ? String(v.message) + String(v.stack || '') : String(v || '');
+          return /metamask|nkbihfbeogaeaoehlefnkodbefgpgknn|inpage\.js|Failed to connect to MetaMask|chrome-extension:\/\//i.test(t);
+        }
+        function block(e) {
+          if (isNoise(e.message) || isNoise(e.error) || isNoise(e.reason) || isNoise(e.filename)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+        }
+        window.addEventListener('error', block, true);
+        window.addEventListener('unhandledrejection', block, true);
+        window.addEventListener('error', block, false);
+        window.addEventListener('unhandledrejection', block, false);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

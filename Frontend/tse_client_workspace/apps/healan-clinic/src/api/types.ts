@@ -249,3 +249,51 @@ export const APPOINTMENT_STATUS_COLORS: Record<AppointmentStatus, string> = {
   NoShow: '#6b7280',
   ReScheduled: '#8b5cf6',
 };
+
+export type PortalSectionType =
+  | 'HeroSlide'
+  | 'TrustBadge'
+  | 'Service'
+  | 'WhyUsFeature'
+  | 'AboutBlock'
+  | 'NavLink'
+  | 'CustomSection'
+  | 'HeroStat';
+
+export type PatientReviewStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface PortalContentItem {
+  portalContentItemId: number;
+  sectionType: PortalSectionType;
+  title?: string;
+  subtitle?: string;
+  body?: string;
+  imageUrl?: string;
+  imageFileId?: string;
+  iconName?: string;
+  linkUrl?: string;
+  color?: string;
+  sortOrder: number;
+  isPublished: boolean;
+}
+
+export interface PortalSiteSetting {
+  portalSiteSettingId: number;
+  settingKey: string;
+  settingValue: string;
+  settingGroup?: string;
+  description?: string;
+}
+
+export interface PatientReviewItem {
+  patientReviewId: number;
+  displayName: string;
+  contactInfo: string;
+  reviewText: string;
+  rating: number;
+  status: PatientReviewStatus;
+  sortOrder: number;
+  adminNote?: string;
+  reviewedAt?: string;
+  createdAt?: string;
+}

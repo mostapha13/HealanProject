@@ -36,6 +36,8 @@ public class PrescriptionListQueryHandler : IRequestHandler<PrescriptionListQuer
     {
         var query =
             _applicationDbContext.Prescriptions
+            .Include(x => x.Appointment).ThenInclude(x => x.Patient)
+            .Include(x => x.Appointment).ThenInclude(x => x.Doctor)
             .Include(x => x.PrescriptionDrugs)
             .Include(x => x.ImagingRequests).ThenInclude(x => x.ImagingResults)
             .Include(x => x.ImagingRequests).ThenInclude(x => x.Attachment)

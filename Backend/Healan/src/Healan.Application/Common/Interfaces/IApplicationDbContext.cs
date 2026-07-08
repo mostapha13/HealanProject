@@ -8,6 +8,7 @@ using Healan.Domain.MedicalFeeServices.Entities;
 using Healan.Domain.Menus.Entities;
 using Healan.Domain.Orders.Entities;
 using Healan.Domain.Patients.Entities;
+using Healan.Domain.Portal.Entities;
 using Healan.Domain.PublicInfos.Entities;
 using Healan.Domain.Users.Entities;
 using Healan.Domain.Views;
@@ -43,6 +44,9 @@ public interface IApplicationDbContext : IDisposable
      DbSet<LabTestResult> LabTestResults { get; set; }
      DbSet<ImagingRequest> ImagingRequests { get; set; }
      DbSet<ImagingResult> ImagingResults { get; set; }
+     DbSet<PortalContentItem> PortalContentItems { get; set; }
+     DbSet<PortalSiteSetting> PortalSiteSettings { get; set; }
+     DbSet<PatientReview> PatientReviews { get; set; }
     //DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 

@@ -21,6 +21,12 @@ const InsurancePage = lazy(() => import('../pages/BasicData/Insurance'));
 const ServicesPage = lazy(() => import('../pages/BasicData/Services'));
 const MedicalFeesPage = lazy(() => import('../pages/BasicData/MedicalFees'));
 const UsersPage = lazy(() => import('../pages/BasicData/Users'));
+const AccessFormsPage = lazy(() => import('../pages/BasicData/AccessForms'));
+const AccessRolesPage = lazy(() => import('../pages/BasicData/AccessRoles'));
+const SiteContentLayout = lazy(() => import('../pages/SiteContent/Layout'));
+const SiteContentSettingsPage = lazy(() => import('../pages/SiteContent/Settings'));
+const SiteContentSectionsPage = lazy(() => import('../pages/SiteContent/Sections'));
+const SiteContentReviewsPage = lazy(() => import('../pages/SiteContent/Reviews'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const WorkflowPage = lazy(() => import('../pages/Workflow'));
 const SignaturePage = lazy(() => import('../pages/Signature'));
@@ -70,6 +76,14 @@ export default function AppRoutes() {
             <Route path="services" element={guarded('/basic-data/services', <ServicesPage />)} />
             <Route path="fees" element={guarded('/basic-data/fees', <MedicalFeesPage />)} />
             <Route path="users" element={guarded('/basic-data/users', <UsersPage />)} />
+            <Route path="access" element={guarded('/basic-data/access', <AccessFormsPage />)} />
+            <Route path="access-roles" element={guarded('/basic-data/access-roles', <AccessRolesPage />)} />
+          </Route>
+          <Route path="site-content" element={guarded('/site-content', <SiteContentLayout />)}>
+            <Route index element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
+            <Route path="settings" element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
+            <Route path="sections" element={guarded('/site-content/sections', <SiteContentSectionsPage />)} />
+            <Route path="reviews" element={guarded('/site-content/reviews', <SiteContentReviewsPage />)} />
           </Route>
           <Route path="reports" element={guarded('/reports', <ReportsPage />)} />
           <Route path="workflow" element={guarded('/workflow', <WorkflowPage />)} />

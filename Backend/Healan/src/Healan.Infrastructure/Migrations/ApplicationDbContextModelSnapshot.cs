@@ -1548,6 +1548,234 @@ namespace Healan.Infrastructure.Migrations
                     b.ToTable("Patients", (string)null);
                 });
 
+            modelBuilder.Entity("Healan.Domain.Portal.Entities.PatientReview", b =>
+                {
+                    b.Property<long>("PatientReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PatientReviewId"));
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ContactInfo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("DepartmentId")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReviewText")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.HasKey("PatientReviewId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Status", "SortOrder");
+
+                    b.ToTable("PatientReviews", (string)null);
+                });
+
+            modelBuilder.Entity("Healan.Domain.Portal.Entities.PortalContentItem", b =>
+                {
+                    b.Property<long>("PortalContentItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PortalContentItemId"));
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("DepartmentId")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("IconName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("ImageFileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LinkUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<short>("SectionType")
+                        .HasColumnType("smallint");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("Subtitle")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("PortalContentItemId");
+
+                    b.HasIndex("SectionType", "SortOrder");
+
+                    b.ToTable("PortalContentItems", (string)null);
+                });
+
+            modelBuilder.Entity("Healan.Domain.Portal.Entities.PortalSiteSetting", b =>
+                {
+                    b.Property<long>("PortalSiteSettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PortalSiteSettingId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("DepartmentId")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SettingGroup")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SettingKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SettingValue")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("PortalSiteSettingId");
+
+                    b.HasIndex("SettingKey")
+                        .IsUnique();
+
+                    b.ToTable("PortalSiteSettings", (string)null);
+                });
+
             modelBuilder.Entity("Healan.Domain.PublicInfos.Entities.ServiceType", b =>
                 {
                     b.Property<long>("ServiceTypeId")

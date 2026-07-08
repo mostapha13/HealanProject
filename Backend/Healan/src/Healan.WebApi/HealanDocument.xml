@@ -217,6 +217,21 @@
             <param name="nationalCode"></param>
             <returns></returns>
         </member>
+        <member name="T:Healan.WebApi.Controllers.PortalContentController">
+            <summary>
+            مدیریت محتوای سایت مطب (CMS)
+            </summary>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.PatientReviewController">
+            <summary>
+            مدیریت نظرات بیماران
+            </summary>
+        </member>
+        <member name="T:Healan.WebApi.Controllers.PortalPublicController">
+            <summary>
+            API عمومی سایت مطب — بدون نیاز به ورود
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.PublicInfoController">
             <summary>
             سرویس های عمومی

@@ -28,6 +28,8 @@ public static class HealanClinicAccess
         public const int Reports = 5117;
         public const int Workflow = 5118;
         public const int Signature = 5119;
+        public const int PortalContent = 5121;
+        public const int PortalReviews = 5122;
     }
 
     /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه.</summary>
@@ -36,7 +38,7 @@ public static class HealanClinicAccess
         Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients, Menus.Doctors,
         Menus.Prescriptions, Menus.Companies, Menus.Insurance, Menus.Services, Menus.MedicalFees,
         Menus.UserDefine, Menus.AccessDefine, Menus.AccessRoleAssign, Menus.Reports,
-        Menus.Workflow, Menus.Signature,
+        Menus.Workflow, Menus.Signature, Menus.PortalContent, Menus.PortalReviews,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>
@@ -44,6 +46,7 @@ public static class HealanClinicAccess
     {
         Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients,
         Menus.Insurance, Menus.Services, Menus.MedicalFees,
+        Menus.PortalContent, Menus.PortalReviews,
     };
 
     /// <summary>پزشک — ویزیت، نسخه، سوابق و صف بیماران.</summary>

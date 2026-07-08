@@ -207,8 +207,7 @@ export function buildPrescriptionPayload(form: PrescriptionForm): ApiPayload {
   };
   const prescriptionId = idOrUndefined(form.prescriptionId);
   if (prescriptionId) payload['prescriptionId'] = prescriptionId;
-  const notes = nullIfEmpty(form.notes);
-  if (notes) payload['notes'] = notes;
+  payload['notes'] = nullIfEmpty(form.notes) ?? '';
   return payload;
 }
 

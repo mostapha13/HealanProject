@@ -9,6 +9,7 @@ using Healan.Domain.Menus.Enums;
 using Healan.Domain.PublicInfos.Entities;
 using Healan.Domain.Users.Entities;
 using Healan.Domain.Users.Enums;
+using Healan.Infrastructure.Portal;
 using Microsoft.EntityFrameworkCore;
 using Share.Domain.Entities;
 using Share.Domain.Enums;
@@ -33,6 +34,7 @@ public static class ApplicationDbContextSeed
         await SeedServiceTypesAsync(context, services);
         await SeedInsuranceDataAsync(context, insurances);
         await SeedMenusAsync(context);
+        await PortalContentSeed.SeedAsync(context);
         await context.SaveChangesAsync();
     }
 

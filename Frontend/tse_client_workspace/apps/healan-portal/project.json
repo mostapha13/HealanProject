@@ -18,7 +18,7 @@
         "assets": ["apps/healan-portal/src/assets"],
         "styles": ["apps/healan-portal/src/styles.scss"],
         "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack"
+        "webpackConfig": "apps/healan-portal/webpack.config.js"
       },
       "configurations": {
         "production": {

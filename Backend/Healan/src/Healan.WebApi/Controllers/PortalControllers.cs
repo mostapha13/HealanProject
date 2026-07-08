@@ -1,0 +1,86 @@
+using Healan.Application.Portal.Commands.PatientReviewDelete;
+using Healan.Application.Portal.Commands.PatientReviewModerate;
+using Healan.Application.Portal.Commands.PatientReviewSubmit;
+using Healan.Application.Portal.Commands.PortalContentItemDelete;
+using Healan.Application.Portal.Commands.PortalContentItemRegister;
+using Healan.Application.Portal.Commands.PortalSiteSettingSave;
+using Healan.Application.Portal.Queries.PatientReviewList;
+using Healan.Application.Portal.Queries.PortalContentItemList;
+using Healan.Application.Portal.Queries.PortalSiteSettingList;
+using Healan.Application.Portal.Queries.PublishedPortalSite;
+using Healan.Domain.Portal.Enums;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Share.Domain.Constants;
+using Share.Infrastructure.CustomAttributes;
+
+namespace Healan.WebApi.Controllers;
+
+/// <summary>
+/// مدیریت محتوای سایت مطب (CMS)
+/// </summary>
+[AccessForm(HealanAccessFormIds.PortalContent)]
+public class PortalContentController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> ContentList([FromQuery] PortalSectionType? sectionType, [FromQuery] bool? isPublished) =>
+        Ok(await Mediator.Send(new PortalContentItemListQuery { SectionType = sectionType, IsPublished = isPublished }));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> ContentRegister([FromBody] PortalContentItemRegisterCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> ContentDelete([FromBody] PortalContentItemDeleteCommand request) =>
+        SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> SettingList() =>
+        Ok(await Mediator.Send(new PortalSiteSettingListQuery()));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> SettingSave([FromBody] PortalSiteSettingSaveCommand request) =>
+        SendCommand(request);
+}
+
+/// <summary>
+/// مدیریت نظرات بیماران
+/// </summary>
+[AccessForm(HealanAccessFormIds.PortalReviews)]
+public class PatientReviewController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> List([FromQuery] PatientReviewStatus? status) =>
+        Ok(await Mediator.Send(new PatientReviewListQuery { Status = status }));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Moderate([FromBody] PatientReviewModerateCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] PatientReviewDeleteCommand request) =>
+        SendCommand(request);
+}
+
+/// <summary>
+/// API عمومی سایت مطب — بدون نیاز به ورود
+/// </summary>
+[ApiController]
+[Route("Healan/api/v1/[controller]")]
+[Produces("application/json")]
+[AllowAnonymous]
+public class PortalPublicController : ControllerBase
+{
+    private IMediator? _mediator;
+    private IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Site() =>
+        Ok(await Mediator.Send(new PublishedPortalSiteQuery()));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> SubmitReview([FromBody] PatientReviewSubmitCommand request) =>
+        Ok(await Mediator.Send(request));
+}

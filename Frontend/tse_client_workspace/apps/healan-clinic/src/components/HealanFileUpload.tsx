@@ -30,6 +30,7 @@ export function HealanFileUpload({
         fileId: res.fileId,
         fileName: res.fileName,
         link: res.link || getFileDownloadUrl(res.fileId),
+        fileType: res.fileType,
       });
     } catch (err) {
       onError?.(err);

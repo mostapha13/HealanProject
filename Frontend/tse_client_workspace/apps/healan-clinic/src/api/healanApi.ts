@@ -16,6 +16,9 @@ import type {
   ServiceType,
   UserSummary,
   CurrentUserResponse,
+  PortalContentItem,
+  PortalSiteSetting,
+  PatientReviewItem,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -219,6 +222,20 @@ export const healanApi = {
   workflow: {
     userCardboard: (params?: Record<string, unknown>) =>
       get('Cardboard/UserCardboard/Fa', pagedParams(params)),
+  },
+
+  portal: {
+    contentList: (params?: { sectionType?: string; isPublished?: boolean }) =>
+      get<PortalContentItem[]>('PortalContent/ContentList', params ?? {}),
+    contentRegister: (data: Record<string, unknown>) => post('PortalContent/ContentRegister', data),
+    contentDelete: (portalContentItemId: number) =>
+      post('PortalContent/ContentDelete', { portalContentItemId }),
+    settingList: () => get<PortalSiteSetting[]>('PortalContent/SettingList'),
+    settingSave: (settings: PortalSiteSetting[]) => post('PortalContent/SettingSave', { settings }),
+    reviewList: (status?: string) =>
+      get<PatientReviewItem[]>('PatientReview/List', status ? { status } : {}),
+    reviewModerate: (data: Record<string, unknown>) => post('PatientReview/Moderate', data),
+    reviewDelete: (patientReviewId: number) => post('PatientReview/Delete', { patientReviewId }),
   },
 };
 

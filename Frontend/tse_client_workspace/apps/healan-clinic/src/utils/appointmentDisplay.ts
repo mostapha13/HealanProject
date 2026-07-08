@@ -89,6 +89,24 @@ export function appointmentServiceTitles(appointment: AppointmentSummary): strin
   return titles.length > 0 ? titles.join('، ') : '—';
 }
 
+export function prescriptionPatientName(
+  prescription: { patientName?: string; appointmentId?: number },
+  appointments: AppointmentSummary[] = []
+): string {
+  if (prescription.patientName?.trim()) return prescription.patientName.trim();
+  const appointment = appointments.find((a) => a.appointmentId === prescription.appointmentId);
+  return appointment ? appointmentPatientName(appointment) : '—';
+}
+
+export function prescriptionDoctorName(
+  prescription: { doctorName?: string; appointmentId?: number },
+  appointments: AppointmentSummary[] = []
+): string {
+  if (prescription.doctorName?.trim()) return prescription.doctorName.trim();
+  const appointment = appointments.find((a) => a.appointmentId === prescription.appointmentId);
+  return appointment ? appointmentDoctorName(appointment) : '—';
+}
+
 /** عنوان خدمت برای ردیف فاکتور */
 export function invoiceItemServiceTitle(
   item: { serviceTypeId?: number; serviceType?: { title?: string; serviceTypeId?: number } },

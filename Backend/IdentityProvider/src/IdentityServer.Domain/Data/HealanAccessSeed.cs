@@ -72,6 +72,8 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.Workflow, "کارتابل", "/workflow"),
             new FormDef(HealanAccessFormIds.Signature, "امضای دیجیتال", "/signature"),
             new FormDef(HealanAccessFormIds.AccessAdmin, "مدیریت دسترسی‌ها", "/basic-data/access-roles"),
+            new FormDef(HealanAccessFormIds.PortalContent, "محتوای سایت", "/site-content"),
+            new FormDef(HealanAccessFormIds.PortalReviews, "نظرات بیماران", "/site-content/reviews"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -129,6 +131,9 @@ public static class HealanAccessSeed
             new MenuDef(5117, HealanAccessFormIds.Reports, null, 4),
             new MenuDef(5118, HealanAccessFormIds.Workflow, null, 5),
             new MenuDef(5119, HealanAccessFormIds.Signature, null, 6),
+            new MenuDef(5120, null, null, 7, "محتوای سایت"),
+            new MenuDef(5121, HealanAccessFormIds.PortalContent, 5120, 1),
+            new MenuDef(5122, HealanAccessFormIds.PortalReviews, 5120, 2),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();

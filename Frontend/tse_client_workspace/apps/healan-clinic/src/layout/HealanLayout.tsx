@@ -13,6 +13,7 @@ const navItems = [
   { path: '/doctors', label: 'پزشکان', icon: '🩺' },
   { path: '/prescriptions', label: 'نسخه‌ها', icon: '💊' },
   { path: '/basic-data', label: 'اطلاعات پایه', icon: '📁' },
+  { path: '/site-content', label: 'محتوای سایت', icon: '🌐' },
   { path: '/reports', label: 'گزارش‌ها', icon: '📈' },
   { path: '/signature', label: 'امضای دیجیتال', icon: '✍️' },
   { path: '/workflow', label: 'کارتابل', icon: '🔄' },

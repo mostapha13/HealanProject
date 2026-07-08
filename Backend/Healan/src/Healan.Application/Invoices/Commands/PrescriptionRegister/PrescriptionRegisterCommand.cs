@@ -65,7 +65,7 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
 
         prescription!.AppointmentId = request.AppointmentId;
         prescription.IssueDate = request.IssueDate;
-        prescription.Notes = request.Notes;
+        prescription.Notes = request.Notes ?? string.Empty;
         prescription.NextAppointmentDate = request.NextAppointmentDate;
 
         await _applicationDbContext.SaveChangesAsync(cancellationToken);
@@ -75,8 +75,8 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             prescription.PrescriptionDrugs.Add(new PrescriptionDrug
             {
                 DrugName = drug.DrugName,
-                Dosage = drug.Dosage,
-                UsageInstructions = drug.UsageInstructions,
+                Dosage = drug.Dosage ?? string.Empty,
+                UsageInstructions = drug.UsageInstructions ?? string.Empty,
             });
         }
 
@@ -88,7 +88,7 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             prescription.ImagingRequests.Add(new ImagingRequest
             {
                 ImageTypeId = imaging.ImageTypeId,
-                Notes = imaging.Notes,
+                Notes = imaging.Notes ?? string.Empty,
                 AttachmentId = imaging.AttachmentId,
             });
         }
@@ -101,7 +101,7 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             prescription.LabTestRequests.Add(new LabTestRequest
             {
                 LabTestType = lab.LabTestType,
-                Notes = lab.Notes,
+                Notes = lab.Notes ?? string.Empty,
                 AttachmentId = lab.AttachmentId,
             });
         }

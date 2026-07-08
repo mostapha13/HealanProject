@@ -377,6 +377,99 @@
   background: #f8fafc;
 }
 
+.healan-prescription-panel {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--healan-border);
+}
+
+.healan-prescription-panel__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.healan-prescription-add {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px dashed var(--healan-border);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.healan-prescription-add--drugs {
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: end;
+}
+
+.healan-prescription-add--labs {
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+}
+
+.healan-prescription-add--imaging {
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+}
+
+.healan-prescription-add__upload {
+  grid-column: 1 / -1;
+}
+
+.healan-prescription-table-wrap {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--healan-border);
+  border-radius: 8px;
+}
+
+.healan-prescription-table-wrap .healan-table {
+  margin: 0;
+}
+
+.healan-prescription-table-wrap .healan-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.healan-prescription-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--healan-text-muted);
+  font-size: 0.85rem;
+}
+
+.healan-attachment-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--healan-primary-dark);
+  text-decoration: none;
+}
+
+.healan-attachment-preview img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--healan-border);
+}
+
+.healan-attachment-preview:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .healan-prescription-add--drugs,
+  .healan-prescription-add--labs,
+  .healan-prescription-add--imaging {
+    grid-template-columns: 1fr;
+  }
+}
+
 .healan-file-upload {
   margin-top: 0.5rem;
   display: flex;
@@ -624,4 +717,19 @@
   .healan-main {
     padding: 1rem;
   }
+}
+
+.healan-hint {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.healan-access-tree {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  max-height: 520px;
+  overflow: auto;
 }
