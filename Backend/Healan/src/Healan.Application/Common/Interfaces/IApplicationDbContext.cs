@@ -44,6 +44,7 @@ public interface IApplicationDbContext : IDisposable
      DbSet<LabTestResult> LabTestResults { get; set; }
      DbSet<ImagingRequest> ImagingRequests { get; set; }
      DbSet<ImagingResult> ImagingResults { get; set; }
+     DbSet<EchoReport> EchoReports { get; set; }
      DbSet<PortalContentItem> PortalContentItems { get; set; }
      DbSet<PortalSiteSetting> PortalSiteSettings { get; set; }
      DbSet<PatientReview> PatientReviews { get; set; }

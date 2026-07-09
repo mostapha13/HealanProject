@@ -26,7 +26,6 @@ public static class HealanAccessSeed
         }
 
         await EnsureSystemRolesAsync(dbContext, roleManager);
-        await EnsureRolePermissionsAsync(dbContext, roleManager);
     }
 
     private static async Task EnsureSystemAsync(ApplicationDbContext dbContext)

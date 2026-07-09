@@ -3,6 +3,8 @@ import { HEALAN_API_URL } from '../constants';
 import { clampPageSize, fetchAllPaginated, HEALAN_MAX_PAGE_SIZE } from '../utils/pagination';
 import type {
   AppointmentSummary,
+  ClinicAnalytics,
+  ClinicAnalyticsFilters,
   CompanySummary,
   DashboardStats,
   DoctorSummary,
@@ -11,6 +13,8 @@ import type {
   MedicalFeeService,
   PaginatedResponse,
   PatientSummary,
+  EchoPrintData,
+  PatientVisitHistoryItem,
   PrescriptionDetail,
   PrescriptionSummary,
   ServiceType,
@@ -42,6 +46,18 @@ export const healanApi = {
     stats: () => get<DashboardStats>('Dashboard/Stats'),
   },
 
+  reports: {
+    analytics: (params: ClinicAnalyticsFilters = {}) => {
+      const query: Record<string, unknown> = {};
+      if (params.startDate) query['startDate'] = params.startDate;
+      if (params.endDate) query['endDate'] = params.endDate;
+      if (params.doctorId && params.doctorId > 0) query['doctorId'] = params.doctorId;
+      if (params.patientId && params.patientId > 0) query['patientId'] = params.patientId;
+      if (params.serviceTypeId && params.serviceTypeId > 0) query['serviceTypeId'] = params.serviceTypeId;
+      return get<ClinicAnalytics>('ClinicReports/Analytics', query);
+    },
+  },
+
   patients: {
     list: (params: { filterText?: string; pageNumber?: number; pageSize?: number } = {}) =>
       get<PaginatedResponse<PatientSummary>>('Patient/PatientList', pagedParams(params)),
@@ -59,6 +75,8 @@ export const healanApi = {
       post<{ id: number; loginUserName?: string; initialPassword?: string }>('Patient/Register', data),
     byNationalCode: (nationalCode: string) =>
       get<PatientSummary>(`Patient/PatientInfoByNationalCode/?nationalCode=${nationalCode}`),
+    visitHistory: (patientId: number) =>
+      get<PatientVisitHistoryItem[]>(`Patient/VisitHistory/?patientId=${patientId}`),
   },
 
   doctors: {
@@ -75,7 +93,7 @@ export const healanApi = {
     info: (doctorId: number) =>
       get<DoctorSummary>(`Doctor/DoctorInfo/?doctorId=${doctorId}`),
     register: (data: Record<string, unknown>) =>
-      post<{ doctorId: number }>('Doctor/Register', data),
+      post<{ id: number }>('Doctor/Register', data),
     medicalGroups: () => get<EnumItem[]>('Doctor/MedicalGroupType'),
   },
 
@@ -127,6 +145,7 @@ export const healanApi = {
     info: (serviceTypeId: number) =>
       get<ServiceType>(`ServiceTypes/Info/?serviceTypeId=${serviceTypeId}`),
     register: (data: Record<string, unknown>) => post('ServiceTypes/Register', data),
+    delete: (serviceTypeId: number) => post('ServiceTypes/Delete', { serviceTypeId }),
     categories: () => get<EnumItem[]>('ServiceTypes/CategoryType'),
   },
 
@@ -210,8 +229,11 @@ export const healanApi = {
       ),
     info: (prescriptionId: number) =>
       get<PrescriptionDetail>(`OrderResult/PrescriptionInfo/?prescriptionId=${prescriptionId}`),
-    register: (data: Record<string, unknown>) => post('OrderResult/Register', data),
+    register: (data: Record<string, unknown>) =>
+      post<{ prescriptionId?: number; id?: number }>('OrderResult/Register', data),
     imageTypes: () => get<EnumItem[]>('OrderResult/GetImageType'),
+    echoPrintData: (prescriptionId: number) =>
+      get<EchoPrintData>(`OrderResult/EchoReportPrintData/?prescriptionId=${prescriptionId}`),
   },
 
   signature: {

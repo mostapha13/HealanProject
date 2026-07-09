@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type {
@@ -17,7 +17,18 @@ import { HealanFileUpload } from '../../components/HealanFileUpload';
 import { getFileDownloadUrl } from '../../api/fileApi';
 import { useLocation } from '@tse/utils';
 import { nowDateTimeLocal } from '../../utils/formatJalali';
+import { EchoReportFormPanel } from '../../components/EchoReportFormPanel';
+import {
+  echoHasAnyValue,
+  emptyEchoReport,
+  mapEchoFromApi,
+  type EchoReportForm,
+} from '../../utils/echoFields';
+import { openEchoPrintWindow, openEchoPrintWindowBlank, writeEchoPrintHtmlToWindow } from '../../utils/printEchoReport';
+import { buildEchoPrintPayload } from '../../utils/echoPrintPayload';
+import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
 
+/** کلیدهای enum تصویربرداری — عدد مطابق ImageTypeId بک‌اند */
 const IMAGE_TYPE_KEY: Record<string, number> = {
   ECG: 1,
   Echocardiography: 2,
@@ -25,7 +36,11 @@ const IMAGE_TYPE_KEY: Record<string, number> = {
   HolterRhythmMonitor: 4,
   AmbulatoryBloodPressureMonitoring: 5,
   MRI: 6,
+  GeneralReport: 7,
 };
+
+const GENERAL_REPORT_TYPE_ID = 7;
+const ECHO_TYPE_ID = 2;
 
 function parseImageTypeId(value: unknown): number {
   if (typeof value === 'number' && value > 0) return value;
@@ -39,7 +54,12 @@ function parseImageTypeId(value: unknown): number {
 
 const emptyDrug = () => ({ drugName: '', dosage: '', usageInstructions: '' });
 const emptyLab = (): PrescriptionLabRow => ({ labTestType: '', notes: '', attachmentId: null, uploadMeta: null });
-const emptyImaging = (): PrescriptionImagingRow => ({ imageTypeId: 0, notes: '', attachmentId: null, uploadMeta: null });
+const emptyImaging = (): PrescriptionImagingRow => ({
+  imageTypeId: GENERAL_REPORT_TYPE_ID,
+  notes: '',
+  attachmentId: null,
+  uploadMeta: null,
+});
 
 const initialForm = () => ({
   prescriptionId: 0,
@@ -49,36 +69,46 @@ const initialForm = () => ({
   prescriptionDrugs: [] as ReturnType<typeof emptyDrug>[],
   labTestRequests: [] as PrescriptionLabRow[],
   imagingRequests: [] as PrescriptionImagingRow[],
+  echoReport: emptyEchoReport() as EchoReportForm,
 });
 
 type FormState = ReturnType<typeof initialForm>;
 
 function mapDetailToForm(detail: PrescriptionDetail): FormState {
-  const drugs = detail.prescriptionDrugs?.filter((d) => d.drugName?.trim()).map((d) => ({
-    drugName: d.drugName ?? '',
-    dosage: d.dosage ?? '',
-    usageInstructions: d.usageInstructions ?? '',
-  })) ?? [];
-  const labs = detail.labTestRequests?.filter((l) => l.labTestType?.trim()).map((l) => ({
-    labTestType: l.labTestType ?? '',
-    notes: l.notes ?? '',
-    attachmentId: l.attachmentId ?? l.attachment?.fileId ?? null,
-    uploadMeta: l.attachment?.fileId
-      ? { fileId: l.attachment.fileId, fileName: l.attachment.fileName ?? 'پیوست', link: l.attachment.link }
-      : l.attachmentId
-        ? { fileId: l.attachmentId, fileName: l.attachment?.fileName ?? 'پیوست' }
-        : null,
-  })) ?? [];
-  const imaging = detail.imagingRequests?.filter((i) => parseImageTypeId(i.imageTypeId) > 0).map((i) => ({
-    imageTypeId: parseImageTypeId(i.imageTypeId),
-    notes: i.notes ?? '',
-    attachmentId: i.attachmentId ?? i.attachment?.fileId ?? null,
-    uploadMeta: i.attachment?.fileId
-      ? { fileId: i.attachment.fileId, fileName: i.attachment.fileName ?? 'پیوست', link: i.attachment.link }
-      : i.attachmentId
-        ? { fileId: i.attachmentId, fileName: i.attachment?.fileName ?? 'پیوست' }
-        : null,
-  })) ?? [];
+  const drugs =
+    detail.prescriptionDrugs
+      ?.filter((d) => d.drugName?.trim())
+      .map((d) => ({
+        drugName: d.drugName ?? '',
+        dosage: d.dosage ?? '',
+        usageInstructions: d.usageInstructions ?? '',
+      })) ?? [];
+  const labs =
+    detail.labTestRequests
+      ?.filter((l) => l.labTestType?.trim())
+      .map((l) => ({
+        labTestType: l.labTestType ?? '',
+        notes: l.notes ?? '',
+        attachmentId: l.attachmentId ?? l.attachment?.fileId ?? null,
+        uploadMeta: l.attachment?.fileId
+          ? { fileId: l.attachment.fileId, fileName: l.attachment.fileName ?? 'پیوست', link: l.attachment.link }
+          : l.attachmentId
+            ? { fileId: l.attachmentId, fileName: l.attachment?.fileName ?? 'پیوست' }
+            : null,
+      })) ?? [];
+  const imaging =
+    detail.imagingRequests
+      ?.filter((i) => parseImageTypeId(i.imageTypeId) > 0)
+      .map((i) => ({
+        imageTypeId: parseImageTypeId(i.imageTypeId),
+        notes: i.notes ?? '',
+        attachmentId: i.attachmentId ?? i.attachment?.fileId ?? null,
+        uploadMeta: i.attachment?.fileId
+          ? { fileId: i.attachment.fileId, fileName: i.attachment.fileName ?? 'پیوست', link: i.attachment.link }
+          : i.attachmentId
+            ? { fileId: i.attachmentId, fileName: i.attachment?.fileName ?? 'پیوست' }
+            : null,
+      })) ?? [];
 
   return {
     prescriptionId: detail.prescriptionId,
@@ -88,6 +118,7 @@ function mapDetailToForm(detail: PrescriptionDetail): FormState {
     prescriptionDrugs: drugs,
     labTestRequests: labs,
     imagingRequests: imaging,
+    echoReport: mapEchoFromApi(detail.echoReport as Record<string, unknown> | null),
   };
 }
 
@@ -105,6 +136,12 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [newImaging, setNewImaging] = useState(emptyImaging);
   const [labDraftKey, setLabDraftKey] = useState(0);
   const [imagingDraftKey, setImagingDraftKey] = useState(0);
+  const [historyPatient, setHistoryPatient] = useState<{ patientId: number; patientName: string } | null>(null);
+
+  const selectedAppointment = useMemo(
+    () => appointments.find((a) => a.appointmentId === form.appointmentId),
+    [appointments, form.appointmentId]
+  );
 
   const resetLabDraft = () => {
     setNewLab(emptyLab());
@@ -121,6 +158,21 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     return match?.displayName ?? match?.name ?? (id > 0 ? String(id) : '—');
   };
 
+  const sortedImageTypes = useMemo(() => {
+    const list = [...imageTypes];
+    list.sort((a, b) => {
+      if (a.key === GENERAL_REPORT_TYPE_ID) return -1;
+      if (b.key === GENERAL_REPORT_TYPE_ID) return 1;
+      return a.key - b.key;
+    });
+    return list;
+  }, [imageTypes]);
+
+  const showEchoForm =
+    form.imagingRequests.some((i) => i.imageTypeId === ECHO_TYPE_ID) ||
+    newImaging.imageTypeId === ECHO_TYPE_ID ||
+    echoHasAnyValue(form.echoReport);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -133,18 +185,21 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
-  const openPrescription = useCallback(async (prescriptionId: number) => {
-    try {
-      const detail = await healanApi.prescriptions.info(prescriptionId);
-      setForm(mapDetailToForm(detail));
-      setNewDrug(emptyDrug());
-      resetLabDraft();
-      resetImagingDraft();
-      setShowForm(true);
-    } catch (err) {
-      onAlert(err);
-    }
-  }, [onAlert]);
+  const openPrescription = useCallback(
+    async (prescriptionId: number) => {
+      try {
+        const detail = await healanApi.prescriptions.info(prescriptionId);
+        setForm(mapDetailToForm(detail));
+        setNewDrug(emptyDrug());
+        resetLabDraft();
+        resetImagingDraft();
+        setShowForm(true);
+      } catch (err) {
+        onAlert(err);
+      }
+    },
+    [onAlert]
+  );
 
   useEffect(() => {
     load();
@@ -231,21 +286,49 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     resetImagingDraft();
   };
 
+  const printEchoById = async (prescriptionId: number) => {
+    try {
+      const w = openEchoPrintWindowBlank();
+      if (!w) {
+        onAlert({ type: 'error', message: 'پنجره چاپ باز نشد (Popup blocker). اجازه پنجره‌های جدید را فعال کن.' });
+        return;
+      }
+      const data = await healanApi.prescriptions.echoPrintData(prescriptionId);
+      writeEchoPrintHtmlToWindow(w, buildEchoPrintPayload(data));
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
   const handleSave = async () => {
     if (form.appointmentId <= 0) {
       onAlert({ type: 'error', message: 'نوبت / ویزیت را انتخاب کنید' });
       return;
     }
-    const hasDrug = form.prescriptionDrugs.length > 0;
-    const hasLab = form.labTestRequests.length > 0;
+
+    // دارو و آزمایش اختیاری‌اند؛ نسخه فقط با یادداشت/اکو هم قابل ذخیره است
     const hasImaging = form.imagingRequests.length > 0;
-    if (!hasDrug && !hasLab && !hasImaging) {
-      onAlert({ type: 'error', message: 'حداقل یک دارو، آزمایش یا تصویربرداری ثبت کنید' });
-      return;
-    }
+    const hasEcho = echoHasAnyValue(form.echoReport);
+    const imagingForSave =
+      hasEcho && !form.imagingRequests.some((i) => i.imageTypeId === ECHO_TYPE_ID)
+        ? [...form.imagingRequests, { imageTypeId: ECHO_TYPE_ID, notes: '', attachmentId: null }]
+        : form.imagingRequests;
+
     setSaving(true);
     try {
-      await healanApi.prescriptions.register(buildPrescriptionPayload({ ...form, includeImaging: hasImaging }));
+      const result = await healanApi.prescriptions.register(
+        buildPrescriptionPayload({
+          ...form,
+          imagingRequests: imagingForSave,
+          includeImaging: imagingForSave.length > 0 || hasImaging,
+          echoReport: hasEcho ? form.echoReport : null,
+        })
+      );
+      const savedId =
+        Number((result as { id?: number; prescriptionId?: number })?.id) ||
+        Number((result as { prescriptionId?: number })?.prescriptionId) ||
+        form.prescriptionId;
+
       setShowForm(false);
       setForm(initialForm());
       setNewDrug(emptyDrug());
@@ -253,6 +336,10 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       resetImagingDraft();
       await load();
       onAlert({ type: 'success', message: 'نسخه با موفقیت ذخیره شد' });
+
+      if (hasEcho && savedId > 0) {
+        // چاپ اکو فقط بعد از ذخیره، از لیست نسخه/صف/پرونده ویزیت
+      }
     } catch (err) {
       onAlert(err);
     } finally {
@@ -280,7 +367,9 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
 
     return (
-      <a href={url} target="_blank" rel="noreferrer">{name}</a>
+      <a href={url} target="_blank" rel="noreferrer">
+        {name}
+      </a>
     );
   };
 
@@ -288,7 +377,7 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     <>
       <PageHeader
         title="نسخه‌های پزشکی"
-        subtitle="ثبت دارو، آزمایش و تصویربرداری — پیوست تصاویر توسط منشی"
+        subtitle="دارو و آزمایش اختیاری — تصویربرداری و گزارش اکو"
         action={
           <button
             type="button"
@@ -308,8 +397,25 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       {showForm && (
         <div className="healan-card" style={{ marginBottom: '1.5rem' }}>
-          <div className="healan-card__header">
+          <div
+            className="healan-card__header"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}
+          >
             <h3>{form.prescriptionId > 0 ? 'ویرایش نسخه' : 'ثبت نسخه'}</h3>
+            {selectedAppointment?.patientHasVisitHistory && selectedAppointment.patientId > 0 ? (
+              <button
+                type="button"
+                className="healan-btn healan-btn--outline healan-btn--sm"
+                onClick={() =>
+                  setHistoryPatient({
+                    patientId: selectedAppointment.patientId,
+                    patientName: appointmentPatientName(selectedAppointment),
+                  })
+                }
+              >
+                مشاهده سوابق بیمار
+              </button>
+            ) : null}
           </div>
           <div className="healan-card__body">
             <div className="healan-form-grid">
@@ -332,12 +438,18 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </div>
 
             <div className="healan-prescription-panel">
-              <h4 className="healan-prescription-panel__title">داروها</h4>
+              <h4 className="healan-prescription-panel__title">داروها (اختیاری)</h4>
               <div className="healan-prescription-add healan-prescription-add--drugs">
                 <input placeholder="نام دارو" value={newDrug.drugName} onChange={(e) => setNewDrug({ ...newDrug, drugName: e.target.value })} />
                 <input placeholder="دوز" value={newDrug.dosage} onChange={(e) => setNewDrug({ ...newDrug, dosage: e.target.value })} />
-                <input placeholder="دستور مصرف" value={newDrug.usageInstructions} onChange={(e) => setNewDrug({ ...newDrug, usageInstructions: e.target.value })} />
-                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addDrug}>افزودن</button>
+                <input
+                  placeholder="دستور مصرف"
+                  value={newDrug.usageInstructions}
+                  onChange={(e) => setNewDrug({ ...newDrug, usageInstructions: e.target.value })}
+                />
+                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addDrug}>
+                  افزودن
+                </button>
               </div>
               <div className="healan-prescription-table-wrap">
                 {form.prescriptionDrugs.length === 0 ? (
@@ -362,7 +474,9 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                             <button
                               type="button"
                               className="healan-btn healan-btn--outline healan-btn--sm"
-                              onClick={() => setForm({ ...form, prescriptionDrugs: form.prescriptionDrugs.filter((_, i) => i !== index) })}
+                              onClick={() =>
+                                setForm({ ...form, prescriptionDrugs: form.prescriptionDrugs.filter((_, i) => i !== index) })
+                              }
                             >
                               حذف
                             </button>
@@ -376,11 +490,17 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </div>
 
             <div className="healan-prescription-panel">
-              <h4 className="healan-prescription-panel__title">آزمایش‌ها</h4>
+              <h4 className="healan-prescription-panel__title">آزمایش‌ها (اختیاری)</h4>
               <div key={`lab-draft-${labDraftKey}`} className="healan-prescription-add healan-prescription-add--labs">
-                <input placeholder="نوع آزمایش" value={newLab.labTestType} onChange={(e) => setNewLab((prev) => ({ ...prev, labTestType: e.target.value }))} />
+                <input
+                  placeholder="نوع آزمایش"
+                  value={newLab.labTestType}
+                  onChange={(e) => setNewLab((prev) => ({ ...prev, labTestType: e.target.value }))}
+                />
                 <input placeholder="یادداشت" value={newLab.notes} onChange={(e) => setNewLab((prev) => ({ ...prev, notes: e.target.value }))} />
-                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addLab}>افزودن</button>
+                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addLab}>
+                  افزودن
+                </button>
                 <div className="healan-prescription-add__upload">
                   <HealanFileUpload
                     key={`lab-upload-${labDraftKey}`}
@@ -414,7 +534,9 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                             <button
                               type="button"
                               className="healan-btn healan-btn--outline healan-btn--sm"
-                              onClick={() => setForm({ ...form, labTestRequests: form.labTestRequests.filter((_, i) => i !== index) })}
+                              onClick={() =>
+                                setForm({ ...form, labTestRequests: form.labTestRequests.filter((_, i) => i !== index) })
+                              }
                             >
                               حذف
                             </button>
@@ -428,19 +550,25 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </div>
 
             <div className="healan-prescription-panel">
-              <h4 className="healan-prescription-panel__title">تصویربرداری (نوار قلب، اکو، ...)</h4>
+              <h4 className="healan-prescription-panel__title">تصویربرداری</h4>
               <div key={`imaging-draft-${imagingDraftKey}`} className="healan-prescription-add healan-prescription-add--imaging">
                 <SearchableSelect
                   value={newImaging.imageTypeId}
-                  onChange={(v) => setNewImaging((prev) => ({ ...prev, imageTypeId: v ?? 0 }))}
+                  onChange={(v) => setNewImaging((prev) => ({ ...prev, imageTypeId: v ?? GENERAL_REPORT_TYPE_ID }))}
                   placeholder="نوع تصویربرداری"
-                  options={imageTypes.map((t) => ({
+                  options={sortedImageTypes.map((t) => ({
                     value: t.key,
                     label: t.displayName ?? t.name ?? String(t.key),
                   }))}
                 />
-                <input placeholder="یادداشت" value={newImaging.notes} onChange={(e) => setNewImaging((prev) => ({ ...prev, notes: e.target.value }))} />
-                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addImaging}>افزودن</button>
+                <input
+                  placeholder="یادداشت"
+                  value={newImaging.notes}
+                  onChange={(e) => setNewImaging((prev) => ({ ...prev, notes: e.target.value }))}
+                />
+                <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={addImaging}>
+                  افزودن
+                </button>
                 <div className="healan-prescription-add__upload">
                   <HealanFileUpload
                     key={`imaging-upload-${imagingDraftKey}`}
@@ -474,7 +602,9 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                             <button
                               type="button"
                               className="healan-btn healan-btn--outline healan-btn--sm"
-                              onClick={() => setForm({ ...form, imagingRequests: form.imagingRequests.filter((_, i) => i !== index) })}
+                              onClick={() =>
+                                setForm({ ...form, imagingRequests: form.imagingRequests.filter((_, i) => i !== index) })
+                              }
                             >
                               حذف
                             </button>
@@ -487,6 +617,10 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
             </div>
 
+            {showEchoForm && (
+              <EchoReportFormPanel value={form.echoReport} onChange={(echoReport) => setForm({ ...form, echoReport })} />
+            )}
+
             <div className="healan-form-field" style={{ marginTop: '1rem' }}>
               <label>یادداشت پزشک</label>
               <textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -495,10 +629,26 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <button type="button" className="healan-btn healan-btn--primary" disabled={saving} onClick={handleSave}>
                 {saving ? 'در حال ذخیره...' : 'ذخیره نسخه'}
               </button>
-              <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
+              {form.prescriptionId > 0 && echoHasAnyValue(form.echoReport) && (
+                <button type="button" className="healan-btn healan-btn--outline" onClick={() => void printEchoById(form.prescriptionId)}>
+                  چاپ اکو
+                </button>
+              )}
+              <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>
+                انصراف
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {historyPatient && (
+        <PatientVisitHistoryDrawer
+          patientId={historyPatient.patientId}
+          patientName={historyPatient.patientName}
+          onAlert={onAlert}
+          onClose={() => setHistoryPatient(null)}
+        />
       )}
 
       <div className="healan-card">
@@ -526,13 +676,24 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                     <td>{prescriptionDoctorName(p, appointments)}</td>
                     <td>{p.notes ?? '—'}</td>
                     <td>
-                      <button
-                        type="button"
-                        className="healan-btn healan-btn--outline healan-btn--sm"
-                        onClick={() => void openPrescription(p.prescriptionId)}
-                      >
-                        ویرایش / پیوست
-                      </button>
+                      <div className="healan-actions">
+                        <button
+                          type="button"
+                          className="healan-btn healan-btn--outline healan-btn--sm"
+                          onClick={() => void openPrescription(p.prescriptionId)}
+                        >
+                          ویرایش / پیوست
+                        </button>
+                        {p.hasEchoReport ? (
+                          <button
+                            type="button"
+                            className="healan-btn healan-btn--primary healan-btn--sm"
+                            onClick={() => void printEchoById(p.prescriptionId)}
+                          >
+                            چاپ اکو
+                          </button>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}

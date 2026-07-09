@@ -7,7 +7,7 @@ namespace Healan.Application.Users.Dtos
 {
     public record UserDto : IMapFrom<User>
     {
-        public int UserId { get; set; }
+        public long UserId { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Landline { get; set; }

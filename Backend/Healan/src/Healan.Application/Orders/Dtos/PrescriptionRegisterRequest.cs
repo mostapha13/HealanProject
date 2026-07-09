@@ -18,5 +18,6 @@ namespace Healan.Application.Orders.Dtos;
         public ICollection<PrescriptionDrugDto> PrescriptionDrugs { get; set; }
         public ICollection<LabTestRequestDto> LabTestRequests { get; set; }
         public ICollection<ImagingRequestDto> ImagingRequests { get; set; }
+        public EchoReportDto? EchoReport { get; set; }
     }
  

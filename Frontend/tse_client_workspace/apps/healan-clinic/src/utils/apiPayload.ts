@@ -1,5 +1,7 @@
 /** ابزارهای ساخت payload سازگار با API Healan (nullable، id=0، رشته خالی) */
 
+import { dateOnlyToIso } from './formatJalali';
+
 export type ApiPayload = Record<string, unknown>;
 
 /** رشته خالی → null؛ undefined → undefined (حذف از payload) */
@@ -84,7 +86,7 @@ export function buildPatientPayload(form: PatientForm): ApiPayload {
   if (patientId) payload['patientId'] = patientId;
   const userId = idOrUndefined(form.userId);
   if (userId) payload['userId'] = userId;
-  const birthdate = isoDate(form.birthdate);
+  const birthdate = dateOnlyToIso(form.birthdate);
   if (birthdate) payload['birthdate'] = birthdate;
   return payload;
 }
@@ -171,7 +173,8 @@ export interface PrescriptionForm {
   prescriptionDrugs: { drugName: string; dosage: string; usageInstructions: string }[];
   labTestRequests: { labTestType: string; notes: string; attachmentId?: string | null }[];
   imagingRequests: { imageTypeId: number; notes: string; attachmentId?: string | null }[];
-  includeImaging: boolean;
+  includeImaging?: boolean;
+  echoReport?: Record<string, string> | null;
 }
 
 function withAttachmentId(attachmentId?: string | null): Record<string, string> {
@@ -208,6 +211,14 @@ export function buildPrescriptionPayload(form: PrescriptionForm): ApiPayload {
   const prescriptionId = idOrUndefined(form.prescriptionId);
   if (prescriptionId) payload['prescriptionId'] = prescriptionId;
   payload['notes'] = nullIfEmpty(form.notes) ?? '';
+  if (form.echoReport) {
+    const echo: Record<string, string> = {};
+    Object.entries(form.echoReport).forEach(([key, value]) => {
+      const trimmed = String(value ?? '').trim();
+      if (trimmed) echo[key] = trimmed;
+    });
+    if (Object.keys(echo).length > 0) payload['echoReport'] = echo;
+  }
   return payload;
 }
 
@@ -217,6 +228,7 @@ export interface ServiceForm {
   code: string;
   categoryTypeId: number;
   description: string;
+  isActive: boolean;
 }
 
 export function buildServicePayload(form: ServiceForm): ApiPayload {
@@ -230,6 +242,7 @@ export function buildServicePayload(form: ServiceForm): ApiPayload {
   if (code) payload['code'] = code;
   const description = nullIfEmpty(form.description);
   if (description) payload['description'] = description;
+  payload['isActive'] = form.isActive;
   return payload;
 }
 
@@ -239,6 +252,7 @@ export interface InsuranceForm {
   code: string;
   insuranceTypeId: number;
   phoneNumber: string;
+  isActive: boolean;
 }
 
 export function buildInsurancePayload(form: InsuranceForm): ApiPayload {
@@ -252,6 +266,7 @@ export function buildInsurancePayload(form: InsuranceForm): ApiPayload {
   if (code) payload['code'] = code;
   const phoneNumber = nullIfEmpty(form.phoneNumber);
   if (phoneNumber) payload['phoneNumber'] = phoneNumber;
+  payload['isActive'] = form.isActive;
   return payload;
 }
 
@@ -263,6 +278,7 @@ export interface CompanyForm {
   address: string;
   email: string;
   companyRegistrationTypeId: number;
+  isActive: boolean;
 }
 
 export function buildCompanyPayload(form: CompanyForm): ApiPayload {
@@ -279,6 +295,7 @@ export function buildCompanyPayload(form: CompanyForm): ApiPayload {
   if (address) payload['address'] = address;
   const email = nullIfEmpty(form.email);
   if (email) payload['email'] = email;
+  payload['isActive'] = form.isActive;
   return payload;
 }
 

@@ -26,6 +26,7 @@ public class ServiceTypeRegisterCommand : IRequest<ServiceTypeResult>
     public string? Code { get; set; }
     public CategoryTypeId CategoryTypeId { get; set; }
     public string Description { get; set; }
+    public bool? IsActive { get; set; }
 
 }
 
@@ -62,9 +63,10 @@ public class ServiceTypeRegisterCommandHandler : IRequestHandler<ServiceTypeRegi
         }
 
         serviceType.Title = request.Title;
-        serviceType.Code = request.Code;
+        serviceType.Code = request.Code ?? serviceType.Code;
         serviceType.CategoryTypeId = request.CategoryTypeId;
-        serviceType.Description = request.Description;
+        serviceType.Description = request.Description ?? serviceType.Description ?? string.Empty;
+        serviceType.IsActive = request.IsActive ?? serviceType.IsActive;
 
         await _applicationDbContext.SaveChangesAsync(cancellationToken);
 

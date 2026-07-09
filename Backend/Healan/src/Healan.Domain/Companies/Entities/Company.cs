@@ -32,6 +32,7 @@ public class Company : AuditableEntity
     public string Landline { get; set; }
     public string PrefixNumber { get; set; }
     public string Address { get; set; }
+    public bool IsActive { get; set; } = true;
     public int? CategoryNumber { get; set; }
     public Guid? AttachmentId { get; set; }
     public Attachment Attachment { get; set; }

@@ -43,10 +43,20 @@ public class AppointmentInfoResult : IMapFrom<Appointment>
     public bool ConfirmSecondInsuranceCompany { get; set; }
     public ICollection<ServiceTypeDto> ServiceTypes { get; set; }
     public ICollection<InvoiceDto> Invoices { get; set; }
+    public long? PrescriptionId { get; set; }
+    public bool HasEchoReport { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Appointment, AppointmentInfoResult>()
-            .ForMember(a => a.AppointmentTypeName, b => b.MapFrom(c => c.AppointmentTypeId.GetDisplayName()));
+            .ForMember(a => a.AppointmentTypeName, b => b.MapFrom(c => c.AppointmentTypeId.GetDisplayName()))
+            .ForMember(a => a.PrescriptionId, b => b.MapFrom(c =>
+                c.Prescriptions
+                    .OrderByDescending(p => p.IssueDate)
+                    .Select(p => (long?)p.PrescriptionId)
+                    .FirstOrDefault()))
+            .ForMember(a => a.HasEchoReport, b => b.MapFrom(c =>
+                c.Prescriptions.Any(p => p.EchoReport != null)));
     }
 }
 

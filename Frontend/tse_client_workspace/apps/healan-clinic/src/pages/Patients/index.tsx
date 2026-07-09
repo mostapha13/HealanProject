@@ -1,112 +1,64 @@
 import React, { useEffect, useState } from 'react';
-
 import withAlert from '../../hoc/withAlert';
-
 import healanApi from '../../api/healanApi';
-
 import type { PatientSummary } from '../../api/types';
-
 import { PageHeader } from '../../components/Ui';
-
 import { convertDateToJalali } from '@tse/tools';
-
 import { buildPatientPayload, toDateInputValue } from '../../utils/apiPayload';
 import { isValidIranNationalCode } from '../../utils/nationalCode';
+import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
+import { JalaliDateInput } from '../../components/JalaliDateInput';
 
 function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
-
   const [patients, setPatients] = useState<PatientSummary[]>([]);
-
   const [filter, setFilter] = useState('');
-
   const [showForm, setShowForm] = useState(false);
-
   const [loading, setLoading] = useState(true);
-
+  const [historyPatient, setHistoryPatient] = useState<PatientSummary | null>(null);
   const [form, setForm] = useState({
-
     patientId: 0,
-
     userId: 0,
-
     firstName: '',
-
     lastName: '',
-
     nationalCode: '',
-
     phoneNumber: '',
-
     birthdate: '',
-
   });
 
-
-
   const load = async () => {
-
     setLoading(true);
-
     try {
-
       const res = await healanApi.patients.listAll({ filterText: filter });
-
       setPatients(res);
-
     } catch (err) {
-
       onAlert(err);
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
-
-
 
   useEffect(() => {
-
     load();
-
   }, []);
 
-
-
   const resetForm = () => {
-
     setForm({ patientId: 0, userId: 0, firstName: '', lastName: '', nationalCode: '', phoneNumber: '', birthdate: '' });
-
     setShowForm(false);
-
   };
 
-
-
   const handleSave = async () => {
-
     if (!form.firstName.trim() || !form.lastName.trim() || !form.nationalCode.trim() || !form.phoneNumber.trim()) {
-
       onAlert({ type: 'error', message: 'نام، نام خانوادگی، کد ملی و موبایل الزامی است' });
-
       return;
-
     }
 
     if (!isValidIranNationalCode(form.nationalCode.trim())) {
-
       onAlert({ type: 'error', message: 'کد ملی نامعتبر است' });
-
       return;
-
     }
 
     try {
-
       const result = await healanApi.patients.register(buildPatientPayload(form));
-
       if (result?.initialPassword) {
         onAlert({
           type: 'success',
@@ -116,231 +68,152 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       } else {
         onAlert({ type: 'success', message: 'بیمار با موفقیت ثبت شد' });
       }
-
       resetForm();
-
       await load();
-
     } catch (err) {
-
       onAlert(err);
-
     }
-
   };
-
-
 
   const editPatient = async (p: PatientSummary) => {
-
     try {
-
       const info = await healanApi.patients.info(p.patientId);
-
       setForm({
-
         patientId: info.patientId,
-
         userId: info.userId ?? 0,
-
         firstName: info.firstName,
-
         lastName: info.lastName,
-
         nationalCode: info.nationalCode,
-
         phoneNumber: info.phoneNumber,
-
         birthdate: toDateInputValue(info.birthdate),
-
       });
-
       setShowForm(true);
-
     } catch (err) {
-
       onAlert(err);
-
     }
-
   };
 
-
-
   return (
-
     <>
-
       <PageHeader
-
         title="مدیریت بیماران"
-
-        subtitle="ثبت، ویرایش و جستجوی پرونده بیماران"
-
+        subtitle="ثبت، ویرایش و مشاهده سوابق ویزیت"
         action={
-
-          <button type="button" className="healan-btn healan-btn--primary" onClick={() => { resetForm(); setShowForm(true); }}>
-
+          <button
+            type="button"
+            className="healan-btn healan-btn--primary"
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+          >
             + بیمار جدید
-
           </button>
-
         }
-
       />
 
-
-
       {showForm && (
-
         <div className="healan-card" style={{ marginBottom: '1.5rem' }}>
-
-          <div className="healan-card__header"><h3>{form.patientId ? 'ویرایش بیمار' : 'ثبت بیمار جدید'}</h3></div>
-
-          <div className="healan-card__body">
-
-            <div className="healan-form-grid">
-
-              <div className="healan-form-field">
-
-                <label>نام</label>
-
-                <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-
-              </div>
-
-              <div className="healan-form-field">
-
-                <label>نام خانوادگی</label>
-
-                <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-
-              </div>
-
-              <div className="healan-form-field">
-
-                <label>کد ملی</label>
-
-                <input value={form.nationalCode} maxLength={10} onChange={(e) => setForm({ ...form, nationalCode: e.target.value })} />
-
-              </div>
-
-              <div className="healan-form-field">
-
-                <label>موبایل</label>
-
-                <input value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
-
-              </div>
-
-              <div className="healan-form-field">
-
-                <label>تاریخ تولد (اختیاری)</label>
-
-                <input type="date" value={form.birthdate} onChange={(e) => setForm({ ...form, birthdate: e.target.value })} />
-
-              </div>
-
-            </div>
-
-            <div className="healan-actions" style={{ marginTop: '1rem' }}>
-
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
-
-              <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>انصراف</button>
-
-            </div>
-
+          <div className="healan-card__header">
+            <h3>{form.patientId ? 'ویرایش بیمار' : 'ثبت بیمار جدید'}</h3>
           </div>
-
+          <div className="healan-card__body">
+            <div className="healan-form-grid">
+              <div className="healan-form-field">
+                <label>نام</label>
+                <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
+              </div>
+              <div className="healan-form-field">
+                <label>نام خانوادگی</label>
+                <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+              </div>
+              <div className="healan-form-field">
+                <label>کد ملی</label>
+                <input value={form.nationalCode} maxLength={10} onChange={(e) => setForm({ ...form, nationalCode: e.target.value })} />
+              </div>
+              <div className="healan-form-field">
+                <label>موبایل</label>
+                <input value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
+              </div>
+              <div className="healan-form-field">
+                <label>تاریخ تولد (شمسی — اختیاری)</label>
+                <JalaliDateInput
+                  value={form.birthdate}
+                  onChange={(birthdate) => setForm({ ...form, birthdate })}
+                />
+              </div>
+            </div>
+            <div className="healan-actions" style={{ marginTop: '1rem' }}>
+              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>
+                ذخیره
+              </button>
+              <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>
+                انصراف
+              </button>
+            </div>
+          </div>
         </div>
-
       )}
 
-
+      {historyPatient && (
+        <PatientVisitHistoryDrawer
+          patientId={historyPatient.patientId}
+          patientName={`${historyPatient.firstName} ${historyPatient.lastName}`}
+          onAlert={onAlert}
+          onClose={() => setHistoryPatient(null)}
+        />
+      )}
 
       <div className="healan-search-bar">
-
         <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()} />
-
-        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>جستجو</button>
-
+        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>
+          جستجو
+        </button>
       </div>
-
-
 
       <div className="healan-card">
-
         <div className="healan-card__body" style={{ padding: 0, overflowX: 'auto' }}>
-
           {loading ? (
-
             <div className="healan-empty">در حال بارگذاری...</div>
-
           ) : (
-
             <table className="healan-table">
-
               <thead>
-
                 <tr>
-
                   <th>نام</th>
-
                   <th>کد ملی</th>
-
                   <th>موبایل</th>
-
                   <th>تاریخ تولد</th>
-
                   <th>عملیات</th>
-
                 </tr>
-
               </thead>
-
               <tbody>
-
                 {patients.map((p) => (
-
                   <tr key={p.patientId}>
-
-                    <td>{p.firstName} {p.lastName}</td>
-
-                    <td>{p.nationalCode}</td>
-
-                    <td>{p.phoneNumber}</td>
-
-                    <td>{p.birthdate ? <span>{convertDateToJalali(p.birthdate)}</span> : '—'}</td>
-
                     <td>
-
-                      <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => editPatient(p)}>ویرایش</button>
-
+                      {p.firstName} {p.lastName}
                     </td>
-
+                    <td>{p.nationalCode}</td>
+                    <td>{p.phoneNumber}</td>
+                    <td>{p.birthdate ? <span>{convertDateToJalali(p.birthdate)}</span> : '—'}</td>
+                    <td>
+                      <div className="healan-actions">
+                        <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => editPatient(p)}>
+                          ویرایش
+                        </button>
+                        <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => setHistoryPatient(p)}>
+                          سوابق
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-
                 ))}
-
               </tbody>
-
             </table>
-
           )}
-
         </div>
-
       </div>
-
     </>
-
   );
-
 }
 
-
-
 export default withAlert(PatientsPage);
-
-

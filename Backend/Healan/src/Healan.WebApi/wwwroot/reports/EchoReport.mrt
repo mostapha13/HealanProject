@@ -1,0 +1,156 @@
+{
+  "ReportVersion": "2024.1",
+  "ReportName": "EchoReport",
+  "ReportAlias": "گزارش اکوکاردیوگرافی کامل قلب",
+  "ReportGuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "ReportUnit": "Centimeters",
+  "ScriptLanguage": "CSharp",
+  "Dictionary": {
+    "DataSources": {
+      "EchoData": {
+        "Name": "EchoData",
+        "Alias": "EchoData",
+        "Columns": [
+          { "Name": "PatientName", "Type": "System.String" },
+          { "Name": "PatientAge", "Type": "System.String" },
+          { "Name": "PatientNationalCode", "Type": "System.String" },
+          { "Name": "ExamDate", "Type": "System.String" },
+          { "Name": "Phm", "Type": "System.String" },
+          { "Name": "Rvid", "Type": "System.String" },
+          { "Name": "Lvidd", "Type": "System.String" },
+          { "Name": "Lvids", "Type": "System.String" },
+          { "Name": "Ivsd", "Type": "System.String" },
+          { "Name": "Pwd", "Type": "System.String" },
+          { "Name": "Lvef", "Type": "System.String" },
+          { "Name": "SimpsonEf", "Type": "System.String" },
+          { "Name": "LvMass", "Type": "System.String" },
+          { "Name": "Sm", "Type": "System.String" },
+          { "Name": "TelIndex", "Type": "System.String" },
+          { "Name": "AvAnnulus", "Type": "System.String" },
+          { "Name": "SinusValsalva", "Type": "System.String" },
+          { "Name": "StJunction", "Type": "System.String" },
+          { "Name": "Acs", "Type": "System.String" },
+          { "Name": "AscAo", "Type": "System.String" },
+          { "Name": "LaArea", "Type": "System.String" },
+          { "Name": "LaDia", "Type": "System.String" },
+          { "Name": "LaVolume", "Type": "System.String" },
+          { "Name": "Edv", "Type": "System.String" },
+          { "Name": "Esv", "Type": "System.String" },
+          { "Name": "Mve", "Type": "System.String" },
+          { "Name": "Mva", "Type": "System.String" },
+          { "Name": "Mvdt", "Type": "System.String" },
+          { "Name": "Mvpht", "Type": "System.String" },
+          { "Name": "MvMean", "Type": "System.String" },
+          { "Name": "MvArea", "Type": "System.String" },
+          { "Name": "MvAnnulus", "Type": "System.String" },
+          { "Name": "PvsMax", "Type": "System.String" },
+          { "Name": "PvdMax", "Type": "System.String" },
+          { "Name": "DtiEm", "Type": "System.String" },
+          { "Name": "DtiAm", "Type": "System.String" },
+          { "Name": "AovMax", "Type": "System.String" },
+          { "Name": "LvotVmax", "Type": "System.String" },
+          { "Name": "LvotVti", "Type": "System.String" },
+          { "Name": "AvVti", "Type": "System.String" },
+          { "Name": "AoPeak", "Type": "System.String" },
+          { "Name": "AoMean", "Type": "System.String" },
+          { "Name": "Ava", "Type": "System.String" },
+          { "Name": "At", "Type": "System.String" },
+          { "Name": "AovMg", "Type": "System.String" },
+          { "Name": "AovPg", "Type": "System.String" },
+          { "Name": "TrgMax", "Type": "System.String" },
+          { "Name": "Rvsp", "Type": "System.String" },
+          { "Name": "Pap", "Type": "System.String" },
+          { "Name": "TvMean", "Type": "System.String" },
+          { "Name": "TvAnnulus", "Type": "System.String" },
+          { "Name": "TvMg", "Type": "System.String" },
+          { "Name": "TvPg", "Type": "System.String" },
+          { "Name": "PvMax", "Type": "System.String" },
+          { "Name": "PvPg", "Type": "System.String" },
+          { "Name": "PvVti", "Type": "System.String" },
+          { "Name": "RvotVti", "Type": "System.String" },
+          { "Name": "Piphi", "Type": "System.String" },
+          { "Name": "Ivc", "Type": "System.String" },
+          { "Name": "RaArea", "Type": "System.String" },
+          { "Name": "SeptalE", "Type": "System.String" },
+          { "Name": "LateralE", "Type": "System.String" },
+          { "Name": "SPrime", "Type": "System.String" },
+          { "Name": "APrime", "Type": "System.String" },
+          { "Name": "SmTdi", "Type": "System.String" },
+          { "Name": "Tapsie", "Type": "System.String" },
+          { "Name": "Conclusion", "Type": "System.String" },
+          { "Name": "Recommendation", "Type": "System.String" },
+          { "Name": "ClinicName", "Type": "System.String" },
+          { "Name": "DoctorSignName", "Type": "System.String" },
+          { "Name": "ClinicAddress", "Type": "System.String" },
+          { "Name": "ClinicPhone", "Type": "System.String" }
+        ]
+      }
+    }
+  },
+  "Pages": [
+    {
+      "Ident": "StiPage",
+      "Name": "Page1",
+      "PageWidth": 21.0,
+      "PageHeight": 29.7,
+      "Watermark": {
+        "Text": "کلینیک قلب و عروق دکتر معصومه شهرویی"
+      },
+      "Components": [
+        {
+          "Ident": "StiText",
+          "Name": "TitleClinic",
+          "Text": { "Value": "کلینیک قلب و عروق دکتر معصومه شهرویی" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "TitleFa",
+          "Text": { "Value": "گزارش اکوکاردیوگرافی کامل قلب" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "TitleEn",
+          "Text": { "Value": "Echocardiography, M-mode-2D Color Doppler" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "PatientName",
+          "Text": { "Value": "{EchoData.PatientName}" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "ExamDate",
+          "Text": { "Value": "{EchoData.ExamDate}" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "Conclusion",
+          "Text": { "Value": "{EchoData.Conclusion}" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "Recommendation",
+          "Text": { "Value": "{EchoData.Recommendation}" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "FooterAddress",
+          "Text": {
+            "Value": "شوشتر، خیابان طالقانی، پایین‌تر از خیابان سادات، ساختمان پزشکان دکتر جلالی (آزمایشگاه سلامت)، طبقه دوم واحد ۲"
+          }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "FooterPhone",
+          "Text": { "Value": "تلفن مطب: 09025103867 | اینستاگرام: @dr.masumehshahrooei | www.drshahrooei.ir" }
+        },
+        {
+          "Ident": "StiText",
+          "Name": "DoctorSign",
+          "Text": { "Value": "دکتر معصومه شهرویی" }
+        }
+      ]
+    }
+  ],
+  "HealanNotes": "این فایل پایهٔ تمپلیت Stimulsoft است. چاپ فعلی کلینیک از لایهٔ HTML هم‌شکل برگهٔ نمونه استفاده می‌کند. می‌توانید همین DataSource را در Stimulsoft Designer باز کرده، چیدمان را مثل برگهٔ فیزیکی نهایی کنید و جایگزین این فایل در wwwroot/reports/EchoReport.mrt قرار دهید. API داده: OrderResult/EchoReportPrintData"
+}

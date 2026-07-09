@@ -49,6 +49,10 @@ public class AppointmentSummaryResult : IMapFrom<Appointment>
     public bool ConfirmSecondInsuranceCompany { get; set; }
     public ICollection<ServiceTypeDto> ServiceTypes  { get; set; }
     public List<Invoice> Invoices { get; set; }
+    public long? PrescriptionId { get; set; }
+    public bool HasEchoReport { get; set; }
+    public bool PatientHasVisitHistory { get; set; }
+
     public void Mapping(Profile profile)
     {
 
@@ -56,7 +60,14 @@ public class AppointmentSummaryResult : IMapFrom<Appointment>
             .ForMember(a => a.AppointmentTypeName, b => b.MapFrom(c => c.AppointmentTypeId.GetDisplayName()))
             .ForMember(a => a.PrimaryInsuranceCompany, b => b.MapFrom(c => c.PrimaryInsuranceCompany))
             .ForMember(a => a.Invoices, b => b.MapFrom(c => c.Invoices))
-            .ForMember(a => a.SecondInsuranceCompany, b => b.MapFrom(c => c.SecondInsuranceCompany));
+            .ForMember(a => a.SecondInsuranceCompany, b => b.MapFrom(c => c.SecondInsuranceCompany))
+            .ForMember(a => a.PrescriptionId, b => b.MapFrom(c =>
+                c.Prescriptions
+                    .OrderByDescending(p => p.IssueDate)
+                    .Select(p => (long?)p.PrescriptionId)
+                    .FirstOrDefault()))
+            .ForMember(a => a.HasEchoReport, b => b.MapFrom(c =>
+                c.Prescriptions.Any(p => p.EchoReport != null)));
     }
 }
 

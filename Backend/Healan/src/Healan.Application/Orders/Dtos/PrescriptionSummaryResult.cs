@@ -19,6 +19,7 @@ namespace Healan.Application.Orders.Dtos;
         public DateTime? NextAppointmentDate { get; set; }
         public string? PatientName { get; set; }
         public string? DoctorName { get; set; }
+        public bool HasEchoReport { get; set; }
 
         public ICollection<PrescriptionDrugDto> PrescriptionDrugs { get; set; }
         public ICollection<LabTestRequestDto> LabTestRequests { get; set; }
@@ -36,6 +37,7 @@ namespace Healan.Application.Orders.Dtos;
                             c.Appointment != null && c.Appointment.Doctor != null
                                 ? (c.Appointment.Doctor.FirstName + " " + c.Appointment.Doctor.LastName).Trim()
                                 : null))
+                        .ForMember(a => a.HasEchoReport, b => b.MapFrom(c => c.EchoReport != null))
                         .ForMember(a => a.PrescriptionDrugs, b => b.MapFrom(c => c.PrescriptionDrugs))
                         .ForMember(a => a.LabTestRequests, b => b.MapFrom(c => c.LabTestRequests))
                         .ForMember(a => a.ImagingRequests, b => b.MapFrom(c => c.ImagingRequests))

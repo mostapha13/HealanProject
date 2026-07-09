@@ -43,6 +43,7 @@ public class PrescriptionListQueryHandler : IRequestHandler<PrescriptionListQuer
             .Include(x => x.ImagingRequests).ThenInclude(x => x.Attachment)
             .Include(x => x.LabTestRequests).ThenInclude(x => x.LabTestResults)
             .Include(x => x.LabTestRequests).ThenInclude(x => x.Attachment)
+            .Include(x => x.EchoReport)
             ;
 
         return await query.ProjectTo<PrescriptionSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);

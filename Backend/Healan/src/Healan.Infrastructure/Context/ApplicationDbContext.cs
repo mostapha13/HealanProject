@@ -57,6 +57,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<LabTestResult> LabTestResults { get; set; }
     public DbSet<ImagingRequest> ImagingRequests { get; set; }
     public DbSet<ImagingResult> ImagingResults { get; set; }
+    public DbSet<EchoReport> EchoReports { get; set; }
     public DbSet<PortalContentItem> PortalContentItems { get; set; }
     public DbSet<PortalSiteSetting> PortalSiteSettings { get; set; }
     public DbSet<PatientReview> PatientReviews { get; set; }

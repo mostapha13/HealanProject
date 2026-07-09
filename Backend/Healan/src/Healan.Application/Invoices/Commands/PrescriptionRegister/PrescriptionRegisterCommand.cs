@@ -3,10 +3,10 @@ using Healan.Application.Common.Interfaces;
 using Healan.Application.Orders.Dtos;
 using Healan.Domain.Attachments.Entities;
 using Healan.Domain.Orders.Entities;
+using Healan.Domain.Orders.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Share.Application.Common.Interfaces;
 using Share.Domain.Exceptions;
 using Share.Domain.Extensions;
 
@@ -45,6 +45,7 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             .Include(x => x.PrescriptionDrugs)
             .Include(x => x.ImagingRequests)
             .Include(x => x.LabTestRequests)
+            .Include(x => x.EchoReport)
             .FirstOrDefaultAsync(x => x.PrescriptionId == request.PrescriptionId, cancellationToken);
 
         var isNew = prescription == null;
@@ -106,6 +107,19 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             });
         }
 
+        var hasEchoImaging = request.ImagingRequests.Any(x => x.ImageTypeId == ImageTypeId.Echocardiography)
+                             || HasAnyEchoValue(request.EchoReport);
+
+        if (hasEchoImaging && request.EchoReport != null)
+        {
+            MapEchoReport(prescription, request.EchoReport);
+        }
+        else if (prescription.EchoReport != null && !hasEchoImaging)
+        {
+            _applicationDbContext.EchoReports.Remove(prescription.EchoReport);
+            prescription.EchoReport = null;
+        }
+
         try
         {
             await _applicationDbContext.SaveChangesAsync(cancellationToken);
@@ -119,6 +133,93 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
             throw new BadRequestExceptions("خطا در ثبت نسخه");
         }
     }
+
+    private static bool HasAnyEchoValue(EchoReportDto? dto)
+    {
+        if (dto == null) return false;
+        return typeof(EchoReportDto).GetProperties()
+            .Where(p => p.PropertyType == typeof(string))
+            .Select(p => p.GetValue(dto) as string)
+            .Any(v => !string.IsNullOrWhiteSpace(v));
+    }
+
+    private void MapEchoReport(Prescription prescription, EchoReportDto dto)
+    {
+        if (prescription.EchoReport == null)
+        {
+            prescription.EchoReport = new EchoReport { PrescriptionId = prescription.PrescriptionId };
+            _applicationDbContext.EchoReports.Add(prescription.EchoReport);
+        }
+
+        var echo = prescription.EchoReport;
+        echo.Phm = NullIfEmpty(dto.Phm);
+        echo.Rvid = NullIfEmpty(dto.Rvid);
+        echo.Lvidd = NullIfEmpty(dto.Lvidd);
+        echo.Lvids = NullIfEmpty(dto.Lvids);
+        echo.Ivsd = NullIfEmpty(dto.Ivsd);
+        echo.Pwd = NullIfEmpty(dto.Pwd);
+        echo.Lvef = NullIfEmpty(dto.Lvef);
+        echo.SimpsonEf = NullIfEmpty(dto.SimpsonEf);
+        echo.LvMass = NullIfEmpty(dto.LvMass);
+        echo.Sm = NullIfEmpty(dto.Sm);
+        echo.TelIndex = NullIfEmpty(dto.TelIndex);
+        echo.AvAnnulus = NullIfEmpty(dto.AvAnnulus);
+        echo.SinusValsalva = NullIfEmpty(dto.SinusValsalva);
+        echo.StJunction = NullIfEmpty(dto.StJunction);
+        echo.Acs = NullIfEmpty(dto.Acs);
+        echo.AscAo = NullIfEmpty(dto.AscAo);
+        echo.LaArea = NullIfEmpty(dto.LaArea);
+        echo.LaDia = NullIfEmpty(dto.LaDia);
+        echo.LaVolume = NullIfEmpty(dto.LaVolume);
+        echo.Edv = NullIfEmpty(dto.Edv);
+        echo.Esv = NullIfEmpty(dto.Esv);
+        echo.Mve = NullIfEmpty(dto.Mve);
+        echo.Mva = NullIfEmpty(dto.Mva);
+        echo.Mvdt = NullIfEmpty(dto.Mvdt);
+        echo.Mvpht = NullIfEmpty(dto.Mvpht);
+        echo.MvMean = NullIfEmpty(dto.MvMean);
+        echo.MvArea = NullIfEmpty(dto.MvArea);
+        echo.MvAnnulus = NullIfEmpty(dto.MvAnnulus);
+        echo.PvsMax = NullIfEmpty(dto.PvsMax);
+        echo.PvdMax = NullIfEmpty(dto.PvdMax);
+        echo.DtiEm = NullIfEmpty(dto.DtiEm);
+        echo.DtiAm = NullIfEmpty(dto.DtiAm);
+        echo.AovMax = NullIfEmpty(dto.AovMax);
+        echo.LvotVmax = NullIfEmpty(dto.LvotVmax);
+        echo.LvotVti = NullIfEmpty(dto.LvotVti);
+        echo.AvVti = NullIfEmpty(dto.AvVti);
+        echo.AoPeak = NullIfEmpty(dto.AoPeak);
+        echo.AoMean = NullIfEmpty(dto.AoMean);
+        echo.Ava = NullIfEmpty(dto.Ava);
+        echo.At = NullIfEmpty(dto.At);
+        echo.AovMg = NullIfEmpty(dto.AovMg);
+        echo.AovPg = NullIfEmpty(dto.AovPg);
+        echo.TrgMax = NullIfEmpty(dto.TrgMax);
+        echo.Rvsp = NullIfEmpty(dto.Rvsp);
+        echo.Pap = NullIfEmpty(dto.Pap);
+        echo.TvMean = NullIfEmpty(dto.TvMean);
+        echo.TvAnnulus = NullIfEmpty(dto.TvAnnulus);
+        echo.TvMg = NullIfEmpty(dto.TvMg);
+        echo.TvPg = NullIfEmpty(dto.TvPg);
+        echo.PvMax = NullIfEmpty(dto.PvMax);
+        echo.PvPg = NullIfEmpty(dto.PvPg);
+        echo.PvVti = NullIfEmpty(dto.PvVti);
+        echo.RvotVti = NullIfEmpty(dto.RvotVti);
+        echo.Piphi = NullIfEmpty(dto.Piphi);
+        echo.Ivc = NullIfEmpty(dto.Ivc);
+        echo.RaArea = NullIfEmpty(dto.RaArea);
+        echo.SeptalE = NullIfEmpty(dto.SeptalE);
+        echo.LateralE = NullIfEmpty(dto.LateralE);
+        echo.SPrime = NullIfEmpty(dto.SPrime);
+        echo.APrime = NullIfEmpty(dto.APrime);
+        echo.SmTdi = NullIfEmpty(dto.SmTdi);
+        echo.Tapsie = NullIfEmpty(dto.Tapsie);
+        echo.Conclusion = NullIfEmpty(dto.Conclusion);
+        echo.Recommendation = NullIfEmpty(dto.Recommendation);
+    }
+
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private async Task EnsureAttachmentAsync(Guid fileId, string title, CancellationToken cancellationToken)
     {

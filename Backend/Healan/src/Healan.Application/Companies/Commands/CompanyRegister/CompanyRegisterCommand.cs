@@ -53,18 +53,18 @@ public class CompanyRegisterCommandHandler : IRequestHandler<CompanyRegisterComm
 
         company.CompanyName = request.CompanyName;
         company.CompanyRegistrationTypeId = request.CompanyRegistrationTypeId;
-        company.EstablishmentDate = request.EstablishmentDate;
-        company.LatinCompanyName = request.LatinCompanyName;
+        company.EstablishmentDate = request.EstablishmentDate ?? company.EstablishmentDate;
+        company.LatinCompanyName = MergeString(request.LatinCompanyName, company.LatinCompanyName);
         company.NationalId = request.NationalId;
-        company.RegistrationDate = request.RegistrationDate;
-        company.ParentCompanyRef = request.ParentCompanyRef;
-        company.Email = request.Email;
-        company.Landline = request.Landline;
-        company.PrefixNumber = request.PrefixNumber;
-        company.RegistrationNumber = request.RegistrationNumber;
-        company.WebSite = request.WebSite;
-        company.Address = request.Address;
-
+        company.RegistrationDate = request.RegistrationDate ?? company.RegistrationDate;
+        company.ParentCompanyRef = request.ParentCompanyRef ?? company.ParentCompanyRef;
+        company.Email = MergeString(request.Email, company.Email);
+        company.Landline = MergeString(request.Landline, company.Landline);
+        company.PrefixNumber = MergeString(request.PrefixNumber, company.PrefixNumber);
+        company.RegistrationNumber = MergeString(request.RegistrationNumber, company.RegistrationNumber);
+        company.WebSite = MergeString(request.WebSite, company.WebSite);
+        company.Address = MergeString(request.Address, company.Address);
+        company.IsActive = request.IsActive ?? company.IsActive;
 
         #endregion
 
@@ -137,4 +137,7 @@ public class CompanyRegisterCommandHandler : IRequestHandler<CompanyRegisterComm
             throw;
         }
     }
+
+    private static string MergeString(string? requestValue, string? existingValue) =>
+        requestValue ?? existingValue ?? string.Empty;
 }

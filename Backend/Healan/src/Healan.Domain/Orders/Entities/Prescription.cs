@@ -20,7 +20,6 @@ public class Prescription : AuditableEntity
     public ICollection<PrescriptionDrug> PrescriptionDrugs { get; set; }
     public ICollection<LabTestRequest> LabTestRequests { get; set; }
     public ICollection<ImagingRequest> ImagingRequests { get; set; }
+    public EchoReport? EchoReport { get; set; }
     public Appointment Appointment { get; set; }
-
-
 }

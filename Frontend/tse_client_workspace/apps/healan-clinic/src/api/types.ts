@@ -19,6 +19,54 @@ export interface DashboardStats {
   todayPrescriptions: number;
 }
 
+export interface ClinicAnalyticsSummary {
+  totalAppointments: number;
+  completedAppointments: number;
+  scheduledAppointments: number;
+  inProgressAppointments: number;
+  cancelledAppointments: number;
+  noShowAppointments: number;
+  totalRevenue: number;
+  patientRevenue: number;
+  insuranceRevenue: number;
+  pendingPayments: number;
+  prescriptionCount: number;
+}
+
+export interface ClinicAnalyticsChartItem {
+  name: string;
+  value: number;
+  count: number;
+}
+
+export interface ClinicAnalyticsTimePoint {
+  label: string;
+  value: number;
+  count: number;
+}
+
+export interface ClinicAnalytics {
+  startDate: string;
+  endDate: string;
+  summary: ClinicAnalyticsSummary;
+  appointmentsByStatus: ClinicAnalyticsChartItem[];
+  appointmentsOverTime: ClinicAnalyticsTimePoint[];
+  revenueOverTime: ClinicAnalyticsTimePoint[];
+  revenueByPaymentMethod: ClinicAnalyticsChartItem[];
+  topServices: ClinicAnalyticsChartItem[];
+  topDoctors: ClinicAnalyticsChartItem[];
+  prescriptionsOverTime: ClinicAnalyticsTimePoint[];
+  paymentStatusBreakdown: ClinicAnalyticsChartItem[];
+}
+
+export interface ClinicAnalyticsFilters {
+  startDate?: string;
+  endDate?: string;
+  doctorId?: number | null;
+  patientId?: number | null;
+  serviceTypeId?: number | null;
+}
+
 export interface PatientSummary {
   patientId: number;
   userId?: number;
@@ -62,6 +110,9 @@ export interface AppointmentSummary {
   confirmSecondInsuranceCompany?: boolean;
   serviceTypes?: ServiceType[];
   invoices?: InvoiceSummary[];
+  prescriptionId?: number | null;
+  hasEchoReport?: boolean;
+  patientHasVisitHistory?: boolean;
 }
 
 export interface InvoiceItemSummary {
@@ -93,6 +144,7 @@ export interface ServiceType {
   code?: string;
   categoryTypeId?: number;
   description?: string;
+  isActive?: boolean;
 }
 
 export interface InsuranceCompany {
@@ -101,6 +153,8 @@ export interface InsuranceCompany {
   code?: string;
   insuranceTypeId?: number;
   insuranceTypeName?: string;
+  phoneNumber?: string;
+  isActive?: boolean;
 }
 
 export interface AppointmentInsuranceInfo {
@@ -113,10 +167,12 @@ export interface AppointmentInsuranceInfo {
 export interface CompanySummary {
   companyId: number;
   companyName: string;
+  companyRegistrationTypeId?: number;
   latinCompanyName?: string;
   nationalId?: string;
   address?: string;
   email?: string;
+  isActive?: boolean;
 }
 
 export interface MedicalFeeService {
@@ -166,6 +222,7 @@ export interface PrescriptionSummary {
   notes?: string;
   patientName?: string;
   doctorName?: string;
+  hasEchoReport?: boolean;
 }
 
 export interface AttachmentInfo {
@@ -216,6 +273,45 @@ export interface PrescriptionDetail {
     attachmentId?: string;
     attachment?: AttachmentInfo;
   }[];
+  echoReport?: Record<string, unknown> | null;
+}
+
+export interface PatientVisitHistoryItem {
+  appointmentId: number;
+  appointmentDate: string;
+  appointmentStatus: string;
+  doctorName?: string;
+  prescriptionId?: number | null;
+  prescriptionIssueDate?: string;
+  prescriptionNotes?: string;
+  hasEchoReport?: boolean;
+  drugs?: PrescriptionDrugRow[];
+  labs?: {
+    labTestType: string;
+    notes?: string;
+    attachmentId?: string;
+    attachmentLink?: string;
+    attachmentFileName?: string;
+  }[];
+  imaging?: {
+    imageTypeId: number;
+    imageTypeName: string;
+    notes?: string;
+    attachmentId?: string;
+    attachmentLink?: string;
+    attachmentFileName?: string;
+  }[];
+}
+
+export interface EchoPrintData {
+  prescriptionId: number;
+  appointmentId: number;
+  patientName: string;
+  patientNationalCode?: string;
+  patientBirthdate?: string;
+  patientAge?: string;
+  examDate: string;
+  echo: Record<string, unknown>;
 }
 
 export interface EnumItem {

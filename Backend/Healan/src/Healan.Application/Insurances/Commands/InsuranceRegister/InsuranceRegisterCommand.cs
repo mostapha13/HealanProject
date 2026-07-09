@@ -56,6 +56,7 @@ public class InsuranceRegisterCommandHandler : IRequestHandler<InsuranceRegister
         insurance.Name = request.Name;
         insurance.Code = request.Code;
         insurance.PhoneNumber = request.PhoneNumber;
+        insurance.IsActive = request.IsActive ?? insurance.IsActive;
         #endregion
 
 

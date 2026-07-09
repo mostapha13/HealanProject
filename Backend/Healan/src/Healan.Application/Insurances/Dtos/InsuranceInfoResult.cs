@@ -14,6 +14,7 @@ public record InsuranceInfoResult : IMapFrom<InsuranceCompany>
     public string? PhoneNumber { get; set; }
     public InsuranceTypeId InsuranceTypeId { get; set; }
     public string InsuranceTypeName { get; set; }
+    public bool IsActive { get; set; }
     public AttachmentDto? Attachment { get; set; }
 
     public void Mapping(Profile profile)

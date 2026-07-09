@@ -10,7 +10,6 @@ import {
   appointmentDoctorName,
   appointmentInsuranceDisplay,
   appointmentInvoice,
-  appointmentCanStartVisit,
   appointmentPendingInvoice,
   appointmentHasPaidInvoice,
   appointmentPatientDisplay,
@@ -18,8 +17,14 @@ import {
   appointmentPaymentColor,
   appointmentPaymentLabel,
   appointmentServiceTitles,
+  appointmentIsScheduled,
+  appointmentIsDuringVisit,
+  appointmentCanRecordClinicalWork,
   invoiceItemServiceTitle,
 } from '../../utils/appointmentDisplay';
+import { openEchoPrintWindow } from '../../utils/printEchoReport';
+import { buildEchoPrintPayload } from '../../utils/echoPrintPayload';
+import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
 
 function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const { id } = useParams();
@@ -28,6 +33,7 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [paymentMethods, setPaymentMethods] = useState<{ paymentMethodTypeId: string; paymentMethodTypeName?: string }[]>([]);
   const [paying, setPaying] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const reload = useCallback(() => {
     if (!id) return Promise.resolve();
@@ -70,20 +76,48 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
     }
   };
 
+  const goToPrescription = async () => {
+    if (!data) return;
+    try {
+      if (appointmentIsScheduled(data.appointmentTypeId as AppointmentStatus)) {
+        await healanApi.appointments.changeStatus({
+          appointmentId: data.appointmentId,
+          appointmentTypeId: 'InProgress',
+        });
+      }
+      navigate(`/prescriptions?appointmentId=${data.appointmentId}`);
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
+  const printEcho = async () => {
+    if (!data?.prescriptionId) return;
+    try {
+      const printData = await healanApi.prescriptions.echoPrintData(data.prescriptionId);
+      openEchoPrintWindow(buildEchoPrintPayload(printData));
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
   if (!data) return <div className="healan-empty">در حال بارگذاری...</div>;
 
   const invoice = appointmentInvoice(data);
   const pendingInvoice = appointmentPendingInvoice(data);
   const status = data.appointmentTypeId as AppointmentStatus;
   const hasPaidInvoice = appointmentHasPaidInvoice(data);
-  const canStartVisit = appointmentCanStartVisit(data) && (status === 'Scheduled' || status === 'ReScheduled');
-  const canComplete = status === 'InProgress';
+  const canStartVisit = appointmentIsScheduled(status);
+  const canComplete = appointmentIsDuringVisit(status);
+  const canRecordClinical = appointmentCanRecordClinicalWork(status) || appointmentIsScheduled(status);
+  const paymentSettled = !pendingInvoice && hasPaidInvoice;
+  const visitStarted = appointmentIsDuringVisit(status) || status === 'Completed';
 
   return (
     <>
       <PageHeader
         title="پرونده ویزیت"
-        subtitle="مراحل پذیرش، پرداخت و ویزیت پزشک"
+        subtitle="ویزیت، ثبت نسخه و پرداخت — پرداخت می‌تواند قبل یا بعد از ویزیت انجام شود"
         action={
           <button type="button" className="healan-btn healan-btn--outline" onClick={() => navigate('/appointments')}>
             بازگشت
@@ -99,11 +133,21 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
         </div>
         <div className="healan-card__body">
           <ol className="healan-workflow-steps">
-            <li className={hasPaidInvoice ? 'done' : 'active'}>۱. ثبت نوبت و خدمات توسط منشی</li>
-            <li className={hasPaidInvoice ? 'done' : ''}>۲. پرداخت هزینه توسط بیمار</li>
-            <li className={status === 'InProgress' || status === 'Completed' ? 'done' : hasPaidInvoice ? 'active' : ''}>۳. شروع ویزیت توسط پزشک</li>
-            <li className={status === 'Completed' ? 'done' : ''}>۴. ثبت نسخه (دارو / آزمایش / تصویربرداری)</li>
+            <li className="done">۱. ثبت نوبت و خدمات توسط منشی</li>
+            <li className={visitStarted ? 'done' : canStartVisit ? 'active' : ''}>
+              ۲. ویزیت توسط پزشک (شروع ویزیت)
+            </li>
+            <li className={status === 'Completed' ? 'done' : appointmentIsDuringVisit(status) ? 'active' : ''}>
+              ۳. ثبت نسخه و افزودن خدمات حین ویزیت
+            </li>
+            <li className={paymentSettled ? 'done' : pendingInvoice || invoice ? 'active' : ''}>
+              ۴. پرداخت (قبل یا بعد از ویزیت)
+            </li>
           </ol>
+          <p className="healan-workflow-hint">
+            پزشک می‌تواند بدون پرداخت، ویزیت را شروع کند و حین ویزیت نسخه و خدمات (مثل اکو) را ثبت کند.
+            مبلغ نهایی پس از ویزیت محاسبه و توسط منشی دریافت می‌شود — یا در صورت چکاپ، از ابتدا پرداخت شود.
+          </p>
         </div>
       </div>
 
@@ -202,34 +246,67 @@ function AppointmentDetailPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 پایان ویزیت
               </button>
             )}
-            {(status === 'InProgress' || status === 'Completed') && (
+            {canRecordClinical && (
+              <button
+                type="button"
+                className="healan-btn healan-btn--primary"
+                onClick={() => void goToPrescription()}
+              >
+                {appointmentIsScheduled(status) ? 'شروع ویزیت و ثبت نسخه' : 'ثبت / ویرایش نسخه'}
+              </button>
+            )}
+            {canRecordClinical && (
               <button
                 type="button"
                 className="healan-btn healan-btn--outline"
-                onClick={() => navigate(`/prescriptions?appointmentId=${data.appointmentId}`)}
+                onClick={() => navigate(`/appointments?edit=${data.appointmentId}`)}
               >
-                ثبت / ویرایش نسخه
+                افزودن خدمت حین ویزیت
               </button>
             )}
-            <button type="button" className="healan-btn healan-btn--outline" onClick={() => navigate(`/appointments?edit=${data.appointmentId}`)}>
-              ویرایش نوبت / افزودن خدمت
+            {data.hasEchoReport && data.prescriptionId ? (
+              <button type="button" className="healan-btn healan-btn--primary" onClick={() => void printEcho()}>
+                چاپ اکو
+              </button>
+            ) : null}
+            <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowHistory(true)}>
+              سوابق بیمار
             </button>
+            {!canRecordClinical && (
+              <button type="button" className="healan-btn healan-btn--outline" onClick={() => navigate(`/appointments?edit=${data.appointmentId}`)}>
+                ویرایش نوبت / افزودن خدمت
+              </button>
+            )}
             <button type="button" className="healan-btn healan-btn--outline" onClick={() => navigate('/queue')}>
               صف انتظار
             </button>
           </div>
-          {!canStartVisit && status === 'Scheduled' && (
+          {pendingInvoice && appointmentIsDuringVisit(status) && (
             <p style={{ marginTop: '1rem', color: '#b45309', fontSize: '0.85rem' }}>
-              برای شروع ویزیت، ابتدا بیمار باید هزینه خدمات را پرداخت کند.
+              ویزیت در حال انجام است — پس از اتمام، مبلغ نهایی (شامل خدمات اضافه‌شده) توسط منشی دریافت می‌شود.
             </p>
           )}
-          {canStartVisit && status === 'Scheduled' && (
+          {pendingInvoice && appointmentIsScheduled(status) && (
+            <p style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.85rem' }}>
+              پرداخت هنوز انجام نشده — می‌توانید ابتدا ویزیت را شروع کنید یا در صورت چکاپ، همین حالا پرداخت را ثبت کنید.
+            </p>
+          )}
+          {paymentSettled && (
             <p style={{ marginTop: '1rem', color: '#047857', fontSize: '0.85rem' }}>
-              پرداخت انجام شده — پزشک می‌تواند ویزیت را شروع کند.
+              پرداخت انجام شده است.
             </p>
           )}
         </div>
       </div>
+
+      {showHistory && (
+        <PatientVisitHistoryDrawer
+          patientId={data.patientId}
+          patientName={appointmentPatientDisplay(data)}
+          onAlert={onAlert}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </>
   );
 }

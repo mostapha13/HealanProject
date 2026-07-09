@@ -1,4 +1,5 @@
 ﻿using Healan.Application.PublicInfos.Queries.CategoryType;
+using Healan.Application.ServiceTypes.Commands.ServiceTypeDelete;
 using Healan.Application.ServiceTypes.Commands.ServiceTypeRegister;
 using Healan.Application.ServiceTypes.Queries.ServiceTypeInfo;
 using Healan.Application.ServiceTypes.Queries.ServiceTypeList;
@@ -32,6 +33,13 @@ public class ServiceTypesController : ApiControllerBase
     /// <returns></returns>
     [HttpPost("[action]")]
     public Task<IActionResult> Register([FromBody] ServiceTypeRegisterCommand request) =>
+        SendCommand(request);
+
+    /// <summary>
+    /// حذف خدمت
+    /// </summary>
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] ServiceTypeDeleteCommand request) =>
         SendCommand(request);
 
     /// <summary>

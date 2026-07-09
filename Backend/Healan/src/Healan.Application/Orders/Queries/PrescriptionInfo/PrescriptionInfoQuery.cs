@@ -36,6 +36,7 @@ public class PrescriptionInfoQueryHandler : IRequestHandler<PrescriptionInfoQuer
            .Include(x => x.ImagingRequests).ThenInclude(x => x.Attachment)
            .Include(x => x.LabTestRequests).ThenInclude(x => x.LabTestResults)
            .Include(x => x.LabTestRequests).ThenInclude(x => x.Attachment)
+           .Include(x => x.EchoReport)
            .AsNoTracking()
            .Where(x=>x.PrescriptionId==request.PrescriptionId)
            ;

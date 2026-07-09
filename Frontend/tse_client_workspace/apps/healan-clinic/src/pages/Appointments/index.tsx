@@ -16,6 +16,8 @@ import { SearchableSelect } from '../../components/SearchableSelect';
 import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
 import { useNavigate, useLocation } from '@tse/utils';
 import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentInvoice, appointmentPatientName, appointmentPatientNationalCode, appointmentIsPaid } from '../../utils/appointmentDisplay';
+import { QuickAddPatientModal } from '../../components/QuickAddPatientModal';
+import { QuickAddDoctorModal } from '../../components/QuickAddDoctorModal';
 
 function createInitialAppointmentForm() {
   return {
@@ -44,7 +46,41 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [patientModalOpen, setPatientModalOpen] = useState(false);
+  const [doctorModalOpen, setDoctorModalOpen] = useState(false);
   const [form, setForm] = useState(createInitialAppointmentForm);
+
+  const refreshPatients = async () => {
+    const list = await healanApi.patients.listAll();
+    setPatients(list);
+    return list;
+  };
+
+  const refreshDoctors = async () => {
+    const list = await healanApi.doctors.listAll();
+    setDoctors(list);
+    return list;
+  };
+
+  const openPatientQuickAdd = () => {
+    setPatientModalOpen(true);
+  };
+
+  const openDoctorQuickAdd = () => {
+    setDoctorModalOpen(true);
+  };
+
+  const handlePatientAdded = async (patientId: number) => {
+    await refreshPatients();
+    setShowForm(true);
+    setForm((prev) => ({ ...prev, patientId }));
+  };
+
+  const handleDoctorAdded = async (doctorId: number) => {
+    await refreshDoctors();
+    setShowForm(true);
+    setForm((prev) => ({ ...prev, doctorId }));
+  };
 
   const openForm = () => {
     setForm(createInitialAppointmentForm());
@@ -164,7 +200,17 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         title="پذیرش و نوبت‌دهی"
         subtitle="ثبت نوبت، محاسبه هزینه و پرداخت"
         action={
-          <button type="button" className="healan-btn healan-btn--primary" onClick={openForm}>+ پذیرش جدید</button>
+          <div className="healan-page-header__actions">
+            <button type="button" className="healan-btn healan-btn--outline" onClick={openPatientQuickAdd}>
+              + بیمار جدید
+            </button>
+            <button type="button" className="healan-btn healan-btn--outline" onClick={openDoctorQuickAdd}>
+              + پزشک جدید
+            </button>
+            <button type="button" className="healan-btn healan-btn--primary" onClick={openForm}>
+              + پذیرش جدید
+            </button>
+          </div>
         }
       />
 
@@ -237,7 +283,7 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <textarea rows={2} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
             </div>
             <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
-              پس از پرداخت اولیه، با افزودن خدمت جدید فاکتور مکمل ایجاد می‌شود.
+              پرداخت می‌تواند قبل یا بعد از ویزیت انجام شود. با افزودن خدمت جدید حین ویزیت، فاکتور مکمل ایجاد می‌شود.
             </p>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
               <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>
@@ -305,6 +351,20 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           )}
         </div>
       </div>
+
+      <QuickAddPatientModal
+        open={patientModalOpen}
+        onClose={() => setPatientModalOpen(false)}
+        onSuccess={(patientId) => void handlePatientAdded(patientId)}
+        onAlert={onAlert}
+      />
+
+      <QuickAddDoctorModal
+        open={doctorModalOpen}
+        onClose={() => setDoctorModalOpen(false)}
+        onSuccess={(doctorId) => void handleDoctorAdded(doctorId)}
+        onAlert={onAlert}
+      />
     </>
   );
 }

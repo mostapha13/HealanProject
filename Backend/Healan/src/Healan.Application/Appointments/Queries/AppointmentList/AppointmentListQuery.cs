@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Healan.Application.Appointments;
 using Healan.Application.Appointments.Dtos;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Doctors.Dtos;
@@ -42,6 +43,7 @@ public class AppointmentListQueryHandler : IRequestHandler<AppointmentListQuery,
             .Include(x => x.Doctor)
             .Include(x => x.PrimaryInsuranceCompany)
             .Include(x => x.SecondInsuranceCompany)
+            .Include(x => x.Prescriptions).ThenInclude(p => p.EchoReport)
             .Where(x =>
              (
             request.StartDate.HasValue && request.EndDate.HasValue ? x.AppointmentDate >= request.StartDate.Value && x.AppointmentDate <= request.EndDate.Value :
@@ -61,7 +63,9 @@ public class AppointmentListQueryHandler : IRequestHandler<AppointmentListQuery,
             ;
 
 
-        return await query.OrderByDescending(x => x.CreatedAt).ProjectTo<AppointmentSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        var result = await query.OrderByDescending(x => x.CreatedAt).ProjectTo<AppointmentSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        await AppointmentSummaryEnricher.EnrichPatientVisitHistoryFlagsAsync(_applicationDbContext, result.Items, cancellationToken);
+        return result;
 
     }
 }

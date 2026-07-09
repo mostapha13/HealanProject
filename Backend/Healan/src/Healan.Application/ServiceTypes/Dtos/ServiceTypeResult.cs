@@ -19,6 +19,7 @@ public record ServiceTypeSummaryResult : IMapFrom<ServiceType>
     public CategoryTypeId CategoryTypeId { get; set; }
     public string CategoryTypeName { get; set; }
     public string Description { get; set; }
+    public bool IsActive { get; set; }
 
     public void Mapping(Profile profile)
     {

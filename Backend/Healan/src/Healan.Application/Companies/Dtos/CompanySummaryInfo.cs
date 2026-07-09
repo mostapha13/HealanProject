@@ -76,6 +76,7 @@ public record CompanySummaryResult : IMapFrom<Company>
     public string Email { get; set; }
     public string PrefixNumber { get; set; }
     public string Landline { get; set; }
+    public bool IsActive { get; set; }
 
 
     //public IEnumerable<CompanyAttachmentDto> CompanyAttachments { get; set; }

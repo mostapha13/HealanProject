@@ -18,27 +18,22 @@ const USER_TYPE_OPTIONS = [
   { value: 8, label: 'حسابدار' },
 ];
 
+const EMPTY_FORM = {
+  userId: 0,
+  firstName: '',
+  lastName: '',
+  phoneNumber: '',
+  userTypeId: 3,
+  isActive: true,
+};
+
 function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<UserSummary[]>([]);
 
   const [showForm, setShowForm] = useState(false);
 
-  const [form, setForm] = useState({
-
-    userId: 0,
-
-    firstName: '',
-
-    lastName: '',
-
-    phoneNumber: '',
-
-    userTypeId: 3,
-
-    isActive: true,
-
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
 
 
@@ -80,6 +75,39 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   };
 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (user: UserSummary) => {
+    setForm({
+      userId: user.userId,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      phoneNumber: user.phoneNumber ?? '',
+      userTypeId: user.userTypeId ?? 3,
+      isActive: user.isActive ?? true,
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleActive = async (user: UserSummary) => {
+    try {
+      await healanApi.users.register(buildUserPayload({
+        userId: user.userId,
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        phoneNumber: user.phoneNumber ?? '',
+        userTypeId: user.userTypeId ?? 3,
+        isActive: !(user.isActive ?? true),
+      }));
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -88,7 +116,7 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <PageHeader title="کاربران" subtitle="مدیریت کاربران و نقش‌ها" action={
 
-        <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ کاربر جدید</button>
+        <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ کاربر جدید</button>
 
       } />
 
@@ -117,6 +145,18 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 />
 
               </div>
+              <div className="healan-form-field"><label>وضعیت</label>
+                <SearchableSelect
+                  value={form.isActive ? 1 : 0}
+                  onChange={(v) => setForm({ ...form, isActive: (v ?? 1) === 1 })}
+                  allowClear={false}
+                  placeholder="وضعیت"
+                  options={[
+                    { value: 1, label: 'فعال' },
+                    { value: 0, label: 'غیرفعال' },
+                  ]}
+                />
+              </div>
 
             </div>
 
@@ -140,11 +180,23 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>موبایل</th><th>فعال</th></tr></thead>
+            <thead><tr><th>نام</th><th>موبایل</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
             <tbody>{items.map((u) => (
 
-              <tr key={u.userId}><td>{u.firstName} {u.lastName}</td><td>{u.phoneNumber ?? '—'}</td><td>{u.isActive ? 'بله' : 'خیر'}</td></tr>
+              <tr key={u.userId}>
+                <td>{u.firstName} {u.lastName}</td>
+                <td>{u.phoneNumber ?? '—'}</td>
+                <td>{u.isActive ? 'فعال' : 'غیرفعال'}</td>
+                <td>
+                  <div className="healan-actions">
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(u)}>ویرایش</button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(u)}>
+                      {u.isActive ? 'غیرفعال' : 'فعال'}
+                    </button>
+                  </div>
+                </td>
+              </tr>
 
             ))}</tbody>
 

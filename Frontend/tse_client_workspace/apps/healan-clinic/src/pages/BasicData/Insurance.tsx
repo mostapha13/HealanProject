@@ -11,6 +11,8 @@ import { PageHeader } from '../../components/Ui';
 import { buildInsurancePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
+const EMPTY_FORM = { insuranceCompanyId: 0, name: '', code: '', insuranceTypeId: 2, phoneNumber: '', isActive: true };
+
 function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<InsuranceCompany[]>([]);
@@ -19,7 +21,7 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [showForm, setShowForm] = useState(false);
 
-  const [form, setForm] = useState({ insuranceCompanyId: 0, name: '', code: '', insuranceTypeId: 2, phoneNumber: '' });
+  const [form, setForm] = useState(EMPTY_FORM);
 
 
 
@@ -63,6 +65,39 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   };
 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (item: InsuranceCompany) => {
+    setForm({
+      insuranceCompanyId: item.insuranceCompanyId,
+      name: item.name ?? '',
+      code: item.code ?? '',
+      insuranceTypeId: item.insuranceTypeId ?? 2,
+      phoneNumber: item.phoneNumber ?? '',
+      isActive: item.isActive ?? true,
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleActive = async (item: InsuranceCompany) => {
+    try {
+      await healanApi.insurance.register(buildInsurancePayload({
+        insuranceCompanyId: item.insuranceCompanyId,
+        name: item.name ?? '',
+        code: item.code ?? '',
+        insuranceTypeId: item.insuranceTypeId ?? 2,
+        phoneNumber: item.phoneNumber ?? '',
+        isActive: !(item.isActive ?? true),
+      }));
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -71,7 +106,7 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <PageHeader title="بیمه و قراردادها" subtitle="شرکت‌های بیمه" action={
 
-        <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ بیمه جدید</button>
+        <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ بیمه جدید</button>
 
       } />
 
@@ -103,6 +138,17 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
 
               <div className="healan-form-field"><label>تلفن (اختیاری)</label><input value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} /></div>
+              <div className="healan-form-field"><label>وضعیت</label>
+                <SearchableSelect
+                  value={form.isActive ? 1 : 0}
+                  onChange={(v) => setForm({ ...form, isActive: (v ?? 1) === 1 })}
+                  allowClear={false}
+                  options={[
+                    { value: 1, label: 'فعال' },
+                    { value: 0, label: 'غیرفعال' },
+                  ]}
+                />
+              </div>
 
             </div>
 
@@ -126,9 +172,21 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>کد</th></tr></thead>
+            <thead><tr><th>نام</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((i) => <tr key={i.insuranceCompanyId}><td>{i.name}</td><td>{i.code ?? '—'}</td></tr>)}</tbody>
+            <tbody>{items.map((i) => <tr key={i.insuranceCompanyId}>
+              <td>{i.name}</td>
+              <td>{i.code ?? '—'}</td>
+              <td>{i.isActive ? 'فعال' : 'غیرفعال'}</td>
+              <td>
+                <div className="healan-actions">
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(i)}>ویرایش</button>
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(i)}>
+                    {i.isActive ? 'غیرفعال' : 'فعال'}
+                  </button>
+                </div>
+              </td>
+            </tr>)}</tbody>
 
           </table>
 

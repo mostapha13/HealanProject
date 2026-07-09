@@ -22,6 +22,7 @@ public class ServiceType //: AuditableEntity
     public string? Code { get; set; }
     public CategoryTypeId CategoryTypeId { get; set; }
     public string Description { get; set; }
+    public bool IsActive { get; set; } = true;
     public ICollection<MedicalFeeService> MedicalFeeServices { get; set; }
     public ICollection<InvoiceItem> InvoiceItems { get; set; }
     public ICollection<InsuranceContractService> InsuranceContractServices { get; set; }

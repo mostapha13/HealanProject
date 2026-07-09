@@ -2,6 +2,7 @@
 using Healan.Application.Patients.Queries.GetPatientInfo;
 using Healan.Application.Patients.Queries.PatientInfoByNationalCode;
 using Healan.Application.Patients.Queries.PatientList;
+using Healan.Application.Patients.Queries.PatientVisitHistory;
 using Microsoft.AspNetCore.Mvc;
 using Share.Domain.Constants;
 using Share.Infrastructure.CustomAttributes;
@@ -17,8 +18,6 @@ public class PatientController : ApiControllerBase
     /// <summary>
     /// لیست بیمار
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
     [HttpGet("[action]")]
     public async Task<IActionResult> PatientList([FromQuery] PatientListQuery request) =>
                                                                 Ok(await Mediator.Send(request));
@@ -26,8 +25,6 @@ public class PatientController : ApiControllerBase
     /// <summary>
     /// افزودن بیمار
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
     [HttpPost("[action]")]
     public Task<IActionResult> Register([FromBody] PatientRegisterCommand request) =>
         SendCommand(request);
@@ -35,17 +32,19 @@ public class PatientController : ApiControllerBase
     /// <summary>
     /// اطلاعات بیمار
     /// </summary>
-    /// <param name="patientId"></param>
-    /// <returns></returns>
     [HttpGet("[action]")]
     public async Task<IActionResult> PatientInfo([FromQuery] int patientId) => Ok(await Mediator.Send(new GetPatientInfoQuery { PatientId = patientId }));
 
     /// <summary>
     /// اطلاعات بیمار با کد ملی
     /// </summary>
-    /// <param name="nationalCode"></param>
-    /// <returns></returns>
     [HttpGet("[action]")]
     public async Task<IActionResult> PatientInfoByNationalCode([FromQuery] string nationalCode) => Ok(await Mediator.Send(new PatientInfoByNationalCodeQuery { nationalCode = nationalCode }));
 
+    /// <summary>
+    /// سوابق ویزیت بیمار (فقط مشاهده)
+    /// </summary>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> VisitHistory([FromQuery] long patientId) =>
+        Ok(await Mediator.Send(new PatientVisitHistoryQuery { PatientId = patientId }));
 }

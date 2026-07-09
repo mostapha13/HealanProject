@@ -1,8 +1,7 @@
-﻿using AutoMapper;
-using IdentityServer.Domain.Data;
+﻿using IdentityServer.Domain.Data;
 using MediatR;
-using Share.Application.Common.Interfaces;
 using Share.Application.Common.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.Role
 {
@@ -15,37 +14,34 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.Role
     public class RoleQueryHandler : IRequestHandler<RoleQuery, List<RoleResponse>>
     {
         private readonly ApplicationDbContext _applicationDbContext;
-        private readonly IMapper _mapper;
-        private readonly ICurrentUserService _currentUserService;
-        public RoleQueryHandler(ApplicationDbContext applicationDbContext, IMapper mapper, ICurrentUserService currentUserService)
+        public RoleQueryHandler(ApplicationDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
-            _mapper = mapper;
-            _currentUserService = currentUserService;
         }
         public async Task<List<RoleResponse>> Handle(RoleQuery request, CancellationToken cancellationToken)
         {
-            var q = from ur in _applicationDbContext.UserRoles
-                    join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                    join accessRole in _applicationDbContext.AccessSystemRoles on role.Id equals accessRole.RoleId
-                    where ur.UserId == _currentUserService.UserId
-                    select accessRole.RoleId;
+            var query = from accessSystemRole in _applicationDbContext.AccessSystemRoles.AsNoTracking()
+                        join role in _applicationDbContext.Roles.AsNoTracking() on accessSystemRole.RoleId equals role.Id
+                        where accessSystemRole.AccessSystemId == request.AccessSystemId
+                        select role;
 
-
-            var roleIds = q.Distinct().ToList();
-
-
-
-            var allRoles = _applicationDbContext.Roles.Where(w => roleIds.Contains(w.Id)).ToList();// == request.AccessSystemId).ToList();
-            List<RoleResponse> roles = new List<RoleResponse>();
-            foreach (var item in allRoles)
+            if (!string.IsNullOrWhiteSpace(request.SearchText))
             {
-                if (!string.IsNullOrEmpty(request.SearchText) && !item.Name.Contains(request.SearchText) && (string.IsNullOrEmpty(item.DisplayName) || !item.DisplayName.Contains(request.SearchText)))
-                    continue;
-                roles.Add(new RoleResponse() { RoleId = item.Id, RoleName = item.Name, RoleTitle = item.DisplayName });
+                var search = request.SearchText.Trim();
+                query = query.Where(r =>
+                    r.Name.Contains(search) ||
+                    (!string.IsNullOrEmpty(r.DisplayName) && r.DisplayName.Contains(search)));
             }
 
-            return roles;
+            return await query
+                .OrderBy(r => r.DisplayName ?? r.Name)
+                .Select(r => new RoleResponse
+                {
+                    RoleId = r.Id,
+                    RoleName = r.Name,
+                    RoleTitle = r.DisplayName ?? r.Name,
+                })
+                .ToListAsync(cancellationToken);
         }
 
     }

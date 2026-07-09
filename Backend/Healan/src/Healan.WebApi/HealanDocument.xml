@@ -9,6 +9,11 @@
             ویزیت
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.ClinicReportsController">
+            <summary>
+            گزارش‌های تحلیلی کلینیک
+            </summary>
+        </member>
         <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyList(Healan.Application.Companies.Queries.CompanyList.CompanyListQuery)">
             <summary>
             لیست شرکت ها
@@ -161,28 +166,26 @@
             <summary>
             لیست نسخه
             </summary>
-            <param name="request"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.OrderResultController.Register(Healan.Application.Invoices.Commands.PrescriptionRegister.PrescriptionRegisterCommand)">
             <summary>
             افزودن نسخه
             </summary>
-            <param name="request"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.OrderResultController.PrescriptionInfo(System.Int32)">
             <summary>
             اطلاعات نسخه
             </summary>
-            <param name="prescriptionId"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.OrderResultController.GetImageType">
             <summary>
             لیست تصویربرداری
             </summary>
-            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.OrderResultController.EchoReportPrintData(System.Int64)">
+            <summary>
+            داده چاپ گزارش اکو برای Stimulsoft
+            </summary>
         </member>
         <member name="T:Healan.WebApi.Controllers.PatientController">
             <summary>
@@ -193,29 +196,26 @@
             <summary>
             لیست بیمار
             </summary>
-            <param name="request"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.PatientController.Register(Healan.Application.Patients.Commands.PatientRegister.PatientRegisterCommand)">
             <summary>
             افزودن بیمار
             </summary>
-            <param name="request"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.PatientController.PatientInfo(System.Int32)">
             <summary>
             اطلاعات بیمار
             </summary>
-            <param name="patientId"></param>
-            <returns></returns>
         </member>
         <member name="M:Healan.WebApi.Controllers.PatientController.PatientInfoByNationalCode(System.String)">
             <summary>
             اطلاعات بیمار با کد ملی
             </summary>
-            <param name="nationalCode"></param>
-            <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.VisitHistory(System.Int64)">
+            <summary>
+            سوابق ویزیت بیمار (فقط مشاهده)
+            </summary>
         </member>
         <member name="T:Healan.WebApi.Controllers.PortalContentController">
             <summary>
@@ -237,6 +237,16 @@
             سرویس های عمومی
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.ReportsController">
+            <summary>
+            فایل‌های قالب گزارش (Stimulsoft و ... )
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ReportsController.EchoTemplate">
+            <summary>
+            قالب گزارش اکو — wwwroot/reports/EchoReport.mrt
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.ServiceTypesController">
             <summary>
             نوع خدمات 
@@ -255,6 +265,11 @@
             </summary>
             <param name="request"></param>
             <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ServiceTypesController.Delete(Healan.Application.ServiceTypes.Commands.ServiceTypeDelete.ServiceTypeDeleteCommand)">
+            <summary>
+            حذف خدمت
+            </summary>
         </member>
         <member name="M:Healan.WebApi.Controllers.ServiceTypesController.Info(System.Int32)">
             <summary>

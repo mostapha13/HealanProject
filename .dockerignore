@@ -1,0 +1,13 @@
+.git
+.gitignore
+**/bin
+**/obj
+**/node_modules
+**/.nx
+**/dist
+**/.vscode
+**/.idea
+**/*.user
+**/*.suo
+**/*.log
+**/Attachment

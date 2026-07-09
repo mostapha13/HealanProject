@@ -32,7 +32,9 @@ public class MedicalFeeServiceListQueryHandler : IRequestHandler<MedicalFeeServi
     }
     public async Task<PaginatedList<MedicalFeeServiceInfoResult>> Handle(MedicalFeeServiceListQuery request, CancellationToken cancellationToken)
     {
-        var query = _applicationDbContext.MedicalFeeServices.Include(s => s.ServiceType);
+        var query = _applicationDbContext.MedicalFeeServices
+            .Include(s => s.ServiceType)
+            .Where(m => m.ServiceType.IsActive);
         return await query.ProjectTo<MedicalFeeServiceInfoResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
 
 

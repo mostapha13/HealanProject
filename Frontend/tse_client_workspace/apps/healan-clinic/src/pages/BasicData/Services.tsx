@@ -11,6 +11,8 @@ import { PageHeader } from '../../components/Ui';
 import { buildServicePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
+const EMPTY_FORM = { serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '', isActive: true };
+
 function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<ServiceType[]>([]);
@@ -19,7 +21,7 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [showForm, setShowForm] = useState(false);
 
-  const [form, setForm] = useState({ serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '' });
+  const [form, setForm] = useState(EMPTY_FORM);
 
 
 
@@ -63,6 +65,50 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   };
 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (item: ServiceType) => {
+    setForm({
+      serviceTypeId: item.serviceTypeId,
+      title: item.title ?? '',
+      code: item.code ?? '',
+      categoryTypeId: item.categoryTypeId ?? 1,
+      description: item.description ?? '',
+      isActive: item.isActive ?? true,
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleActive = async (item: ServiceType) => {
+    try {
+      await healanApi.services.register(buildServicePayload({
+        serviceTypeId: item.serviceTypeId,
+        title: item.title ?? '',
+        code: item.code ?? '',
+        categoryTypeId: item.categoryTypeId ?? 1,
+        description: item.description ?? '',
+        isActive: !(item.isActive ?? true),
+      }));
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
+  const handleDelete = async (item: ServiceType) => {
+    if (!window.confirm(`خدمت «${item.title}» حذف شود؟`)) return;
+    try {
+      await healanApi.services.delete(item.serviceTypeId);
+      onAlert({ type: 'success', message: 'خدمت با موفقیت حذف شد' });
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -71,7 +117,7 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <PageHeader title="انواع خدمات" action={
 
-        <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ خدمت جدید</button>
+        <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ خدمت جدید</button>
 
       } />
 
@@ -103,6 +149,17 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
 
               <div className="healan-form-field"><label>توضیحات (اختیاری)</label><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div className="healan-form-field"><label>وضعیت</label>
+                <SearchableSelect
+                  value={form.isActive ? 1 : 0}
+                  onChange={(v) => setForm({ ...form, isActive: (v ?? 1) === 1 })}
+                  allowClear={false}
+                  options={[
+                    { value: 1, label: 'فعال' },
+                    { value: 0, label: 'غیرفعال' },
+                  ]}
+                />
+              </div>
 
             </div>
 
@@ -126,9 +183,24 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>عنوان</th><th>کد</th></tr></thead>
+            <thead><tr><th>عنوان</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((s) => <tr key={s.serviceTypeId}><td>{s.title}</td><td>{s.code ?? '—'}</td></tr>)}</tbody>
+            <tbody>{items.map((s) => <tr key={s.serviceTypeId}>
+              <td>{s.title}</td>
+              <td>{s.code ?? '—'}</td>
+              <td>{s.isActive ? 'فعال' : 'غیرفعال'}</td>
+              <td>
+                <div className="healan-actions">
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(s)}>ویرایش</button>
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(s)}>
+                    {s.isActive ? 'غیرفعال' : 'فعال'}
+                  </button>
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleDelete(s)}>
+                    حذف
+                  </button>
+                </div>
+              </td>
+            </tr>)}</tbody>
 
           </table>
 

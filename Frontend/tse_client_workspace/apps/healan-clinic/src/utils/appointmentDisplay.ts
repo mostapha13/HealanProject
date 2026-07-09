@@ -1,4 +1,4 @@
-import type { AppointmentSummary } from '../api/types';
+import type { AppointmentStatus, AppointmentSummary } from '../api/types';
 
 function fullName(firstName?: string, lastName?: string): string {
   const name = `${firstName ?? ''} ${lastName ?? ''}`.trim();
@@ -64,8 +64,21 @@ export function appointmentIsPaid(appointment: AppointmentSummary): boolean {
   return appointmentHasPaidInvoice(appointment);
 }
 
-export function appointmentCanStartVisit(appointment: AppointmentSummary): boolean {
-  return appointmentHasPaidInvoice(appointment);
+/** ویزیت بدون پرداخت هم قابل شروع است — پرداخت می‌تواند قبل یا بعد از ویزیت انجام شود */
+export function appointmentCanStartVisit(_appointment: AppointmentSummary): boolean {
+  return true;
+}
+
+export function appointmentIsScheduled(status: AppointmentStatus | string): boolean {
+  return status === 'Scheduled' || status === 'ReScheduled';
+}
+
+export function appointmentIsDuringVisit(status: AppointmentStatus | string): boolean {
+  return status === 'InProgress';
+}
+
+export function appointmentCanRecordClinicalWork(status: AppointmentStatus | string): boolean {
+  return status === 'InProgress' || status === 'Completed';
 }
 
 export function appointmentPaymentLabel(appointment: AppointmentSummary): string {

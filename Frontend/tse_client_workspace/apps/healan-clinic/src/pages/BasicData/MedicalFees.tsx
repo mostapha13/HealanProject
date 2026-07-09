@@ -13,6 +13,15 @@ import { convertDateToJalali } from '@tse/tools';
 import { buildMedicalFeePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
+const EMPTY_FORM = {
+  medicalFeeServiceId: 0,
+  serviceTypeId: 0,
+  price: 0,
+  startDate: new Date().toISOString().slice(0, 10),
+  endDate: `${new Date().getFullYear()}-12-31`,
+  isActive: true,
+};
+
 function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<MedicalFeeService[]>([]);
@@ -21,21 +30,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [showForm, setShowForm] = useState(false);
 
-  const [form, setForm] = useState({
-
-    medicalFeeServiceId: 0,
-
-    serviceTypeId: 0,
-
-    price: 0,
-
-    startDate: new Date().toISOString().slice(0, 10),
-
-    endDate: `${new Date().getFullYear()}-12-31`,
-
-    isActive: true,
-
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
 
 
@@ -47,7 +42,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
     load();
 
-    healanApi.services.listAll().then(setServices).catch(() => {});
+    healanApi.services.listAll().then((list) => setServices(list.filter((s) => s.isActive !== false))).catch(() => {});
 
   }, []);
 
@@ -87,6 +82,39 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   };
 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (item: MedicalFeeService) => {
+    setForm({
+      medicalFeeServiceId: item.medicalFeeServiceId,
+      serviceTypeId: item.serviceTypeId,
+      price: item.price,
+      startDate: item.startDate ? item.startDate.slice(0, 10) : EMPTY_FORM.startDate,
+      endDate: item.endDate ? item.endDate.slice(0, 10) : EMPTY_FORM.endDate,
+      isActive: item.isActive,
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleActive = async (item: MedicalFeeService) => {
+    try {
+      await healanApi.medicalFees.register(buildMedicalFeePayload({
+        medicalFeeServiceId: item.medicalFeeServiceId,
+        serviceTypeId: item.serviceTypeId,
+        price: item.price,
+        startDate: item.startDate ? item.startDate.slice(0, 10) : EMPTY_FORM.startDate,
+        endDate: item.endDate ? item.endDate.slice(0, 10) : EMPTY_FORM.endDate,
+        isActive: !item.isActive,
+      }));
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -95,7 +123,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <PageHeader title="تعرفه خدمات" action={
 
-        <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ تعرفه جدید</button>
+        <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ تعرفه جدید</button>
 
       } />
 
@@ -126,6 +154,17 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <div className="healan-form-field"><label>از تاریخ</label><input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} /></div>
 
               <div className="healan-form-field"><label>تا تاریخ</label><input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} /></div>
+              <div className="healan-form-field"><label>وضعیت</label>
+                <SearchableSelect
+                  value={form.isActive ? 1 : 0}
+                  onChange={(v) => setForm({ ...form, isActive: (v ?? 1) === 1 })}
+                  allowClear={false}
+                  options={[
+                    { value: 1, label: 'فعال' },
+                    { value: 0, label: 'غیرفعال' },
+                  ]}
+                />
+              </div>
 
             </div>
 
@@ -149,7 +188,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>خدمت</th><th>قیمت</th><th>از</th><th>تا</th><th>فعال</th></tr></thead>
+            <thead><tr><th>خدمت</th><th>قیمت</th><th>از</th><th>تا</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
             <tbody>{items.map((m) => (
 
@@ -163,7 +202,15 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
                 <td><span>{convertDateToJalali(m.endDate)}</span></td>
 
-                <td>{m.isActive ? 'بله' : 'خیر'}</td>
+                <td>{m.isActive ? 'فعال' : 'غیرفعال'}</td>
+                <td>
+                  <div className="healan-actions">
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(m)}>ویرایش</button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(m)}>
+                      {m.isActive ? 'غیرفعال' : 'فعال'}
+                    </button>
+                  </div>
+                </td>
 
               </tr>
 

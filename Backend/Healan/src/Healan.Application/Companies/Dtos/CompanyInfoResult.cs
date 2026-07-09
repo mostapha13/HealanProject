@@ -33,6 +33,7 @@ public record CompanyInfoResult : IMapFrom<Company>
     public string Email { get; set; }
     public string Landline { get; set; }
     public string PrefixNumber { get; set; }
+    public bool IsActive { get; set; }
     public AttachmentDto? AttachmentLogo { get; set; }
     public List<CompanyInfo>? ChildsRefCompanies { get; set; }
     //public IEnumerable<CompanyType> CompanyTypes { get; set; }

@@ -42,6 +42,7 @@ public class CurrentAppointmentListQueryHandler : IRequestHandler<CurrentAppoint
             .Include(x => x.Doctor)
             .Include(x => x.PrimaryInsuranceCompany)
             .Include(x => x.SecondInsuranceCompany)
+            .Include(x => x.Prescriptions).ThenInclude(p => p.EchoReport)
             .Where(x =>
              (
           x.AppointmentDate.Date == DateTime.Now.Date
@@ -58,7 +59,9 @@ public class CurrentAppointmentListQueryHandler : IRequestHandler<CurrentAppoint
             ;
 
 
-        return await query.OrderByDescending(x => x.CreatedAt).ProjectTo<AppointmentSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        var result = await query.OrderByDescending(x => x.CreatedAt).ProjectTo<AppointmentSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        await AppointmentSummaryEnricher.EnrichPatientVisitHistoryFlagsAsync(_applicationDbContext, result.Items, cancellationToken);
+        return result;
 
     }
 }

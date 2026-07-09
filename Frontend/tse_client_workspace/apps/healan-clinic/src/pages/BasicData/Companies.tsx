@@ -11,6 +11,17 @@ import { PageHeader } from '../../components/Ui';
 import { buildCompanyPayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 
+const EMPTY_FORM = {
+  companyId: 0,
+  companyName: '',
+  latinCompanyName: '',
+  nationalId: '',
+  address: '',
+  email: '',
+  companyRegistrationTypeId: 2,
+  isActive: true,
+};
+
 function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<CompanySummary[]>([]);
@@ -19,23 +30,7 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [showForm, setShowForm] = useState(false);
 
-  const [form, setForm] = useState({
-
-    companyId: 0,
-
-    companyName: '',
-
-    latinCompanyName: '',
-
-    nationalId: '',
-
-    address: '',
-
-    email: '',
-
-    companyRegistrationTypeId: 2,
-
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
 
 
@@ -81,6 +76,45 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   };
 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (item: CompanySummary) => {
+    setForm({
+      companyId: item.companyId,
+      companyName: item.companyName ?? '',
+      latinCompanyName: item.latinCompanyName ?? '',
+      nationalId: item.nationalId ?? '',
+      address: item.address ?? '',
+      email: item.email ?? '',
+      companyRegistrationTypeId: item.companyRegistrationTypeId ?? 2,
+      isActive: item.isActive ?? true,
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleActive = async (item: CompanySummary) => {
+    try {
+      await healanApi.companies.register(
+        buildCompanyPayload({
+          companyId: item.companyId,
+          companyName: item.companyName ?? '',
+          latinCompanyName: item.latinCompanyName ?? '',
+          nationalId: item.nationalId ?? '',
+          address: item.address ?? '',
+          email: item.email ?? '',
+          companyRegistrationTypeId: item.companyRegistrationTypeId ?? 2,
+          isActive: !(item.isActive ?? true),
+        })
+      );
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -89,7 +123,7 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <PageHeader title="شرکت / مرکز درمانی" subtitle="اطلاعات پایه مرکز" action={
 
-        <button type="button" className="healan-btn healan-btn--primary" onClick={() => setShowForm(true)}>+ مرکز جدید</button>
+        <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ مرکز جدید</button>
 
       } />
 
@@ -125,6 +159,17 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <div className="healan-form-field"><label>آدرس</label><input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
 
               <div className="healan-form-field"><label>ایمیل (اختیاری)</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+              <div className="healan-form-field"><label>وضعیت</label>
+                <SearchableSelect
+                  value={form.isActive ? 1 : 0}
+                  onChange={(v) => setForm({ ...form, isActive: (v ?? 1) === 1 })}
+                  allowClear={false}
+                  options={[
+                    { value: 1, label: 'فعال' },
+                    { value: 0, label: 'غیرفعال' },
+                  ]}
+                />
+              </div>
 
             </div>
 
@@ -148,9 +193,22 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>شناسه ملی</th><th>آدرس</th></tr></thead>
+            <thead><tr><th>نام</th><th>شناسه ملی</th><th>آدرس</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((c) => <tr key={c.companyId}><td>{c.companyName}</td><td>{c.nationalId ?? '—'}</td><td>{c.address ?? '—'}</td></tr>)}</tbody>
+            <tbody>{items.map((c) => <tr key={c.companyId}>
+              <td>{c.companyName}</td>
+              <td>{c.nationalId ?? '—'}</td>
+              <td>{c.address ?? '—'}</td>
+              <td>{c.isActive ? 'فعال' : 'غیرفعال'}</td>
+              <td>
+                <div className="healan-actions">
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(c)}>ویرایش</button>
+                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(c)}>
+                    {c.isActive ? 'غیرفعال' : 'فعال'}
+                  </button>
+                </div>
+              </td>
+            </tr>)}</tbody>
 
           </table>
 

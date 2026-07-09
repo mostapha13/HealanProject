@@ -10,7 +10,7 @@ using Share.Application.Common.Interfaces;
 namespace Healan.Application.Users.Queries.GetUserInfo;
 public class GetUserInfoQuery : IRequest<UserResult>
 {
-    public int UserId { get; set; }
+    public long UserId { get; set; }
 }
 
 public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserResult>

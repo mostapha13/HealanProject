@@ -19,6 +19,7 @@ namespace Healan.Application.Orders.Dtos;
     public ICollection<PrescriptionDrugDto> PrescriptionDrugs { get; set; }
     public ICollection<LabTestRequestDto> LabTestRequests { get; set; }
     public ICollection<ImagingRequestDto> ImagingRequests { get; set; }
+    public EchoReportDto? EchoReport { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -27,6 +28,7 @@ namespace Healan.Application.Orders.Dtos;
                         .ForMember(a => a.PrescriptionDrugs, b => b.MapFrom(c => c.PrescriptionDrugs))
                         .ForMember(a => a.LabTestRequests, b => b.MapFrom(c => c.LabTestRequests))
                         .ForMember(a => a.ImagingRequests, b => b.MapFrom(c => c.ImagingRequests))
+                        .ForMember(a => a.EchoReport, b => b.MapFrom(c => c.EchoReport))
                         ;
 
 

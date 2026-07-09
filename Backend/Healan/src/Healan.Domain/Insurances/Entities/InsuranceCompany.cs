@@ -23,6 +23,7 @@ public class InsuranceCompany:AuditableEntity
     public string Name { get; set; }
     public string? Code { get; set; }
     public string? PhoneNumber { get; set; }
+    public bool IsActive { get; set; } = true;
     public Guid? AttachmentId { get; set; }
     public Attachment Attachment { get; set; }
     public ICollection<InsuranceContract> InsuranceContracts { get; set; }

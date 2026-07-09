@@ -52,6 +52,7 @@ public class CompanyRegisterRequest
     /// </summary>
     public string Landline { get; set; }
     public string PrefixNumber { get; set; }
+    public bool? IsActive { get; set; }
     /// <summary>
     /// لوگو
     /// </summary>
