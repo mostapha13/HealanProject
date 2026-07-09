@@ -42,7 +42,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
     load();
 
-    healanApi.services.listAll().then((list) => setServices(list.filter((s) => s.isActive !== false))).catch(() => {});
+    healanApi.services.listActive().then(setServices).catch(() => {});
 
   }, []);
 

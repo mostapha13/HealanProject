@@ -12,6 +12,7 @@ import {
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { AccessTree } from '../../components/AccessTree';
+import { useUserAccess } from '../../context/UserAccessContext';
 
 function normalizeText(value: string | undefined): string {
   return (value ?? '').trim().toLowerCase();
@@ -58,6 +59,7 @@ function hasSelectionChanged(current: number[], baseline: number[]): boolean {
 }
 
 function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const { reload: reloadUserAccess } = useUserAccess();
   const [roles, setRoles] = useState<IdentityRoleItem[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [treeItems, setTreeItems] = useState<AccessRoleTreeItem[]>([]);
@@ -175,9 +177,9 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     try {
       const payload = applyCheckedKeys(treeItems, checkedKeys);
       await saveAccessRole(selectedRoleId, payload);
-      setSavedCheckedKeys(checkedKeys);
-      onAlert({ type: 'success', message: 'سطح دسترسی با موفقیت ذخیره شد' });
       await loadTree(selectedRoleId);
+      await reloadUserAccess();
+      onAlert({ type: 'success', message: 'سطح دسترسی با موفقیت ذخیره شد' });
     } catch (err) {
       onAlert(err);
     } finally {

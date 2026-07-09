@@ -8,6 +8,7 @@ export interface JalaliDateInputProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  calendarPopperPosition?: 'auto' | 'top' | 'bottom';
 }
 
 export function JalaliDateInput({
@@ -15,6 +16,7 @@ export function JalaliDateInput({
   onChange,
   disabled,
   placeholder = 'انتخاب تاریخ تولد',
+  calendarPopperPosition = 'auto',
 }: JalaliDateInputProps) {
   const [selectedDay, setSelectedDay] = useState<DayValue>(() => toJalaliDay(value));
 
@@ -41,7 +43,8 @@ export function JalaliDateInput({
         value={selectedDay}
         onChange={disabled ? () => {} : handleDayChange}
         shouldHighlightWeekends
-        calendarPopperPosition="bottom"
+        calendarPopperPosition={calendarPopperPosition}
+        wrapperClassName="healan-jalali-date__picker"
         renderInput={({ ref }) => (
           <input
             ref={ref as React.RefObject<HTMLInputElement>}

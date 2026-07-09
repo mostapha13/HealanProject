@@ -185,6 +185,7 @@ export function QuickAddPatientModal({ open, onClose, onSuccess, onAlert }: Quic
             value={form.birthdate}
             onChange={(birthdate) => update('birthdate', birthdate)}
             placeholder="انتخاب تاریخ تولد"
+            calendarPopperPosition="top"
           />
         </div>
       </div>

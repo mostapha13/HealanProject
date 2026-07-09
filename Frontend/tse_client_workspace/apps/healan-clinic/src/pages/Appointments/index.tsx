@@ -82,14 +82,32 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     setForm((prev) => ({ ...prev, doctorId }));
   };
 
-  const openForm = () => {
+  const openForm = async () => {
     setForm(createInitialAppointmentForm());
+    try {
+      const activeServices = await healanApi.services.listActive();
+      setServices(activeServices);
+    } catch {
+      // keep previous list if refresh fails
+    }
     setShowForm(true);
+  };
+
+  const mergeServicesForForm = (activeServices: ServiceType[], selected?: ServiceType[]) => {
+    const merged = [...activeServices];
+    (selected ?? []).forEach((service) => {
+      if (!merged.some((item) => item.serviceTypeId === service.serviceTypeId)) {
+        merged.push(service);
+      }
+    });
+    return merged;
   };
 
   const openEdit = async (appointmentId: number) => {
     try {
       const info = await healanApi.appointments.info(appointmentId);
+      const activeServices = await healanApi.services.listActive();
+      setServices(mergeServicesForForm(activeServices, info.serviceTypes));
       setForm({
         appointmentId: info.appointmentId,
         patientId: info.patientId,
@@ -132,7 +150,7 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     Promise.all([
       healanApi.patients.listAll(),
       healanApi.doctors.listAll(),
-      healanApi.services.listAll(),
+      healanApi.services.listActive(),
       healanApi.insurance.listAll(),
     ]).then(([p, d, s, i]) => {
       setPatients(p);
@@ -271,9 +289,15 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <label style={{ fontWeight: 600, fontSize: '0.85rem' }}>خدمات</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                 {services.map((s) => (
-                  <label key={s.serviceTypeId} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}>
-                    <input type="checkbox" checked={form.serviceTypeIds.includes(s.serviceTypeId)} onChange={() => toggleService(s.serviceTypeId)} />
+                  <label key={s.serviceTypeId} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem', opacity: s.isActive === false ? 0.65 : 1 }}>
+                    <input
+                      type="checkbox"
+                      checked={form.serviceTypeIds.includes(s.serviceTypeId)}
+                      onChange={() => toggleService(s.serviceTypeId)}
+                      disabled={s.isActive === false}
+                    />
                     {s.title}
+                    {s.isActive === false ? ' (غیرفعال)' : ''}
                   </label>
                 ))}
               </div>

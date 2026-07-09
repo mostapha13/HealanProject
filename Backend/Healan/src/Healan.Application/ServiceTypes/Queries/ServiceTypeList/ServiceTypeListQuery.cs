@@ -12,6 +12,7 @@ public class ServiceTypeListQuery : AbstractSearchRequest<PaginatedList<ServiceT
     public string FilterText { get; set; }
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
+    public bool OnlyActive { get; set; }
 }
 
 
@@ -27,10 +28,15 @@ public class ServiceTypeListQueryHandler : IRequestHandler<ServiceTypeListQuery,
     }
     public async Task<PaginatedList<ServiceTypeSummaryResult>> Handle(ServiceTypeListQuery request, CancellationToken cancellationToken)
     {
-        var query = from serviceType in _applicationDbContext.ServiceTypes
-                    select serviceType;
+        var query = _applicationDbContext.ServiceTypes.AsQueryable();
 
-        return await query.ProjectTo<ServiceTypeSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        if (request.OnlyActive)
+        {
+            query = query.Where(s => s.IsActive);
+        }
 
+        return await query
+            .ProjectTo<ServiceTypeSummaryResult>(_mapper.ConfigurationProvider)
+            .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
 }

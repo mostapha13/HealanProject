@@ -142,6 +142,15 @@ export const healanApi = {
           pageSize,
         })
       ),
+    listActive: (params?: { filterText?: string }) =>
+      fetchAllPaginated<ServiceType>((pageNumber, pageSize) =>
+        get<PaginatedResponse<ServiceType>>('ServiceTypes/List', {
+          ...params,
+          onlyActive: true,
+          pageNumber,
+          pageSize,
+        })
+      ),
     info: (serviceTypeId: number) =>
       get<ServiceType>(`ServiceTypes/Info/?serviceTypeId=${serviceTypeId}`),
     register: (data: Record<string, unknown>) => post('ServiceTypes/Register', data),

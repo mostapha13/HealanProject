@@ -152,8 +152,13 @@ export function collectCheckedKeys(items: AccessRoleTreeItem[]): number[] {
   const keys: number[] = [];
   const walk = (nodes: AccessRoleTreeItem[]) => {
     nodes.forEach((item) => {
-      if (item.hasAccess) keys.push(item.key);
-      if (item.children?.length) walk(item.children);
+      const hasChildren = Boolean(item.children?.length);
+      if (item.hasAccess && !hasChildren) {
+        keys.push(item.key);
+      }
+      if (hasChildren) {
+        walk(item.children!);
+      }
     });
   };
   walk(items);

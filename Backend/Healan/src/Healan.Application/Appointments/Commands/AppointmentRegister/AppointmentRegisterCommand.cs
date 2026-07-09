@@ -82,6 +82,17 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
             var newServices = await _applicationDbContext.ServiceTypes
                 .Where(s => toAdd.Contains(s.ServiceTypeId))
                 .ToListAsync(cancellationToken);
+
+            if (newServices.Count != toAdd.Count)
+            {
+                throw new NotFoundExceptions("خدمت یافت نشد");
+            }
+
+            if (newServices.Any(s => !s.IsActive))
+            {
+                throw new BadRequestExceptions("فقط خدمات فعال قابل انتخاب هستند");
+            }
+
             foreach (var service in newServices)
                 appointment.ServiceTypes.Add(service);
         }
@@ -128,7 +139,7 @@ public class AppointmentRegisterCommandHandler : IRequestHandler<AppointmentRegi
         }
 
         var medicalFeeServices = await _applicationDbContext.MedicalFeeServices
-            .Where(x => x.IsActive)
+            .Where(x => x.IsActive && x.ServiceType.IsActive)
             .ToListAsync(cancellationToken);
 
         decimal totalPrimary = 0;

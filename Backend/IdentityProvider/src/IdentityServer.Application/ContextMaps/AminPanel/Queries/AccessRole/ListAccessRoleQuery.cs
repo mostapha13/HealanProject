@@ -142,8 +142,13 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
                     FixAccess(child);
                 }
 
-            if (mainMenuResponse.Children != null && mainMenuResponse.Children.Any())
+            // Container menus have no AccessForm; reflect checked state from children for tree UI only.
+            if (mainMenuResponse.Children != null
+                && mainMenuResponse.Children.Any()
+                && !mainMenuResponse.AccessFormId.HasValue)
+            {
                 mainMenuResponse.HasAccess = mainMenuResponse.Children.All(w => w.HasAccess);
+            }
         }
     }
 }

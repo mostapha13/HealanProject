@@ -675,8 +675,23 @@
   z-index: 20;
 }
 
-.healan-jalali-datetime .Calendar__calendarContainer {
-  z-index: 30 !important;
+.healan-jalali-date__picker,
+.healan-jalali-datetime__picker {
+  display: block !important;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.healan-jalali-date .DatePicker__calendarContainer,
+.healan-jalali-datetime .DatePicker__calendarContainer {
+  z-index: 1200 !important;
+  min-width: 18.5em;
+}
+
+.healan-jalali-date .DatePicker__calendarArrow,
+.healan-jalali-datetime .DatePicker__calendarArrow {
+  z-index: 1200;
 }
 
 .healan-jalali-date {
@@ -724,10 +739,6 @@
 
 .healan-jalali-date .Calendar {
   z-index: 40;
-}
-
-.healan-jalali-date .Calendar__calendarContainer {
-  z-index: 50 !important;
 }
 
 .healan-search-bar {
@@ -926,9 +937,10 @@
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(2px);
   animation: healan-modal-fade-in 0.18s ease;
@@ -940,7 +952,8 @@
   border-radius: 14px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
   border: 1px solid var(--healan-border);
-  overflow: hidden;
+  overflow: visible;
+  margin: auto;
   animation: healan-modal-slide-in 0.22s ease;
 }
 
@@ -1002,6 +1015,17 @@
 
 .healan-modal__body {
   padding: 1.25rem;
+  overflow: visible;
+}
+
+.healan-modal:has(.healan-jalali-date),
+.healan-modal:has(.healan-jalali-datetime) {
+  overflow: visible;
+}
+
+.healan-card:has(.healan-jalali-date),
+.healan-card:has(.healan-jalali-datetime) {
+  overflow: visible;
 }
 
 .healan-modal__footer {

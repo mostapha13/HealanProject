@@ -40,10 +40,16 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
             var allAccessMenuId = await (from am in _applicationDbContext.AccessMenus
                                    join af in _applicationDbContext.AccessForms on am.AccessFormId equals af.AccessFormId
                                    where allSystemId.Contains(af.AccessSystemId)
-                                   select am.AccessMenuId).ToListAsync(cancellationToken);
-            request.Items = request.Items.Where(w => allAccessMenuId.Contains(w.AccessMenuId)).ToList();
+                                   select am.AccessMenuId).ToHashSetAsync(cancellationToken);
 
-            List<int> allMenuIds = new List<int>();
+            if (allAccessMenuId.Count == 0)
+            {
+                throw new BadRequestExceptions("No access menus found for this role's system");
+            }
+
+            request.Items ??= [];
+
+            List<int> allMenuIds = [];
             var requestItemByMenuId = new Dictionary<int, AccessRoleFullResponseItem>();
             foreach (var item in request.Items)
             {
@@ -51,8 +57,12 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                     item.HasAccess = true;
                 SetAllMenuIds(item, allMenuIds, requestItemByMenuId);
             }
+
+            // Only persist menus linked to forms; container parents are kept in the tree walk above.
+            allMenuIds = allMenuIds.Where(id => allAccessMenuId.Contains(id)).ToList();
+
             var allExistsAccessMenuId = await _applicationDbContext.AccessRoles
-                .Where(w => w.RoleId == request.RoleId)
+                .Where(w => w.RoleId == request.RoleId && allAccessMenuId.Contains(w.AccessMenuId))
                 .Select(s => s.AccessMenuId)
                 .ToListAsync(cancellationToken);
             var mustInserted = allMenuIds.Except(allExistsAccessMenuId);
@@ -61,7 +71,12 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
             foreach (var item in mustInserted)
             {
                 requestItemByMenuId.TryGetValue(item, out var itm);
-                _applicationDbContext.AccessRoles.Add(new IdentityServer.Domain.Entities.AccessRole() { AccessMenuId = item, RoleId = request.RoleId, HasPersianAccess = itm?.HasPersianAccess });
+                _applicationDbContext.AccessRoles.Add(new IdentityServer.Domain.Entities.AccessRole()
+                {
+                    AccessMenuId = item,
+                    RoleId = request.RoleId,
+                    HasPersianAccess = itm?.HasPersianAccess ?? true,
+                });
             }
             foreach (var item in mustUpdated)
             {
