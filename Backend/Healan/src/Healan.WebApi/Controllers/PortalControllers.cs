@@ -1,12 +1,18 @@
+using Healan.Application.Portal.Commands.BlogPostDelete;
+using Healan.Application.Portal.Commands.BlogPostRegister;
 using Healan.Application.Portal.Commands.PatientReviewDelete;
 using Healan.Application.Portal.Commands.PatientReviewModerate;
 using Healan.Application.Portal.Commands.PatientReviewSubmit;
 using Healan.Application.Portal.Commands.PortalContentItemDelete;
 using Healan.Application.Portal.Commands.PortalContentItemRegister;
 using Healan.Application.Portal.Commands.PortalSiteSettingSave;
+using Healan.Application.Portal.Queries.BlogPostInfo;
+using Healan.Application.Portal.Queries.BlogPostList;
 using Healan.Application.Portal.Queries.PatientReviewList;
 using Healan.Application.Portal.Queries.PortalContentItemList;
 using Healan.Application.Portal.Queries.PortalSiteSettingList;
+using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
+using Healan.Application.Portal.Queries.PublishedBlogPostList;
 using Healan.Application.Portal.Queries.PublishedPortalSite;
 using Healan.Domain.Portal.Enums;
 using MediatR;
@@ -42,6 +48,35 @@ public class PortalContentController : ApiControllerBase
 
     [HttpPost("[action]")]
     public Task<IActionResult> SettingSave([FromBody] PortalSiteSettingSaveCommand request) =>
+        SendCommand(request);
+}
+
+/// <summary>
+/// مدیریت بلاگ سایت مطب
+/// </summary>
+public class BlogPostController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalBlog)]
+    public async Task<IActionResult> List([FromQuery] BlogPostListQuery query) =>
+        Ok(await Mediator.Send(query));
+
+    [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalBlog, HealanAccessFormIds.PortalBlogEdit)]
+    public async Task<IActionResult> Info([FromQuery] long blogPostId) =>
+        Ok(await Mediator.Send(new BlogPostInfoQuery { BlogPostId = blogPostId }));
+
+    [HttpPost("[action]")]
+    [AccessForm(
+        HealanAccessFormIds.PortalBlogAdd,
+        HealanAccessFormIds.PortalBlogEdit,
+        HealanAccessFormIds.PortalBlogPublish)]
+    public Task<IActionResult> Register([FromBody] BlogPostRegisterCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalBlogDelete)]
+    public Task<IActionResult> Delete([FromBody] BlogPostDeleteCommand request) =>
         SendCommand(request);
 }
 
@@ -83,4 +118,12 @@ public class PortalPublicController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> SubmitReview([FromBody] PatientReviewSubmitCommand request) =>
         Ok(await Mediator.Send(request));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BlogList([FromQuery] PublishedBlogPostListQuery query) =>
+        Ok(await Mediator.Send(query));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BlogPost([FromQuery] string slug) =>
+        Ok(await Mediator.Send(new PublishedBlogPostBySlugQuery { Slug = slug }));
 }

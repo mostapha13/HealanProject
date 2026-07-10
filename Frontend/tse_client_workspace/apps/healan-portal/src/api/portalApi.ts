@@ -49,12 +49,57 @@ export interface SubmitReviewPayload {
   rating: number;
 }
 
+export interface BlogPostSummary {
+  blogPostId: number;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  coverImageUrl?: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt?: string;
+}
+
+export interface BlogPostDetail extends BlogPostSummary {
+  body: string;
+}
+
+export interface PaginatedBlogPosts {
+  items: BlogPostSummary[];
+  pageNumber: number;
+  totalPages: number;
+  totalCount: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
 export async function fetchPublishedSite(): Promise<PublishedPortalSite> {
   return request.get({ baseUrl: BASE, url: 'Site' }) as Promise<PublishedPortalSite>;
 }
 
 export async function submitPatientReview(payload: SubmitReviewPayload): Promise<{ id: number }> {
   return request.post({ baseUrl: BASE, url: 'SubmitReview', options: payload }) as Promise<{ id: number }>;
+}
+
+export async function fetchBlogPosts(params?: {
+  filterText?: string;
+  pageNumber?: number;
+  pageSize?: number;
+}): Promise<PaginatedBlogPosts> {
+  return request.get({
+    baseUrl: BASE,
+    url: 'BlogList',
+    options: params ?? {},
+  }) as Promise<PaginatedBlogPosts>;
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetail | null> {
+  const result = await request.get({
+    baseUrl: BASE,
+    url: 'BlogPost',
+    options: { slug },
+  });
+  return (result ?? null) as BlogPostDetail | null;
 }
 
 export function portalSetting(site: PublishedPortalSite | null, key: string, fallback = ''): string {

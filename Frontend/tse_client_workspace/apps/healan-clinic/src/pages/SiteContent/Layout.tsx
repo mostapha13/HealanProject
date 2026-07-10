@@ -7,6 +7,7 @@ import { useUserAccess } from '../../context/UserAccessContext';
 const tabs = [
   { path: '/site-content/settings', label: 'تنظیمات سایت' },
   { path: '/site-content/sections', label: 'بخش‌ها و مطالب' },
+  { path: '/site-content/blog', label: 'بلاگ' },
   { path: '/site-content/reviews', label: 'نظرات بیماران' },
 ];
 

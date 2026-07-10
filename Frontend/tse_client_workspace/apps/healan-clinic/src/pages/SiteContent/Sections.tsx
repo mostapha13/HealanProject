@@ -27,6 +27,7 @@ const MANAGED_SECTIONS: { key: string; label: string }[] = [
   { key: 'about', label: 'بخش درباره پزشک' },
   { key: 'reviews', label: 'بخش نظرات بیماران' },
   { key: 'contact', label: 'بخش تماس' },
+  { key: 'blog', label: 'بخش بلاگ' },
 ];
 
 const SECTION_HINTS: Partial<Record<PortalSectionType, string>> = {

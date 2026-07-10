@@ -23,6 +23,8 @@ import type {
   PortalContentItem,
   PortalSiteSetting,
   PatientReviewItem,
+  BlogPostSummary,
+  BlogPostDetail,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -267,6 +269,12 @@ export const healanApi = {
       get<PatientReviewItem[]>('PatientReview/List', status ? { status } : {}),
     reviewModerate: (data: Record<string, unknown>) => post('PatientReview/Moderate', data),
     reviewDelete: (patientReviewId: number) => post('PatientReview/Delete', { patientReviewId }),
+    blogList: (params?: { filterText?: string; isPublished?: boolean; pageNumber?: number; pageSize?: number }) =>
+      get<PaginatedResponse<BlogPostSummary>>('BlogPost/List', pagedParams(params)),
+    blogInfo: (blogPostId: number) =>
+      get<BlogPostDetail>(`BlogPost/Info/?blogPostId=${blogPostId}`),
+    blogRegister: (data: Record<string, unknown>) => post('BlogPost/Register', data),
+    blogDelete: (blogPostId: number) => post('BlogPost/Delete', { blogPostId }),
   },
 };
 

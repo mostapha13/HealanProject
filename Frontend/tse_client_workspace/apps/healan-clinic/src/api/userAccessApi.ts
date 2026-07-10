@@ -197,3 +197,18 @@ export function hasPathAccess(accessRole: AccessUserRoleItem[], path: string): b
     (item) => item.hasAccess && normalized.startsWith(`${item.url}/`)
   );
 }
+
+export const BLOG_ACCESS_PATHS = {
+  view: '/site-content/blog',
+  add: '/site-content/blog/add',
+  edit: '/site-content/blog/edit',
+  delete: '/site-content/blog/delete',
+  publish: '/site-content/blog/publish',
+} as const;
+
+export function hasBlogAccess(
+  accessRole: AccessUserRoleItem[],
+  action: keyof typeof BLOG_ACCESS_PATHS
+): boolean {
+  return hasPathAccess(accessRole, BLOG_ACCESS_PATHS[action]);
+}

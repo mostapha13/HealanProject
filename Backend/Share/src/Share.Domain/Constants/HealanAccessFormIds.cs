@@ -28,4 +28,9 @@ public static class HealanAccessFormIds
     public const int AccessAdmin = 5017;
     public const int PortalContent = 5018;
     public const int PortalReviews = 5019;
+    public const int PortalBlog = 5020;
+    public const int PortalBlogAdd = 5021;
+    public const int PortalBlogEdit = 5022;
+    public const int PortalBlogDelete = 5023;
+    public const int PortalBlogPublish = 5024;
 }

@@ -27,6 +27,7 @@ const SiteContentLayout = lazy(() => import('../pages/SiteContent/Layout'));
 const SiteContentSettingsPage = lazy(() => import('../pages/SiteContent/Settings'));
 const SiteContentSectionsPage = lazy(() => import('../pages/SiteContent/Sections'));
 const SiteContentReviewsPage = lazy(() => import('../pages/SiteContent/Reviews'));
+const SiteContentBlogPage = lazy(() => import('../pages/SiteContent/Blog'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const WorkflowPage = lazy(() => import('../pages/Workflow'));
 const SignaturePage = lazy(() => import('../pages/Signature'));
@@ -83,6 +84,7 @@ export default function AppRoutes() {
             <Route index element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
             <Route path="settings" element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
             <Route path="sections" element={guarded('/site-content/sections', <SiteContentSectionsPage />)} />
+            <Route path="blog" element={guarded('/site-content/blog', <SiteContentBlogPage />)} />
             <Route path="reviews" element={guarded('/site-content/reviews', <SiteContentReviewsPage />)} />
           </Route>
           <Route path="reports" element={guarded('/reports', <ReportsPage />)} />

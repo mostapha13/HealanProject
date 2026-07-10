@@ -393,3 +393,19 @@ export interface PatientReviewItem {
   reviewedAt?: string;
   createdAt?: string;
 }
+
+export interface BlogPostSummary {
+  blogPostId: number;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  coverImageUrl?: string;
+  coverImageFileId?: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt?: string;
+}
+
+export interface BlogPostDetail extends BlogPostSummary {
+  body: string;
+}

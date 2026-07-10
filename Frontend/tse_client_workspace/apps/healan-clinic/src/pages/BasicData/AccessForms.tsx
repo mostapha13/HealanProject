@@ -9,14 +9,17 @@ function menuTitle(item: AccessMenuTreeItem, depth = 0): string {
   return `${prefix}${label}`;
 }
 
-function flattenMenus(items: AccessMenuTreeItem[], depth = 0): { id: number; title: string; url: string; depth: number }[] {
-  const rows: { id: number; title: string; url: string; depth: number }[] = [];
+function flattenMenus(items: AccessMenuTreeItem[], depth = 0): { id: number; title: string; url: string; depth: number; kind: string }[] {
+  const rows: { id: number; title: string; url: string; depth: number; kind: string }[] = [];
   items.forEach((item) => {
+    const url = item.accessForm?.url ?? '';
+    const isAction = /\/(add|edit|delete|publish)$/.test(url);
     rows.push({
       id: item.accessMenuId,
       title: menuTitle(item, depth),
-      url: item.accessForm?.url ?? '—',
+      url: url || '—',
       depth,
+      kind: isAction ? 'عملیات' : url ? 'صفحه / فرم' : 'گروه',
     });
     if (item.children?.length) {
       rows.push(...flattenMenus(item.children, depth + 1));
@@ -42,7 +45,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     <>
       <PageHeader
         title="تعریف دسترسی‌ها"
-        subtitle="ساختار منوها و فرم‌های سامانه Healan — برای تخصیص به نقش‌ها از «سطح دسترسی» استفاده کنید"
+        subtitle="ساختار منوها و عملیات سامانه — برای تخصیص به نقش‌ها از «سطح دسترسی نقش‌ها» استفاده کنید (زیرمنوهای افزودن، ویرایش، حذف و نمایش)"
       />
       <div className="healan-card">
         <div className="healan-card__body" style={{ padding: 0, overflowX: 'auto' }}>
@@ -55,6 +58,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               <thead>
                 <tr>
                   <th>عنوان منو / فرم</th>
+                  <th>نوع</th>
                   <th>آدرس (URL)</th>
                 </tr>
               </thead>
@@ -62,6 +66,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 {rows.map((row) => (
                   <tr key={row.id}>
                     <td>{row.title}</td>
+                    <td>{row.kind}</td>
                     <td><code>{row.url}</code></td>
                   </tr>
                 ))}

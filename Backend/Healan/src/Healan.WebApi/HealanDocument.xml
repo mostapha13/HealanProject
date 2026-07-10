@@ -222,6 +222,11 @@
             مدیریت محتوای سایت مطب (CMS)
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.BlogPostController">
+            <summary>
+            مدیریت بلاگ سایت مطب
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.PatientReviewController">
             <summary>
             مدیریت نظرات بیماران

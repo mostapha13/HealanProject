@@ -73,6 +73,11 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.AccessAdmin, "مدیریت دسترسی‌ها", "/basic-data/access-roles"),
             new FormDef(HealanAccessFormIds.PortalContent, "محتوای سایت", "/site-content"),
             new FormDef(HealanAccessFormIds.PortalReviews, "نظرات بیماران", "/site-content/reviews"),
+            new FormDef(HealanAccessFormIds.PortalBlog, "بلاگ — مشاهده", "/site-content/blog"),
+            new FormDef(HealanAccessFormIds.PortalBlogAdd, "بلاگ — افزودن", "/site-content/blog/add"),
+            new FormDef(HealanAccessFormIds.PortalBlogEdit, "بلاگ — ویرایش", "/site-content/blog/edit"),
+            new FormDef(HealanAccessFormIds.PortalBlogDelete, "بلاگ — حذف", "/site-content/blog/delete"),
+            new FormDef(HealanAccessFormIds.PortalBlogPublish, "بلاگ — نمایش/عدم نمایش", "/site-content/blog/publish"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -133,6 +138,11 @@ public static class HealanAccessSeed
             new MenuDef(5120, null, null, 7, "محتوای سایت"),
             new MenuDef(5121, HealanAccessFormIds.PortalContent, 5120, 1),
             new MenuDef(5122, HealanAccessFormIds.PortalReviews, 5120, 2),
+            new MenuDef(5123, HealanAccessFormIds.PortalBlog, 5120, 3),
+            new MenuDef(5124, HealanAccessFormIds.PortalBlogAdd, 5123, 1),
+            new MenuDef(5125, HealanAccessFormIds.PortalBlogEdit, 5123, 2),
+            new MenuDef(5126, HealanAccessFormIds.PortalBlogDelete, 5123, 3),
+            new MenuDef(5127, HealanAccessFormIds.PortalBlogPublish, 5123, 4),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();

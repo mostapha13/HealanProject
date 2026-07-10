@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { callForAppointment, goToClinicLogin } from '../../constants';
 import {
   IconClock,
@@ -131,6 +132,7 @@ export function LandingPage() {
                 {label}
               </button>
             ))}
+            <Link to="/blog" className="portal-nav__link">بلاگ</Link>
           </nav>
 
           <div className="portal-header__actions">
@@ -164,6 +166,7 @@ export function LandingPage() {
                 {label}
               </button>
             ))}
+            <Link to="/blog" onClick={() => setMenuOpen(false)}>بلاگ</Link>
             <hr />
             <button type="button" className="p-btn p-btn--primary" onClick={() => { setMenuOpen(false); callForAppointment(); }}>
               <IconPhone className="portal-icon-sm" />
