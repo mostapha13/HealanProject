@@ -2,7 +2,7 @@ FROM node:20-alpine AS build
 ARG APP_NAME
 WORKDIR /workspace
 COPY Frontend/tse_client_workspace/package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 COPY Frontend/tse_client_workspace/ ./
 RUN npx nx run ${APP_NAME}:build:production --skip-nx-cache
 
