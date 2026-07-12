@@ -6,6 +6,9 @@ using Healan.Application.Portal.Commands.PatientReviewSubmit;
 using Healan.Application.Portal.Commands.PortalContentItemDelete;
 using Healan.Application.Portal.Commands.PortalContentItemRegister;
 using Healan.Application.Portal.Commands.PortalSiteSettingSave;
+using Healan.Application.Portal.Commands.RagKnowledgeDelete;
+using Healan.Application.Portal.Commands.RagKnowledgeRegister;
+using Healan.Application.Portal.Commands.RagSettingSave;
 using Healan.Application.Portal.Queries.BlogPostInfo;
 using Healan.Application.Portal.Queries.BlogPostList;
 using Healan.Application.Portal.Queries.PatientReviewList;
@@ -14,6 +17,10 @@ using Healan.Application.Portal.Queries.PortalSiteSettingList;
 using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
 using Healan.Application.Portal.Queries.PublishedBlogPostList;
 using Healan.Application.Portal.Queries.PublishedPortalSite;
+using Healan.Application.Portal.Queries.RagAsk;
+using Healan.Application.Portal.Queries.RagKnowledgeInfo;
+using Healan.Application.Portal.Queries.RagKnowledgeList;
+using Healan.Application.Portal.Queries.RagSettingGet;
 using Healan.Domain.Portal.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -81,6 +88,37 @@ public class BlogPostController : ApiControllerBase
 }
 
 /// <summary>
+/// مدیریت دانش پایه RAG (سوال و جواب ربات سایت)
+/// </summary>
+[AccessForm(HealanAccessFormIds.PortalRag)]
+public class RagKnowledgeController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> List([FromQuery] RagKnowledgeListQuery query) =>
+        Ok(await Mediator.Send(query));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Info([FromQuery] long ragKnowledgeItemId) =>
+        Ok(await Mediator.Send(new RagKnowledgeInfoQuery { RagKnowledgeItemId = ragKnowledgeItemId }));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Register([FromBody] RagKnowledgeRegisterCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] RagKnowledgeDeleteCommand request) =>
+        SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> SettingGet() =>
+        Ok(await Mediator.Send(new RagSettingGetQuery()));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> SettingSave([FromBody] RagSettingSaveCommand request) =>
+        Ok(await Mediator.Send(request));
+}
+
+/// <summary>
 /// مدیریت نظرات بیماران
 /// </summary>
 [AccessForm(HealanAccessFormIds.PortalReviews)]
@@ -126,4 +164,8 @@ public class PortalPublicController : ControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> BlogPost([FromQuery] string slug) =>
         Ok(await Mediator.Send(new PublishedBlogPostBySlugQuery { Slug = slug }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> RagAsk([FromBody] RagAskQuery query) =>
+        Ok(await Mediator.Send(query));
 }

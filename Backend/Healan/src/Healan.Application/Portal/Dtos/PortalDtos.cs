@@ -70,3 +70,44 @@ public class BlogPostDetailDto : BlogPostSummaryDto
 {
     public string Body { get; set; } = string.Empty;
 }
+
+public class RagKnowledgeItemDto
+{
+    public long RagKnowledgeItemId { get; set; }
+    public string Question { get; set; } = string.Empty;
+    public string? QuestionSummary { get; set; }
+    public string? Keywords { get; set; }
+    public string? Topic { get; set; }
+    public string Answer { get; set; } = string.Empty;
+    public string? SimilarQuestions { get; set; }
+    public int Priority { get; set; }
+    public int SortOrder { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
+}
+
+public class RagSettingDto
+{
+    public int RagSettingId { get; set; }
+    public int SyncIntervalMinutes { get; set; }
+    public int SimilarityThresholdPercent { get; set; }
+    public string PythonApiUrl { get; set; } = "http://localhost:8000";
+    public bool IsEnabled { get; set; }
+    public DateTime? LastSyncedAt { get; set; }
+}
+
+public class RagAskRequestDto
+{
+    public string Question { get; set; } = string.Empty;
+    public string? SessionId { get; set; }
+}
+
+public class RagAskResponseDto
+{
+    public string Answer { get; set; } = string.Empty;
+    public bool WasAnswered { get; set; }
+    public double? SimilarityScore { get; set; }
+    public long? MatchedKnowledgeItemId { get; set; }
+    public string? SourceType { get; set; }
+}

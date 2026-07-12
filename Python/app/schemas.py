@@ -31,6 +31,8 @@ class SummarizeResponse(BaseModel):
 class RagAskRequest(BaseModel):
     question: str = Field(..., min_length=2, max_length=2000)
     top_k: int | None = Field(None, ge=1, le=20)
+    similarity_threshold: float | None = Field(None, ge=0.0, le=1.0)
+    answer_mode: str | None = Field("direct", description="direct | llm")
 
 
 class RagSourceItem(BaseModel):
@@ -41,10 +43,14 @@ class RagSourceItem(BaseModel):
 
 class RagAskResponse(BaseModel):
     answer: str
-    sources: list[RagSourceItem]
+    was_answered: bool = False
+    similarity_score: float | None = None
+    matched_id: str | None = None
+    source_type: str | None = None
+    sources: list["RagSourceItem"] = Field(default_factory=list)
     model: str
     embedding_model: str | None = None
-    answer_mode: str = Field("llm", description="llm | local | none")
+    answer_mode: str = Field("direct", description="direct | llm | local | none")
 
 
 class RagIngestResponse(BaseModel):

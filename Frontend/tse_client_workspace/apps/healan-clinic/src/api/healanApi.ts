@@ -25,6 +25,8 @@ import type {
   PatientReviewItem,
   BlogPostSummary,
   BlogPostDetail,
+  RagKnowledgeItem,
+  RagSetting,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -275,6 +277,14 @@ export const healanApi = {
       get<BlogPostDetail>(`BlogPost/Info/?blogPostId=${blogPostId}`),
     blogRegister: (data: Record<string, unknown>) => post('BlogPost/Register', data),
     blogDelete: (blogPostId: number) => post('BlogPost/Delete', { blogPostId }),
+    ragList: (params?: { filterText?: string; topic?: string; isActive?: boolean; pageNumber?: number; pageSize?: number }) =>
+      get<PaginatedResponse<RagKnowledgeItem>>('RagKnowledge/List', pagedParams(params)),
+    ragInfo: (ragKnowledgeItemId: number) =>
+      get<RagKnowledgeItem>(`RagKnowledge/Info/?ragKnowledgeItemId=${ragKnowledgeItemId}`),
+    ragRegister: (data: Record<string, unknown>) => post('RagKnowledge/Register', data),
+    ragDelete: (ragKnowledgeItemId: number) => post('RagKnowledge/Delete', { ragKnowledgeItemId }),
+    ragSettingGet: () => get<RagSetting>('RagKnowledge/SettingGet'),
+    ragSettingSave: (data: RagSetting) => post<RagSetting>('RagKnowledge/SettingSave', data),
   },
 };
 

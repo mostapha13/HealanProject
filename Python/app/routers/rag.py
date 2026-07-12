@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from openai import AsyncOpenAI
+import logging
 
 from app.config import Settings, get_settings
 from app.rag.pipeline import build_data_source
 from app.rag.rerank import filter_and_rerank
-from app.rag.service import get_rag_pipeline, reset_rag_pipeline
+from app.rag.direct_answer import INDEXING_MESSAGE
+from app.rag.service import get_rag_pipeline, is_ingesting, reset_rag_pipeline
 from app.schemas import (
     RagAskRequest,
     RagAskResponse,
@@ -17,6 +19,7 @@ from app.schemas import (
 from app.services.llm import create_client
 
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
+logger = logging.getLogger(__name__)
 
 
 def require_llm(settings: Settings = Depends(get_settings)) -> Settings:
@@ -122,16 +125,65 @@ async def rag_ask(
     except ImportError as exc:
         raise _rag_deps_error(exc) from exc
     if pipeline.store.document_count == 0:
+        if is_ingesting():
+            logger.info(
+                "RAG ask while indexing. question=%r document_count=0",
+                body.question,
+            )
+            return RagAskResponse(
+                answer=INDEXING_MESSAGE,
+                was_answered=False,
+                similarity_score=None,
+                matched_id=None,
+                source_type=None,
+                sources=[],
+                model="direct",
+                embedding_model=settings.embedding_model,
+                answer_mode="direct",
+            )
+        logger.warning(
+            "RAG ask rejected: index empty. question=%r document_count=0 ingesting=%s",
+            body.question,
+            is_ingesting(),
+        )
         raise HTTPException(
             status_code=404,
-            detail="Index is empty. POST /api/v1/rag/ingest first.",
+            detail="Index is empty. POST /api/v1/rag/ingest first or wait for background sync.",
         )
 
-    client = create_client(settings) if settings.llm_configured else None
+    mode = (body.answer_mode or settings.rag_answer_mode or "direct").lower().strip()
+    threshold = body.similarity_threshold
+    if threshold is None and settings.sql_server_connection_string.strip():
+        sql_settings = {}
+        try:
+            from app.data.healan_sql_source import HealanSqlDataSource
+
+            sql_settings = HealanSqlDataSource.read_sync_settings(
+                settings.sql_server_connection_string
+            )
+        except Exception:
+            sql_settings = {}
+        if sql_settings.get("similarity_threshold_percent") is not None:
+            threshold = float(sql_settings["similarity_threshold_percent"]) / 100.0
+
+    client = create_client(settings) if mode == "llm" and settings.llm_configured else None
     result = await pipeline.ask(
         body.question,
         top_k=body.top_k,
         client=client,
+        similarity_threshold=threshold,
+        answer_mode=mode,
+    )
+
+    logger.info(
+        "RAG ask result. question=%r was_answered=%s score=%s matched_id=%s source_type=%s documents=%s threshold=%s",
+        body.question,
+        result.get("was_answered"),
+        result.get("similarity_score"),
+        result.get("matched_id"),
+        result.get("source_type"),
+        pipeline.store.document_count,
+        threshold,
     )
 
     sources = [
@@ -145,8 +197,12 @@ async def rag_ask(
 
     return RagAskResponse(
         answer=result["answer"],
+        was_answered=bool(result.get("was_answered")),
+        similarity_score=result.get("similarity_score"),
+        matched_id=result.get("matched_id"),
+        source_type=result.get("source_type"),
         sources=sources,
         model=result["model"],
-        embedding_model=result.get("embedding_model"),
-        answer_mode=result.get("answer_mode", "llm"),
+        embedding_model=result.get("embedding_model") or settings.embedding_model,
+        answer_mode=result.get("answer_mode", mode),
     )

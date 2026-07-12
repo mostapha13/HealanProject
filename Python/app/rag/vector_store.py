@@ -51,11 +51,24 @@ class VectorStore:
             path=persist_dir,
             settings=ChromaSettings(anonymized_telemetry=False),
         )
-        self._collection = self._client.get_or_create_collection(
-            name=collection_name,
-            embedding_function=chroma_ef,
-            metadata={"hnsw:space": "cosine"},
-        )
+        try:
+            self._collection = self._client.get_or_create_collection(
+                name=collection_name,
+                embedding_function=chroma_ef,
+                metadata={"hnsw:space": "cosine"},
+            )
+        except ValueError as exc:
+            if "embedding function" not in str(exc).lower():
+                raise
+            try:
+                self._client.delete_collection(collection_name)
+            except Exception:
+                pass
+            self._collection = self._client.get_or_create_collection(
+                name=collection_name,
+                embedding_function=chroma_ef,
+                metadata={"hnsw:space": "cosine"},
+            )
         self._embedding_model = embedding_model
 
     @property

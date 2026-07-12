@@ -73,6 +73,14 @@ export interface PaginatedBlogPosts {
   hasNextPage: boolean;
 }
 
+export interface RagAskResult {
+  answer: string;
+  wasAnswered: boolean;
+  similarityScore?: number;
+  matchedKnowledgeItemId?: number;
+  sourceType?: string;
+}
+
 export async function fetchPublishedSite(): Promise<PublishedPortalSite> {
   return request.get({ baseUrl: BASE, url: 'Site' }) as Promise<PublishedPortalSite>;
 }
@@ -100,6 +108,14 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetail 
     options: { slug },
   });
   return (result ?? null) as BlogPostDetail | null;
+}
+
+export async function fetchRagAnswer(question: string, sessionId?: string): Promise<RagAskResult> {
+  return request.post({
+    baseUrl: BASE,
+    url: 'RagAsk',
+    options: { question, sessionId },
+  }) as Promise<RagAskResult>;
 }
 
 export function portalSetting(site: PublishedPortalSite | null, key: string, fallback = ''): string {

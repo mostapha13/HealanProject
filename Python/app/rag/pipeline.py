@@ -5,7 +5,9 @@ from openai import AsyncOpenAI
 from app.config import Settings
 from app.data.base import DataSource, Document
 from app.data.excel_source import ExcelDataSource
+from app.data.healan_sql_source import HealanSqlDataSource
 from app.data.sql_server_source import SqlServerDataSource
+from app.rag.direct_answer import ask_direct
 from app.rag.local_answer import generate_local_answer
 from app.rag.prompts import RAG_SYSTEM_PROMPT
 from app.rag.rerank import filter_and_rerank
@@ -21,6 +23,8 @@ def build_data_source(settings: Settings) -> DataSource:
             sheet_name=settings.excel_sheet_name,
         )
     if source == "sqlserver":
+        if settings.sql_server_use_healan_bundle:
+            return HealanSqlDataSource(connection_string=settings.sql_server_connection_string)
         return SqlServerDataSource(
             connection_string=settings.sql_server_connection_string,
             query=settings.sql_server_query,
@@ -70,8 +74,22 @@ class RagPipeline:
         *,
         top_k: int | None = None,
         client: AsyncOpenAI | None = None,
+        similarity_threshold: float | None = None,
+        answer_mode: str | None = None,
     ) -> dict:
+        mode = (answer_mode or self.settings.rag_answer_mode or "direct").lower().strip()
+        threshold = (
+            similarity_threshold
+            if similarity_threshold is not None
+            else self.settings.rag_similarity_threshold
+        )
         k = top_k or self.settings.rag_top_k
+
+        if mode == "direct":
+            pool = max(k * 4, 12)
+            hits = self.store.search(question, top_k=pool)
+            return ask_direct(hits, question=question, similarity_threshold=threshold)
+
         from app.rag.intent import detect_intent
 
         intent = detect_intent(question)

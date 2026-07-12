@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.config import get_settings
+from app.rag.background_sync import run_background_sync
 from app.rag.service import get_rag_pipeline, init_rag
 from app.routers import chat, rag
 
@@ -18,20 +20,37 @@ STATIC_DIR = Path(__file__).parent / "static"
 async def lifespan(_: FastAPI):
     settings = get_settings()
     if not settings.llm_configured:
-        print("Warning: OPENAI_API_KEY is not set. AI endpoints will return 503.")
+        print("Info: OPENAI_API_KEY is not set — RAG runs in direct-answer mode without LLM.")
 
-    ingest_result = init_rag(settings)
-    if ingest_result:
-        print(
-            f"RAG indexed {ingest_result['indexed']} documents "
-            f"({ingest_result['embedding_model']})"
-        )
-    elif settings.excel_path.exists():
-        print("RAG: auto-ingest skipped or failed.")
-    else:
-        print(f"RAG: Excel not found at {settings.excel_path}. Run scripts/create_sample_excel.py")
+    async def _run_initial_ingest() -> None:
+        ingest_result = await asyncio.to_thread(init_rag, settings)
+        if ingest_result:
+            print(
+                f"RAG indexed {ingest_result['indexed']} documents "
+                f"({ingest_result['embedding_model']})"
+            )
+        elif settings.data_source.lower() == "excel" and settings.excel_path.exists():
+            print("RAG: auto-ingest skipped or failed.")
+        elif settings.data_source.lower() == "sqlserver":
+            print("RAG: initial SQL Server ingest failed — background sync will retry.")
+        else:
+            print(f"RAG: data source not ready ({settings.data_source}).")
+
+    ingest_task = asyncio.create_task(_run_initial_ingest())
+
+    stop_event = asyncio.Event()
+    sync_task = asyncio.create_task(run_background_sync(settings, stop_event))
 
     yield
+
+    stop_event.set()
+    ingest_task.cancel()
+    sync_task.cancel()
+    for task in (ingest_task, sync_task):
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(

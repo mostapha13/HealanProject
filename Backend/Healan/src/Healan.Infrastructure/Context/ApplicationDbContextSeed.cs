@@ -35,6 +35,7 @@ public static class ApplicationDbContextSeed
         await SeedInsuranceDataAsync(context, insurances);
         await SeedMenusAsync(context);
         await PortalContentSeed.SeedAsync(context);
+        await RagKnowledgeSeed.SeedAsync(context);
         await context.SaveChangesAsync();
     }
 

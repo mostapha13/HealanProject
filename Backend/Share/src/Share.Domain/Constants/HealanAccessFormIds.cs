@@ -33,4 +33,5 @@ public static class HealanAccessFormIds
     public const int PortalBlogEdit = 5022;
     public const int PortalBlogDelete = 5023;
     public const int PortalBlogPublish = 5024;
+    public const int PortalRag = 5025;
 }

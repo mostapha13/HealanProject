@@ -1,12 +1,24 @@
-# Healan AI (Python)
+# RAG — Healan Doctor
 
-سرویس AI برای Healan Doctor: چت LLM، خلاصه‌سازی، و **RAG** (پاسخ بر اساس دادهٔ اکسل / بعداً SQL Server).
+سرویس AI برای Healan Doctor: **RAG فارسی** با پاسخ مستقیم از دیتابیس (بدون LLM).
+
+## مدل Embedding (وکتورسازی فارسی)
+
+| مورد | مقدار |
+|------|--------|
+| **مدل** | `heydariAI/persian-embeddings` |
+| **لینک HuggingFace** | https://huggingface.co/heydariAI/persian-embeddings |
+| **نوع** | Sentence Transformer مخصوص فارسی |
+| **ChromaDB** | ذخیره وکتورها با فاصله cosine |
+
+پاسخ نهایی از فیلد `Answer` رکورد بازیابی‌شده برگردانده می‌شود (حالت `direct`).
 
 ## پیش‌نیاز
 
-- Python 3.11+ (ترجیحاً 3.11 یا 3.12؛ 3.14 ممکن است با برخی پکیج‌ها سازگ نباشد)
-- کلید API سازگار با OpenAI
-- برای RAG: اولین اجرا مدل embedding فارسی را از HuggingFace دانلود می‌کند (حدود چندصد مگابایت)
+- Python 3.11+
+- SQL Server با جداول `RagKnowledgeItems`, `RagSettings`, ...
+- ODBC Driver 17 for SQL Server
+- اولین اجرا مدل embedding را از HuggingFace دانلود می‌کند
 
 ## نصب
 
@@ -16,20 +28,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
-python scripts\create_sample_excel.py
-```
-
-## مدل‌ها برای فارسی
-
-| نقش | پیش‌فرض | توضیح |
-|-----|---------|--------|
-| **Embedding (RAG)** | `heydariAI/persian-embeddings` | مخصوص فارسی؛ tokenization و شباهت معنایی بهتر |
-| **LLM (پاسخ نهایی)** | `gpt-4o-mini` | برای کیفیت بالاتر فارسی: `gpt-4o` |
-| **LLM لوکال (Ollama)** | `qwen2.5:7b` | فارسی قابل قبول بدون API ابری |
-
-```env
-EMBEDDING_MODEL=heydariAI/persian-embeddings
-OPENAI_MODEL=gpt-4o
+# ویرایش SQL_SERVER_CONNECTION_STRING
 ```
 
 ## اجرا
@@ -40,78 +39,40 @@ python run.py
 
 Swagger: http://localhost:8000/docs
 
-**UI تست RAG:** http://localhost:8000/
-
-## RAG — جریان کار
+## جریان کار
 
 ```
-Excel (هر ردیف = یک سند) → Embedding فارسی → ChromaDB
-سوال کاربر → جستجوی شباهت → Top-K ردیف → LLM با context → پاسخ
+SQL Server (FAQ + محتوای سایت + بلاگ + نظرات) 
+  → Embedding فارسی → ChromaDB
+  → Background sync هر N دقیقه (از RagSettings)
+سوال کاربر → Healan API → Python /rag/ask → پاسخ مستقیم
 ```
 
-### API
+## API
 
 | مسیر | توضیح |
 |------|--------|
 | `GET /api/v1/rag/status` | وضعیت ایندکس |
-| `POST /api/v1/rag/ingest` | بارگذاری مجدد از اکسل |
-| `POST /api/v1/rag/ask` | پرسش بر اساس داده |
+| `POST /api/v1/rag/ingest` | همگام‌سازی دستی |
+| `POST /api/v1/rag/ask` | پرسش (حالت direct) |
 
-### نمونه پرسش
-
-```powershell
-curl -X POST http://localhost:8000/api/v1/rag/ask `
-  -H "Content-Type: application/json" `
-  -d "{\"question\": \"پزشک متخصص قلب کیست و شماره تماسش چیه؟\"}"
-```
-
-پاسخ شامل `answer` و `sources` (ردیف‌های بازیابی‌شده از اکسل) است.
-
-### فایل Excel خودتان
-
-1. ستون‌ها را با نام فارسی یا انگلیسی بگذارید (هر ردیف یک رکورد).
-2. مسیر را در `.env` تنظیم کنید: `EXCEL_FILE_PATH=data/my_data.xlsx`
-3. `POST /api/v1/rag/ingest` را بزنید.
-
-## SQL Server (فاز بعد)
+## تنظیمات (.env)
 
 ```env
 DATA_SOURCE=sqlserver
-SQL_SERVER_CONNECTION_STRING=mssql+pyodbc://user:pass@SERVER/HealanDB?driver=ODBC+Driver+17+for+SQL+Server
-SQL_SERVER_QUERY=SELECT Id, FullName, Specialty, Phone, Address FROM Doctors
+EMBEDDING_MODEL=heydariAI/persian-embeddings
+SQL_SERVER_CONNECTION_STRING=mssql+pyodbc://...
+RAG_ANSWER_MODE=direct
+RAG_SYNC_ENABLED=true
+RAG_SYNC_INTERVAL_MINUTES=10
 ```
 
-نیاز: `pip install pyodbc sqlalchemy`
+فاصله sync و آستانه شباهت از جدول `RagSettings` در SQL نیز خوانده می‌شود.
 
-کلاس آماده: `app/data/sql_server_source.py`
+## پنل کلینیک
 
-## ساختار
+`/site-content/rag` — مدیریت سوال/جواب و تنظیمات RAG
 
-```
-Python/
-  app/
-    data/
-      excel_source.py       # خواندن اکسل
-      sql_server_source.py  # آماده برای SQL Server
-    rag/
-      embeddings.py         # heydariAI/persian-embeddings
-      vector_store.py       # ChromaDB
-      pipeline.py           # ingest + ask
-    routers/rag.py
-  data/
-    sample.xlsx             # بعد از create_sample_excel.py
-  scripts/create_sample_excel.py
-```
+## پورتال
 
-## تست
-
-```powershell
-pytest
-```
-
-## APIهای قبلی
-
-| مسیر | توضیح |
-|------|--------|
-| `POST /api/v1/chat` | چت آزاد |
-| `POST /api/v1/summarize` | خلاصه متن |
+دکمه شناور ربات → `/assistant`

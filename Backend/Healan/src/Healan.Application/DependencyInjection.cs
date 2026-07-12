@@ -26,6 +26,10 @@ namespace Healan.Application
             services.AddPipelineBehavior(configuration);
             services.AddFileManagerServices(configuration);
             services.AddScoped<IInvoiceCalculationService, InvoiceCalculationService>();
+            services.AddHttpClient<Portal.Services.IRagPythonService, Portal.Services.RagPythonService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(120);
+            });
 
             #region Caching
             //Behavior

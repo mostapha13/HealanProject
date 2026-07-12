@@ -114,6 +114,13 @@
       "request": "launch",
       "command": "npm.cmd run start:portal",
       "cwd": "${workspaceFolder}/Frontend/tse_client_workspace"
+    },
+    {
+      "name": "Healan RAG (Python)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": ".venv\\Scripts\\python.exe run.py",
+      "cwd": "${workspaceFolder}/Python"
     }
   ],
   "compounds": [
@@ -129,6 +136,7 @@
         "UserManager API",
         "WorkFlow API",
         "Healan WebApi",
+        "Healan RAG (Python)",
         "Healan Portal (Public Site)",
         "Healan Frontend"
       ],

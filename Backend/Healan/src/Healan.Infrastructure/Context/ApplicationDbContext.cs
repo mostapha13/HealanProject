@@ -62,6 +62,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<PortalSiteSetting> PortalSiteSettings { get; set; }
     public DbSet<PatientReview> PatientReviews { get; set; }
     public DbSet<BlogPost> BlogPosts { get; set; }
+    public DbSet<RagKnowledgeItem> RagKnowledgeItems { get; set; }
+    public DbSet<RagSetting> RagSettings { get; set; }
+    public DbSet<RagChatLog> RagChatLogs { get; set; }
     //public DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //public DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 

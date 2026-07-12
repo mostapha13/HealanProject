@@ -78,6 +78,7 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PortalBlogEdit, "بلاگ — ویرایش", "/site-content/blog/edit"),
             new FormDef(HealanAccessFormIds.PortalBlogDelete, "بلاگ — حذف", "/site-content/blog/delete"),
             new FormDef(HealanAccessFormIds.PortalBlogPublish, "بلاگ — نمایش/عدم نمایش", "/site-content/blog/publish"),
+            new FormDef(HealanAccessFormIds.PortalRag, "ربات پاسخ‌گو — دانش پایه", "/site-content/rag"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -143,6 +144,7 @@ public static class HealanAccessSeed
             new MenuDef(5125, HealanAccessFormIds.PortalBlogEdit, 5123, 2),
             new MenuDef(5126, HealanAccessFormIds.PortalBlogDelete, 5123, 3),
             new MenuDef(5127, HealanAccessFormIds.PortalBlogPublish, 5123, 4),
+            new MenuDef(5128, HealanAccessFormIds.PortalRag, 5120, 4),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();

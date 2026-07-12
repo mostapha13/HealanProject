@@ -409,3 +409,27 @@ export interface BlogPostSummary {
 export interface BlogPostDetail extends BlogPostSummary {
   body: string;
 }
+
+export interface RagKnowledgeItem {
+  ragKnowledgeItemId: number;
+  question: string;
+  questionSummary?: string;
+  keywords?: string;
+  topic?: string;
+  answer: string;
+  similarQuestions?: string;
+  priority: number;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  lastModifiedAt?: string;
+}
+
+export interface RagSetting {
+  ragSettingId: number;
+  syncIntervalMinutes: number;
+  similarityThresholdPercent: number;
+  pythonApiUrl: string;
+  isEnabled: boolean;
+  lastSyncedAt?: string;
+}

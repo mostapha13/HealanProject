@@ -27,17 +27,22 @@ class Settings(BaseSettings):
     chroma_persist_dir: str = "data/chroma"
     chroma_collection: str = "healan_rag"
 
-    # منبع داده: excel (فعلی) | sqlserver (آینده)
-    data_source: str = "excel"
+    # منبع داده: excel | sqlserver
+    data_source: str = "sqlserver"
     excel_file_path: str = "data/sample.xlsx"
     excel_sheet_name: str | None = None
 
     sql_server_connection_string: str = ""
     sql_server_query: str = ""
+    sql_server_use_healan_bundle: bool = True
 
     rag_top_k: int = 5
     rag_auto_ingest: bool = True
     rag_chunk_max_chars: int = 1200
+    rag_answer_mode: str = "direct"
+    rag_similarity_threshold: float = 0.55
+    rag_sync_enabled: bool = True
+    rag_sync_interval_minutes: int = 10
 
     _PLACEHOLDER_KEYS = frozenset(
         {"", "your-api-key-here", "sk-placeholder-set-your-key"}

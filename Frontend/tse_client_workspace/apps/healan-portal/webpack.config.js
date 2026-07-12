@@ -4,6 +4,11 @@ const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 module.exports = (config) => {
   config = reactWebpackConfig(config);
 
+  config.devServer = {
+    ...(config.devServer ?? {}),
+    historyApiFallback: true,
+  };
+
   if (config.mode === 'development') {
     config.plugins = config.plugins.filter((plugin) => !(plugin instanceof ReactRefreshPlugin));
     config.plugins.push(new ReactRefreshPlugin({ overlay: false }));

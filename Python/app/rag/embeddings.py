@@ -30,6 +30,9 @@ class PersianEmbeddingFunction:
             def __call__(self, input: Documents) -> Embeddings:
                 return outer.__call__(input)
 
+            def name(self) -> str:
+                return f"persian-{model_name}"
+
         self._chromadb_ef = _Wrapper()
         return self._chromadb_ef
 

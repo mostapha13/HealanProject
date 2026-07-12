@@ -227,6 +227,11 @@
             مدیریت بلاگ سایت مطب
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.RagKnowledgeController">
+            <summary>
+            مدیریت دانش پایه RAG (سوال و جواب ربات سایت)
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.PatientReviewController">
             <summary>
             مدیریت نظرات بیماران
