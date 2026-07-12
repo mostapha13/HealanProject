@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Share.Application.Common.Interfaces;
+using WorkFlow.Application.Common.Constant;
 using WorkFlow.Application.Common.Interfaces;
+using WorkFlow.Domain.Entities;
 
 namespace WorkFlow.Application.ContextMaps.Forms.Command.RejectForm
 {
@@ -12,24 +14,25 @@ namespace WorkFlow.Application.ContextMaps.Forms.Command.RejectForm
         {
 #if !DEBUG
             _applicationDbContext = applicationDbContext;
+            _currentUserService = currentUserService;
             RuleFor(a => a).Custom((dt, context) =>
             {
 
                 var cuurentUserId = _currentUserService.UserId;
-                WorkFlowUser WorkFlowUser = null;
+                WorkFlowUser workFlowUser = null;
                 if (cuurentUserId == Guid.Empty)
                 {
                     context.AddFailure(ValidationMessages.Public_YouMustLogin);
                     return;
                 }
-                WorkFlowUser = _applicationDbContext.WorkFlowUsers.FirstOrDefault(w => w.IdentityUserId == cuurentUserId);
+                workFlowUser = _applicationDbContext.WorkFlowUsers.FirstOrDefault(w => w.IdentityUserId == cuurentUserId);
                 var workFlow = _applicationDbContext.WorkFlowItems.Where(w => w.OrderId == dt.OrderId).FirstOrDefault();
                 if (workFlow != null)
                 {
                     var WorkFlowGuide = _applicationDbContext.WorkFlowGuides.Where(w => w.WorkFlowGuideId == workFlow.WorkFlowGuideId).FirstOrDefault();
-                    if (WorkFlowGuide != null)
+                    if (WorkFlowGuide != null && workFlowUser != null)
                     {
-                        if (WorkFlowUser.WorkFlowUserGroupId != WorkFlowGuide.ReceiverGroupId)
+                        if (workFlowUser.WorkFlowUserGroupId != WorkFlowGuide.ReceiverGroupId)
                         {
                             context.AddFailure(ValidationMessages.ConfirmForm_ItemNotInYourCartboard);
                             return;
@@ -39,7 +42,6 @@ namespace WorkFlow.Application.ContextMaps.Forms.Command.RejectForm
 
 
             });
-            _currentUserService = currentUserService;
 #endif
         }
     }
