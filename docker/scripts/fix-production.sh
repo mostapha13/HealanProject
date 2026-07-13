@@ -10,6 +10,11 @@ PROJECT_DIR="$(pwd)"
 echo "==> Project: $PROJECT_DIR"
 cd "$PROJECT_DIR"
 
+if [ ! -f docker/config/identity-server/appsettings.Production.json.bak ]; then
+  cp docker/config/identity-server/appsettings.Production.json docker/config/identity-server/appsettings.Production.json.bak
+  echo "==> Backed up identity-server appsettings"
+fi
+
 if [ -f docker/config/identity-server/appsettings.Production.json.bak ]; then
   echo "==> Restoring SQL password from backup..."
   cp docker/config/identity-server/appsettings.Production.json.bak docker/config/identity-server/appsettings.Production.json
