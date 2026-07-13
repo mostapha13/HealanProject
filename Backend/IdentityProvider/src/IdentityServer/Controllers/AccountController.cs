@@ -240,10 +240,17 @@ namespace IdentityServer.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> SuccessLogin(string ReturnUrl = null)
         {
-            return View();
+            // Never show the static Success page — always continue to clinic / OIDC returnUrl.
+            if (!string.IsNullOrWhiteSpace(ReturnUrl))
+            {
+                if (await _interaction.IsValidReturnUrlAsync(ReturnUrl) || Url.IsLocalUrl(ReturnUrl))
+                    return Redirect(ReturnUrl);
+            }
+
+            return Redirect(GetClinicRedirectUrl());
         }
         private async Task<LoginViewModel> FillModel(LoginViewModel model, string returnUrl, bool requireCaptcha = false)
         {
