@@ -1,8 +1,13 @@
 import { environment } from '../environments/environment';
 
-/** ورود به سامانه Healan — AuthGuard کلینیک کاربر را به Identity هدایت می‌کند */
+/** ورود کاربر — صفحه login روی auth */
+export function goToLogin() {
+  window.location.href = environment.authLoginUrl || 'http://auth.drshahrooei.ir/';
+}
+
+/** @deprecated از goToLogin استفاده کنید */
 export function goToClinicLogin() {
-  window.location.href = environment.clinicAppUrl;
+  goToLogin();
 }
 
 export function callForAppointment() {
