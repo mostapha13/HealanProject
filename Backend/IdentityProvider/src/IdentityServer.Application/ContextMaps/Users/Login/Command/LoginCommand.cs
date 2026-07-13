@@ -31,6 +31,8 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
         public string Password { get; set; }
         public string CaptchaKey { get; set; }
         public string CaptchaCode { get; set; }
+        /// <summary>When true, captcha must be validated (after a failed attempt).</summary>
+        public bool RequireCaptcha { get; set; }
     }
     public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     {
@@ -58,10 +60,13 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
             await _signInManager.SignOutAsync();
 
 #if !DEBUG
-            var captchaResult = await _captchaValidatorService.ValidateCaptcha(new CaptchaModelRequest(request.CaptchaKey, request.CaptchaCode));
-            if (captchaResult == null || !captchaResult.Result)
+            if (request.RequireCaptcha)
             {
-                throw new BadRequestExceptions("کد کپچا صحیح نیست");
+                var captchaResult = await _captchaValidatorService.ValidateCaptcha(new CaptchaModelRequest(request.CaptchaKey, request.CaptchaCode));
+                if (captchaResult == null || !captchaResult.Result)
+                {
+                    throw new BadRequestExceptions("کد کپچا صحیح نیست");
+                }
             }
 #endif
             var getUser = _applicationDbContext.Users.FirstOrDefault(x => x.UserName == request.UserName);

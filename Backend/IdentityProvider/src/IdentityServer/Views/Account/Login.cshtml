@@ -7,7 +7,7 @@
 
 @{
     ViewData["Title"] = "ورود";
-    var captchaAvailable = Model?.Image != null && Model.Image.Length > 0;
+    var captchaAvailable = Model?.ShowCaptcha == true && Model?.Image != null && Model.Image.Length > 0;
     string source = captchaAvailable
         ? $"data:image/png;base64,{Convert.ToBase64String(Model.Image)}"
         : null;
@@ -23,9 +23,10 @@
         <p class="healan-login-card__subtitle">برای دسترسی به سامانه مدیریت کلینیک، اطلاعات خود را وارد کنید.</p>
     </header>
 
-    <form class="healan-login-form" asp-route-returnurl="@ViewData["ReturnUrl"]" asp-controller="Account" asp-action="Login" asp-antiforgery="true" method="post">
+    <form class="healan-login-form" asp-controller="Account" asp-action="Login" asp-antiforgery="true" method="post" autocomplete="on">
         @Html.HiddenFor(x => x.CaptchaKey)
         @Html.HiddenFor(x => x.ReturnUrl)
+        @Html.HiddenFor(x => x.ShowCaptcha)
 
         <div class="healan-field">
             <label asp-for="UserName">نام کاربری</label>
@@ -35,11 +36,11 @@
 
         <div class="healan-field">
             <label asp-for="Password">رمز عبور</label>
-            <input asp-for="Password" type="password" placeholder="رمز عبور" autocomplete="current-password" />
+            <input asp-for="Password" type="password" placeholder="رمز عبور خود را وارد کنید" autocomplete="current-password" />
             <span asp-validation-for="Password" class="healan-field-error"></span>
         </div>
 
-        @if (captchaAvailable)
+        @if (Model?.ShowCaptcha == true)
         {
             <div class="healan-captcha">
                 <div class="healan-field">
@@ -47,9 +48,12 @@
                     <input asp-for="CaptchaCode" type="text" placeholder="کد تصویر را وارد کنید" autocomplete="off" inputmode="numeric" />
                     <span asp-validation-for="CaptchaCode" class="healan-field-error"></span>
                 </div>
-                <div class="healan-captcha__image">
-                    <img src="@source" alt="کد امنیتی" />
-                </div>
+                @if (captchaAvailable)
+                {
+                    <div class="healan-captcha__image">
+                        <img src="@source" alt="کد امنیتی" />
+                    </div>
+                }
             </div>
         }
 
@@ -59,7 +63,7 @@
 
         <button type="submit" class="healan-btn healan-btn--primary">ورود به سامانه</button>
 
-        <div asp-validation-summary="All" class="healan-validation"></div>
+        <div asp-validation-summary="ModelOnly" class="healan-validation"></div>
     </form>
 
     <p class="healan-login-note">

@@ -119,15 +119,7 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string ReturnUrl = null)
         {
-
-            if (!ModelState.IsValid)
-                return View();
-
-            if (string.IsNullOrEmpty(ReturnUrl))
-            {
-                ModelState.AddModelError(string.Empty, "");
-            }
-
+            // First visit: username + password only. Captcha appears after a failed attempt.
             string returnUrl = ReturnUrl;
 #if !DEBUG
             if (!string.IsNullOrEmpty(ReturnUrl))
@@ -138,61 +130,55 @@ namespace IdentityServer.Controllers
                     returnUrl = context.RedirectUri;
                     ValidateReturnUrl(returnUrl);
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "پارامتر ورودی صحیح نیست");
-                }
             }
 #endif
 
-            LoginViewModel model = new LoginViewModel() { ReturnUrl = returnUrl };
-            if (ModelState["ReturnUrl"] != null)
-                ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+            LoginViewModel model = new LoginViewModel() { ReturnUrl = returnUrl, ShowCaptcha = false };
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             await _signInManager.SignOutAsync();
 
-#if DEBUG
             return View(model);
-#else
-            try
-            {
-                var getCaptcha = await _captchaProviderService.GetCaptcha();
-                model.Image = getCaptcha.Image;
-                model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Captcha service unavailable on login page");
-                ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست.");
-                return View(model);
-            }
-#endif
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
+            // Captcha is optional on first attempt
+            if (!model.ShowCaptcha)
+            {
+                ModelState.Remove(nameof(model.CaptchaCode));
+                ModelState.Remove(nameof(model.CaptchaKey));
+            }
+            else if (string.IsNullOrWhiteSpace(model.CaptchaCode))
+            {
+                ModelState.AddModelError(nameof(model.CaptchaCode), "کد کپچا وارد نشده است");
+            }
+
 #if DEBUG
             ModelState.Remove(nameof(model.CaptchaCode));
 #endif
 
-            var rUrl = string.Empty;// _configuration["IdentityServer:MarketMakerBaseUri"];
+            var rUrl = string.Empty;
             if (!string.IsNullOrEmpty(model.ReturnUrl))
             {
                 rUrl = model.ReturnUrl;
-                ValidateReturnUrl(returnUrl);    
+                ValidateReturnUrl(returnUrl);
             }
             if (!ModelState.IsValid)
-                return View(await FillModel(model, rUrl));
+                return View(await FillModel(model, rUrl, requireCaptcha: model.ShowCaptcha));
             try
             {
-                var loginCommand = new LoginCommand() { UserName = model.UserName, Password = model.Password, CaptchaKey = model.CaptchaKey, CaptchaCode = model.CaptchaCode };
+                var loginCommand = new LoginCommand()
+                {
+                    UserName = model.UserName,
+                    Password = model.Password,
+                    CaptchaKey = model.CaptchaKey,
+                    CaptchaCode = model.CaptchaCode,
+                    RequireCaptcha = model.ShowCaptcha,
+                };
                 var result2 = await Mediator.Send(loginCommand);
-
-                // _cacheManager.Remove(result2.userId.ToString());
 
                 if (result2.IsSuccess && result2.TwoFactorEnabled)
                     return RedirectToAction(nameof(LoginWith2fa), new { rememberMe = true, returnUrl = rUrl });
@@ -212,19 +198,16 @@ namespace IdentityServer.Controllers
             catch (Exception ex)
             {
                 model.ReturnUrl = rUrl;
-                ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+                if (ModelState["ReturnUrl"] != null)
+                    ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(await FillModel(model, rUrl));
-            }
-            try
-            {
-                return View(await FillModel(model, rUrl));
-            }
-            catch (Exception ex)
-            {
-                return View(await FillModel(model, rUrl));
+                // Failed login → show captcha on next attempt
+                return View(await FillModel(model, rUrl, requireCaptcha: true));
             }
 
+            // Unsuccessful credential check → require captcha next
+            ModelState.AddModelError(string.Empty, "نام کاربری یا رمز عبور صحیح نیست");
+            return View(await FillModel(model, rUrl, requireCaptcha: true));
         }
 
         [HttpGet]
@@ -233,12 +216,23 @@ namespace IdentityServer.Controllers
         {
             return View();
         }
-        private async Task<LoginViewModel> FillModel(LoginViewModel model, string returnUrl)
+        private async Task<LoginViewModel> FillModel(LoginViewModel model, string returnUrl, bool requireCaptcha = false)
         {
             try
             {
                 model.ReturnUrl = returnUrl;
-                ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+                if (ModelState["ReturnUrl"] != null)
+                    ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+
+                model.ShowCaptcha = requireCaptcha;
+                if (!requireCaptcha)
+                {
+                    model.Image = null;
+                    model.CaptchaKey = null;
+                    model.CaptchaCode = null;
+                    return model;
+                }
+
                 var getCaptcha = await _captchaProviderService.GetCaptcha();
                 model.Image = getCaptcha.Image;
                 model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
@@ -248,11 +242,17 @@ namespace IdentityServer.Controllers
                     ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
                     ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
                 }
+
+                if (model.Image == null || model.Image.Length == 0)
+                    ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.");
+
                 return model;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Captcha service unavailable while refreshing login model");
+                model.ShowCaptcha = true;
+                ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.");
                 return model;
             }
         }

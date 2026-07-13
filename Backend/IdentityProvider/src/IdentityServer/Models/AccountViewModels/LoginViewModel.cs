@@ -20,7 +20,11 @@ namespace IdentityServer.Models.AccountViewModels
         public string CaptchaKey { get; set; }
         public byte[] Image { get; set; }
 
-        [Required(ErrorMessage = "کد کپچا وارد نشده است")]
+        /// <summary>
+        /// After a failed login, captcha is required. First attempt skips captcha.
+        /// </summary>
+        public bool ShowCaptcha { get; set; }
+
         [Display(Name = "کد کپچا")]
         public string CaptchaCode { get; set; }
         public string ReturnUrl { get; set; }
