@@ -107,7 +107,7 @@ namespace IdentityServer.Controllers
             if (!string.IsNullOrEmpty(returnUrl))
             {
                 // Complete OIDC authorize round-trip (issues code/token to clinic)
-                if (await _interaction.IsValidReturnUrlAsync(returnUrl))
+                if (_interaction.IsValidReturnUrl(returnUrl))
                     return Redirect(returnUrl);
 
                 return Redirect(SetCashedValue(userId, returnUrl));
@@ -241,12 +241,12 @@ namespace IdentityServer.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> SuccessLogin(string ReturnUrl = null)
+        public IActionResult SuccessLogin(string ReturnUrl = null)
         {
             // Never show the static Success page — always continue to clinic / OIDC returnUrl.
             if (!string.IsNullOrWhiteSpace(ReturnUrl))
             {
-                if (await _interaction.IsValidReturnUrlAsync(ReturnUrl) || Url.IsLocalUrl(ReturnUrl))
+                if (_interaction.IsValidReturnUrl(ReturnUrl) || Url.IsLocalUrl(ReturnUrl))
                     return Redirect(ReturnUrl);
             }
 
