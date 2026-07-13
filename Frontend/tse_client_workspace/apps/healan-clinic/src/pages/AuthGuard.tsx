@@ -10,6 +10,7 @@ interface AuthGuardProps {
 /** بررسی احراز هویت OIDC قبل از نمایش اپ */
 export function AuthGuard({ children }: AuthGuardProps) {
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,8 +24,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
           return;
         }
         await userManager.signinRedirect();
-      } catch {
-        await userManager.signinRedirect();
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            'اتصال به سرویس ورود برقرار نشد. لطفاً چند دقیقه بعد دوباره تلاش کنید یا مستقیماً به auth.drshahrooei.ir بروید.'
+          );
+        }
       }
     };
 
@@ -33,6 +38,20 @@ export function AuthGuard({ children }: AuthGuardProps) {
       cancelled = true;
     };
   }, []);
+
+  if (error) {
+    return (
+      <div className="healan-auth-screen">
+        <div className="healan-auth-card">
+          <h1>Healan</h1>
+          <p>{error}</p>
+          <p>
+            <a href="http://auth.drshahrooei.ir/">رفتن به صفحه ورود</a>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!ready) {
     return (
