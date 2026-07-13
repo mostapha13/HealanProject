@@ -10,4 +10,5 @@ FROM nginx:1.27-alpine AS runtime
 COPY docker/nginx-spa.conf /etc/nginx/conf.d/default.conf
 ARG APP_NAME
 COPY --from=build /workspace/dist/apps/${APP_NAME} /usr/share/nginx/html
+RUN echo "${APP_NAME}" > /usr/share/nginx/html/.healan-app
 EXPOSE 80
