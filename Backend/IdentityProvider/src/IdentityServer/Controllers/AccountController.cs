@@ -84,6 +84,38 @@ namespace IdentityServer.Controllers
             _cacheManager = cacheManager;
 
         }
+        private string GetClinicRedirectUrl()
+        {
+            var clinicUrl = _configuration["IdentityServer:HealanClinicUrl"];
+            if (!string.IsNullOrWhiteSpace(clinicUrl))
+                return clinicUrl.TrimEnd('/') + "/";
+
+            // Fallback: first post-logout URI host → clinic root
+            var postLogout = _configuration["IdentityServer:HealanPostLogoutRedirectUri"];
+            if (!string.IsNullOrWhiteSpace(postLogout))
+            {
+                var first = postLogout.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault();
+                if (!string.IsNullOrEmpty(first) && Uri.TryCreate(first, UriKind.Absolute, out var uri))
+                    return $"{uri.Scheme}://{uri.Authority}/";
+            }
+
+            return "http://clinic.drshahrooei.ir/";
+        }
+
+        private async Task<IActionResult> RedirectAfterLoginAsync(string userId, string returnUrl)
+        {
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                // Complete OIDC authorize round-trip (issues code/token to clinic)
+                if (await _interaction.IsValidReturnUrlAsync(returnUrl))
+                    return Redirect(returnUrl);
+
+                return Redirect(SetCashedValue(userId, returnUrl));
+            }
+
+            return Redirect(GetClinicRedirectUrl());
+        }
+
         private string GetCashedValue(string key)
         {
 
@@ -110,7 +142,6 @@ namespace IdentityServer.Controllers
                 _cache.Remove(key);
         }
 
-
         [TempData]
         public string ErrorMessage { get; set; }
 
@@ -119,16 +150,17 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string ReturnUrl = null)
         {
-            // First visit: username + password only. Captcha appears after a failed attempt.
+            // Keep IdentityServer ReturnUrl so authorize can complete after login.
+            // Do NOT replace it with client RedirectUri — that skips token issuance.
             string returnUrl = ReturnUrl;
 #if !DEBUG
             if (!string.IsNullOrEmpty(ReturnUrl))
             {
                 var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
-                if (context != null)
+                if (context == null)
                 {
-                    returnUrl = context.RedirectUri;
-                    ValidateReturnUrl(returnUrl);
+                    // Plain client URL (not an OIDC interaction returnUrl)
+                    ValidateReturnUrl(ReturnUrl);
                 }
             }
 #endif
@@ -136,7 +168,6 @@ namespace IdentityServer.Controllers
             LoginViewModel model = new LoginViewModel() { ReturnUrl = returnUrl, ShowCaptcha = false };
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            await _signInManager.SignOutAsync();
 
             return View(model);
         }
@@ -185,14 +216,12 @@ namespace IdentityServer.Controllers
                 if (result2.IsSuccess && !result2.TwoFactorEnabled && result2.IsAdmin)
                 {
                     if (!string.IsNullOrEmpty(rUrl))
-                        return Redirect(SetCashedValue(result2.userId, rUrl));
+                        return await RedirectAfterLoginAsync(result2.userId, rUrl);
                     return RedirectToAction("Index", "AdminPanel");
                 }
                 else if (result2.IsSuccess && !result2.TwoFactorEnabled)
                 {
-                    if (string.IsNullOrEmpty(rUrl))
-                        return View(nameof(SuccessLogin));
-                    return Redirect(SetCashedValue(result2.userId, rUrl));
+                    return await RedirectAfterLoginAsync(result2.userId, rUrl);
                 }
             }
             catch (Exception ex)
@@ -289,9 +318,7 @@ namespace IdentityServer.Controllers
                 }
                 else if (result.IsSuccess)
                 {
-                    if (string.IsNullOrEmpty(returnUrl))
-                        return View(nameof(SuccessLogin));
-                    return Redirect(SetCashedValue(result.userId, returnUrl));
+                    return await RedirectAfterLoginAsync(result.userId, returnUrl);
                 }
                 //return Redirect(returnUrl);
             }

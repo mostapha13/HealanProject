@@ -1,47 +1,12 @@
-﻿@{
-    ViewData["Title"] = "Access denied";
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewData["Title"] = "ورود موفق";
+    var clinicUrl = Configuration["IdentityServer:HealanClinicUrl"];
+    if (string.IsNullOrWhiteSpace(clinicUrl))
+        clinicUrl = "http://clinic.drshahrooei.ir/";
+    clinicUrl = clinicUrl.TrimEnd('/') + "/";
 }
-
-<header>
-  <style>
-      body {
-        text-align: center;
-        padding: 40px 0;
-        background: #EBF0F5;
-      }
-        h1 {
-          color: #88B04B;
-          font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
-          font-weight: 900;
-          font-size: 40px;
-          margin-bottom: 10px;
-        }
-        p {
-          color: #404F5E;
-          font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
-          font-size:20px;
-          margin: 0;
-        }
-      i {
-        color: #9ABC66;
-        font-size: 100px;
-        line-height: 200px;
-        margin-left:-15px;
-      }
-      .card {
-        background: white;
-        padding: 60px;
-        border-radius: 4px;
-        box-shadow: 0 2px 3px #C8D0D8;
-        display: inline-block;
-        margin: 0 auto;
-      }
-    </style>
-</header>
-  <div class="card">
-      <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
-        <i class="checkmark">✓</i>
-      </div>
-        <h1>Success</h1> 
-        <p>برای ورود به سامانه مورد نظر آدرس آن را در مرورگر وارد کنید</p>
-      </div>
+<meta http-equiv="refresh" content="0;url=@clinicUrl" />
+<script>window.location.replace("@clinicUrl");</script>
+<p>در حال انتقال به سامانه کلینیک...</p>
+<p><a href="@clinicUrl">اگر منتقل نشدید اینجا کلیک کنید</a></p>

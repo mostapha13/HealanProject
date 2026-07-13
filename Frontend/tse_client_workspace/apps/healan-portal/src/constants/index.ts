@@ -1,8 +1,11 @@
 import { environment } from '../environments/environment';
 
-/** ورود کاربر — صفحه login روی auth */
+/** ورود کاربر — پنل کلینیک (OAuth را AuthGuard شروع می‌کند) */
 export function goToLogin() {
-  window.location.href = environment.authLoginUrl || 'http://auth.drshahrooei.ir/';
+  window.location.href =
+    environment.authLoginUrl ||
+    environment.clinicAppUrl ||
+    'http://clinic.drshahrooei.ir/';
 }
 
 /** @deprecated از goToLogin استفاده کنید */
