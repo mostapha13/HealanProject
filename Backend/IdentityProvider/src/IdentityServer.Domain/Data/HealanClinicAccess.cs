@@ -38,13 +38,11 @@ public static class HealanClinicAccess
         public const int PortalRag = 5128;
     }
 
-    /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه.</summary>
+    /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه (فولدرها + زیرمنوها).</summary>
     public static readonly int[] AdminMenuIds =
     {
-        Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients, Menus.Doctors,
-        Menus.Prescriptions, Menus.Companies, Menus.Insurance, Menus.Services, Menus.MedicalFees,
-        Menus.UserDefine, Menus.AccessDefine, Menus.AccessRoleAssign, Menus.Reports,
-        Menus.Workflow, Menus.Signature, Menus.PortalContent, Menus.PortalReviews, Menus.PortalBlog, Menus.PortalRag,
+        5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113,
+        5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>

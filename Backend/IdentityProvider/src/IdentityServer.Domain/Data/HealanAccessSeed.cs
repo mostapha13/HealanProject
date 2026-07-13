@@ -26,6 +26,7 @@ public static class HealanAccessSeed
         }
 
         await EnsureSystemRolesAsync(dbContext, roleManager);
+        await EnsureRolePermissionsAsync(dbContext, roleManager);
     }
 
     private static async Task EnsureSystemAsync(ApplicationDbContext dbContext)
@@ -213,9 +214,15 @@ public static class HealanAccessSeed
         ApplicationDbContext dbContext,
         RoleManager<ApplicationRole> roleManager)
     {
+        // Admin gets every Healan menu (folders + leaves), including newly added ones.
+        var allHealanMenuIds = await dbContext.AccessMenus
+            .Where(m => m.AccessMenuId >= 5101 && m.AccessMenuId < 5200)
+            .Select(m => m.AccessMenuId)
+            .ToListAsync();
+
         var roleMenus = new Dictionary<string, int[]>
         {
-            [ConstUserInfo.AdminRole] = HealanClinicAccess.AdminMenuIds,
+            [ConstUserInfo.AdminRole] = allHealanMenuIds.ToArray(),
             [HealanClinicAccess.SecretaryRole] = HealanClinicAccess.SecretaryMenuIds,
             [HealanClinicAccess.DoctorRole] = HealanClinicAccess.DoctorMenuIds,
             [HealanClinicAccess.AccountantRole] = HealanClinicAccess.AccountantMenuIds,
