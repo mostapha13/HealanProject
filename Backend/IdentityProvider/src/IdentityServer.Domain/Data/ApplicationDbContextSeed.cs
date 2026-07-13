@@ -23,7 +23,7 @@ namespace IdentityServer.Domain.Data
             if (isExistAdminUser == null)
                 await AddUser(userManager, ConstUserInfo.AdminRole, ConstUserInfo.AdminUserName, ConstUserInfo.AdminPass, ConstUserInfo.AdminFirstName, ConstUserInfo.AdminLastName);
 
-            await HealanClinicUserSeed.SeedAsync(dbContext, userManager, roleManager);
+            await HealanClinicUserSeed.SeedAsync(userManager, roleManager);
         }
 
         private static async Task AddRoles(ApplicationDbContext dbContext, RoleManager<ApplicationRole> roleManager)

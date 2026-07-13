@@ -1,4 +1,5 @@
 ﻿using IdentityServer.GrpcClient.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,11 +35,22 @@ namespace Share.Infrastructure.SecurityMiddlewares
             await _next(context);
             return;
 #endif
+            var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint
+                ?? context.GetEndpoint();
+
+            // Public endpoints (e.g. PortalPublic) must not require an active logged-in user.
+            if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+            {
+                await _next(context);
+                return;
+            }
+
             using var scope = _serviceScopeFactory.CreateScope();
             var _identityTool = scope.ServiceProvider.GetRequiredService<IIdentityTool>();
             var _currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
             _logger.LogInformation("Check If User Is Active...");
-            if (!await _identityTool.IsUserActive(_currentUserService.UserId))
+            if (_currentUserService.UserId == Guid.Empty ||
+                !await _identityTool.IsUserActive(_currentUserService.UserId))
             {
                 var cookies = context.Request.Cookies.Keys.ToList();
                 if (cookies.Any())
@@ -71,8 +83,6 @@ namespace Share.Infrastructure.SecurityMiddlewares
             bool shouldCopyBody = false;
             try
             {
-
-                var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
                 var routeValues = context.Request.RouteValues;
                 int languageId = 0;
                 var attribute = endpoint?.Metadata.GetMetadata<AccessFormAttribute>();

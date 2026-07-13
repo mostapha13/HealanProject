@@ -2,7 +2,6 @@ using IdentityServer.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Share.Domain.Enums;
-
 namespace IdentityServer.Domain.Data;
 
 /// <summary>
@@ -20,7 +19,6 @@ public static class HealanClinicUserSeed
     };
 
     public static async Task SeedAsync(
-        ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager)
     {
@@ -29,8 +27,6 @@ public static class HealanClinicUserSeed
             await EnsureRoleExistsAsync(roleManager, def.Role);
             await EnsureUserAsync(userManager, def);
         }
-
-        await EnsureAdminHealanAccessAsync(dbContext, userManager, roleManager);
     }
 
     private static async Task EnsureRoleExistsAsync(RoleManager<ApplicationRole> roleManager, string roleName)
@@ -131,34 +127,6 @@ public static class HealanClinicUserSeed
         {
             throw new InvalidOperationException(
                 $"Failed to assign role {def.Role} to {def.Phone}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
-        }
-    }
-
-    private static async Task EnsureAdminHealanAccessAsync(
-        ApplicationDbContext dbContext,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<ApplicationRole> roleManager)
-    {
-        var admin = await userManager.FindByNameAsync(ConstUserInfo.AdminUserName);
-        if (admin == null)
-            return;
-
-        if (!await userManager.IsInRoleAsync(admin, ConstUserInfo.AdminRole))
-            await userManager.AddToRoleAsync(admin, ConstUserInfo.AdminRole);
-
-        var adminRole = await roleManager.FindByNameAsync(ConstUserInfo.AdminRole);
-        if (adminRole == null)
-            return;
-
-        if (!await dbContext.AccessSystemRoles.AnyAsync(r =>
-                r.RoleId == adminRole.Id && r.AccessSystemId == Share.Domain.Constants.HealanAccessFormIds.SystemId))
-        {
-            dbContext.AccessSystemRoles.Add(new AccessSystemRole
-            {
-                RoleId = adminRole.Id,
-                AccessSystemId = Share.Domain.Constants.HealanAccessFormIds.SystemId,
-            });
-            await dbContext.SaveChangesAsync();
         }
     }
 }
