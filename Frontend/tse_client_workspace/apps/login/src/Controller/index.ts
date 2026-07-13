@@ -1,6 +1,6 @@
 import { request } from '@tse/tools';
 
-const BASE_URL = 'http://172.20.16.94:8066/IdentityProvider/api/v1/User/';
+const BASE_URL = '/UserManager/api/v1/User/';
 
 interface requestInterface {
   data?: any;
@@ -12,7 +12,7 @@ export const getCaptcha = ({ onSuccess, onFail }: requestInterface) => {
   const url = '';
   request
     .get({
-      baseUrl: 'http://172.20.16.94:8063/CaptchaProvider/api/v1/Captcha/Get',
+      baseUrl: '/CaptchaProvider/api/v1/Captcha/Get',
       url,
     })
     .then((res) => onSuccess(res))
