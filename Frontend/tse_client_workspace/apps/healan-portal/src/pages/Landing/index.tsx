@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { callForAppointment, goToClinicLogin } from '../../constants';
+import { callForAppointment, goToLogin } from '../../constants';
 import {
   IconClock,
   IconEcg,
@@ -140,7 +140,7 @@ export function LandingPage() {
               <IconPhone className="portal-icon-sm" />
               <span>رزرو نوبت</span>
             </button>
-            <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={goToClinicLogin}>
+            <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={goToLogin}>
               <IconLogin className="portal-icon-sm" />
               <span>ورود</span>
             </button>
@@ -172,7 +172,7 @@ export function LandingPage() {
               <IconPhone className="portal-icon-sm" />
               تماس برای نوبت
             </button>
-            <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToClinicLogin(); }}>
+            <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
               <IconLogin className="portal-icon-sm" />
               ورود به سامانه
             </button>
@@ -393,7 +393,7 @@ export function LandingPage() {
               <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={callForAppointment}>
                 تماس الان
               </button>
-              <button type="button" className="p-btn p-btn--outline p-btn--lg" onClick={goToClinicLogin}>
+              <button type="button" className="p-btn p-btn--outline p-btn--lg" onClick={goToLogin}>
                 <IconLogin className="portal-icon-sm" />
                 ورود به سامانه Healan
               </button>
@@ -437,7 +437,7 @@ export function LandingPage() {
           <div className="portal-footer__links">
             <button type="button" onClick={() => scrollTo('services')}>خدمات</button>
             <button type="button" onClick={() => scrollTo('contact')}>تماس</button>
-            <button type="button" onClick={goToClinicLogin}>ورود</button>
+            <button type="button" onClick={goToLogin}>ورود</button>
           </div>
         </div>
         <div className="portal-container">
