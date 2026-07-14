@@ -180,16 +180,17 @@ namespace IdentityServer.GrpcServer.Services
             UserHasAccessResonse userHasAccessResonse = new UserHasAccessResonse();
 
             bool persianAccess = request.LanguageId == 1;
+            // LanguageId 0 = caller did not specify — do not filter by HasPersianAccess
+            // (otherwise Persian-only AccessRoles are denied for endpoints without {lang}).
+            var ignorePersianFlag = request.LanguageId == 0;
 
             var q = from a in _applicationDbContext.AccessRoles
                     join r in _applicationDbContext.UserRoles on a.RoleId equals r.RoleId
                     join m in _applicationDbContext.AccessMenus on a.AccessMenuId equals m.AccessMenuId
                     join f in _applicationDbContext.AccessForms on m.AccessFormId equals f.AccessFormId
-                    //join sy in _applicationDbContext.AccessSystems on f.AccessSystemId equals sy.AccessSystemId
                     where
-                    //sy.     == request.SystemName &&
                     r.UserId == request.UserId.ToGuid() &&
-                    (!a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
+                    (ignorePersianFlag || !a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
                     request.AccessFormId.Contains(f.AccessFormId)
                     select a.AccessRoleId;
 

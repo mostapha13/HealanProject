@@ -192,17 +192,15 @@ namespace Share.Infrastructure.SecurityMiddlewares
                     }
                 }
 
-
-
-
-
-
-
-
+                // Healan APIs often have no {lang} route (Dashboard/Stats, Appointment/...).
+                // UserHasAccess treats LanguageId==1 as Persian; LanguageId==0 requires
+                // HasPersianAccess==false and wrongly denies seeded Persian roles.
+                if (languageId == 0)
+                    languageId = (int)LanguageId.Fa;
 
                 // Get the controller and action names
 
-                _logger.LogInformation($"UserId is {_currentUserService.UserId} SystemName {_systemName} AccessFormId  {accessFormIds}");
+                _logger.LogInformation($"UserId is {_currentUserService.UserId} SystemName {_systemName} AccessFormId  {string.Join(",", accessFormIds ?? Array.Empty<int>())} LanguageId={languageId}");
 
 
                 var request = new IdentityServer.GrpcClient.UserHasAccessRequest()
@@ -216,18 +214,41 @@ namespace Share.Infrastructure.SecurityMiddlewares
                 var hasAccess = await _identityTool.UserHasAccess(request);
                 if (hasAccess != null && !hasAccess.HasAccess)
                 {
-                    _logger.LogInformation($"UserId is {_currentUserService.UserId} Has Not Access");
-                    // Return 403 Forbidden
-                    context.Response.StatusCode = 403;
-                    await context.Response.WriteAsync($"Access forbidden for This Action.");
+                    _logger.LogWarning(
+                        "Access denied UserId={UserId} forms=[{Forms}] languageId={Lang}",
+                        _currentUserService.UserId,
+                        string.Join(",", accessFormIds),
+                        languageId);
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.ContentType = "application/json";
+                    context.Response.Headers["X-Auth-Reason"] = "access_form_denied";
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
+                    {
+                        Title = "Forbidden",
+                        Errors = new[]
+                        {
+                            "دسترسی به این بخش برای نقش شما فعال نیست.",
+                            $"diag:access_form_denied;forms={string.Join(",", accessFormIds)};lang={languageId};userId={_currentUserService.UserId}"
+                        }
+                    }));
                     return;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"CheckAccess Has Exception");
-                context.Response.StatusCode = 403;
-                await context.Response.WriteAsync($"Access forbidden for This Action For Exception.");
+                _logger.LogError(ex, "CheckAccess Has Exception");
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                context.Response.ContentType = "application/json";
+                context.Response.Headers["X-Auth-Reason"] = "access_check_exception";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
+                {
+                    Title = "Access Check Failed",
+                    Errors = new[]
+                    {
+                        "بررسی دسترسی موقتاً ممکن نیست.",
+                        $"diag:access_check_exception;{ex.GetType().Name}:{ex.Message}"
+                    }
+                }));
                 return;
             }
             // Call the next middleware
