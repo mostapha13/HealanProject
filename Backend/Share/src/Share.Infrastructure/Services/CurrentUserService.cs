@@ -20,7 +20,17 @@ namespace Share.Infrastructure.Services
         {
             get
             {
-                if (Guid.TryParse(_httpContextAccessor.HttpContext?.User?.FindFirstValue("sub"), out var result))
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user?.Identity?.IsAuthenticated != true)
+                    return Guid.Empty;
+
+                // JWT "sub" is often remapped to NameIdentifier by inbound claim mapping.
+                var raw =
+                    user.FindFirstValue("sub")
+                    ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ?? user.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+                if (Guid.TryParse(raw, out var result))
                     return result;
 
                 return Guid.Empty;

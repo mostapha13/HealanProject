@@ -49,8 +49,39 @@ namespace Share.Infrastructure.SecurityMiddlewares
             var _identityTool = scope.ServiceProvider.GetRequiredService<IIdentityTool>();
             var _currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
             _logger.LogInformation("Check If User Is Active...");
-            if (_currentUserService.UserId == Guid.Empty ||
-                !await _identityTool.IsUserActive(_currentUserService.UserId))
+
+            // Unauthenticated / missing user id in token → 401 (not a login-page credential error)
+            if (_currentUserService.UserId == Guid.Empty)
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
+                {
+                    Title = "Unauthorized",
+                    Errors = new[] { "نشست کاربری معتبر نیست. دوباره وارد شوید." }
+                }));
+                return;
+            }
+
+            bool isActive;
+            try
+            {
+                isActive = await _identityTool.IsUserActive(_currentUserService.UserId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "IsUserActive gRPC failed for {UserId}", _currentUserService.UserId);
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
+                {
+                    Title = "Identity Unavailable",
+                    Errors = new[] { "سرویس احراز هویت در دسترس نیست." }
+                }));
+                return;
+            }
+
+            if (!isActive)
             {
                 var cookies = context.Request.Cookies.Keys.ToList();
                 if (cookies.Any())
@@ -59,24 +90,18 @@ namespace Share.Infrastructure.SecurityMiddlewares
                     foreach (var cookie in cookies)
                     {
                         if (context.Request.Cookies[cookie] != null)
-                        {
-                            _logger.LogInformation($"Remove Cookie ...");
                             context.Response.Cookies.Delete(cookie);
-                        }
                     }
                 }
 
-
-                var details = new CustomProblemDetails()
+                // Inactive account — client should send user back to login
+                context.Response.StatusCode = 456;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
                 {
                     Title = "User Is Not Active",
-                    Errors = new string[] { "نام کاربری یا رمز عبور صحیح نیست" }
-                };
-
-                context.Response.StatusCode = 456;// StatusCodes.Status403Forbidden; 
-                context.Response.ContentType = "application/json";
-                var json = JsonSerializer.Serialize(details);
-                await context.Response.WriteAsync(json);
+                    Errors = new[] { "حساب کاربری غیرفعال است." }
+                }));
                 return;
             }
             _logger.LogInformation("Start Check Access");
