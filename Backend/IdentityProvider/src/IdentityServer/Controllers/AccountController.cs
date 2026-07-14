@@ -191,11 +191,13 @@ namespace IdentityServer.Controllers
             ModelState.Remove(nameof(model.CaptchaCode));
 #endif
 
-            var rUrl = string.Empty;
-            if (!string.IsNullOrEmpty(model.ReturnUrl))
+            var rUrl = !string.IsNullOrEmpty(model.ReturnUrl)
+                ? model.ReturnUrl
+                : (returnUrl ?? string.Empty);
+            if (!string.IsNullOrEmpty(rUrl))
             {
-                rUrl = model.ReturnUrl;
-                ValidateReturnUrl(returnUrl);
+                try { ValidateReturnUrl(rUrl); }
+                catch { /* leave validation to RedirectAfterLoginAsync / IsValidReturnUrl */ }
             }
             if (!ModelState.IsValid)
                 return View(await FillModel(model, rUrl, requireCaptcha: model.ShowCaptcha));
@@ -213,16 +215,11 @@ namespace IdentityServer.Controllers
 
                 if (result2.IsSuccess && result2.TwoFactorEnabled)
                     return RedirectToAction(nameof(LoginWith2fa), new { rememberMe = true, returnUrl = rUrl });
-                if (result2.IsSuccess && !result2.TwoFactorEnabled && result2.IsAdmin)
-                {
-                    if (!string.IsNullOrEmpty(rUrl))
-                        return await RedirectAfterLoginAsync(result2.userId, rUrl);
-                    return RedirectToAction("Index", "AdminPanel");
-                }
-                else if (result2.IsSuccess && !result2.TwoFactorEnabled)
-                {
+
+                // Healan: all roles (including Admin) must complete OIDC ReturnUrl back to clinic.
+                // Do NOT divert Admin to /AdminPanel — that breaks clinic login for AdminUser.
+                if (result2.IsSuccess && !result2.TwoFactorEnabled)
                     return await RedirectAfterLoginAsync(result2.userId, rUrl);
-                }
             }
             catch (Exception ex)
             {
@@ -317,16 +314,9 @@ namespace IdentityServer.Controllers
                 //_cacheManager.Remove(result.userId.ToString());
 
 
-                if (result.IsSuccess && result.IsAdmin)
-                {
-                    if (!string.IsNullOrEmpty(returnUrl))
-                        return Redirect(SetCashedValue(result.userId, returnUrl));
-                    return RedirectToAction("Index", "AdminPanel");
-                }
-                else if (result.IsSuccess)
-                {
-                    return await RedirectAfterLoginAsync(result.userId, returnUrl);
-                }
+                // Healan: never divert Admin to AdminPanel during OIDC / clinic login.
+                if (result.IsSuccess)
+                    return await RedirectAfterLoginAsync(result.userId, returnUrl ?? model.ReturnUrl);
                 //return Redirect(returnUrl);
             }
             catch (Exception ex)
