@@ -7,15 +7,30 @@ function CallBackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let cancelled = false;
+
     userManager
       .signinRedirectCallback()
       .then((user) => {
+        if (cancelled) return;
         if (user?.access_token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+          sessionStorage.removeItem('healan_401_redirect_at');
+          navigate('/', { replace: true });
+          return;
         }
-        navigate('/', { replace: true });
+        navigate('/?auth=missing_token', { replace: true });
       })
-      .catch(() => navigate('/', { replace: true }));
+      .catch((err) => {
+        if (cancelled) return;
+        // Avoid AuthGuard→login→callback loop when code was already consumed.
+        console.error('OIDC callback failed', err);
+        navigate('/?auth=callback_error', { replace: true });
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   return (

@@ -1,5 +1,6 @@
 import { request } from '@tse/tools';
 import { HEALAN_API_URL } from '../constants';
+import { userManager } from '../store/userManager';
 import { clampPageSize, fetchAllPaginated, HEALAN_MAX_PAGE_SIZE } from '../utils/pagination';
 import type {
   AppointmentSummary,
@@ -31,12 +32,24 @@ import type {
 
 const BASE = HEALAN_API_URL;
 
+async function accessToken(): Promise<string | undefined> {
+  try {
+    const user = await userManager.getUser();
+    if (user?.access_token && !user.expired) return user.access_token;
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
 async function get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-  return request.get({ baseUrl: BASE, url, options: params ?? {} }) as Promise<T>;
+  const token = await accessToken();
+  return request.get({ baseUrl: BASE, url, options: params ?? {}, token }) as Promise<T>;
 }
 
 async function post<T>(url: string, data: unknown): Promise<T> {
-  return request.post({ baseUrl: BASE, url, options: data }) as Promise<T>;
+  const token = await accessToken();
+  return request.post({ baseUrl: BASE, url, options: data, token }) as Promise<T>;
 }
 
 function pagedParams(params?: Record<string, unknown>): Record<string, unknown> {

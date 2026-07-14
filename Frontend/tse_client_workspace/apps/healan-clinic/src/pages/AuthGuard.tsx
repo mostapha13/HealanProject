@@ -17,14 +17,36 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     const init = async () => {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const authHint = params.get('auth');
+
         const user = await userManager.getUser();
-        if (user && !user.expired) {
+        if (user && !user.expired && user.access_token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
           if (!cancelled) setReady(true);
           return;
         }
+
+        if (authHint === 'callback_error' || authHint === 'missing_token') {
+          if (!cancelled) {
+            setError(
+              'تکمیل ورود ناموفق بود. یک‌بار صفحه را کامل ببندید و دوباره از clinic وارد شوید.'
+            );
+          }
+          return;
+        }
+
+        const last = Number(sessionStorage.getItem('healan_auth_redirect_at') || '0');
+        if (Date.now() - last < 30_000) {
+          if (!cancelled) {
+            setError('ورود در حلقه افتاده است. تب را ببندید و دوباره باز کنید.');
+          }
+          return;
+        }
+
+        sessionStorage.setItem('healan_auth_redirect_at', String(Date.now()));
         await userManager.signinRedirect();
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setError(
             'اتصال به سرویس ورود برقرار نشد. لطفاً چند دقیقه بعد دوباره تلاش کنید یا مستقیماً به auth.drshahrooei.ir بروید.'
