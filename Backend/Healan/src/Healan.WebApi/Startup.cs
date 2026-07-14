@@ -5,7 +5,6 @@ using Healan.WebApi.OperationFilter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Domain.Constants;
 using Share.Domain.Converters;
@@ -16,8 +15,6 @@ using Share.Infrastructure;
 using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
 using Share.MessageBroker.RabbitMQ;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text.Json.Serialization;
 using WorkFlow.Share;
 
@@ -37,9 +34,8 @@ namespace Healan.WebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Show auth failure details in docker logs (iss/aud/signature messages).
             IdentityModelEventSource.ShowPII = true;
-            // Keep JWT "sub" readable as "sub" (not remapped away before CurrentUserService).
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
             services.AddApplication(Configuration);
             services.AddInfrastructure(Configuration);
@@ -77,65 +73,59 @@ namespace Healan.WebApi
                 c.IncludeXmlComments("HealanDocument.xml");
             });
 
-            // Authority = internal Identity (Docker DNS). Issuer on tokens = public auth host.
-            var authority = (Configuration["IdentityServer:Url"] ?? "http://identity-server:8080/").TrimEnd('/') + "/";
-            var validIssuer = (Configuration["IdentityServer:ValidIssuer"]
-                ?? "http://auth.drshahrooei.ir").TrimEnd('/');
+            var authority = Configuration["IdentityServer:Url"];
+            Console.WriteLine($"[HealanAuth] Configure IdentityServerAuthentication Authority={authority} ApiName=WorkFlowWebApi (same as UserManagerAPI) Env={_env.EnvironmentName}");
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-              .AddJwtBearer(options =>
-              {
-                  options.Authority = authority;
-                  options.RequireHttpsMetadata = false;
-                  options.SaveToken = true;
-
-                  options.TokenValidationParameters = new TokenValidationParameters
-                  {
-                      ValidateIssuer = true,
-                      ValidIssuers = new[]
-                      {
-                          validIssuer,
-                          "http://auth.drshahrooei.ir",
-                          "https://auth.drshahrooei.ir",
-                          authority.TrimEnd('/'),
-                      },
-                      // Same clinic tokens work for UserManager (WorkFlowWebApi audience).
-                      // Do not reject Healan because aud list omits HealanWebApi.
-                      ValidateAudience = false,
-                      ValidateLifetime = true,
-                      NameClaimType = "sub",
-                      RoleClaimType = "role",
-                  };
-
-                  options.Events = new JwtBearerEvents
-                  {
-                      OnMessageReceived = context =>
-                      {
-                          Console.WriteLine(
-                              $"[HealanAuth] MessageReceived path={context.Request.Path} hasBearer={context.Request.Headers.ContainsKey("Authorization")}");
-                          return Task.CompletedTask;
-                      },
-                      OnAuthenticationFailed = context =>
-                      {
-                          Console.Error.WriteLine($"[HealanAuth] FAIL: {context.Exception}");
-                          return Task.CompletedTask;
-                      },
-                      OnTokenValidated = context =>
-                      {
-                          var sub = context.Principal?.FindFirst("sub")?.Value
-                              ?? context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                              ?? "(none)";
-                          Console.WriteLine($"[HealanAuth] OK sub={sub}");
-                          return Task.CompletedTask;
-                      },
-                      OnChallenge = context =>
-                      {
-                          Console.Error.WriteLine(
-                              $"[HealanAuth] Challenge error={context.Error} desc={context.ErrorDescription}");
-                          return Task.CompletedTask;
-                      }
-                  };
-              });
+            // EXACT copy of IdentityServer.UserManagerAPI production auth — the only proven path
+            // for these clinic tokens on this Docker stack. Do NOT use custom JwtBearer here:
+            // Authority hostname (identity-server) vs token iss (auth.drshahrooei.ir) breaks JwtBearer
+            // issuer validation differently than IdentityServerAuthentication.
+            //
+            // ApiName = WorkFlowWebApi because UserManager already accepts the same Bearer token
+            // with that audience; HealanWebApi is often missing from JWT aud when Content_Producer
+            // is requested unless identity-server was rebuilt with that ApiResource.
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+              .AddIdentityServerAuthentication("Bearer", options =>
+               {
+                   options.Authority = authority;
+                   options.ApiName = "WorkFlowWebApi";
+                   options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
+                   options.RequireHttpsMetadata = false;
+                   options.JwtBearerEvents = new JwtBearerEvents
+                   {
+                       OnMessageReceived = ctx =>
+                       {
+                           Console.WriteLine($"[HealanAuth] MessageReceived path={ctx.Request.Path} hasAuthHeader={ctx.Request.Headers.ContainsKey("Authorization")}");
+                           return Task.CompletedTask;
+                       },
+                       OnAuthenticationFailed = ctx =>
+                       {
+                           Console.Error.WriteLine($"[HealanAuth] FAIL type={ctx.Exception.GetType().Name} msg={ctx.Exception.Message}");
+                           if (ctx.Exception.InnerException != null)
+                               Console.Error.WriteLine($"[HealanAuth] FAIL inner={ctx.Exception.InnerException.Message}");
+                           return Task.CompletedTask;
+                       },
+                       OnTokenValidated = ctx =>
+                       {
+                           var sub = ctx.Principal?.FindFirst("sub")?.Value
+                               ?? ctx.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                               ?? "(none)";
+                           var claimTypes = string.Join(",", ctx.Principal?.Claims.Select(c => c.Type).Distinct().Take(15) ?? Array.Empty<string>());
+                           Console.WriteLine($"[HealanAuth] OK sub={sub} claimTypes=[{claimTypes}]");
+                           return Task.CompletedTask;
+                       },
+                       OnChallenge = ctx =>
+                       {
+                           Console.Error.WriteLine($"[HealanAuth] Challenge error={ctx.Error} desc={ctx.ErrorDescription} authFailure={ctx.AuthenticateFailure?.Message}");
+                           return Task.CompletedTask;
+                       }
+                   };
+               });
 
             services.AddAuthorization();
 
@@ -161,6 +151,8 @@ namespace Healan.WebApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            Console.WriteLine($"[HealanAuth] Pipeline start Env={env.EnvironmentName} IsDevelopment={env.IsDevelopment()}");
+
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else
@@ -174,7 +166,9 @@ namespace Healan.WebApi
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
-            // Before Authorization so failed JWT still hits AccessMiddleware (visible logs).
+            // Decode JWT iss/aud/sub even when auth fails — visible in docker logs as [AuthDiag]
+            app.UseMiddleware<AuthDiagnosticsMiddleware>();
+            // Must run after Authentication. (Local DEBUG builds skip checks inside AccessMiddleware.)
             app.UseMiddleware<AccessMiddleware>(HealanAccessFormIds.SystemName);
             app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());

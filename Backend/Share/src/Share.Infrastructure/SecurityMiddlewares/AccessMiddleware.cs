@@ -30,8 +30,11 @@ namespace Share.Infrastructure.SecurityMiddlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
+            // IMPORTANT: Local Visual Studio runs as DEBUG — this entire security gate is SKIPPED.
+            // Docker publishes Release, so Production always enforces auth. That is why clinic
+            // "worked locally" but returns 401 on the server with the same token.
 #if DEBUG
-
+            _logger.LogDebug("AccessMiddleware SKIPPED (DEBUG build) path={Path}", context.Request.Path.Value);
             await _next(context);
             return;
 #endif
@@ -48,27 +51,29 @@ namespace Share.Infrastructure.SecurityMiddlewares
             using var scope = _serviceScopeFactory.CreateScope();
             var _identityTool = scope.ServiceProvider.GetRequiredService<IIdentityTool>();
             var _currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
-            _logger.LogInformation("Check If User Is Active...");
+            _logger.LogInformation("AccessMiddleware check path={Path} system={System}", context.Request.Path.Value, _systemName);
 
-            // Unauthenticated / token rejected by JWT middleware → 401
-            if (context.User?.Identity?.IsAuthenticated != true ||
-                _currentUserService.UserId == Guid.Empty)
+            var isAuthenticated = context.User?.Identity?.IsAuthenticated == true;
+            var userId = _currentUserService.UserId;
+
+            // Unauthenticated / token rejected / sub claim not mapped → 401
+            if (!isAuthenticated || userId == Guid.Empty)
             {
-                var claimTypes = context.User?.Claims?
-                    .Select(c => c.Type)
-                    .Distinct()
-                    .Take(20);
-                var claimsJoined = claimTypes == null ? "" : string.Join(",", claimTypes);
-                var authHeader = context.Request.Headers.ContainsKey("Authorization");
-                // Console so it always appears in docker logs regardless of LogLevel
-                Console.Error.WriteLine(
-                    $"[AccessMiddleware] 401 path={context.Request.Path} authHeader={authHeader} authenticated={context.User?.Identity?.IsAuthenticated == true} userIdEmpty={_currentUserService.UserId == Guid.Empty} claims=[{claimsJoined}]");
-                _logger.LogWarning(
-                    "Auth rejected for {Path}. Authenticated={Auth}, UserIdEmpty={Empty}, Claims=[{Claims}]",
-                    context.Request.Path.Value,
-                    context.User?.Identity?.IsAuthenticated == true,
-                    _currentUserService.UserId == Guid.Empty,
-                    claimsJoined);
+                var claimDump = string.Join("; ",
+                    (context.User?.Claims ?? Enumerable.Empty<System.Security.Claims.Claim>())
+                        .Take(20)
+                        .Select(c => $"{c.Type}={Truncate(c.Value, 40)}"));
+                var authHeaderPresent = context.Request.Headers.ContainsKey("Authorization");
+                var reason = !authHeaderPresent
+                    ? "missing_authorization_header"
+                    : !isAuthenticated
+                        ? "jwt_not_authenticated"
+                        : "userid_empty_despite_authenticated";
+
+                var line =
+                    $"[AccessMiddleware] 401 path={context.Request.Path} reason={reason} authHeader={authHeaderPresent} authenticated={isAuthenticated} userId={userId} claims=[{claimDump}]";
+                Console.Error.WriteLine(line);
+                _logger.LogWarning("{Line}", line);
 
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
@@ -83,11 +88,11 @@ namespace Share.Infrastructure.SecurityMiddlewares
             bool isActive;
             try
             {
-                isActive = await _identityTool.IsUserActive(_currentUserService.UserId);
+                isActive = await _identityTool.IsUserActive(userId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "IsUserActive gRPC failed for {UserId}", _currentUserService.UserId);
+                _logger.LogError(ex, "IsUserActive gRPC failed for {UserId}", userId);
                 context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
@@ -288,6 +293,12 @@ namespace Share.Infrastructure.SecurityMiddlewares
 
             // Return null if no "language.id" is found
             return null;
+        }
+
+        private static string Truncate(string value, int max)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value.Length <= max ? value : value[..max] + "…";
         }
     }
 }

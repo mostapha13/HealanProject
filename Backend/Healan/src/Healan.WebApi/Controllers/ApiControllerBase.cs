@@ -7,8 +7,7 @@ namespace Healan.WebApi.Controllers
     [ApiController]
     [Route("Healan/api/v1/[controller]")]
     [Produces("application/json")]
-    // Same as UserManagerAPI: authenticated user is enough.
-    // Scope is already enforced by IdentityServerAuthentication ApiName=HealanWebApi.
+    // Same as UserManagerAPI: authenticated Bearer is enough.
     [Authorize]
     public abstract class ApiControllerBase : ControllerBase
     {
