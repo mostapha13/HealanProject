@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Share.Application.Common.Interfaces;
 using Share.Domain.Enums;
 using System;
 using System.Linq;
 using System.Security.Claims;
-using Share.Application.Common.Interfaces;
 
 namespace Share.Infrastructure.Services
 {
@@ -24,14 +24,35 @@ namespace Share.Infrastructure.Services
                 if (user?.Identity?.IsAuthenticated != true)
                     return Guid.Empty;
 
-                // JWT "sub" is often remapped to NameIdentifier by inbound claim mapping.
-                var raw =
-                    user.FindFirstValue("sub")
-                    ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
-                    ?? user.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+                // IdentityServer / JWT may expose subject under several claim types
+                // depending on inbound claim mapping and authentication handler.
+                var candidates = new[]
+                {
+                    user.FindFirstValue("sub"),
+                    user.FindFirstValue(ClaimTypes.NameIdentifier),
+                    user.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"),
+                    user.FindFirstValue("nameid"),
+                    user.Identity?.Name
+                };
 
-                if (Guid.TryParse(raw, out var result))
-                    return result;
+                foreach (var raw in candidates)
+                {
+                    if (Guid.TryParse(raw, out var id) && id != Guid.Empty)
+                        return id;
+                }
+
+                // Last resort: any claim whose value is a Guid and type looks like subject/id.
+                foreach (var claim in user.Claims)
+                {
+                    if (!Guid.TryParse(claim.Value, out var id) || id == Guid.Empty)
+                        continue;
+
+                    var t = claim.Type ?? string.Empty;
+                    if (t is "sub" or "nameid"
+                        || t.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase)
+                        || t.Equals(ClaimTypes.NameIdentifier, StringComparison.Ordinal))
+                        return id;
+                }
 
                 return Guid.Empty;
             }

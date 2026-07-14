@@ -2,10 +2,9 @@ using FluentValidation.AspNetCore;
 using Healan.Application;
 using Healan.Infrastructure;
 using Healan.WebApi.OperationFilter;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Domain.Constants;
 using Share.Domain.Converters;
@@ -16,7 +15,6 @@ using Share.Infrastructure;
 using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
 using Share.MessageBroker.RabbitMQ;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
 using WorkFlow.Share;
 
@@ -36,10 +34,10 @@ namespace Healan.WebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            IdentityModelEventSource.ShowPII = _env.IsDevelopment();
+            IdentityModelEventSource.ShowPII = true;
 
-            // Keep JWT "sub" as "sub" (default map remaps it to NameIdentifier).
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            // Match UserManagerAPI: do NOT clear inbound claim map
+            // (sub is remapped to NameIdentifier; CurrentUserService reads both).
 
             services.AddApplication(Configuration);
             services.AddInfrastructure(Configuration);
@@ -80,29 +78,20 @@ namespace Healan.WebApi
             var allowAnonymousDev = _env.IsDevelopment() &&
                 Configuration.GetValue<bool>("Healan:AllowAnonymousInDevelopment");
 
-            var authority = Configuration["IdentityServer:Url"]?.TrimEnd('/') + "/";
-            var validIssuer = (Configuration["IdentityServer:ValidIssuer"] ?? authority)?.TrimEnd('/');
-            // Production auth host is HTTP for now — must not require HTTPS metadata.
-            var requireHttpsMetadata = Configuration.GetValue(
-                "IdentityServer:RequireHttpsMetadata",
-                authority?.StartsWith("https://", StringComparison.OrdinalIgnoreCase) == true);
-
-            services.AddAuthentication("Bearer")
-              .AddJwtBearer("Bearer", options =>
+            // Same working pattern as UserManagerAPI in production.
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+              .AddIdentityServerAuthentication("Bearer", options =>
                {
-                   options.Authority = authority;
-                   options.Audience = "HealanWebApi";
-                   options.RequireHttpsMetadata = requireHttpsMetadata;
-                   options.TokenValidationParameters = new TokenValidationParameters
-                   {
-                       NameClaimType = "sub",
-                       RoleClaimType = "role",
-                       ValidIssuer = validIssuer,
-                       ValidateIssuer = true,
-                       // IdentityServer may put API name and/or scope in "aud"
-                       ValidAudiences = new[] { "HealanWebApi", "Content_Producer" },
-                       ValidateAudience = true,
-                   };
+                   // Match UserManagerAPI exactly (proven working on this stack).
+                   options.Authority = Configuration["IdentityServer:Url"];
+                   options.ApiName = "HealanWebApi";
+                   options.ApiSecret = "T$e.!R*HealanWebApi*E@M@M@A@M";
+                   options.RequireHttpsMetadata = false;
                });
 
             services.AddAuthorization(options =>

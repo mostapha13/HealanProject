@@ -54,6 +54,17 @@ namespace Share.Infrastructure.SecurityMiddlewares
             if (context.User?.Identity?.IsAuthenticated != true ||
                 _currentUserService.UserId == Guid.Empty)
             {
+                var claimTypes = context.User?.Claims?
+                    .Select(c => c.Type)
+                    .Distinct()
+                    .Take(20);
+                _logger.LogWarning(
+                    "Auth rejected for {Path}. Authenticated={Auth}, UserIdEmpty={Empty}, Claims=[{Claims}]",
+                    context.Request.Path.Value,
+                    context.User?.Identity?.IsAuthenticated == true,
+                    _currentUserService.UserId == Guid.Empty,
+                    claimTypes == null ? "" : string.Join(",", claimTypes));
+
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
