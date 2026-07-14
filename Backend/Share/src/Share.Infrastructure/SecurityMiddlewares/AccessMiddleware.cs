@@ -50,8 +50,9 @@ namespace Share.Infrastructure.SecurityMiddlewares
             var _currentUserService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
             _logger.LogInformation("Check If User Is Active...");
 
-            // Unauthenticated / missing user id in token → 401 (not a login-page credential error)
-            if (_currentUserService.UserId == Guid.Empty)
+            // Unauthenticated / token rejected by JWT middleware → 401
+            if (context.User?.Identity?.IsAuthenticated != true ||
+                _currentUserService.UserId == Guid.Empty)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
