@@ -58,12 +58,17 @@ namespace Share.Infrastructure.SecurityMiddlewares
                     .Select(c => c.Type)
                     .Distinct()
                     .Take(20);
+                var claimsJoined = claimTypes == null ? "" : string.Join(",", claimTypes);
+                var authHeader = context.Request.Headers.ContainsKey("Authorization");
+                // Console so it always appears in docker logs regardless of LogLevel
+                Console.Error.WriteLine(
+                    $"[AccessMiddleware] 401 path={context.Request.Path} authHeader={authHeader} authenticated={context.User?.Identity?.IsAuthenticated == true} userIdEmpty={_currentUserService.UserId == Guid.Empty} claims=[{claimsJoined}]");
                 _logger.LogWarning(
                     "Auth rejected for {Path}. Authenticated={Auth}, UserIdEmpty={Empty}, Claims=[{Claims}]",
                     context.Request.Path.Value,
                     context.User?.Identity?.IsAuthenticated == true,
                     _currentUserService.UserId == Guid.Empty,
-                    claimTypes == null ? "" : string.Join(",", claimTypes));
+                    claimsJoined);
 
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";

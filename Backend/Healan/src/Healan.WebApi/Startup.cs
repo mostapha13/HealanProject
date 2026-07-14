@@ -15,6 +15,7 @@ using Share.Infrastructure;
 using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
 using Share.MessageBroker.RabbitMQ;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using WorkFlow.Share;
 
@@ -35,9 +36,6 @@ namespace Healan.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             IdentityModelEventSource.ShowPII = true;
-
-            // Match UserManagerAPI: do NOT clear inbound claim map
-            // (sub is remapped to NameIdentifier; CurrentUserService reads both).
 
             services.AddApplication(Configuration);
             services.AddInfrastructure(Configuration);
@@ -75,10 +73,11 @@ namespace Healan.WebApi
                 c.IncludeXmlComments("HealanDocument.xml");
             });
 
-            var allowAnonymousDev = _env.IsDevelopment() &&
-                Configuration.GetValue<bool>("Healan:AllowAnonymousInDevelopment");
-
-            // Same working pattern as UserManagerAPI in production.
+            // CRITICAL: use the SAME ApiName/ApiSecret as UserManagerAPI.
+            // Clinic tokens are issued for Content_Producer; aud includes WorkFlowWebApi
+            // (UserManager already accepts them). HealanWebApi alone fails if that
+            // audience is missing from the JWT — which leaves silent 401 with no AccessMiddleware logs
+            // because UseAuthorization Challenge short-circuits the pipeline.
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -87,26 +86,41 @@ namespace Healan.WebApi
             })
               .AddIdentityServerAuthentication("Bearer", options =>
                {
-                   // Match UserManagerAPI exactly (proven working on this stack).
                    options.Authority = Configuration["IdentityServer:Url"];
-                   options.ApiName = "HealanWebApi";
-                   options.ApiSecret = "T$e.!R*HealanWebApi*E@M@M@A@M";
+                   options.ApiName = "WorkFlowWebApi";
+                   options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
                    options.RequireHttpsMetadata = false;
+                   options.JwtBearerEvents = new JwtBearerEvents
+                   {
+                       OnMessageReceived = context =>
+                       {
+                           var hasBearer = context.Request.Headers.ContainsKey("Authorization");
+                           Console.WriteLine($"[HealanAuth] MessageReceived path={context.Request.Path} hasBearer={hasBearer}");
+                           return Task.CompletedTask;
+                       },
+                       OnAuthenticationFailed = context =>
+                       {
+                           Console.Error.WriteLine($"[HealanAuth] FAIL: {context.Exception}");
+                           return Task.CompletedTask;
+                       },
+                       OnTokenValidated = context =>
+                       {
+                           var sub = context.Principal?.FindFirst("sub")?.Value
+                               ?? context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                               ?? "(none)";
+                           var aud = string.Join("|", context.Principal?.FindAll("aud").Select(c => c.Value) ?? Array.Empty<string>());
+                           Console.WriteLine($"[HealanAuth] OK sub={sub} aud={aud}");
+                           return Task.CompletedTask;
+                       },
+                       OnChallenge = context =>
+                       {
+                           Console.Error.WriteLine($"[HealanAuth] Challenge error={context.Error} desc={context.ErrorDescription}");
+                           return Task.CompletedTask;
+                       }
+                   };
                });
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("HealanApi", policy =>
-                {
-                    if (allowAnonymousDev)
-                        policy.RequireAssertion(_ => true);
-                    else
-                    {
-                        policy.RequireAuthenticatedUser();
-                        policy.RequireClaim("scope", "Content_Producer");
-                    }
-                });
-            });
+            services.AddAuthorization();
 
             services.AddCors(options =>
             {
@@ -140,8 +154,10 @@ namespace Healan.WebApi
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
-            app.UseAuthorization();
+            // Before UseAuthorization so rejected JWT still hits AccessMiddleware (and our logs),
+            // instead of an empty ASP.NET Challenge that leaves docker logs silent.
             app.UseMiddleware<AccessMiddleware>(HealanAccessFormIds.SystemName);
+            app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
