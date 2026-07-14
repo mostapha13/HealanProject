@@ -73,14 +73,22 @@ namespace Share.Infrastructure.SecurityMiddlewares
                 var line =
                     $"[AccessMiddleware] 401 path={context.Request.Path} reason={reason} authHeader={authHeaderPresent} authenticated={isAuthenticated} userId={userId} claims=[{claimDump}]";
                 Console.Error.WriteLine(line);
-                _logger.LogWarning("{Line}", line);
+                _logger.LogError("{Line}", line); // Error level so Serilog always emits to docker console
 
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
+                context.Response.Headers["X-Auth-Reason"] = reason;
+                context.Response.Headers["X-Auth-Authenticated"] = isAuthenticated ? "1" : "0";
+                context.Response.Headers["X-Auth-Has-Bearer"] = authHeaderPresent ? "1" : "0";
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
                 {
                     Title = "Unauthorized",
-                    Errors = new[] { "نشست کاربری معتبر نیست. دوباره وارد شوید." }
+                    Errors = new[]
+                    {
+                        "نشست کاربری معتبر نیست. دوباره وارد شوید.",
+                        // Visible in browser Network tab — proves Release AccessMiddleware ran
+                        $"diag:{reason};bearer={authHeaderPresent};authenticated={isAuthenticated};userId={(userId == Guid.Empty ? "empty" : userId.ToString())};claims={claimDump}"
+                    }
                 }));
                 return;
             }

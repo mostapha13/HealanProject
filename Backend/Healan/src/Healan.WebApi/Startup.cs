@@ -74,7 +74,7 @@ namespace Healan.WebApi
             });
 
             var authority = Configuration["IdentityServer:Url"];
-            Console.WriteLine($"[HealanAuth] Configure IdentityServerAuthentication Authority={authority} ApiName=WorkFlowWebApi (same as UserManagerAPI) Env={_env.EnvironmentName}");
+            Console.WriteLine($"[HealanAuth] Configure IdentityServerAuthentication Authority={authority} ApiName=WorkFlowWebApi (same as UserManagerAPI) Env={_env.EnvironmentName} BuildTag=f28a843-authdiag-v2");
 
             // EXACT copy of IdentityServer.UserManagerAPI production auth — the only proven path
             // for these clinic tokens on this Docker stack. Do NOT use custom JwtBearer here:
