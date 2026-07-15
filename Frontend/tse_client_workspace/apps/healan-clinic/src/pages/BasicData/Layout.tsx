@@ -5,7 +5,6 @@ import { PageHeader } from '../../components/Ui';
 import { useUserAccess } from '../../context/UserAccessContext';
 
 const tabs = [
-  { path: '/basic-data/companies', label: 'مرکز درمانی' },
   { path: '/basic-data/insurance', label: 'بیمه' },
   { path: '/basic-data/services', label: 'خدمات' },
   { path: '/basic-data/fees', label: 'تعرفه' },

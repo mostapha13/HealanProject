@@ -50,12 +50,8 @@ namespace Share.Application.Common.Filters
                 return;
             }
 
-            if (!context.ModelState.IsValid)
-            {
-                HandleInvalidModelStateException(context);
-                return;
-            }
-
+            // Do not mask real exceptions as "invalid input" just because ModelState
+            // has NRT/[Required] noise (e.g. optional FilterText/SearchText left unset).
             HandleUnknownException(context);
         }
 
@@ -190,7 +186,11 @@ namespace Share.Application.Common.Filters
 
             var errors = isDevelopment
                 ? BuildDevelopmentErrors(ex)
-                : new[] { "دیتای ورودی غیر معتبر است" };
+                : new[]
+                {
+                    "خطای داخلی سرور.",
+                    $"diag:{ex.GetType().Name}:{Truncate(ex.Message, 180)}",
+                };
 
             _logger.LogError(ex,
                 "Unhandled API exception. Type={ExceptionType}, Message={Message}",
@@ -225,6 +225,13 @@ namespace Share.Application.Common.Filters
                 ? messages.Distinct().ToArray()
                 : new[] { "خطای نامشخص سرور" };
         }
+
+        private static string Truncate(string? value, int max)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+            return value.Length <= max ? value : value.Substring(0, max);
+        }
+
         private void HandleBadRequestException(ExceptionContext context)
         {
             var exception = context.Exception as BadRequestExceptions;

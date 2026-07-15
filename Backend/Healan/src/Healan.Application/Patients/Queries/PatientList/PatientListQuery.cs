@@ -9,7 +9,7 @@ using Share.Application.Common.Models;
 namespace Healan.Application.Patients.Queries.PatientList;
 public class PatientListQuery : AbstractSearchRequest<PaginatedList<PatientSummaryResult>>
 {
-    public string FilterText { get; set; }
+    public string? FilterText { get; set; }
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
 }

@@ -22,7 +22,6 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [showForm, setShowForm] = useState(false);
 
   const [defaultCompanyId, setDefaultCompanyId] = useState(0);
-  const [companies, setCompanies] = useState<{ companyId: number; companyName: string }[]>([]);
 
   const [medicalGroups, setMedicalGroups] = useState<{ key: number; name: string; displayName?: string }[]>([]);
 
@@ -79,7 +78,6 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     healanApi.doctors.medicalGroups().then(setMedicalGroups).catch(() => {});
 
     healanApi.companies.listAll().then((list) => {
-      setCompanies(list.map((c) => ({ companyId: c.companyId, companyName: c.companyName })));
       if (list[0]) {
         setDefaultCompanyId(list[0].companyId);
         setForm((f) => ({ ...f, companyId: list[0].companyId }));
@@ -138,7 +136,7 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
     if (form.companyId <= 0) {
 
-      onAlert({ type: 'error', message: 'شرکت/مرکز درمانی یافت نشد. ابتدا مرکز را ثبت کنید.' });
+      onAlert({ type: 'error', message: 'مرکز پیش‌فرض یافت نشد. با پشتیبانی تماس بگیرید.' });
 
       return;
 
@@ -249,22 +247,6 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 <label>موبایل</label>
 
                 <input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} />
-
-              </div>
-
-              <div className="healan-form-field">
-
-                <label>مرکز درمانی</label>
-
-                <SearchableSelect
-                  value={form.companyId}
-                  onChange={(v) => setForm({ ...form, companyId: v ?? 0 })}
-                  placeholder="انتخاب مرکز"
-                  options={companies.map((c) => ({
-                    value: c.companyId,
-                    label: c.companyName,
-                  }))}
-                />
 
               </div>
 

@@ -45,7 +45,7 @@ function validate(form: QuickAddDoctorForm): FieldErrors {
     errors.mobile = 'شماره موبایل الزامی است';
   }
   if (form.medicalGroupTypeId <= 0) errors.medicalGroupTypeId = 'تخصص را انتخاب کنید';
-  if (form.companyId <= 0) errors.companyId = 'مرکز درمانی یافت نشد';
+  if (form.companyId <= 0) errors.companyId = 'مرکز پیش‌فرض یافت نشد';
   return errors;
 }
 
@@ -114,8 +114,6 @@ export function QuickAddDoctorModal({ open, onClose, onSuccess, onAlert }: Quick
     }
   };
 
-  const singleCompany = companies.length === 1;
-
   return (
     <HealanModal
       open={open}
@@ -144,7 +142,7 @@ export function QuickAddDoctorModal({ open, onClose, onSuccess, onAlert }: Quick
         <div className="healan-modal__loading">در حال بارگذاری...</div>
       ) : companies.length === 0 ? (
         <div className="healan-modal__empty">
-          مرکز درمانی در سیستم ثبت نشده است. ابتدا از بخش «اطلاعات پایه» یک مرکز ثبت کنید.
+          مرکز پیش‌فرض در سیستم یافت نشد. با پشتیبانی فنی تماس بگیرید.
         </div>
       ) : (
         <div className="healan-quick-form">
@@ -224,26 +222,6 @@ export function QuickAddDoctorModal({ open, onClose, onSuccess, onAlert }: Quick
             {errors.medicalGroupTypeId && (
               <span className="healan-field-error">{errors.medicalGroupTypeId}</span>
             )}
-          </div>
-
-          <div className="healan-form-field">
-            <label>
-              مرکز درمانی <span className="healan-required">*</span>
-            </label>
-            {singleCompany ? (
-              <input value={companies[0].companyName} readOnly className="healan-input--readonly" />
-            ) : (
-              <SearchableSelect
-                value={form.companyId || null}
-                onChange={(v) => update('companyId', v ?? 0)}
-                placeholder="انتخاب مرکز"
-                options={companies.map((c) => ({
-                  value: c.companyId,
-                  label: c.companyName,
-                }))}
-              />
-            )}
-            {errors.companyId && <span className="healan-field-error">{errors.companyId}</span>}
           </div>
         </div>
       )}

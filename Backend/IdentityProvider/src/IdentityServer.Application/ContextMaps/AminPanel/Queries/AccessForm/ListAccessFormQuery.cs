@@ -16,7 +16,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessForm
 
     public class ListAccessFormQuery : AbstractSearchRequest<PaginatedList<AccessFormResponse>>
     {
-        public string SearchText { get; set; }
+        public string? SearchText { get; set; }
     }
     public class ListAccessFormQueryHandler : IRequestHandler<ListAccessFormQuery, PaginatedList<AccessFormResponse>>
     {

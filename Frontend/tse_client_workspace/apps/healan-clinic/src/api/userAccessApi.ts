@@ -131,6 +131,7 @@ export async function fetchIdentityRoles(searchText = ''): Promise<IdentityRoleI
 }
 
 export async function fetchAccessRoleTree(roleId: string): Promise<AccessRoleTreeItem[]> {
+  if (!roleId?.trim()) return [];
   const token = await accessToken();
   const res = await request.get({
     baseUrl: USER_MANAGER_API,

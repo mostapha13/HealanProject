@@ -9,7 +9,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.Role
     public class RoleQuery : AbstractRequestBase<List<RoleResponse>>
     {
         public int AccessSystemId { get; set; }
-        public string SearchText { get; set; }
+        public string? SearchText { get; set; }
     }
     public class RoleQueryHandler : IRequestHandler<RoleQuery, List<RoleResponse>>
     {

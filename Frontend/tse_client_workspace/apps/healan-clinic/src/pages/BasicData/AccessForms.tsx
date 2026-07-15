@@ -56,6 +56,10 @@ function flattenMenus(
   const rows: FlatRow[] = [];
   items.forEach((item, index) => {
     const url = item.accessForm?.url ?? '';
+    // مرکز درمانی مخفی شده از UI
+    if (url === '/basic-data/companies' || item.accessMenuId === 5109) {
+      return;
+    }
     const isAction = /\/(add|edit|delete|publish)$/.test(url);
     const isSystem = item.accessMenuId >= 5101 && item.accessMenuId <= 5128;
     rows.push({

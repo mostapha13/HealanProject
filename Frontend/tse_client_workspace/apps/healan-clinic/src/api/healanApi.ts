@@ -228,10 +228,11 @@ export const healanApi = {
 
   users: {
     list: (params?: Record<string, unknown>) =>
-      get<PaginatedResponse<UserSummary>>('User/UserList', pagedParams(params)),
+      get<PaginatedResponse<UserSummary>>('User/UserList', pagedParams({ filterText: '', ...params })),
     listAll: (params?: Record<string, unknown>) =>
       fetchAllPaginated<UserSummary>((pageNumber, pageSize) =>
         get<PaginatedResponse<UserSummary>>('User/UserList', {
+          filterText: '',
           ...params,
           pageNumber,
           pageSize,
