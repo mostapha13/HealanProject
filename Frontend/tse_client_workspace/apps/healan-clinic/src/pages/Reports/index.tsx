@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from '@tse/utils';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type { ClinicAnalytics, DoctorSummary, PatientSummary, ServiceType } from '../../api/types';
@@ -20,6 +21,7 @@ function createDefaultFilters() {
 }
 
 function ReportsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState(createDefaultFilters);
   const [appliedFilters, setAppliedFilters] = useState(createDefaultFilters);
   const [data, setData] = useState<ClinicAnalytics | null>(null);
@@ -103,6 +105,24 @@ function ReportsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           </button>
         }
       />
+
+      <div className="healan-card" style={{ marginBottom: '1rem' }}>
+        <div className="healan-card__body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <div>
+            <strong>پیامک‌های ارسالی</strong>
+            <div style={{ color: 'var(--healan-text-muted)', fontSize: '0.9rem', marginTop: 4 }}>
+              مشاهده OTP فراموشی رمز و تاریخچه پیامک‌ها
+            </div>
+          </div>
+          <button
+            type="button"
+            className="healan-btn healan-btn--primary"
+            onClick={() => navigate('/reports/sms')}
+          >
+            مشاهده پیامک‌ها
+          </button>
+        </div>
+      </div>
 
       <div className="healan-card healan-reports-filters">
         <div className="healan-card__header">

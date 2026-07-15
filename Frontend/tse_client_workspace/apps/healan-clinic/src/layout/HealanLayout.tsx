@@ -5,7 +5,7 @@ import { HealanNavLink } from '../components/HealanNavLink';
 import { useUserAccess } from '../context/UserAccessContext';
 import './healan.scss';
 
-const navItems = [
+const navItems: Array<{ path: string; label: string; icon: string; end?: boolean; accessPath?: string }> = [
   { path: '/', label: 'داشبورد', end: true, icon: '📊' },
   { path: '/queue', label: 'صف انتظار', icon: '⏳' },
   { path: '/appointments', label: 'پذیرش و نوبت', icon: '📋' },
@@ -15,6 +15,7 @@ const navItems = [
   { path: '/basic-data', label: 'اطلاعات پایه', icon: '📁' },
   { path: '/site-content', label: 'محتوای سایت', icon: '🌐' },
   { path: '/reports', label: 'گزارش‌ها', icon: '📈' },
+  { path: '/reports/sms', label: 'پیامک‌ها', icon: '💬', accessPath: '/reports' },
   { path: '/signature', label: 'امضای دیجیتال', icon: '✍️' },
   { path: '/workflow', label: 'کارتابل', icon: '🔄' },
 ];
@@ -30,7 +31,7 @@ export function HealanLayout() {
 
   const visibleNavItems = loading
     ? navItems
-    : navItems.filter((item) => canAccess(item.path));
+    : navItems.filter((item) => canAccess(item.accessPath ?? item.path));
 
   const handleLogout = async () => {
     await userManager.signoutRedirect();
