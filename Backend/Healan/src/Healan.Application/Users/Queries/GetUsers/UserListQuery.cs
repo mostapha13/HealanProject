@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Users.Dtos;
 using Healan.Domain.Users.Entities;
 using IdentityServer.GrpcClient.Interfaces;
 using MediatR;
-using Share.Application.Common.Mapping;
+using Microsoft.EntityFrameworkCore;
 using Share.Application.Common.Models;
 
 namespace Healan.Application.Users.Queries.GetUsers
@@ -42,7 +41,7 @@ namespace Healan.Application.Users.Queries.GetUsers
                 });
             }
 
-            IQueryable<User> users = _applicationDbContext.Users;
+            IQueryable<User> users = _applicationDbContext.Users.AsNoTracking().Include(u => u.Company);
 
             if (userIds != null)
             {
@@ -59,9 +58,22 @@ namespace Healan.Application.Users.Queries.GetUsers
                     (c.PhoneNumber != null && c.PhoneNumber.Contains(filter)));
             }
 
-            return await users
-                .ProjectTo<UserListResult>(_mapper.ConfigurationProvider)
-                .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+            // Avoid ProjectTo + GetDisplayName() (not SQL-translatable → 500).
+            var pageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
+            var pageSize = request.PageSize < 1 ? 10 : Math.Min(request.PageSize, 20);
+            var totalCount = await users.CountAsync(cancellationToken);
+            var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages > 0 && pageNumber > totalPages)
+                pageNumber = totalPages;
+
+            var entities = await users
+                .OrderBy(u => u.UserId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<UserListResult>>(entities);
+            return new PaginatedList<UserListResult>(items, totalCount, pageNumber, pageSize);
         }
     }
 }
