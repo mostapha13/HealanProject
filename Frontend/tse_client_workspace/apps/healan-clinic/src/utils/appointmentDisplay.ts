@@ -19,6 +19,19 @@ export function appointmentDoctorName(appointment: AppointmentSummary): string {
   return fullName(appointment.doctor?.firstName, appointment.doctor?.lastName);
 }
 
+/** پزشک + گروه پزشکی — مثال: شهرویی · قلب و عروق */
+export function appointmentDoctorDisplay(appointment: AppointmentSummary): string {
+  const name = appointmentDoctorName(appointment);
+  const group = appointment.doctor?.medicalGroupTypeName?.trim();
+  if (group && name !== '—') return `${name} · ${group}`;
+  if (group) return group;
+  return name;
+}
+
+export function appointmentDoctorGroupKey(appointment: AppointmentSummary): string {
+  return `${appointment.doctorId ?? 0}|${appointmentDoctorName(appointment)}`;
+}
+
 export function appointmentPatientNationalCode(appointment: AppointmentSummary): string {
   return appointment.patient?.nationalCode ?? appointment.patientNationalCode ?? '—';
 }

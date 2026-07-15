@@ -260,6 +260,25 @@
   background: var(--healan-primary-light);
 }
 
+.healan-btn--confirm-danger {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.healan-btn--confirm-danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.healan-confirm__hint {
+  margin: 0;
+  color: var(--healan-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  text-align: center;
+}
+
 .healan-btn--ghost {
   width: 100%;
   background: rgba(255, 255, 255, 0.1);

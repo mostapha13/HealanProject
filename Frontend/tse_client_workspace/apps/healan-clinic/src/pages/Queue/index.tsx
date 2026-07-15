@@ -9,7 +9,7 @@ import {
   AppointmentSummary,
 } from '../../api/types';
 import { convertDateAndTimeToJalali } from '@tse/tools';
-import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentPatientDisplay, appointmentPatientName, appointmentPaymentColor, appointmentPaymentLabel, appointmentIsScheduled, appointmentIsDuringVisit, appointmentCanRecordClinicalWork } from '../../utils/appointmentDisplay';
+import { appointmentDoctorDisplay, appointmentInsuranceDisplay, appointmentPatientDisplay, appointmentPatientName, appointmentPaymentColor, appointmentPaymentLabel, appointmentIsScheduled, appointmentIsDuringVisit, appointmentCanRecordClinicalWork, appointmentDoctorGroupKey } from '../../utils/appointmentDisplay';
 import { useNavigate } from '@tse/utils';
 import { openEchoPrintWindowBlank, writeEchoPrintHtmlToWindow } from '../../utils/printEchoReport';
 import { buildEchoPrintPayload } from '../../utils/echoPrintPayload';
@@ -110,13 +110,36 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           ) : items.length === 0 ? (
             <div className="healan-empty">نوبتی یافت نشد</div>
           ) : (
-            items.map((item) => {
-              const status = item.appointmentTypeId as AppointmentStatus;
-              return (
+            (() => {
+              const groups = new Map<string, AppointmentSummary[]>();
+              for (const item of items) {
+                const key = appointmentDoctorGroupKey(item);
+                const list = groups.get(key) ?? [];
+                list.push(item);
+                groups.set(key, list);
+              }
+              return Array.from(groups.entries()).map(([groupKey, groupItems]) => {
+                const first = groupItems[0];
+                return (
+                  <div key={groupKey}>
+                    <div
+                      style={{
+                        padding: '0.65rem 1rem',
+                        background: 'var(--healan-primary-light, #eef6f4)',
+                        borderBottom: '1px solid var(--healan-border, #e5e7eb)',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      پزشک: {appointmentDoctorDisplay(first)}
+                    </div>
+                    {groupItems.map((item) => {
+                      const status = item.appointmentTypeId as AppointmentStatus;
+                      return (
                 <div key={item.appointmentId} className="healan-queue-item">
                   <div className="healan-queue-item__info">
                     <h4>{appointmentPatientDisplay(item)}</h4>
-                    <p>{appointmentDoctorName(item)} · <span>{convertDateAndTimeToJalali(item.appointmentDate)}</span></p>
+                    <p><span>{convertDateAndTimeToJalali(item.appointmentDate)}</span></p>
                     <p className="healan-queue-item__meta">بیمه: {appointmentInsuranceDisplay(item)}</p>
                   </div>
                   <div className="healan-actions">
@@ -200,8 +223,12 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                     <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => navigate(`/appointments/${item.appointmentId}`)}>پرونده ویزیت</button>
                   </div>
                 </div>
-              );
-            })
+                      );
+                    })}
+                  </div>
+                );
+              });
+            })()
           )}
         </div>
       </div>

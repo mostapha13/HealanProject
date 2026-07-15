@@ -1,3 +1,4 @@
+using Healan.Application.Common.ClinicAccess;
 using Healan.Application.Common.Interfaces;
 using Healan.Domain.Appointments.Enums;
 using Healan.Domain.Invoices.Enums;
@@ -19,11 +20,17 @@ public class GetClinicAnalyticsQuery : IRequest<ClinicAnalyticsResult>
 public class GetClinicAnalyticsQueryHandler : IRequestHandler<GetClinicAnalyticsQuery, ClinicAnalyticsResult>
 {
     private readonly IApplicationDbContext _db;
+    private readonly IClinicAccessScopeService _clinicAccess;
 
-    public GetClinicAnalyticsQueryHandler(IApplicationDbContext db) => _db = db;
+    public GetClinicAnalyticsQueryHandler(IApplicationDbContext db, IClinicAccessScopeService clinicAccess)
+    {
+        _db = db;
+        _clinicAccess = clinicAccess;
+    }
 
     public async Task<ClinicAnalyticsResult> Handle(GetClinicAnalyticsQuery request, CancellationToken cancellationToken)
     {
+        var scope = await _clinicAccess.ResolveAsync(cancellationToken);
         var start = (request.StartDate ?? DateTime.Today).Date;
         var end = (request.EndDate ?? start).Date;
         if (end < start)
@@ -36,7 +43,8 @@ public class GetClinicAnalyticsQueryHandler : IRequestHandler<GetClinicAnalytics
             .Include(a => a.Doctor)
             .Include(a => a.ServiceTypes)
             .Include(a => a.Invoices)
-            .Where(a => a.AppointmentDate >= start && a.AppointmentDate < endExclusive);
+            .Where(a => a.AppointmentDate >= start && a.AppointmentDate < endExclusive)
+            .ApplyClinicScope(scope);
 
         if (request.DoctorId is > 0)
             appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == request.DoctorId.Value);

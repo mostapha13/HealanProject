@@ -8,6 +8,7 @@ import {
 } from '../../api/userAccessApi';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const FOLDER_TITLES: Record<number, string> = {
   5102: 'مدیریت کلینیک',
@@ -161,7 +162,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       onAlert({ type: 'error', message: 'منوهای سیستمی قابل حذف نیستند' });
       return;
     }
-    if (!window.confirm(`حذف «${row.title.replace(/^—\s*/g, '')}»؟`)) {
+    if (!(await confirmDelete(`منوی «${row.title.replace(/^—\s*/g, '')}» حذف شود؟`))) {
       return;
     }
     try {

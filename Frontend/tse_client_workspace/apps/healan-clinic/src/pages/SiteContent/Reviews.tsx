@@ -5,6 +5,7 @@ import type { PatientReviewItem, PatientReviewStatus } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { convertDateAndTimeToJalali } from '@tse/tools';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const STATUS_OPTIONS: { value: PatientReviewStatus | ''; label: string }[] = [
   { value: '', label: 'همه' },
@@ -53,7 +54,7 @@ function ReviewsAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const remove = async (id: number) => {
-    if (!window.confirm('این نظر حذف شود؟')) return;
+    if (!(await confirmDelete('این نظر حذف شود؟'))) return;
     try {
       await healanApi.portal.reviewDelete(id);
       await load();

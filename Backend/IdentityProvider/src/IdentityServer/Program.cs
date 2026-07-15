@@ -56,6 +56,9 @@ namespace IdentityServer
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                         logger.LogError(accessEx, "Healan access seed failed — clinic users were still seeded.");
                     }
+
+                    // بعد از AccessSystem — نقش‌های رضا/سارا/مریم فقط Doctor/Secretary/Accountant
+                    await HealanClinicUserSeed.SeedAsync(context, userManager, roleManager);
                 }
                 catch (Exception ex)
                 {

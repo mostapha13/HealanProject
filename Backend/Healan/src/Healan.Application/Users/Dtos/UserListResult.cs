@@ -16,7 +16,7 @@ namespace Healan.Application.Users.Dtos
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public bool IsActive { get; set; }
-        // public List<UserRole> UserRoles { get; set; }
+        public List<UserRole> UserRoles { get; set; } = new();
         public string PersonnelNumber { get; set; }
         public string Landline { get; set; }
         public string PrefixNumber { get; set; }

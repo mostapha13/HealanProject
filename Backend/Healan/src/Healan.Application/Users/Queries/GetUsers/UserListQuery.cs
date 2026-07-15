@@ -73,6 +73,34 @@ namespace Healan.Application.Users.Queries.GetUsers
                 .ToListAsync(cancellationToken);
 
             var items = _mapper.Map<List<UserListResult>>(entities);
+
+            foreach (var item in items)
+            {
+                var entity = entities.FirstOrDefault(e => e.UserId == item.UserId);
+                if (entity?.IdentityUserId == null || entity.IdentityUserId == Guid.Empty)
+                    continue;
+
+                try
+                {
+                    var summary = await _identityTool.GetUserSummaryInfo(
+                        new IdentityServer.GrpcClient.GetByIdRequest
+                        {
+                            UserId = entity.IdentityUserId.Value.ToString(),
+                        });
+                    if (summary?.RoleInfos == null)
+                        continue;
+
+                    item.UserRoles = summary.RoleInfos
+                        .Where(r => !string.IsNullOrWhiteSpace(r.RoleName))
+                        .Select(r => new UserRole(r.RoleName, string.IsNullOrWhiteSpace(r.RoleTitle) ? r.RoleName : r.RoleTitle))
+                        .ToList();
+                }
+                catch
+                {
+                    // Identity unavailable for this row
+                }
+            }
+
             return new PaginatedList<UserListResult>(items, totalCount, pageNumber, pageSize);
         }
     }

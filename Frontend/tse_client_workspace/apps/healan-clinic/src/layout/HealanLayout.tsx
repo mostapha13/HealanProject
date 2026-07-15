@@ -74,6 +74,14 @@ export function HealanLayout() {
                 )}
               </div>
             </div>
+            <button
+              type="button"
+              className="healan-btn healan-btn--outline healan-btn--sm"
+              style={{ width: '100%', marginBottom: '0.5rem', borderColor: 'rgba(255,255,255,0.35)', color: '#fff' }}
+              onClick={() => navigate('/profile')}
+            >
+              ویرایش حساب / رمز
+            </button>
             <button type="button" className="healan-btn healan-btn--ghost" onClick={handleLogout}>
               خروج از حساب
             </button>

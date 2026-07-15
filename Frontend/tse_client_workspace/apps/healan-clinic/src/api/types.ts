@@ -98,7 +98,7 @@ export interface AppointmentSummary {
   doctorName?: string;
   patientNationalCode?: string;
   patient?: Pick<PatientSummary, 'patientId' | 'firstName' | 'lastName' | 'nationalCode'>;
-  doctor?: Pick<DoctorSummary, 'doctorId' | 'firstName' | 'lastName' | 'nationalCode'>;
+  doctor?: Pick<DoctorSummary, 'doctorId' | 'firstName' | 'lastName' | 'nationalCode' | 'medicalGroupTypeId' | 'medicalGroupTypeName'>;
   appointmentDate: string;
   appointmentTypeId: string;
   appointmentTypeName?: string;
@@ -191,6 +191,11 @@ export interface UserRoleInfo {
   roleTitle?: string;
 }
 
+export interface UserRoleDto {
+  name: string;
+  displayName: string;
+}
+
 export interface UserSummary {
   userId: number;
   identityUserId?: string;
@@ -199,15 +204,12 @@ export interface UserSummary {
   phoneNumber?: string;
   userName?: string;
   userTypeId?: number;
+  userTypeName?: string;
   isActive?: boolean;
   departmentName?: string;
   roleTitle?: string;
   roles?: UserRoleInfo[];
-}
-
-export interface UserRoleDto {
-  name: string;
-  displayName: string;
+  userRoles?: UserRoleDto[];
 }
 
 export interface CurrentUserResponse {

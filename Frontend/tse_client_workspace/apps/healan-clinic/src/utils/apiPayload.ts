@@ -62,6 +62,8 @@ export const ACCESS_ROLE_BY_USER_TYPE: Record<number, UserRoleDto> = {
 export function rolesForUserType(userTypeId: number): UserRoleDto[] {
   const role = ACCESS_ROLE_BY_USER_TYPE[userTypeId];
   if (!role) return [{ name: 'Healan', displayName: 'پذیرش' }];
+  // پزشک فقط نقش Doctor — بدون Healan/پذیرش
+  if (userTypeId === 7) return [role];
   return [role, { name: 'Healan', displayName: 'پذیرش' }];
 }
 

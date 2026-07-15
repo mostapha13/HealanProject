@@ -180,13 +180,21 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
           <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>موبایل</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+            <thead><tr><th>نام</th><th>موبایل</th><th>نقش Identity</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
             <tbody>{items.map((u) => (
 
               <tr key={u.userId}>
                 <td>{u.firstName} {u.lastName}</td>
                 <td>{u.phoneNumber ?? '—'}</td>
+                <td>
+                  {u.userRoles && u.userRoles.length > 0
+                    ? u.userRoles
+                        .filter((r) => r.name && r.name !== 'Healan')
+                        .map((r) => r.displayName || r.name)
+                        .join('، ') || u.userRoles.map((r) => r.displayName || r.name).join('، ')
+                    : u.userTypeName ?? '—'}
+                </td>
                 <td>{u.isActive ? 'فعال' : 'غیرفعال'}</td>
                 <td>
                   <div className="healan-actions">

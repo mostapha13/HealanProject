@@ -1,4 +1,5 @@
 ﻿using Healan.Application.Users.Commands.SaveUser;
+using Healan.Application.Users.Commands.UpdateMyProfile;
 using Healan.Application.Users.Queries.CurrentUser;
 using Healan.Application.Users.Queries.GetUserInfo;
 using Healan.Application.Users.Queries.GetUsers;
@@ -52,6 +53,8 @@ public class UserController : ApiControllerBase
         return Ok(await Mediator.Send(new CurrentUserQuery()));
     }
 
- 
-
+    /// <summary>به‌روزرسانی پروفایل کاربر جاری (بدون نیاز به دسترسی تعریف کاربر)</summary>
+    [HttpPost("UpdateMyProfile")]
+    public Task<IActionResult> UpdateMyProfile([FromBody] UpdateMyProfileCommand request) =>
+        SendCommand(request);
 }

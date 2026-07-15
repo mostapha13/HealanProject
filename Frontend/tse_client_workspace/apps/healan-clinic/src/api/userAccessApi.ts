@@ -271,6 +271,10 @@ export function hasPathAccess(accessRole: AccessUserRoleItem[], path: string): b
 
   const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
 
+  if (normalized === '/profile') {
+    return true;
+  }
+
   if (normalized === '/basic-data') {
     return accessRole.some((item) => item.hasAccess && item.url?.startsWith('/basic-data'));
   }

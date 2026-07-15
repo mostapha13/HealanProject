@@ -3,6 +3,7 @@ import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type { PortalContentItem, PortalSiteSetting } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const SETTING_GROUPS: { group: string; label: string; fields: { key: string; label: string; multiline?: boolean }[] }[] = [
   {
@@ -230,7 +231,7 @@ function SettingsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const handleDeleteStat = async (id: number) => {
-    if (!window.confirm('این آمار حذف شود؟')) return;
+    if (!(await confirmDelete('این آمار حذف شود؟'))) return;
     try {
       await healanApi.portal.contentDelete(id);
       await load();

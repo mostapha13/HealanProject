@@ -241,6 +241,8 @@ export const healanApi = {
     info: (userId: number) => get(`User/UserInfo/?userId=${userId}`),
     register: (data: Record<string, unknown>) => post('User/Register', data),
     current: () => get<CurrentUserResponse>('User/CurrentUser/Fa'),
+    updateMyProfile: (data: { firstName: string; lastName: string; phoneNumber: string }) =>
+      post('User/UpdateMyProfile', data),
   },
 
   prescriptions: {

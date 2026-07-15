@@ -1,31 +1,36 @@
 using IdentityServer.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Share.Domain.Constants;
 using Share.Domain.Enums;
+using Share.Domain.Models.UserAccessModels;
+
 namespace IdentityServer.Domain.Data;
 
 /// <summary>
 /// کاربران پیش‌فرض کلینیک Healan (منشی، پزشک، حسابدار).
+/// هر کاربر فقط یک نقش Identity دارد — بدون Admin یا Healan اضافه.
 /// </summary>
 public static class HealanClinicUserSeed
 {
-    private sealed record ClinicUserDef(string Phone, string Role, string FirstName, string LastName);
+    private sealed record ClinicUserDef(string Phone, string Role, string FirstName, string LastName, DepartmentId DepartmentId);
 
     private static readonly ClinicUserDef[] Users =
     {
-        new("09122221010", HealanClinicAccess.SecretaryRole, "سارا", "منشی"),
-        new("09122221020", HealanClinicAccess.DoctorRole, "رضا", "متخصص قلب"),
-        new("09122221030", HealanClinicAccess.AccountantRole, "مریم", "حسابدار"),
+        new("09122221010", HealanClinicAccess.SecretaryRole, "سارا", "منشی", DepartmentId.Public),
+        new("09122221020", HealanClinicAccess.DoctorRole, "رضا", "متخصص قلب", DepartmentId.Doctor),
+        new("09122221030", HealanClinicAccess.AccountantRole, "مریم", "حسابدار", DepartmentId.Public),
     };
 
     public static async Task SeedAsync(
+        ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager)
     {
         foreach (var def in Users)
         {
             await EnsureRoleExistsAsync(roleManager, def.Role);
-            await EnsureUserAsync(userManager, def);
+            await EnsureUserAsync(dbContext, userManager, def);
         }
     }
 
@@ -52,7 +57,10 @@ public static class HealanClinicUserSeed
         }
     }
 
-    private static async Task EnsureUserAsync(UserManager<ApplicationUser> userManager, ClinicUserDef def)
+    private static async Task EnsureUserAsync(
+        ApplicationDbContext dbContext,
+        UserManager<ApplicationUser> userManager,
+        ClinicUserDef def)
     {
         var user = await userManager.FindByNameAsync(def.Phone);
         user ??= await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == def.Phone);
@@ -70,7 +78,7 @@ public static class HealanClinicUserSeed
                 PhoneNumberConfirmed = true,
                 IsActive = true,
                 LastLoginIP = "0.0.0.0",
-                DepartmentId = DepartmentId.Public,
+                DepartmentId = def.DepartmentId,
             };
 
             var createResult = await userManager.CreateAsync(user, HealanClinicAccess.ClinicDefaultPassword);
@@ -89,6 +97,7 @@ public static class HealanClinicUserSeed
             user.PhoneNumberConfirmed = true;
             user.EmailConfirmed = true;
             user.IsActive = true;
+            user.DepartmentId = def.DepartmentId;
 
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -118,6 +127,7 @@ public static class HealanClinicUserSeed
             }
         }
 
+        // فقط یک نقش — حذف Admin، Healan و هر نقش اضافه
         var currentRoles = await userManager.GetRolesAsync(user);
         if (currentRoles.Count > 0)
             await userManager.RemoveFromRolesAsync(user, currentRoles);
@@ -128,5 +138,47 @@ public static class HealanClinicUserSeed
             throw new InvalidOperationException(
                 $"Failed to assign role {def.Role} to {def.Phone}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
         }
+
+        await SyncHealanSystemRolesAsync(dbContext, user.Id, def.Role);
+    }
+
+    /// <summary>
+    /// نقش‌های سامانه Healan را به همان یک نقش کلینیک محدود می‌کند (بدون Healan/Admin اضافه).
+    /// </summary>
+    private static async Task SyncHealanSystemRolesAsync(ApplicationDbContext dbContext, Guid userId, string roleName)
+    {
+        var accessSystemId = HealanAccessFormIds.SystemId;
+
+        var systemRoleIds = await dbContext.AccessSystemRoles
+            .AsNoTracking()
+            .Where(r => r.AccessSystemId == accessSystemId)
+            .Select(r => r.RoleId)
+            .ToListAsync();
+
+        if (systemRoleIds.Count == 0)
+            return;
+
+        var staleAssignments = await (
+            from ur in dbContext.UserRoles
+            join r in dbContext.Roles on ur.RoleId equals r.Id
+            where ur.UserId == userId && systemRoleIds.Contains(r.Id)
+            select ur).ToListAsync();
+
+        if (staleAssignments.Count > 0)
+            dbContext.UserRoles.RemoveRange(staleAssignments);
+
+        var targetRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+        if (targetRole != null
+            && systemRoleIds.Contains(targetRole.Id)
+            && !await dbContext.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == targetRole.Id))
+        {
+            dbContext.UserRoles.Add(new IdentityUserRole<Guid>
+            {
+                UserId = userId,
+                RoleId = targetRole.Id,
+            });
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 }

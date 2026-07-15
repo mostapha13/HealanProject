@@ -131,6 +131,16 @@ namespace Healan.Application.Users.Commands.SaveUser
             user.PhoneNumber = userSummary.PhoneNumber;
             user.PrefixNumber = request.PrefixNumber;
             user.CompanyId = request.CompanyId;
+            if (user.CompanyId is null or <= 0)
+            {
+                var defaultCompanyId = await _applicationDbContext.Companies
+                    .AsNoTracking()
+                    .OrderBy(c => c.CompanyId)
+                    .Select(c => (long?)c.CompanyId)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (defaultCompanyId is > 0)
+                    user.CompanyId = defaultCompanyId;
+            }
             user.Landline = request.Landline;
             user.PersonnelNumber = request.PersonnelNumber;
             user.ExtensionCompanyPhoneNumber = request.ExtensionCompanyPhoneNumber;

@@ -1,3 +1,4 @@
+using Healan.Application.Common.ClinicAccess;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Orders.Dtos;
 using MediatR;
@@ -10,17 +11,26 @@ namespace Healan.Application.Patients.Queries.PatientVisitHistory;
 public class PatientVisitHistoryQueryHandler : IRequestHandler<PatientVisitHistoryQuery, List<PatientVisitHistoryItemResult>>
 {
     private readonly IApplicationDbContext _db;
+    private readonly IClinicAccessScopeService _clinicAccess;
 
-    public PatientVisitHistoryQueryHandler(IApplicationDbContext db)
+    public PatientVisitHistoryQueryHandler(IApplicationDbContext db, IClinicAccessScopeService clinicAccess)
     {
         _db = db;
+        _clinicAccess = clinicAccess;
     }
 
-    public async Task<List<PatientVisitHistoryItemResult>> Handle(PatientVisitHistoryQuery request, CancellationToken cancellationToken)
+    public async Task<List<PatientVisitHistoryItemResult>> Handle(
+        PatientVisitHistoryQuery request,
+        CancellationToken cancellationToken)
     {
-        var patientExists = await _db.Patients.AnyAsync(p => p.PatientId == request.PatientId, cancellationToken);
-        if (!patientExists)
-            throw new NotFoundExceptions("بیمار یافت نشد");
+        var scope = await _clinicAccess.ResolveAsync(cancellationToken);
+
+        var patientVisible = await _db.Patients
+            .ApplyClinicScope(scope)
+            .AnyAsync(p => p.PatientId == request.PatientId, cancellationToken);
+
+        if (!patientVisible)
+            throw new NotFoundExceptions("بیمار یافت نشد یا به این بیمار دسترسی ندارید");
 
         var appointments = await _db.Appointments
             .AsNoTracking()
@@ -36,6 +46,7 @@ public class PatientVisitHistoryQueryHandler : IRequestHandler<PatientVisitHisto
             .Include(a => a.Prescriptions)
                 .ThenInclude(p => p.EchoReport)
             .Where(a => a.PatientId == request.PatientId)
+            .ApplyClinicScope(scope)
             .OrderByDescending(a => a.AppointmentDate)
             .ToListAsync(cancellationToken);
 

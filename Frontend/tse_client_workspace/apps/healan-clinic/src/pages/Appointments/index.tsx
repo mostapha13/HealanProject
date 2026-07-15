@@ -15,7 +15,7 @@ import { buildAppointmentPayload, toDateTimeLocalValue } from '../../utils/apiPa
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
 import { useNavigate, useLocation } from '@tse/utils';
-import { appointmentDoctorName, appointmentInsuranceDisplay, appointmentInvoice, appointmentPatientName, appointmentPatientNationalCode, appointmentIsPaid } from '../../utils/appointmentDisplay';
+import { appointmentDoctorDisplay, appointmentInsuranceDisplay, appointmentInvoice, appointmentPatientName, appointmentPatientNationalCode, appointmentIsPaid } from '../../utils/appointmentDisplay';
 import { QuickAddPatientModal } from '../../components/QuickAddPatientModal';
 import { QuickAddDoctorModal } from '../../components/QuickAddDoctorModal';
 
@@ -353,7 +353,7 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                     <tr key={a.appointmentId}>
                       <td>{appointmentPatientName(a)}</td>
                       <td>{appointmentPatientNationalCode(a)}</td>
-                      <td>{appointmentDoctorName(a)}</td>
+                      <td>{appointmentDoctorDisplay(a)}</td>
                       <td>{appointmentInsuranceDisplay(a)}</td>
                       <td><span>{convertDateAndTimeToJalali(a.appointmentDate)}</span></td>
                       <td>{a.appointmentTypeName ?? a.appointmentTypeId}</td>

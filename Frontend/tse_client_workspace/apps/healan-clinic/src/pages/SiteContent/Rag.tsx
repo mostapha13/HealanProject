@@ -6,6 +6,7 @@ import type { RagKnowledgeItem, RagSetting } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { convertDateAndTimeToJalali } from '@tse/tools';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const PAGE_SIZE = 10;
 
@@ -155,7 +156,7 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const remove = async (id: number) => {
-    if (!window.confirm('این سوال حذف شود؟')) return;
+    if (!(await confirmDelete('این سوال حذف شود؟'))) return;
     try {
       await healanApi.portal.ragDelete(id);
       await load();

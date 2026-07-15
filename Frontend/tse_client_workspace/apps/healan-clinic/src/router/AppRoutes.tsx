@@ -31,6 +31,7 @@ const SiteContentRagPage = lazy(() => import('../pages/SiteContent/Rag'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const WorkflowPage = lazy(() => import('../pages/Workflow'));
 const SignaturePage = lazy(() => import('../pages/Signature'));
+const ProfilePage = lazy(() => import('../pages/Profile'));
 
 function guarded(path: string, element: React.ReactNode) {
   return <AccessRouteGuard path={path}>{element}</AccessRouteGuard>;
@@ -90,6 +91,7 @@ export default function AppRoutes() {
           <Route path="reports" element={guarded('/reports', <ReportsPage />)} />
           <Route path="workflow" element={guarded('/workflow', <WorkflowPage />)} />
           <Route path="signature" element={guarded('/signature', <SignaturePage />)} />
+          <Route path="profile" element={guarded('/profile', <ProfilePage />)} />
         </Route>
       </Routes>
     </Suspense>

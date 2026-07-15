@@ -5,6 +5,7 @@ import type { PortalContentItem, PortalSectionType, PortalSiteSetting } from '..
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanFileUpload, type FileUploadMeta } from '../../components/HealanFileUpload';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const SECTION_OPTIONS: { value: PortalSectionType; label: string }[] = [
   { value: 'HeroSlide', label: 'اسلاید هیرو' },
@@ -201,7 +202,7 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('این مطلب حذف شود؟')) return;
+    if (!(await confirmDelete('این مطلب حذف شود؟'))) return;
     try {
       await healanApi.portal.contentDelete(id);
       await loadItems();

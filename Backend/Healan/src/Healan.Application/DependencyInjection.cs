@@ -1,5 +1,6 @@
 ﻿using FileManager.GrpcClient;
 using FluentValidation;
+using Healan.Application.Common.ClinicAccess;
 using Healan.Application.Common.Services;
 using IdentityServer.GrpcClient;
 
@@ -26,6 +27,7 @@ namespace Healan.Application
             services.AddPipelineBehavior(configuration);
             services.AddFileManagerServices(configuration);
             services.AddScoped<IInvoiceCalculationService, InvoiceCalculationService>();
+            services.AddScoped<IClinicAccessScopeService, ClinicAccessScopeService>();
             services.AddHttpClient<Portal.Services.IRagPythonService, Portal.Services.RagPythonService>(client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(120);

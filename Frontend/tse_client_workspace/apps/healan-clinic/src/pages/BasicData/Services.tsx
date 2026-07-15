@@ -10,6 +10,7 @@ import { PageHeader } from '../../components/Ui';
 
 import { buildServicePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const EMPTY_FORM = { serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '', isActive: true };
 
@@ -99,7 +100,7 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   };
 
   const handleDelete = async (item: ServiceType) => {
-    if (!window.confirm(`خدمت «${item.title}» حذف شود؟`)) return;
+    if (!(await confirmDelete(`خدمت «${item.title}» حذف شود؟`))) return;
     try {
       await healanApi.services.delete(item.serviceTypeId);
       onAlert({ type: 'success', message: 'خدمت با موفقیت حذف شد' });

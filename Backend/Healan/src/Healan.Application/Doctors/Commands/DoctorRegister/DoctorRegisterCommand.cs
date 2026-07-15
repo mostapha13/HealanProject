@@ -14,6 +14,7 @@ using Healan.Domain.Doctors.Entities;
 
 using Healan.Domain.Users.Entities;
 
+using Healan.Domain.Users.Enums;
 using IdentityServer.GrpcClient.Interfaces;
 
 using MediatR;
@@ -197,8 +198,6 @@ public class DoctorRegisterCommandHandler : IRequestHandler<DoctorRegisterComman
 
         };
 
-        roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Healan));
-
         roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Doctor));
 
 
@@ -222,6 +221,12 @@ public class DoctorRegisterCommandHandler : IRequestHandler<DoctorRegisterComman
         user.PhoneNumber = userSummary.PhoneNumber;
 
         user.IsActive = true;
+
+        user.UserTypeId = UserTypeId.Doctor;
+
+        if (request.CompanyId > 0)
+
+            user.CompanyId = request.CompanyId;
 
 
 
