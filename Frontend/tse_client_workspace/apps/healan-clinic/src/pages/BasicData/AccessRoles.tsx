@@ -3,6 +3,7 @@ import withAlert from '../../hoc/withAlert';
 import {
   applyCheckedKeys,
   collectCheckedKeys,
+  collectFormMenuKeys,
   fetchAccessRoleTree,
   fetchIdentityRoles,
   saveAccessRole,
@@ -22,16 +23,9 @@ function titleOf(item: AccessRoleTreeItem): string {
   return item.title || item.accessForm?.formTitle || item.accessForm?.url || `منو ${item.key}`;
 }
 
+/** Only form menus (not structural folders) for select-all / counters. */
 function collectNodeKeys(items: AccessRoleTreeItem[]): number[] {
-  const keys: number[] = [];
-  const walk = (nodes: AccessRoleTreeItem[]) => {
-    nodes.forEach((node) => {
-      keys.push(node.key);
-      if (node.children?.length) walk(node.children);
-    });
-  };
-  walk(items);
-  return keys;
+  return collectFormMenuKeys(items);
 }
 
 function filterTree(items: AccessRoleTreeItem[], searchText: string): AccessRoleTreeItem[] {
@@ -270,7 +264,7 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 </div>
 
                 <p className="healan-hint" style={{ marginBottom: '0.75rem' }}>
-                  انتخاب‌شده: <strong>{checkedCount}</strong> از <strong>{totalCount}</strong> منو
+                  انتخاب‌شده: <strong>{checkedCount}</strong> از <strong>{totalCount}</strong> فرم/صفحه
                   {isDirty ? ' (تغییرات ذخیره نشده)' : ''}
                 </p>
 

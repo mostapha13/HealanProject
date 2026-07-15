@@ -42,7 +42,8 @@ export function normalizeUploadResponse(raw: unknown): UploadFileResponse {
   }
 
   const fileId = pickString(res, 'fileId', 'FileId');
-  const link = pickString(res, 'link', 'Link') || (fileId ? getFileDownloadUrl(fileId) : '');
+  const rawLink = pickString(res, 'link', 'Link');
+  const link = publicFileDownloadUrl(fileId, rawLink) || (fileId ? getFileDownloadUrl(fileId) : '');
   const fileType = normalizeFileType(res['fileType'] ?? res['FileType']);
 
   return {
@@ -67,4 +68,24 @@ export function uploadFile(file: File): Promise<UploadFileResponse> {
 
 export function getFileDownloadUrl(fileId: string): string {
   return `${FILE_API_URL}Download/${fileId}`;
+}
+
+/** Prefer relative /File/Download when API returns docker/internal hostnames. */
+export function publicFileDownloadUrl(fileId: string, link?: string | null): string {
+  if (!fileId) return link || '';
+  if (!link) return getFileDownloadUrl(fileId);
+  try {
+    const host = new URL(link, window.location.origin).hostname.toLowerCase();
+    if (
+      host === 'filemanager-webui' ||
+      host.endsWith('.local') ||
+      host === 'localhost' ||
+      /^\d+\.\d+\.\d+\.\d+$/.test(host)
+    ) {
+      return getFileDownloadUrl(fileId);
+    }
+  } catch {
+    return getFileDownloadUrl(fileId);
+  }
+  return link;
 }

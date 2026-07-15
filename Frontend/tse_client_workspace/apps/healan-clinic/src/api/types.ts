@@ -179,6 +179,7 @@ export interface MedicalFeeService {
   medicalFeeServiceId: number;
   serviceTypeId: number;
   serviceTypeTitle?: string;
+  serviceTypeName?: string;
   price: number;
   startDate: string;
   endDate: string;

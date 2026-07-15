@@ -99,11 +99,7 @@ export const request = {
   },
   upload: async ({ baseUrl, url, formData }: any) => {
     return axios
-      .post(`${baseUrl}${url}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      .post(`${baseUrl}${url}`, formData)
       .then((res) => {
         return new Promise((resolve) => {
           resolve(res.data);

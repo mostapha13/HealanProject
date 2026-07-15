@@ -123,12 +123,13 @@ namespace FileManager.WebUI
 
 
             #region Identity Server Connection Configuration
+            // Align with Healan/UserManager: clinic Bearer tokens typically list WorkFlowWebApi in aud.
             var builder = services.AddAuthentication("Bearer")
               .AddIdentityServerAuthentication("Bearer", options =>
               {
                   options.Authority = Configuration["IdentityServer:Url"];
-                  options.ApiName = "FileManagerWebApi";
-                  options.ApiSecret = "T$e.!R*FileManagerWebApi*E@M@M@A@M";
+                  options.ApiName = "WorkFlowWebApi";
+                  options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
                   options.RequireHttpsMetadata = false;
                   options.SaveToken=true;
               });

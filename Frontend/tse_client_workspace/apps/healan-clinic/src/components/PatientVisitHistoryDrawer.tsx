@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import healanApi from '../api/healanApi';
 import type { PatientVisitHistoryItem } from '../api/types';
 import { convertDateAndTimeToJalali } from '@tse/tools';
-import { getFileDownloadUrl } from '../api/fileApi';
+import { publicFileDownloadUrl } from '../api/fileApi';
 import { openEchoPrintWindowBlank, writeEchoPrintHtmlToWindow } from '../utils/printEchoReport';
 import { buildEchoPrintPayload } from '../utils/echoPrintPayload';
 
@@ -121,7 +121,7 @@ export function PatientVisitHistoryDrawer({ patientId, patientName, onAlert, onC
                               <li key={i}>
                                 {l.labTestType} {l.notes ? `— ${l.notes}` : ''}
                                 {l.attachmentId ? (
-                                  <> · <a href={l.attachmentLink || getFileDownloadUrl(l.attachmentId)} target="_blank" rel="noreferrer">پیوست</a></>
+                                  <> · <a href={publicFileDownloadUrl(l.attachmentId, l.attachmentLink)} target="_blank" rel="noreferrer">پیوست</a></>
                                 ) : null}
                               </li>
                             ))}
@@ -136,7 +136,7 @@ export function PatientVisitHistoryDrawer({ patientId, patientName, onAlert, onC
                               <li key={i}>
                                 {img.imageTypeName} {img.notes ? `— ${img.notes}` : ''}
                                 {img.attachmentId ? (
-                                  <> · <a href={img.attachmentLink || getFileDownloadUrl(img.attachmentId)} target="_blank" rel="noreferrer">پیوست</a></>
+                                  <> · <a href={publicFileDownloadUrl(img.attachmentId, img.attachmentLink)} target="_blank" rel="noreferrer">پیوست</a></>
                                 ) : null}
                               </li>
                             ))}

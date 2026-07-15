@@ -234,41 +234,8 @@ public static class HealanAccessSeed
             if (role == null)
                 continue;
 
-            await SyncRoleMenusAsync(dbContext, role.Id, menuIds);
+            await GrantMenusAsync(dbContext, role.Id, menuIds);
         }
-    }
-
-    private static async Task<List<int>> GetHealanFormMenuIdsAsync(ApplicationDbContext dbContext)
-    {
-        return await dbContext.AccessMenus
-            .Where(m => m.AccessFormId != null)
-            .Join(
-                dbContext.AccessForms.Where(f => f.AccessSystemId == HealanAccessFormIds.SystemId),
-                m => m.AccessFormId,
-                f => f.AccessFormId,
-                (m, _) => m.AccessMenuId)
-            .ToListAsync();
-    }
-
-    private static async Task SyncRoleMenusAsync(
-        ApplicationDbContext dbContext,
-        Guid roleId,
-        IEnumerable<int> allowedMenuIds)
-    {
-        var healanMenuIds = await GetHealanFormMenuIdsAsync(dbContext);
-        var allowed = allowedMenuIds.ToHashSet();
-
-        var stale = await dbContext.AccessRoles
-            .Where(r => r.RoleId == roleId && healanMenuIds.Contains(r.AccessMenuId) && !allowed.Contains(r.AccessMenuId))
-            .ToListAsync();
-
-        if (stale.Count > 0)
-        {
-            dbContext.AccessRoles.RemoveRange(stale);
-            await dbContext.SaveChangesAsync();
-        }
-
-        await GrantMenusAsync(dbContext, roleId, allowed);
     }
 
     private static async Task GrantMenusAsync(ApplicationDbContext dbContext, Guid roleId, IEnumerable<int> menuIds)

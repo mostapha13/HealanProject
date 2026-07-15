@@ -12,6 +12,7 @@ import { convertDateToJalali } from '@tse/tools';
 
 import { buildMedicalFeePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { JalaliDateInput } from '../../components/JalaliDateInput';
 
 const EMPTY_FORM = {
   medicalFeeServiceId: 0,
@@ -151,9 +152,19 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
               <div className="healan-form-field"><label>قیمت (ریال)</label><input type="number" min={1} value={form.price || ''} onChange={(e) => setForm({ ...form, price: +e.target.value })} /></div>
 
-              <div className="healan-form-field"><label>از تاریخ</label><input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} /></div>
+              <div className="healan-form-field"><label>از تاریخ</label>
+                <JalaliDateInput
+                  value={form.startDate}
+                  onChange={(v) => setForm({ ...form, startDate: v })}
+                />
+              </div>
 
-              <div className="healan-form-field"><label>تا تاریخ</label><input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} /></div>
+              <div className="healan-form-field"><label>تا تاریخ</label>
+                <JalaliDateInput
+                  value={form.endDate}
+                  onChange={(v) => setForm({ ...form, endDate: v })}
+                />
+              </div>
               <div className="healan-form-field"><label>وضعیت</label>
                 <SearchableSelect
                   value={form.isActive ? 1 : 0}
@@ -194,7 +205,7 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
               <tr key={m.medicalFeeServiceId}>
 
-                <td>{m.serviceTypeTitle ?? m.serviceTypeId}</td>
+                <td>{m.serviceTypeTitle || m.serviceTypeName || services.find((s) => s.serviceTypeId === m.serviceTypeId)?.title || '—'}</td>
 
                 <td>{formatCurrency(m.price)}</td>
 

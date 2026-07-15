@@ -90,6 +90,22 @@ namespace IdentityServer.UserManagerAPI.Controllers
             return Ok(await Mediator.Send(saveAccessRoleCommand));
         }
 
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [HttpPost("SaveAccessForm")]
+        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        public async Task<IActionResult> SaveAccessForm([FromBody] SaveAccessFormCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [HttpPost("DeleteAccessForm")]
+        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        public async Task<IActionResult> DeleteAccessForm([FromBody] DeleteAccessFormCommand command)
+        {
+            return Ok(await Mediator.Send(command));
+        }
+
         /// <summary>
         ///  Get Every Time Windows Refreshed For Show Menu 
         /// </summary>

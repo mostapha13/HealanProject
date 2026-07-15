@@ -43,15 +43,25 @@ interface UserAccessRequest {
   AccessSystemId: number;
 }
 
+const FOLDER_TITLES: Record<number, string> = {
+  5102: 'مدیریت کلینیک',
+  5108: 'اطلاعات پایه',
+  5113: 'مدیریت کاربران',
+  5120: 'محتوای سایت',
+};
+
 function normalizeTreeItem(raw: Record<string, unknown>): AccessRoleTreeItem {
-  const key = Number(raw['key'] ?? raw['accessMenuId'] ?? 0);
+  const key = Number(raw['key'] ?? raw['accessMenuId'] ?? raw['AccessMenuId'] ?? 0);
   const childrenRaw = (raw['children'] ?? raw['Children']) as Record<string, unknown>[] | undefined;
   const accessForm = (raw['accessForm'] ?? raw['AccessForm']) as AccessRoleTreeItem['accessForm'];
+  const accessFormId = (raw['accessFormId'] ?? raw['AccessFormId']) as number | undefined;
   return {
     key,
     accessMenuId: key,
-    accessFormId: raw['accessFormId'] as number | undefined,
-    title: (raw['title'] ?? raw['Title'] ?? accessForm?.formTitle) as string | undefined,
+    accessFormId,
+    title:
+      ((raw['title'] ?? raw['Title'] ?? accessForm?.formTitle) as string | undefined) ||
+      FOLDER_TITLES[key],
     hasAccess: Boolean(raw['hasAccess'] ?? raw['HasAccess']),
     hasPersianAccess: raw['hasPersianAccess'] as boolean | undefined,
     accessForm,
@@ -65,8 +75,11 @@ function normalizeMenuItem(raw: Record<string, unknown>): AccessMenuTreeItem {
   const accessForm = (raw['accessForm'] ?? raw['AccessForm']) as AccessMenuTreeItem['accessForm'];
   return {
     accessMenuId,
-    accessFormId: raw['accessFormId'] as number | undefined,
-    title: accessForm?.formTitle,
+    accessFormId: (raw['accessFormId'] ?? raw['AccessFormId']) as number | undefined,
+    title:
+      (raw['title'] as string | undefined) ||
+      accessForm?.formTitle ||
+      FOLDER_TITLES[accessMenuId],
     accessForm,
     children: Array.isArray(childrenRaw) ? childrenRaw.map(normalizeMenuItem) : [],
   };
@@ -148,16 +161,79 @@ export function fetchAccessMenuTree(): Promise<AccessMenuTreeItem[]> {
     });
 }
 
+export interface SaveAccessFormPayload {
+  accessFormId?: number;
+  accessMenuId?: number;
+  formTitle: string;
+  url?: string;
+  parentMenuId?: number | null;
+  order?: number;
+  isFolder?: boolean;
+  accessSystemId?: number;
+}
+
+export function saveAccessForm(payload: SaveAccessFormPayload): Promise<{
+  accessFormId: number;
+  accessMenuId: number;
+  formTitle: string;
+  url: string;
+}> {
+  return request.post({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/SaveAccessForm',
+    options: {
+      accessFormId: payload.accessFormId ?? 0,
+      accessMenuId: payload.accessMenuId ?? 0,
+      formTitle: payload.formTitle,
+      url: payload.url ?? '',
+      parentMenuId: payload.parentMenuId ?? null,
+      order: payload.order ?? 0,
+      isFolder: Boolean(payload.isFolder),
+      accessSystemId: payload.accessSystemId ?? HEALAN_ACCESS_SYSTEM_ID,
+    },
+  }) as Promise<{
+    accessFormId: number;
+    accessMenuId: number;
+    formTitle: string;
+    url: string;
+  }>;
+}
+
+export function deleteAccessForm(accessMenuId: number): Promise<boolean> {
+  return request.post({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/DeleteAccessForm',
+    options: { accessMenuId },
+  }) as Promise<boolean>;
+}
+
+/** Menus linked to an AccessForm — these are what save/load persist. */
+export function collectFormMenuKeys(items: AccessRoleTreeItem[]): number[] {
+  const keys: number[] = [];
+  const walk = (nodes: AccessRoleTreeItem[]) => {
+    nodes.forEach((item) => {
+      if (item.accessFormId) {
+        keys.push(item.key);
+      }
+      if (item.children?.length) {
+        walk(item.children);
+      }
+    });
+  };
+  walk(items);
+  return keys;
+}
+
 export function collectCheckedKeys(items: AccessRoleTreeItem[]): number[] {
   const keys: number[] = [];
   const walk = (nodes: AccessRoleTreeItem[]) => {
     nodes.forEach((item) => {
-      const hasChildren = Boolean(item.children?.length);
-      if (item.hasAccess && !hasChildren) {
+      // Include form menus even when they have children (e.g. PortalBlog parent).
+      if (item.hasAccess && item.accessFormId) {
         keys.push(item.key);
       }
-      if (hasChildren) {
-        walk(item.children!);
+      if (item.children?.length) {
+        walk(item.children);
       }
     });
   };

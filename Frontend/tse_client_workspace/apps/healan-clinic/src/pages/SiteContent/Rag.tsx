@@ -5,6 +5,7 @@ import healanApi from '../../api/healanApi';
 import type { RagKnowledgeItem, RagSetting } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { convertDateAndTimeToJalali } from '@tse/tools';
 
 const PAGE_SIZE = 10;
 
@@ -247,7 +248,7 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               {settings.lastSyncedAt && (
                 <div className="healan-form-field">
                   <label>آخرین همگام‌سازی</label>
-                  <div>{new Date(settings.lastSyncedAt).toLocaleString('fa-IR')}</div>
+                  <div>{convertDateAndTimeToJalali(settings.lastSyncedAt)}</div>
                 </div>
               )}
             </div>

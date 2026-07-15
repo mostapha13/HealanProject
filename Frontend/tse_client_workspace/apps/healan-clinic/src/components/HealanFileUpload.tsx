@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { uploadFile, getFileDownloadUrl, type FileUploadMeta } from '../api/fileApi';
+import { uploadFile, getFileDownloadUrl, publicFileDownloadUrl, type FileUploadMeta } from '../api/fileApi';
 
 export type { FileUploadMeta };
 
@@ -40,7 +40,9 @@ export function HealanFileUpload({
     }
   };
 
-  const downloadUrl = value?.link ?? (value?.fileId ? getFileDownloadUrl(value.fileId) : null);
+  const downloadUrl = value?.fileId
+    ? publicFileDownloadUrl(value.fileId, value.link)
+    : null;
 
   return (
     <div className="healan-file-upload">

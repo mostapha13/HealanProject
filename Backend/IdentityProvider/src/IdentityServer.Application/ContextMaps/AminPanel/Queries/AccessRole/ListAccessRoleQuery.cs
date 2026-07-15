@@ -14,6 +14,14 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
     }
     public class ListAccessRoleQueryHandler : IRequestHandler<ListAccessRoleQuery, AccessRoleFullResponse>
     {
+        private static readonly Dictionary<int, string> FolderTitles = new()
+        {
+            [5102] = "مدیریت کلینیک",
+            [5108] = "اطلاعات پایه",
+            [5113] = "مدیریت کاربران",
+            [5120] = "محتوای سایت",
+        };
+
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly IMapper _mapper;
         public ListAccessRoleQueryHandler(ApplicationDbContext applicationDbContext, IMapper mapper)
@@ -124,7 +132,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
             mainMenuResponse.HasPersianAccess = accessByMenuId.TryGetValue(mainMenuResponse.AccessMenuId, out var access)
                 ? access.HasPersianAccess
                 : null;
-            mainMenuResponse.Title = mainMenuResponse.AccessForm?.FormTitle;
+            mainMenuResponse.Title = mainMenuResponse.AccessForm?.FormTitle
+                ?? FolderTitles.GetValueOrDefault(mainMenuResponse.AccessMenuId);
             if (mainMenuResponse.Children != null)
                 foreach (var child in mainMenuResponse.Children)
                 {

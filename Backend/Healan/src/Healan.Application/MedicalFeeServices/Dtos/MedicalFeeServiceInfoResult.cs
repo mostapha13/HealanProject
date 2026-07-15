@@ -13,6 +13,7 @@ public record MedicalFeeServiceInfoResult:IMapFrom<MedicalFeeService>
     public long MedicalFeeServiceId { get; set; }
     public long ServiceTypeId { get; set; }
     public string ServiceTypeName { get; set; }
+    public string ServiceTypeTitle { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool IsActive { get; set; }
@@ -22,7 +23,7 @@ public record MedicalFeeServiceInfoResult:IMapFrom<MedicalFeeService>
     {
         profile.CreateMap<MedicalFeeService, MedicalFeeServiceInfoResult>()
             .ForMember(a => a.ServiceTypeName, b => b.MapFrom(c => c.ServiceType.Title))
-           
+            .ForMember(a => a.ServiceTypeTitle, b => b.MapFrom(c => c.ServiceType.Title))
           ;
     }
 }

@@ -14,9 +14,10 @@ import { appointmentPatientName, prescriptionDoctorName, prescriptionPatientName
 import { buildPrescriptionPayload, toDateTimeLocalValue } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanFileUpload } from '../../components/HealanFileUpload';
-import { getFileDownloadUrl } from '../../api/fileApi';
+import { publicFileDownloadUrl } from '../../api/fileApi';
 import { useLocation } from '@tse/utils';
 import { nowDateTimeLocal } from '../../utils/formatJalali';
+import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
 import { EchoReportFormPanel } from '../../components/EchoReportFormPanel';
 import {
   echoHasAnyValue,
@@ -351,7 +352,7 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     const fileId = row.uploadMeta?.fileId ?? row.attachmentId ?? null;
     if (!fileId) return <>—</>;
 
-    const url = row.uploadMeta?.link ?? getFileDownloadUrl(fileId);
+    const url = publicFileDownloadUrl(fileId, row.uploadMeta?.link);
     const name = row.uploadMeta?.fileName || 'مشاهده فایل';
     const isImage =
       String(row.uploadMeta?.fileType ?? '').toLowerCase() === 'image' ||
@@ -433,7 +434,10 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
               <div className="healan-form-field">
                 <label>تاریخ صدور</label>
-                <input type="datetime-local" value={form.issueDate} onChange={(e) => setForm({ ...form, issueDate: e.target.value })} />
+                <JalaliDateTimeInput
+                  value={form.issueDate}
+                  onChange={(v) => setForm({ ...form, issueDate: v })}
+                />
               </div>
             </div>
 
