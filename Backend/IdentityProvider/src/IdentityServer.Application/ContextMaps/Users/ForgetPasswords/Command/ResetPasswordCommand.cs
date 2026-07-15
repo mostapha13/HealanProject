@@ -88,6 +88,11 @@ namespace IdentityServer.Application.ContextMaps.Users.ForgetPasswords.Command
             var result = await _userManager.ResetPasswordAsync(getUser, token, request.Password);
             if (result.Succeeded)
             {
+                getUser.ResetPasswordToken = null;
+                getUser.CodeSendedDateTime = null;
+                // Forgot-password SMS must not block the next login (2FA) OTP.
+                _smsService.ClearSmsRateLimit(getUser.PhoneNumber);
+                await _applicationDbContext.SaveChangesAsync(cancellationToken);
                 return new ResetPasswordResponse() { userId = getUser.Id.ToString() };
             }
             else

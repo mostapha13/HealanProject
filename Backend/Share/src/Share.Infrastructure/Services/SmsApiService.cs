@@ -114,13 +114,24 @@ namespace Share.Infrastructure.Services
 
         public void ValidToSendSms(string phoneNumber)
         {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return;
+
             string key = $"Phone_{phoneNumber}";
             DateTime? dout;
-            if (_memoryCache.TryGetValue(key, out dout))
+            if (_memoryCache.TryGetValue(key, out dout) && dout.HasValue)
             {
-                if (DateTime.Now.Subtract(dout.Value).TotalSeconds < 120)
-                    throw new BadRequestExceptions($"پیامک قبلا ارسال شده.لطفا {120-(int)DateTime.Now.Subtract(dout.Value).TotalSeconds} ثانیه دیگر منتظر بمانید");
+                var wait = 120 - (int)DateTime.Now.Subtract(dout.Value).TotalSeconds;
+                if (wait > 0)
+                    throw new BadRequestExceptions($"پیامک قبلا ارسال شده.لطفا {wait} ثانیه دیگر منتظر بمانید");
             }
+        }
+
+        public void ClearSmsRateLimit(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return;
+            _memoryCache.Remove($"Phone_{phoneNumber}");
         }
     }
 }

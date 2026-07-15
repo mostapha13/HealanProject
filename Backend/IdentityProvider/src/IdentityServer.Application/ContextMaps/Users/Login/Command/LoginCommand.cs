@@ -130,25 +130,35 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
             }
             if (result == Microsoft.AspNetCore.Identity.SignInResult.TwoFactorRequired)
             {
-                _smsService.ValidToSendSms(getUser.PhoneNumber);
+                // Password already verified. Cooldown from forgot-password must not block login 2FA.
+                _smsService.ClearSmsRateLimit(getUser.PhoneNumber);
+
                 var code = await _userManager.GenerateTwoFactorTokenAsync(getUser, "CustomPhone");
 
                 getUser.CodeSendedDateTime = DateTimeHelper.GetCurrentDateTime();
 
                 if (string.IsNullOrWhiteSpace(code))
                 {
-                    new BadRequestExceptions("Code Not Generated");
+                    throw new BadRequestExceptions("Code Not Generated");
                 }
 
-                await _smsService.SendSMS(new SMSModelRequest()
+                var smsResult = await _smsService.SendSMS(new SMSModelRequest()
                 {
                     PhoneNumbers = new List<string>() { getUser.PhoneNumber },
                     Message = $"مطب Healan\nکد تأیید ورود: {code}",
                 });
+
+                if (smsResult != null && !string.IsNullOrWhiteSpace(smsResult.ErrorMessage))
+                    throw new BadRequestExceptions($"ارسال پیامک ناموفق بود: {smsResult.ErrorMessage}");
+
                 await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-
-                return new LoginResponse() { userId = getUser.Id.ToString(), TwoFactorEnabled = getUser.TwoFactorEnabled, IsSuccess = true };
+                return new LoginResponse()
+                {
+                    userId = getUser.Id.ToString(),
+                    TwoFactorEnabled = true,
+                    IsSuccess = true
+                };
             }
             throw new BadRequestExceptions("نام کاربری یا رمز عبور صحیح نیست");
 
