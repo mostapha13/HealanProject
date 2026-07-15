@@ -20,11 +20,36 @@ namespace IdentityServer.GrpcClient.Services
         public IdentityTool(IConfiguration configuration, ILogger<IdentityTool> logger)
         {
             _logger = logger;
+            var address = ResolveIdentityGrpcAddress(configuration);
+            _logger.LogInformation("Identity gRPC address={Address}", address);
+
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            var channel = GrpcChannel.ForAddress(configuration["GrpcServer:IdentityServer"], new GrpcChannelOptions { HttpHandler = httpHandler });
+            var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpHandler = httpHandler });
             client = new UserService.UserServiceClient(channel);
+        }
 
+        /// <summary>
+        /// Docker Production must use identity-grpc on the compose network.
+        /// Incomplete appsettings.Production.json often leaves the baked-in localhost:6829.
+        /// </summary>
+        private static string ResolveIdentityGrpcAddress(IConfiguration configuration)
+        {
+            var address = configuration["GrpcServer:IdentityServer"]?.Trim();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
+            var inContainer = string.Equals(
+                Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+
+            if ((env.Equals("Production", StringComparison.OrdinalIgnoreCase) || inContainer)
+                && (string.IsNullOrWhiteSpace(address)
+                    || address.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
+            {
+                return "http://identity-grpc:8080";
+            }
+
+            return string.IsNullOrWhiteSpace(address) ? "http://localhost:6829" : address;
         }
 
         public async Task<RoleInfos> GetAllRole(Empty request)

@@ -74,17 +74,84 @@ namespace Share.Infrastructure.Services
         public async Task<CaptchaModelResponse> GetCaptcha()
         {
             CaptchaModelResponse captcahResponse = new CaptchaModelResponse();
-            using var client = CreateClient();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            HttpResponseMessage response = await client.GetAsync("Get");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var empResponse = await response.Content.ReadAsStringAsync();
-                captcahResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CaptchaModelResponse>(empResponse);
-            }
+                var baseUrl = _configuration["CaptchaBaseUrl"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    _logger.LogError("CaptchaBaseUrl is not configured");
+                    return captcahResponse;
+                }
 
-            return captcahResponse;
+                using var client = CreateClient();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("Get");
+                var empResponse = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError(
+                        "Captcha Get failed: {Status} {Body} BaseUrl={BaseUrl}",
+                        (int)response.StatusCode,
+                        empResponse,
+                        baseUrl);
+                    return captcahResponse;
+                }
+
+                var settings = new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+                };
+                captcahResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<CaptchaModelResponse>(empResponse, settings)
+                    ?? new CaptchaModelResponse();
+
+                // STJ may emit Image as base64 string; also try parsing envelope-style payloads.
+                if (captcahResponse.Image == null || captcahResponse.Image.Length == 0)
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(empResponse);
+                        if (doc.RootElement.TryGetProperty("image", out var imageEl)
+                            || doc.RootElement.TryGetProperty("Image", out imageEl))
+                        {
+                            if (imageEl.ValueKind == JsonValueKind.String)
+                                captcahResponse.Image = Convert.FromBase64String(imageEl.GetString()!);
+                            else if (imageEl.ValueKind == JsonValueKind.Array)
+                            {
+                                captcahResponse.Image = imageEl.EnumerateArray()
+                                    .Select(e => (byte)e.GetInt32())
+                                    .ToArray();
+                            }
+                        }
+
+                        if (captcahResponse.CaptchaKey == Guid.Empty)
+                        {
+                            if (doc.RootElement.TryGetProperty("captchaKey", out var keyEl)
+                                || doc.RootElement.TryGetProperty("CaptchaKey", out keyEl))
+                            {
+                                if (Guid.TryParse(keyEl.GetString(), out var key))
+                                    captcahResponse.CaptchaKey = key;
+                            }
+                        }
+                    }
+                    catch (Exception parseEx)
+                    {
+                        _logger.LogError(parseEx, "Captcha Get payload parse fallback failed. Body={Body}", empResponse);
+                    }
+                }
+
+                if (captcahResponse.Image == null || captcahResponse.Image.Length == 0)
+                    _logger.LogError("Captcha Get returned empty image. BaseUrl={BaseUrl} BodySnippet={Body}",
+                        baseUrl,
+                        empResponse.Length > 200 ? empResponse[..200] : empResponse);
+
+                return captcahResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Captcha Get exception. BaseUrl={BaseUrl}", _configuration["CaptchaBaseUrl"]);
+                return captcahResponse;
+            }
         }
     }
 }

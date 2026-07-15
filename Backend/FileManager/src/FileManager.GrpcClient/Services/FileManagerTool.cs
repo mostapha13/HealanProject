@@ -20,10 +20,30 @@ namespace FileManager.GrpcClient.Services
         FileManagerClient.IFileManagerService.IFileManagerServiceClient client;
         public FileManagerTool(IConfiguration configuration)
         {
+            var address = ResolveFileManagerGrpcAddress(configuration);
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            var channel = GrpcChannel.ForAddress(configuration["GrpcServer:FileManager"], new GrpcChannelOptions { HttpHandler = httpHandler });
+            var channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions { HttpHandler = httpHandler });
             client = new IFileManagerService.IFileManagerServiceClient(channel);
+        }
+
+        private static string ResolveFileManagerGrpcAddress(IConfiguration configuration)
+        {
+            var address = configuration["GrpcServer:FileManager"]?.Trim();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
+            var inContainer = string.Equals(
+                Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+
+            if ((env.Equals("Production", StringComparison.OrdinalIgnoreCase) || inContainer)
+                && (string.IsNullOrWhiteSpace(address)
+                    || address.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
+            {
+                return "http://filemanager-grpc:8080";
+            }
+
+            return string.IsNullOrWhiteSpace(address) ? "http://localhost:5060" : address;
         }
 
         public async Task<FileReplyInfo> GetFileReplyInfo(Guid fileId)

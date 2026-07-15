@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Share.Application.Common.Interfaces;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using SixLaborsCaptcha.Core;
 using System;
 using System.Collections.Generic;
@@ -41,17 +45,15 @@ namespace CaptchaProvider.Infrastructure.Services
         {
             CaptchaInfo captchaInfo = new CaptchaInfo();
 
-            //int random = new Random().Next(0, 3);
-
-
-            var result = GetCode(true);
+            // ASCII-only codes so Docker images without Persian fonts still render text.
+            var result = GetCode(isLetter: false);
             captchaInfo.Code = result.code;
             captchaInfo.Result = result.result;
-            captchaInfo.RequestIp = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            captchaInfo.RequestIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "0.0.0.0";
             captchaInfo.RequestTime = _dateTime.Now;
             _applicationDbContext.CaptchaInfos.Add(captchaInfo);
             await _applicationDbContext.SaveChangesAsync(System.Threading.CancellationToken.None);
-            var captchaInfoResult = GetCaptchaInfoResult(captchaInfo.Code, captchaInfo.CaptchaInfoId.ToString(), true);
+            var captchaInfoResult = BuildCaptchaImage(captchaInfo.Code, captchaInfo.CaptchaInfoId.ToString());
             return captchaInfoResult;
         }
         public async Task<bool> ValidateCaptcha(ValidationCaptchaRequest validationCaptchaRequest)
@@ -83,10 +85,13 @@ namespace CaptchaProvider.Infrastructure.Services
             _applicationDbContext.CaptchaInfos.Remove(captchaInfo);
             await _applicationDbContext.SaveChangesAsync(System.Threading.CancellationToken.None);
         }
-        private CaptchaInfoResult GetCaptchaInfoResult(string code, string captchaInfoId, bool isLetter)
+        private CaptchaInfoResult BuildCaptchaImage(string code, string captchaInfoId)
         {
-            CaptchaInfoResult captchaInfoResult = new CaptchaInfoResult();
-            captchaInfoResult.CaptchaKey = captchaInfoId;
+            CaptchaInfoResult captchaInfoResult = new CaptchaInfoResult
+            {
+                CaptchaKey = captchaInfoId
+            };
+
             ushort noiseRate = 300;
             byte maxRotationDegrees = 10;
             byte drawLines = 1;
@@ -114,8 +119,6 @@ namespace CaptchaProvider.Infrastructure.Services
                 maxRotationDegrees = (byte)(maxRotationDegrees / 2);
             }
 
-
-
             var slc = new SixLaborsCaptchaModule(new SixLaborsCaptchaOptions
             {
                 DrawLines = drawLines,
@@ -123,24 +126,106 @@ namespace CaptchaProvider.Infrastructure.Services
                 NoiseRate = noiseRate,
                 TextColor = new Color[] { Color.Blue, Color.Black },
             });
-            var key = code;
-           
-            if (isLetter)
-                using (MemoryStream picStream = ImageFactory.BuildImage(key, 50, 220, 20, 4))
+
+            // Prefer ImageFactory → SixLaborsCaptcha → blank JPEG so API never returns Image=null.
+            try
+            {
+                using MemoryStream picStream = ImageFactory.BuildImage(code, 50, 220, 20, 4);
+                captchaInfoResult.Image = picStream.ToArray();
+            }
+            catch
+            {
+                try
                 {
-                    captchaInfoResult.Image = picStream.ToArray();
+                    captchaInfoResult.Image = slc.Generate(code);
                 }
-            else
-                captchaInfoResult.Image = slc.Generate(key);
+                catch
+                {
+                    captchaInfoResult.Image = CreateMinimalJpeg(code);
+                }
+            }
+
+            if (captchaInfoResult.Image == null || captchaInfoResult.Image.Length == 0)
+                captchaInfoResult.Image = CreateMinimalJpeg(code);
+
             return captchaInfoResult;
         }
+
+        /// <summary>Last-resort JPEG so the Identity UI always has an image to display.</summary>
+        private static byte[] CreateMinimalJpeg(string code)
+        {
+            const int width = 220;
+            const int height = 50;
+            using var image = new Image<Rgba32>(width, height);
+            image.Mutate(ctx =>
+            {
+                ctx.Fill(Color.White);
+                ctx.DrawLine(Color.LightGray, 1, new PointF(0, 15), new PointF(width, 15));
+                ctx.DrawLine(Color.LightGray, 1, new PointF(0, 35), new PointF(width, 35));
+            });
+
+            // Draw each character as a simple 5x7 bitmap so no system font is required.
+            var x = 12;
+            foreach (var ch in (code ?? "?").Take(10))
+            {
+                DrawGlyph(image, ch, x, 12);
+                x += 20;
+            }
+
+            using var ms = new MemoryStream();
+            image.SaveAsJpeg(ms);
+            return ms.ToArray();
+        }
+
+        private static void DrawGlyph(Image<Rgba32> image, char ch, int originX, int originY)
+        {
+            // Very small 5x7 patterns for digits and a few symbols used by math captchas.
+            byte[] pattern = ch switch
+            {
+                '0' => new byte[] { 0x1F, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },
+                '1' => new byte[] { 0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E },
+                '2' => new byte[] { 0x1F, 0x01, 0x01, 0x1F, 0x10, 0x10, 0x1F },
+                '3' => new byte[] { 0x1F, 0x01, 0x01, 0x0F, 0x01, 0x01, 0x1F },
+                '4' => new byte[] { 0x11, 0x11, 0x11, 0x1F, 0x01, 0x01, 0x01 },
+                '5' => new byte[] { 0x1F, 0x10, 0x10, 0x1F, 0x01, 0x01, 0x1F },
+                '6' => new byte[] { 0x1F, 0x10, 0x10, 0x1F, 0x11, 0x11, 0x1F },
+                '7' => new byte[] { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08 },
+                '8' => new byte[] { 0x1F, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x1F },
+                '9' => new byte[] { 0x1F, 0x11, 0x11, 0x1F, 0x01, 0x01, 0x1F },
+                '+' => new byte[] { 0x00, 0x04, 0x04, 0x1F, 0x04, 0x04, 0x00 },
+                '-' => new byte[] { 0x00, 0x00, 0x00, 0x1F, 0x00, 0x00, 0x00 },
+                'x' or 'X' or '*' => new byte[] { 0x00, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x00 },
+                ' ' => new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+                _ => new byte[] { 0x1F, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },
+            };
+
+            for (var row = 0; row < 7; row++)
+            {
+                for (var col = 0; col < 5; col++)
+                {
+                    if ((pattern[row] & (1 << (4 - col))) == 0)
+                        continue;
+                    var px = originX + col * 2;
+                    var py = originY + row * 3;
+                    for (var dy = 0; dy < 2; dy++)
+                    for (var dx = 0; dx < 2; dx++)
+                    {
+                        var x = px + dx;
+                        var y = py + dy;
+                        if (x >= 0 && x < image.Width && y >= 0 && y < image.Height)
+                            image[x, y] = new Rgba32(40, 40, 40);
+                    }
+                }
+            }
+        }
+
         private (string code, string result) GetCode(bool isLetter)
         {
             CaptchaFormat captchaFormat = _captchaConfig.CurrentValue.CaptchaFormat;
-            if (captchaFormat == CaptchaFormat.Hybrid)
+            if (captchaFormat == CaptchaFormat.Hybrid || captchaFormat == 0)
             {
-                var random = new Random().Next(6, 10)/2;
-                captchaFormat = (CaptchaFormat)random;
+                // Digits only — always renderable even with the fontsless JPEG fallback.
+                captchaFormat = CaptchaFormat.Number;
             }
             return GenerateCode(captchaFormat, isLetter);
         }

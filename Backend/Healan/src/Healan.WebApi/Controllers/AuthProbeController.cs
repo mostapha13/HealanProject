@@ -31,17 +31,31 @@ namespace Healan.WebApi.Controllers
         {
             var auth = Request.Headers.Authorization.ToString();
             var hasBearer = auth.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase);
+            var configuredUrl = _configuration["IdentityServer:Url"];
+            var grpcIdentity = _configuration["GrpcServer:IdentityServer"];
+            var looksBroken = string.IsNullOrWhiteSpace(configuredUrl)
+                || configuredUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+            var grpcBroken = string.IsNullOrWhiteSpace(grpcIdentity)
+                || grpcIdentity.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+
             return Ok(new
             {
-                build = "f28a843-authdiag-v2",
+                build = "f28a843-authdiag-v3",
                 environment = _env.EnvironmentName,
-                identityAuthority = _configuration["IdentityServer:Url"],
+                identityAuthority = configuredUrl,
+                validIssuer = _configuration["IdentityServer:ValidIssuer"],
+                grpcIdentityServer = grpcIdentity,
+                grpcFileManager = _configuration["GrpcServer:FileManager"],
+                identityAuthorityLooksBroken = looksBroken,
+                grpcLooksBroken = grpcBroken,
                 hasBearer,
                 isAuthenticated = User?.Identity?.IsAuthenticated == true,
                 userId = _currentUser.UserId,
                 claimCount = User?.Claims?.Count() ?? 0,
                 claimTypes = User?.Claims?.Select(c => c.Type).Distinct().Take(20),
-                message = "If you see build=f28a843-authdiag-v2, the new Healan image is live."
+                message = (looksBroken || grpcBroken)
+                    ? "BROKEN config: fix docker/config/healan-webapi/appsettings.Production.json (IdentityServer.Url + GrpcServer.*) then recreate; rebuild needed for code fallback."
+                    : "If you see build=f28a843-authdiag-v3, the new Healan image is live."
             });
         }
     }

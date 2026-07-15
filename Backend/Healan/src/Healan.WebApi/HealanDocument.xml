@@ -19,6 +19,9 @@
             گزارش‌های تحلیلی کلینیک
             </summary>
         </member>
+        <member name="M:Healan.WebApi.Controllers.ClinicReportsController.SmsOutbox(Healan.Application.Reports.Queries.GetSmsOutboxList.GetSmsOutboxListQuery)">
+            <summary>لیست پیامک‌های ارسالی (OTP / فراموشی رمز و ...)</summary>
+        </member>
         <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyList(Healan.Application.Companies.Queries.CompanyList.CompanyListQuery)">
             <summary>
             لیست شرکت ها
@@ -350,6 +353,9 @@
             </summary>
             <param name="userId"></param>
             <returns></returns>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.UserController.UpdateMyProfile(Healan.Application.Users.Commands.UpdateMyProfile.UpdateMyProfileCommand)">
+            <summary>به‌روزرسانی پروفایل کاربر جاری (بدون نیاز به دسترسی تعریف کاربر)</summary>
         </member>
     </members>
 </doc>

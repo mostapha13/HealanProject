@@ -7,42 +7,31 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CaptchaGen.NetCore
 {
     /// <summary>
     /// Generates a captcha image based on the captcha code string given.
-    /// yangzhongke(http://www.youzack.com) migrated from https://github.com/vishnuprasadv/CaptchaGen/blob/master/CaptchaGen/ImageFactory.cs
     /// </summary>
     public static class ImageFactory
     {
-        const string FONTFAMILY = "Arial";
-
-        /// <summary>
-        /// Create a random string that consits of 'digitCount' characters
-        /// </summary>
-        /// <param name="digitCount"></param>
-        /// <returns></returns>
-        public static string CreateCode(int digitCount=5)
+        /// <summary>Create a random string that consists of 'digitCount' characters</summary>
+        public static string CreateCode(int digitCount = 5)
         {
             char[] chars = {'A','B','C','D','G','H','K','M','N','P','Q','R','S','T','W','X','Y',
                 '3','4','5','6','8'};
             StringBuilder sb = new StringBuilder();
             Random random = new Random();
-            for (int i=0;i< digitCount;i++)
+            for (int i = 0; i < digitCount; i++)
             {
                 sb.Append(chars[random.Next(chars.Length)]);
             }
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Background color to be used.
-        /// Default value = Color.Wheat
-        /// </summary>
         public static Color BackgroundColor { get; set; } = Color.Wheat;
-
 
         public static MemoryStream BuildImage(string captchaCode, int imageHeight, int imageWidth,
             int fontSize, int distortion = 18, IImageEncoder imgFormat = null)
@@ -50,6 +39,7 @@ namespace CaptchaGen.NetCore
             int newX, newY;
             Random random = new Random();
             MemoryStream memoryStream = new MemoryStream();
+            var font = ResolveFont(fontSize);
 
             using (var captchaImage = new Image<Rgba32>(imageWidth, imageHeight))
             using (var cache = new Image<Rgba32>(imageWidth, imageHeight))
@@ -57,22 +47,18 @@ namespace CaptchaGen.NetCore
                 captchaImage.Mutate(ctx =>
                 {
                     ctx.Fill(Color.White);
-                    var font = SystemFonts.CreateFont("Tahoma", fontSize, FontStyle.Italic);
-                    ctx.DrawText(captchaCode, font, Color.Gray, new PointF(0, 0));
+                    ctx.DrawText(captchaCode, font, Color.Gray, new PointF(8, 8));
 
-                    // Draw interfering lines
                     for (int i = 0; i < 8; i++)
                     {
                         int startX = random.Next(imageWidth);
                         int startY = random.Next(imageHeight);
                         int endX = random.Next(imageWidth);
                         int endY = random.Next(imageHeight);
-
                         ctx.DrawLine(Color.Gray, 1, new PointF(startX, startY), new PointF(endX, endY));
                     }
                 });
 
-                // Distort the image with a wave function
                 for (int y = 0; y < imageHeight; y++)
                 {
                     for (int x = 0; x < imageWidth; x++)
@@ -85,15 +71,41 @@ namespace CaptchaGen.NetCore
                     }
                 }
 
-                if (imgFormat == null)
-                {
-                    imgFormat = new JpegEncoder();
-                }
-
+                imgFormat ??= new JpegEncoder();
                 cache.Save(memoryStream, imgFormat);
                 memoryStream.Position = 0;
                 return memoryStream;
             }
+        }
+
+        /// <summary>
+        /// Linux Docker images often lack Tahoma — fall back to Liberation/DejaVu/Arial.
+        /// </summary>
+        private static Font ResolveFont(float fontSize)
+        {
+            string[] preferred =
+            {
+                "Liberation Sans",
+                "DejaVu Sans",
+                "FreeSans",
+                "Noto Sans",
+                "Arial",
+                "Tahoma",
+                "Verdana",
+            };
+
+            foreach (var name in preferred)
+            {
+                if (SystemFonts.TryGet(name, out var family))
+                    return family.CreateFont(fontSize, FontStyle.Italic);
+            }
+
+            var first = SystemFonts.Collection.Families.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(first.Name))
+                return first.CreateFont(fontSize, FontStyle.Italic);
+
+            // Absolute last resort — may throw if no fonts exist at all
+            return SystemFonts.CreateFont("Arial", fontSize, FontStyle.Italic);
         }
     }
 }

@@ -73,8 +73,24 @@ namespace Healan.WebApi
                 c.IncludeXmlComments("HealanDocument.xml");
             });
 
-            var authority = Configuration["IdentityServer:Url"];
-            Console.WriteLine($"[HealanAuth] Configure IdentityServerAuthentication Authority={authority} ApiName=WorkFlowWebApi (same as UserManagerAPI) Env={_env.EnvironmentName} BuildTag=f28a843-authdiag-v2");
+            // Docker Production MUST talk to identity-server on the compose network.
+            // If appsettings.Production.json was overwritten (password-only restore), the baked-in
+            // Development URL (https://localhost:44320) survives → IDX20804 and every JWT fails.
+            var authority = Configuration["IdentityServer:Url"]?.Trim();
+            if (_env.IsProduction()
+                && (string.IsNullOrWhiteSpace(authority)
+                    || authority.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
+            {
+                Console.Error.WriteLine(
+                    $"[HealanAuth] WARN IdentityServer:Url was '{authority}' — forcing http://identity-server:8080/ (fix docker/config/healan-webapi/appsettings.Production.json)");
+                authority = "http://identity-server:8080/";
+            }
+
+            var validIssuer = Configuration["IdentityServer:ValidIssuer"]?.Trim()
+                ?? "http://auth.drshahrooei.ir";
+
+            Console.WriteLine(
+                $"[HealanAuth] Configure Authority={authority} ValidIssuer={validIssuer} ApiName=WorkFlowWebApi Env={_env.EnvironmentName} BuildTag=f28a843-authdiag-v3");
 
             // EXACT copy of IdentityServer.UserManagerAPI production auth — the only proven path
             // for these clinic tokens on this Docker stack. Do NOT use custom JwtBearer here:

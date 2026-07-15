@@ -417,19 +417,9 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(string returnUrl = null)
         {
-            ForgotPasswordViewModel model = new ForgotPasswordViewModel();
-            try
-            {
-                var getCaptcha = await _captchaProviderService.GetCaptcha();
-                model.Image = getCaptcha.Image;
-                model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-                model.ReturnUrl = returnUrl;
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                return View(model);
-            }
+            var model = new ForgotPasswordViewModel { ReturnUrl = returnUrl };
+            await AttachCaptchaAsync(model);
+            return View(model);
         }
 
         [HttpPost]
@@ -437,34 +427,29 @@ namespace IdentityServer.Controllers
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model: model);
+            {
+                await AttachCaptchaAsync(model);
+                return View(model);
+            }
+
             try
             {
-                var forgetPasswordCommand = new ForgetPasswordCommand() { UserName = model.PhoneNumber, CaptchaCode = model.CaptchaCode, CaptchaKey = model.CaptchaKey };
-                var result = await Mediator.Send(forgetPasswordCommand);
+                var forgetPasswordCommand = new ForgetPasswordCommand()
+                {
+                    UserName = model.PhoneNumber,
+                    CaptchaCode = model.CaptchaCode,
+                    CaptchaKey = model.CaptchaKey,
+                };
+                await Mediator.Send(forgetPasswordCommand);
                 TempData["PhoneNumber"] = model.PhoneNumber;
                 return RedirectToAction(nameof(ResetPassword), new { returnUrl = model.ReturnUrl });
-
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-            }
-            try
-            {
-                var getCaptcha = await _captchaProviderService.GetCaptcha();
-                model.Image = getCaptcha.Image;
-                model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-                model.CaptchaCode = string.Empty;
-                ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
-                ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
+                await AttachCaptchaAsync(model);
                 return View(model);
             }
-            catch (Exception ex)
-            {
-                return RedirectToAction("ForgotPassword");
-            }
-
         }
 
         [HttpGet]
@@ -479,14 +464,10 @@ namespace IdentityServer.Controllers
         public async Task<IActionResult> ResetPassword(string returnUrl = null)
         {
             var model = new ResetPasswordViewModel { ReturnUrl = returnUrl };
-            var getCaptcha = await _captchaProviderService.GetCaptcha();
-            model.Image = getCaptcha.Image;
-            model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
             if (TempData["PhoneNumber"] != null)
-            {
                 model.PhoneNumber = TempData["PhoneNumber"].ToString();
-            }
             TempData["PhoneNumber"] = model.PhoneNumber;
+            await AttachCaptchaAsync(model);
             return View(model);
         }
 
@@ -494,44 +475,80 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
+            TempData["PhoneNumber"] = model.PhoneNumber;
             if (!ModelState.IsValid)
             {
-                TempData["PhoneNumber"] = model.PhoneNumber;
+                await AttachCaptchaAsync(model);
                 return View(model);
             }
+
             try
             {
-
-
-                TempData["PhoneNumber"] = model.PhoneNumber;
-                var command = new ResetPasswordCommand() { Code = model.Code, UserName = model.PhoneNumber, Password = model.Password, CaptchaKey = model.CaptchaKey, CaptchaCode = model.CaptchaCode };
-                var result = await Mediator.Send(command);
-                var modelLogin = await FillModel(new LoginViewModel(), model.ReturnUrl);
-
-
-                var getCaptcha = await _captchaProviderService.GetCaptcha();
-                model.Image = getCaptcha.Image;
-                model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-                model.CaptchaCode = string.Empty;
-                ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
-                ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
-
-
-                return RedirectToAction(nameof(Login), new { returnUrl = modelLogin.ReturnUrl });
+                var command = new ResetPasswordCommand()
+                {
+                    Code = model.Code,
+                    UserName = model.PhoneNumber,
+                    Password = model.Password,
+                    CaptchaKey = model.CaptchaKey,
+                    CaptchaCode = model.CaptchaCode,
+                };
+                await Mediator.Send(command);
+                return RedirectToAction(nameof(Login), new { returnUrl = model.ReturnUrl });
             }
             catch (Exception ex)
             {
-                TempData["PhoneNumber"] = model.PhoneNumber;
                 ModelState.AddModelError(string.Empty, ex.Message);
-                var getCaptcha = await _captchaProviderService.GetCaptcha();
-                model.Image = getCaptcha.Image;
-                model.CaptchaKey = getCaptcha.CaptchaKey.ToString();
-                model.CaptchaCode = string.Empty;
-                ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
-                ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
+                await AttachCaptchaAsync(model);
+                return View(model);
             }
+        }
 
-            return View(model);
+        private async Task AttachCaptchaAsync(ForgotPasswordViewModel model)
+        {
+            try
+            {
+                var getCaptcha = await _captchaProviderService.GetCaptcha();
+                model.Image = getCaptcha?.Image;
+                model.CaptchaKey = getCaptcha?.CaptchaKey.ToString();
+                model.CaptchaCode = string.Empty;
+                if (ModelState["CaptchaKey"] != null)
+                    ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
+                if (ModelState["CaptchaCode"] != null)
+                    ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
+
+                if (model.Image == null || model.Image.Length == 0)
+                    ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً چند لحظه بعد دوباره تلاش کنید.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Captcha unavailable for ForgotPassword");
+                model.Image = null;
+                ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً چند لحظه بعد دوباره تلاش کنید.");
+            }
+        }
+
+        private async Task AttachCaptchaAsync(ResetPasswordViewModel model)
+        {
+            try
+            {
+                var getCaptcha = await _captchaProviderService.GetCaptcha();
+                model.Image = getCaptcha?.Image;
+                model.CaptchaKey = getCaptcha?.CaptchaKey.ToString();
+                model.CaptchaCode = string.Empty;
+                if (ModelState["CaptchaKey"] != null)
+                    ModelState["CaptchaKey"].RawValue = model.CaptchaKey;
+                if (ModelState["CaptchaCode"] != null)
+                    ModelState["CaptchaCode"].RawValue = model.CaptchaCode;
+
+                if (model.Image == null || model.Image.Length == 0)
+                    ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً چند لحظه بعد دوباره تلاش کنید.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Captcha unavailable for ResetPassword");
+                model.Image = null;
+                ModelState.AddModelError(string.Empty, "سرویس کپچا در دسترس نیست. لطفاً چند لحظه بعد دوباره تلاش کنید.");
+            }
         }
 
 

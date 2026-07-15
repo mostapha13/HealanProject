@@ -94,6 +94,8 @@ services:
         condition: service_healthy
       identity-grpc:
         condition: service_started
+      captcha-webui:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
     volumes:
