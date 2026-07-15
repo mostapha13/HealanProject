@@ -103,10 +103,15 @@ namespace Share.Infrastructure.SecurityMiddlewares
                 _logger.LogError(ex, "IsUserActive gRPC failed for {UserId}", userId);
                 context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                 context.Response.ContentType = "application/json";
+                context.Response.Headers["X-Auth-Reason"] = "identity_grpc_unavailable";
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new CustomProblemDetails
                 {
                     Title = "Identity Unavailable",
-                    Errors = new[] { "سرویس احراز هویت در دسترس نیست." }
+                    Errors = new[]
+                    {
+                        "سرویس احراز هویت در دسترس نیست.",
+                        $"diag:identity_grpc_unavailable;userId={userId};{ex.GetType().Name}:{ex.Message}"
+                    }
                 }));
                 return;
             }

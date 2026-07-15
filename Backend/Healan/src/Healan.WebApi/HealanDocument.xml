@@ -9,6 +9,11 @@
             ویزیت
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.AuthProbeController">
+            <summary>
+            Public probe to confirm which auth build is live in Docker.
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.ClinicReportsController">
             <summary>
             گزارش‌های تحلیلی کلینیک
