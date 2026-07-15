@@ -41,22 +41,51 @@ namespace Share.Infrastructure.Services
                 var sms = JsonSerializer.Serialize(sMSModelRequest);
                 var requestContent = new StringContent(sms, Encoding.UTF8, "application/json");
 
-                var loginResult = await _loginProviderApi.Login(new LoginProviderRequest() { userName = _configuration["LoginProviderUserName"], password = _configuration["LoginProviderPassword"] });
-
+                var baseUrl = _configuration["SMSBaseUrl"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    sMSModelResponce.ErrorMessage = "SMSBaseUrl تنظیم نشده است.";
+                    return sMSModelResponce;
+                }
 
                 HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(_configuration["SMSBaseUrl"]);
-                client.DefaultRequestHeaders.Add("token", loginResult.token);
+                client.BaseAddress = new Uri(baseUrl);
+
+                // SMSProvider محلی نیازی به LoginProvider / token ندارد.
+                var skipAuth = string.Equals(_configuration["SMSSkipAuthToken"], "true", StringComparison.OrdinalIgnoreCase)
+                    || baseUrl.Contains("SMSProvider", StringComparison.OrdinalIgnoreCase)
+                    || baseUrl.Contains("smsprovider", StringComparison.OrdinalIgnoreCase);
+
+                if (!skipAuth)
+                {
+                    var loginResult = await _loginProviderApi.Login(new LoginProviderRequest()
+                    {
+                        userName = _configuration["LoginProviderUserName"],
+                        password = _configuration["LoginProviderPassword"],
+                    });
+                    client.DefaultRequestHeaders.Add("token", loginResult.token);
+                }
 
                 HttpResponseMessage response = await client.PostAsync($"SendSMS", requestContent);
-                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Parse the response body.
-                    var result = await response.Content.ReadAsStringAsync();
-                    sMSModelResponce = JsonSerializer.Deserialize<SMSModelResponce>(result);
+                    try
+                    {
+                        sMSModelResponce = JsonSerializer.Deserialize<SMSModelResponce>(result, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                        }) ?? new SMSModelResponce();
+                    }
+                    catch
+                    {
+                        sMSModelResponce = new SMSModelResponce { TraceNumber = result };
+                    }
                     client.Dispose();
+
+                    if (!string.IsNullOrWhiteSpace(sMSModelResponce.ErrorMessage))
+                        return sMSModelResponce;
 
                     foreach (var item in sMSModelRequest.PhoneNumbers)
                     {
@@ -64,13 +93,14 @@ namespace Share.Infrastructure.Services
                         _memoryCache.Set(key, DateTime.Now);
                     }
 
-
                     return sMSModelResponce;
                 }
                 else
                 {
                     client.Dispose();
-                    sMSModelResponce.ErrorMessage = response.ReasonPhrase;
+                    sMSModelResponce.ErrorMessage = string.IsNullOrWhiteSpace(result)
+                        ? response.ReasonPhrase
+                        : result;
                     return sMSModelResponce;
                 }
             }

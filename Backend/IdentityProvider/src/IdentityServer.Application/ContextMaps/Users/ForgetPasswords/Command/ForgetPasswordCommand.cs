@@ -85,9 +85,17 @@ namespace IdentityServer.Application.ContextMaps.Users.ForgetPasswords.Command
 
             if (string.IsNullOrWhiteSpace(code))
             {
-                new BadRequestExceptions("Reset Code Not Generated");
+                throw new BadRequestExceptions("Reset Code Not Generated");
             }
-            await _smsService.SendSMS(new SMSModelRequest() { PhoneNumbers = new List<string>() { getUser.PhoneNumber }, Message = "بورس تهران \n" + $" کد موقت {code}" });
+
+            var smsResult = await _smsService.SendSMS(new SMSModelRequest()
+            {
+                PhoneNumbers = new List<string>() { getUser.PhoneNumber },
+                Message = $"مطب Healan\nکد بازیابی رمز عبور: {code}",
+            });
+
+            if (smsResult != null && !string.IsNullOrWhiteSpace(smsResult.ErrorMessage))
+                throw new BadRequestExceptions($"ارسال پیامک ناموفق بود: {smsResult.ErrorMessage}");
 
             return new ForgetPasswordResponse() { userId = getUser.Id.ToString() };
         }

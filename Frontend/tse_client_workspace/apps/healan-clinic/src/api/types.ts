@@ -67,6 +67,18 @@ export interface ClinicAnalyticsFilters {
   serviceTypeId?: number | null;
 }
 
+export interface SmsOutboxItem {
+  id: number;
+  createdAt: string;
+  phoneNumber: string;
+  extractedCode?: string | null;
+  message: string;
+  success: boolean;
+  errorMessage?: string | null;
+  traceNumber?: string | null;
+  channel?: string;
+}
+
 export interface PatientSummary {
   patientId: number;
   userId?: number;

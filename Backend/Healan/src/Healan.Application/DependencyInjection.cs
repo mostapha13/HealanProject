@@ -28,6 +28,18 @@ namespace Healan.Application
             services.AddFileManagerServices(configuration);
             services.AddScoped<IInvoiceCalculationService, InvoiceCalculationService>();
             services.AddScoped<IClinicAccessScopeService, ClinicAccessScopeService>();
+            services.AddHttpClient("SMSProvider", (sp, client) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                var baseUrl = config["SMSProviderBaseUrl"]?.Trim();
+                if (!string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    if (!baseUrl.EndsWith('/'))
+                        baseUrl += "/";
+                    client.BaseAddress = new Uri(baseUrl);
+                }
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
             services.AddHttpClient<Portal.Services.IRagPythonService, Portal.Services.RagPythonService>(client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(120);

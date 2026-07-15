@@ -218,6 +218,24 @@ services:
     volumes:
       - ./docker/config/notification-webapp/appsettings.Production.json:/app/appsettings.Production.json:ro
 
+  smsprovider-webapp:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/SMSProvider/SMSProvider.WebApp/SMSProvider.WebApp.csproj
+        DLL_NAME: SMSProvider.WebApp.dll
+    container_name: healan-smsprovider-webapp
+    ports:
+      - "6032:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    volumes:
+      - ./docker/config/smsprovider-webapp/appsettings.Production.json:/app/appsettings.Production.json:ro
+
   healan-webapi:
     build:
       context: .

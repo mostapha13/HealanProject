@@ -140,7 +140,11 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
                     new BadRequestExceptions("Code Not Generated");
                 }
 
-                await _smsService.SendSMS(new SMSModelRequest() { PhoneNumbers = new List<string>() { getUser.PhoneNumber }, Message = "بورس تهران \n" + $"کد تایید {code}" });
+                await _smsService.SendSMS(new SMSModelRequest()
+                {
+                    PhoneNumbers = new List<string>() { getUser.PhoneNumber },
+                    Message = $"مطب Healan\nکد تأیید ورود: {code}",
+                });
                 await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
 

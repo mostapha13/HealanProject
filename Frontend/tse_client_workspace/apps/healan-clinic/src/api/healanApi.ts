@@ -28,6 +28,7 @@ import type {
   BlogPostDetail,
   RagKnowledgeItem,
   RagSetting,
+  SmsOutboxItem,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -72,6 +73,11 @@ export const healanApi = {
       if (params.patientId && params.patientId > 0) query['patientId'] = params.patientId;
       if (params.serviceTypeId && params.serviceTypeId > 0) query['serviceTypeId'] = params.serviceTypeId;
       return get<ClinicAnalytics>('ClinicReports/Analytics', query);
+    },
+    smsOutbox: (params: { take?: number; phone?: string } = {}) => {
+      const query: Record<string, unknown> = { take: params.take ?? 50 };
+      if (params.phone) query['phone'] = params.phone;
+      return get<SmsOutboxItem[]>('ClinicReports/SmsOutbox', query);
     },
   },
 
