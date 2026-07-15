@@ -1,5 +1,7 @@
 import { request } from '@tse/tools';
 import { HEALAN_ACCESS_SYSTEM_ID, USER_MANAGER_API } from '../constants';
+import { userManager } from '../store/userManager';
+import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 
 export interface AccessUserRoleItem {
   url: string;
@@ -50,6 +52,19 @@ const FOLDER_TITLES: Record<number, string> = {
   5120: 'محتوای سایت',
 };
 
+async function accessToken(): Promise<string | undefined> {
+  try {
+    const user = await userManager.getUser();
+    if (user?.access_token && !user.expired) {
+      setClinicBearerToken(user.access_token);
+      return user.access_token;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
 function normalizeTreeItem(raw: Record<string, unknown>): AccessRoleTreeItem {
   const key = Number(raw['key'] ?? raw['accessMenuId'] ?? raw['AccessMenuId'] ?? 0);
   const childrenRaw = (raw['children'] ?? raw['Children']) as Record<string, unknown>[] | undefined;
@@ -85,57 +100,54 @@ function normalizeMenuItem(raw: Record<string, unknown>): AccessMenuTreeItem {
   };
 }
 
-export function fetchUserAccessRole(params: UserAccessRequest): Promise<AccessUserRoleItem[]> {
-  return new Promise((resolve, reject) => {
-    request
-      .get({
-        baseUrl: USER_MANAGER_API,
-        url: 'UserAccess/UserAccessRole',
-        options: params,
-      })
-      .then((res) => resolve((res ?? []) as AccessUserRoleItem[]))
-      .catch(reject);
+export async function fetchUserAccessRole(params: UserAccessRequest): Promise<AccessUserRoleItem[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/UserAccessRole',
+    options: params,
+    token,
   });
+  return (res ?? []) as AccessUserRoleItem[];
 }
 
-export function fetchIdentityRoles(searchText = ''): Promise<IdentityRoleItem[]> {
-  return request
-    .get({
-      baseUrl: USER_MANAGER_API,
-      url: 'UserAccess/Role/1',
-      options: {
-        AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
-        SearchText: searchText,
-      },
-    })
-    .then((res) => {
-      const list = (res ?? []) as Record<string, unknown>[];
-      return list.map((item) => ({
-        roleId: String(item['roleId'] ?? item['RoleId'] ?? ''),
-        roleName: String(item['roleName'] ?? item['RoleName'] ?? ''),
-        roleTitle: String(item['roleTitle'] ?? item['RoleTitle'] ?? item['roleName'] ?? item['RoleName'] ?? ''),
-      }));
-    });
+export async function fetchIdentityRoles(searchText = ''): Promise<IdentityRoleItem[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/Role/1',
+    options: {
+      AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
+      SearchText: searchText,
+    },
+    token,
+  });
+  const list = (res ?? []) as Record<string, unknown>[];
+  return list.map((item) => ({
+    roleId: String(item['roleId'] ?? item['RoleId'] ?? ''),
+    roleName: String(item['roleName'] ?? item['RoleName'] ?? ''),
+    roleTitle: String(item['roleTitle'] ?? item['RoleTitle'] ?? item['roleName'] ?? item['RoleName'] ?? ''),
+  }));
 }
 
-export function fetchAccessRoleTree(roleId: string): Promise<AccessRoleTreeItem[]> {
-  return request
-    .get({
-      baseUrl: USER_MANAGER_API,
-      url: 'UserAccess/AccessRole/1',
-      options: {
-        RoleId: roleId,
-        AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
-      },
-    })
-    .then((res) => {
-      const data = (res ?? {}) as Record<string, unknown>;
-      const items = (data['items'] ?? data['Items'] ?? []) as Record<string, unknown>[];
-      return Array.isArray(items) ? items.map(normalizeTreeItem) : [];
-    });
+export async function fetchAccessRoleTree(roleId: string): Promise<AccessRoleTreeItem[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/AccessRole/1',
+    options: {
+      RoleId: roleId,
+      AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
+    },
+    token,
+  });
+  const data = (res ?? {}) as Record<string, unknown>;
+  const items = (data['items'] ?? data['Items'] ?? []) as Record<string, unknown>[];
+  return Array.isArray(items) ? items.map(normalizeTreeItem) : [];
 }
 
-export function saveAccessRole(roleId: string, items: AccessRoleTreeItem[]): Promise<AccessRoleResponse> {
+export async function saveAccessRole(roleId: string, items: AccessRoleTreeItem[]): Promise<AccessRoleResponse> {
+  const token = await accessToken();
   return request.post({
     baseUrl: USER_MANAGER_API,
     url: 'UserAccess/SaveAccessRole',
@@ -143,25 +155,25 @@ export function saveAccessRole(roleId: string, items: AccessRoleTreeItem[]): Pro
       roleId,
       items,
     },
+    token,
   }) as Promise<AccessRoleResponse>;
 }
 
-export function fetchAccessMenuTree(): Promise<AccessMenuTreeItem[]> {
-  return request
-    .get({
-      baseUrl: USER_MANAGER_API,
-      url: 'UserAccess/AccessMenu/1',
-      options: {
-        AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
-      },
-    })
-    .then((res) => {
-      const list = (res ?? []) as Record<string, unknown>[];
-      return Array.isArray(list) ? list.map(normalizeMenuItem) : [];
-    });
+export async function fetchAccessMenuTree(): Promise<AccessMenuTreeItem[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/AccessMenu/1',
+    options: {
+      AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
+    },
+    token,
+  });
+  const list = (res ?? []) as Record<string, unknown>[];
+  return Array.isArray(list) ? list.map(normalizeMenuItem) : [];
 }
 
-export interface SaveAccessFormPayload {
+export async function saveAccessForm(payload: {
   accessFormId?: number;
   accessMenuId?: number;
   formTitle: string;
@@ -170,14 +182,13 @@ export interface SaveAccessFormPayload {
   order?: number;
   isFolder?: boolean;
   accessSystemId?: number;
-}
-
-export function saveAccessForm(payload: SaveAccessFormPayload): Promise<{
+}): Promise<{
   accessFormId: number;
   accessMenuId: number;
   formTitle: string;
   url: string;
 }> {
+  const token = await accessToken();
   return request.post({
     baseUrl: USER_MANAGER_API,
     url: 'UserAccess/SaveAccessForm',
@@ -191,6 +202,7 @@ export function saveAccessForm(payload: SaveAccessFormPayload): Promise<{
       isFolder: Boolean(payload.isFolder),
       accessSystemId: payload.accessSystemId ?? HEALAN_ACCESS_SYSTEM_ID,
     },
+    token,
   }) as Promise<{
     accessFormId: number;
     accessMenuId: number;
@@ -199,11 +211,13 @@ export function saveAccessForm(payload: SaveAccessFormPayload): Promise<{
   }>;
 }
 
-export function deleteAccessForm(accessMenuId: number): Promise<boolean> {
+export async function deleteAccessForm(accessMenuId: number): Promise<boolean> {
+  const token = await accessToken();
   return request.post({
     baseUrl: USER_MANAGER_API,
     url: 'UserAccess/DeleteAccessForm',
     options: { accessMenuId },
+    token,
   }) as Promise<boolean>;
 }
 
