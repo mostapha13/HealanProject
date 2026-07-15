@@ -47,12 +47,12 @@ namespace Share.Domain.Extensions
         public static TAttribute GetAttribute<TAttribute>(this Enum enumValue)
            where TAttribute : Attribute
         {
-            var sss = typeof(TAttribute);
-
-            return enumValue.GetType()
-                            .GetMember(enumValue.ToString())
-                            .First()
-                            .GetCustomAttribute<TAttribute>();
+            // Undefined DB enum values (e.g. 0) have no named member — First() threw
+            // "Sequence contains no elements" and broke UserList / other ProjectTo/Map paths.
+            var member = enumValue.GetType()
+                .GetMember(enumValue.ToString())
+                .FirstOrDefault();
+            return member?.GetCustomAttribute<TAttribute>();
         }
     }
 }

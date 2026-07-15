@@ -28,8 +28,10 @@ namespace Healan.Application.Users.Dtos
         public void Mapping(Profile profile)
         {
             profile.CreateMap<User, UserListResult>()
-                .ForMember(a => a.UserTypeName, b => b.MapFrom(c => c.UserTypeId.GetDisplayName()))
-                .ForMember(a => a.FullName, b => b.MapFrom(c => $"{c.FirstName} {c.LastName}"));
+                .ForMember(a => a.UserTypeName, b => b.MapFrom(c =>
+                    c.UserTypeId.GetDisplayName() ?? c.UserTypeId.ToString()))
+                .ForMember(a => a.FullName, b => b.MapFrom(c => $"{c.FirstName} {c.LastName}"))
+                .ForMember(a => a.Company, b => b.MapFrom(c => c.Company));
         }
     }
 }
