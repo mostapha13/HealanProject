@@ -1,12 +1,12 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route } from '@tse/utils';
-import axios from 'axios';
 import { userManager } from '../store/userManager';
 import { Loading } from '@tse/components/atoms';
 import HealanLayout from '../layout/HealanLayout';
 import AuthGuard from '../pages/AuthGuard';
 import CallBackPage from '../pages/CallBack';
 import AccessRouteGuard from '../components/AccessRouteGuard';
+import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const PatientsPage = lazy(() => import('../pages/Patients'));
@@ -40,8 +40,8 @@ function guarded(path: string, element: React.ReactNode) {
 export default function AppRoutes() {
   useEffect(() => {
     userManager.getUser().then((user) => {
-      if (user && !user.expired) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+      if (user && !user.expired && user.access_token) {
+        setClinicBearerToken(user.access_token);
       }
     });
   }, []);

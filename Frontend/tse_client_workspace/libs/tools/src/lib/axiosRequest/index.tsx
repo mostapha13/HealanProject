@@ -1,10 +1,6 @@
 import axios from 'axios';
-
-import { downloadFile } from '@tse/tools';
+import { loadFromSession } from '../sessionStorage';
 const qs = require('qs');
-// eslint-disable-next-line no-undef
-// eslint-disable-next-line no-undef
-// const fileBaseUrl = process.env.REACT_APP_FILE_BASE_URL;
 
 type DataEntry = {
   baseUrl?: string;
@@ -15,12 +11,41 @@ type DataEntry = {
 };
 axios.defaults.withCredentials = true;
 
+const ACCESS_TOKEN_SESSION_KEY = 'healan_access_token';
+
+function resolveToken(explicit?: string): string | undefined {
+  if (explicit) return explicit;
+  try {
+    const fromSession = loadFromSession(ACCESS_TOKEN_SESSION_KEY);
+    return typeof fromSession === 'string' && fromSession ? fromSession : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function ensureAuthHeader(explicit?: string) {
+  const token = resolveToken(explicit);
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+  }
+  return token;
+}
+
+axios.interceptors.request.use((config) => {
+  const token = resolveToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    if (!config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export const request = {
   get: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    }
+    ensureAuthHeader(token);
     return axios
       .get(`${baseUrl}${url}`, {
         params: options,
@@ -42,9 +67,7 @@ export const request = {
   },
   delete: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    }
+    ensureAuthHeader(token);
     return axios
       .delete(`${baseUrl}${url}`, {
         ...options,
@@ -62,10 +85,7 @@ export const request = {
       });
   },
   post: async ({ baseUrl, url, options, token }: DataEntry) => {
-    // const cancelToken = axios.CancelToken.source();
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    }
+    ensureAuthHeader(token);
     return axios
       .post(`${baseUrl}${url}`, { ...options })
       .then((res: any) => {
@@ -81,9 +101,7 @@ export const request = {
   },
   put: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    }
+    ensureAuthHeader(token);
     return axios
       .put(`${baseUrl}${url}`, { ...options, cancelToken: cancelToken.token })
       .then((res: unknown) => {
@@ -98,6 +116,7 @@ export const request = {
       });
   },
   upload: async ({ baseUrl, url, formData }: any) => {
+    ensureAuthHeader();
     return axios
       .post(`${baseUrl}${url}`, formData)
       .then((res) => {
@@ -112,6 +131,7 @@ export const request = {
       });
   },
   download: async ({ baseUrl, url, options, fileName }: any) => {
+    ensureAuthHeader();
     return axios
       .get(`${baseUrl}${url}`, {
         params: options,
@@ -129,9 +149,7 @@ export const request = {
       });
   },
   all: async ({ urls, token }: DataEntry) => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-    }
+    ensureAuthHeader(token);
     if (urls) {
       return axios.all([...urls]).then(
         axios.spread((...responses) => {

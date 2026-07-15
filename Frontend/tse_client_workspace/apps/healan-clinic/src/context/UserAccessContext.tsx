@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
 import { saveToSession } from '@tse/tools';
 import { userManager } from '../store/userManager';
 import healanApi from '../api/healanApi';
@@ -11,6 +10,7 @@ import {
 import { HEALAN_ACCESS_SYSTEM_ID } from '../constants';
 import type { UserRoleInfo, UserSummary } from '../api/types';
 import { withTimeout } from '../utils/withTimeout';
+import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 
 interface UserAccessContextValue {
   accessRole: AccessUserRoleItem[];
@@ -132,7 +132,7 @@ function userSummaryFromOidcProfile(profile: Record<string, unknown>): UserSumma
 async function ensureAuthHeader() {
   const user = await userManager.getUser();
   if (user?.access_token && !user.expired) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+    setClinicBearerToken(user.access_token);
   }
   return user;
 }

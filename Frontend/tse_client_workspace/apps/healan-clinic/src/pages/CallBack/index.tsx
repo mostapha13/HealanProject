@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from '@tse/utils';
 import { userManager } from '../../store/userManager';
+import { setClinicBearerToken } from '../../utils/setClinicBearerToken';
 
 function CallBackPage() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ function CallBackPage() {
       .then((user) => {
         if (cancelled) return;
         if (user?.access_token) {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+          setClinicBearerToken(user.access_token);
           sessionStorage.removeItem('healan_401_redirect_at');
           navigate('/', { replace: true });
           return;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { userManager } from '../store/userManager';
 import { UserAccessProvider } from '../context/UserAccessContext';
+import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
         const user = await userManager.getUser();
         if (user && !user.expired && user.access_token) {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+          setClinicBearerToken(user.access_token);
           if (!cancelled) setReady(true);
           return;
         }
