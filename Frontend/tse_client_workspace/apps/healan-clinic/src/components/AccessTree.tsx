@@ -8,15 +8,11 @@ function itemTitle(item: AccessRoleTreeItem): string {
 }
 
 function toTreeNodes(items: AccessRoleTreeItem[]): DataNode[] {
-  return items.map((item) => {
-    const isFolder = !item.accessFormId;
-    return {
-      key: item.key,
-      title: itemTitle(item),
-      disableCheckbox: isFolder,
-      children: item.children?.length ? toTreeNodes(item.children) : undefined,
-    };
-  });
+  return items.map((item) => ({
+    key: item.key,
+    title: itemTitle(item),
+    children: item.children?.length ? toTreeNodes(item.children) : undefined,
+  }));
 }
 
 interface AccessTreeProps {
@@ -25,6 +21,7 @@ interface AccessTreeProps {
   onCheckedKeysChange: (keys: number[]) => void;
 }
 
+/** Cascading checkboxes: parent check selects all children; user can then tweak leaves. */
 export function AccessTree({ items, checkedKeys, onCheckedKeysChange }: AccessTreeProps) {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const treeData = useMemo(() => toTreeNodes(items), [items]);
@@ -44,10 +41,9 @@ export function AccessTree({ items, checkedKeys, onCheckedKeysChange }: AccessTr
   return (
     <Tree
       checkable
-      checkStrictly
       selectable={false}
       treeData={treeData}
-      checkedKeys={{ checked: checkedKeys, halfChecked: [] }}
+      checkedKeys={checkedKeys}
       expandedKeys={expandedKeys}
       onExpand={(keys) => setExpandedKeys(keys)}
       onCheck={(keys) => {

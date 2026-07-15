@@ -206,11 +206,24 @@ export function LandingPage() {
             </div>
             {isSectionEnabled('HeroStat') && (
             <div className="portal-hero__stats">
-              {(heroStats.length > 0 ? heroStats : [
-                { strong: '+۱۰', span: 'سال تجربه بالینی' },
-                { strong: 'بورد', span: 'تخصصی معتبر' },
-                { strong: 'شوشتر', span: 'پذیرش نوبتی' },
-              ]).map((stat) => (
+              {((): { strong: string; span: string }[] => {
+                const source =
+                  heroStats.length > 0
+                    ? heroStats
+                    : [
+                        { strong: '+۱۰', span: 'سال تجربه بالینی' },
+                        { strong: 'بورد', span: 'تخصصی معتبر' },
+                        { strong: 'شوشتر', span: 'پذیرش نوبتی' },
+                      ];
+                // Deduplicate identical rows (CMS sometimes has duplicates)
+                const seen = new Set<string>();
+                return source.filter((stat) => {
+                  const key = `${stat.strong}|${stat.span}`;
+                  if (seen.has(key)) return false;
+                  seen.add(key);
+                  return true;
+                });
+              })().map((stat) => (
                 <div key={`${stat.strong}-${stat.span}`}>
                   <strong>{stat.strong}</strong>
                   <span>{stat.span}</span>

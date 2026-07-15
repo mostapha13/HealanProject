@@ -367,17 +367,37 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                     <td>
                       <div className="healan-actions">
                         {canEdit && (
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void openEdit(item)}>
+                          <button
+                            type="button"
+                            className="healan-btn healan-btn--sm healan-btn--action healan-btn--edit"
+                            onClick={() => void openEdit(item)}
+                            title="ویرایش"
+                          >
+                            <span aria-hidden>✎</span>
                             ویرایش
                           </button>
                         )}
                         {canPublish && (
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void togglePublish(item)}>
+                          <button
+                            type="button"
+                            className={`healan-btn healan-btn--sm healan-btn--action ${
+                              item.isPublished ? 'healan-btn--unpublish' : 'healan-btn--publish'
+                            }`}
+                            onClick={() => void togglePublish(item)}
+                            title={item.isPublished ? 'عدم نمایش' : 'نمایش'}
+                          >
+                            <span aria-hidden>{item.isPublished ? '👁' : '✓'}</span>
                             {item.isPublished ? 'عدم نمایش' : 'نمایش'}
                           </button>
                         )}
                         {canDelete && (
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void remove(item.blogPostId)}>
+                          <button
+                            type="button"
+                            className="healan-btn healan-btn--sm healan-btn--action healan-btn--danger"
+                            onClick={() => void remove(item.blogPostId)}
+                            title="حذف"
+                          >
+                            <span aria-hidden>🗑</span>
                             حذف
                           </button>
                         )}

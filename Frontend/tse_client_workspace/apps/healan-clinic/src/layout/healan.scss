@@ -276,6 +276,58 @@
   font-size: 0.8rem;
 }
 
+.healan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.healan-btn--action {
+  width: auto;
+  border: 1px solid transparent;
+}
+
+.healan-btn--edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.healan-btn--edit:hover {
+  background: #dbeafe;
+}
+
+.healan-btn--publish {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.healan-btn--publish:hover {
+  background: #d1fae5;
+}
+
+.healan-btn--unpublish {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.healan-btn--unpublish:hover {
+  background: #ffedd5;
+}
+
+.healan-btn--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.healan-btn--danger:hover {
+  background: #fee2e2;
+}
+
 .healan-badge {
   display: inline-flex;
   align-items: center;
