@@ -1,6 +1,7 @@
 import { request } from '@tse/tools';
 import { HEALAN_API_URL } from '../constants';
 import { userManager } from '../store/userManager';
+import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 import { clampPageSize, fetchAllPaginated } from '../utils/pagination';
 import type {
   AppointmentSummary,
@@ -37,7 +38,10 @@ const BASE = HEALAN_API_URL;
 async function accessToken(): Promise<string | undefined> {
   try {
     const user = await userManager.getUser();
-    if (user?.access_token && !user.expired) return user.access_token;
+    if (user?.access_token && !user.expired) {
+      setClinicBearerToken(user.access_token);
+      return user.access_token;
+    }
   } catch {
     // ignore
   }

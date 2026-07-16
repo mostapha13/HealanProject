@@ -23,19 +23,20 @@ function resolveToken(explicit?: string): string | undefined {
   }
 }
 
-function ensureAuthHeader(explicit?: string) {
+function authHeaders(explicit?: string): Record<string, string> | undefined {
   const token = resolveToken(explicit);
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-  }
-  return token;
+  if (!token) return undefined;
+  const header = `Bearer ${token}`;
+  axios.defaults.headers.common['Authorization'] = header;
+  return { Authorization: header };
 }
 
 axios.interceptors.request.use((config) => {
   const token = resolveToken();
   if (token) {
     config.headers = config.headers ?? {};
-    if (!config.headers['Authorization']) {
+    const existing = config.headers['Authorization'] ?? config.headers['authorization'];
+    if (!existing) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
   }
@@ -45,10 +46,10 @@ axios.interceptors.request.use((config) => {
 export const request = {
   get: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    ensureAuthHeader(token);
     return axios
       .get(`${baseUrl}${url}`, {
         params: options,
+        headers: authHeaders(token),
         cancelToken: cancelToken?.token,
         paramsSerializer: (params) => {
           return qs.stringify(params);
@@ -67,10 +68,10 @@ export const request = {
   },
   delete: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    ensureAuthHeader(token);
     return axios
       .delete(`${baseUrl}${url}`, {
         ...options,
+        headers: { ...(options?.headers ?? {}), ...authHeaders(token) },
         cancelToken: cancelToken.token,
       })
       .then((res: unknown) => {
@@ -85,9 +86,8 @@ export const request = {
       });
   },
   post: async ({ baseUrl, url, options, token }: DataEntry) => {
-    ensureAuthHeader(token);
     return axios
-      .post(`${baseUrl}${url}`, { ...options })
+      .post(`${baseUrl}${url}`, { ...options }, { headers: authHeaders(token) })
       .then((res: any) => {
         return new Promise((resolve) => {
           resolve(res?.data);
@@ -101,9 +101,11 @@ export const request = {
   },
   put: async ({ baseUrl, url, options, token }: DataEntry) => {
     const cancelToken = axios.CancelToken.source();
-    ensureAuthHeader(token);
     return axios
-      .put(`${baseUrl}${url}`, { ...options, cancelToken: cancelToken.token })
+      .put(`${baseUrl}${url}`, { ...options }, {
+        headers: authHeaders(token),
+        cancelToken: cancelToken.token,
+      })
       .then((res: unknown) => {
         return new Promise((resolve) => {
           resolve(res);
@@ -116,9 +118,8 @@ export const request = {
       });
   },
   upload: async ({ baseUrl, url, formData }: any) => {
-    ensureAuthHeader();
     return axios
-      .post(`${baseUrl}${url}`, formData)
+      .post(`${baseUrl}${url}`, formData, { headers: authHeaders() })
       .then((res) => {
         return new Promise((resolve) => {
           resolve(res.data);
@@ -131,11 +132,11 @@ export const request = {
       });
   },
   download: async ({ baseUrl, url, options, fileName }: any) => {
-    ensureAuthHeader();
     return axios
       .get(`${baseUrl}${url}`, {
         params: options,
         responseType: 'blob',
+        headers: authHeaders(),
       })
       .then((res) => {
         return new Promise((resolve) => {
@@ -149,7 +150,7 @@ export const request = {
       });
   },
   all: async ({ urls, token }: DataEntry) => {
-    ensureAuthHeader(token);
+    authHeaders(token);
     if (urls) {
       return axios.all([...urls]).then(
         axios.spread((...responses) => {
