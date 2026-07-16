@@ -76,12 +76,13 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const openEdit = (user: UserSummary) => {
     setForm({
       userId: user.userId,
+      identityUserId: user.identityUserId,
       firstName: user.firstName ?? '',
       lastName: user.lastName ?? '',
       phoneNumber: user.phoneNumber ?? '',
       userTypeId: user.userTypeId ?? 3,
       isActive: user.isActive ?? true,
-      twoFactorEnabled: user.twoFactorEnabled ?? false,
+      twoFactorEnabled: Boolean(user.twoFactorEnabled),
     });
     setShowForm(true);
   };
@@ -91,12 +92,13 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       await healanApi.users.register(
         buildUserPayload({
           userId: user.userId,
+          identityUserId: user.identityUserId,
           firstName: user.firstName ?? '',
           lastName: user.lastName ?? '',
           phoneNumber: user.phoneNumber ?? '',
           userTypeId: user.userTypeId ?? 3,
           isActive: !(user.isActive ?? true),
-          twoFactorEnabled: user.twoFactorEnabled ?? false,
+          twoFactorEnabled: Boolean(user.twoFactorEnabled),
         })
       );
       await load();

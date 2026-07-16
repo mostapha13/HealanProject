@@ -62,8 +62,8 @@ namespace Healan.Application.Users.Commands.SaveUser
         public AttachmentDto? Attachment { get; set; }
         public UserTypeId UserTypeId { get; set; }
 
-        /// <summary>ورود دو مرحله‌ای با پیامک برای این کاربر</summary>
-        public bool TwoFactorEnabled { get; set; } = true;
+        /// <summary>ورود دو مرحله‌ای با پیامک برای این کاربر — در AspNetUsers.TwoFactorEnabled ذخیره می‌شود</summary>
+        public bool TwoFactorEnabled { get; set; }
 
     }
     public class UserSaveCommandHandler : IRequestHandler<UserSaveCommand, UserResult>
@@ -109,9 +109,16 @@ namespace Healan.Application.Users.Commands.SaveUser
 
 
             string password = isNew ? IdentityPasswordGenerator.Generate() : string.Empty;
+            var identityUserId =
+                request.IdentityUserId is Guid id && id != Guid.Empty
+                    ? id.ToString()
+                    : user.IdentityUserId is Guid existing && existing != Guid.Empty
+                        ? existing.ToString()
+                        : string.Empty;
+
             var saveRequest = new IdentityServer.GrpcClient.SaveRequest()
             {
-                UserId = request != null && request.IdentityUserId != null ? request.IdentityUserId.Value.ToString() : user.IdentityUserId.ToString(),
+                UserId = identityUserId,
                 IsActive = request.IsActive,
                 DepartmentId = (int)DepartmentId.PublicRelations,
                 FirstName = request.FirstName,

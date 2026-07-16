@@ -24,6 +24,7 @@ namespace Healan.Application.Users.Dtos
         public string ExtensionCompanyPhoneNumber { get; set; }
         public UserTypeId UserTypeId { get; set; }
         public string UserTypeName { get; set; }
+        public Guid? IdentityUserId { get; set; }
         public bool TwoFactorEnabled { get; set; }
 
         public void Mapping(Profile profile)
@@ -32,7 +33,9 @@ namespace Healan.Application.Users.Dtos
                 .ForMember(a => a.UserTypeName, b => b.MapFrom(c =>
                     c.UserTypeId.GetDisplayName() ?? c.UserTypeId.ToString()))
                 .ForMember(a => a.FullName, b => b.MapFrom(c => $"{c.FirstName} {c.LastName}"))
-                .ForMember(a => a.Company, b => b.MapFrom(c => c.Company));
+                .ForMember(a => a.Company, b => b.MapFrom(c => c.Company))
+                .ForMember(a => a.IdentityUserId, b => b.MapFrom(c => c.IdentityUserId))
+                .ForMember(a => a.TwoFactorEnabled, b => b.Ignore());
         }
     }
 }

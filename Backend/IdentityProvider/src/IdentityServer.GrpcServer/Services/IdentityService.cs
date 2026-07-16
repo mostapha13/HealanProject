@@ -52,16 +52,26 @@ namespace IdentityServer.GrpcServer.Services
         }
         public override async Task<UserSummaryReply> SaveUser(SaveRequest request, ServerCallContext context)
         {
-
             var userId = request.UserId.ToGuid();
-            if (!userId.HasValue)
+            if (!userId.HasValue || userId.Value == Guid.Empty)
             {
-                var oldUser = _applicationDbContext.Users.FirstOrDefault(p => p.UserName == request.PhoneNumber);
+                var oldUser = _applicationDbContext.Users.FirstOrDefault(p =>
+                    p.UserName == request.PhoneNumber || p.PhoneNumber == request.PhoneNumber);
                 if (oldUser != null)
                     userId = oldUser.Id;
             }
-            //If User Exists . . . 
-            var user = _applicationDbContext.Users.FirstOrDefault(p => p.Id == userId);
+
+            var user = userId.HasValue && userId.Value != Guid.Empty
+                ? _applicationDbContext.Users.FirstOrDefault(p => p.Id == userId.Value)
+                : null;
+
+            // Phone fallback if id was wrong / stale
+            if (user == null && !string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                user = _applicationDbContext.Users.FirstOrDefault(p =>
+                    p.UserName == request.PhoneNumber || p.PhoneNumber == request.PhoneNumber);
+            }
+
             if (user == null)
             {
                 user = new ApplicationUser();
@@ -74,7 +84,6 @@ namespace IdentityServer.GrpcServer.Services
                 user.PhoneNumberConfirmed = true;
                 user.UserName = request.PhoneNumber;
                 user.NormalizedUserName = request.PhoneNumber;
-                user.TwoFactorEnabled = request.TwoFactorEnabled;
                 var createResult = await _userManager.CreateAsync(user, request.Password);
                 if (!createResult.Succeeded)
                 {
@@ -93,10 +102,34 @@ namespace IdentityServer.GrpcServer.Services
                 user.PhoneNumberConfirmed = true;
                 user.UserName = request.PhoneNumber;
                 user.NormalizedUserName = request.PhoneNumber;
-                user.TwoFactorEnabled = request.TwoFactorEnabled;
-                await _userManager.UpdateAsync(user);
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Identity SaveUser UpdateAsync failed for {Phone}: {Errors}", request.PhoneNumber, errors);
+                    return new UserSummaryReply();
+                }
             }
-            await _applicationDbContext.SaveChangesAsync();
+
+            // Persist AspNetUsers.TwoFactorEnabled explicitly (UpdateAsync alone is unreliable here).
+            var twoFactorResult = await _userManager.SetTwoFactorEnabledAsync(user, request.TwoFactorEnabled);
+            if (!twoFactorResult.Succeeded)
+            {
+                var errors = string.Join("; ", twoFactorResult.Errors.Select(e => e.Description));
+                _logger.LogError(
+                    "Identity SaveUser SetTwoFactorEnabledAsync({Enabled}) failed for {Phone}: {Errors}",
+                    request.TwoFactorEnabled,
+                    request.PhoneNumber,
+                    errors);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Identity SaveUser set TwoFactorEnabled={Enabled} for user {UserId} phone={Phone}",
+                    request.TwoFactorEnabled,
+                    user.Id,
+                    request.PhoneNumber);
+            }
 
             await UpdateUserRoles(user.Id, request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
 

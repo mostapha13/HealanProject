@@ -325,6 +325,7 @@ export function buildMedicalFeePayload(form: MedicalFeeForm): ApiPayload {
 
 export interface UserForm {
   userId: number;
+  identityUserId?: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -339,12 +340,13 @@ export function buildUserPayload(form: UserForm): ApiPayload {
     lastName: form.lastName.trim(),
     phoneNumber: form.phoneNumber.trim(),
     userTypeId: form.userTypeId,
-    isActive: form.isActive,
-    twoFactorEnabled: form.twoFactorEnabled,
+    isActive: Boolean(form.isActive),
+    twoFactorEnabled: Boolean(form.twoFactorEnabled),
     userRoles: rolesForUserType(form.userTypeId),
   };
   const userId = idOrUndefined(form.userId);
   if (userId) payload['userId'] = userId;
+  if (form.identityUserId) payload['identityUserId'] = form.identityUserId;
   return payload;
 }
 
