@@ -22,6 +22,12 @@
         <member name="M:Healan.WebApi.Controllers.ClinicReportsController.SmsOutbox(Healan.Application.Reports.Queries.GetSmsOutboxList.GetSmsOutboxListQuery)">
             <summary>لیست پیامک‌های ارسالی (OTP / فراموشی رمز و ...)</summary>
         </member>
+        <member name="M:Healan.WebApi.Controllers.ClinicReportsController.SmsSettings">
+            <summary>خواندن تنظیمات پیامک (ApiKey ماسک‌شده)</summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ClinicReportsController.SmsSettingsSave(Healan.Application.Reports.Commands.SaveSmsSettings.SaveSmsSettingsCommand)">
+            <summary>ذخیره تنظیمات پیامک و همگام‌سازی با SMSProvider</summary>
+        </member>
         <member name="M:Healan.WebApi.Controllers.CompanyController.CompanyList(Healan.Application.Companies.Queries.CompanyList.CompanyListQuery)">
             <summary>
             لیست شرکت ها

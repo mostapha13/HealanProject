@@ -5,6 +5,7 @@ import { HealanNavLink } from '../../components/HealanNavLink';
 const tabs = [
   { path: '/reports', label: 'نمودارها و آمار', end: true },
   { path: '/reports/sms', label: 'پیامک‌های ارسالی' },
+  { path: '/reports/sms-settings', label: 'تنظیمات پیامک' },
 ];
 
 export function ReportsLayout() {

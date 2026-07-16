@@ -31,6 +31,7 @@ const SiteContentRagPage = lazy(() => import('../pages/SiteContent/Rag'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const ReportsLayout = lazy(() => import('../pages/Reports/Layout'));
 const SmsOutboxPage = lazy(() => import('../pages/Reports/SmsOutbox'));
+const SmsSettingsPage = lazy(() => import('../pages/Reports/SmsSettings'));
 const WorkflowPage = lazy(() => import('../pages/Workflow'));
 const SignaturePage = lazy(() => import('../pages/Signature'));
 const ProfilePage = lazy(() => import('../pages/Profile'));
@@ -93,6 +94,7 @@ export default function AppRoutes() {
           <Route path="reports" element={guarded('/reports', <ReportsLayout />)}>
             <Route index element={guarded('/reports', <ReportsPage />)} />
             <Route path="sms" element={guarded('/reports', <SmsOutboxPage />)} />
+            <Route path="sms-settings" element={guarded('/reports', <SmsSettingsPage />)} />
           </Route>
           <Route path="workflow" element={guarded('/workflow', <WorkflowPage />)} />
           <Route path="signature" element={guarded('/signature', <SignaturePage />)} />

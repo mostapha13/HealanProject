@@ -1,10 +1,13 @@
 import type { PaginatedResponse } from '../api/types';
 
+/** پیش‌فرض لیست‌های جدولی کلینیک */
+export const HEALAN_DEFAULT_PAGE_SIZE = 10;
+
 /** حداکثر pageSize مجاز در API (Share.Application PaginatedList) */
 export const HEALAN_MAX_PAGE_SIZE = 20;
 
 export function clampPageSize(pageSize?: number): number {
-  if (!pageSize || pageSize < 1) return HEALAN_MAX_PAGE_SIZE;
+  if (!pageSize || pageSize < 1) return HEALAN_DEFAULT_PAGE_SIZE;
   return Math.min(pageSize, HEALAN_MAX_PAGE_SIZE);
 }
 

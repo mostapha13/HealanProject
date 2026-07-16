@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Pagination } from 'antd';
 
 export const HEALAN_LIST_PAGE_SIZE = 10;
-export const HEALAN_LIST_PAGE_SIZE_OPTIONS = [10, 20] as const;
+export const HEALAN_LIST_PAGE_SIZE_OPTIONS = [10, 15, 20] as const;
 
 export function useListPagination(initialPageSize = HEALAN_LIST_PAGE_SIZE) {
   const [page, setPage] = useState(1);
@@ -42,10 +42,14 @@ export function ListPagination({
         current={page}
         total={totalCount}
         pageSize={pageSize}
-        pageSizeOptions={HEALAN_LIST_PAGE_SIZE_OPTIONS.map(String)}
+        pageSizeOptions={[...HEALAN_LIST_PAGE_SIZE_OPTIONS].map(String)}
         showSizeChanger
+        showQuickJumper
         onChange={(nextPage, nextSize) => onChange(nextPage, nextSize ?? pageSize)}
-        showTotal={(total) => `${total} مورد`}
+        showTotal={(total) => {
+          const totalPages = Math.max(1, Math.ceil(total / pageSize));
+          return `صفحه ${page} از ${totalPages} · ${total} مورد`;
+        }}
       />
     </div>
   );

@@ -1,40 +1,33 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using IPE.SmsIrClient;
+using IPE.SmsIrClient.Models.Requests;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using SMSProvider.Application.Configs;
 using SMSProvider.Application.Interfaces;
 using SMSProvider.Application.Models;
 
 namespace SMSProvider.Infrastructure.Services;
 
+/// <summary>
+/// ارسال از طریق پکیج رسمی IPE.SmsIR — تنظیمات از ISmsRuntimeSettings خوانده می‌شود.
+/// </summary>
 public sealed class SmsIrSender : ISmsSender
 {
-    private readonly HttpClient _httpClient;
-    private readonly SmsIrOptions _options;
+    private readonly ISmsRuntimeSettings _runtimeSettings;
     private readonly ILogger<SmsIrSender> _logger;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    public SmsIrSender(ISmsRuntimeSettings runtimeSettings, ILogger<SmsIrSender> logger)
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
-
-    public SmsIrSender(HttpClient httpClient, IOptions<SmsIrOptions> options, ILogger<SmsIrSender> logger)
-    {
-        _httpClient = httpClient;
-        _options = options.Value;
+        _runtimeSettings = runtimeSettings;
         _logger = logger;
     }
 
     public async Task<SendSmsResponse> SendAsync(SendSmsRequest request, CancellationToken cancellationToken = default)
     {
         var mobiles = (request.PhoneNumbers ?? new List<string>())
-            .Select(NormalizeMobile)
+            .Select(NormalizeMobileForSmsIr)
             .Where(m => !string.IsNullOrWhiteSpace(m))
             .Distinct()
+            .Cast<string>()
             .ToList();
 
         if (mobiles.Count == 0)
@@ -43,23 +36,39 @@ public sealed class SmsIrSender : ISmsSender
         if (string.IsNullOrWhiteSpace(request.Message))
             return Fail("متن پیامک خالی است.");
 
-        if (string.IsNullOrWhiteSpace(_options.ApiKey))
-            return Fail("کلید API پیامک (SmsIr:ApiKey) تنظیم نشده است.");
+        var settings = await _runtimeSettings.GetAsync(cancellationToken);
+
+        if (!settings.SendEnabled)
+        {
+            _logger.LogInformation(
+                "SMS send disabled — recording only. phones={Phones}",
+                string.Join(",", mobiles));
+            return new SendSmsResponse
+            {
+                TraceNumber = $"disabled-{Guid.NewGuid():N}",
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(settings.ApiKey))
+            return Fail("کلید API پیامک (ApiKey) تنظیم نشده است.");
 
         var otp = OtpMessageHelper.TryExtractCode(request.Message);
-        var useVerify = _options.PreferVerifyForOtp
-                        && _options.TemplateId > 0
+        var useVerify = settings.PreferVerifyForOtp
+                        && settings.TemplateId > 0
                         && !string.IsNullOrWhiteSpace(otp)
                         && mobiles.Count == 1;
 
         try
         {
-            if (useVerify)
-                return await SendVerifyAsync(mobiles[0]!, otp!, cancellationToken);
+            var smsIr = new SmsIr(settings.ApiKey);
 
-            if (_options.LineNumber <= 0)
+            if (useVerify)
+                return await SendVerifyAsync(smsIr, mobiles[0], otp!, settings);
+
+            var lineNumber = await ResolveLineNumberAsync(smsIr, settings);
+            if (lineNumber <= 0)
             {
-                if (_options.LogOnlyWhenUnconfigured)
+                if (settings.LogOnlyWhenUnconfigured)
                 {
                     _logger.LogWarning(
                         "SMS LogOnly mode: LineNumber/TemplateId not set. Message logged for phones {Phones}",
@@ -71,11 +80,11 @@ public sealed class SmsIrSender : ISmsSender
                 }
 
                 return Fail(
-                    "برای ارسال آزاد، SmsIr:LineNumber را از پنل sms.ir تنظیم کنید؛ " +
-                    "یا برای OTP، SmsIr:TemplateId قالب Verify را تنظیم کنید.");
+                    "برای ارسال آزاد، LineNumber را تنظیم کنید؛ " +
+                    "برای OTP ترجیحاً TemplateId قالب Verify را تنظیم کنید.");
             }
 
-            return await SendBulkAsync(mobiles!, request.Message, cancellationToken);
+            return await SendBulkAsync(smsIr, lineNumber, request.Message, mobiles);
         }
         catch (Exception ex)
         {
@@ -84,89 +93,92 @@ public sealed class SmsIrSender : ISmsSender
         }
     }
 
-    private async Task<SendSmsResponse> SendVerifyAsync(string mobile, string code, CancellationToken ct)
+    private async Task<SendSmsResponse> SendVerifyAsync(
+        SmsIr smsIr,
+        string mobile,
+        string code,
+        SmsRuntimeSnapshot settings)
     {
-        var body = new
-        {
+        var paramName = string.IsNullOrWhiteSpace(settings.VerifyParameterName)
+            ? "Code"
+            : settings.VerifyParameterName;
+
+        var response = await smsIr.VerifySendAsync(
             mobile,
-            templateId = _options.TemplateId,
-            parameters = new[]
-            {
-                new { name = _options.VerifyParameterName, value = code },
-            },
-        };
+            settings.TemplateId,
+            new[] { new VerifySendParameter(paramName, code) });
 
-        using var response = await PostJsonAsync("send/verify", body, ct);
-        return await ParseResponseAsync(response, ct);
+        if (response.Status != 1)
+            return Fail(response.Message ?? "ارسال Verify ناموفق بود.");
+
+        var messageId = response.Data?.MessageId.ToString();
+        _logger.LogInformation(
+            "SMS.ir Verify OK mobile={Mobile} template={Template} messageId={MessageId}",
+            mobile,
+            settings.TemplateId,
+            messageId);
+
+        return new SendSmsResponse { TraceNumber = messageId ?? Guid.NewGuid().ToString("N") };
     }
 
-    private async Task<SendSmsResponse> SendBulkAsync(List<string> mobiles, string message, CancellationToken ct)
+    private async Task<SendSmsResponse> SendBulkAsync(
+        SmsIr smsIr,
+        long lineNumber,
+        string message,
+        IReadOnlyList<string> mobiles)
     {
-        var body = new
-        {
-            lineNumber = _options.LineNumber,
-            messageText = message,
-            mobiles,
-        };
+        var response = await smsIr.BulkSendAsync(lineNumber, message, mobiles.ToArray());
 
-        using var response = await PostJsonAsync("send/bulk", body, ct);
-        return await ParseResponseAsync(response, ct);
+        if (response.Status != 1)
+            return Fail(response.Message ?? "ارسال Bulk ناموفق بود.");
+
+        var packId = response.Data?.PackId.ToString("N");
+        _logger.LogInformation(
+            "SMS.ir Bulk OK line={Line} phones={Phones} packId={PackId}",
+            lineNumber,
+            string.Join(",", mobiles),
+            packId);
+
+        return new SendSmsResponse { TraceNumber = packId ?? Guid.NewGuid().ToString("N") };
     }
 
-    private async Task<HttpResponseMessage> PostJsonAsync(string relativeUrl, object body, CancellationToken ct)
+    private async Task<long> ResolveLineNumberAsync(SmsIr smsIr, SmsRuntimeSnapshot settings)
     {
-        var json = JsonSerializer.Serialize(body, JsonOptions);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        using var request = new HttpRequestMessage(HttpMethod.Post, relativeUrl) { Content = content };
-        request.Headers.TryAddWithoutValidation("x-api-key", _options.ApiKey);
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        return await _httpClient.SendAsync(request, ct);
-    }
-
-    private async Task<SendSmsResponse> ParseResponseAsync(HttpResponseMessage response, CancellationToken ct)
-    {
-        var raw = await response.Content.ReadAsStringAsync(ct);
-        _logger.LogInformation("SMS.ir response {Status}: {Body}", (int)response.StatusCode, raw);
+        if (settings.LineNumber > 0)
+            return settings.LineNumber;
 
         try
         {
-            using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(raw) ? "{}" : raw);
-            var root = doc.RootElement;
-            var status = root.TryGetProperty("status", out var st) ? st.GetInt32() : (response.IsSuccessStatusCode ? 1 : 0);
-            var message = root.TryGetProperty("message", out var msg) ? msg.GetString() : null;
-
-            if (status != 1)
-                return Fail(message ?? raw ?? response.ReasonPhrase ?? "ارسال پیامک ناموفق بود.");
-
-            string? trace = null;
-            if (root.TryGetProperty("data", out var data))
+            var lines = await smsIr.GetLinesAsync();
+            if (lines.Status == 1 && lines.Data is { Length: > 0 })
             {
-                if (data.TryGetProperty("packId", out var pack) && pack.ValueKind == JsonValueKind.String)
-                    trace = pack.GetString();
-                else if (data.TryGetProperty("messageId", out var mid))
-                    trace = mid.ToString();
+                var line = lines.Data[0];
+                _logger.LogInformation("SmsIr LineNumber not set — using first panel line {Line}", line);
+                return line;
             }
-
-            return new SendSmsResponse { TraceNumber = trace ?? Guid.NewGuid().ToString("N") };
         }
-        catch
+        catch (Exception ex)
         {
-            if (!response.IsSuccessStatusCode)
-                return Fail(raw ?? response.ReasonPhrase ?? "ارسال پیامک ناموفق بود.");
-            return new SendSmsResponse { TraceNumber = Guid.NewGuid().ToString("N") };
+            _logger.LogWarning(ex, "GetLinesAsync failed while resolving default line number");
         }
+
+        return 0;
     }
 
-    private static string? NormalizeMobile(string? phone)
+    private static string? NormalizeMobileForSmsIr(string? phone)
     {
         if (string.IsNullOrWhiteSpace(phone))
             return null;
+
         var digits = new string(phone.Where(char.IsDigit).ToArray());
         if (digits.StartsWith("98") && digits.Length == 12)
-            digits = "0" + digits[2..];
-        if (digits.StartsWith("9") && digits.Length == 10)
-            digits = "0" + digits;
-        return digits.Length >= 11 ? digits : null;
+            digits = digits[2..];
+        if (digits.StartsWith("0") && digits.Length == 11)
+            digits = digits[1..];
+        if (digits.Length == 10 && digits.StartsWith('9'))
+            return digits;
+
+        return null;
     }
 
     private static SendSmsResponse Fail(string error) =>

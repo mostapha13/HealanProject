@@ -19,12 +19,18 @@ public class SMSController : ControllerBase
 {
     private readonly ISmsDispatchService _dispatch;
     private readonly ISmsOutboxStore _outbox;
+    private readonly ISmsRuntimeSettings _runtimeSettings;
     private readonly ILogger<SMSController> _logger;
 
-    public SMSController(ISmsDispatchService dispatch, ISmsOutboxStore outbox, ILogger<SMSController> logger)
+    public SMSController(
+        ISmsDispatchService dispatch,
+        ISmsOutboxStore outbox,
+        ISmsRuntimeSettings runtimeSettings,
+        ILogger<SMSController> logger)
     {
         _dispatch = dispatch;
         _outbox = outbox;
+        _runtimeSettings = runtimeSettings;
         _logger = logger;
     }
 
@@ -60,6 +66,29 @@ public class SMSController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>همگام‌سازی تنظیمات از Healan (منبع حقیقت)</summary>
+    [HttpPut("Settings")]
+    public async Task<IActionResult> UpsertSettings([FromBody] SmsSettingsUpsertRequest request, CancellationToken cancellationToken)
+    {
+        if (request == null)
+            return BadRequest(new { error = "درخواست نامعتبر است." });
+
+        var current = await _runtimeSettings.GetAsync(cancellationToken);
+        var snapshot = new SmsRuntimeSnapshot
+        {
+            ApiKey = string.IsNullOrWhiteSpace(request.ApiKey) ? current.ApiKey : request.ApiKey.Trim(),
+            TemplateId = request.TemplateId > 0 ? request.TemplateId : 640023,
+            LineNumber = request.LineNumber,
+            VerifyParameterName = string.IsNullOrWhiteSpace(request.VerifyParameterName) ? "Code" : request.VerifyParameterName.Trim(),
+            PreferVerifyForOtp = current.PreferVerifyForOtp,
+            SendEnabled = request.SendEnabled,
+            LogOnlyWhenUnconfigured = current.LogOnlyWhenUnconfigured,
+        };
+
+        await _runtimeSettings.SaveAsync(snapshot, cancellationToken);
+        return Ok(new { success = true });
+    }
+
     private async Task SaveOutboxAsync(
         string message,
         IReadOnlyList<string> phones,
@@ -67,9 +96,7 @@ public class SMSController : ControllerBase
         CancellationToken cancellationToken)
     {
         var otp = OtpMessageHelper.TryExtractCode(message);
-        var channel = result.Success
-            ? (result.TraceNumber?.StartsWith("log-only", StringComparison.OrdinalIgnoreCase) == true ? "LogOnly" : "sms.ir")
-            : "Failed";
+        var channel = ResolveChannel(result);
 
         foreach (var phone in phones.DefaultIfEmpty("?"))
         {
@@ -92,6 +119,18 @@ public class SMSController : ControllerBase
                 _logger.LogError(ex, "Failed to persist SMS outbox for {Phone}", phone);
             }
         }
+    }
+
+    internal static string ResolveChannel(SendSmsResponse result)
+    {
+        if (!result.Success)
+            return "Failed";
+        var trace = result.TraceNumber ?? string.Empty;
+        if (trace.StartsWith("disabled-", StringComparison.OrdinalIgnoreCase))
+            return "Disabled";
+        if (trace.StartsWith("log-only", StringComparison.OrdinalIgnoreCase))
+            return "LogOnly";
+        return "sms.ir";
     }
 
     /// <summary>لیست JSON پیامک‌های ارسالی (صفحه‌بندی‌شده)</summary>
@@ -185,5 +224,14 @@ public class SMSController : ControllerBase
     {
         public string? Message { get; set; }
         public ICollection<string>? PhoneNumbers { get; set; }
+    }
+
+    public class SmsSettingsUpsertRequest
+    {
+        public string? ApiKey { get; set; }
+        public int TemplateId { get; set; } = 640023;
+        public long LineNumber { get; set; }
+        public string? VerifyParameterName { get; set; }
+        public bool SendEnabled { get; set; } = true;
     }
 }

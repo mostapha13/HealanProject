@@ -21,19 +21,11 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
         services.AddScoped<ISmsOutboxStore, SmsOutboxStore>();
+        services.AddSingleton<ISmsRuntimeSettings, SmsRuntimeSettingsStore>();
         services.AddChannelService();
         services.AddScoped<ISmsDispatchService, SmsDispatchService>();
         services.AddHostedService<SmsQueueConsumerService>();
-
-        services.AddHttpClient<ISmsSender, SmsIrSender>((_, client) =>
-        {
-            var options = configuration.GetSection(SmsIrOptions.SectionName).Get<SmsIrOptions>() ?? new SmsIrOptions();
-            var baseUrl = string.IsNullOrWhiteSpace(options.BaseUrl)
-                ? "https://api.sms.ir/v1/"
-                : options.BaseUrl.TrimEnd('/') + "/";
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
+        services.AddScoped<ISmsSender, SmsIrSender>();
 
         return services;
     }

@@ -17,16 +17,17 @@ public class SmsIrOptions
     /// <summary>شناسه قالب Verify — اگر &gt; 0 باشد برای کد OTP اولویت دارد.</summary>
     public int TemplateId { get; set; }
 
-    /// <summary>نام پارامتر قالب Verify (معمولاً CODE یا Code)</summary>
-    public string VerifyParameterName { get; set; } = "CODE";
+    /// <summary>نام پارامتر قالب Verify (در نمونه رسمی پکیج معمولاً Code)</summary>
+    public string VerifyParameterName { get; set; } = "Code";
 
     /// <summary>اگر true و TemplateId تنظیم شده، از /send/verify استفاده می‌شود وقتی متن شبیه OTP باشد.</summary>
     public bool PreferVerifyForOtp { get; set; } = true;
 
     /// <summary>
-    /// اگر خط/قالب تنظیم نباشد، پیامک واقعی ارسال نشود ولی به‌عنوان موفق لاگ شود (مناسب تست).
+    /// اگر خط/قالب تنظیم نباشد، پیامک واقعی ارسال نشود ولی به‌عنوان موفق لاگ شود (فقط برای تست محلی).
+    /// در production باید false باشد تا OTP واقعاً به sms.ir برود.
     /// </summary>
-    public bool LogOnlyWhenUnconfigured { get; set; } = true;
+    public bool LogOnlyWhenUnconfigured { get; set; } = false;
 }
 
 public static class OtpMessageHelper

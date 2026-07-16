@@ -79,6 +79,17 @@ export interface SmsOutboxItem {
   channel?: string;
 }
 
+export interface SmsSetting {
+  smsSettingId: number;
+  apiKeyMasked: string;
+  hasApiKey: boolean;
+  templateId: number;
+  lineNumber: number;
+  verifyParameterName: string;
+  sendEnabled: boolean;
+  updatedAt: string;
+}
+
 export interface PatientSummary {
   patientId: number;
   userId?: number;

@@ -256,10 +256,10 @@ write_json docker/config/smsprovider-webapp/appsettings.Production.json <<'EOF'
     "ApiKey": "w6kRP51S1acR5qRGvC4ojJfzIArb6Aaq0cKOn05zv7L36pLt",
     "BaseUrl": "https://api.sms.ir/v1/",
     "LineNumber": 0,
-    "TemplateId": 0,
-    "VerifyParameterName": "CODE",
+    "TemplateId": 640023,
+    "VerifyParameterName": "Code",
     "PreferVerifyForOtp": true,
-    "LogOnlyWhenUnconfigured": true
+    "LogOnlyWhenUnconfigured": false
   },
   "RabbitMQ": {
     "UserName": "guest",

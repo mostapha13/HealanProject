@@ -51,9 +51,7 @@ public sealed class SmsQueueConsumerService : BackgroundService
 
                     var result = sender.SendAsync(request, CancellationToken.None).GetAwaiter().GetResult();
                     var otp = OtpMessageHelper.TryExtractCode(message);
-                    var channel = result.Success
-                        ? (result.TraceNumber?.StartsWith("log-only", StringComparison.OrdinalIgnoreCase) == true ? "LogOnly" : "sms.ir")
-                        : "Failed";
+                    var channel = ResolveChannel(result);
 
                     foreach (var phone in phones.DefaultIfEmpty("?"))
                     {
@@ -89,5 +87,17 @@ public sealed class SmsQueueConsumerService : BackgroundService
                 }
             }, (QueueNames.SMS, nameof(SMSModelRequest)));
         }, TaskCreationOptions.LongRunning);
+    }
+
+    private static string ResolveChannel(SendSmsResponse result)
+    {
+        if (!result.Success)
+            return "Failed";
+        var trace = result.TraceNumber ?? string.Empty;
+        if (trace.StartsWith("disabled-", StringComparison.OrdinalIgnoreCase))
+            return "Disabled";
+        if (trace.StartsWith("log-only", StringComparison.OrdinalIgnoreCase))
+            return "LogOnly";
+        return "sms.ir";
     }
 }

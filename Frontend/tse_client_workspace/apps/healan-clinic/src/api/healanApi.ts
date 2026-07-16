@@ -1,7 +1,7 @@
 import { request } from '@tse/tools';
 import { HEALAN_API_URL } from '../constants';
 import { userManager } from '../store/userManager';
-import { clampPageSize, fetchAllPaginated, HEALAN_MAX_PAGE_SIZE } from '../utils/pagination';
+import { clampPageSize, fetchAllPaginated } from '../utils/pagination';
 import type {
   AppointmentSummary,
   ClinicAnalytics,
@@ -29,6 +29,7 @@ import type {
   RagKnowledgeItem,
   RagSetting,
   SmsOutboxItem,
+  SmsSetting,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -55,7 +56,9 @@ async function post<T>(url: string, data: unknown): Promise<T> {
 
 function pagedParams(params?: Record<string, unknown>): Record<string, unknown> {
   const pageNumber = Number(params?.['pageNumber'] ?? 1) || 1;
-  const pageSize = clampPageSize(Number(params?.['pageSize'] ?? HEALAN_MAX_PAGE_SIZE));
+  const pageSize = clampPageSize(
+    params?.['pageSize'] == null ? undefined : Number(params['pageSize'])
+  );
   return { ...params, pageNumber, pageSize };
 }
 
@@ -83,6 +86,14 @@ export const healanApi = {
           pageSize: params.pageSize,
         })
       ),
+    smsSettingsGet: () => get<SmsSetting>('ClinicReports/SmsSettings'),
+    smsSettingsSave: (data: {
+      apiKey?: string;
+      templateId: number;
+      lineNumber: number;
+      verifyParameterName?: string;
+      sendEnabled: boolean;
+    }) => post<SmsSetting>('ClinicReports/SmsSettingsSave', data),
   },
 
   patients: {

@@ -2291,6 +2291,44 @@ namespace Healan.Infrastructure.Migrations
                     b.ToTable("RagKnowledgeItems", (string)null);
                 });
 
+            modelBuilder.Entity("Healan.Domain.Sms.Entities.SmsSetting", b =>
+                {
+                    b.Property<int>("SmsSettingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<long>("LineNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L);
+
+                    b.Property<bool>("SendEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("TemplateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(640023);
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerifyParameterName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("SmsSettingId");
+
+                    b.ToTable("SmsSettings", (string)null);
+                });
+
             modelBuilder.Entity("Healan.Domain.Portal.Entities.RagSetting", b =>
                 {
                     b.Property<int>("RagSettingId")

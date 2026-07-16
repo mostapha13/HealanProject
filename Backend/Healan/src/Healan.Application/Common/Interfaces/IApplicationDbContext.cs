@@ -10,6 +10,7 @@ using Healan.Domain.Orders.Entities;
 using Healan.Domain.Patients.Entities;
 using Healan.Domain.Portal.Entities;
 using Healan.Domain.PublicInfos.Entities;
+using Healan.Domain.Sms.Entities;
 using Healan.Domain.Users.Entities;
 using Healan.Domain.Views;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,7 @@ public interface IApplicationDbContext : IDisposable
      DbSet<RagKnowledgeItem> RagKnowledgeItems { get; set; }
      DbSet<RagSetting> RagSettings { get; set; }
      DbSet<RagChatLog> RagChatLogs { get; set; }
+     DbSet<SmsSetting> SmsSettings { get; set; }
     //DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 
