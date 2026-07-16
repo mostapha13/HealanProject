@@ -229,6 +229,7 @@ export interface UserSummary {
   userTypeId?: number;
   userTypeName?: string;
   isActive?: boolean;
+  twoFactorEnabled?: boolean;
   departmentName?: string;
   roleTitle?: string;
   roles?: UserRoleInfo[];

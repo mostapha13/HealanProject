@@ -24,6 +24,7 @@ namespace Healan.Application.Users.Dtos
         public string ExtensionCompanyPhoneNumber { get; set; }
         public UserTypeId UserTypeId { get; set; }
         public string UserTypeName { get; set; }
+        public bool TwoFactorEnabled { get; set; }
 
         public void Mapping(Profile profile)
         {

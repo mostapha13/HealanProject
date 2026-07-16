@@ -330,6 +330,7 @@ export interface UserForm {
   phoneNumber: string;
   userTypeId: number;
   isActive: boolean;
+  twoFactorEnabled: boolean;
 }
 
 export function buildUserPayload(form: UserForm): ApiPayload {
@@ -339,6 +340,7 @@ export function buildUserPayload(form: UserForm): ApiPayload {
     phoneNumber: form.phoneNumber.trim(),
     userTypeId: form.userTypeId,
     isActive: form.isActive,
+    twoFactorEnabled: form.twoFactorEnabled,
     userRoles: rolesForUserType(form.userTypeId),
   };
   const userId = idOrUndefined(form.userId);

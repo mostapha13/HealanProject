@@ -120,10 +120,8 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
 
                 await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-                await _userManager.GenerateTwoFactorTokenAsync(getUser, "CustomPhone");
-
-
-                var result2222 = await _signInManager.TwoFactorSignInAsync("CustomPhone", request.Code, false, false);
+                // Do not regenerate / re-verify the OTP here — that invalidates the just-used
+                // code and can leave SignInManager in a bad state after a successful login.
                 return new Login2FAResponse() { userId = getUser.Id.ToString(), IsSuccess = true, IsAdmin = roles.Contains("Admin") };
             }
             if (result == Microsoft.AspNetCore.Identity.SignInResult.LockedOut)

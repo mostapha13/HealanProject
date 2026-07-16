@@ -18,8 +18,9 @@
         <p class="healan-login-card__subtitle">کد ارسال‌شده به تلفن همراه خود را وارد کنید.</p>
     </header>
 
-    <form class="healan-login-form" asp-route-returnurl="@ViewData["ReturnUrl"]" asp-controller="Account" asp-action="LoginWith2fa" asp-antiforgery="true" method="post">
+    <form class="healan-login-form" asp-route-returnurl="@(Model.ReturnUrl ?? ViewData["ReturnUrl"])" asp-controller="Account" asp-action="LoginWith2fa" asp-antiforgery="true" method="post">
         @Html.HiddenFor(x => x.ReturnUrl)
+        <input type="hidden" name="rememberMe" value="@(Model.RememberMe ? "true" : "false")" />
 
         <div class="healan-field">
             <label asp-for="TwoFactorCode">کد تأیید</label>

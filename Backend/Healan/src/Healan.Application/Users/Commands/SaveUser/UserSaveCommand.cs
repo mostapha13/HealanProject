@@ -62,6 +62,9 @@ namespace Healan.Application.Users.Commands.SaveUser
         public AttachmentDto? Attachment { get; set; }
         public UserTypeId UserTypeId { get; set; }
 
+        /// <summary>ورود دو مرحله‌ای با پیامک برای این کاربر</summary>
+        public bool TwoFactorEnabled { get; set; } = true;
+
     }
     public class UserSaveCommandHandler : IRequestHandler<UserSaveCommand, UserResult>
     {
@@ -114,8 +117,8 @@ namespace Healan.Application.Users.Commands.SaveUser
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,
-                Password = password
-
+                Password = password,
+                TwoFactorEnabled = request.TwoFactorEnabled,
             };
             foreach (var role in request.UserRoles)
                 saveRequest.RoleNames.Add(role.Name);

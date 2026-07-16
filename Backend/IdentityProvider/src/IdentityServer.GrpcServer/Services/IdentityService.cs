@@ -74,7 +74,7 @@ namespace IdentityServer.GrpcServer.Services
                 user.PhoneNumberConfirmed = true;
                 user.UserName = request.PhoneNumber;
                 user.NormalizedUserName = request.PhoneNumber;
-                user.TwoFactorEnabled = true;
+                user.TwoFactorEnabled = request.TwoFactorEnabled;
                 var createResult = await _userManager.CreateAsync(user, request.Password);
                 if (!createResult.Succeeded)
                 {
@@ -93,6 +93,7 @@ namespace IdentityServer.GrpcServer.Services
                 user.PhoneNumberConfirmed = true;
                 user.UserName = request.PhoneNumber;
                 user.NormalizedUserName = request.PhoneNumber;
+                user.TwoFactorEnabled = request.TwoFactorEnabled;
                 await _userManager.UpdateAsync(user);
             }
             await _applicationDbContext.SaveChangesAsync();
@@ -281,6 +282,7 @@ namespace IdentityServer.GrpcServer.Services
                 DepartmentName = user.DepartmentId.GetDisplayName(),
                 LastLoginIP = user.LastLoginIP ?? string.Empty,
                 LastLoginDate = user.LastLoginDate.HasValue ? ((DateTimeOffset)user.LastLoginDate.Value).ToUnixTimeSeconds() : 0,
+                TwoFactorEnabled = user.TwoFactorEnabled,
             };
             var allRoleId = _applicationDbContext.UserRoles.Where(w => w.UserId == user.Id).Select(s => s.RoleId).ToList();
             if (allRoleId != null && allRoleId.Any())

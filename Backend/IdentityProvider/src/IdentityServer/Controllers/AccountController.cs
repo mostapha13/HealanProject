@@ -294,9 +294,8 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
         {
-
             var model = new LoginWith2faViewModel { RememberMe = rememberMe, ReturnUrl = returnUrl };
-
+            ViewData["ReturnUrl"] = returnUrl;
             return View(model);
         }
 
@@ -304,29 +303,34 @@ namespace IdentityServer.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
         {
+            var effectiveReturnUrl = !string.IsNullOrWhiteSpace(returnUrl)
+                ? returnUrl
+                : model?.ReturnUrl;
 
             try
             {
-                var login2faCommand = new Login2FACommand() { Code = model.TwoFactorCode };
+                var login2faCommand = new Login2FACommand() { Code = model?.TwoFactorCode };
                 var result = await Mediator.Send(login2faCommand);
-
-
-                //_cacheManager.Remove(result.userId.ToString());
-
 
                 // Healan: never divert Admin to AdminPanel during OIDC / clinic login.
                 if (result.IsSuccess)
-                    return await RedirectAfterLoginAsync(result.userId, returnUrl ?? model.ReturnUrl);
-                //return Redirect(returnUrl);
+                    return await RedirectAfterLoginAsync(result.userId, effectiveReturnUrl);
             }
             catch (Exception ex)
             {
-                ModelState["ReturnUrl"].RawValue = model.ReturnUrl;
+                _logger.LogWarning(ex, "LoginWith2fa failed");
+                if (ModelState["ReturnUrl"] != null)
+                    ModelState["ReturnUrl"].RawValue = effectiveReturnUrl;
                 ModelState.AddModelError(string.Empty, ex.Message);
             }
 
-            //return RedirectToAction("LoginWith2fa");
-            return View(nameof(LoginWith2fa), new LoginWith2faViewModel { RememberMe = rememberMe, ReturnUrl = returnUrl });
+            var retry = new LoginWith2faViewModel
+            {
+                RememberMe = rememberMe,
+                ReturnUrl = effectiveReturnUrl,
+            };
+            ViewData["ReturnUrl"] = effectiveReturnUrl;
+            return View(nameof(LoginWith2fa), retry);
         }
 
 

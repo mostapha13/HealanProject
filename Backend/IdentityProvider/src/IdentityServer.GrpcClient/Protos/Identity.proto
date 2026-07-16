@@ -50,6 +50,7 @@ message UserSummaryReply {
     string LastLoginIP=10;
   int64 LastLoginDate=11;
   repeated RoleInfo RoleInfos = 12;
+  bool TwoFactorEnabled = 13;
 }
 message UserSummariesReply {
 	repeated UserSummaryReply UserSummaries = 1;
@@ -63,6 +64,7 @@ message SaveRequest {
   int32 DepartmentId=6;
   string Password=7;
   repeated string RoleNames = 8;
+  bool TwoFactorEnabled = 9;
 }
 message SetUserRoleRequest {
   string UserId = 1;

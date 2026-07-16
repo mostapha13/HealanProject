@@ -87,7 +87,12 @@ namespace Healan.Application.Users.Queries.GetUsers
                         {
                             UserId = entity.IdentityUserId.Value.ToString(),
                         });
-                    if (summary?.RoleInfos == null)
+                    if (summary == null)
+                        continue;
+
+                    item.TwoFactorEnabled = summary.TwoFactorEnabled;
+
+                    if (summary.RoleInfos == null)
                         continue;
 
                     item.UserRoles = summary.RoleInfos
