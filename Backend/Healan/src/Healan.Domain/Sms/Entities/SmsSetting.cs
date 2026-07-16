@@ -5,9 +5,8 @@ public class SmsSetting
 {
     public int SmsSettingId { get; set; } = 1;
 
-    /// <summary>کلید API پنل sms.ir</summary>
-    public string ApiKey { get; set; } =
-        "w6kRP51S1acR5qRGvC4ojJfzIArb6Aaq0cKOn05zv7L36pLt";
+    /// <summary>کلید API پنل sms.ir — از UI تنظیمات پیامک وارد شود</summary>
+    public string ApiKey { get; set; } = string.Empty;
 
     /// <summary>شناسه قالب Verify (پیش‌فرض پنل)</summary>
     public int TemplateId { get; set; } = 640023;

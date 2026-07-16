@@ -14,42 +14,38 @@ namespace Healan.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "SmsSettings",
-                columns: table => new
-                {
-                    SmsSettingId = table.Column<int>(type: "int", nullable: false),
-                    ApiKey = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    TemplateId = table.Column<int>(type: "int", nullable: false, defaultValue: 640023),
-                    LineNumber = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
-                    VerifyParameterName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    SendEnabled = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SmsSettings", x => x.SmsSettingId);
-                });
+            // Hand-written migration (no Designer model): avoid InsertData — EF needs entity
+            // mappings / columnTypes for data operations and crashes otherwise.
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'[SmsSettings]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [SmsSettings] (
+        [SmsSettingId] int NOT NULL,
+        [ApiKey] nvarchar(200) NOT NULL,
+        [TemplateId] int NOT NULL CONSTRAINT [DF_SmsSettings_TemplateId] DEFAULT 640023,
+        [LineNumber] bigint NOT NULL CONSTRAINT [DF_SmsSettings_LineNumber] DEFAULT CAST(0 AS bigint),
+        [VerifyParameterName] nvarchar(50) NOT NULL,
+        [SendEnabled] bit NOT NULL CONSTRAINT [DF_SmsSettings_SendEnabled] DEFAULT CAST(1 AS bit),
+        [UpdatedAt] datetime2 NOT NULL,
+        CONSTRAINT [PK_SmsSettings] PRIMARY KEY ([SmsSettingId])
+    );
+END
 
-            migrationBuilder.InsertData(
-                table: "SmsSettings",
-                columns: new[] { "SmsSettingId", "ApiKey", "TemplateId", "LineNumber", "VerifyParameterName", "SendEnabled", "UpdatedAt" },
-                values: new object[]
-                {
-                    1,
-                    "w6kRP51S1acR5qRGvC4ojJfzIArb6Aaq0cKOn05zv7L36pLt",
-                    640023,
-                    0L,
-                    "Code",
-                    true,
-                    new DateTime(2026, 7, 16, 0, 0, 0, DateTimeKind.Utc)
-                });
+IF NOT EXISTS (SELECT 1 FROM [SmsSettings] WHERE [SmsSettingId] = 1)
+BEGIN
+    INSERT INTO [SmsSettings] ([SmsSettingId], [ApiKey], [TemplateId], [LineNumber], [VerifyParameterName], [SendEnabled], [UpdatedAt])
+    VALUES (1, N'', 640023, CAST(0 AS bigint), N'Code', CAST(1 AS bit), '2026-07-16T00:00:00');
+END
+");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "SmsSettings");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID(N'[SmsSettings]', N'U') IS NOT NULL
+    DROP TABLE [SmsSettings];
+");
         }
     }
 }
