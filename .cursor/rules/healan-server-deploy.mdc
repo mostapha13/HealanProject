@@ -1,0 +1,104 @@
+---
+description: Healan production server deploy checklist — avoid repeating past failures
+alwaysApply: true
+---
+
+# Healan server deploy rules (`/opt/healan`)
+
+When giving the user **server commands**, follow this checklist **before** the final block. Do not invent paths or skip chmod/stash steps that have already bitten us.
+
+## Fixed facts
+
+- Project path on server is always: `/opt/healan` (never `/path/to/...`)
+- GitHub: `https://github.com/mostapha13/HealanProject.git`
+- SQL password comes from `/opt/healan/.env` as `MSSQL_SA_PASSWORD`
+- `apply-server-appsettings.sh` needs `SQL_PASSWORD` (map from `MSSQL_SA_PASSWORD`)
+- Server shell is bash; local Windows PowerShell does **not** support `&&` / `||` the same way
+
+## Never do these on production
+
+1. **Do not** `docker compose down` then `up -d --build` for the whole stack — it takes everything down and rebuilds unrelated apps (`modern-instrumentations`, `tax-front`, …) which often fail and leave the site offline.
+2. **Do not** rebuild all services when only SMS/auth/clinic changed.
+3. **Do not** hardcode a guessed SQL password; always `source .env`.
+
+## Always do these before/with pull + deploy
+
+```bash
+cd /opt/healan
+
+# 1) Unblock pull if apply-server-appsettings left local edits
+git stash push -m "server-local-before-pull" -- \
+  docker/config/*/appsettings.Production.json \
+  docker/scripts/apply-server-appsettings.sh \
+  || true
+
+git fetch origin
+git checkout <branch>
+git pull origin <branch>
+
+# 2) Appsettings (chmod first — Permission denied is a recurring failure)
+set -a
+source .env
+set +a
+export SQL_PASSWORD="$MSSQL_SA_PASSWORD"
+chmod +x docker/scripts/apply-server-appsettings.sh
+./docker/scripts/apply-server-appsettings.sh
+# fallback if still denied: bash docker/scripts/apply-server-appsettings.sh
+```
+
+## Targeted rebuild only
+
+Prefer:
+
+```bash
+export COMPOSE_PARALLEL_LIMIT=1
+docker compose build --no-deps <only-needed-services>
+docker compose up -d --no-deps --force-recreate <only-needed-services>
+```
+
+Typical mapping:
+
+| Change | Rebuild |
+|--------|---------|
+| SMSProvider / sms.ir | `smsprovider-webapp` |
+| Healan API / migrations | `healan-webapi` |
+| Clinic UI (pagination, menus, pages) | `healan-clinic` |
+| AccessForm / AccessMenu seed | `identity-server` (then user must re-login) |
+| Nginx routes | `nginx-gateway` recreate |
+
+Bring infra up without rebuild if containers are down:
+
+```bash
+docker compose up -d --no-build sqlserver redis rabbitmq
+docker compose up -d --no-build <needed-services>
+```
+
+## Disk / build failures
+
+If `No space left on device` or NuGet restore fails:
+
+```bash
+docker builder prune -af
+docker image prune -af
+df -h /
+```
+
+Then rebuild **one service at a time** with `--no-deps`.
+
+## Access / UI not visible after deploy
+
+- Clinic UI changes require **`healan-clinic` rebuild**, not only API.
+- New AccessForm/Menu entries require **`identity-server` recreate** so `HealanAccessSeed` runs, then **logout/login**.
+- New Healan DB tables need **`healan-webapi`** so `Database.Migrate()` runs.
+- After SMS settings save in clinic, settings are pushed to SMSProvider; first Save after deploy may be required.
+
+## Command quality bar
+
+Final server instructions must be:
+
+1. Copy-paste ready (no placeholders like `/path/to`)
+2. Include `chmod +x` for shell scripts
+3. Include stash/checkout of local appsettings before pull
+4. Use `.env` for SQL password
+5. Targeted `--no-deps` builds only
+6. Mention re-login when access seed changed
