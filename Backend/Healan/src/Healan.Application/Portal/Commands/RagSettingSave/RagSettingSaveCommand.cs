@@ -11,7 +11,7 @@ public class RagSettingSaveCommand : IRequest<RagSettingDto>
 {
     public int SyncIntervalMinutes { get; set; } = 10;
     public int SimilarityThresholdPercent { get; set; } = 55;
-    public string PythonApiUrl { get; set; } = "http://localhost:8000";
+    public string PythonApiUrl { get; set; } = "http://python-rag:8000";
     public bool IsEnabled { get; set; } = true;
 }
 

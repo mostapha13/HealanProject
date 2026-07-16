@@ -50,7 +50,7 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
         }
 
         var threshold = setting?.SimilarityThresholdPercent ?? 55;
-        var pythonUrl = setting?.PythonApiUrl ?? "http://localhost:8000";
+        var pythonUrl = ResolvePythonApiUrl(setting?.PythonApiUrl);
 
         _logger.LogInformation(
             "RAG request received. Question={Question}, PythonUrl={PythonUrl}, ThresholdPercent={ThresholdPercent}, RagEnabled={RagEnabled}",
@@ -79,6 +79,31 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             response.SourceType);
 
         return await LogAndReturnAsync(question, request.SessionId, response, cancellationToken);
+    }
+
+    /// <summary>
+    /// In Docker, localhost:8000 inside healan-webapi is the API container itself — rewrite to python-rag.
+    /// </summary>
+    internal static string ResolvePythonApiUrl(string? configured)
+    {
+        const string dockerDefault = "http://python-rag:8000";
+        var url = (configured ?? string.Empty).Trim().TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(url))
+            return dockerDefault;
+
+        var inContainer = string.Equals(
+            Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+        if (inContainer
+            && (url.Contains("localhost:8000", StringComparison.OrdinalIgnoreCase)
+                || url.Contains("127.0.0.1:8000", StringComparison.OrdinalIgnoreCase)))
+        {
+            return dockerDefault;
+        }
+
+        return url;
     }
 
     private async Task<RagAskResponseDto> LogAndReturnAsync(

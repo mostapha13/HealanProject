@@ -47,18 +47,33 @@ public static class RagKnowledgeSeed
 
     private static async Task SeedSettingsAsync(ApplicationDbContext context)
     {
+        var dockerUrl = "http://python-rag:8000";
         if (await context.RagSettings.AnyAsync())
+        {
+            // Existing installs often still point at localhost — rewrite for Docker.
+            var setting = await context.RagSettings.FirstAsync();
+            var url = setting.PythonApiUrl?.Trim() ?? string.Empty;
+            if (url.Contains("localhost:8000", StringComparison.OrdinalIgnoreCase)
+                || url.Contains("127.0.0.1:8000", StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(url))
+            {
+                setting.PythonApiUrl = dockerUrl;
+                setting.UpdatedAt = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+            }
             return;
+        }
 
         context.RagSettings.Add(new RagSetting
         {
             RagSettingId = 1,
             SyncIntervalMinutes = 10,
             SimilarityThresholdPercent = 55,
-            PythonApiUrl = "http://localhost:8000",
+            PythonApiUrl = dockerUrl,
             IsEnabled = true,
             UpdatedAt = DateTime.UtcNow,
         });
+        await context.SaveChangesAsync();
     }
 
     private static List<SeedRow> BuildSeedRows() =>

@@ -10,12 +10,30 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PASS="${SQL_PASSWORD:?Set SQL_PASSWORD env var first}"
 
+# URL-encode password for pyodbc connection URI
+if command -v python3 >/dev/null 2>&1; then
+  PASS_ENC="$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$PASS")"
+elif command -v python >/dev/null 2>&1; then
+  PASS_ENC="$(python -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$PASS")"
+else
+  PASS_ENC="$PASS"
+  echo "WARN: python not found — SQL password not URL-encoded for python-rag .env"
+fi
+
 write_json() {
   local rel="$1"
   local file="$ROOT/$rel"
   mkdir -p "$(dirname "$file")"
   # stdin = json with __SQL_PASSWORD__ placeholder
   sed "s/__SQL_PASSWORD__/${PASS}/g" > "$file"
+  echo "wrote $rel"
+}
+
+write_env() {
+  local rel="$1"
+  local file="$ROOT/$rel"
+  mkdir -p "$(dirname "$file")"
+  sed -e "s/__SQL_PASSWORD_ENC__/${PASS_ENC}/g" > "$file"
   echo "wrote $rel"
 }
 
@@ -270,11 +288,38 @@ write_json docker/config/smsprovider-webapp/appsettings.Production.json <<'EOF'
 }
 EOF
 
+write_env docker/config/python/rag.env <<'EOF'
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
+
+HOST=0.0.0.0
+PORT=8000
+DEBUG=false
+
+EMBEDDING_MODEL=heydariAI/persian-embeddings
+CHROMA_PERSIST_DIR=/data/chroma
+CHROMA_COLLECTION=healan_rag
+
+DATA_SOURCE=sqlserver
+SQL_SERVER_USE_HEALAN_BUNDLE=true
+SQL_SERVER_CONNECTION_STRING=mssql+pyodbc://sa:__SQL_PASSWORD_ENC__@sqlserver:1433/Healan?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+
+RAG_AUTO_INGEST=true
+RAG_TOP_K=5
+RAG_ANSWER_MODE=direct
+RAG_SIMILARITY_THRESHOLD=0.55
+RAG_SYNC_ENABLED=true
+RAG_SYNC_INTERVAL_MINUTES=10
+EOF
+
 echo ""
 echo "Done. Verify healan-webapi:"
 grep -E 'Database=|identity-grpc|identity-server' "$ROOT/docker/config/healan-webapi/appsettings.Production.json"
 echo ""
 echo "Next:"
 echo "  cd $ROOT"
-echo "  docker compose up -d --force-recreate healan-webapi identity-grpc identity-server identity-usermanager captcha-webui"
+echo "  docker compose build python-rag healan-webapi"
+echo "  docker compose up -d --no-deps --force-recreate python-rag healan-webapi"
+echo "  sleep 30 && curl -s http://127.0.0.1:8000/health"
 echo "  sleep 20 && curl -s http://127.0.0.1:6128/Healan/api/v1/AuthProbe"

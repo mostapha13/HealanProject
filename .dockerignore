@@ -11,3 +11,8 @@
 **/*.suo
 **/*.log
 **/Attachment
+Python/.venv
+Python/**/__pycache__
+Python/data/chroma
+Python/.env
+**/.pytest_cache

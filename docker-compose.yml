@@ -22,6 +22,7 @@ services:
       - identity-usermanager
       - filemanager-webui
       - login
+      - python-rag
     ports:
       - "80:80"
       - "443:443"
@@ -238,6 +239,37 @@ services:
     volumes:
       - ./docker/config/smsprovider-webapp/appsettings.Production.json:/app/appsettings.Production.json:ro
 
+  python-rag:
+    build:
+      context: .
+      dockerfile: docker/python-rag.Dockerfile
+    container_name: healan-python-rag
+    ports:
+      - "8000:8000"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    env_file:
+      - ./docker/config/python/rag.env
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}"
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      DATA_SOURCE: "sqlserver"
+      SQL_SERVER_USE_HEALAN_BUNDLE: "true"
+      EMBEDDING_MODEL: "heydariAI/persian-embeddings"
+      CHROMA_PERSIST_DIR: "/data/chroma"
+      CHROMA_COLLECTION: "healan_rag"
+      RAG_AUTO_INGEST: "true"
+      RAG_TOP_K: "5"
+      RAG_ANSWER_MODE: "direct"
+      RAG_SIMILARITY_THRESHOLD: "0.55"
+      RAG_SYNC_ENABLED: "true"
+      RAG_SYNC_INTERVAL_MINUTES: "10"
+    volumes:
+      - python_rag_chroma:/data/chroma
+    restart: unless-stopped
+
   healan-webapi:
     build:
       context: .
@@ -256,6 +288,8 @@ services:
       filemanager-grpc:
         condition: service_started
       workflow-webui:
+        condition: service_started
+      python-rag:
         condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
@@ -345,3 +379,4 @@ services:
 volumes:
   sqlserver_data:
   filemanager_attachments:
+  python_rag_chroma:

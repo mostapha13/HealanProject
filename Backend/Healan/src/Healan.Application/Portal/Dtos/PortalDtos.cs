@@ -92,7 +92,7 @@ public class RagSettingDto
     public int RagSettingId { get; set; }
     public int SyncIntervalMinutes { get; set; }
     public int SimilarityThresholdPercent { get; set; }
-    public string PythonApiUrl { get; set; } = "http://localhost:8000";
+    public string PythonApiUrl { get; set; } = "http://python-rag:8000";
     public bool IsEnabled { get; set; }
     public DateTime? LastSyncedAt { get; set; }
 }
