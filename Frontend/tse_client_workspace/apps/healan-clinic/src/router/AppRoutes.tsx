@@ -93,8 +93,8 @@ export default function AppRoutes() {
           </Route>
           <Route path="reports" element={guarded('/reports', <ReportsLayout />)}>
             <Route index element={guarded('/reports', <ReportsPage />)} />
-            <Route path="sms" element={guarded('/reports', <SmsOutboxPage />)} />
-            <Route path="sms-settings" element={guarded('/reports', <SmsSettingsPage />)} />
+            <Route path="sms" element={guarded('/reports/sms', <SmsOutboxPage />)} />
+            <Route path="sms-settings" element={guarded('/reports/sms-settings', <SmsSettingsPage />)} />
           </Route>
           <Route path="workflow" element={guarded('/workflow', <WorkflowPage />)} />
           <Route path="signature" element={guarded('/signature', <SignaturePage />)} />

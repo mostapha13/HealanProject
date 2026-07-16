@@ -34,7 +34,9 @@ export function ListPagination({
   pageSize,
   onChange,
 }: ListPaginationProps) {
-  if (totalCount <= 0) return null;
+  // حتی با یک صفحه هم انتخاب سایز 10/15/20 را نشان بده
+  if (totalCount < 0) return null;
+  if (totalCount === 0) return null;
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem', paddingBottom: '0.5rem' }}>
@@ -44,7 +46,8 @@ export function ListPagination({
         pageSize={pageSize}
         pageSizeOptions={[...HEALAN_LIST_PAGE_SIZE_OPTIONS].map(String)}
         showSizeChanger
-        showQuickJumper
+        showQuickJumper={totalCount > pageSize}
+        hideOnSinglePage={false}
         onChange={(nextPage, nextSize) => onChange(nextPage, nextSize ?? pageSize)}
         showTotal={(total) => {
           const totalPages = Math.max(1, Math.ceil(total / pageSize));

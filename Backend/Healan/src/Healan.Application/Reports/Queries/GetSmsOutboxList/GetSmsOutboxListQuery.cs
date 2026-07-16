@@ -70,8 +70,11 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
                 throw new BadRequestExceptions("دریافت لیست پیامک از SMSProvider ناموفق بود.");
             }
 
-            var page = await response.Content.ReadFromJsonAsync<SmsOutboxPageDto>(
-                cancellationToken: cancellationToken);
+            var page = string.IsNullOrWhiteSpace(body)
+                ? null
+                : System.Text.Json.JsonSerializer.Deserialize<SmsOutboxPageDto>(
+                    body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             var items = (page?.Items ?? new List<SmsOutboxDto>())
                 .Select(x => new SmsOutboxItemResult

@@ -36,6 +36,8 @@ public static class HealanClinicAccess
         public const int PortalBlogDelete = 5126;
         public const int PortalBlogPublish = 5127;
         public const int PortalRag = 5128;
+        public const int SmsOutbox = 5129;
+        public const int SmsSettings = 5130;
     }
 
     /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه (فولدرها + زیرمنوها).</summary>
@@ -43,6 +45,7 @@ public static class HealanClinicAccess
     {
         5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113,
         5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128,
+        5129, 5130,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>
@@ -63,6 +66,7 @@ public static class HealanClinicAccess
     public static readonly int[] AccountantMenuIds =
     {
         Menus.Dashboard, Menus.Appointments, Menus.Patients, Menus.MedicalFees, Menus.Reports,
+        Menus.SmsOutbox, Menus.SmsSettings,
     };
 
     public static readonly string[] ClinicSystemRoles =

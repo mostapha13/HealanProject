@@ -11,25 +11,28 @@ namespace Healan.WebApi.Controllers;
 /// <summary>
 /// گزارش‌های تحلیلی کلینیک
 /// </summary>
-[AccessForm(HealanAccessFormIds.Reports)]
 public class ClinicReportsController : ApiControllerBase
 {
     [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.Reports)]
     public async Task<IActionResult> Analytics([FromQuery] GetClinicAnalyticsQuery request) =>
         Ok(await Mediator.Send(request));
 
     /// <summary>لیست پیامک‌های ارسالی (OTP / فراموشی رمز و ...)</summary>
     [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.Reports, HealanAccessFormIds.SmsOutbox)]
     public async Task<IActionResult> SmsOutbox([FromQuery] GetSmsOutboxListQuery request) =>
         Ok(await Mediator.Send(request));
 
     /// <summary>خواندن تنظیمات پیامک (ApiKey ماسک‌شده)</summary>
     [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.Reports, HealanAccessFormIds.SmsSettings)]
     public async Task<IActionResult> SmsSettings() =>
         Ok(await Mediator.Send(new GetSmsSettingsQuery()));
 
     /// <summary>ذخیره تنظیمات پیامک و همگام‌سازی با SMSProvider</summary>
     [HttpPost("[action]")]
+    [AccessForm(HealanAccessFormIds.Reports, HealanAccessFormIds.SmsSettings)]
     public async Task<IActionResult> SmsSettingsSave([FromBody] SaveSmsSettingsCommand request) =>
         Ok(await Mediator.Send(request));
 }

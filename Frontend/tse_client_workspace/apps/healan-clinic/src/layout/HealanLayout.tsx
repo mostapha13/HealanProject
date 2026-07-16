@@ -15,8 +15,8 @@ const navItems: Array<{ path: string; label: string; icon: string; end?: boolean
   { path: '/basic-data', label: 'اطلاعات پایه', icon: '📁' },
   { path: '/site-content', label: 'محتوای سایت', icon: '🌐' },
   { path: '/reports', label: 'گزارش‌ها', icon: '📈' },
-  { path: '/reports/sms', label: 'پیامک‌ها', icon: '💬', accessPath: '/reports' },
-  { path: '/reports/sms-settings', label: 'تنظیمات پیامک', icon: '⚙️', accessPath: '/reports' },
+  { path: '/reports/sms', label: 'پیامک‌ها', icon: '💬' },
+  { path: '/reports/sms-settings', label: 'تنظیمات پیامک', icon: '⚙️' },
   { path: '/signature', label: 'امضای دیجیتال', icon: '✍️' },
   { path: '/workflow', label: 'کارتابل', icon: '🔄' },
 ];
