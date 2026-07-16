@@ -20,8 +20,18 @@ const USER_TYPE_OPTIONS = [
   { value: 8, label: 'حسابدار' },
 ];
 
-const EMPTY_FORM = {
+const EMPTY_FORM: {
+  userId: number;
+  identityUserId?: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  userTypeId: number;
+  isActive: boolean;
+  twoFactorEnabled: boolean;
+} = {
   userId: 0,
+  identityUserId: undefined,
   firstName: '',
   lastName: '',
   phoneNumber: '',
