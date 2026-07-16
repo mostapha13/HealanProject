@@ -13,6 +13,8 @@ import { convertDateToJalali } from '@tse/tools';
 import { buildMedicalFeePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const EMPTY_FORM = {
   medicalFeeServiceId: 0,
@@ -26,6 +28,10 @@ const EMPTY_FORM = {
 function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<MedicalFeeService[]>([]);
+  const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [services, setServices] = useState<ServiceType[]>([]);
 
@@ -35,52 +41,45 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const load = () => healanApi.medicalFees.listAll().then(setItems).catch(onAlert);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await healanApi.medicalFees.list({ pageNumber: page, pageSize });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
+    } catch (err) {
+      onAlert(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
   useEffect(() => {
+    void load();
+  }, [page, pageSize]);
 
-    load();
-
+  useEffect(() => {
     healanApi.services.listActive().then(setServices).catch(() => {});
-
   }, []);
 
 
 
-  const handleSave = async () => {
-
-    if (form.serviceTypeId <= 0) {
-
-      onAlert({ type: 'error', message: 'خدمت را انتخاب کنید' });
-
-      return;
-
-    }
-
-    if (form.price <= 0) {
-
-      onAlert({ type: 'error', message: 'قیمت باید بیشتر از صفر باشد' });
-
-      return;
-
-    }
-
-    try {
-
+  const handleSave = () => {
+    void guard(async () => {
+      if (form.serviceTypeId <= 0) {
+        onAlert({ type: 'error', message: 'خدمت را انتخاب کنید' });
+        return;
+      }
+      if (form.price <= 0) {
+        onAlert({ type: 'error', message: 'قیمت باید بیشتر از صفر باشد' });
+        return;
+      }
       await healanApi.medicalFees.register(buildMedicalFeePayload(form));
-
       setShowForm(false);
-
       await load();
-
-    } catch (err) {
-
-      onAlert(err);
-
-    }
-
+    }).catch((err) => onAlert(err));
   };
 
   const openCreate = () => {
@@ -181,7 +180,9 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
 
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
 
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
 
@@ -197,6 +198,9 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
         <div className="healan-card__body" style={{ padding: 0 }}>
 
+          {loading ? (
+            <div className="healan-empty">در حال بارگذاری...</div>
+          ) : (
           <table className="healan-table">
 
             <thead><tr><th>خدمت</th><th>قیمت</th><th>از</th><th>تا</th><th>وضعیت</th><th>عملیات</th></tr></thead>
@@ -228,8 +232,11 @@ function MedicalFeesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             ))}</tbody>
 
           </table>
+          )}
 
         </div>
+
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
 

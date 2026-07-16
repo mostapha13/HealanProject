@@ -11,12 +11,18 @@ import { PageHeader } from '../../components/Ui';
 import { buildServicePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { confirmDelete } from '../../components/confirmDialog';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const EMPTY_FORM = { serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '', isActive: true };
 
 function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<ServiceType[]>([]);
+  const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [categories, setCategories] = useState<{ key: number; displayName?: string; name?: string }[]>([]);
 
@@ -26,13 +32,28 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const load = () => healanApi.services.listAll().then(setItems).catch(onAlert);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await healanApi.services.list({ pageNumber: page, pageSize });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
+    } catch (err) {
+      onAlert(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
   useEffect(() => {
+    void load();
+  }, [page, pageSize]);
 
-    load();
+
+
+  useEffect(() => {
 
     healanApi.services.categories().then(setCategories).catch(() => {});
 
@@ -40,30 +61,16 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const handleSave = async () => {
-
-    if (!form.title.trim()) {
-
-      onAlert({ type: 'error', message: 'عنوان خدمت الزامی است' });
-
-      return;
-
-    }
-
-    try {
-
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.title.trim()) {
+        onAlert({ type: 'error', message: 'عنوان خدمت الزامی است' });
+        return;
+      }
       await healanApi.services.register(buildServicePayload(form));
-
       setShowForm(false);
-
       await load();
-
-    } catch (err) {
-
-      onAlert(err);
-
-    }
-
+    }).catch((err) => onAlert(err));
   };
 
   const openCreate = () => {
@@ -166,7 +173,9 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
 
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
 
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
 
@@ -182,30 +191,36 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
         <div className="healan-card__body" style={{ padding: 0 }}>
 
-          <table className="healan-table">
+          {loading ? (
+            <div className="healan-empty">در حال بارگذاری...</div>
+          ) : (
+            <table className="healan-table">
 
-            <thead><tr><th>عنوان</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+              <thead><tr><th>عنوان</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((s) => <tr key={s.serviceTypeId}>
-              <td>{s.title}</td>
-              <td>{s.code ?? '—'}</td>
-              <td>{s.isActive ? 'فعال' : 'غیرفعال'}</td>
-              <td>
-                <div className="healan-actions">
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(s)}>ویرایش</button>
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(s)}>
-                    {s.isActive ? 'غیرفعال' : 'فعال'}
-                  </button>
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleDelete(s)}>
-                    حذف
-                  </button>
-                </div>
-              </td>
-            </tr>)}</tbody>
+              <tbody>{items.map((s) => <tr key={s.serviceTypeId}>
+                <td>{s.title}</td>
+                <td>{s.code ?? '—'}</td>
+                <td>{s.isActive ? 'فعال' : 'غیرفعال'}</td>
+                <td>
+                  <div className="healan-actions">
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(s)}>ویرایش</button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(s)}>
+                      {s.isActive ? 'غیرفعال' : 'فعال'}
+                    </button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleDelete(s)}>
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>)}</tbody>
 
-          </table>
+            </table>
+          )}
 
         </div>
+
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
 
@@ -218,5 +233,3 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 export default withAlert(ServicesPage);
-
-

@@ -74,11 +74,15 @@ export const healanApi = {
       if (params.serviceTypeId && params.serviceTypeId > 0) query['serviceTypeId'] = params.serviceTypeId;
       return get<ClinicAnalytics>('ClinicReports/Analytics', query);
     },
-    smsOutbox: (params: { take?: number; phone?: string } = {}) => {
-      const query: Record<string, unknown> = { take: params.take ?? 50 };
-      if (params.phone) query['phone'] = params.phone;
-      return get<SmsOutboxItem[]>('ClinicReports/SmsOutbox', query);
-    },
+    smsOutbox: (params: { phone?: string; pageNumber?: number; pageSize?: number } = {}) =>
+      get<PaginatedResponse<SmsOutboxItem>>(
+        'ClinicReports/SmsOutbox',
+        pagedParams({
+          phone: params.phone,
+          pageNumber: params.pageNumber,
+          pageSize: params.pageSize,
+        })
+      ),
   },
 
   patients: {

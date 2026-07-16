@@ -10,12 +10,18 @@ import { PageHeader } from '../../components/Ui';
 
 import { buildInsurancePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const EMPTY_FORM = { insuranceCompanyId: 0, name: '', code: '', insuranceTypeId: 2, phoneNumber: '', isActive: true };
 
 function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<InsuranceCompany[]>([]);
+  const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [insTypes, setInsTypes] = useState<{ key: number; displayName?: string; name?: string }[]>([]);
 
@@ -25,13 +31,28 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const load = () => healanApi.insurance.listAll().then(setItems).catch(onAlert);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await healanApi.insurance.list({ pageNumber: page, pageSize });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
+    } catch (err) {
+      onAlert(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
   useEffect(() => {
+    void load();
+  }, [page, pageSize]);
 
-    load();
+
+
+  useEffect(() => {
 
     healanApi.insurance.types().then(setInsTypes).catch(() => {});
 
@@ -39,30 +60,16 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const handleSave = async () => {
-
-    if (!form.name.trim()) {
-
-      onAlert({ type: 'error', message: 'نام بیمه الزامی است' });
-
-      return;
-
-    }
-
-    try {
-
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.name.trim()) {
+        onAlert({ type: 'error', message: 'نام بیمه الزامی است' });
+        return;
+      }
       await healanApi.insurance.register(buildInsurancePayload(form));
-
       setShowForm(false);
-
       await load();
-
-    } catch (err) {
-
-      onAlert(err);
-
-    }
-
+    }).catch((err) => onAlert(err));
   };
 
   const openCreate = () => {
@@ -154,7 +161,9 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
 
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
 
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
 
@@ -170,27 +179,33 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
         <div className="healan-card__body" style={{ padding: 0 }}>
 
-          <table className="healan-table">
+          {loading ? (
+            <div className="healan-empty">در حال بارگذاری...</div>
+          ) : (
+            <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+              <thead><tr><th>نام</th><th>کد</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((i) => <tr key={i.insuranceCompanyId}>
-              <td>{i.name}</td>
-              <td>{i.code ?? '—'}</td>
-              <td>{i.isActive ? 'فعال' : 'غیرفعال'}</td>
-              <td>
-                <div className="healan-actions">
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(i)}>ویرایش</button>
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(i)}>
-                    {i.isActive ? 'غیرفعال' : 'فعال'}
-                  </button>
-                </div>
-              </td>
-            </tr>)}</tbody>
+              <tbody>{items.map((i) => <tr key={i.insuranceCompanyId}>
+                <td>{i.name}</td>
+                <td>{i.code ?? '—'}</td>
+                <td>{i.isActive ? 'فعال' : 'غیرفعال'}</td>
+                <td>
+                  <div className="healan-actions">
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(i)}>ویرایش</button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(i)}>
+                      {i.isActive ? 'غیرفعال' : 'فعال'}
+                    </button>
+                  </div>
+                </td>
+              </tr>)}</tbody>
 
-          </table>
+            </table>
+          )}
 
         </div>
+
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
 
@@ -203,5 +218,3 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 export default withAlert(InsurancePage);
-
-

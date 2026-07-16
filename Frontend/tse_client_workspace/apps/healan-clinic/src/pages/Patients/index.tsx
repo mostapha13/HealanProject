@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type { PatientSummary } from '../../api/types';
@@ -8,9 +8,14 @@ import { buildPatientPayload, toDateInputValue } from '../../utils/apiPayload';
 import { isValidIranNationalCode } from '../../utils/nationalCode';
 import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [patients, setPatients] = useState<PatientSummary[]>([]);
+  const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
   const [filter, setFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,39 +30,51 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     birthdate: '',
   });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await healanApi.patients.listAll({ filterText: filter });
-      setPatients(res);
+      const res = await healanApi.patients.list({
+        filterText: filter || undefined,
+        pageNumber: page,
+        pageSize,
+      });
+      setPatients(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
       onAlert(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page, pageSize, onAlert]);
 
   useEffect(() => {
-    load();
-  }, []);
+    const timer = setTimeout(() => {
+      void load();
+    }, filter ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [load, filter]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
   const resetForm = () => {
     setForm({ patientId: 0, userId: 0, firstName: '', lastName: '', nationalCode: '', phoneNumber: '', birthdate: '' });
     setShowForm(false);
   };
 
-  const handleSave = async () => {
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.nationalCode.trim() || !form.phoneNumber.trim()) {
-      onAlert({ type: 'error', message: 'نام، نام خانوادگی، کد ملی و موبایل الزامی است' });
-      return;
-    }
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.firstName.trim() || !form.lastName.trim() || !form.nationalCode.trim() || !form.phoneNumber.trim()) {
+        onAlert({ type: 'error', message: 'نام، نام خانوادگی، کد ملی و موبایل الزامی است' });
+        return;
+      }
 
-    if (!isValidIranNationalCode(form.nationalCode.trim())) {
-      onAlert({ type: 'error', message: 'کد ملی نامعتبر است' });
-      return;
-    }
+      if (!isValidIranNationalCode(form.nationalCode.trim())) {
+        onAlert({ type: 'error', message: 'کد ملی نامعتبر است' });
+        return;
+      }
 
-    try {
       const result = await healanApi.patients.register(buildPatientPayload(form));
       if (result?.initialPassword) {
         onAlert({
@@ -70,9 +87,7 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       }
       resetForm();
       await load();
-    } catch (err) {
-      onAlert(err);
-    }
+    }).catch((err) => onAlert(err));
   };
 
   const editPatient = async (p: PatientSummary) => {
@@ -144,8 +159,8 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
             </div>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>
-                ذخیره
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
               </button>
               <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>
                 انصراف
@@ -165,10 +180,7 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       )}
 
       <div className="healan-search-bar">
-        <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()} />
-        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>
-          جستجو
-        </button>
+        <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} />
       </div>
 
       <div className="healan-card">
@@ -211,6 +223,7 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </table>
           )}
         </div>
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
       </div>
     </>
   );

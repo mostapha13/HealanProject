@@ -29,11 +29,8 @@ public sealed class SmsIrSender : ISmsSender
         _logger = logger;
     }
 
-    public Task<SendSmsResponse> SendAsync(SendSmsRequest request, CancellationToken cancellationToken = default)
+    public async Task<SendSmsResponse> SendAsync(SendSmsRequest request, CancellationToken cancellationToken = default)
     {
-        // --- ارسال واقعی به sms.ir فعلاً غیرفعال است؛ فقط لاگ می‌شود ---
-        // برای فعال‌سازی: این بلاک LogOnly را حذف کنید و کد زیر را از حالت کامنت خارج کنید.
-
         var mobiles = (request.PhoneNumbers ?? new List<string>())
             .Select(NormalizeMobile)
             .Where(m => !string.IsNullOrWhiteSpace(m))
@@ -41,22 +38,11 @@ public sealed class SmsIrSender : ISmsSender
             .ToList();
 
         if (mobiles.Count == 0)
-            return Task.FromResult(Fail("شماره موبایل معتبر نیست."));
+            return Fail("شماره موبایل معتبر نیست.");
 
         if (string.IsNullOrWhiteSpace(request.Message))
-            return Task.FromResult(Fail("متن پیامک خالی است."));
+            return Fail("متن پیامک خالی است.");
 
-        _logger.LogWarning(
-            "SMS.ir DISABLED (LogOnly). phones={Phones} message={Message}",
-            string.Join(",", mobiles),
-            request.Message);
-
-        return Task.FromResult(new SendSmsResponse
-        {
-            TraceNumber = $"log-only-{Guid.NewGuid():N}",
-        });
-
-        /*
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
             return Fail("کلید API پیامک (SmsIr:ApiKey) تنظیم نشده است.");
 
@@ -96,7 +82,6 @@ public sealed class SmsIrSender : ISmsSender
             _logger.LogError(ex, "SMS.ir send failed");
             return Fail(ex.Message);
         }
-        */
     }
 
     private async Task<SendSmsResponse> SendVerifyAsync(string mobile, string code, CancellationToken ct)

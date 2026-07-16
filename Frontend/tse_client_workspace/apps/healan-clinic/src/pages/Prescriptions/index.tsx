@@ -28,6 +28,7 @@ import {
 import { openEchoPrintWindow, openEchoPrintWindowBlank, writeEchoPrintHtmlToWindow } from '../../utils/printEchoReport';
 import { buildEchoPrintPayload } from '../../utils/echoPrintPayload';
 import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 
 /** کلیدهای enum تصویربرداری — عدد مطابق ImageTypeId بک‌اند */
 const IMAGE_TYPE_KEY: Record<string, number> = {
@@ -126,6 +127,8 @@ function mapDetailToForm(detail: PrescriptionDetail): FormState {
 function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const location = useLocation();
   const [items, setItems] = useState<PrescriptionSummary[]>([]);
+  const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -174,17 +177,21 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     newImaging.imageTypeId === ECHO_TYPE_ID ||
     echoHasAnyValue(form.echoReport);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await healanApi.prescriptions.listAll();
-      setItems(res);
+      const res = await healanApi.prescriptions.list({
+        pageNumber: page,
+        pageSize,
+      });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
       onAlert(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, onAlert]);
 
   const openPrescription = useCallback(
     async (prescriptionId: number) => {
@@ -203,7 +210,10 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   );
 
   useEffect(() => {
-    load();
+    void load();
+  }, [load]);
+
+  useEffect(() => {
     healanApi.appointments.listAll().then(setAppointments).catch(() => {});
     healanApi.prescriptions.imageTypes().then(setImageTypes).catch(() => {});
   }, []);
@@ -220,10 +230,9 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       }
       if (appointmentId) {
         try {
-          const list = await healanApi.prescriptions.listAll();
-          const existing = list.find((p) => p.appointmentId === +appointmentId);
-          if (existing) {
-            await openPrescription(existing.prescriptionId);
+          const appt = await healanApi.appointments.info(+appointmentId);
+          if (appt.prescriptionId) {
+            await openPrescription(appt.prescriptionId);
           } else {
             setForm({ ...initialForm(), appointmentId: +appointmentId });
             setNewDrug(emptyDrug());
@@ -705,6 +714,7 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </table>
           )}
         </div>
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
       </div>
     </>
   );

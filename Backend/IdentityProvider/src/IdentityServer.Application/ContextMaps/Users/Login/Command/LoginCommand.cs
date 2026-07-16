@@ -1,4 +1,4 @@
-﻿using IdentityServer.Application.ContextMaps.Users.Login.Query;
+using IdentityServer.Application.ContextMaps.Users.Login.Query;
 using IdentityServer.Domain.Data;
 using IdentityServer.Domain.Entities;
 using IdentityServer4;
@@ -145,7 +145,7 @@ namespace IdentityServer.Application.ContextMaps.Users.Login.Command
                 var smsResult = await _smsService.SendSMS(new SMSModelRequest()
                 {
                     PhoneNumbers = new List<string>() { getUser.PhoneNumber },
-                    Message = $"مطب Healan\nکد تأیید ورود: {code}",
+                    Message = $"کلینیک قلب دکتر معصومه شهرویی\nکد تأیید ورود: {code}",
                 });
 
                 if (smsResult != null && !string.IsNullOrWhiteSpace(smsResult.ErrorMessage))

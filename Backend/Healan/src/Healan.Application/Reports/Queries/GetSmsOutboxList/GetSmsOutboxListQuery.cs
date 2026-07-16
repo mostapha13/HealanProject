@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Share.Application.Common.Models;
 using Share.Domain.Exceptions;
 
 namespace Healan.Application.Reports.Queries.GetSmsOutboxList;
 
-public class GetSmsOutboxListQuery : IRequest<List<SmsOutboxItemResult>>
+public class GetSmsOutboxListQuery : AbstractSearchRequest<PaginatedList<SmsOutboxItemResult>>
 {
-    public int Take { get; set; } = 50;
     public string? Phone { get; set; }
 }
 
@@ -26,7 +26,7 @@ public class SmsOutboxItemResult
     public string Channel { get; set; } = string.Empty;
 }
 
-public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuery, List<SmsOutboxItemResult>>
+public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuery, PaginatedList<SmsOutboxItemResult>>
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
@@ -42,7 +42,7 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
         _logger = logger;
     }
 
-    public async Task<List<SmsOutboxItemResult>> Handle(GetSmsOutboxListQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<SmsOutboxItemResult>> Handle(GetSmsOutboxListQuery request, CancellationToken cancellationToken)
     {
         var baseUrl = _configuration["SMSProviderBaseUrl"]?.Trim();
         if (string.IsNullOrWhiteSpace(baseUrl))
@@ -51,8 +51,9 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
         if (!baseUrl.EndsWith('/'))
             baseUrl += "/";
 
-        var take = request.Take < 1 ? 50 : Math.Min(request.Take, 500);
-        var url = $"List?take={take}";
+        var pageNumber = request.PageNumber < 1 ? 1 : request.PageNumber;
+        var pageSize = request.PageSize < 1 ? 10 : Math.Min(request.PageSize, 20);
+        var url = $"List?pageNumber={pageNumber}&pageSize={pageSize}";
         if (!string.IsNullOrWhiteSpace(request.Phone))
             url += $"&phone={Uri.EscapeDataString(request.Phone.Trim())}";
 
@@ -69,10 +70,10 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
                 throw new BadRequestExceptions("دریافت لیست پیامک از SMSProvider ناموفق بود.");
             }
 
-            var items = await response.Content.ReadFromJsonAsync<List<SmsOutboxDto>>(
+            var page = await response.Content.ReadFromJsonAsync<SmsOutboxPageDto>(
                 cancellationToken: cancellationToken);
 
-            return (items ?? new List<SmsOutboxDto>())
+            var items = (page?.Items ?? new List<SmsOutboxDto>())
                 .Select(x => new SmsOutboxItemResult
                 {
                     Id = x.Id,
@@ -86,6 +87,12 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
                     Channel = x.Channel ?? string.Empty,
                 })
                 .ToList();
+
+            return new PaginatedList<SmsOutboxItemResult>(
+                items,
+                page?.TotalCount ?? items.Count,
+                page?.PageNumber ?? pageNumber,
+                pageSize);
         }
         catch (BadRequestExceptions)
         {
@@ -96,6 +103,18 @@ public class GetSmsOutboxListQueryHandler : IRequestHandler<GetSmsOutboxListQuer
             _logger.LogError(ex, "SMSProvider List error");
             throw new BadRequestExceptions($"خطا در ارتباط با SMSProvider: {ex.Message}");
         }
+    }
+
+    private sealed class SmsOutboxPageDto
+    {
+        [JsonPropertyName("items")]
+        public List<SmsOutboxDto>? Items { get; set; }
+        [JsonPropertyName("pageNumber")]
+        public int PageNumber { get; set; }
+        [JsonPropertyName("totalPages")]
+        public int TotalPages { get; set; }
+        [JsonPropertyName("totalCount")]
+        public int TotalCount { get; set; }
     }
 
     private sealed class SmsOutboxDto

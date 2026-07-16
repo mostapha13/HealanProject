@@ -5,7 +5,7 @@ import type { PortalContentItem, PortalSectionType, PortalSiteSetting } from '..
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanFileUpload, type FileUploadMeta } from '../../components/HealanFileUpload';
-import { confirmDelete } from '../../components/confirmDialog';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const SECTION_OPTIONS: { value: PortalSectionType; label: string }[] = [
   { value: 'HeroSlide', label: 'اسلاید هیرو' },
@@ -69,6 +69,7 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [loading, setLoading] = useState(true);
   const [sectionSettings, setSectionSettings] = useState<Record<string, string>>({});
   const [togglingSection, setTogglingSection] = useState<string | null>(null);
+  const { submitting, guard } = useAsyncSubmit();
 
   const loadItems = async () => {
     setLoading(true);
@@ -124,12 +125,12 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     setShowForm(true);
   };
 
-  const handleSave = async () => {
-    if (!form.title?.trim() && !form.body?.trim()) {
-      onAlert({ type: 'error', message: 'عنوان یا متن الزامی است' });
-      return;
-    }
-    try {
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.title?.trim() && !form.body?.trim()) {
+        onAlert({ type: 'error', message: 'عنوان یا متن الزامی است' });
+        return;
+      }
       await healanApi.portal.contentRegister({
         portalContentItemId: form.portalContentItemId || undefined,
         sectionType: form.sectionType,
@@ -147,9 +148,7 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       setShowForm(false);
       await loadItems();
       onAlert({ type: 'success', message: 'مطلب ذخیره شد' });
-    } catch (err) {
-      onAlert(err);
-    }
+    }).catch((err) => onAlert(err));
   };
 
   const handleToggleActive = async (item: PortalContentItem) => {
@@ -330,7 +329,9 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
             </div>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--primary" onClick={() => void handleSave()}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
             </div>
           </div>

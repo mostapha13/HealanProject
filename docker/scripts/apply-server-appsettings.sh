@@ -260,6 +260,12 @@ write_json docker/config/smsprovider-webapp/appsettings.Production.json <<'EOF'
     "VerifyParameterName": "CODE",
     "PreferVerifyForOtp": true,
     "LogOnlyWhenUnconfigured": true
+  },
+  "RabbitMQ": {
+    "UserName": "guest",
+    "Password": "guest",
+    "HostName": "rabbitmq",
+    "Port": 5672
   }
 }
 EOF

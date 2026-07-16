@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import withAlert from '../../hoc/withAlert';
 
@@ -10,10 +10,15 @@ import { PageHeader } from '../../components/Ui';
 
 import { buildDoctorPayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
+  const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
 
   const [filter, setFilter] = useState('');
 
@@ -47,43 +52,42 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const load = async () => {
-
+  const load = useCallback(async () => {
     setLoading(true);
-
     try {
-
-      const res = await healanApi.doctors.listAll({ filterText: filter });
-
-      setDoctors(res);
-
+      const res = await healanApi.doctors.list({
+        filterText: filter || undefined,
+        pageNumber: page,
+        pageSize,
+      });
+      setDoctors(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
-
       onAlert(err);
-
     } finally {
-
       setLoading(false);
-
     }
-
-  };
-
-
+  }, [filter, page, pageSize, onAlert]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      void load();
+    }, filter ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [load, filter]);
 
-    load();
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
+  useEffect(() => {
     healanApi.doctors.medicalGroups().then(setMedicalGroups).catch(() => {});
-
     healanApi.companies.listAll().then((list) => {
       if (list[0]) {
         setDefaultCompanyId(list[0].companyId);
         setForm((f) => ({ ...f, companyId: list[0].companyId }));
       }
     }).catch(() => {});
-
   }, []);
 
 
@@ -116,46 +120,27 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const handleSave = async () => {
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.firstName.trim() || !form.lastName.trim() || !form.nationalCode.trim() || !form.mobile.trim()) {
+        onAlert({ type: 'error', message: 'نام، نام خانوادگی، کد ملی و موبایل الزامی است' });
+        return;
+      }
 
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.nationalCode.trim() || !form.mobile.trim()) {
+      if (form.medicalGroupTypeId <= 0) {
+        onAlert({ type: 'error', message: 'گروه پزشکی را انتخاب کنید' });
+        return;
+      }
 
-      onAlert({ type: 'error', message: 'نام، نام خانوادگی، کد ملی و موبایل الزامی است' });
-
-      return;
-
-    }
-
-    if (form.medicalGroupTypeId <= 0) {
-
-      onAlert({ type: 'error', message: 'گروه پزشکی را انتخاب کنید' });
-
-      return;
-
-    }
-
-    if (form.companyId <= 0) {
-
-      onAlert({ type: 'error', message: 'مرکز پیش‌فرض یافت نشد. با پشتیبانی تماس بگیرید.' });
-
-      return;
-
-    }
-
-    try {
+      if (form.companyId <= 0) {
+        onAlert({ type: 'error', message: 'مرکز پیش‌فرض یافت نشد. با پشتیبانی تماس بگیرید.' });
+        return;
+      }
 
       await healanApi.doctors.register(buildDoctorPayload(form));
-
       resetForm();
-
       await load();
-
-    } catch (err) {
-
-      onAlert(err);
-
-    }
-
+    }).catch((err) => onAlert(err));
   };
 
 
@@ -278,7 +263,9 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
 
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
 
               <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>انصراف</button>
 
@@ -294,9 +281,7 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
       <div className="healan-search-bar">
 
-        <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()} />
-
-        <button type="button" className="healan-btn healan-btn--primary" onClick={load}>جستجو</button>
+        <input placeholder="جستجو..." value={filter} onChange={(e) => setFilter(e.target.value)} />
 
       </div>
 
@@ -363,6 +348,8 @@ function DoctorsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           )}
 
         </div>
+
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type {
@@ -18,6 +18,8 @@ import { useNavigate, useLocation } from '@tse/utils';
 import { appointmentDoctorDisplay, appointmentInsuranceDisplay, appointmentInvoice, appointmentPatientName, appointmentPatientNationalCode, appointmentIsPaid } from '../../utils/appointmentDisplay';
 import { QuickAddPatientModal } from '../../components/QuickAddPatientModal';
 import { QuickAddDoctorModal } from '../../components/QuickAddDoctorModal';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 function createInitialAppointmentForm() {
   return {
@@ -39,6 +41,9 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
   const [services, setServices] = useState<ServiceType[]>([]);
@@ -127,23 +132,32 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await healanApi.appointments.listAll({ filterText: filter });
-      setAppointments(res);
+      const res = await healanApi.appointments.list({
+        filterText: filter || undefined,
+        pageNumber: page,
+        pageSize,
+      });
+      setAppointments(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
       onAlert(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page, pageSize, onAlert]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       void load();
     }, filter ? 300 : 0);
     return () => clearTimeout(timer);
+  }, [load, filter]);
+
+  useEffect(() => {
+    setPage(1);
   }, [filter]);
 
   useEffect(() => {
@@ -176,26 +190,24 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }));
   };
 
-  const handleSave = async () => {
-    if (form.patientId <= 0 || form.doctorId <= 0) {
-      onAlert({ type: 'error', message: 'بیمار و پزشک را انتخاب کنید' });
-      return;
-    }
-    if (form.serviceTypeIds.length === 0) {
-      onAlert({ type: 'error', message: 'حداقل یک خدمت انتخاب کنید' });
-      return;
-    }
-    if (!form.appointmentDate?.trim()) {
-      onAlert({ type: 'error', message: 'تاریخ و ساعت نوبت را انتخاب کنید' });
-      return;
-    }
-    try {
+  const handleSave = () => {
+    void guard(async () => {
+      if (form.patientId <= 0 || form.doctorId <= 0) {
+        onAlert({ type: 'error', message: 'بیمار و پزشک را انتخاب کنید' });
+        return;
+      }
+      if (form.serviceTypeIds.length === 0) {
+        onAlert({ type: 'error', message: 'حداقل یک خدمت انتخاب کنید' });
+        return;
+      }
+      if (!form.appointmentDate?.trim()) {
+        onAlert({ type: 'error', message: 'تاریخ و ساعت نوبت را انتخاب کنید' });
+        return;
+      }
       await healanApi.appointments.register(buildAppointmentPayload(form));
       setShowForm(false);
       await load();
-    } catch (err) {
-      onAlert(err);
-    }
+    }).catch((err) => onAlert(err));
   };
 
   const handlePay = async (appointmentId: number) => {
@@ -310,8 +322,8 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               پرداخت می‌تواند قبل یا بعد از ویزیت انجام شود. با افزودن خدمت جدید حین ویزیت، فاکتور مکمل ایجاد می‌شود.
             </p>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>
-                {form.appointmentId > 0 ? 'ذخیره تغییرات' : 'ثبت نوبت'}
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : form.appointmentId > 0 ? 'ذخیره تغییرات' : 'ثبت نوبت'}
               </button>
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
             </div>
@@ -374,6 +386,7 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </table>
           )}
         </div>
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
       </div>
 
       <QuickAddPatientModal

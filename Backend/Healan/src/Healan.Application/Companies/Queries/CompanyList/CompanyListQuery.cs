@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Companies.Dtos;
@@ -42,7 +42,10 @@ namespace Healan.Application.Companies.Queries.CompanyList
 
                         select company;
 
-            return await query.ProjectTo<CompanySummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+            return await query
+                .OrderByDescending(c => c.CreatedAt)
+                .ProjectTo<CompanySummaryResult>(_mapper.ConfigurationProvider)
+                .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
 
         }
     }

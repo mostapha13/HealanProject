@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.ClinicAccess;
 using Healan.Application.Common.Interfaces;
@@ -54,6 +54,7 @@ public class DoctorListQueryHandler : IRequestHandler<DoctorListQuery, Paginated
         }
 
         return await query
+            .OrderByDescending(d => d.CreatedAt)
             .ProjectTo<DoctorSummaryResult>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }

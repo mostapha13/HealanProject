@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Doctors.Dtos;
@@ -33,7 +33,10 @@ public class InsuranceListQueryHandler : IRequestHandler<InsuranceListQuery, Pag
             .Where(x=>request.InsuranceTypeId!=null?x.InsuranceTypeId==request.InsuranceTypeId:true)
             ;
 
-        return await query.ProjectTo<InsuranceSummaryResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        return await query
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<InsuranceSummaryResult>(_mapper.ConfigurationProvider)
+            .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
 
     }
 }

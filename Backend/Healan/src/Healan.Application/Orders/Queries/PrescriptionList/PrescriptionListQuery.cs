@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.ClinicAccess;
 using Healan.Application.Common.Interfaces;
@@ -52,6 +52,7 @@ public class PrescriptionListQueryHandler : IRequestHandler<PrescriptionListQuer
             .AsNoTracking();
 
         return await query
+            .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<PrescriptionSummaryResult>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }

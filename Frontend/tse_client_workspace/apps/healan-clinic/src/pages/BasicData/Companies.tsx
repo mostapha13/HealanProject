@@ -10,6 +10,8 @@ import { PageHeader } from '../../components/Ui';
 
 import { buildCompanyPayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
+import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const EMPTY_FORM = {
   companyId: 0,
@@ -25,6 +27,10 @@ const EMPTY_FORM = {
 function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<CompanySummary[]>([]);
+  const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const { submitting, guard } = useAsyncSubmit();
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [regTypes, setRegTypes] = useState<{ key: number; displayName?: string; name?: string }[]>([]);
 
@@ -34,15 +40,28 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const load = () =>
-
-    healanApi.companies.listAll().then(setItems).catch(onAlert);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await healanApi.companies.list({ pageNumber: page, pageSize });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
+    } catch (err) {
+      onAlert(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
   useEffect(() => {
+    void load();
+  }, [page, pageSize]);
 
-    load();
+
+
+  useEffect(() => {
 
     healanApi.companies.registrationTypes().then(setRegTypes).catch(() => {});
 
@@ -50,30 +69,16 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 
-  const handleSave = async () => {
-
-    if (!form.companyName.trim() || !form.nationalId.trim()) {
-
-      onAlert({ type: 'error', message: 'نام و شناسه ملی الزامی است' });
-
-      return;
-
-    }
-
-    try {
-
+  const handleSave = () => {
+    void guard(async () => {
+      if (!form.companyName.trim() || !form.nationalId.trim()) {
+        onAlert({ type: 'error', message: 'نام و شناسه ملی الزامی است' });
+        return;
+      }
       await healanApi.companies.register(buildCompanyPayload(form));
-
       setShowForm(false);
-
       await load();
-
-    } catch (err) {
-
-      onAlert(err);
-
-    }
-
+    }).catch((err) => onAlert(err));
   };
 
   const openCreate = () => {
@@ -175,7 +180,9 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
 
-              <button type="button" className="healan-btn healan-btn--primary" onClick={handleSave}>ذخیره</button>
+              <button type="button" className="healan-btn healan-btn--primary" disabled={submitting} onClick={handleSave}>
+                {submitting ? 'در حال ذخیره...' : 'ذخیره'}
+              </button>
 
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>انصراف</button>
 
@@ -191,28 +198,34 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
         <div className="healan-card__body" style={{ padding: 0 }}>
 
-          <table className="healan-table">
+          {loading ? (
+            <div className="healan-empty">در حال بارگذاری...</div>
+          ) : (
+            <table className="healan-table">
 
-            <thead><tr><th>نام</th><th>شناسه ملی</th><th>آدرس</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+              <thead><tr><th>نام</th><th>شناسه ملی</th><th>آدرس</th><th>وضعیت</th><th>عملیات</th></tr></thead>
 
-            <tbody>{items.map((c) => <tr key={c.companyId}>
-              <td>{c.companyName}</td>
-              <td>{c.nationalId ?? '—'}</td>
-              <td>{c.address ?? '—'}</td>
-              <td>{c.isActive ? 'فعال' : 'غیرفعال'}</td>
-              <td>
-                <div className="healan-actions">
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(c)}>ویرایش</button>
-                  <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(c)}>
-                    {c.isActive ? 'غیرفعال' : 'فعال'}
-                  </button>
-                </div>
-              </td>
-            </tr>)}</tbody>
+              <tbody>{items.map((c) => <tr key={c.companyId}>
+                <td>{c.companyName}</td>
+                <td>{c.nationalId ?? '—'}</td>
+                <td>{c.address ?? '—'}</td>
+                <td>{c.isActive ? 'فعال' : 'غیرفعال'}</td>
+                <td>
+                  <div className="healan-actions">
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(c)}>ویرایش</button>
+                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(c)}>
+                      {c.isActive ? 'غیرفعال' : 'فعال'}
+                    </button>
+                  </div>
+                </td>
+              </tr>)}</tbody>
 
-          </table>
+            </table>
+          )}
 
         </div>
+
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
 
@@ -225,5 +238,3 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
 
 export default withAlert(CompaniesPage);
-
-

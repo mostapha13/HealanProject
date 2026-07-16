@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Share.MessageBroker.RabbitMQ;
 using SMSProvider.Application.Configs;
 using SMSProvider.Application.Interfaces;
 using SMSProvider.Infrastructure.Persistence;
@@ -20,6 +21,9 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
         services.AddScoped<ISmsOutboxStore, SmsOutboxStore>();
+        services.AddChannelService();
+        services.AddScoped<ISmsDispatchService, SmsDispatchService>();
+        services.AddHostedService<SmsQueueConsumerService>();
 
         services.AddHttpClient<ISmsSender, SmsIrSender>((_, client) =>
         {

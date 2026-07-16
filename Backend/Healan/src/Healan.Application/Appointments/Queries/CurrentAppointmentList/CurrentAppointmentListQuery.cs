@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Appointments.Dtos;
 using Healan.Application.Common.ClinicAccess;
@@ -64,9 +64,9 @@ public class CurrentAppointmentListQueryHandler : IRequestHandler<CurrentAppoint
             .AsNoTracking();
 
         var result = await query
-            .OrderBy(x => x.Doctor.LastName)
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenBy(x => x.Doctor.LastName)
             .ThenBy(x => x.Doctor.FirstName)
-            .ThenByDescending(x => x.CreatedAt)
             .ProjectTo<AppointmentSummaryResult>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
 

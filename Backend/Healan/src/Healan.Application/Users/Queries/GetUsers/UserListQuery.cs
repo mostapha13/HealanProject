@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Users.Dtos;
 using Healan.Domain.Users.Entities;
@@ -67,7 +67,7 @@ namespace Healan.Application.Users.Queries.GetUsers
                 pageNumber = totalPages;
 
             var entities = await users
-                .OrderBy(u => u.UserId)
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);

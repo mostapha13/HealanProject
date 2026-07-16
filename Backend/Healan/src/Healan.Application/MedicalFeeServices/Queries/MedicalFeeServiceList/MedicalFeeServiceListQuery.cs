@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.MedicalFeeServices.Dtos;
@@ -35,7 +35,10 @@ public class MedicalFeeServiceListQueryHandler : IRequestHandler<MedicalFeeServi
         var query = _applicationDbContext.MedicalFeeServices
             .Include(s => s.ServiceType)
             .Where(m => m.ServiceType.IsActive);
-        return await query.ProjectTo<MedicalFeeServiceInfoResult>(_mapper.ConfigurationProvider).PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        return await query
+            .OrderByDescending(m => m.CreatedAt)
+            .ProjectTo<MedicalFeeServiceInfoResult>(_mapper.ConfigurationProvider)
+            .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
 
 
     }

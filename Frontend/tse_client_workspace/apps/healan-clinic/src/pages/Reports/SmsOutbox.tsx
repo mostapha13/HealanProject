@@ -3,27 +3,32 @@ import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type { SmsOutboxItem } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 
 function SmsOutboxPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [items, setItems] = useState<SmsOutboxItem[]>([]);
   const [phone, setPhone] = useState('');
+  const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await healanApi.reports.smsOutbox({
-        take: 100,
+        pageNumber: page,
+        pageSize,
         phone: phone.trim() || undefined,
       });
-      setItems(res);
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
       onAlert(err);
     } finally {
       setLoading(false);
     }
-  }, [phone, onAlert]);
+  }, [page, pageSize, phone, onAlert]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -31,6 +36,10 @@ function SmsOutboxPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }, phone ? 300 : 0);
     return () => clearTimeout(timer);
   }, [load, phone]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [phone, setPage]);
 
   return (
     <>
@@ -92,6 +101,12 @@ function SmsOutboxPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             </table>
           )}
         </div>
+        <ListPagination
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onChange={onPaginationChange}
+        />
       </div>
       <p style={{ marginTop: '0.75rem', color: 'var(--healan-text-muted)', fontSize: '0.85rem' }}>
         کد OTP ارسالی برای فراموشی رمز را از ستون «کد» بخوانید و در صفحه تغییر رمز وارد کنید.

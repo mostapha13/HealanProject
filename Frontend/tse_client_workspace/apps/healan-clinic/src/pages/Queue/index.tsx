@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import { PageHeader, StatusBadge } from '../../components/Ui';
@@ -14,31 +14,43 @@ import { useNavigate } from '@tse/utils';
 import { openEchoPrintWindowBlank, writeEchoPrintHtmlToWindow } from '../../utils/printEchoReport';
 import { buildEchoPrintPayload } from '../../utils/echoPrintPayload';
 import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
+import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 
 function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const navigate = useNavigate();
   const [items, setItems] = useState<AppointmentSummary[]>([]);
+  const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [historyPatient, setHistoryPatient] = useState<{ patientId: number; patientName: string } | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await healanApi.appointments.todayAll({ filterText: filter });
-      setItems(res);
+      const res = await healanApi.appointments.today({
+        filterText: filter || undefined,
+        pageNumber: page,
+        pageSize,
+      });
+      setItems(res.items ?? []);
+      setTotalCount(res.totalCount ?? 0);
     } catch (err) {
       onAlert(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page, pageSize, onAlert]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       void load();
     }, filter ? 300 : 0);
     return () => clearTimeout(timer);
+  }, [load, filter]);
+
+  useEffect(() => {
+    setPage(1);
   }, [filter]);
 
   const changeStatus = async (appointmentId: number, status: AppointmentStatus) => {
@@ -231,6 +243,7 @@ function QueuePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             })()
           )}
         </div>
+        <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.ServiceTypes.Dtos;
@@ -36,6 +36,7 @@ public class ServiceTypeListQueryHandler : IRequestHandler<ServiceTypeListQuery,
         }
 
         return await query
+            .OrderByDescending(s => s.ServiceTypeId)
             .ProjectTo<ServiceTypeSummaryResult>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
