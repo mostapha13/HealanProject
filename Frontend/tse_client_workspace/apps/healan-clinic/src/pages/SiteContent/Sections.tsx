@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanFileUpload, type FileUploadMeta } from '../../components/HealanFileUpload';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import { confirmDelete } from '../../components/confirmDialog';
 
 const SECTION_OPTIONS: { value: PortalSectionType; label: string }[] = [
   { value: 'HeroSlide', label: 'اسلاید هیرو' },
