@@ -39,3 +39,5 @@ Backend/FileManager/src/FileManager.WebUI/Attachment/
 # Docker secrets (use .env.example as template)
 .env
 docker/config/python/.env
+
+commit-msg.txt
