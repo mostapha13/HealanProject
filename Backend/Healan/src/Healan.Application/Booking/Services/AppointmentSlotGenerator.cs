@@ -9,7 +9,7 @@ public static class BookingTimeHelper
 {
     public static TimeSpan ParseTime(string value)
     {
-        var raw = (value ?? string.Empty).Trim();
+        var raw = NormalizeAsciiDigits(value ?? string.Empty).Trim();
         // SQL Server `time` cannot store 24:00 — map to end-of-day.
         if (raw is "24:00" or "24:00:00")
             return new TimeSpan(23, 59, 0);
@@ -28,6 +28,41 @@ public static class BookingTimeHelper
         if (ts.Days > 0 || (ts.Hours == 23 && ts.Minutes >= 59))
             return "24:00";
         return ts.ToString(@"hh\:mm");
+    }
+
+    /// <summary>Convert Persian/Arabic digits to ASCII; keep separators (e.g. 2026-07-18).</summary>
+    public static string NormalizeAsciiDigits(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        var buffer = new char[value.Length];
+        var n = 0;
+        foreach (var ch in value)
+        {
+            if (ch >= '۰' && ch <= '۹')
+                buffer[n++] = (char)('0' + (ch - '۰'));
+            else if (ch >= '٠' && ch <= '٩')
+                buffer[n++] = (char)('0' + (ch - '٠'));
+            else
+                buffer[n++] = ch;
+        }
+
+        return new string(buffer, 0, n);
+    }
+
+    public static bool TryParseDate(string? value, out DateOnly date)
+    {
+        date = default;
+        var raw = NormalizeAsciiDigits(value).Trim();
+        if (string.IsNullOrEmpty(raw))
+            return false;
+
+        return DateOnly.TryParse(raw, System.Globalization.CultureInfo.InvariantCulture,
+                   System.Globalization.DateTimeStyles.None, out date)
+               || DateOnly.TryParseExact(raw, new[] { "yyyy-MM-dd", "yyyy/M/d", "yyyy/MM/dd", "yyyyMMdd" },
+                   System.Globalization.CultureInfo.InvariantCulture,
+                   System.Globalization.DateTimeStyles.None, out date);
     }
 
     public static DateTime Combine(DateOnly date, TimeSpan time) =>

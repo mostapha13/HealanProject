@@ -78,7 +78,8 @@ public class ScheduleGenerateSlotsCommandHandler : IRequestHandler<ScheduleGener
 
     public async Task<object> Handle(ScheduleGenerateSlotsCommand request, CancellationToken cancellationToken)
     {
-        if (!DateOnly.TryParse(request.FromDate, out var from) || !DateOnly.TryParse(request.ToDate, out var to))
+        if (!BookingTimeHelper.TryParseDate(request.FromDate, out var from)
+            || !BookingTimeHelper.TryParseDate(request.ToDate, out var to))
             throw new BadRequestExceptions("بازه تاریخ نامعتبر است.");
 
         if (!await _db.Doctors.AnyAsync(x => x.DoctorId == request.DoctorId, cancellationToken))
@@ -108,7 +109,7 @@ public class ScheduleExceptionSaveCommandHandler : IRequestHandler<ScheduleExcep
 
     public async Task<ScheduleExceptionDto> Handle(ScheduleExceptionSaveCommand request, CancellationToken cancellationToken)
     {
-        if (!DateOnly.TryParse(request.Date, out var date))
+        if (!BookingTimeHelper.TryParseDate(request.Date, out var date))
             throw new BadRequestExceptions("تاریخ نامعتبر است.");
 
         DoctorScheduleException entity;

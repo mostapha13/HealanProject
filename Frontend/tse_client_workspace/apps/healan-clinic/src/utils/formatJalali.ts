@@ -46,11 +46,13 @@ export function localDateTimeToTime(value: DateInput): string {
   return m ? m.format('HH:mm') : '00:00';
 }
 
-/** تبدیل روز شمسی به YYYY-MM-DD برای API */
+/** تبدیل روز شمسی به YYYY-MM-DD لاتین برای API (moment با usePersianDigits رقم فارسی می‌دهد) */
 export function jalaliDayToDateInput(day: JalaliDay): string {
   const m = moment(`${day.year}/${day.month}/${day.day}`, 'jYYYY/jM/jD');
   if (!m.isValid()) return '';
-  return m.format('YYYY-MM-DD');
+  const pad = (n: number) => String(n).padStart(2, '0');
+  // Avoid moment.format('YYYY-MM-DD') — Persian digits break DateOnly.TryParse on API.
+  return `${m.year()}-${pad(m.month() + 1)}-${pad(m.date())}`;
 }
 
 /** نمایش تاریخ شمسی — مثال ۱۴۰۳/۰۱/۱۵ */
