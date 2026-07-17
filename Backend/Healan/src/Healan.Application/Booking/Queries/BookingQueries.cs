@@ -44,7 +44,7 @@ public class ScheduleTemplateListQueryHandler : IRequestHandler<ScheduleTemplate
             DoctorScheduleTemplateId = x.DoctorScheduleTemplateId,
             DoctorId = x.DoctorId,
             DoctorName = x.DoctorName,
-            DayOfWeek = x.DayOfWeek,
+            DayOfWeek = (int)x.DayOfWeek,
             StartTime = Booking.Services.BookingTimeHelper.FormatTime(x.StartTime),
             EndTime = Booking.Services.BookingTimeHelper.FormatTime(x.EndTime),
             VisitDurationMinutes = x.VisitDurationMinutes,

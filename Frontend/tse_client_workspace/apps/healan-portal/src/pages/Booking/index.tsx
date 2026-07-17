@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   bookingCancel,
@@ -19,8 +19,19 @@ import { callClinicPhone } from '../../constants';
 
 type Step = 'phone' | 'otp' | 'book' | 'done';
 
-function toAsciiDigits(value: string): string {
-  return value
+function asArray<T>(value: unknown): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.result)) return obj.result as T[];
+  }
+  return [];
+}
+
+function toAsciiDigits(value: unknown): string {
+  return String(value ?? '')
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - '۰'.charCodeAt(0)))
     .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - '٠'.charCodeAt(0)))
     .replace(/\D/g, '');
@@ -40,9 +51,12 @@ function apiErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
-function formatSlot(iso: string) {
+function formatSlot(iso: unknown) {
+  if (iso == null || iso === '') return '—';
   try {
-    return new Date(iso).toLocaleString('fa-IR', {
+    const d = new Date(String(iso));
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return d.toLocaleString('fa-IR', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -51,7 +65,18 @@ function formatSlot(iso: string) {
       minute: '2-digit',
     });
   } catch {
-    return iso;
+    return String(iso);
+  }
+}
+
+function formatSlotTime(iso: unknown) {
+  if (iso == null || iso === '') return '—';
+  try {
+    const d = new Date(String(iso));
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return String(iso);
   }
 }
 
@@ -62,6 +87,45 @@ function stepClass(current: Step, target: Step): string {
   if (ti < ci) return 'portal-booking__step is-done';
   if (ti === ci) return 'portal-booking__step is-active';
   return 'portal-booking__step';
+}
+
+class BookingErrorBoundary extends Component<
+  { children: ReactNode; onReset?: () => void },
+  { hasError: boolean; message: string }
+> {
+  state = { hasError: false, message: '' };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message || 'خطای نمایش' };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Booking page crash', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="portal-booking__card">
+          <h3>مشکلی در نمایش مرحله رزرو پیش آمد</h3>
+          <p className="portal-booking__hint">{this.state.message || 'لطفاً دوباره تلاش کنید.'}</p>
+          <div className="portal-booking__actions">
+            <button
+              type="button"
+              className="portal-booking__btn portal-booking__btn--primary"
+              onClick={() => {
+                this.setState({ hasError: false, message: '' });
+                this.props.onReset?.();
+              }}
+            >
+              بازگشت به شروع
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export default function BookingPage() {
@@ -90,10 +154,12 @@ export default function BookingPage() {
   useEffect(() => {
     Promise.all([bookingDoctors(), bookingServices()])
       .then(([d, s]) => {
-        setDoctors(d ?? []);
-        setServices(s ?? []);
-        if ((d ?? []).length === 1) {
-          setForm((prev) => ({ ...prev, doctorId: d[0].doctorId }));
+        const docs = asArray<PortalBookingDoctor>(d);
+        const svcs = asArray<PortalBookingService>(s);
+        setDoctors(docs);
+        setServices(svcs);
+        if (docs.length === 1) {
+          setForm((prev) => ({ ...prev, doctorId: Number(docs[0].doctorId) || 0 }));
         }
       })
       .catch(() => setError('بارگذاری اطلاعات نوبت‌دهی ناموفق بود.'));
@@ -101,9 +167,17 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (step !== 'book') return;
+    let cancelled = false;
     void bookingOpenSlots({ doctorId: form.doctorId || undefined })
-      .then((list) => setSlots(Array.isArray(list) ? list : []))
-      .catch(() => setSlots([]));
+      .then((list) => {
+        if (!cancelled) setSlots(asArray<PortalOpenSlot>(list));
+      })
+      .catch(() => {
+        if (!cancelled) setSlots([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [step, form.doctorId]);
 
   const groupedSlots = useMemo(() => {
@@ -117,6 +191,16 @@ export default function BookingPage() {
     }
     return [...map.entries()];
   }, [slots]);
+
+  const resetToPhone = () => {
+    setStep('phone');
+    setError('');
+    setOtpCode('');
+    setBookingToken('');
+    setMyBookings([]);
+    setSlots([]);
+    setRescheduleBookingId(0);
+  };
 
   const sendOtp = async () => {
     setError('');
@@ -145,38 +229,36 @@ export default function BookingPage() {
       const code = toAsciiDigits(otpCode);
       if (code.length < 4) throw new Error('کد تأیید را کامل وارد کنید.');
       const res = await bookingOtpVerify({ phoneNumber: phone, code });
-      if (!res?.bookingToken) throw new Error('تأیید انجام نشد. دوباره تلاش کنید.');
+      const token = String((res as { bookingToken?: string })?.bookingToken ?? '');
+      if (!token) throw new Error('تأیید انجام نشد. دوباره تلاش کنید.');
 
-      const verifiedPhone = toAsciiDigits(res.phoneNumber || phone);
-      setBookingToken(res.bookingToken);
-      setForm((prev) => ({ ...prev, phoneNumber: verifiedPhone }));
+      const verifiedPhone = toAsciiDigits((res as { phoneNumber?: string })?.phoneNumber || phone);
+      const patient = (res as { patient?: Record<string, unknown> })?.patient;
 
-      const patient = res.patient;
-      if (patient?.found) {
-        setPatientKnown(true);
-        setForm((prev) => ({
-          ...prev,
-          firstName: patient.firstName || prev.firstName,
-          lastName: patient.lastName || prev.lastName,
-          nationalCode: toAsciiDigits(patient.nationalCode || '') || prev.nationalCode,
-          phoneNumber: toAsciiDigits(patient.phoneNumber || '') || verifiedPhone,
-        }));
-      } else {
-        setPatientKnown(false);
-      }
+      setBookingToken(token);
+      setForm((prev) => {
+        const next = { ...prev, phoneNumber: verifiedPhone };
+        if (patient && (patient.found === true || patient.Found === true)) {
+          next.firstName = String(patient.firstName ?? patient.FirstName ?? prev.firstName);
+          next.lastName = String(patient.lastName ?? patient.LastName ?? prev.lastName);
+          next.nationalCode =
+            toAsciiDigits(patient.nationalCode ?? patient.NationalCode ?? '') || prev.nationalCode;
+          next.phoneNumber =
+            toAsciiDigits(patient.phoneNumber ?? patient.PhoneNumber ?? '') || verifiedPhone;
+        }
+        return next;
+      });
+      setPatientKnown(!!(patient && (patient.found === true || patient.Found === true)));
 
-      // Don't block the booking step if "my list" fails.
-      try {
-        const mine = await bookingMyList(verifiedPhone);
-        setMyBookings(Array.isArray(mine) ? mine : []);
-      } catch {
-        setMyBookings([]);
-      }
-
+      // Enter book step immediately so UI never depends on secondary APIs.
       setStep('book');
+      setBusy(false);
+
+      void bookingMyList(verifiedPhone)
+        .then((mine) => setMyBookings(asArray<PortalBookingItem>(mine)))
+        .catch(() => setMyBookings([]));
     } catch (e: unknown) {
       setError(apiErrorMessage(e, 'کد تأیید نادرست است'));
-    } finally {
       setBusy(false);
     }
   };
@@ -236,7 +318,8 @@ export default function BookingPage() {
         nationalCode: form.nationalCode,
         phoneNumber: form.phoneNumber,
       });
-      setMyBookings(await bookingMyList(form.phoneNumber));
+      const mine = await bookingMyList(form.phoneNumber);
+      setMyBookings(asArray<PortalBookingItem>(mine));
     } catch (e: unknown) {
       setError(apiErrorMessage(e, 'لغو ناموفق بود'));
     } finally {
@@ -257,10 +340,11 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v8-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v9-booking</span>
           <h1 className="portal-booking__title">رزرو آنلاین نوبت قلب</h1>
           <p className="portal-booking__lead">
-            فقط با شماره موبایل وارد شوید، کد پیامک را تأیید کنید، سپس زمان مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
+            فقط با شماره موبایل وارد شوید، کد پیامک را تأیید کنید، سپس زمان مناسب را انتخاب کنید. پرداخت هنگام مراجعه به
+            مطب انجام می‌شود.
           </p>
         </header>
 
@@ -273,241 +357,252 @@ export default function BookingPage() {
 
         {error && <div className="portal-booking__error">{error}</div>}
 
-        {step === 'phone' && (
-          <div className="portal-booking__card">
-            <label className="portal-booking__label" htmlFor="booking-phone">
-              شماره موبایل
-            </label>
-            <input
-              id="booking-phone"
-              className="portal-booking__input"
-              inputMode="numeric"
-              autoComplete="tel"
-              value={form.phoneNumber}
-              onChange={(e) => setForm({ ...form, phoneNumber: toAsciiDigits(e.target.value).slice(0, 11) })}
-              placeholder="09123456789"
-            />
-            <p className="portal-booking__hint">کد تأیید فقط به همین شماره پیامک می‌شود.</p>
-            <div className="portal-booking__actions">
-              <button
-                type="button"
-                className="portal-booking__btn portal-booking__btn--primary"
-                disabled={busy}
-                onClick={() => void sendOtp()}
-              >
-                {busy ? 'در حال ارسال…' : 'دریافت کد تأیید'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'otp' && (
-          <div className="portal-booking__card">
-            <p className="portal-booking__hint" style={{ marginTop: 0, marginBottom: '0.85rem' }}>
-              کد پیامک‌شده به <strong>{form.phoneNumber}</strong> را وارد کنید.
-            </p>
-            <label className="portal-booking__label" htmlFor="booking-otp">
-              کد تأیید
-            </label>
-            <input
-              id="booking-otp"
-              className="portal-booking__input portal-booking__input--otp"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              value={otpCode}
-              onChange={(e) => setOtpCode(toAsciiDigits(e.target.value).slice(0, 6))}
-              placeholder="------"
-            />
-            <div className="portal-booking__actions">
-              <button
-                type="button"
-                className="portal-booking__btn portal-booking__btn--green"
-                disabled={busy}
-                onClick={() => void verify()}
-              >
-                {busy ? 'در حال بررسی…' : 'تأیید'}
-              </button>
-              <button
-                type="button"
-                className="portal-booking__btn portal-booking__btn--outline"
-                disabled={busy}
-                onClick={() => void sendOtp()}
-              >
-                ارسال مجدد
-              </button>
-              <button
-                type="button"
-                className="portal-booking__btn portal-booking__btn--ghost"
-                disabled={busy}
-                onClick={() => setStep('phone')}
-              >
-                تغییر شماره
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'book' && (
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {myBookings.length > 0 && (
-              <div className="portal-booking__card">
-                <h3>رزروهای فعال شما</h3>
-                {myBookings.map((b) => (
-                  <div key={b.appointmentBookingId} className="portal-booking__mine-item">
-                    <div>{formatSlot(b.startAt)}</div>
-                    <div style={{ color: 'var(--p-muted)', fontSize: '0.88rem' }}>{b.doctorName}</div>
-                    <div className="portal-booking__actions" style={{ marginTop: 8 }}>
-                      <button
-                        type="button"
-                        className="portal-booking__btn portal-booking__btn--outline"
-                        onClick={() => {
-                          setRescheduleBookingId(b.appointmentBookingId);
-                          setForm((prev) => ({ ...prev, appointmentSlotId: 0, doctorId: b.doctorId }));
-                        }}
-                      >
-                        جابجایی
-                      </button>
-                      <button
-                        type="button"
-                        className="portal-booking__btn portal-booking__btn--ghost"
-                        onClick={() => void cancelMine(b.appointmentBookingId)}
-                      >
-                        لغو
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
+        <BookingErrorBoundary onReset={resetToPhone}>
+          {step === 'phone' && (
             <div className="portal-booking__card">
-              <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'اطلاعات بیمار و نوبت'}</h3>
-              {!rescheduleBookingId && (
-                <>
-                  {patientKnown && (
-                    <div className="portal-booking__success-banner">اطلاعات شما از پرونده قبلی پر شد.</div>
-                  )}
-                  <div className="portal-booking__grid-2">
-                    <div>
-                      <label className="portal-booking__label">نام</label>
-                      <input
-                        className="portal-booking__input"
-                        value={form.firstName}
-                        onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="portal-booking__label">نام خانوادگی</label>
-                      <input
-                        className="portal-booking__input"
-                        value={form.lastName}
-                        onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <label className="portal-booking__label">کد ملی</label>
-                    <input
-                      className="portal-booking__input"
-                      inputMode="numeric"
-                      value={form.nationalCode}
-                      onChange={(e) => setForm({ ...form, nationalCode: toAsciiDigits(e.target.value).slice(0, 10) })}
-                      placeholder="0012345678"
-                    />
-                  </div>
-                  {services.length > 0 && (
-                    <div style={{ marginTop: 12 }}>
-                      <label className="portal-booking__label">عنوان خدمت درخواستی (اختیاری)</label>
-                      <div className="portal-booking__services">
-                        {services.map((s) => (
-                          <label key={s.serviceTypeId} className="portal-booking__chip">
-                            <input
-                              type="checkbox"
-                              checked={form.serviceTypeIds.includes(s.serviceTypeId)}
-                              onChange={() => toggleService(s.serviceTypeId)}
-                            />
-                            {s.title}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {doctors.length > 1 && (
-                <div style={{ marginTop: 12 }}>
-                  <label className="portal-booking__label">پزشک</label>
-                  <select
-                    className="portal-booking__input"
-                    value={form.doctorId}
-                    onChange={(e) => setForm({ ...form, doctorId: Number(e.target.value), appointmentSlotId: 0 })}
-                  >
-                    <option value={0}>همه</option>
-                    {doctors.map((d) => (
-                      <option key={d.doctorId} value={d.doctorId}>
-                        {d.firstName} {d.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div style={{ marginTop: 16 }}>
-                <label className="portal-booking__label">زمان‌های آزاد</label>
-                {groupedSlots.length === 0 ? (
-                  <p className="portal-booking__hint">نوبت آزادی در روزهای آینده ثبت نشده است.</p>
-                ) : (
-                  groupedSlots.map(([day, daySlots]) => (
-                    <div key={day} className="portal-booking__slots-day">
-                      <strong>{formatSlot(daySlots[0].startAt).split('،')[0]}</strong>
-                      <div className="portal-booking__slot-grid">
-                        {daySlots.map((slot) => (
-                          <button
-                            key={slot.appointmentSlotId}
-                            type="button"
-                            className={`portal-booking__slot${
-                              form.appointmentSlotId === slot.appointmentSlotId ? ' is-selected' : ''
-                            }`}
-                            onClick={() => setForm({ ...form, appointmentSlotId: slot.appointmentSlotId })}
-                          >
-                            {new Date(slot.startAt).toLocaleTimeString('fa-IR', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                )}
+              <label className="portal-booking__label" htmlFor="booking-phone">
+                شماره موبایل
+              </label>
+              <input
+                id="booking-phone"
+                className="portal-booking__input"
+                inputMode="numeric"
+                autoComplete="tel"
+                value={form.phoneNumber}
+                onChange={(e) => setForm({ ...form, phoneNumber: toAsciiDigits(e.target.value).slice(0, 11) })}
+                placeholder="09123456789"
+              />
+              <p className="portal-booking__hint">کد تأیید فقط به همین شماره پیامک می‌شود.</p>
+              <div className="portal-booking__actions">
+                <button
+                  type="button"
+                  className="portal-booking__btn portal-booking__btn--primary"
+                  disabled={busy}
+                  onClick={() => void sendOtp()}
+                >
+                  {busy ? 'در حال ارسال…' : 'دریافت کد تأیید'}
+                </button>
               </div>
+            </div>
+          )}
 
+          {step === 'otp' && (
+            <div className="portal-booking__card">
+              <p className="portal-booking__hint" style={{ marginTop: 0, marginBottom: '0.85rem' }}>
+                کد پیامک‌شده به <strong>{form.phoneNumber}</strong> را وارد کنید.
+              </p>
+              <label className="portal-booking__label" htmlFor="booking-otp">
+                کد تأیید
+              </label>
+              <input
+                id="booking-otp"
+                className="portal-booking__input portal-booking__input--otp"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={otpCode}
+                onChange={(e) => setOtpCode(toAsciiDigits(e.target.value).slice(0, 6))}
+                placeholder="------"
+              />
               <div className="portal-booking__actions">
                 <button
                   type="button"
                   className="portal-booking__btn portal-booking__btn--green"
                   disabled={busy}
-                  onClick={() => void submitBook()}
+                  onClick={() => void verify()}
                 >
-                  {busy ? '…' : rescheduleBookingId ? 'ثبت جابجایی' : 'ثبت رزرو'}
+                  {busy ? 'در حال بررسی…' : 'تأیید'}
+                </button>
+                <button
+                  type="button"
+                  className="portal-booking__btn portal-booking__btn--outline"
+                  disabled={busy}
+                  onClick={() => void sendOtp()}
+                >
+                  ارسال مجدد
+                </button>
+                <button
+                  type="button"
+                  className="portal-booking__btn portal-booking__btn--ghost"
+                  disabled={busy}
+                  onClick={() => setStep('phone')}
+                >
+                  تغییر شماره
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 'done' && (
-          <div className="portal-booking__card portal-booking__done">
-            <h2>رزرو شما ثبت شد</h2>
-            <p className="portal-booking__hint">لطفاً در موعد مقرر در مطب حاضر شوید. پرداخت در محل انجام می‌شود.</p>
-            <div className="portal-booking__actions" style={{ justifyContent: 'center' }}>
-              <Link to="/" className="portal-booking__btn portal-booking__btn--primary">
-                بازگشت به صفحه اصلی
-              </Link>
+          {step === 'book' && (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {myBookings.length > 0 && (
+                <div className="portal-booking__card">
+                  <h3>رزروهای فعال شما</h3>
+                  {myBookings.map((b, idx) => (
+                    <div key={b.appointmentBookingId || idx} className="portal-booking__mine-item">
+                      <div>{formatSlot(b.startAt)}</div>
+                      <div style={{ color: 'var(--p-muted)', fontSize: '0.88rem' }}>{b.doctorName || '—'}</div>
+                      <div className="portal-booking__actions" style={{ marginTop: 8 }}>
+                        <button
+                          type="button"
+                          className="portal-booking__btn portal-booking__btn--outline"
+                          onClick={() => {
+                            setRescheduleBookingId(Number(b.appointmentBookingId) || 0);
+                            setForm((prev) => ({
+                              ...prev,
+                              appointmentSlotId: 0,
+                              doctorId: Number(b.doctorId) || 0,
+                            }));
+                          }}
+                        >
+                          جابجایی
+                        </button>
+                        <button
+                          type="button"
+                          className="portal-booking__btn portal-booking__btn--ghost"
+                          onClick={() => void cancelMine(Number(b.appointmentBookingId))}
+                        >
+                          لغو
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="portal-booking__card">
+                <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'اطلاعات بیمار و نوبت'}</h3>
+                {!rescheduleBookingId && (
+                  <>
+                    {patientKnown && (
+                      <div className="portal-booking__success-banner">اطلاعات شما از پرونده قبلی پر شد.</div>
+                    )}
+                    <div className="portal-booking__grid-2">
+                      <div>
+                        <label className="portal-booking__label">نام</label>
+                        <input
+                          className="portal-booking__input"
+                          value={form.firstName}
+                          onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="portal-booking__label">نام خانوادگی</label>
+                        <input
+                          className="portal-booking__input"
+                          value={form.lastName}
+                          onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 12 }}>
+                      <label className="portal-booking__label">کد ملی</label>
+                      <input
+                        className="portal-booking__input"
+                        inputMode="numeric"
+                        value={form.nationalCode}
+                        onChange={(e) =>
+                          setForm({ ...form, nationalCode: toAsciiDigits(e.target.value).slice(0, 10) })
+                        }
+                        placeholder="0012345678"
+                      />
+                    </div>
+                    {services.length > 0 && (
+                      <div style={{ marginTop: 12 }}>
+                        <label className="portal-booking__label">عنوان خدمت درخواستی (اختیاری)</label>
+                        <div className="portal-booking__services">
+                          {services.map((s) => (
+                            <label key={s.serviceTypeId} className="portal-booking__chip">
+                              <input
+                                type="checkbox"
+                                checked={form.serviceTypeIds.includes(Number(s.serviceTypeId))}
+                                onChange={() => toggleService(Number(s.serviceTypeId))}
+                              />
+                              {s.title}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {doctors.length > 1 && (
+                  <div style={{ marginTop: 12 }}>
+                    <label className="portal-booking__label">پزشک</label>
+                    <select
+                      className="portal-booking__input"
+                      value={form.doctorId}
+                      onChange={(e) =>
+                        setForm({ ...form, doctorId: Number(e.target.value), appointmentSlotId: 0 })
+                      }
+                    >
+                      <option value={0}>همه</option>
+                      {doctors.map((d) => (
+                        <option key={d.doctorId} value={d.doctorId}>
+                          {d.firstName} {d.lastName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 16 }}>
+                  <label className="portal-booking__label">زمان‌های آزاد</label>
+                  {groupedSlots.length === 0 ? (
+                    <p className="portal-booking__hint">نوبت آزادی در روزهای آینده ثبت نشده است.</p>
+                  ) : (
+                    groupedSlots.map(([day, daySlots]) => (
+                      <div key={day} className="portal-booking__slots-day">
+                        <strong>{formatSlot(daySlots[0]?.startAt).split('،')[0]}</strong>
+                        <div className="portal-booking__slot-grid">
+                          {daySlots.map((slot) => (
+                            <button
+                              key={slot.appointmentSlotId}
+                              type="button"
+                              className={`portal-booking__slot${
+                                form.appointmentSlotId === slot.appointmentSlotId ? ' is-selected' : ''
+                              }`}
+                              onClick={() =>
+                                setForm({ ...form, appointmentSlotId: Number(slot.appointmentSlotId) || 0 })
+                              }
+                            >
+                              {formatSlotTime(slot.startAt)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="portal-booking__actions">
+                  <button
+                    type="button"
+                    className="portal-booking__btn portal-booking__btn--green"
+                    disabled={busy}
+                    onClick={() => void submitBook()}
+                  >
+                    {busy ? '…' : rescheduleBookingId ? 'ثبت جابجایی' : 'ثبت رزرو'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {step === 'done' && (
+            <div className="portal-booking__card portal-booking__done">
+              <h2>رزرو شما ثبت شد</h2>
+              <p className="portal-booking__hint">
+                لطفاً در موعد مقرر در مطب حاضر شوید. پرداخت در محل انجام می‌شود.
+              </p>
+              <div className="portal-booking__actions" style={{ justifyContent: 'center' }}>
+                <Link to="/" className="portal-booking__btn portal-booking__btn--primary">
+                  بازگشت به صفحه اصلی
+                </Link>
+              </div>
+            </div>
+          )}
+        </BookingErrorBoundary>
       </div>
     </div>
   );

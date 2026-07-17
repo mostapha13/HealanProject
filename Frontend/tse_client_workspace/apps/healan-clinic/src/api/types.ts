@@ -482,7 +482,7 @@ export interface ScheduleTemplateItem {
   doctorScheduleTemplateId: number;
   doctorId: number;
   doctorName?: string;
-  dayOfWeek: number;
+  dayOfWeek: number | string;
   startTime: string;
   endTime: string;
   visitDurationMinutes: number;

@@ -6,15 +6,48 @@ import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
 
-const DAY_LABELS: Record<number, string> = {
-  0: 'یکشنبه',
-  1: 'دوشنبه',
-  2: 'سه‌شنبه',
-  3: 'چهارشنبه',
-  4: 'پنجشنبه',
-  5: 'جمعه',
-  6: 'شنبه',
+const DAY_LABELS: Record<string, string> = {
+  '0': 'یکشنبه',
+  '1': 'دوشنبه',
+  '2': 'سه‌شنبه',
+  '3': 'چهارشنبه',
+  '4': 'پنجشنبه',
+  '5': 'جمعه',
+  '6': 'شنبه',
+  Sunday: 'یکشنبه',
+  Monday: 'دوشنبه',
+  Tuesday: 'سه‌شنبه',
+  Wednesday: 'چهارشنبه',
+  Thursday: 'پنجشنبه',
+  Friday: 'جمعه',
+  Saturday: 'شنبه',
 };
+
+/** ترتیب هفته ایرانی: شنبه → جمعه */
+const WEEK_DAYS = [6, 0, 1, 2, 3, 4, 5];
+
+function resolveDayOfWeek(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const raw = String(value ?? '').trim();
+  if (raw in DAY_LABELS && /^\d+$/.test(raw)) return Number(raw);
+  const named: Record<string, number> = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+  if (raw in named) return named[raw];
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 6;
+}
+
+function dayTitle(value: unknown): string {
+  const n = resolveDayOfWeek(value);
+  return DAY_LABELS[String(n)] ?? String(value ?? '');
+}
 
 const HOUR_OPTIONS = Array.from({ length: 25 }, (_, h) => h); // 0..24
 
@@ -132,7 +165,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   const editTemplate = (t: ScheduleTemplateItem) => {
     setEditingId(t.doctorScheduleTemplateId);
     setForm({
-      dayOfWeek: t.dayOfWeek,
+      dayOfWeek: resolveDayOfWeek(t.dayOfWeek),
       startHour: timeToHour(t.startTime),
       endHour: timeToHour(t.endTime),
       visitDurationMinutes: t.visitDurationMinutes || 30,
@@ -227,9 +260,9 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 value={form.dayOfWeek}
                 onChange={(e) => setForm({ ...form, dayOfWeek: Number(e.target.value) })}
               >
-                {Object.entries(DAY_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
+                {WEEK_DAYS.map((day) => (
+                  <option key={day} value={day}>
+                    {dayTitle(day)}
                   </option>
                 ))}
               </select>
@@ -298,17 +331,16 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
             روز مبدأ همان روز انتخاب‌شده در فرم بالاست. روزهای مقصد را تیک بزنید.
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-            {Object.entries(DAY_LABELS).map(([k, v]) => {
-              const day = Number(k);
+            {WEEK_DAYS.map((day) => {
               if (day === form.dayOfWeek) return null;
               return (
-                <label key={k} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <label key={day} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
                   <input
                     type="checkbox"
                     checked={copyTargets.includes(day)}
                     onChange={() => toggleCopyDay(day)}
                   />
-                  {v}
+                  {dayTitle(day)}
                 </label>
               );
             })}
@@ -370,9 +402,12 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 </tr>
               </thead>
               <tbody>
-                {templates.map((t) => (
+                {templates
+                  .slice()
+                  .sort((a, b) => WEEK_DAYS.indexOf(resolveDayOfWeek(a.dayOfWeek)) - WEEK_DAYS.indexOf(resolveDayOfWeek(b.dayOfWeek)))
+                  .map((t) => (
                   <tr key={t.doctorScheduleTemplateId}>
-                    <td>{DAY_LABELS[t.dayOfWeek] ?? t.dayOfWeek}</td>
+                    <td>{dayTitle(t.dayOfWeek)}</td>
                     <td>{t.startTime}</td>
                     <td>{t.endTime}</td>
                     <td>{t.visitDurationMinutes} دقیقه</td>

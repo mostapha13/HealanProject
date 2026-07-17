@@ -7,7 +7,7 @@ public class ScheduleTemplateDto
     public long DoctorScheduleTemplateId { get; set; }
     public long DoctorId { get; set; }
     public string? DoctorName { get; set; }
-    public DayOfWeek DayOfWeek { get; set; }
+    public int DayOfWeek { get; set; }
     public string StartTime { get; set; } = "17:00";
     public string EndTime { get; set; } = "21:00";
     public int VisitDurationMinutes { get; set; } = 30;

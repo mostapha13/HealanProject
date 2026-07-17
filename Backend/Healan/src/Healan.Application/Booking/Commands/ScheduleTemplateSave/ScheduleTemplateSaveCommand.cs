@@ -73,7 +73,7 @@ public class ScheduleTemplateSaveCommandHandler : IRequestHandler<ScheduleTempla
             DoctorScheduleTemplateId = entity.DoctorScheduleTemplateId,
             DoctorId = entity.DoctorId,
             DoctorName = $"{doctor.FirstName} {doctor.LastName}".Trim(),
-            DayOfWeek = entity.DayOfWeek,
+            DayOfWeek = (int)entity.DayOfWeek,
             StartTime = BookingTimeHelper.FormatTime(entity.StartTime),
             EndTime = BookingTimeHelper.FormatTime(entity.EndTime),
             VisitDurationMinutes = entity.VisitDurationMinutes,
