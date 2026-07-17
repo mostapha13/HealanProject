@@ -247,7 +247,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v7-booking</span>
           <h1 className="portal-booking__title">رزرو آنلاین نوبت قلب</h1>
           <p className="portal-booking__lead">
             فقط با شماره موبایل وارد شوید، کد پیامک را تأیید کنید، سپس زمان مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
