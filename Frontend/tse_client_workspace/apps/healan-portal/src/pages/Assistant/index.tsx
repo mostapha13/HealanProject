@@ -30,6 +30,45 @@ const WELCOME =
 const GUEST_COOKIE = 'healan_rag_guest';
 const OTP_TTL_SECONDS = 120;
 
+const BTN_PRIMARY: React.CSSProperties = {
+  backgroundColor: '#ef394e',
+  backgroundImage: 'none',
+  color: '#ffffff',
+  border: 'none',
+  borderRadius: 12,
+  padding: '0.65rem 1.15rem',
+  fontWeight: 700,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  boxShadow: '0 8px 18px rgba(239, 57, 78, 0.28)',
+};
+
+const BTN_GHOST: React.CSSProperties = {
+  backgroundColor: '#e8ebf2',
+  backgroundImage: 'none',
+  color: '#23254e',
+  border: 'none',
+  borderRadius: 12,
+  padding: '0.65rem 1.15rem',
+  fontWeight: 700,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+};
+
+const BTN_LOGIN_PILL: React.CSSProperties = {
+  backgroundColor: '#ef394e',
+  backgroundImage: 'none',
+  color: '#ffffff',
+  border: 'none',
+  borderRadius: 999,
+  padding: '0.45rem 1rem',
+  fontWeight: 700,
+  fontSize: '0.88rem',
+  cursor: 'pointer',
+  boxShadow: '0 6px 14px rgba(239, 57, 78, 0.25)',
+  whiteSpace: 'nowrap',
+};
+
 function createSessionId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
@@ -90,17 +129,36 @@ export default function AssistantPage() {
   const [authError, setAuthError] = useState('');
   const sessionIdRef = useRef(createSessionId());
   const guestKeyRef = useRef(ensureGuestKey());
-  const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const streamTimerRef = useRef<number | null>(null);
   const streamCancelRef = useRef(false);
-  const skipInitialScrollRef = useRef(true);
   const otpExpireAtRef = useRef<number>(0);
+  const hasScrolledRef = useRef(false);
 
   const busy = loading || streaming;
-  const showSuggestions = messages.length <= 1 && !busy;
+  const emptyChat = messages.length <= 1 && !busy;
+  const showSuggestions = emptyChat;
   const blocked = !!quota?.requiresLogin && !quota.isAuthenticated;
+
+  const focusInput = () => {
+    window.requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el || el.disabled) return;
+      el.focus({ preventScroll: true });
+    });
+  };
+
+  const scrollMessagesToBottom = (smooth = true) => {
+    const el = messagesRef.current;
+    if (!el) return;
+    // فقط داخل باکس پیام‌ها اسکرول کن — scrollIntoView کل صفحه را جابه‌جا می‌کند
+    if (smooth && !prefersReducedMotion()) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+  };
 
   const refreshQuota = async () => {
     try {
@@ -114,16 +172,39 @@ export default function AssistantPage() {
 
   useEffect(() => {
     void refreshQuota();
+    focusInput();
+  }, []);
+
+  // قفل اسکرول صفحه تا هدر چت از viewport بیرون نرود
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyHeight = body.style.height;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    body.style.height = '100%';
+    window.scrollTo(0, 0);
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      body.style.height = prevBodyHeight;
+    };
   }, []);
 
   useEffect(() => {
-    if (skipInitialScrollRef.current) {
-      skipInitialScrollRef.current = false;
+    if (emptyChat) {
       if (messagesRef.current) messagesRef.current.scrollTop = 0;
       return;
     }
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages, loading, streaming]);
+    if (!hasScrolledRef.current) {
+      hasScrolledRef.current = true;
+      scrollMessagesToBottom(false);
+      return;
+    }
+    scrollMessagesToBottom(true);
+  }, [messages, loading, streaming, emptyChat]);
 
   useEffect(() => {
     return () => {
@@ -224,6 +305,7 @@ export default function AssistantPage() {
     setInput('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setLoading(true);
+    focusInput();
 
     try {
       const res = await fetchRagAnswer(question, sessionIdRef.current, guestKeyRef.current);
@@ -279,6 +361,8 @@ export default function AssistantPage() {
         response?.data?.title ||
         (response?.status ? `خطای سرور (${response.status})` : 'خطا در ارتباط با سرور');
       await streamAssistantReply(`${detail} لطفاً دوباره تلاش کنید یا با مطب تماس بگیرید.`);
+    } finally {
+      focusInput();
     }
   };
 
@@ -286,14 +370,8 @@ export default function AssistantPage() {
     setAuthError('');
     setAuthBusy(true);
     try {
-      const res = (await requestRagOtp(phone.trim())) as {
-        sent?: boolean;
-        expiresInSeconds?: number;
-        reused?: boolean;
-        phoneMasked?: string;
-      };
+      const res = await requestRagOtp(phone.trim());
       startOtpTimer(res.expiresInSeconds ?? OTP_TTL_SECONDS);
-      // اگر کد قبلی هنوز معتبر است، SMS جدید نمی‌رود؛ همان کد را وارد کنید
     } catch (err: unknown) {
       const response = err as { data?: { detail?: string; message?: string; title?: string } };
       setAuthError(response?.data?.detail || response?.data?.message || response?.data?.title || 'ارسال کد ناموفق بود');
@@ -313,7 +391,6 @@ export default function AssistantPage() {
       setOtpSecondsLeft(0);
       otpExpireAtRef.current = 0;
       await refreshQuota();
-      // تاریخچه چت حفظ می‌شود؛ فقط پیام موفقیت اضافه می‌شود
       setMessages((prev) => [
         ...prev,
         {
@@ -322,6 +399,7 @@ export default function AssistantPage() {
           text: 'ورود موفق بود. تاریخچه گفتگو حفظ شد و می‌توانید سوالات بیشتری بپرسید.',
         },
       ]);
+      focusInput();
     } catch (err: unknown) {
       const response = err as { data?: { detail?: string; message?: string; title?: string } };
       setAuthError(response?.data?.detail || response?.data?.message || response?.data?.title || 'تأیید کد ناموفق بود');
@@ -358,7 +436,7 @@ export default function AssistantPage() {
               />
             </svg>
           </div>
-          <div>
+          <div className="portal-assistant__brand-text">
             <h1>دستیار هوشمند مطب</h1>
             <p className="portal-assistant__status">
               <span className="portal-assistant__status-dot" />
@@ -371,7 +449,7 @@ export default function AssistantPage() {
 
         <div className="portal-assistant__quota">
           {quota && (
-            <span>
+            <span className="portal-assistant__quota-count">
               امروز: {quota.usedCount}/{quota.dailyLimit}
             </span>
           )}
@@ -380,14 +458,19 @@ export default function AssistantPage() {
               خروج
             </button>
           ) : (
-            <button type="button" className="portal-assistant__linkbtn" onClick={openLogin}>
+            <button type="button" className="portal-assistant__login-btn" style={BTN_LOGIN_PILL} onClick={openLogin}>
               ورود
             </button>
           )}
         </div>
       </header>
 
-      <div className="portal-assistant__messages" ref={messagesRef} role="log" aria-live="polite">
+      <div
+        className={`portal-assistant__messages${emptyChat ? ' is-empty' : ''}`}
+        ref={messagesRef}
+        role="log"
+        aria-live="polite"
+      >
         <div className="portal-assistant__thread">
           {messages.map((msg) => (
             <div
@@ -448,8 +531,6 @@ export default function AssistantPage() {
               </div>
             </div>
           )}
-
-          <div ref={bottomRef} />
         </div>
       </div>
 
@@ -460,7 +541,12 @@ export default function AssistantPage() {
               سقف سوالات رایگان امروز تمام شد.
               <strong> در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.</strong>
             </div>
-            <button type="button" className="portal-assistant__limit-login" onClick={openLogin}>
+            <button
+              type="button"
+              className="portal-assistant__limit-login"
+              style={BTN_LOGIN_PILL}
+              onClick={openLogin}
+            >
               ورود / لاگین
             </button>
           </div>
@@ -518,6 +604,7 @@ export default function AssistantPage() {
                 placeholder="09123456789"
                 inputMode="tel"
                 disabled={authBusy}
+                autoFocus={!otpSent}
               />
             </label>
 
@@ -531,6 +618,7 @@ export default function AssistantPage() {
                     placeholder="کد ۶ رقمی"
                     inputMode="numeric"
                     disabled={authBusy}
+                    autoFocus
                   />
                 </label>
                 <p className={`portal-assistant__otp-timer${otpSecondsLeft <= 0 ? ' is-expired' : ''}`}>
@@ -544,13 +632,18 @@ export default function AssistantPage() {
             {authError && <p className="portal-assistant__auth-error">{authError}</p>}
 
             <div className="portal-assistant__modal-actions">
-              <button type="button" className="portal-assistant__ghost" onClick={() => setLoginOpen(false)}>
+              <button type="button" className="portal-assistant__ghost" style={BTN_GHOST} onClick={() => setLoginOpen(false)}>
                 انصراف
               </button>
               {!otpSent || otpSecondsLeft <= 0 ? (
                 <button
                   type="button"
                   className="portal-assistant__primary"
+                  style={{
+                    ...BTN_PRIMARY,
+                    opacity: authBusy || !phone.trim() ? 0.55 : 1,
+                    cursor: authBusy || !phone.trim() ? 'not-allowed' : 'pointer',
+                  }}
                   disabled={authBusy || !phone.trim()}
                   onClick={() => void sendOtp()}
                 >
@@ -561,6 +654,7 @@ export default function AssistantPage() {
                   <button
                     type="button"
                     className="portal-assistant__ghost"
+                    style={BTN_GHOST}
                     disabled={authBusy}
                     onClick={() => void sendOtp()}
                   >
@@ -569,6 +663,11 @@ export default function AssistantPage() {
                   <button
                     type="button"
                     className="portal-assistant__primary"
+                    style={{
+                      ...BTN_PRIMARY,
+                      opacity: authBusy || !otpCode.trim() ? 0.55 : 1,
+                      cursor: authBusy || !otpCode.trim() ? 'not-allowed' : 'pointer',
+                    }}
                     disabled={authBusy || !otpCode.trim()}
                     onClick={() => void verifyOtp()}
                   >
