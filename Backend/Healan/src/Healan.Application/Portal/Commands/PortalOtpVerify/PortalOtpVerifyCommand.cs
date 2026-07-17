@@ -38,14 +38,15 @@ public class PortalOtpVerifyCommandHandler : IRequestHandler<PortalOtpVerifyComm
     public async Task<PortalAuthResultDto> Handle(PortalOtpVerifyCommand request, CancellationToken cancellationToken)
     {
         var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
-        var code = (request.Code ?? string.Empty).Trim();
+        var code = RagQuotaHelper.ToAsciiDigits(request.Code);
         if (phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             throw new BadRequestExceptions("شماره موبایل معتبر نیست");
         if (code.Length < 4)
             throw new BadRequestExceptions("کد تأیید نامعتبر است");
 
         var cacheKey = $"portal_otp_{phone}";
-        if (!_cache.TryGetValue(cacheKey, out string? expected) || !string.Equals(expected, code, StringComparison.Ordinal))
+        if (!_cache.TryGetValue(cacheKey, out string? expected)
+            || !string.Equals(RagQuotaHelper.ToAsciiDigits(expected), code, StringComparison.Ordinal))
             throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است");
 
         _cache.Remove(cacheKey);

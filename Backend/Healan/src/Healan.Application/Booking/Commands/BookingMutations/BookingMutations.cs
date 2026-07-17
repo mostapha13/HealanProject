@@ -29,8 +29,8 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
 
     public async Task<AppointmentBookingDto> Handle(BookingCreateCommand request, CancellationToken cancellationToken)
     {
-        var national = (request.NationalCode ?? string.Empty).Trim();
-        if (national.Length != 10 || !national.All(char.IsDigit))
+        var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
+        if (national.Length != 10)
             throw new BadRequestExceptions("کد ملی معتبر نیست.");
 
         var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
@@ -118,6 +118,7 @@ public class BookingCancelCommand : IRequest<object>
 {
     public long AppointmentBookingId { get; set; }
     public string? NationalCode { get; set; }
+    public string? PhoneNumber { get; set; }
     public bool ByStaff { get; set; }
 }
 
@@ -135,8 +136,11 @@ public class BookingCancelCommandHandler : IRequestHandler<BookingCancelCommand,
 
         if (!request.ByStaff)
         {
-            var national = (request.NationalCode ?? string.Empty).Trim();
-            if (!string.Equals(booking.NationalCode, national, StringComparison.Ordinal))
+            var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
+            var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
+            var phoneOk = phone.Length == 11 && string.Equals(booking.PhoneNumber, phone, StringComparison.Ordinal);
+            var nationalOk = national.Length == 10 && string.Equals(booking.NationalCode, national, StringComparison.Ordinal);
+            if (!phoneOk && !nationalOk)
                 throw new BadRequestExceptions("اجازه لغو این رزرو را ندارید.");
         }
 
@@ -159,6 +163,7 @@ public class BookingRescheduleCommand : IRequest<AppointmentBookingDto>
     public long AppointmentBookingId { get; set; }
     public long NewAppointmentSlotId { get; set; }
     public string? NationalCode { get; set; }
+    public string? PhoneNumber { get; set; }
     public bool ByStaff { get; set; }
 }
 
@@ -177,8 +182,11 @@ public class BookingRescheduleCommandHandler : IRequestHandler<BookingReschedule
 
         if (!request.ByStaff)
         {
-            var national = (request.NationalCode ?? string.Empty).Trim();
-            if (!string.Equals(booking.NationalCode, national, StringComparison.Ordinal))
+            var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
+            var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
+            var phoneOk = phone.Length == 11 && string.Equals(booking.PhoneNumber, phone, StringComparison.Ordinal);
+            var nationalOk = national.Length == 10 && string.Equals(booking.NationalCode, national, StringComparison.Ordinal);
+            if (!phoneOk && !nationalOk)
                 throw new BadRequestExceptions("اجازه جابجایی این رزرو را ندارید.");
         }
 

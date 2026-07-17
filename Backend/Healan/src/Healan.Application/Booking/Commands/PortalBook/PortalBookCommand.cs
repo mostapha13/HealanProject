@@ -31,7 +31,7 @@ public class PortalBookCommandHandler : IRequestHandler<PortalBookCommand, Appoi
 
     public Task<AppointmentBookingDto> Handle(PortalBookCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.NationalCode, request.PhoneNumber);
+        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
         return _mediator.Send(new BookingCreateCommand
         {
             AppointmentSlotId = request.AppointmentSlotId,
@@ -67,11 +67,12 @@ public class PortalCancelBookingCommandHandler : IRequestHandler<PortalCancelBoo
 
     public Task<object> Handle(PortalCancelBookingCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.NationalCode, request.PhoneNumber);
+        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
         return _mediator.Send(new BookingCancelCommand
         {
             AppointmentBookingId = request.AppointmentBookingId,
             NationalCode = request.NationalCode,
+            PhoneNumber = request.PhoneNumber,
             ByStaff = false,
         }, cancellationToken);
     }
@@ -99,12 +100,13 @@ public class PortalRescheduleBookingCommandHandler : IRequestHandler<PortalResch
 
     public Task<AppointmentBookingDto> Handle(PortalRescheduleBookingCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.NationalCode, request.PhoneNumber);
+        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
         return _mediator.Send(new BookingRescheduleCommand
         {
             AppointmentBookingId = request.AppointmentBookingId,
             NewAppointmentSlotId = request.NewAppointmentSlotId,
             NationalCode = request.NationalCode,
+            PhoneNumber = request.PhoneNumber,
             ByStaff = false,
         }, cancellationToken);
     }

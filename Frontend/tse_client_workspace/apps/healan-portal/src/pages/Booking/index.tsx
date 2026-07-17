@@ -4,7 +4,6 @@ import {
   bookingCancel,
   bookingCreate,
   bookingDoctors,
-  bookingLookupPatient,
   bookingMyList,
   bookingOpenSlots,
   bookingOtpRequest,
@@ -18,7 +17,26 @@ import {
 } from '../../api/portalApi';
 import { callClinicPhone } from '../../constants';
 
-type Step = 'identity' | 'otp' | 'book' | 'done';
+type Step = 'phone' | 'otp' | 'book' | 'done';
+
+function toAsciiDigits(value: string): string {
+  return value
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - '۰'.charCodeAt(0)))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - '٠'.charCodeAt(0)))
+    .replace(/\D/g, '');
+}
+
+function apiErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object') {
+    const data = err as { data?: { errors?: string[]; title?: string; message?: string }; statusText?: string };
+    const errors = data.data?.errors;
+    if (Array.isArray(errors) && errors[0]) return String(errors[0]);
+    if (data.data?.message) return String(data.data.message);
+    if (data.data?.title) return String(data.data.title);
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
 
 function formatSlot(iso: string) {
   try {
@@ -36,7 +54,7 @@ function formatSlot(iso: string) {
 }
 
 export default function BookingPage() {
-  const [step, setStep] = useState<Step>('identity');
+  const [step, setStep] = useState<Step>('phone');
   const [doctors, setDoctors] = useState<PortalBookingDoctor[]>([]);
   const [services, setServices] = useState<PortalBookingService[]>([]);
   const [slots, setSlots] = useState<PortalOpenSlot[]>([]);
@@ -45,6 +63,7 @@ export default function BookingPage() {
   const [busy, setBusy] = useState(false);
   const [bookingToken, setBookingToken] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [patientKnown, setPatientKnown] = useState(false);
   const [form, setForm] = useState({
     nationalCode: '',
     phoneNumber: '',
@@ -89,31 +108,20 @@ export default function BookingPage() {
     return [...map.entries()];
   }, [slots]);
 
-  const lookup = async () => {
+  const sendOtp = async () => {
     setError('');
     setBusy(true);
     try {
-      const national = form.nationalCode.trim();
-      if (national.length !== 10) throw new Error('کد ملی باید ۱۰ رقم باشد.');
-      const found = await bookingLookupPatient(national);
-      if (found.found) {
-        setForm((prev) => ({
-          ...prev,
-          firstName: found.firstName ?? prev.firstName,
-          lastName: found.lastName ?? prev.lastName,
-          phoneNumber: found.phoneNumber ?? prev.phoneNumber,
-        }));
+      const phone = toAsciiDigits(form.phoneNumber);
+      if (phone.length !== 11 || !phone.startsWith('09')) {
+        throw new Error('شماره موبایل معتبر نیست (مثال: 09123456789)');
       }
-      if (!form.phoneNumber && !found.phoneNumber) {
-        setError('شماره موبایل را وارد کنید.');
-        return;
-      }
-      const phone = (found.phoneNumber || form.phoneNumber).trim();
       setForm((prev) => ({ ...prev, phoneNumber: phone }));
       await bookingOtpRequest(phone);
+      setOtpCode('');
       setStep('otp');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'خطا در ارسال کد تأیید');
+      setError(apiErrorMessage(e, 'خطا در ارسال کد تأیید'));
     } finally {
       setBusy(false);
     }
@@ -123,17 +131,31 @@ export default function BookingPage() {
     setError('');
     setBusy(true);
     try {
-      const res = await bookingOtpVerify({
-        phoneNumber: form.phoneNumber,
-        code: otpCode,
-        nationalCode: form.nationalCode,
-      });
+      const phone = toAsciiDigits(form.phoneNumber);
+      const code = toAsciiDigits(otpCode);
+      const res = await bookingOtpVerify({ phoneNumber: phone, code });
       setBookingToken(res.bookingToken);
-      const mine = await bookingMyList(form.nationalCode, form.phoneNumber);
+      setForm((prev) => ({ ...prev, phoneNumber: res.phoneNumber || phone }));
+
+      const patient = res.patient;
+      if (patient?.found) {
+        setPatientKnown(true);
+        setForm((prev) => ({
+          ...prev,
+          firstName: patient.firstName || prev.firstName,
+          lastName: patient.lastName || prev.lastName,
+          nationalCode: toAsciiDigits(patient.nationalCode || '') || prev.nationalCode,
+          phoneNumber: toAsciiDigits(patient.phoneNumber || '') || prev.phoneNumber,
+        }));
+      } else {
+        setPatientKnown(false);
+      }
+
+      const mine = await bookingMyList(res.phoneNumber || phone);
       setMyBookings(mine ?? []);
       setStep('book');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'کد تأیید نادرست است');
+      setError(apiErrorMessage(e, 'کد تأیید نادرست است'));
     } finally {
       setBusy(false);
     }
@@ -152,7 +174,9 @@ export default function BookingPage() {
     setError('');
     setBusy(true);
     try {
+      const national = toAsciiDigits(form.nationalCode);
       if (!form.firstName.trim() || !form.lastName.trim()) throw new Error('نام و نام خانوادگی لازم است.');
+      if (national.length !== 10) throw new Error('کد ملی باید ۱۰ رقم باشد.');
       if (!form.appointmentSlotId) throw new Error('یک نوبت آزاد انتخاب کنید.');
 
       if (rescheduleBookingId > 0) {
@@ -160,14 +184,14 @@ export default function BookingPage() {
           bookingToken,
           appointmentBookingId: rescheduleBookingId,
           newAppointmentSlotId: form.appointmentSlotId,
-          nationalCode: form.nationalCode,
+          nationalCode: national,
           phoneNumber: form.phoneNumber,
         });
       } else {
         await bookingCreate({
           bookingToken,
           appointmentSlotId: form.appointmentSlotId,
-          nationalCode: form.nationalCode,
+          nationalCode: national,
           phoneNumber: form.phoneNumber,
           firstName: form.firstName,
           lastName: form.lastName,
@@ -177,7 +201,7 @@ export default function BookingPage() {
       }
       setStep('done');
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'ثبت رزرو ناموفق بود');
+      setError(apiErrorMessage(e, 'ثبت رزرو ناموفق بود'));
     } finally {
       setBusy(false);
     }
@@ -192,9 +216,9 @@ export default function BookingPage() {
         nationalCode: form.nationalCode,
         phoneNumber: form.phoneNumber,
       });
-      setMyBookings(await bookingMyList(form.nationalCode, form.phoneNumber));
+      setMyBookings(await bookingMyList(form.phoneNumber));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'لغو ناموفق بود');
+      setError(apiErrorMessage(e, 'لغو ناموفق بود'));
     } finally {
       setBusy(false);
     }
@@ -216,7 +240,7 @@ export default function BookingPage() {
           رزرو نوبت آنلاین
         </h1>
         <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-          فقط نوبت پزشکان قلب. پرداخت در مطب انجام می‌شود.
+          ابتدا موبایل را وارد کنید؛ کد تأیید پیامک می‌شود. پرداخت در مطب انجام می‌شود.
         </p>
 
         {error && (
@@ -225,24 +249,18 @@ export default function BookingPage() {
           </div>
         )}
 
-        {step === 'identity' && (
+        {step === 'phone' && (
           <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }}>
-            <label style={{ display: 'block', marginBottom: 6 }}>کد ملی</label>
+            <label style={{ display: 'block', marginBottom: 6 }}>شماره موبایل</label>
             <input
-              value={form.nationalCode}
-              onChange={(e) => setForm({ ...form, nationalCode: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-              style={{ width: '100%', padding: 10, marginBottom: 12, border: '1px solid #cbd5e1', borderRadius: 8 }}
-              placeholder="۰۰۱۲۳۴۵۶۷۸"
-            />
-            <label style={{ display: 'block', marginBottom: 6 }}>موبایل (اگر بیمار جدید هستید)</label>
-            <input
+              inputMode="numeric"
               value={form.phoneNumber}
-              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 11) })}
+              onChange={(e) => setForm({ ...form, phoneNumber: toAsciiDigits(e.target.value).slice(0, 11) })}
               style={{ width: '100%', padding: 10, marginBottom: 12, border: '1px solid #cbd5e1', borderRadius: 8 }}
-              placeholder="0912…"
+              placeholder="09123456789"
             />
-            <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void lookup()}>
-              {busy ? '…' : 'ادامه و دریافت کد تأیید'}
+            <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void sendOtp()}>
+              {busy ? '…' : 'دریافت کد تأیید'}
             </button>
           </div>
         )}
@@ -251,14 +269,23 @@ export default function BookingPage() {
           <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }}>
             <p style={{ marginBottom: 12 }}>کد پیامک‌شده به {form.phoneNumber} را وارد کنید.</p>
             <input
+              inputMode="numeric"
               value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) => setOtpCode(toAsciiDigits(e.target.value).slice(0, 6))}
               style={{ width: '100%', padding: 10, marginBottom: 12, border: '1px solid #cbd5e1', borderRadius: 8, letterSpacing: 4, fontSize: 20 }}
               placeholder="------"
             />
-            <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void verify()}>
-              تأیید
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void verify()}>
+                تأیید
+              </button>
+              <button type="button" className="p-btn p-btn--outline" disabled={busy} onClick={() => void sendOtp()}>
+                ارسال مجدد
+              </button>
+              <button type="button" className="p-btn p-btn--ghost" disabled={busy} onClick={() => setStep('phone')}>
+                تغییر شماره
+              </button>
+            </div>
           </div>
         )}
 
@@ -299,6 +326,9 @@ export default function BookingPage() {
               <h3 style={{ marginTop: 0 }}>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'اطلاعات بیمار و نوبت'}</h3>
               {!rescheduleBookingId && (
                 <>
+                  {patientKnown && (
+                    <p style={{ color: '#0f766e', marginTop: 0 }}>اطلاعات شما از پرونده قبلی پر شد.</p>
+                  )}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div>
                       <label>نام</label>
@@ -316,6 +346,16 @@ export default function BookingPage() {
                         style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
                       />
                     </div>
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <label>کد ملی</label>
+                    <input
+                      inputMode="numeric"
+                      value={form.nationalCode}
+                      onChange={(e) => setForm({ ...form, nationalCode: toAsciiDigits(e.target.value).slice(0, 10) })}
+                      style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
+                      placeholder="0012345678"
+                    />
                   </div>
                   <div style={{ marginTop: 12 }}>
                     <label>عنوان خدمت درخواستی (اختیاری)</label>

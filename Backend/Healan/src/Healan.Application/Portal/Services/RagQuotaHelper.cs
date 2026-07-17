@@ -41,9 +41,29 @@ public static class RagQuotaHelper
         return (limit, used, remaining, requiresLogin);
     }
 
+    public static string ToAsciiDigits(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        var buffer = new char[value.Length];
+        var n = 0;
+        foreach (var ch in value)
+        {
+            if (ch >= '0' && ch <= '9')
+                buffer[n++] = ch;
+            else if (ch >= '۰' && ch <= '۹') // Persian
+                buffer[n++] = (char)('0' + (ch - '۰'));
+            else if (ch >= '٠' && ch <= '٩') // Arabic-Indic
+                buffer[n++] = (char)('0' + (ch - '٠'));
+        }
+
+        return new string(buffer, 0, n);
+    }
+
     public static string MaskPhone(string phone)
     {
-        var digits = new string((phone ?? string.Empty).Where(char.IsDigit).ToArray());
+        var digits = ToAsciiDigits(phone);
         if (digits.Length < 7)
             return "***";
         return $"{digits[..4]}***{digits[^3..]}";
@@ -51,7 +71,7 @@ public static class RagQuotaHelper
 
     public static string NormalizePhone(string? phone)
     {
-        var digits = new string((phone ?? string.Empty).Where(char.IsDigit).ToArray());
+        var digits = ToAsciiDigits(phone);
         if (digits.StartsWith("98") && digits.Length == 12)
             digits = "0" + digits[2..];
         if (digits.Length == 10 && digits.StartsWith("9"))

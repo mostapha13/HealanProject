@@ -3,6 +3,7 @@ using Healan.Application.Common.Interfaces;
 using Healan.Application.Portal.Services;
 using Healan.Domain.Booking.Enums;
 using Healan.Domain.Doctors.Enums;
+using Healan.Domain.Patients.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -107,7 +108,8 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
 
 public class BookingLookupPatientQuery : IRequest<BookingLookupPatientDto>
 {
-    public string NationalCode { get; set; } = string.Empty;
+    public string? NationalCode { get; set; }
+    public string? PhoneNumber { get; set; }
 }
 
 public class BookingLookupPatientQueryHandler : IRequestHandler<BookingLookupPatientQuery, BookingLookupPatientDto>
@@ -117,19 +119,31 @@ public class BookingLookupPatientQueryHandler : IRequestHandler<BookingLookupPat
 
     public async Task<BookingLookupPatientDto> Handle(BookingLookupPatientQuery request, CancellationToken cancellationToken)
     {
-        var national = (request.NationalCode ?? string.Empty).Trim();
-        if (national.Length != 10)
-            throw new BadRequestExceptions("کد ملی معتبر نیست.");
+        var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
+        var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
 
-        var patient = await _db.Patients.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.NationalCode == national, cancellationToken);
+        Domain.Patients.Entities.Patient? patient = null;
+        if (phone.Length == 11 && phone.StartsWith("09", StringComparison.Ordinal))
+        {
+            patient = await _db.Patients.AsNoTracking()
+                .Where(x => x.PhoneNumber == phone)
+                .OrderByDescending(x => x.PatientId)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        if (patient is null && national.Length == 10)
+        {
+            patient = await _db.Patients.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.NationalCode == national, cancellationToken);
+        }
 
         if (patient is null)
         {
             return new BookingLookupPatientDto
             {
                 Found = false,
-                NationalCode = national,
+                PhoneNumber = phone.Length == 11 ? phone : null,
+                NationalCode = national.Length == 10 ? national : string.Empty,
             };
         }
 
@@ -147,8 +161,8 @@ public class BookingLookupPatientQueryHandler : IRequestHandler<BookingLookupPat
 
 public class PortalMyBookingsQuery : IRequest<List<AppointmentBookingDto>>
 {
-    public string NationalCode { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string? NationalCode { get; set; }
 }
 
 public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuery, List<AppointmentBookingDto>>
@@ -158,17 +172,20 @@ public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuer
 
     public async Task<List<AppointmentBookingDto>> Handle(PortalMyBookingsQuery request, CancellationToken cancellationToken)
     {
-        var national = (request.NationalCode ?? string.Empty).Trim();
         var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
-        if (national.Length != 10 || phone.Length != 11)
-            throw new BadRequestExceptions("کد ملی یا موبایل نامعتبر است.");
+        if (phone.Length != 11)
+            throw new BadRequestExceptions("شماره موبایل نامعتبر است.");
 
-        return await _db.AppointmentBookings.AsNoTracking()
-            .Where(x => x.NationalCode == national
-                        && x.PhoneNumber == phone
+        var q = _db.AppointmentBookings.AsNoTracking()
+            .Where(x => x.PhoneNumber == phone
                         && x.Status == AppointmentBookingStatus.Booked
-                        && x.Slot.StartAt > DateTime.Now)
-            .OrderBy(x => x.Slot.StartAt)
+                        && x.Slot.StartAt > DateTime.Now);
+
+        var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
+        if (national.Length == 10)
+            q = q.Where(x => x.NationalCode == national);
+
+        return await q.OrderBy(x => x.Slot.StartAt)
             .Select(x => new AppointmentBookingDto
             {
                 AppointmentBookingId = x.AppointmentBookingId,
@@ -201,7 +218,7 @@ public class BookingOtpRequestCommand : IRequest<object>
 
 public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequestCommand, object>
 {
-    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(90);
     private readonly IMemoryCache _cache;
     private readonly IPortalSmsSender _smsSender;
@@ -243,9 +260,6 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
 
         var code = Random.Shared.Next(100000, 999999).ToString();
         var expiresAt = DateTime.UtcNow.Add(OtpTtl);
-        _cache.Set(otpKey, code, OtpTtl);
-        _cache.Set(metaKey, new OtpMeta(expiresAt), OtpTtl);
-        _cache.Set(cooldownKey, true, ResendCooldown);
 
         var (ok, error) = await _smsSender.SendAsync(
             phone,
@@ -254,6 +268,10 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
 
         if (!ok)
             throw new BadRequestExceptions(error ?? "ارسال پیامک ناموفق بود.");
+
+        _cache.Set(otpKey, code, OtpTtl);
+        _cache.Set(metaKey, new OtpMeta(expiresAt), OtpTtl);
+        _cache.Set(cooldownKey, true, ResendCooldown);
 
         return new
         {
@@ -271,50 +289,60 @@ public class BookingOtpVerifyCommand : IRequest<object>
 {
     public string PhoneNumber { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
-    public string NationalCode { get; set; } = string.Empty;
 }
 
 public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, object>
 {
     private readonly IMemoryCache _cache;
-    public BookingOtpVerifyCommandHandler(IMemoryCache cache) => _cache = cache;
+    private readonly IMediator _mediator;
 
-    public Task<object> Handle(BookingOtpVerifyCommand request, CancellationToken cancellationToken)
+    public BookingOtpVerifyCommandHandler(IMemoryCache cache, IMediator mediator)
+    {
+        _cache = cache;
+        _mediator = mediator;
+    }
+
+    public async Task<object> Handle(BookingOtpVerifyCommand request, CancellationToken cancellationToken)
     {
         var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
-        var national = (request.NationalCode ?? string.Empty).Trim();
-        var code = (request.Code ?? string.Empty).Trim();
+        var code = RagQuotaHelper.ToAsciiDigits(request.Code);
 
-        if (phone.Length != 11 || national.Length != 10 || code.Length < 4)
-            throw new BadRequestExceptions("اطلاعات تأیید ناقص است.");
+        if (phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
+            throw new BadRequestExceptions("شماره موبایل معتبر نیست.");
+        if (code.Length != 6)
+            throw new BadRequestExceptions("کد تأیید باید ۶ رقم باشد.");
 
         var otpKey = $"booking_otp_{phone}";
-        if (!_cache.TryGetValue(otpKey, out string? expected) || expected != code)
+        if (!_cache.TryGetValue(otpKey, out string? expected)
+            || string.IsNullOrWhiteSpace(expected)
+            || !string.Equals(RagQuotaHelper.ToAsciiDigits(expected), code, StringComparison.Ordinal))
             throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است.");
 
         _cache.Remove(otpKey);
         _cache.Remove($"booking_otp_meta_{phone}");
 
         var token = Guid.NewGuid().ToString("N");
-        BookingSessionGuard.Store(_cache, token, national, phone);
+        BookingSessionGuard.Store(_cache, token, phone);
 
-        return Task.FromResult<object>(new
+        var patient = await _mediator.Send(new BookingLookupPatientQuery { PhoneNumber = phone }, cancellationToken);
+
+        return new
         {
             verified = true,
             bookingToken = token,
             expiresInSeconds = 30 * 60,
-            nationalCode = national,
             phoneNumber = phone,
-        });
+            patient,
+        };
     }
 }
 
 public static class BookingSessionGuard
 {
-    public static void Store(IMemoryCache cache, string token, string nationalCode, string phoneNumber) =>
-        cache.Set($"booking_session_{token}", new BookingSession(nationalCode, phoneNumber), TimeSpan.FromMinutes(30));
+    public static void Store(IMemoryCache cache, string token, string phoneNumber) =>
+        cache.Set($"booking_session_{token}", new BookingSession(RagQuotaHelper.NormalizePhone(phoneNumber)), TimeSpan.FromMinutes(30));
 
-    public static void Ensure(IMemoryCache cache, string? bookingToken, string nationalCode, string phoneNumber)
+    public static void Ensure(IMemoryCache cache, string? bookingToken, string phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(bookingToken))
             throw new BadRequestExceptions("جلسه تأیید منقضی شده است. دوباره کد بگیرید.");
@@ -324,11 +352,9 @@ public static class BookingSessionGuard
             throw new BadRequestExceptions("جلسه تأیید منقضی شده است. دوباره کد بگیرید.");
 
         var phone = RagQuotaHelper.NormalizePhone(phoneNumber);
-        var national = (nationalCode ?? string.Empty).Trim();
-        if (!string.Equals(session.NationalCode, national, StringComparison.Ordinal)
-            || !string.Equals(session.PhoneNumber, phone, StringComparison.Ordinal))
+        if (!string.Equals(session.PhoneNumber, phone, StringComparison.Ordinal))
             throw new BadRequestExceptions("اطلاعات با جلسه تأیید هم‌خوانی ندارد.");
     }
 
-    private sealed record BookingSession(string NationalCode, string PhoneNumber);
+    private sealed record BookingSession(string PhoneNumber);
 }

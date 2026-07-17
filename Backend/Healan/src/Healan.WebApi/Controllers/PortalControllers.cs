@@ -212,8 +212,12 @@ public class PortalPublicController : ControllerBase
         Ok(await Mediator.Send(new PortalBookingServicesQuery()));
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> BookingLookupPatient([FromQuery] string nationalCode) =>
-        Ok(await Mediator.Send(new BookingLookupPatientQuery { NationalCode = nationalCode }));
+    public async Task<IActionResult> BookingLookupPatient([FromQuery] string? phoneNumber, [FromQuery] string? nationalCode) =>
+        Ok(await Mediator.Send(new BookingLookupPatientQuery
+        {
+            PhoneNumber = phoneNumber,
+            NationalCode = nationalCode,
+        }));
 
     [HttpPost("[action]")]
     public async Task<IActionResult> BookingOtpRequest([FromBody] BookingOtpRequestCommand request) =>

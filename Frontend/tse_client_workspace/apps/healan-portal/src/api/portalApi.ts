@@ -248,11 +248,11 @@ export function bookingServices() {
   return request.get({ baseUrl: BASE, url: 'BookingServices' }) as Promise<PortalBookingService[]>;
 }
 
-export function bookingLookupPatient(nationalCode: string) {
+export function bookingLookupPatient(params: { phoneNumber?: string; nationalCode?: string }) {
   return request.get({
     baseUrl: BASE,
     url: 'BookingLookupPatient',
-    options: { nationalCode },
+    options: params,
   }) as Promise<{
     found: boolean;
     patientId?: number;
@@ -271,7 +271,7 @@ export function bookingOtpRequest(phoneNumber: string) {
   }) as Promise<{ sent: boolean; phoneMasked?: string; expiresInSeconds?: number; reused?: boolean }>;
 }
 
-export function bookingOtpVerify(payload: { phoneNumber: string; code: string; nationalCode: string }) {
+export function bookingOtpVerify(payload: { phoneNumber: string; code: string }) {
   return request.post({
     baseUrl: BASE,
     url: 'BookingOtpVerify',
@@ -280,8 +280,15 @@ export function bookingOtpVerify(payload: { phoneNumber: string; code: string; n
     verified: boolean;
     bookingToken: string;
     expiresInSeconds: number;
-    nationalCode: string;
     phoneNumber: string;
+    patient?: {
+      found: boolean;
+      patientId?: number;
+      nationalCode?: string;
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+    };
   }>;
 }
 
@@ -293,11 +300,11 @@ export function bookingCreate(payload: Record<string, unknown>) {
   }) as Promise<PortalBookingItem>;
 }
 
-export function bookingMyList(nationalCode: string, phoneNumber: string) {
+export function bookingMyList(phoneNumber: string, nationalCode?: string) {
   return request.get({
     baseUrl: BASE,
     url: 'BookingMyList',
-    options: { nationalCode, phoneNumber },
+    options: { phoneNumber, nationalCode },
   }) as Promise<PortalBookingItem[]>;
 }
 
