@@ -29,6 +29,7 @@ import type {
   BlogPostDetail,
   RagKnowledgeItem,
   RagSetting,
+  RagChatLogItem,
   SmsOutboxItem,
   SmsSetting,
 } from './types';
@@ -326,6 +327,15 @@ export const healanApi = {
     ragDelete: (ragKnowledgeItemId: number) => post('RagKnowledge/Delete', { ragKnowledgeItemId }),
     ragSettingGet: () => get<RagSetting>('RagKnowledge/SettingGet'),
     ragSettingSave: (data: RagSetting) => post<RagSetting>('RagKnowledge/SettingSave', data),
+    ragChatLogList: (params?: {
+      filterText?: string;
+      phone?: string;
+      fromUtc?: string;
+      toUtc?: string;
+      authenticatedOnly?: boolean;
+      pageNumber?: number;
+      pageSize?: number;
+    }) => get<PaginatedResponse<RagChatLogItem>>('RagKnowledge/ChatLogList', pagedParams(params)),
   },
 };
 

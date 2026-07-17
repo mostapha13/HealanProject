@@ -16,8 +16,10 @@ public class RagChatLogConfiguration : IEntityTypeConfiguration<RagChatLog>
         builder.Property(x => x.SourceType).HasMaxLength(50);
         builder.Property(x => x.SessionId).HasMaxLength(64);
         builder.Property(x => x.GuestKey).HasMaxLength(64);
+        builder.Property(x => x.PhoneNumber).HasMaxLength(11);
         builder.HasIndex(x => x.CreatedAt);
         builder.HasIndex(x => new { x.GuestKey, x.CreatedAt });
         builder.HasIndex(x => new { x.IdentityUserId, x.CreatedAt });
+        builder.HasIndex(x => new { x.PhoneNumber, x.CreatedAt });
     }
 }

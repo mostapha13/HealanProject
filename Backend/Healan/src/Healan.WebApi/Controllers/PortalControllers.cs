@@ -20,6 +20,7 @@ using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
 using Healan.Application.Portal.Queries.PublishedBlogPostList;
 using Healan.Application.Portal.Queries.PublishedPortalSite;
 using Healan.Application.Portal.Queries.RagAsk;
+using Healan.Application.Portal.Queries.RagChatLogList;
 using Healan.Application.Portal.Queries.RagKnowledgeInfo;
 using Healan.Application.Portal.Queries.RagKnowledgeList;
 using Healan.Application.Portal.Queries.RagQuotaStatus;
@@ -93,7 +94,7 @@ public class BlogPostController : ApiControllerBase
 /// <summary>
 /// مدیریت دانش پایه RAG (سوال و جواب ربات سایت)
 /// </summary>
-[AccessForm(HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
+[AccessForm(HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings, HealanAccessFormIds.PortalRagLogs)]
 public class RagKnowledgeController : ApiControllerBase
 {
     [HttpGet("[action]")]
@@ -119,6 +120,11 @@ public class RagKnowledgeController : ApiControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> SettingSave([FromBody] RagSettingSaveCommand request) =>
         Ok(await Mediator.Send(request));
+
+    [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
+    public async Task<IActionResult> ChatLogList([FromQuery] RagChatLogListQuery query) =>
+        Ok(await Mediator.Send(query));
 }
 
 /// <summary>

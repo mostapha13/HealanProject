@@ -2188,6 +2188,10 @@ namespace Healan.Infrastructure.Migrations
                     b.Property<long?>("MatchedKnowledgeItemId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasMaxLength(2000)
@@ -2214,6 +2218,8 @@ namespace Healan.Infrastructure.Migrations
                     b.HasIndex("GuestKey", "CreatedAt");
 
                     b.HasIndex("IdentityUserId", "CreatedAt");
+
+                    b.HasIndex("PhoneNumber", "CreatedAt");
 
                     b.ToTable("RagChatLogs", (string)null);
                 });

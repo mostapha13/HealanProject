@@ -37,4 +37,5 @@ public static class HealanAccessFormIds
     public const int SmsOutbox = 5026;
     public const int SmsSettings = 5027;
     public const int AssistantSettings = 5028;
+    public const int PortalRagLogs = 5029;
 }

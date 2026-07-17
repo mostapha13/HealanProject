@@ -13,6 +13,8 @@ public class RagChatLog
     public string? GuestKey { get; set; }
     /// <summary>کاربر Identity پس از لاگین پورتال.</summary>
     public Guid? IdentityUserId { get; set; }
+    /// <summary>شماره موبایل کاربر لاگین‌شده (برای نمایش در کلینیک).</summary>
+    public string? PhoneNumber { get; set; }
     public bool WasAnswered { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

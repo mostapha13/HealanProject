@@ -125,6 +125,20 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
             </div>
 
             <div className="healan-form-field">
+              <label>فاصله همگام‌سازی دانش (دقیقه)</label>
+              <input
+                className="healan-input"
+                type="number"
+                min={1}
+                max={1440}
+                value={settings.syncIntervalMinutes ?? 30}
+                onChange={(e) =>
+                  setSettings({ ...settings, syncIntervalMinutes: Number(e.target.value) })
+                }
+              />
+            </div>
+
+            <div className="healan-form-field">
               <label>آستانه شباهت (درصد)</label>
               <input
                 className="healan-input"

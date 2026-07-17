@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pagination } from 'antd';
+import { useNavigate } from '@tse/utils';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
-import type { RagKnowledgeItem, RagSetting } from '../../api/types';
+import type { RagKnowledgeItem } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
-import { convertDateAndTimeToJalali } from '@tse/tools';
 import { confirmDelete } from '../../components/confirmDialog';
 
 const PAGE_SIZE = 10;
@@ -31,6 +31,7 @@ const emptyForm = (): RagKnowledgeItem => ({
 });
 
 function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const navigate = useNavigate();
   const [items, setItems] = useState<RagKnowledgeItem[]>([]);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -39,10 +40,8 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [activeFilter, setActiveFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showSettings, setShowSettings] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<RagKnowledgeItem>(emptyForm);
-  const [settings, setSettings] = useState<RagSetting | null>(null);
 
   const topicOptions = useMemo(() => {
     const topics = Array.from(new Set(items.map((i) => i.topic).filter(Boolean))) as string[];
@@ -68,22 +67,9 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
-  const loadSettings = async () => {
-    try {
-      const res = await healanApi.portal.ragSettingGet();
-      setSettings(res);
-    } catch (err) {
-      onAlert(err);
-    }
-  };
-
   useEffect(() => {
     void load();
   }, [page, activeFilter, topicFilter]);
-
-  useEffect(() => {
-    void loadSettings();
-  }, []);
 
   const openNew = () => {
     setForm(emptyForm());
@@ -166,30 +152,18 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
-  const saveSettings = async () => {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      const saved = await healanApi.portal.ragSettingSave(settings);
-      setSettings(saved);
-      setShowSettings(false);
-      onAlert({ type: 'success', message: 'تنظیمات RAG ذخیره شد' });
-    } catch (err) {
-      onAlert(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
     <>
       <PageHeader
         title="ربات پاسخ‌گو — دانش پایه"
-        subtitle="مدیریت سوال و جواب‌های ربات سایت و تنظیمات همگام‌سازی وکتور"
+        subtitle="مدیریت سوال و جواب‌های رسمی ربات سایت"
         action={
           <div className="healan-actions">
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => setShowSettings(true)}>
-              تنظیمات RAG
+            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => navigate('/basic-data/assistant')}>
+              تنظیمات دستیار
+            </button>
+            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => navigate('/site-content/rag-logs')}>
+              گفتگوها
             </button>
             <button type="button" className="healan-btn healan-btn--primary" onClick={openNew}>
               سوال جدید
@@ -198,94 +172,12 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         }
       />
 
-      {showSettings && settings && (
-        <div className="healan-card" style={{ marginBottom: '1rem' }}>
-          <div className="healan-card__header">
-            <h3>تنظیمات RAG</h3>
-          </div>
-          <div className="healan-card__body">
-            <div className="healan-form-grid">
-              <div className="healan-form-field">
-                <label>فاصله همگام‌سازی (دقیقه)</label>
-                <input
-                  className="healan-input"
-                  type="number"
-                  min={1}
-                  max={1440}
-                  value={settings.syncIntervalMinutes}
-                  onChange={(e) => setSettings({ ...settings, syncIntervalMinutes: Number(e.target.value) })}
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>آستانه شباهت (درصد)</label>
-                <input
-                  className="healan-input"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={settings.similarityThresholdPercent}
-                  onChange={(e) => setSettings({ ...settings, similarityThresholdPercent: Number(e.target.value) })}
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>آدرس سرویس Python</label>
-                <input
-                  className="healan-input"
-                  value={settings.pythonApiUrl}
-                  onChange={(e) => setSettings({ ...settings, pythonApiUrl: e.target.value })}
-                  placeholder="http://localhost:8000"
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>سقف سوال مهمان (روزانه)</label>
-                <input
-                  className="healan-input"
-                  type="number"
-                  min={0}
-                  max={1000}
-                  value={settings.guestDailyLimit ?? 10}
-                  onChange={(e) => setSettings({ ...settings, guestDailyLimit: Number(e.target.value) })}
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>سقف سوال کاربر لاگین‌شده (روزانه)</label>
-                <input
-                  className="healan-input"
-                  type="number"
-                  min={1}
-                  max={5000}
-                  value={settings.authenticatedDailyLimit ?? 200}
-                  onChange={(e) => setSettings({ ...settings, authenticatedDailyLimit: Number(e.target.value) })}
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={settings.isEnabled}
-                    onChange={(e) => setSettings({ ...settings, isEnabled: e.target.checked })}
-                  />{' '}
-                  ربات فعال باشد
-                </label>
-              </div>
-              {settings.lastSyncedAt && (
-                <div className="healan-form-field">
-                  <label>آخرین همگام‌سازی</label>
-                  <div>{convertDateAndTimeToJalali(settings.lastSyncedAt)}</div>
-                </div>
-              )}
-            </div>
-            <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--ghost" onClick={() => setShowSettings(false)}>
-                انصراف
-              </button>
-              <button type="button" className="healan-btn healan-btn--primary" disabled={saving} onClick={() => void saveSettings()}>
-                ذخیره تنظیمات
-              </button>
-            </div>
-          </div>
+      <div className="healan-card" style={{ marginBottom: '1rem' }}>
+        <div className="healan-card__body" style={{ padding: '0.85rem 1rem' }}>
+          سقف سوال روزانه و تنظیمات فنی در{' '}
+          <strong>اطلاعات پایه ← دستیار هوشمند</strong> مدیریت می‌شود.
         </div>
-      )}
+      </div>
 
       {showForm && (
         <div className="healan-card" style={{ marginBottom: '1rem' }}>

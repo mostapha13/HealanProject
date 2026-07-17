@@ -29,6 +29,7 @@ const SiteContentSectionsPage = lazy(() => import('../pages/SiteContent/Sections
 const SiteContentReviewsPage = lazy(() => import('../pages/SiteContent/Reviews'));
 const SiteContentBlogPage = lazy(() => import('../pages/SiteContent/Blog'));
 const SiteContentRagPage = lazy(() => import('../pages/SiteContent/Rag'));
+const SiteContentRagLogsPage = lazy(() => import('../pages/SiteContent/RagLogs'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const ReportsLayout = lazy(() => import('../pages/Reports/Layout'));
 const SmsOutboxPage = lazy(() => import('../pages/Reports/SmsOutbox'));
@@ -91,6 +92,7 @@ export default function AppRoutes() {
             <Route path="sections" element={guarded('/site-content/sections', <SiteContentSectionsPage />)} />
             <Route path="blog" element={guarded('/site-content/blog', <SiteContentBlogPage />)} />
             <Route path="rag" element={guarded('/site-content/rag', <SiteContentRagPage />)} />
+            <Route path="rag-logs" element={guarded('/site-content/rag-logs', <SiteContentRagLogsPage />)} />
             <Route path="reviews" element={guarded('/site-content/reviews', <SiteContentReviewsPage />)} />
           </Route>
           <Route path="reports" element={guarded('/reports', <ReportsLayout />)}>

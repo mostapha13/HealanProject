@@ -1,7 +1,7 @@
 using Healan.Application.Portal.Dtos;
 using Healan.Application.Common.Interfaces;
+using Healan.Application.Portal.Messages;
 using Healan.Application.Portal.Services;
-using Healan.Domain.Portal.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,17 +24,23 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
     private readonly IApplicationDbContext _db;
     private readonly IRagPythonService _ragPythonService;
     private readonly IPortalAuthTokenService _tokenService;
+    private readonly IRagChatLogPublisher _logPublisher;
+    private readonly IRagQuotaCounter _quotaCounter;
     private readonly ILogger<RagAskQueryHandler> _logger;
 
     public RagAskQueryHandler(
         IApplicationDbContext db,
         IRagPythonService ragPythonService,
         IPortalAuthTokenService tokenService,
+        IRagChatLogPublisher logPublisher,
+        IRagQuotaCounter quotaCounter,
         ILogger<RagAskQueryHandler> logger)
     {
         _db = db;
         _ragPythonService = ragPythonService;
         _tokenService = tokenService;
+        _logPublisher = logPublisher;
+        _quotaCounter = quotaCounter;
         _logger = logger;
     }
 
@@ -45,27 +51,32 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             throw new BadRequestExceptions("سوال باید حداقل ۲ کاراکتر باشد");
 
         var setting = await _db.RagSettings.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
-        if (setting is { IsEnabled: false })
-        {
-            return await LogAndReturnAsync(
-                question, request, null, null,
-                new RagAskResponseDto
-                {
-                    Answer = "سرویس پاسخ‌گویی هوشمند در حال حاضر غیرفعال است.",
-                    WasAnswered = false,
-                },
-                cancellationToken);
-        }
 
         Guid? userId = null;
-        if (_tokenService.TryValidate(request.AccessToken, out var uid, out _))
+        string? phone = null;
+        if (_tokenService.TryValidate(request.AccessToken, out var uid, out var ph))
+        {
             userId = uid;
+            phone = ph;
+        }
 
         var guestKey = string.IsNullOrWhiteSpace(request.GuestKey) ? null : request.GuestKey.Trim();
         if (!userId.HasValue && string.IsNullOrWhiteSpace(guestKey))
             throw new BadRequestExceptions("شناسه نشست نامعتبر است. صفحه را رفرش کنید.");
 
-        var used = await RagQuotaHelper.CountTodayAsync(_db, userId, guestKey, cancellationToken);
+        if (setting is { IsEnabled: false })
+        {
+            var disabled = new RagAskResponseDto
+            {
+                Answer = "سرویس پاسخ‌گویی هوشمند در حال حاضر غیرفعال است.",
+                WasAnswered = false,
+                IsAuthenticated = userId.HasValue,
+            };
+            PublishLog(question, request, userId, guestKey, phone, disabled);
+            return disabled;
+        }
+
+        var used = await _quotaCounter.GetUsedTodayAsync(userId, guestKey, cancellationToken);
         var (limit, usedCount, remaining, requiresLogin) = RagQuotaHelper.Evaluate(setting, userId.HasValue, used);
 
         if (requiresLogin || remaining <= 0)
@@ -96,6 +107,7 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             limit);
 
         var result = await _ragPythonService.AskAsync(pythonUrl, question, threshold, cancellationToken);
+        var newUsed = await _quotaCounter.IncrementTodayAsync(userId, guestKey, cancellationToken);
         var response = new RagAskResponseDto
         {
             Answer = result.WasAnswered || !string.IsNullOrWhiteSpace(result.Answer)
@@ -106,13 +118,14 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             MatchedKnowledgeItemId = result.MatchedKnowledgeItemId,
             SourceType = result.SourceType,
             RequiresLogin = false,
-            UsedCount = usedCount + 1,
+            UsedCount = newUsed,
             DailyLimit = limit,
-            RemainingCount = Math.Max(0, remaining - 1),
+            RemainingCount = Math.Max(0, limit - newUsed),
             IsAuthenticated = userId.HasValue,
         };
 
-        return await LogAndReturnAsync(question, request, userId, guestKey, response, cancellationToken);
+        PublishLog(question, request, userId, guestKey, phone, response);
+        return response;
     }
 
     internal static string ResolvePythonApiUrl(string? configured)
@@ -137,15 +150,15 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
         return url;
     }
 
-    private async Task<RagAskResponseDto> LogAndReturnAsync(
+    private void PublishLog(
         string question,
         RagAskQuery request,
         Guid? identityUserId,
         string? guestKey,
-        RagAskResponseDto response,
-        CancellationToken cancellationToken)
+        string? phone,
+        RagAskResponseDto response)
     {
-        _db.RagChatLogs.Add(new RagChatLog
+        _logPublisher.Publish(new RagChatLogMessage
         {
             Question = question,
             Answer = response.Answer,
@@ -155,10 +168,9 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             SessionId = string.IsNullOrWhiteSpace(request.SessionId) ? null : request.SessionId.Trim(),
             GuestKey = identityUserId.HasValue ? null : guestKey,
             IdentityUserId = identityUserId,
+            PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : RagQuotaHelper.NormalizePhone(phone),
             WasAnswered = response.WasAnswered,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAtUtc = DateTime.UtcNow,
         });
-        await _db.SaveChangesAsync(cancellationToken);
-        return response;
     }
 }

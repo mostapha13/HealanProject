@@ -10,5 +10,6 @@
 
         public const string MessageFile = "Q_Message_File";
         public const string Notification = "Q_Notification";
+        public const string RagChatLog = "Q_RagChatLog";
     }
 }

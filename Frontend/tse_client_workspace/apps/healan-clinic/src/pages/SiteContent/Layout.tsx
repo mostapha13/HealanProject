@@ -9,6 +9,7 @@ const tabs = [
   { path: '/site-content/sections', label: 'بخش‌ها و مطالب' },
   { path: '/site-content/blog', label: 'بلاگ' },
   { path: '/site-content/rag', label: 'ربات پاسخ‌گو' },
+  { path: '/site-content/rag-logs', label: 'گفتگوهای دستیار' },
   { path: '/site-content/reviews', label: 'نظرات بیماران' },
 ];
 

@@ -1,5 +1,6 @@
 ﻿using Healan.Application.Common.Interfaces;
 using Healan.Infrastructure.Context;
+using Healan.Infrastructure.Portal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +36,9 @@ namespace Healan.Infrastructure
             services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
             services.AddScoped<IDocumentManagement, DocumentManagement>();
 
-
+            services.AddScoped<Healan.Application.Portal.Services.IRagChatLogPublisher, RagChatLogPublisher>();
+            services.AddScoped<Healan.Application.Portal.Services.IRagQuotaCounter, RagQuotaCounter>();
+            services.AddHostedService<RagChatLogConsumerService>();
         }
 
 

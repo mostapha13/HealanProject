@@ -62,7 +62,7 @@ function flattenMenus(
       return;
     }
     const isAction = /\/(add|edit|delete|publish)$/.test(url);
-    const isSystem = item.accessMenuId >= 5101 && item.accessMenuId <= 5131;
+    const isSystem = item.accessMenuId >= 5101 && item.accessMenuId <= 5132;
     rows.push({
       accessMenuId: item.accessMenuId,
       accessFormId: item.accessFormId,

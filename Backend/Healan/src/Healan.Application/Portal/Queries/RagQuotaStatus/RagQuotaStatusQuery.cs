@@ -16,11 +16,16 @@ public class RagQuotaStatusQueryHandler : IRequestHandler<RagQuotaStatusQuery, R
 {
     private readonly IApplicationDbContext _db;
     private readonly IPortalAuthTokenService _tokenService;
+    private readonly IRagQuotaCounter _quotaCounter;
 
-    public RagQuotaStatusQueryHandler(IApplicationDbContext db, IPortalAuthTokenService tokenService)
+    public RagQuotaStatusQueryHandler(
+        IApplicationDbContext db,
+        IPortalAuthTokenService tokenService,
+        IRagQuotaCounter quotaCounter)
     {
         _db = db;
         _tokenService = tokenService;
+        _quotaCounter = quotaCounter;
     }
 
     public async Task<RagQuotaStatusDto> Handle(RagQuotaStatusQuery request, CancellationToken cancellationToken)
@@ -34,7 +39,8 @@ public class RagQuotaStatusQueryHandler : IRequestHandler<RagQuotaStatusQuery, R
             phone = ph;
         }
 
-        var used = await RagQuotaHelper.CountTodayAsync(_db, userId, request.GuestKey, cancellationToken);
+        var guestKey = string.IsNullOrWhiteSpace(request.GuestKey) ? null : request.GuestKey.Trim();
+        var used = await _quotaCounter.GetUsedTodayAsync(userId, guestKey, cancellationToken);
         var (limit, usedCount, remaining, requiresLogin) = RagQuotaHelper.Evaluate(setting, userId.HasValue, used);
 
         return new RagQuotaStatusDto

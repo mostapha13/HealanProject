@@ -462,3 +462,18 @@ export interface RagSetting {
   authenticatedDailyLimit: number;
   lastSyncedAt?: string;
 }
+
+export interface RagChatLogItem {
+  ragChatLogId: number;
+  question: string;
+  answer?: string;
+  similarityScore?: number;
+  sourceType?: string;
+  sessionId?: string;
+  guestKey?: string;
+  identityUserId?: string;
+  phoneNumber?: string;
+  wasAnswered: boolean;
+  isAuthenticated: boolean;
+  createdAt: string;
+}
