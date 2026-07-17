@@ -28,8 +28,10 @@ function toAsciiDigits(value: string): string {
 
 function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object') {
-    const data = err as { data?: { errors?: string[]; title?: string; message?: string }; statusText?: string };
-    const errors = data.data?.errors;
+    const data = err as {
+      data?: { errors?: string[]; title?: string; message?: string; Errors?: string[] };
+    };
+    const errors = data.data?.errors ?? data.data?.Errors;
     if (Array.isArray(errors) && errors[0]) return String(errors[0]);
     if (data.data?.message) return String(data.data.message);
     if (data.data?.title) return String(data.data.title);
@@ -51,6 +53,15 @@ function formatSlot(iso: string) {
   } catch {
     return iso;
   }
+}
+
+function stepClass(current: Step, target: Step): string {
+  const order: Step[] = ['phone', 'otp', 'book', 'done'];
+  const ci = order.indexOf(current);
+  const ti = order.indexOf(target);
+  if (ti < ci) return 'portal-booking__step is-done';
+  if (ti === ci) return 'portal-booking__step is-active';
+  return 'portal-booking__step';
 }
 
 export default function BookingPage() {
@@ -90,9 +101,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (step !== 'book') return;
-    void bookingOpenSlots({
-      doctorId: form.doctorId || undefined,
-    })
+    void bookingOpenSlots({ doctorId: form.doctorId || undefined })
       .then((list) => setSlots(list ?? []))
       .catch(() => setSlots([]));
   }, [step, form.doctorId]);
@@ -133,6 +142,7 @@ export default function BookingPage() {
     try {
       const phone = toAsciiDigits(form.phoneNumber);
       const code = toAsciiDigits(otpCode);
+      if (code.length < 4) throw new Error('کد تأیید را کامل وارد کنید.');
       const res = await bookingOtpVerify({ phoneNumber: phone, code });
       setBookingToken(res.bookingToken);
       setForm((prev) => ({ ...prev, phoneNumber: res.phoneNumber || phone }));
@@ -225,10 +235,10 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="portal-page" style={{ minHeight: '100vh', background: 'linear-gradient(180deg,#f0f9ff,#fff)', padding: '1.5rem 1rem 3rem' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <Link to="/" style={{ color: '#0f766e', textDecoration: 'none', fontWeight: 600 }}>
+    <div className="portal-booking">
+      <div className="portal-booking__shell">
+        <div className="portal-booking__nav">
+          <Link to="/" className="portal-booking__back">
             ← بازگشت به سایت
           </Link>
           <button type="button" className="p-btn p-btn--outline p-btn--sm" onClick={callClinicPhone}>
@@ -236,53 +246,91 @@ export default function BookingPage() {
           </button>
         </div>
 
-        <h1 style={{ fontFamily: 'Vazirmatn, Tahoma, sans-serif', fontSize: '1.75rem', marginBottom: 8, color: '#0f172a' }}>
-          رزرو نوبت آنلاین
-        </h1>
-        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-          ابتدا موبایل را وارد کنید؛ کد تأیید پیامک می‌شود. پرداخت در مطب انجام می‌شود.
-        </p>
+        <header className="portal-booking__hero">
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین</span>
+          <h1 className="portal-booking__title">رزرو نوبت مطب قلب</h1>
+          <p className="portal-booking__lead">
+            با موبایل وارد شوید، کد پیامک را تأیید کنید و زمان مناسب را انتخاب کنید. پرداخت در مطب انجام می‌شود.
+          </p>
+        </header>
 
-        {error && (
-          <div style={{ background: '#fef2f2', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 8, marginBottom: '1rem' }}>
-            {error}
-          </div>
-        )}
+        <div className="portal-booking__steps" aria-hidden>
+          <div className={stepClass(step, 'phone')}>۱. موبایل</div>
+          <div className={stepClass(step, 'otp')}>۲. کد تأیید</div>
+          <div className={stepClass(step, 'book')}>۳. انتخاب نوبت</div>
+          <div className={stepClass(step, 'done')}>۴. ثبت</div>
+        </div>
+
+        {error && <div className="portal-booking__error">{error}</div>}
 
         {step === 'phone' && (
-          <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }}>
-            <label style={{ display: 'block', marginBottom: 6 }}>شماره موبایل</label>
+          <div className="portal-booking__card">
+            <label className="portal-booking__label" htmlFor="booking-phone">
+              شماره موبایل
+            </label>
             <input
+              id="booking-phone"
+              className="portal-booking__input"
               inputMode="numeric"
+              autoComplete="tel"
               value={form.phoneNumber}
               onChange={(e) => setForm({ ...form, phoneNumber: toAsciiDigits(e.target.value).slice(0, 11) })}
-              style={{ width: '100%', padding: 10, marginBottom: 12, border: '1px solid #cbd5e1', borderRadius: 8 }}
               placeholder="09123456789"
             />
-            <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void sendOtp()}>
-              {busy ? '…' : 'دریافت کد تأیید'}
-            </button>
+            <p className="portal-booking__hint">کد تأیید فقط به همین شماره پیامک می‌شود.</p>
+            <div className="portal-booking__actions">
+              <button
+                type="button"
+                className="portal-booking__btn portal-booking__btn--primary"
+                disabled={busy}
+                onClick={() => void sendOtp()}
+              >
+                {busy ? 'در حال ارسال…' : 'دریافت کد تأیید'}
+              </button>
+            </div>
           </div>
         )}
 
         {step === 'otp' && (
-          <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }}>
-            <p style={{ marginBottom: 12 }}>کد پیامک‌شده به {form.phoneNumber} را وارد کنید.</p>
+          <div className="portal-booking__card">
+            <p className="portal-booking__hint" style={{ marginTop: 0, marginBottom: '0.85rem' }}>
+              کد پیامک‌شده به <strong>{form.phoneNumber}</strong> را وارد کنید.
+            </p>
+            <label className="portal-booking__label" htmlFor="booking-otp">
+              کد تأیید
+            </label>
             <input
+              id="booking-otp"
+              className="portal-booking__input portal-booking__input--otp"
               inputMode="numeric"
+              autoComplete="one-time-code"
               value={otpCode}
               onChange={(e) => setOtpCode(toAsciiDigits(e.target.value).slice(0, 6))}
-              style={{ width: '100%', padding: 10, marginBottom: 12, border: '1px solid #cbd5e1', borderRadius: 8, letterSpacing: 4, fontSize: 20 }}
               placeholder="------"
             />
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button type="button" className="p-btn p-btn--primary" disabled={busy} onClick={() => void verify()}>
-                تأیید
+            <div className="portal-booking__actions">
+              <button
+                type="button"
+                className="portal-booking__btn portal-booking__btn--green"
+                disabled={busy}
+                onClick={() => void verify()}
+              >
+                {busy ? 'در حال بررسی…' : 'تأیید'}
               </button>
-              <button type="button" className="p-btn p-btn--outline" disabled={busy} onClick={() => void sendOtp()}>
+              <button
+                type="button"
+                className="portal-booking__btn portal-booking__btn--outline"
+                disabled={busy}
+                onClick={() => void sendOtp()}
+              >
                 ارسال مجدد
               </button>
-              <button type="button" className="p-btn p-btn--ghost" disabled={busy} onClick={() => setStep('phone')}>
+              <button
+                type="button"
+                className="portal-booking__btn portal-booking__btn--ghost"
+                disabled={busy}
+                onClick={() => setStep('phone')}
+              >
                 تغییر شماره
               </button>
             </div>
@@ -292,16 +340,16 @@ export default function BookingPage() {
         {step === 'book' && (
           <div style={{ display: 'grid', gap: '1rem' }}>
             {myBookings.length > 0 && (
-              <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem' }}>
-                <h3 style={{ marginTop: 0 }}>رزروهای فعال شما</h3>
+              <div className="portal-booking__card">
+                <h3>رزروهای فعال شما</h3>
                 {myBookings.map((b) => (
-                  <div key={b.appointmentBookingId} style={{ borderBottom: '1px solid #e2e8f0', padding: '0.75rem 0' }}>
+                  <div key={b.appointmentBookingId} className="portal-booking__mine-item">
                     <div>{formatSlot(b.startAt)}</div>
-                    <div style={{ color: '#64748b' }}>{b.doctorName}</div>
-                    <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                    <div style={{ color: 'var(--p-muted)', fontSize: '0.88rem' }}>{b.doctorName}</div>
+                    <div className="portal-booking__actions" style={{ marginTop: 8 }}>
                       <button
                         type="button"
-                        className="p-btn p-btn--outline p-btn--sm"
+                        className="portal-booking__btn portal-booking__btn--outline"
                         onClick={() => {
                           setRescheduleBookingId(b.appointmentBookingId);
                           setForm((prev) => ({ ...prev, appointmentSlotId: 0, doctorId: b.doctorId }));
@@ -311,7 +359,7 @@ export default function BookingPage() {
                       </button>
                       <button
                         type="button"
-                        className="p-btn p-btn--ghost p-btn--sm"
+                        className="portal-booking__btn portal-booking__btn--ghost"
                         onClick={() => void cancelMine(b.appointmentBookingId)}
                       >
                         لغو
@@ -322,66 +370,68 @@ export default function BookingPage() {
               </div>
             )}
 
-            <div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem' }}>
-              <h3 style={{ marginTop: 0 }}>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'اطلاعات بیمار و نوبت'}</h3>
+            <div className="portal-booking__card">
+              <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'اطلاعات بیمار و نوبت'}</h3>
               {!rescheduleBookingId && (
                 <>
                   {patientKnown && (
-                    <p style={{ color: '#0f766e', marginTop: 0 }}>اطلاعات شما از پرونده قبلی پر شد.</p>
+                    <div className="portal-booking__success-banner">اطلاعات شما از پرونده قبلی پر شد.</div>
                   )}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="portal-booking__grid-2">
                     <div>
-                      <label>نام</label>
+                      <label className="portal-booking__label">نام</label>
                       <input
+                        className="portal-booking__input"
                         value={form.firstName}
                         onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                        style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
                       />
                     </div>
                     <div>
-                      <label>نام خانوادگی</label>
+                      <label className="portal-booking__label">نام خانوادگی</label>
                       <input
+                        className="portal-booking__input"
                         value={form.lastName}
                         onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                        style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
                       />
                     </div>
                   </div>
                   <div style={{ marginTop: 12 }}>
-                    <label>کد ملی</label>
+                    <label className="portal-booking__label">کد ملی</label>
                     <input
+                      className="portal-booking__input"
                       inputMode="numeric"
                       value={form.nationalCode}
                       onChange={(e) => setForm({ ...form, nationalCode: toAsciiDigits(e.target.value).slice(0, 10) })}
-                      style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
                       placeholder="0012345678"
                     />
                   </div>
-                  <div style={{ marginTop: 12 }}>
-                    <label>عنوان خدمت درخواستی (اختیاری)</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
-                      {services.map((s) => (
-                        <label key={s.serviceTypeId} style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-                          <input
-                            type="checkbox"
-                            checked={form.serviceTypeIds.includes(s.serviceTypeId)}
-                            onChange={() => toggleService(s.serviceTypeId)}
-                          />
-                          {s.title}
-                        </label>
-                      ))}
+                  {services.length > 0 && (
+                    <div style={{ marginTop: 12 }}>
+                      <label className="portal-booking__label">عنوان خدمت درخواستی (اختیاری)</label>
+                      <div className="portal-booking__services">
+                        {services.map((s) => (
+                          <label key={s.serviceTypeId} className="portal-booking__chip">
+                            <input
+                              type="checkbox"
+                              checked={form.serviceTypeIds.includes(s.serviceTypeId)}
+                              onChange={() => toggleService(s.serviceTypeId)}
+                            />
+                            {s.title}
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               )}
 
               {doctors.length > 1 && (
                 <div style={{ marginTop: 12 }}>
-                  <label>پزشک</label>
+                  <label className="portal-booking__label">پزشک</label>
                   <select
+                    className="portal-booking__input"
                     value={form.doctorId}
                     onChange={(e) => setForm({ ...form, doctorId: Number(e.target.value), appointmentSlotId: 0 })}
-                    style={{ width: '100%', padding: 10, border: '1px solid #cbd5e1', borderRadius: 8 }}
                   >
                     <option value={0}>همه</option>
                     {doctors.map((d) => (
@@ -394,29 +444,22 @@ export default function BookingPage() {
               )}
 
               <div style={{ marginTop: 16 }}>
-                <label>اسلات‌های آزاد</label>
+                <label className="portal-booking__label">زمان‌های آزاد</label>
                 {groupedSlots.length === 0 ? (
-                  <p style={{ color: '#64748b' }}>نوبت آزادی در روزهای آینده نیست.</p>
+                  <p className="portal-booking__hint">نوبت آزادی در روزهای آینده ثبت نشده است.</p>
                 ) : (
                   groupedSlots.map(([day, daySlots]) => (
-                    <div key={day} style={{ marginTop: 10 }}>
+                    <div key={day} className="portal-booking__slots-day">
                       <strong>{formatSlot(daySlots[0].startAt).split('،')[0]}</strong>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                      <div className="portal-booking__slot-grid">
                         {daySlots.map((slot) => (
                           <button
                             key={slot.appointmentSlotId}
                             type="button"
+                            className={`portal-booking__slot${
+                              form.appointmentSlotId === slot.appointmentSlotId ? ' is-selected' : ''
+                            }`}
                             onClick={() => setForm({ ...form, appointmentSlotId: slot.appointmentSlotId })}
-                            style={{
-                              padding: '8px 12px',
-                              borderRadius: 8,
-                              border:
-                                form.appointmentSlotId === slot.appointmentSlotId
-                                  ? '2px solid #0f766e'
-                                  : '1px solid #cbd5e1',
-                              background: form.appointmentSlotId === slot.appointmentSlotId ? '#ccfbf1' : '#fff',
-                              cursor: 'pointer',
-                            }}
                           >
                             {new Date(slot.startAt).toLocaleTimeString('fa-IR', {
                               hour: '2-digit',
@@ -430,26 +473,29 @@ export default function BookingPage() {
                 )}
               </div>
 
-              <button
-                type="button"
-                className="p-btn p-btn--primary"
-                style={{ marginTop: 16 }}
-                disabled={busy}
-                onClick={() => void submitBook()}
-              >
-                {busy ? '…' : rescheduleBookingId ? 'ثبت جابجایی' : 'ثبت رزرو'}
-              </button>
+              <div className="portal-booking__actions">
+                <button
+                  type="button"
+                  className="portal-booking__btn portal-booking__btn--green"
+                  disabled={busy}
+                  onClick={() => void submitBook()}
+                >
+                  {busy ? '…' : rescheduleBookingId ? 'ثبت جابجایی' : 'ثبت رزرو'}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {step === 'done' && (
-          <div style={{ background: '#fff', borderRadius: 12, padding: '1.5rem', textAlign: 'center' }}>
-            <h2 style={{ color: '#0f766e' }}>رزرو شما ثبت شد</h2>
-            <p style={{ color: '#64748b' }}>لطفاً در موعد مقرر در مطب حاضر شوید. پرداخت در محل انجام می‌شود.</p>
-            <Link to="/" className="p-btn p-btn--primary" style={{ display: 'inline-block', marginTop: 12 }}>
-              بازگشت به صفحه اصلی
-            </Link>
+          <div className="portal-booking__card portal-booking__done">
+            <h2>رزرو شما ثبت شد</h2>
+            <p className="portal-booking__hint">لطفاً در موعد مقرر در مطب حاضر شوید. پرداخت در محل انجام می‌شود.</p>
+            <div className="portal-booking__actions" style={{ justifyContent: 'center' }}>
+              <Link to="/" className="portal-booking__btn portal-booking__btn--primary">
+                بازگشت به صفحه اصلی
+              </Link>
+            </div>
           </div>
         )}
       </div>

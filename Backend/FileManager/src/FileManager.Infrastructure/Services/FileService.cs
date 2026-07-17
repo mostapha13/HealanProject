@@ -57,75 +57,54 @@ namespace FileManager.Infrastructure.Services
         }
         public async Task<UploadFileResponse> UploadFile(UploadFileRequest request)
         {
-
             ValidateFileName(request.Filename);
 
-            var fileExtension = Path.GetExtension(request.Filename).ToLower();
-            var profile = _config.Profiles.FirstOrDefault(item => item.Extension.Contains(fileExtension));
+            var profiles = _config.Profiles?.ToList() ?? new List<UploadFileProfile>();
+            if (profiles.Count == 0)
+                throw new BadRequestExceptions("پروفایل آپلود فایل تنظیم نشده است.");
+
+            var fileExtension = Path.GetExtension(request.Filename).ToLowerInvariant();
+            var profile = profiles.FirstOrDefault(item => item.Extension != null && item.Extension.Contains(fileExtension));
             if (profile == null)
                 throw new BadRequestExceptions("فرمت فایل صحیح نیست");
 
-
             if (request.Size < profile.MinSizeKB)
-            {
                 throw new BadRequestExceptions($"حجم فایل ارسالی نباید کمتر از {profile.MinSizeKB} کیلوبایت باشد");
-            }
 
             if (request.Size > profile.MaxSizeKB)
-            {
                 throw new BadRequestExceptions($"حجم فایل ارسالی نباید بیشتر از {profile.MaxSizeKB} کیلوبایت باشد");
-            }
 
-            using (var ms = new MemoryStream())
+            await using var ms = new MemoryStream();
+            await request.Stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            var meme = MimeDetective.InMemory.MimeExtensions.DetectMimeType(ms);
+            if (meme == null && fileExtension != ".txt")
+                throw new BadRequestExceptions("محتوای فایل با فرمت فایل مرتبط نیست");
+
+            if (meme != null)
             {
-
-                await request.Stream.CopyToAsync(ms);
-
-                ms.Position = 0;
-
-                var meme = MimeDetective.InMemory.MimeExtensions.DetectMimeType(ms);
-                if (meme == null && fileExtension!=".txt")
+                if (fileExtension == ".zip")
                 {
-                    throw new BadRequestExceptions("محتوای فایل با فرمت فایل مرتبط نیست");
-                }
-                if (meme != null)
-                {
-                    if (fileExtension == ".zip")
-                    {
-                        if (meme.Mime != "application/x-compressed")
-                            throw new BadRequestExceptions("محتوای فایل صحیح نیست");
-                    }
-                    else if (!MimeMapping.MimeUtility.TypeMap.Any(a => a.Key == fileExtension.Replace(".", "") && a.Value == meme.Mime))
+                    if (meme.Mime != "application/x-compressed" && meme.Mime != "application/zip")
                         throw new BadRequestExceptions("محتوای فایل صحیح نیست");
                 }
-                //var postedFileExtension = fileExtension.Replace(".", "");
-                //var fileType = MimeDetective.InMemory.MimeExtensions.DetectMimeType(request.Stream);
-                //if (!MimeMapping.MimeUtility.TypeMap.Any(a => a.Key == postedFileExtension && a.Value == fileType.Mime))
-                //    throw new BadRequestExceptions("محتوای فایل صحیح نیست");
+                else if (!MimeMapping.MimeUtility.TypeMap.Any(a =>
+                             a.Key == fileExtension.Replace(".", "") && a.Value == meme.Mime))
+                {
+                    // Soft-fail for common image MIME aliases rather than hard 500/400 noise.
+                    var isImage = profile.Type == FileTypeId.Image
+                                  && meme.Mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                    if (!isImage)
+                        throw new BadRequestExceptions("محتوای فایل صحیح نیست");
+                }
             }
 
-
-
-
-
-            //try
-            //{
-            //    using (MemoryStream ms = new MemoryStream())
-            //    {
-            //        ms.Position = 0;
-            //        var mimeType = GetMimeType(ms, fileExtension);
-            //        if (!MimeMapping.MimeUtility.TypeMap.Any(a => a.Key == fileExtension.Replace(".", "") && a.Value == mimeType))
-            //            throw new BadRequestExceptions("محتوای فایل صحیح نیست");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.LogError("MimeUtility Raised Exception", ex);
-            //}
+            ms.Position = 0;
 
             var fileId = Guid.NewGuid();
             var fileLink = _linkMaker.MakeLink(fileId.ToString(), "File/Download");
-            var savedFileName = await _fileManager.SaveFile(request.Stream, fileId, fileExtension, request.IsEncrypted);
+            var savedFileName = await _fileManager.SaveFile(ms, fileId, fileExtension, request.IsEncrypted);
 
             var file = new Domain.Entities.File()
             {
@@ -139,7 +118,7 @@ namespace FileManager.Infrastructure.Services
                 CreatedAt = _dateTime.Now,
                 FileSize = request.Size,
                 IsEncrypted = request.IsEncrypted,
-                RequestIP = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()
+                RequestIP = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
             };
 
             dbContext.Files.Add(file);

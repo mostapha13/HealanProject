@@ -1,4 +1,5 @@
 using Healan.Application.Booking.Dtos;
+using Healan.Application.Booking.Services;
 using Healan.Application.Common.Interfaces;
 using Healan.Application.Portal.Services;
 using Healan.Domain.Booking.Enums;
@@ -185,7 +186,7 @@ public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuer
         if (national.Length == 10)
             q = q.Where(x => x.NationalCode == national);
 
-        return await q.OrderBy(x => x.Slot.StartAt)
+        var items = await q.OrderBy(x => x.Slot.StartAt)
             .Select(x => new AppointmentBookingDto
             {
                 AppointmentBookingId = x.AppointmentBookingId,
@@ -204,10 +205,33 @@ public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuer
                 CreatedAt = x.CreatedAt,
                 StartAt = x.Slot.StartAt,
                 EndAt = x.Slot.EndAt,
-                RequestedServiceTypeIds = x.RequestedServices.Select(s => s.ServiceTypeId).ToList(),
-                RequestedServiceTitles = x.RequestedServices.Select(s => s.Title).ToList(),
             })
             .ToListAsync(cancellationToken);
+
+        if (items.Count == 0)
+            return items;
+
+        var ids = items.Select(x => x.AppointmentBookingId).ToList();
+        var services = await _db.AppointmentBookings.AsNoTracking()
+            .Where(x => ids.Contains(x.AppointmentBookingId))
+            .Select(x => new
+            {
+                x.AppointmentBookingId,
+                Ids = x.RequestedServices.Select(s => s.ServiceTypeId).ToArray(),
+                Titles = x.RequestedServices.Select(s => s.Title).ToArray(),
+            })
+            .ToListAsync(cancellationToken);
+
+        var map = services.ToDictionary(x => x.AppointmentBookingId);
+        foreach (var item in items)
+        {
+            if (!map.TryGetValue(item.AppointmentBookingId, out var svc))
+                continue;
+            item.RequestedServiceTypeIds = svc.Ids.ToList();
+            item.RequestedServiceTitles = svc.Titles.ToList();
+        }
+
+        return items;
     }
 }
 
@@ -219,13 +243,13 @@ public class BookingOtpRequestCommand : IRequest<object>
 public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequestCommand, object>
 {
     private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(5);
-    private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(90);
-    private readonly IMemoryCache _cache;
+    private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(60);
+    private readonly IBookingOtpStore _otpStore;
     private readonly IPortalSmsSender _smsSender;
 
-    public BookingOtpRequestCommandHandler(IMemoryCache cache, IPortalSmsSender smsSender)
+    public BookingOtpRequestCommandHandler(IBookingOtpStore otpStore, IPortalSmsSender smsSender)
     {
-        _cache = cache;
+        _otpStore = otpStore;
         _smsSender = smsSender;
     }
 
@@ -235,31 +259,10 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
         if (phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             throw new BadRequestExceptions("شماره موبایل معتبر نیست (مثال: 09123456789)");
 
-        var otpKey = $"booking_otp_{phone}";
-        var metaKey = $"booking_otp_meta_{phone}";
-        var cooldownKey = $"booking_otp_cd_{phone}";
-
-        if (_cache.TryGetValue(otpKey, out string? existingCode)
-            && !string.IsNullOrWhiteSpace(existingCode)
-            && _cache.TryGetValue(metaKey, out OtpMeta? meta)
-            && meta != null
-            && meta.ExpiresAtUtc > DateTime.UtcNow)
-        {
-            var remaining = (int)Math.Ceiling((meta.ExpiresAtUtc - DateTime.UtcNow).TotalSeconds);
-            return new
-            {
-                sent = true,
-                reused = true,
-                expiresInSeconds = Math.Max(1, remaining),
-                phoneMasked = RagQuotaHelper.MaskPhone(phone),
-            };
-        }
-
-        if (_cache.TryGetValue(cooldownKey, out _))
+        if (await _otpStore.IsInCooldownAsync(phone, cancellationToken))
             throw new BadRequestExceptions("لطفاً کمی صبر کنید و دوباره تلاش کنید.");
 
         var code = Random.Shared.Next(100000, 999999).ToString();
-        var expiresAt = DateTime.UtcNow.Add(OtpTtl);
 
         var (ok, error) = await _smsSender.SendAsync(
             phone,
@@ -269,20 +272,16 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
         if (!ok)
             throw new BadRequestExceptions(error ?? "ارسال پیامک ناموفق بود.");
 
-        _cache.Set(otpKey, code, OtpTtl);
-        _cache.Set(metaKey, new OtpMeta(expiresAt), OtpTtl);
-        _cache.Set(cooldownKey, true, ResendCooldown);
+        await _otpStore.SetAsync(phone, code, OtpTtl, cancellationToken);
+        await _otpStore.SetCooldownAsync(phone, ResendCooldown, cancellationToken);
 
         return new
         {
             sent = true,
-            reused = false,
             expiresInSeconds = (int)OtpTtl.TotalSeconds,
             phoneMasked = RagQuotaHelper.MaskPhone(phone),
         };
     }
-
-    private sealed record OtpMeta(DateTime ExpiresAtUtc);
 }
 
 public class BookingOtpVerifyCommand : IRequest<object>
@@ -293,12 +292,12 @@ public class BookingOtpVerifyCommand : IRequest<object>
 
 public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, object>
 {
-    private readonly IMemoryCache _cache;
+    private readonly IBookingOtpStore _otpStore;
     private readonly IMediator _mediator;
 
-    public BookingOtpVerifyCommandHandler(IMemoryCache cache, IMediator mediator)
+    public BookingOtpVerifyCommandHandler(IBookingOtpStore otpStore, IMediator mediator)
     {
-        _cache = cache;
+        _otpStore = otpStore;
         _mediator = mediator;
     }
 
@@ -309,20 +308,18 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
 
         if (phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             throw new BadRequestExceptions("شماره موبایل معتبر نیست.");
-        if (code.Length != 6)
-            throw new BadRequestExceptions("کد تأیید باید ۶ رقم باشد.");
+        if (code.Length < 4 || code.Length > 8)
+            throw new BadRequestExceptions("کد تأیید نامعتبر است.");
 
-        var otpKey = $"booking_otp_{phone}";
-        if (!_cache.TryGetValue(otpKey, out string? expected)
-            || string.IsNullOrWhiteSpace(expected)
-            || !string.Equals(RagQuotaHelper.ToAsciiDigits(expected), code, StringComparison.Ordinal))
-            throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است.");
+        var stored = await _otpStore.TryGetAsync(phone, cancellationToken);
+        var expected = RagQuotaHelper.ToAsciiDigits(stored.Code);
+        if (!stored.Found || string.IsNullOrWhiteSpace(expected) || !string.Equals(expected, code, StringComparison.Ordinal))
+            throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است. دوباره درخواست کد دهید.");
 
-        _cache.Remove(otpKey);
-        _cache.Remove($"booking_otp_meta_{phone}");
+        await _otpStore.RemoveAsync(phone, cancellationToken);
 
         var token = Guid.NewGuid().ToString("N");
-        BookingSessionGuard.Store(_cache, token, phone);
+        await _otpStore.SetSessionAsync(token, phone, TimeSpan.FromMinutes(30), cancellationToken);
 
         var patient = await _mediator.Send(new BookingLookupPatientQuery { PhoneNumber = phone }, cancellationToken);
 
@@ -339,22 +336,17 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
 
 public static class BookingSessionGuard
 {
-    public static void Store(IMemoryCache cache, string token, string phoneNumber) =>
-        cache.Set($"booking_session_{token}", new BookingSession(RagQuotaHelper.NormalizePhone(phoneNumber)), TimeSpan.FromMinutes(30));
-
-    public static void Ensure(IMemoryCache cache, string? bookingToken, string phoneNumber)
+    public static async Task EnsureAsync(IBookingOtpStore store, string? bookingToken, string phoneNumber, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(bookingToken))
             throw new BadRequestExceptions("جلسه تأیید منقضی شده است. دوباره کد بگیرید.");
 
-        var key = $"booking_session_{bookingToken.Trim()}";
-        if (!cache.TryGetValue(key, out BookingSession? session) || session is null)
+        var sessionPhone = await store.GetSessionPhoneAsync(bookingToken.Trim(), cancellationToken);
+        if (string.IsNullOrWhiteSpace(sessionPhone))
             throw new BadRequestExceptions("جلسه تأیید منقضی شده است. دوباره کد بگیرید.");
 
         var phone = RagQuotaHelper.NormalizePhone(phoneNumber);
-        if (!string.Equals(session.PhoneNumber, phone, StringComparison.Ordinal))
+        if (!string.Equals(RagQuotaHelper.NormalizePhone(sessionPhone), phone, StringComparison.Ordinal))
             throw new BadRequestExceptions("اطلاعات با جلسه تأیید هم‌خوانی ندارد.");
     }
-
-    private sealed record BookingSession(string PhoneNumber);
 }

@@ -172,6 +172,7 @@ public class AppointmentBookingListQueryHandler : IRequestHandler<AppointmentBoo
             q = q.Where(x => x.FirstName.Contains(f) || x.LastName.Contains(f) || x.NationalCode.Contains(f) || x.PhoneNumber.Contains(f));
         }
 
+        // Avoid EF translation failure on collection .ToList() inside Select.
         var projected = q.OrderByDescending(x => x.Slot.StartAt).Select(x => new AppointmentBookingDto
         {
             AppointmentBookingId = x.AppointmentBookingId,
@@ -190,10 +191,32 @@ public class AppointmentBookingListQueryHandler : IRequestHandler<AppointmentBoo
             CreatedAt = x.CreatedAt,
             StartAt = x.Slot.StartAt,
             EndAt = x.Slot.EndAt,
-            RequestedServiceTypeIds = x.RequestedServices.Select(s => s.ServiceTypeId).ToList(),
-            RequestedServiceTitles = x.RequestedServices.Select(s => s.Title).ToList(),
         });
 
-        return await projected.PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        var page = await projected.PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        if (page.Items.Count == 0)
+            return page;
+
+        var ids = page.Items.Select(x => x.AppointmentBookingId).ToList();
+        var services = await _db.AppointmentBookings.AsNoTracking()
+            .Where(x => ids.Contains(x.AppointmentBookingId))
+            .Select(x => new
+            {
+                x.AppointmentBookingId,
+                Ids = x.RequestedServices.Select(s => s.ServiceTypeId).ToArray(),
+                Titles = x.RequestedServices.Select(s => s.Title).ToArray(),
+            })
+            .ToListAsync(cancellationToken);
+
+        var map = services.ToDictionary(x => x.AppointmentBookingId);
+        foreach (var item in page.Items)
+        {
+            if (!map.TryGetValue(item.AppointmentBookingId, out var svc))
+                continue;
+            item.RequestedServiceTypeIds = svc.Ids.ToList();
+            item.RequestedServiceTitles = svc.Titles.ToList();
+        }
+
+        return page;
     }
 }

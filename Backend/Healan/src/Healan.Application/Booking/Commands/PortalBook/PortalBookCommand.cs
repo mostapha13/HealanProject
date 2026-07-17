@@ -1,8 +1,8 @@
 using Healan.Application.Booking.Commands.BookingMutations;
 using Healan.Application.Booking.Dtos;
 using Healan.Application.Booking.Queries.PortalBooking;
+using Healan.Application.Booking.Services;
 using MediatR;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Healan.Application.Booking.Commands.PortalBook;
 
@@ -21,18 +21,18 @@ public class PortalBookCommand : IRequest<AppointmentBookingDto>
 public class PortalBookCommandHandler : IRequestHandler<PortalBookCommand, AppointmentBookingDto>
 {
     private readonly IMediator _mediator;
-    private readonly IMemoryCache _cache;
+    private readonly IBookingOtpStore _otpStore;
 
-    public PortalBookCommandHandler(IMediator mediator, IMemoryCache cache)
+    public PortalBookCommandHandler(IMediator mediator, IBookingOtpStore otpStore)
     {
         _mediator = mediator;
-        _cache = cache;
+        _otpStore = otpStore;
     }
 
-    public Task<AppointmentBookingDto> Handle(PortalBookCommand request, CancellationToken cancellationToken)
+    public async Task<AppointmentBookingDto> Handle(PortalBookCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
-        return _mediator.Send(new BookingCreateCommand
+        await BookingSessionGuard.EnsureAsync(_otpStore, request.BookingToken, request.PhoneNumber, cancellationToken);
+        return await _mediator.Send(new BookingCreateCommand
         {
             AppointmentSlotId = request.AppointmentSlotId,
             NationalCode = request.NationalCode,
@@ -57,18 +57,18 @@ public class PortalCancelBookingCommand : IRequest<object>
 public class PortalCancelBookingCommandHandler : IRequestHandler<PortalCancelBookingCommand, object>
 {
     private readonly IMediator _mediator;
-    private readonly IMemoryCache _cache;
+    private readonly IBookingOtpStore _otpStore;
 
-    public PortalCancelBookingCommandHandler(IMediator mediator, IMemoryCache cache)
+    public PortalCancelBookingCommandHandler(IMediator mediator, IBookingOtpStore otpStore)
     {
         _mediator = mediator;
-        _cache = cache;
+        _otpStore = otpStore;
     }
 
-    public Task<object> Handle(PortalCancelBookingCommand request, CancellationToken cancellationToken)
+    public async Task<object> Handle(PortalCancelBookingCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
-        return _mediator.Send(new BookingCancelCommand
+        await BookingSessionGuard.EnsureAsync(_otpStore, request.BookingToken, request.PhoneNumber, cancellationToken);
+        return await _mediator.Send(new BookingCancelCommand
         {
             AppointmentBookingId = request.AppointmentBookingId,
             NationalCode = request.NationalCode,
@@ -90,18 +90,18 @@ public class PortalRescheduleBookingCommand : IRequest<AppointmentBookingDto>
 public class PortalRescheduleBookingCommandHandler : IRequestHandler<PortalRescheduleBookingCommand, AppointmentBookingDto>
 {
     private readonly IMediator _mediator;
-    private readonly IMemoryCache _cache;
+    private readonly IBookingOtpStore _otpStore;
 
-    public PortalRescheduleBookingCommandHandler(IMediator mediator, IMemoryCache cache)
+    public PortalRescheduleBookingCommandHandler(IMediator mediator, IBookingOtpStore otpStore)
     {
         _mediator = mediator;
-        _cache = cache;
+        _otpStore = otpStore;
     }
 
-    public Task<AppointmentBookingDto> Handle(PortalRescheduleBookingCommand request, CancellationToken cancellationToken)
+    public async Task<AppointmentBookingDto> Handle(PortalRescheduleBookingCommand request, CancellationToken cancellationToken)
     {
-        BookingSessionGuard.Ensure(_cache, request.BookingToken, request.PhoneNumber);
-        return _mediator.Send(new BookingRescheduleCommand
+        await BookingSessionGuard.EnsureAsync(_otpStore, request.BookingToken, request.PhoneNumber, cancellationToken);
+        return await _mediator.Send(new BookingRescheduleCommand
         {
             AppointmentBookingId = request.AppointmentBookingId,
             NewAppointmentSlotId = request.NewAppointmentSlotId,

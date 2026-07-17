@@ -1,5 +1,6 @@
 ﻿using Healan.Application.Common.Interfaces;
 using Healan.Infrastructure.Context;
+using Healan.Infrastructure.Booking;
 using Healan.Infrastructure.Portal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,8 @@ namespace Healan.Infrastructure
 
             services.AddScoped<Healan.Application.Portal.Services.IRagChatLogPublisher, RagChatLogPublisher>();
             services.AddScoped<Healan.Application.Portal.Services.IRagQuotaCounter, RagQuotaCounter>();
+            services.AddSingleton<Healan.Application.Booking.Services.MemoryBookingOtpStore>();
+            services.AddSingleton<Healan.Application.Booking.Services.IBookingOtpStore, RedisBookingOtpStore>();
             services.AddHostedService<RagChatLogConsumerService>();
         }
 
