@@ -24,9 +24,10 @@ public static class BookingTimeHelper
 
     public static string FormatTime(TimeSpan ts)
     {
-        if (ts.Hours == 23 && ts.Minutes >= 59)
+        // TimeSpan custom format has `hh` (0–23), NOT `HH` (DateTime-only) — `HH` throws FormatException.
+        if (ts.Days > 0 || (ts.Hours == 23 && ts.Minutes >= 59))
             return "24:00";
-        return ts.ToString(@"HH\:mm");
+        return ts.ToString(@"hh\:mm");
     }
 
     public static DateTime Combine(DateOnly date, TimeSpan time) =>

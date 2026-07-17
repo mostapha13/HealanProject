@@ -102,14 +102,15 @@ export default function BookingPage() {
   useEffect(() => {
     if (step !== 'book') return;
     void bookingOpenSlots({ doctorId: form.doctorId || undefined })
-      .then((list) => setSlots(list ?? []))
+      .then((list) => setSlots(Array.isArray(list) ? list : []))
       .catch(() => setSlots([]));
   }, [step, form.doctorId]);
 
   const groupedSlots = useMemo(() => {
     const map = new Map<string, PortalOpenSlot[]>();
     for (const slot of slots) {
-      const day = slot.startAt.slice(0, 10);
+      if (!slot?.startAt) continue;
+      const day = String(slot.startAt).slice(0, 10);
       const list = map.get(day) ?? [];
       list.push(slot);
       map.set(day, list);
@@ -144,8 +145,11 @@ export default function BookingPage() {
       const code = toAsciiDigits(otpCode);
       if (code.length < 4) throw new Error('کد تأیید را کامل وارد کنید.');
       const res = await bookingOtpVerify({ phoneNumber: phone, code });
+      if (!res?.bookingToken) throw new Error('تأیید انجام نشد. دوباره تلاش کنید.');
+
+      const verifiedPhone = toAsciiDigits(res.phoneNumber || phone);
       setBookingToken(res.bookingToken);
-      setForm((prev) => ({ ...prev, phoneNumber: res.phoneNumber || phone }));
+      setForm((prev) => ({ ...prev, phoneNumber: verifiedPhone }));
 
       const patient = res.patient;
       if (patient?.found) {
@@ -155,14 +159,20 @@ export default function BookingPage() {
           firstName: patient.firstName || prev.firstName,
           lastName: patient.lastName || prev.lastName,
           nationalCode: toAsciiDigits(patient.nationalCode || '') || prev.nationalCode,
-          phoneNumber: toAsciiDigits(patient.phoneNumber || '') || prev.phoneNumber,
+          phoneNumber: toAsciiDigits(patient.phoneNumber || '') || verifiedPhone,
         }));
       } else {
         setPatientKnown(false);
       }
 
-      const mine = await bookingMyList(res.phoneNumber || phone);
-      setMyBookings(mine ?? []);
+      // Don't block the booking step if "my list" fails.
+      try {
+        const mine = await bookingMyList(verifiedPhone);
+        setMyBookings(Array.isArray(mine) ? mine : []);
+      } catch {
+        setMyBookings([]);
+      }
+
       setStep('book');
     } catch (e: unknown) {
       setError(apiErrorMessage(e, 'کد تأیید نادرست است'));
@@ -247,7 +257,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v7-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v8-booking</span>
           <h1 className="portal-booking__title">رزرو آنلاین نوبت قلب</h1>
           <p className="portal-booking__lead">
             فقط با شماره موبایل وارد شوید، کد پیامک را تأیید کنید، سپس زمان مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.

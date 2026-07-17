@@ -24,19 +24,32 @@ public class ScheduleTemplateListQueryHandler : IRequestHandler<ScheduleTemplate
         if (request.DoctorId is > 0)
             q = q.Where(x => x.DoctorId == request.DoctorId);
 
-        return await q.OrderBy(x => x.DoctorId).ThenBy(x => x.DayOfWeek)
-            .Select(x => new ScheduleTemplateDto
+        // Materialize first — custom FormatTime is not EF-translatable.
+        var rows = await q.OrderBy(x => x.DoctorId).ThenBy(x => x.DayOfWeek)
+            .Select(x => new
             {
-                DoctorScheduleTemplateId = x.DoctorScheduleTemplateId,
-                DoctorId = x.DoctorId,
+                x.DoctorScheduleTemplateId,
+                x.DoctorId,
                 DoctorName = (x.Doctor.FirstName + " " + x.Doctor.LastName).Trim(),
-                DayOfWeek = x.DayOfWeek,
-                StartTime = Booking.Services.BookingTimeHelper.FormatTime(x.StartTime),
-                EndTime = Booking.Services.BookingTimeHelper.FormatTime(x.EndTime),
-                VisitDurationMinutes = x.VisitDurationMinutes,
-                IsActive = x.IsActive,
+                x.DayOfWeek,
+                x.StartTime,
+                x.EndTime,
+                x.VisitDurationMinutes,
+                x.IsActive,
             })
             .ToListAsync(cancellationToken);
+
+        return rows.Select(x => new ScheduleTemplateDto
+        {
+            DoctorScheduleTemplateId = x.DoctorScheduleTemplateId,
+            DoctorId = x.DoctorId,
+            DoctorName = x.DoctorName,
+            DayOfWeek = x.DayOfWeek,
+            StartTime = Booking.Services.BookingTimeHelper.FormatTime(x.StartTime),
+            EndTime = Booking.Services.BookingTimeHelper.FormatTime(x.EndTime),
+            VisitDurationMinutes = x.VisitDurationMinutes,
+            IsActive = x.IsActive,
+        }).ToList();
     }
 }
 
@@ -60,19 +73,31 @@ public class ScheduleExceptionListQueryHandler : IRequestHandler<ScheduleExcepti
         if (DateOnly.TryParse(request.ToDate, out var to))
             q = q.Where(x => x.Date <= to);
 
-        return await q.OrderBy(x => x.Date)
-            .Select(x => new ScheduleExceptionDto
+        var rows = await q.OrderBy(x => x.Date)
+            .Select(x => new
             {
-                DoctorScheduleExceptionId = x.DoctorScheduleExceptionId,
-                DoctorId = x.DoctorId,
-                Date = x.Date.ToString("yyyy-MM-dd"),
-                IsClosed = x.IsClosed,
-                StartTime = x.StartTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.StartTime.Value),
-                EndTime = x.EndTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.EndTime.Value),
-                VisitDurationMinutes = x.VisitDurationMinutes,
-                Note = x.Note,
+                x.DoctorScheduleExceptionId,
+                x.DoctorId,
+                x.Date,
+                x.IsClosed,
+                x.StartTime,
+                x.EndTime,
+                x.VisitDurationMinutes,
+                x.Note,
             })
             .ToListAsync(cancellationToken);
+
+        return rows.Select(x => new ScheduleExceptionDto
+        {
+            DoctorScheduleExceptionId = x.DoctorScheduleExceptionId,
+            DoctorId = x.DoctorId,
+            Date = x.Date.ToString("yyyy-MM-dd"),
+            IsClosed = x.IsClosed,
+            StartTime = x.StartTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.StartTime.Value),
+            EndTime = x.EndTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.EndTime.Value),
+            VisitDurationMinutes = x.VisitDurationMinutes,
+            Note = x.Note,
+        }).ToList();
     }
 }
 
