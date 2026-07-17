@@ -1,86 +1,134 @@
-﻿using AutoMapper;
+﻿using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessForm;
 using IdentityServer.Domain.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Share.Application.Common.Models;
+
 namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
 {
-
     public class ListAccessMenuQuery : AbstractRequestBase<List<AccessMenuFullResponse>>
     {
         public int AccessSystemId { get; set; }
     }
+
     public class ListAccessMenuQueryHandler : IRequestHandler<ListAccessMenuQuery, List<AccessMenuFullResponse>>
     {
+        private static readonly Dictionary<int, string> FolderTitles = new()
+        {
+            [5102] = "مدیریت کلینیک",
+            [5108] = "اطلاعات پایه",
+            [5113] = "مدیریت کاربران",
+            [5120] = "محتوای سایت",
+        };
+
         private readonly ApplicationDbContext _applicationDbContext;
-        private readonly IMapper _mapper;
-        public ListAccessMenuQueryHandler(ApplicationDbContext applicationDbContext, IMapper mapper)
+        private readonly ILogger<ListAccessMenuQueryHandler> _logger;
+
+        public ListAccessMenuQueryHandler(
+            ApplicationDbContext applicationDbContext,
+            ILogger<ListAccessMenuQueryHandler> logger)
         {
             _applicationDbContext = applicationDbContext;
-            _mapper = mapper;
+            _logger = logger;
         }
-        public async Task<List<AccessMenuFullResponse>> Handle(ListAccessMenuQuery request, CancellationToken cancellationToken)
+
+        public async Task<List<AccessMenuFullResponse>> Handle(
+            ListAccessMenuQuery request,
+            CancellationToken cancellationToken)
         {
-            var allMenus = await _applicationDbContext.AccessMenus
-                .Include(a => a.AccessForm)
-                .AsNoTracking()
-                .OrderBy(o => o.Order)
-                .ToListAsync(cancellationToken);
-
-            var allowedMenuIds = allMenus
-                .Where(m => m.AccessForm != null && m.AccessForm.AccessSystemId == request.AccessSystemId)
-                .Select(m => m.AccessMenuId)
-                .ToHashSet();
-
-            if (allowedMenuIds.Count == 0)
-                return [];
-
-            IncludeAncestors(allMenus, allowedMenuIds);
-
-            var selectedMenus = allMenus
-                .Where(m => allowedMenuIds.Contains(m.AccessMenuId))
-                .ToList();
-
-            var result = BuildTree(selectedMenus);
-            foreach (var item in result)
+            try
             {
-                SetLevel(item, 0);
-            }
+                // Projection only — avoid AutoMapper on EF graph (Parent/Children fix-up → stack overflow / 500)
+                var flat = await _applicationDbContext.AccessMenus
+                    .AsNoTracking()
+                    .Select(m => new
+                    {
+                        m.AccessMenuId,
+                        m.AccessFormId,
+                        m.ParentRef,
+                        m.Order,
+                        FormId = m.AccessForm != null ? m.AccessForm.AccessFormId : (int?)null,
+                        FormTitle = m.AccessForm != null ? m.AccessForm.FormTitle : null,
+                        FormUrl = m.AccessForm != null ? m.AccessForm.URL : null,
+                        FormSystemId = m.AccessForm != null ? m.AccessForm.AccessSystemId : (int?)null,
+                    })
+                    .OrderBy(o => o.Order)
+                    .ToListAsync(cancellationToken);
 
-            return result;
+                var allowedMenuIds = flat
+                    .Where(m => m.FormSystemId == request.AccessSystemId)
+                    .Select(m => m.AccessMenuId)
+                    .ToHashSet();
+
+                if (allowedMenuIds.Count == 0)
+                    return [];
+
+                IncludeAncestors(flat.Select(m => (m.AccessMenuId, m.ParentRef)).ToList(), allowedMenuIds);
+
+                var selected = flat
+                    .Where(m => allowedMenuIds.Contains(m.AccessMenuId))
+                    .Select(m => new AccessMenuFullResponse
+                    {
+                        AccessMenuId = m.AccessMenuId,
+                        AccessFormId = m.AccessFormId,
+                        ParentRef = m.ParentRef,
+                        Order = m.Order,
+                        Level = 0,
+                        Children = new List<AccessMenuFullResponse>(),
+                        AccessForm = m.FormId.HasValue
+                            ? new AccessFormResponse
+                            {
+                                AccessFormId = m.FormId.Value,
+                                FormTitle = m.FormTitle
+                                    ?? FolderTitles.GetValueOrDefault(m.AccessMenuId)
+                                    ?? string.Empty,
+                                URL = m.FormUrl ?? string.Empty,
+                            }
+                            : null,
+                    })
+                    .ToList();
+
+                var result = BuildTree(selected);
+                foreach (var item in result)
+                    SetLevel(item, 0);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "ListAccessMenuQuery failed. AccessSystemId={AccessSystemId}",
+                    request.AccessSystemId);
+                throw;
+            }
         }
 
         private static void IncludeAncestors(
-            List<IdentityServer.Domain.Entities.AccessMenu> allMenus,
+            List<(int AccessMenuId, int? ParentRef)> menus,
             HashSet<int> selectedIds)
         {
-            var menuById = allMenus.ToDictionary(m => m.AccessMenuId);
+            var menuById = menus.ToDictionary(m => m.AccessMenuId, m => m.ParentRef);
             var queue = new Queue<int>(selectedIds);
 
             while (queue.Count > 0)
             {
                 var menuId = queue.Dequeue();
-                if (!menuById.TryGetValue(menuId, out var menu) || !menu.ParentRef.HasValue)
+                if (!menuById.TryGetValue(menuId, out var parentRef) || !parentRef.HasValue)
                     continue;
 
-                var parentId = menu.ParentRef.Value;
+                var parentId = parentRef.Value;
                 if (selectedIds.Add(parentId))
-                {
                     queue.Enqueue(parentId);
-                }
             }
         }
 
-        private List<AccessMenuFullResponse> BuildTree(List<IdentityServer.Domain.Entities.AccessMenu> menus)
+        private static List<AccessMenuFullResponse> BuildTree(List<AccessMenuFullResponse> menus)
         {
-            var mapped = menus
-                .Select(m => _mapper.Map<AccessMenuFullResponse>(m))
-                .ToDictionary(m => m.AccessMenuId);
-
+            var mapped = menus.ToDictionary(m => m.AccessMenuId);
             foreach (var item in mapped.Values)
-            {
-                item.Children = [];
-            }
+                item.Children = new List<AccessMenuFullResponse>();
 
             var roots = new List<AccessMenuFullResponse>();
             foreach (var item in mapped.Values.OrderBy(i => i.Order))
@@ -96,17 +144,19 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
 
             return roots.OrderBy(r => r.Order).ToList();
         }
-        private void SetLevel(AccessMenuFullResponse mainMenuResponse, int level)
+
+        private static void SetLevel(AccessMenuFullResponse menu, int level)
         {
-            if (mainMenuResponse == null)
+            if (menu == null)
                 return;
+
             level++;
-            mainMenuResponse.Level = level;
-            if (mainMenuResponse.Children != null)
-                foreach (var child in mainMenuResponse.Children)
-                {
-                    SetLevel(child, mainMenuResponse.Level);
-                }
+            menu.Level = level;
+            if (menu.Children == null)
+                return;
+
+            foreach (var child in menu.Children)
+                SetLevel(child, menu.Level);
         }
     }
 }

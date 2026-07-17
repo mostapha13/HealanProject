@@ -1,17 +1,18 @@
-﻿using AutoMapper;
+﻿using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessForm;
 using IdentityServer.Domain.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Share.Application.Common.Models;
 
 namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
 {
-
     public class ListAccessRoleQuery : AbstractRequestBase<AccessRoleFullResponse>
     {
         public int AccessSystemId { get; set; }
         public Guid? RoleId { get; set; }
     }
+
     public class ListAccessRoleQueryHandler : IRequestHandler<ListAccessRoleQuery, AccessRoleFullResponse>
     {
         private static readonly Dictionary<int, string> FolderTitles = new()
@@ -23,89 +24,138 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
         };
 
         private readonly ApplicationDbContext _applicationDbContext;
-        private readonly IMapper _mapper;
-        public ListAccessRoleQueryHandler(ApplicationDbContext applicationDbContext, IMapper mapper)
+        private readonly ILogger<ListAccessRoleQueryHandler> _logger;
+
+        public ListAccessRoleQueryHandler(
+            ApplicationDbContext applicationDbContext,
+            ILogger<ListAccessRoleQueryHandler> logger)
         {
             _applicationDbContext = applicationDbContext;
-            _mapper = mapper;
+            _logger = logger;
         }
-        public async Task<AccessRoleFullResponse> Handle(ListAccessRoleQuery request, CancellationToken cancellationToken)
+
+        public async Task<AccessRoleFullResponse> Handle(
+            ListAccessRoleQuery request,
+            CancellationToken cancellationToken)
         {
             if (!request.RoleId.HasValue)
-                return null;
+                return null!;
 
-            var allMenus = await _applicationDbContext.AccessMenus
-                .Include(a => a.AccessForm)
-                .AsNoTracking()
-                .OrderBy(o => o.Order)
-                .ToListAsync(cancellationToken);
-
-            var allowedMenuIds = allMenus
-                .Where(m => m.AccessForm != null && m.AccessForm.AccessSystemId == request.AccessSystemId)
-                .Select(m => m.AccessMenuId)
-                .ToHashSet();
-
-            if (allowedMenuIds.Count == 0)
+            try
             {
+                var flat = await _applicationDbContext.AccessMenus
+                    .AsNoTracking()
+                    .Select(m => new
+                    {
+                        m.AccessMenuId,
+                        m.AccessFormId,
+                        m.ParentRef,
+                        m.Order,
+                        FormId = m.AccessForm != null ? m.AccessForm.AccessFormId : (int?)null,
+                        FormTitle = m.AccessForm != null ? m.AccessForm.FormTitle : null,
+                        FormUrl = m.AccessForm != null ? m.AccessForm.URL : null,
+                        FormSystemId = m.AccessForm != null ? m.AccessForm.AccessSystemId : (int?)null,
+                    })
+                    .OrderBy(o => o.Order)
+                    .ToListAsync(cancellationToken);
+
+                var allowedMenuIds = flat
+                    .Where(m => m.FormSystemId == request.AccessSystemId)
+                    .Select(m => m.AccessMenuId)
+                    .ToHashSet();
+
+                if (allowedMenuIds.Count == 0)
+                {
+                    return new AccessRoleFullResponse
+                    {
+                        RoleId = request.RoleId.Value,
+                        Items = [],
+                    };
+                }
+
+                IncludeAncestors(flat.Select(m => (m.AccessMenuId, m.ParentRef)).ToList(), allowedMenuIds);
+
+                var selected = flat
+                    .Where(m => allowedMenuIds.Contains(m.AccessMenuId))
+                    .Select(m => new AccessRoleFullResponseItem
+                    {
+                        AccessMenuId = m.AccessMenuId,
+                        AccessFormId = m.AccessFormId,
+                        ParentRef = m.ParentRef,
+                        Order = m.Order,
+                        Level = 0,
+                        Children = new List<AccessRoleFullResponseItem>(),
+                        AccessForm = m.FormId.HasValue
+                            ? new AccessFormResponse
+                            {
+                                AccessFormId = m.FormId.Value,
+                                FormTitle = m.FormTitle
+                                    ?? FolderTitles.GetValueOrDefault(m.AccessMenuId)
+                                    ?? string.Empty,
+                                URL = m.FormUrl ?? string.Empty,
+                            }
+                            : null,
+                    })
+                    .ToList();
+
+                var result = BuildTree(selected);
+
+                var allAccessRole = await _applicationDbContext.AccessRoles
+                    .AsNoTracking()
+                    .Where(w => w.RoleId == request.RoleId)
+                    .ToListAsync(cancellationToken);
+
+                var accessByMenuId = allAccessRole
+                    .GroupBy(a => a.AccessMenuId)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                foreach (var item in result)
+                {
+                    SetLevel(accessByMenuId, item, 0);
+                    FixAccess(item);
+                }
+
                 return new AccessRoleFullResponse
                 {
                     RoleId = request.RoleId.Value,
-                    Items = [],
+                    Items = result,
                 };
             }
-
-            IncludeAncestors(allMenus, allowedMenuIds);
-            var selectedMenus = allMenus.Where(m => allowedMenuIds.Contains(m.AccessMenuId)).ToList();
-            var result = BuildTree(selectedMenus);
-
-            var allAccessRole = await _applicationDbContext.AccessRoles
-                .AsNoTracking()
-                .Where(w => w.RoleId == request.RoleId)
-                .ToListAsync(cancellationToken);
-
-            var accessByMenuId = allAccessRole.ToDictionary(a => a.AccessMenuId, a => a);
-            foreach (var item in result)
+            catch (Exception ex)
             {
-                SetLevel(accessByMenuId, item, 0);
-                FixAccess(item);
+                _logger.LogError(
+                    ex,
+                    "ListAccessRoleQuery failed. AccessSystemId={AccessSystemId}, RoleId={RoleId}",
+                    request.AccessSystemId,
+                    request.RoleId);
+                throw;
             }
-
-            AccessRoleFullResponse accessRoleFullResponse = new AccessRoleFullResponse();
-            accessRoleFullResponse.RoleId = request.RoleId.Value;
-            accessRoleFullResponse.Items = result;
-            return accessRoleFullResponse;
         }
+
         private static void IncludeAncestors(
-            List<IdentityServer.Domain.Entities.AccessMenu> allMenus,
+            List<(int AccessMenuId, int? ParentRef)> menus,
             HashSet<int> selectedIds)
         {
-            var menuById = allMenus.ToDictionary(m => m.AccessMenuId);
+            var menuById = menus.ToDictionary(m => m.AccessMenuId, m => m.ParentRef);
             var queue = new Queue<int>(selectedIds);
 
             while (queue.Count > 0)
             {
                 var menuId = queue.Dequeue();
-                if (!menuById.TryGetValue(menuId, out var menu) || !menu.ParentRef.HasValue)
+                if (!menuById.TryGetValue(menuId, out var parentRef) || !parentRef.HasValue)
                     continue;
 
-                var parentId = menu.ParentRef.Value;
+                var parentId = parentRef.Value;
                 if (selectedIds.Add(parentId))
-                {
                     queue.Enqueue(parentId);
-                }
             }
         }
 
-        private List<AccessRoleFullResponseItem> BuildTree(List<IdentityServer.Domain.Entities.AccessMenu> menus)
+        private static List<AccessRoleFullResponseItem> BuildTree(List<AccessRoleFullResponseItem> menus)
         {
-            var mapped = menus
-                .Select(m => _mapper.Map<AccessRoleFullResponseItem>(m))
-                .ToDictionary(m => m.AccessMenuId);
-
+            var mapped = menus.ToDictionary(m => m.AccessMenuId);
             foreach (var item in mapped.Values)
-            {
-                item.Children = [];
-            }
+                item.Children = new List<AccessRoleFullResponseItem>();
 
             var roots = new List<AccessRoleFullResponseItem>();
             foreach (var item in mapped.Values.OrderBy(i => i.Order))
@@ -122,42 +172,41 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
             return roots.OrderBy(r => r.Order).ToList();
         }
 
-        private void SetLevel(Dictionary<int, IdentityServer.Domain.Entities.AccessRole> accessByMenuId, AccessRoleFullResponseItem mainMenuResponse, int level)
+        private static void SetLevel(
+            Dictionary<int, IdentityServer.Domain.Entities.AccessRole> accessByMenuId,
+            AccessRoleFullResponseItem menu,
+            int level)
         {
-            if (mainMenuResponse == null)
+            if (menu == null)
                 return;
+
             level++;
-            mainMenuResponse.Level = level;
-            mainMenuResponse.HasAccess = accessByMenuId.ContainsKey(mainMenuResponse.AccessMenuId);
-            mainMenuResponse.HasPersianAccess = accessByMenuId.TryGetValue(mainMenuResponse.AccessMenuId, out var access)
+            menu.Level = level;
+            menu.HasAccess = accessByMenuId.ContainsKey(menu.AccessMenuId);
+            menu.HasPersianAccess = accessByMenuId.TryGetValue(menu.AccessMenuId, out var access)
                 ? access.HasPersianAccess
                 : null;
-            mainMenuResponse.Title = mainMenuResponse.AccessForm?.FormTitle
-                ?? FolderTitles.GetValueOrDefault(mainMenuResponse.AccessMenuId);
-            if (mainMenuResponse.Children != null)
-                foreach (var child in mainMenuResponse.Children)
-                {
-                    SetLevel(accessByMenuId, child, mainMenuResponse.Level);
-                }
-        }
-        private void FixAccess(AccessRoleFullResponseItem mainMenuResponse)
-        {
-            if (mainMenuResponse == null)
+            menu.Title = menu.AccessForm?.FormTitle
+                ?? FolderTitles.GetValueOrDefault(menu.AccessMenuId)
+                ?? string.Empty;
+
+            if (menu.Children == null)
                 return;
 
-            if (mainMenuResponse.Children != null)
-                foreach (var child in mainMenuResponse.Children)
-                {
-                    FixAccess(child);
-                }
+            foreach (var child in menu.Children)
+                SetLevel(accessByMenuId, child, menu.Level);
+        }
 
-            // Container menus have no AccessForm; reflect checked state from children for tree UI only.
-            if (mainMenuResponse.Children != null
-                && mainMenuResponse.Children.Any()
-                && !mainMenuResponse.AccessFormId.HasValue)
-            {
-                mainMenuResponse.HasAccess = mainMenuResponse.Children.All(w => w.HasAccess);
-            }
+        private static void FixAccess(AccessRoleFullResponseItem menu)
+        {
+            if (menu?.Children == null)
+                return;
+
+            foreach (var child in menu.Children)
+                FixAccess(child);
+
+            if (menu.Children.Count > 0 && !menu.AccessFormId.HasValue)
+                menu.HasAccess = menu.Children.All(w => w.HasAccess);
         }
     }
 }

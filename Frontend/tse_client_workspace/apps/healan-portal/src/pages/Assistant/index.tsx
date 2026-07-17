@@ -424,6 +424,12 @@ export default function AssistantPage() {
           onClick={() => navigate('/')}
           aria-label="بازگشت به سایت"
         >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+            <path
+              fill="currentColor"
+              d="M14.5 5.5 9 11l5.5 5.5-1.4 1.4L6.2 11l7.9-7.9 1.4 1.4z"
+            />
+          </svg>
           بازگشت
         </button>
 
@@ -440,11 +446,13 @@ export default function AssistantPage() {
             <h1>دستیار هوشمند مطب</h1>
             <p className="portal-assistant__status">
               <span className="portal-assistant__status-dot" />
-              {quota?.isAuthenticated
-                ? `وارد شده${quota.phoneMasked ? ` · ${quota.phoneMasked}` : ''}`
-                : 'مهمان · پاسخ بر اساس اطلاعات رسمی مطب'}
+              <span className="portal-assistant__status-label">
+                {quota?.isAuthenticated
+                  ? `وارد شده${quota.phoneMasked ? ` · ${quota.phoneMasked}` : ''}`
+                  : 'مهمان · پاسخ بر اساس اطلاعات رسمی مطب'}
+              </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                · build-v4
+                build-v5
               </span>
             </p>
           </div>
@@ -452,8 +460,8 @@ export default function AssistantPage() {
 
         <div className="portal-assistant__quota">
           {quota && (
-            <span className="portal-assistant__quota-count">
-              امروز: {quota.usedCount}/{quota.dailyLimit}
+            <span className="portal-assistant__quota-count" title="سقف سوالات روزانه">
+              {quota.usedCount}/{quota.dailyLimit}
             </span>
           )}
           {quota?.isAuthenticated || getPortalRagToken() ? (
@@ -495,8 +503,11 @@ export default function AssistantPage() {
               <div
                 className={`portal-assistant__bubble portal-assistant__bubble--${msg.role}${
                   msg.streaming ? ' portal-assistant__bubble--streaming' : ''
-                }`}
+                }${msg.id === 'welcome' ? ' portal-assistant__bubble--welcome' : ''}`}
               >
+                {msg.id === 'welcome' && (
+                  <span className="portal-assistant__bubble-label">خوش آمدید</span>
+                )}
                 <span className="portal-assistant__bubble-text">{msg.text}</span>
                 {msg.streaming && <span className="portal-assistant__caret" aria-hidden />}
               </div>
@@ -519,7 +530,15 @@ export default function AssistantPage() {
 
           {showSuggestions && (
             <div className="portal-assistant__suggestions">
-              <p>پیشنهاد سوال:</p>
+              <div className="portal-assistant__suggestions-head">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                  <path
+                    fill="currentColor"
+                    d="M12 2a7 7 0 0 0-4 12.74V18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3.26A7 7 0 0 0 12 2zm0 2a5 5 0 0 1 3.9 8.32l-.4.48V17h-3V12.8l-.4-.48A5 5 0 0 1 12 4z"
+                  />
+                </svg>
+                <p>سوالات پرتکرار</p>
+              </div>
               <div className="portal-assistant__chips">
                 {SUGGESTIONS.map((item) => (
                   <button
@@ -539,7 +558,15 @@ export default function AssistantPage() {
 
       <div className="portal-assistant__composer-wrap">
         {blocked && (
-          <div className="portal-assistant__limit-banner">
+          <div className="portal-assistant__limit-banner" role="alert">
+            <div className="portal-assistant__limit-banner-icon" aria-hidden>
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path
+                  fill="currentColor"
+                  d="M12 2 1 21h22L12 2zm0 4.5L19.5 19h-15L12 6.5zM11 10v5h2v-5h-2zm0 7v2h2v-2h-2z"
+                />
+              </svg>
+            </div>
             <div className="portal-assistant__limit-banner-text">
               سقف سوالات رایگان امروز تمام شد.
               <strong> در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.</strong>
@@ -596,8 +623,33 @@ export default function AssistantPage() {
             aria-label="ورود با موبایل"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>ورود به دستیار هوشمند</h2>
-            <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید. تاریخچه گفتگو حفظ می‌شود.</p>
+            <div className="portal-assistant__modal-head">
+              <div className="portal-assistant__modal-icon" aria-hidden>
+                <svg viewBox="0 0 24 24" width="22" height="22">
+                  <path
+                    fill="currentColor"
+                    d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h2>ورود به دستیار هوشمند</h2>
+                <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید. تاریخچه گفتگو حفظ می‌شود.</p>
+              </div>
+              <button
+                type="button"
+                className="portal-assistant__modal-close"
+                aria-label="بستن"
+                onClick={() => setLoginOpen(false)}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                  <path
+                    fill="currentColor"
+                    d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3 1.4 1.4z"
+                  />
+                </svg>
+              </button>
+            </div>
 
             <label className="portal-assistant__field">
               شماره موبایل
