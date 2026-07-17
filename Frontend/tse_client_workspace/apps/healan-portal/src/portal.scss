@@ -1741,7 +1741,6 @@
 
 .portal-assistant {
   --assistant-max: 780px;
-  --assistant-top-pad: max(10%, env(safe-area-inset-top, 0px));
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -1757,8 +1756,7 @@
     linear-gradient(180deg, #f8f9fc 0%, #eef1f6 100%);
   color: var(--p-text);
   overflow: hidden;
-  /* فضای بالای صفحه — بدون این، هدر و پیام خوش‌آمد زیر لبه مرورگر بریده می‌شود */
-  padding-top: var(--assistant-top-pad);
+  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
   box-sizing: border-box;
@@ -1842,26 +1840,39 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  color: #fff;
-  background: var(--p-primary);
-  box-shadow: 0 6px 16px rgba(239, 57, 78, 0.22);
+  overflow: hidden;
 }
 
 .portal-assistant__avatar {
-  width: 2.65rem;
-  height: 2.65rem;
-  border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  outline: 2px solid rgba(239, 57, 78, 0.12);
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #e8f9fc 0%, #d7f2f7 100%);
+  border: 1.5px solid rgba(25, 191, 211, 0.35);
+  box-shadow: 0 6px 16px rgba(25, 191, 211, 0.18);
 }
 
 .portal-assistant__msg-avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 10px;
-  margin-top: 0.15rem;
-  background: var(--p-accent);
-  box-shadow: 0 4px 12px rgba(25, 191, 211, 0.22);
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 12px;
+  margin-top: 0.1rem;
+  background: linear-gradient(145deg, #e8f9fc 0%, #d7f2f7 100%);
+  border: 1.5px solid rgba(25, 191, 211, 0.3);
+  box-shadow: 0 4px 12px rgba(25, 191, 211, 0.14);
+}
+
+.portal-assistant__msg-avatar--user {
+  background: linear-gradient(145deg, #ffe8ec 0%, #ffd6de 100%);
+  border-color: rgba(239, 57, 78, 0.28);
+  box-shadow: 0 4px 12px rgba(239, 57, 78, 0.14);
+}
+
+.portal-assistant__avatar svg,
+.portal-assistant__msg-avatar svg {
+  width: 78%;
+  height: 78%;
+  display: block;
 }
 
 .portal-assistant__header h1 {
@@ -2029,11 +2040,11 @@
 }
 
 .portal-assistant__bubble--user {
-  background: var(--p-primary);
-  border: 1px solid rgba(239, 57, 78, 0.15);
-  color: #ffffff;
+  background: #ffe8ec;
+  border: 1px solid rgba(239, 57, 78, 0.28);
+  color: #23254e;
   border-start-end-radius: 6px;
-  box-shadow: 0 6px 18px rgba(239, 57, 78, 0.22);
+  box-shadow: 0 4px 14px rgba(239, 57, 78, 0.1);
 }
 
 .portal-assistant__row--user .portal-assistant__bubble {
@@ -2218,21 +2229,22 @@
 .portal-assistant__send {
   width: 2.65rem;
   height: 2.65rem;
-  border: none;
+  border: 1.5px solid rgba(239, 57, 78, 0.35);
   border-radius: 999px;
-  background: var(--p-primary);
-  color: #fff;
+  background: #ffe8ec;
+  color: #c6283a;
   display: grid;
   place-items: center;
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-  box-shadow: 0 6px 16px rgba(239, 57, 78, 0.28);
+  box-shadow: 0 4px 12px rgba(239, 57, 78, 0.12);
 }
 
 .portal-assistant__send:hover:not(:disabled) {
   transform: scale(1.04);
-  background: var(--p-primary-hover);
+  background: #ffd6de;
+  color: #a81e2f;
 }
 
 .portal-assistant__send:disabled {
@@ -2339,12 +2351,12 @@
 
 .portal-assistant__limit-login,
 .portal-assistant__limit-banner button.portal-assistant__limit-login {
-  border: none !important;
+  border: 1.5px solid rgba(239, 57, 78, 0.4) !important;
   border-radius: 999px !important;
-  background: #ef394e !important;
-  background-color: #ef394e !important;
+  background: #ffe8ec !important;
+  background-color: #ffe8ec !important;
   background-image: none !important;
-  color: #fff !important;
+  color: #c6283a !important;
   padding: 0.55rem 1rem !important;
   cursor: pointer;
   white-space: nowrap;
@@ -2388,11 +2400,12 @@ button.portal-assistant__ghost {
 }
 
 button.portal-assistant__primary {
-  background: #ef394e !important;
-  background-color: #ef394e !important;
+  background: #ffe8ec !important;
+  background-color: #ffe8ec !important;
   background-image: none !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 18px rgba(239, 57, 78, 0.28);
+  color: #c6283a !important;
+  border: 1.5px solid rgba(239, 57, 78, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(239, 57, 78, 0.12);
 }
 
 button.portal-assistant__primary:disabled,

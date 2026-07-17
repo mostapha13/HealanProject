@@ -31,23 +31,23 @@ const GUEST_COOKIE = 'healan_rag_guest';
 const OTP_TTL_SECONDS = 120;
 
 const BTN_PRIMARY: React.CSSProperties = {
-  backgroundColor: '#ef394e',
+  backgroundColor: '#ffe8ec',
   backgroundImage: 'none',
-  color: '#ffffff',
-  border: 'none',
+  color: '#c6283a',
+  border: '1.5px solid rgba(239, 57, 78, 0.4)',
   borderRadius: 12,
   padding: '0.65rem 1.15rem',
   fontWeight: 700,
   fontSize: '0.95rem',
   cursor: 'pointer',
-  boxShadow: '0 8px 18px rgba(239, 57, 78, 0.28)',
+  boxShadow: '0 4px 12px rgba(239, 57, 78, 0.12)',
 };
 
 const BTN_GHOST: React.CSSProperties = {
   backgroundColor: '#e8ebf2',
   backgroundImage: 'none',
   color: '#23254e',
-  border: 'none',
+  border: '1.5px solid rgba(35, 37, 78, 0.12)',
   borderRadius: 12,
   padding: '0.65rem 1.15rem',
   fontWeight: 700,
@@ -56,18 +56,58 @@ const BTN_GHOST: React.CSSProperties = {
 };
 
 const BTN_LOGIN_PILL: React.CSSProperties = {
-  backgroundColor: '#ef394e',
+  backgroundColor: '#ffe8ec',
   backgroundImage: 'none',
-  color: '#ffffff',
-  border: 'none',
+  color: '#c6283a',
+  border: '1.5px solid rgba(239, 57, 78, 0.4)',
   borderRadius: 999,
   padding: '0.45rem 1rem',
   fontWeight: 700,
   fontSize: '0.88rem',
   cursor: 'pointer',
-  boxShadow: '0 6px 14px rgba(239, 57, 78, 0.25)',
+  boxShadow: '0 4px 12px rgba(239, 57, 78, 0.12)',
   whiteSpace: 'nowrap',
 };
+
+function RobotIcon() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden>
+      <rect x="12" y="16" width="24" height="20" rx="7" fill="#19bfd3" />
+      <rect x="15" y="19" width="18" height="12" rx="5" fill="#e8f9fc" />
+      <circle cx="20.5" cy="25" r="2.4" fill="#23254e" />
+      <circle cx="27.5" cy="25" r="2.4" fill="#23254e" />
+      <circle cx="20.5" cy="25" r="0.9" fill="#7dd3e0" />
+      <circle cx="27.5" cy="25" r="0.9" fill="#7dd3e0" />
+      <path d="M22.2 29.2h3.6" stroke="#0f766e" strokeWidth="1.6" strokeLinecap="round" />
+      <rect x="21.5" y="9" width="5" height="5" rx="2" fill="#ef394e" />
+      <path d="M24 9V6.5" stroke="#ef394e" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="24" cy="5.2" r="1.5" fill="#ef394e" />
+      <path d="M12 24H8.5a2 2 0 0 1 0-4H12" fill="#19bfd3" />
+      <path d="M36 24h3.5a2 2 0 0 0 0-4H36" fill="#19bfd3" />
+      <rect x="17" y="36" width="5" height="4" rx="2" fill="#0f766e" />
+      <rect x="26" y="36" width="5" height="4" rx="2" fill="#0f766e" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="24" r="18" fill="#ef394e" opacity="0.12" />
+      <circle cx="24" cy="18" r="7" fill="#ef394e" />
+      <circle cx="24" cy="18" r="4.2" fill="#ffd6de" />
+      <path
+        d="M10.5 38.5c2.8-7.2 8.2-10.5 13.5-10.5S34.7 31.3 37.5 38.5"
+        fill="#ef394e"
+      />
+      <path
+        d="M14 37c2.2-5 6.2-7.2 10-7.2s7.8 2.2 10 7.2"
+        fill="#c6283a"
+        opacity="0.35"
+      />
+    </svg>
+  );
+}
 
 function createSessionId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -142,17 +182,27 @@ export default function AssistantPage() {
   const blocked = !!quota?.requiresLogin && !quota.isAuthenticated;
 
   const focusInput = () => {
-    window.requestAnimationFrame(() => {
+    const apply = () => {
       const el = textareaRef.current;
       if (!el || el.disabled) return;
       el.focus({ preventScroll: true });
+      const len = el.value.length;
+      try {
+        el.setSelectionRange(len, len);
+      } catch {
+        /* ignore */
+      }
+    };
+    window.requestAnimationFrame(() => {
+      apply();
+      window.setTimeout(apply, 0);
+      window.setTimeout(apply, 60);
     });
   };
 
   const scrollMessagesToBottom = (smooth = true) => {
     const el = messagesRef.current;
     if (!el) return;
-    // فقط داخل باکس پیام‌ها اسکرول کن — scrollIntoView کل صفحه را جابه‌جا می‌کند
     if (smooth && !prefersReducedMotion()) {
       el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     } else {
@@ -175,7 +225,6 @@ export default function AssistantPage() {
     focusInput();
   }, []);
 
-  // قفل اسکرول صفحه تا هدر چت از viewport بیرون نرود
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
@@ -223,6 +272,12 @@ export default function AssistantPage() {
     const id = window.setInterval(tick, 250);
     return () => window.clearInterval(id);
   }, [otpSent]);
+
+  useEffect(() => {
+    if (!busy && !blocked && !loginOpen) {
+      focusInput();
+    }
+  }, [busy, blocked, loginOpen]);
 
   const resizeTextarea = () => {
     const el = textareaRef.current;
@@ -435,12 +490,7 @@ export default function AssistantPage() {
 
         <div className="portal-assistant__brand">
           <div className="portal-assistant__avatar" aria-hidden>
-            <svg viewBox="0 0 24 24" width="22" height="22">
-              <path
-                fill="currentColor"
-                d="M12 2a5 5 0 0 1 5 5v1.1A5 5 0 0 1 20 13v2a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3v-1H5a1 1 0 0 1-1-1v-2a5 5 0 0 1 3-4.6V7a5 5 0 0 1 5-5z"
-              />
-            </svg>
+            <RobotIcon />
           </div>
           <div className="portal-assistant__brand-text">
             <h1>دستیار هوشمند مطب</h1>
@@ -452,7 +502,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ بر اساس اطلاعات رسمی مطب'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v5
+                build-v6
               </span>
             </p>
           </div>
@@ -492,12 +542,7 @@ export default function AssistantPage() {
             >
               {msg.role === 'assistant' && (
                 <div className="portal-assistant__msg-avatar" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="16" height="16">
-                    <path
-                      fill="currentColor"
-                      d="M12 2a5 5 0 0 1 5 5v1.1A5 5 0 0 1 20 13v2a1 1 0 0 1-1 1h-1v1a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3v-1H5a1 1 0 0 1-1-1v-2a5 5 0 0 1 3-4.6V7a5 5 0 0 1 5-5z"
-                    />
-                  </svg>
+                  <RobotIcon />
                 </div>
               )}
               <div
@@ -511,12 +556,19 @@ export default function AssistantPage() {
                 <span className="portal-assistant__bubble-text">{msg.text}</span>
                 {msg.streaming && <span className="portal-assistant__caret" aria-hidden />}
               </div>
+              {msg.role === 'user' && (
+                <div className="portal-assistant__msg-avatar portal-assistant__msg-avatar--user" aria-hidden>
+                  <UserIcon />
+                </div>
+              )}
             </div>
           ))}
 
           {loading && (
             <div className="portal-assistant__row portal-assistant__row--assistant">
-              <div className="portal-assistant__msg-avatar" aria-hidden />
+              <div className="portal-assistant__msg-avatar" aria-hidden>
+                <RobotIcon />
+              </div>
               <div className="portal-assistant__bubble portal-assistant__bubble--assistant portal-assistant__bubble--thinking">
                 <span className="portal-assistant__thinking-label">در حال فکر کردن</span>
                 <span className="portal-assistant__dots" aria-hidden>
@@ -587,7 +639,7 @@ export default function AssistantPage() {
             rows={1}
             value={input}
             placeholder={blocked ? 'برای ادامه وارد شوید…' : 'سوال خود را بنویسید…'}
-            disabled={busy || blocked}
+            disabled={blocked}
             onChange={(e) => {
               setInput(e.target.value);
               resizeTextarea();
@@ -596,6 +648,7 @@ export default function AssistantPage() {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 void send();
+                focusInput();
               }
             }}
           />

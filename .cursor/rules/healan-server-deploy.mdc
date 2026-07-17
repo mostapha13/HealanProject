@@ -52,8 +52,10 @@ Prefer:
 
 ```bash
 export COMPOSE_PARALLEL_LIMIT=1
-docker compose build --no-deps <only-needed-services>
-docker compose up -d --no-deps --force-recreate <only-needed-services>
+# NOTE: older compose on the server rejects `build --no-deps` (unknown flag).
+# Use --no-cache for frontends so the new UI actually lands in the image.
+docker compose build --no-cache <only-needed-services>
+docker compose up -d --force-recreate <only-needed-services>
 ```
 
 Typical mapping:
@@ -62,9 +64,33 @@ Typical mapping:
 |--------|---------|
 | SMSProvider / sms.ir | `smsprovider-webapp` |
 | Healan API / migrations | `healan-webapi` |
-| Clinic UI (pagination, menus, pages) | `healan-clinic` |
+| **Portal public site /assistant chat UI** | **`healan-portal` + `nginx-gateway`** |
+| Clinic UI (pagination, menus, pages) | `healan-clinic` (+ `nginx-gateway` if recreate) |
 | AccessForm / AccessMenu seed | `identity-server` (then user must re-login) |
-| Nginx routes | `nginx-gateway` recreate |
+| Nginx routes / HTTPS upstream | `nginx-gateway` recreate |
+
+### Portal UI deploy (copy-paste)
+
+After frontend assistant changes are **committed and pushed** to `ai`:
+
+```bash
+cd /opt/healan
+git stash push -m "server-local-before-pull" -- \
+  docker/config/*/appsettings.Production.json \
+  docker/scripts/apply-server-appsettings.sh \
+  || true
+git fetch origin
+git checkout ai
+git pull origin ai
+export COMPOSE_PARALLEL_LIMIT=1
+docker compose build --no-cache healan-portal
+docker compose up -d --force-recreate healan-portal
+sleep 2
+docker compose up -d --force-recreate nginx-gateway
+docker exec healan-portal grep -R "build-v" /usr/share/nginx/html/ | head
+```
+
+Verify marker in browser header on `https://www.drshahrooei.ir/assistant` (e.g. `build-v6`).
 
 Bring infra up without rebuild if containers are down:
 
