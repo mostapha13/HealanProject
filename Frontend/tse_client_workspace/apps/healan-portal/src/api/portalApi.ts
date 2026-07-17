@@ -292,24 +292,96 @@ export function bookingOtpVerify(payload: { phoneNumber: string; code: string })
   }>;
 }
 
+export interface PortalBookingAuthResult {
+  isAuthenticated?: boolean;
+  isPatient?: boolean;
+  accessToken: string;
+  phoneNumber: string;
+  phoneMasked?: string;
+  userId?: string;
+  expiresAtUtc?: string;
+  patientId?: number;
+  firstName?: string;
+  lastName?: string;
+  nationalCode?: string;
+}
+
+export function bookingRegisterOtpRequest(payload: {
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  nationalCode: string;
+}) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingRegisterOtpRequest',
+    options: payload,
+  }) as Promise<{ sent: boolean; phoneMasked?: string; expiresInSeconds?: number }>;
+}
+
+export function bookingRegisterOtpVerify(payload: { phoneNumber: string; code: string }) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingRegisterOtpVerify',
+    options: payload,
+  }).then((result) => {
+    const res = result as PortalBookingAuthResult;
+    if (res?.accessToken) setPortalRagToken(res.accessToken);
+    return res;
+  }) as Promise<PortalBookingAuthResult>;
+}
+
+export function bookingCompleteProfile(payload: {
+  firstName: string;
+  lastName: string;
+  nationalCode: string;
+  phoneNumber?: string;
+}) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingCompleteProfile',
+    options: payload,
+    token: getPortalRagToken(),
+  }).then((result) => {
+    const res = result as PortalBookingAuthResult;
+    if (res?.accessToken) setPortalRagToken(res.accessToken);
+    return res;
+  }) as Promise<PortalBookingAuthResult>;
+}
+
+export function bookingProfileStatus() {
+  return request.get({
+    baseUrl: BASE,
+    url: 'BookingProfileStatus',
+    token: getPortalRagToken(),
+  }) as Promise<PortalBookingAuthResult>;
+}
+
 export function bookingCreate(payload: Record<string, unknown>) {
   return request.post({
     baseUrl: BASE,
     url: 'BookingCreate',
     options: payload,
+    token: getPortalRagToken(),
   }) as Promise<PortalBookingItem>;
 }
 
-export function bookingMyList(phoneNumber: string, nationalCode?: string) {
+export function bookingMyList(phoneNumber?: string, nationalCode?: string) {
   return request.get({
     baseUrl: BASE,
     url: 'BookingMyList',
     options: { phoneNumber, nationalCode },
+    token: getPortalRagToken(),
   }) as Promise<PortalBookingItem[]>;
 }
 
 export function bookingCancel(payload: Record<string, unknown>) {
-  return request.post({ baseUrl: BASE, url: 'BookingCancel', options: payload });
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingCancel',
+    options: payload,
+    token: getPortalRagToken(),
+  });
 }
 
 export function bookingReschedule(payload: Record<string, unknown>) {
@@ -317,6 +389,7 @@ export function bookingReschedule(payload: Record<string, unknown>) {
     baseUrl: BASE,
     url: 'BookingReschedule',
     options: payload,
+    token: getPortalRagToken(),
   }) as Promise<PortalBookingItem>;
 }
 

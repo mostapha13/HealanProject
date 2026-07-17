@@ -1,7 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Healan.Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Healan.Application.Portal.Services;
 
@@ -13,22 +16,26 @@ public interface IPortalAuthTokenService
 
 public sealed class PortalAuthTokenService : IPortalAuthTokenService
 {
-    private readonly byte[] _key;
-    private readonly TimeSpan _lifetime;
+    public const string TokenHoursSettingKey = "auth.tokenHours";
 
-    public PortalAuthTokenService(IConfiguration configuration)
+    private readonly byte[] _key;
+    private readonly int _fallbackHours;
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public PortalAuthTokenService(IConfiguration configuration, IServiceScopeFactory scopeFactory)
     {
+        _scopeFactory = scopeFactory;
         var secret = configuration["PortalAuth:SigningKey"];
         if (string.IsNullOrWhiteSpace(secret) || secret.Length < 32)
             secret = "HealanPortalAuthDevKey-ChangeMe-32chars!!";
         _key = Encoding.UTF8.GetBytes(secret);
-        var hours = int.TryParse(configuration["PortalAuth:TokenHours"], out var h) ? h : 720;
-        _lifetime = TimeSpan.FromHours(Math.Clamp(hours, 1, 24 * 90));
+        _fallbackHours = int.TryParse(configuration["PortalAuth:TokenHours"], out var h) ? h : 24;
     }
 
     public string CreateToken(Guid userId, string phoneNumber, out DateTime expiresAtUtc)
     {
-        expiresAtUtc = DateTime.UtcNow.Add(_lifetime);
+        var lifetime = ResolveLifetime();
+        expiresAtUtc = DateTime.UtcNow.Add(lifetime);
         var payload = JsonSerializer.Serialize(new Payload(userId, phoneNumber, expiresAtUtc.Ticks));
         var payloadBytes = Encoding.UTF8.GetBytes(payload);
         var payloadPart = Base64UrlEncode(payloadBytes);
@@ -67,6 +74,27 @@ public sealed class PortalAuthTokenService : IPortalAuthTokenService
         {
             return false;
         }
+    }
+
+    private TimeSpan ResolveLifetime()
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+            var raw = db.PortalSiteSettings.AsNoTracking()
+                .Where(x => x.SettingKey == TokenHoursSettingKey)
+                .Select(x => x.SettingValue)
+                .FirstOrDefault();
+            if (int.TryParse(raw, out var hours) && hours > 0)
+                return TimeSpan.FromHours(Math.Clamp(hours, 1, 24 * 90));
+        }
+        catch
+        {
+            // fall through to config default
+        }
+
+        return TimeSpan.FromHours(Math.Clamp(_fallbackHours, 1, 24 * 90));
     }
 
     private static string Base64UrlEncode(byte[] data) =>

@@ -162,18 +162,35 @@ public class BookingLookupPatientQueryHandler : IRequestHandler<BookingLookupPat
 
 public class PortalMyBookingsQuery : IRequest<List<AppointmentBookingDto>>
 {
-    public string PhoneNumber { get; set; } = string.Empty;
+    public string? AccessToken { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? NationalCode { get; set; }
 }
 
 public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuery, List<AppointmentBookingDto>>
 {
     private readonly IApplicationDbContext _db;
-    public PortalMyBookingsQueryHandler(IApplicationDbContext db) => _db = db;
+    private readonly IPortalAuthTokenService _tokenService;
+
+    public PortalMyBookingsQueryHandler(IApplicationDbContext db, IPortalAuthTokenService tokenService)
+    {
+        _db = db;
+        _tokenService = tokenService;
+    }
 
     public async Task<List<AppointmentBookingDto>> Handle(PortalMyBookingsQuery request, CancellationToken cancellationToken)
     {
-        var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
+        string phone;
+        if (!string.IsNullOrWhiteSpace(request.AccessToken)
+            && _tokenService.TryValidate(request.AccessToken, out _, out var tokenPhone))
+        {
+            phone = RagQuotaHelper.NormalizePhone(tokenPhone);
+        }
+        else
+        {
+            phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
+        }
+
         if (phone.Length != 11)
             throw new BadRequestExceptions("شماره موبایل نامعتبر است.");
 

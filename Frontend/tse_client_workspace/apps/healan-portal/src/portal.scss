@@ -2992,6 +2992,60 @@ button.portal-assistant__ghost:disabled {
   }
 }
 
+.portal-auth-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.portal-auth-modal {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.35rem 1.25rem 1.25rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  animation: portal-booking-in 0.35s ease both;
+}
+
+.portal-auth-modal__close {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.65rem;
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.portal-auth-modal__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.portal-auth-modal__lead {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.portal-auth-modal__fields {
+  display: grid;
+  gap: 0.35rem;
+}
+
 @media (max-width: 560px) {
   .portal-booking__grid-2 {
     grid-template-columns: 1fr;

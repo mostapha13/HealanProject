@@ -1,4 +1,5 @@
 using Healan.Application.Booking.Commands.PortalBook;
+using Healan.Application.Booking.Commands.PortalPatientRegister;
 using Healan.Application.Booking.Queries.PortalBooking;
 using Healan.Application.Portal.Commands.BlogPostDelete;
 using Healan.Application.Portal.Commands.BlogPostRegister;
@@ -228,21 +229,51 @@ public class PortalPublicController : ControllerBase
         Ok(await Mediator.Send(request));
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> BookingCreate([FromBody] PortalBookCommand request) =>
+    public async Task<IActionResult> BookingRegisterOtpRequest([FromBody] BookingRegisterOtpRequestCommand request) =>
         Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingRegisterOtpVerify([FromBody] BookingRegisterOtpVerifyCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingCompleteProfile([FromBody] BookingCompleteProfileCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> BookingMyList([FromQuery] PortalMyBookingsQuery query) =>
-        Ok(await Mediator.Send(query));
+    public async Task<IActionResult> BookingProfileStatus() =>
+        Ok(await Mediator.Send(new BookingProfileStatusQuery { AccessToken = ExtractBearerToken() }));
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> BookingCancel([FromBody] PortalCancelBookingCommand request) =>
-        Ok(await Mediator.Send(request));
+    public async Task<IActionResult> BookingCreate([FromBody] PortalBookCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingMyList([FromQuery] PortalMyBookingsQuery query)
+    {
+        query.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(query));
+    }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> BookingReschedule([FromBody] PortalRescheduleBookingCommand request) =>
-        Ok(await Mediator.Send(request));
+    public async Task<IActionResult> BookingCancel([FromBody] PortalCancelBookingCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
 
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingReschedule([FromBody] PortalRescheduleBookingCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
     private string? ExtractBearerToken()
     {
         var header = Request.Headers.Authorization.ToString();

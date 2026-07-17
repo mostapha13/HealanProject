@@ -50,7 +50,7 @@ write_json docker/config/healan-webapi/appsettings.Production.json <<'EOF'
   "SMSProviderBaseUrl": "http://smsprovider-webapp:8080/api/v1/SMS/",
   "PortalAuth": {
     "SigningKey": "HealanPortalAuth-ProdKey-ChangeIfNeeded-64b!",
-    "TokenHours": 720
+    "TokenHours": 24
   },
   "IdentityServer": {
     "Url": "http://identity-server:8080/",

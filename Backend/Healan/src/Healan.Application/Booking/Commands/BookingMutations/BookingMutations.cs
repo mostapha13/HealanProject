@@ -60,6 +60,9 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
             patientId = patient?.PatientId;
         }
 
+        if (patientId is null or <= 0 && !request.BookedByStaff)
+            throw new BadRequestExceptions("ابتدا مشخصات بیمار را تکمیل کنید.");
+
         var services = new List<Domain.PublicInfos.Entities.ServiceType>();
         if (request.RequestedServiceTypeIds.Count > 0)
         {

@@ -64,6 +64,7 @@ public static class PortalContentSeed
             ("section.enabled.about", "true", "section", "نمایش بخش درباره پزشک"),
             ("section.enabled.reviews", "true", "section", "نمایش بخش نظرات"),
             ("section.enabled.contact", "true", "section", "نمایش بخش تماس"),
+            ("auth.tokenHours", "24", "auth", "مدت اعتبار لاگین سایت (ساعت)"),
         };
 
         foreach (var item in defaults)

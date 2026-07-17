@@ -342,6 +342,11 @@ export default function AssistantPage() {
     });
 
   const openLogin = () => {
+    if (getPortalRagToken() || quota?.isAuthenticated) {
+      setAuthError('');
+      setLoginOpen(false);
+      return;
+    }
     setAuthError('');
     setLoginOpen(true);
   };

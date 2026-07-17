@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { callForAppointment, goToLogin } from '../../constants';
+import { Link, useNavigate } from 'react-router-dom';
+import { goToLogin } from '../../constants';
 import {
   IconClock,
   IconEcg,
@@ -15,6 +15,7 @@ import {
 } from '../../components/Icons';
 import { HeroSlider } from '../../components/HeroSlider';
 import { PatientReviewForm } from '../../components/PatientReviewForm';
+import { PortalAuthModal, resolveBookingEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
 import { usePortalSite } from '../../hooks/usePortalSite';
 import { resolvePortalIcon } from '../../utils/portalIcons';
 
@@ -50,9 +51,23 @@ const fallbackWhy = [
 ];
 
 export function LandingPage() {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<PortalAuthModalMode>('register');
   const { doctor, contact, hero, sections, map, heroStats, heroSlides, isSectionEnabled, navItems, trustItems, services, whyItems, reviews } = usePortalSite();
+
+  const startBooking = async () => {
+    setMenuOpen(false);
+    const entry = await resolveBookingEntry();
+    if (entry.action === 'goto-booking') {
+      navigate('/booking');
+      return;
+    }
+    setAuthMode(entry.mode);
+    setAuthOpen(true);
+  };
 
   const navList = useMemo(() => {
     if (navItems.length === 0) return [...fallbackNav];
@@ -136,7 +151,7 @@ export function LandingPage() {
           </nav>
 
           <div className="portal-header__actions">
-            <button type="button" className="p-btn p-btn--outline p-btn--sm portal-header__call" onClick={callForAppointment}>
+            <button type="button" className="p-btn p-btn--outline p-btn--sm portal-header__call" onClick={startBooking}>
               <IconPhone className="portal-icon-sm" />
               <span>رزرو نوبت</span>
             </button>
@@ -168,7 +183,7 @@ export function LandingPage() {
             ))}
             <Link to="/blog" onClick={() => setMenuOpen(false)}>بلاگ</Link>
             <hr />
-            <button type="button" className="p-btn p-btn--primary" onClick={() => { setMenuOpen(false); callForAppointment(); }}>
+            <button type="button" className="p-btn p-btn--primary" onClick={() => { setMenuOpen(false); startBooking(); }}>
               <IconPhone className="portal-icon-sm" />
               تماس برای نوبت
             </button>
@@ -196,7 +211,7 @@ export function LandingPage() {
               {hero.description}
             </p>
             <div className="portal-hero__cta">
-              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={callForAppointment}>
+              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={startBooking}>
                 <IconPhone className="portal-icon-sm" />
                 تماس برای نوبت
               </button>
@@ -324,7 +339,7 @@ export function LandingPage() {
                 </span>
                 <h3>{title}</h3>
                 <p>{desc}</p>
-                <button type="button" className="portal-service__link" onClick={callForAppointment}>
+                <button type="button" className="portal-service__link" onClick={startBooking}>
                   درخواست نوبت ←
                 </button>
               </article>
@@ -403,7 +418,7 @@ export function LandingPage() {
             </div>
 
             <div className="portal-contact__cta">
-              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={callForAppointment}>
+              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={startBooking}>
                 تماس الان
               </button>
               <button type="button" className="p-btn p-btn--outline p-btn--lg" onClick={goToLogin}>
@@ -457,6 +472,16 @@ export function LandingPage() {
           <p className="portal-footer__copy">© {new Date().getFullYear()} — تمامی حقوق محفوظ است</p>
         </div>
       </footer>
+
+      <PortalAuthModal
+        open={authOpen}
+        initialMode={authMode}
+        onClose={() => setAuthOpen(false)}
+        onSuccess={() => {
+          setAuthOpen(false);
+          navigate('/booking');
+        }}
+      />
     </div>
   );
 }

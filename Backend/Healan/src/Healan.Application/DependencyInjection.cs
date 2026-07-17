@@ -47,6 +47,7 @@ namespace Healan.Application
             services.AddMemoryCache();
             services.AddSingleton<Portal.Services.IPortalAuthTokenService, Portal.Services.PortalAuthTokenService>();
             services.AddScoped<Portal.Services.IPortalSmsSender, Portal.Services.PortalSmsSender>();
+            services.AddScoped<Booking.Commands.PortalPatientRegister.PortalPatientRegistrar>();
 
             #region Caching
             //Behavior

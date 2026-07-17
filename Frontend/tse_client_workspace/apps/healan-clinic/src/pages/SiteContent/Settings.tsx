@@ -75,6 +75,13 @@ const SETTING_GROUPS: { group: string; label: string; fields: { key: string; lab
       { key: 'about.quote', label: 'جمله درباره پزشک', multiline: true },
     ],
   },
+  {
+    group: 'auth',
+    label: 'ورود سایت',
+    fields: [
+      { key: 'auth.tokenHours', label: 'مدت اعتبار لاگین (ساعت) — پیش‌فرض ۲۴' },
+    ],
+  },
 ];
 
 const EMPTY_STAT = {
