@@ -30,6 +30,58 @@ function asArray<T>(value: unknown): T[] {
   return [];
 }
 
+/** Case-insensitive nested field lookup for API payloads. */
+function pickField(source: unknown, ...names: string[]): unknown {
+  if (!source || typeof source !== 'object') return undefined;
+  const obj = source as Record<string, unknown>;
+  const lower = names.map((n) => n.toLowerCase());
+  for (const [key, val] of Object.entries(obj)) {
+    if (lower.includes(key.toLowerCase()) && val != null && val !== '') return val;
+  }
+  for (const nestKey of ['data', 'result', 'value', 'Data', 'Result', 'Value']) {
+    const nested = obj[nestKey];
+    if (nested && typeof nested === 'object') {
+      const found = pickField(nested, ...names);
+      if (found != null && found !== '') return found;
+    }
+  }
+  return undefined;
+}
+
+function slotDayKey(startAt: unknown): string {
+  const raw = String(startAt ?? '');
+  const m = raw.match(/(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  try {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${mo}-${day}`;
+    }
+  } catch {
+    // ignore
+  }
+  return '';
+}
+
+function normalizeOpenSlots(list: unknown): PortalOpenSlot[] {
+  return asArray<Record<string, unknown>>(list)
+    .map((raw) => {
+      const appointmentSlotId = Number(
+        pickField(raw, 'appointmentSlotId', 'AppointmentSlotId') ?? 0
+      );
+      const doctorId = Number(pickField(raw, 'doctorId', 'DoctorId') ?? 0);
+      const startAt = String(pickField(raw, 'startAt', 'StartAt') ?? '');
+      const endAt = String(pickField(raw, 'endAt', 'EndAt') ?? '');
+      const doctorName = String(pickField(raw, 'doctorName', 'DoctorName') ?? '');
+      return { appointmentSlotId, doctorId, startAt, endAt, doctorName } as PortalOpenSlot;
+    })
+    .filter((s) => s.appointmentSlotId > 0 && !!s.startAt)
+    .slice(0, 120);
+}
+
 function toAsciiDigits(value: unknown): string {
   return String(value ?? '')
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - '۰'.charCodeAt(0)))
@@ -149,7 +201,36 @@ export default function BookingPage() {
     note: '',
     serviceTypeIds: [] as number[],
   });
+  const [selectedDay, setSelectedDay] = useState('');
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const [rescheduleBookingId, setRescheduleBookingId] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('healan_booking_session');
+      if (!raw) return;
+      const saved = JSON.parse(raw) as {
+        bookingToken?: string;
+        phoneNumber?: string;
+        step?: Step;
+        firstName?: string;
+        lastName?: string;
+        nationalCode?: string;
+      };
+      if (!saved?.bookingToken || !saved.phoneNumber) return;
+      setBookingToken(saved.bookingToken);
+      setForm((prev) => ({
+        ...prev,
+        phoneNumber: saved.phoneNumber || prev.phoneNumber,
+        firstName: saved.firstName || prev.firstName,
+        lastName: saved.lastName || prev.lastName,
+        nationalCode: saved.nationalCode || prev.nationalCode,
+      }));
+      if (saved.step === 'book' || saved.step === 'done') setStep(saved.step);
+    } catch {
+      // ignore corrupt session
+    }
+  }, []);
 
   useEffect(() => {
     Promise.all([bookingDoctors(), bookingServices()])
@@ -168,29 +249,58 @@ export default function BookingPage() {
   useEffect(() => {
     if (step !== 'book') return;
     let cancelled = false;
+    setSlots([]);
+    setSelectedDay('');
+    setSlotsLoading(true);
     void bookingOpenSlots({ doctorId: form.doctorId || undefined })
       .then((list) => {
-        if (!cancelled) setSlots(asArray<PortalOpenSlot>(list));
+        if (cancelled) return;
+        const next = normalizeOpenSlots(list);
+        setSlots(next);
+        setSelectedDay(slotDayKey(next[0]?.startAt));
       })
       .catch(() => {
-        if (!cancelled) setSlots([]);
+        if (!cancelled) {
+          setSlots([]);
+          setSelectedDay('');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
       });
     return () => {
       cancelled = true;
     };
   }, [step, form.doctorId]);
 
-  const groupedSlots = useMemo(() => {
-    const map = new Map<string, PortalOpenSlot[]>();
+  const dayOptions = useMemo(() => {
+    const days: string[] = [];
     for (const slot of slots) {
-      if (!slot?.startAt) continue;
-      const day = String(slot.startAt).slice(0, 10);
-      const list = map.get(day) ?? [];
-      list.push(slot);
-      map.set(day, list);
+      const day = slotDayKey(slot?.startAt);
+      if (day && !days.includes(day)) days.push(day);
     }
-    return [...map.entries()];
+    return days;
   }, [slots]);
+
+  const daySlots = useMemo(() => {
+    if (!selectedDay) return [] as PortalOpenSlot[];
+    return slots.filter((s) => slotDayKey(s?.startAt) === selectedDay);
+  }, [slots, selectedDay]);
+
+  const persistSession = (next: {
+    bookingToken: string;
+    phoneNumber: string;
+    step: Step;
+    firstName?: string;
+    lastName?: string;
+    nationalCode?: string;
+  }) => {
+    try {
+      sessionStorage.setItem('healan_booking_session', JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
 
   const resetToPhone = () => {
     setStep('phone');
@@ -199,7 +309,13 @@ export default function BookingPage() {
     setBookingToken('');
     setMyBookings([]);
     setSlots([]);
+    setSelectedDay('');
     setRescheduleBookingId(0);
+    try {
+      sessionStorage.removeItem('healan_booking_session');
+    } catch {
+      // ignore
+    }
   };
 
   const sendOtp = async () => {
@@ -229,30 +345,45 @@ export default function BookingPage() {
       const code = toAsciiDigits(otpCode);
       if (code.length < 4) throw new Error('کد تأیید را کامل وارد کنید.');
       const res = await bookingOtpVerify({ phoneNumber: phone, code });
-      const token = String((res as { bookingToken?: string })?.bookingToken ?? '');
+      const token = String(pickField(res, 'bookingToken', 'BookingToken') ?? '');
       if (!token) throw new Error('تأیید انجام نشد. دوباره تلاش کنید.');
 
-      const verifiedPhone = toAsciiDigits((res as { phoneNumber?: string })?.phoneNumber || phone);
-      const patient = (res as { patient?: Record<string, unknown> })?.patient;
-
+      // Enter step 3 immediately — never wait on myList / patient parsing.
       setBookingToken(token);
-      setForm((prev) => {
-        const next = { ...prev, phoneNumber: verifiedPhone };
-        if (patient && (patient.found === true || patient.Found === true)) {
-          next.firstName = String(patient.firstName ?? patient.FirstName ?? prev.firstName);
-          next.lastName = String(patient.lastName ?? patient.LastName ?? prev.lastName);
-          next.nationalCode =
-            toAsciiDigits(patient.nationalCode ?? patient.NationalCode ?? '') || prev.nationalCode;
-          next.phoneNumber =
-            toAsciiDigits(patient.phoneNumber ?? patient.PhoneNumber ?? '') || verifiedPhone;
-        }
-        return next;
-      });
-      setPatientKnown(!!(patient && (patient.found === true || patient.Found === true)));
-
-      // Enter book step immediately so UI never depends on secondary APIs.
       setStep('book');
       setBusy(false);
+
+      const verifiedPhone =
+        toAsciiDigits(pickField(res, 'phoneNumber', 'PhoneNumber') ?? phone) || phone;
+      const patient = (pickField(res, 'patient', 'Patient') ?? undefined) as
+        | Record<string, unknown>
+        | undefined;
+      const known = !!(patient && (patient.found === true || patient.Found === true));
+      const nextForm = {
+        ...form,
+        phoneNumber: verifiedPhone,
+        firstName: known
+          ? String(pickField(patient, 'firstName', 'FirstName') ?? form.firstName)
+          : form.firstName,
+        lastName: known
+          ? String(pickField(patient, 'lastName', 'LastName') ?? form.lastName)
+          : form.lastName,
+        nationalCode: known
+          ? toAsciiDigits(pickField(patient, 'nationalCode', 'NationalCode') ?? '') ||
+            form.nationalCode
+          : form.nationalCode,
+      };
+
+      setForm(nextForm);
+      setPatientKnown(known);
+      persistSession({
+        bookingToken: token,
+        phoneNumber: verifiedPhone,
+        step: 'book',
+        firstName: nextForm.firstName,
+        lastName: nextForm.lastName,
+        nationalCode: nextForm.nationalCode,
+      });
 
       void bookingMyList(verifiedPhone)
         .then((mine) => setMyBookings(asArray<PortalBookingItem>(mine)))
@@ -302,6 +433,14 @@ export default function BookingPage() {
         });
       }
       setStep('done');
+      persistSession({
+        bookingToken,
+        phoneNumber: form.phoneNumber,
+        step: 'done',
+        firstName: form.firstName,
+        lastName: form.lastName,
+        nationalCode: form.nationalCode,
+      });
     } catch (e: unknown) {
       setError(apiErrorMessage(e, 'ثبت رزرو ناموفق بود'));
     } finally {
@@ -340,7 +479,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v9-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v10-booking</span>
           <h1 className="portal-booking__title">رزرو آنلاین نوبت قلب</h1>
           <p className="portal-booking__lead">
             فقط با شماره موبایل وارد شوید، کد پیامک را تأیید کنید، سپس زمان مناسب را انتخاب کنید. پرداخت هنگام مراجعه به
@@ -547,31 +686,52 @@ export default function BookingPage() {
                 )}
 
                 <div style={{ marginTop: 16 }}>
-                  <label className="portal-booking__label">زمان‌های آزاد</label>
-                  {groupedSlots.length === 0 ? (
+                  <label className="portal-booking__label">روز نوبت</label>
+                  {slotsLoading ? (
+                    <p className="portal-booking__hint">در حال بارگذاری نوبت‌های آزاد…</p>
+                  ) : dayOptions.length === 0 ? (
                     <p className="portal-booking__hint">نوبت آزادی در روزهای آینده ثبت نشده است.</p>
                   ) : (
-                    groupedSlots.map(([day, daySlots]) => (
-                      <div key={day} className="portal-booking__slots-day">
-                        <strong>{formatSlot(daySlots[0]?.startAt).split('،')[0]}</strong>
-                        <div className="portal-booking__slot-grid">
-                          {daySlots.map((slot) => (
-                            <button
-                              key={slot.appointmentSlotId}
-                              type="button"
-                              className={`portal-booking__slot${
-                                form.appointmentSlotId === slot.appointmentSlotId ? ' is-selected' : ''
-                              }`}
-                              onClick={() =>
-                                setForm({ ...form, appointmentSlotId: Number(slot.appointmentSlotId) || 0 })
-                              }
-                            >
-                              {formatSlotTime(slot.startAt)}
-                            </button>
-                          ))}
-                        </div>
+                    <>
+                      <select
+                        className="portal-booking__input"
+                        value={selectedDay}
+                        onChange={(e) => {
+                          setSelectedDay(e.target.value);
+                          setForm((prev) => ({ ...prev, appointmentSlotId: 0 }));
+                        }}
+                      >
+                        {dayOptions.map((day) => (
+                          <option key={day} value={day}>
+                            {formatSlot(`${day}T12:00:00`).split(/[،,]/)[0] || day}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="portal-booking__label" style={{ marginTop: 12 }}>
+                        ساعت‌های آزاد این روز
+                      </label>
+                      <div className="portal-booking__slot-grid">
+                        {daySlots.map((slot) => (
+                          <button
+                            key={slot.appointmentSlotId}
+                            type="button"
+                            className={`portal-booking__slot${
+                              form.appointmentSlotId === Number(slot.appointmentSlotId)
+                                ? ' is-selected'
+                                : ''
+                            }`}
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                appointmentSlotId: Number(slot.appointmentSlotId) || 0,
+                              })
+                            }
+                          >
+                            {formatSlotTime(slot.startAt)}
+                          </button>
+                        ))}
                       </div>
-                    ))
+                    </>
                   )}
                 </div>
 

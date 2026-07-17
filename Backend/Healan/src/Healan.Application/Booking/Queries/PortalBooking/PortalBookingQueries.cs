@@ -92,9 +92,9 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
         if (DateOnly.TryParse(request.ToDate, out var to))
             q = q.Where(x => x.StartAt < to.AddDays(1).ToDateTime(TimeOnly.MinValue));
         else
-            q = q.Where(x => x.StartAt < now.Date.AddDays(45));
+            q = q.Where(x => x.StartAt < now.Date.AddDays(21));
 
-        return await q.OrderBy(x => x.StartAt).Take(400)
+        return await q.OrderBy(x => x.StartAt).Take(120)
             .Select(x => new PortalOpenSlotDto
             {
                 AppointmentSlotId = x.AppointmentSlotId,
@@ -288,13 +288,13 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
     }
 }
 
-public class BookingOtpVerifyCommand : IRequest<object>
+public class BookingOtpVerifyCommand : IRequest<BookingOtpVerifyResultDto>
 {
     public string PhoneNumber { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
 }
 
-public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, object>
+public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, BookingOtpVerifyResultDto>
 {
     private readonly IBookingOtpStore _otpStore;
     private readonly IMediator _mediator;
@@ -305,7 +305,7 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
         _mediator = mediator;
     }
 
-    public async Task<object> Handle(BookingOtpVerifyCommand request, CancellationToken cancellationToken)
+    public async Task<BookingOtpVerifyResultDto> Handle(BookingOtpVerifyCommand request, CancellationToken cancellationToken)
     {
         var phone = RagQuotaHelper.NormalizePhone(request.PhoneNumber);
         var code = RagQuotaHelper.ToAsciiDigits(request.Code);
@@ -325,17 +325,39 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
         var token = Guid.NewGuid().ToString("N");
         await _otpStore.SetSessionAsync(token, phone, TimeSpan.FromMinutes(30), cancellationToken);
 
-        var patient = await _mediator.Send(new BookingLookupPatientQuery { PhoneNumber = phone }, cancellationToken);
-
-        return new
+        BookingLookupPatientDto patient;
+        try
         {
-            verified = true,
-            bookingToken = token,
-            expiresInSeconds = 30 * 60,
-            phoneNumber = phone,
-            patient,
+            patient = await _mediator.Send(new BookingLookupPatientQuery { PhoneNumber = phone }, cancellationToken);
+        }
+        catch
+        {
+            patient = new BookingLookupPatientDto
+            {
+                Found = false,
+                PhoneNumber = phone,
+                NationalCode = string.Empty,
+            };
+        }
+
+        return new BookingOtpVerifyResultDto
+        {
+            Verified = true,
+            BookingToken = token,
+            ExpiresInSeconds = 30 * 60,
+            PhoneNumber = phone,
+            Patient = patient,
         };
     }
+}
+
+public class BookingOtpVerifyResultDto
+{
+    public bool Verified { get; set; }
+    public string BookingToken { get; set; } = string.Empty;
+    public int ExpiresInSeconds { get; set; }
+    public string PhoneNumber { get; set; } = string.Empty;
+    public BookingLookupPatientDto? Patient { get; set; }
 }
 
 public static class BookingSessionGuard
