@@ -82,6 +82,7 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PortalRag, "ربات پاسخ‌گو — دانش پایه", "/site-content/rag"),
             new FormDef(HealanAccessFormIds.SmsOutbox, "پیامک‌های ارسالی", "/reports/sms"),
             new FormDef(HealanAccessFormIds.SmsSettings, "تنظیمات پیامک", "/reports/sms-settings"),
+            new FormDef(HealanAccessFormIds.AssistantSettings, "تنظیمات دستیار هوشمند", "/basic-data/assistant"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -150,6 +151,7 @@ public static class HealanAccessSeed
             new MenuDef(5128, HealanAccessFormIds.PortalRag, 5120, 4),
             new MenuDef(5129, HealanAccessFormIds.SmsOutbox, 5117, 1),
             new MenuDef(5130, HealanAccessFormIds.SmsSettings, 5117, 2),
+            new MenuDef(5131, HealanAccessFormIds.AssistantSettings, 5108, 5),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();

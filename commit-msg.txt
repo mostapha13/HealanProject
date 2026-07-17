@@ -1,0 +1,3 @@
+fix: restore access roles, add basic-data assistant settings, verify portal build
+
+Harden RoleQuery against SQL translation failures, add assistant quota settings under اطلاعات پایه, open RAG settings by default, and stamp portal UI with build-v3 for deploy verification.

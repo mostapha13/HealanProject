@@ -93,7 +93,7 @@ public class BlogPostController : ApiControllerBase
 /// <summary>
 /// مدیریت دانش پایه RAG (سوال و جواب ربات سایت)
 /// </summary>
-[AccessForm(HealanAccessFormIds.PortalRag)]
+[AccessForm(HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
 public class RagKnowledgeController : ApiControllerBase
 {
     [HttpGet("[action]")]

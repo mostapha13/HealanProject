@@ -22,6 +22,7 @@ const MedicalFeesPage = lazy(() => import('../pages/BasicData/MedicalFees'));
 const UsersPage = lazy(() => import('../pages/BasicData/Users'));
 const AccessFormsPage = lazy(() => import('../pages/BasicData/AccessForms'));
 const AccessRolesPage = lazy(() => import('../pages/BasicData/AccessRoles'));
+const AssistantSettingsPage = lazy(() => import('../pages/BasicData/AssistantSettings'));
 const SiteContentLayout = lazy(() => import('../pages/SiteContent/Layout'));
 const SiteContentSettingsPage = lazy(() => import('../pages/SiteContent/Settings'));
 const SiteContentSectionsPage = lazy(() => import('../pages/SiteContent/Sections'));
@@ -80,6 +81,7 @@ export default function AppRoutes() {
             <Route path="services" element={guarded('/basic-data/services', <ServicesPage />)} />
             <Route path="fees" element={guarded('/basic-data/fees', <MedicalFeesPage />)} />
             <Route path="users" element={guarded('/basic-data/users', <UsersPage />)} />
+            <Route path="assistant" element={guarded('/basic-data/assistant', <AssistantSettingsPage />)} />
             <Route path="access" element={guarded('/basic-data/access', <AccessFormsPage />)} />
             <Route path="access-roles" element={guarded('/basic-data/access-roles', <AccessRolesPage />)} />
           </Route>

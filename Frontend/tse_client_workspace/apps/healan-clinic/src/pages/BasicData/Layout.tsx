@@ -9,6 +9,7 @@ const tabs = [
   { path: '/basic-data/services', label: 'خدمات' },
   { path: '/basic-data/fees', label: 'تعرفه' },
   { path: '/basic-data/users', label: 'کاربران' },
+  { path: '/basic-data/assistant', label: 'دستیار هوشمند' },
   { path: '/basic-data/access', label: 'تعریف دسترسی' },
   { path: '/basic-data/access-roles', label: 'سطح دسترسی' },
 ];
