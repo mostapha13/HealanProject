@@ -64,10 +64,11 @@ Typical mapping:
 |--------|---------|
 | SMSProvider / sms.ir | `smsprovider-webapp` |
 | Healan API / migrations | `healan-webapi` |
-| **Portal public site /assistant chat UI** | **`healan-portal` + `nginx-gateway`** |
+| **Portal public site /assistant /booking** | **`healan-portal` + `nginx-gateway`** |
 | Clinic UI (pagination, menus, pages) | `healan-clinic` (+ `nginx-gateway` if recreate) |
 | AccessForm / AccessMenu seed | `identity-server` (then user must re-login) |
 | Nginx routes / HTTPS upstream | `nginx-gateway` recreate |
+| Slot booking (schedules + portal reserve) | `healan-webapi` + `healan-clinic` + `healan-portal` + `identity-server` + re-login |
 
 ### Portal UI deploy (copy-paste)
 

@@ -477,3 +477,69 @@ export interface RagChatLogItem {
   isAuthenticated: boolean;
   createdAt: string;
 }
+
+export interface ScheduleTemplateItem {
+  doctorScheduleTemplateId: number;
+  doctorId: number;
+  doctorName?: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  visitDurationMinutes: number;
+  isActive: boolean;
+}
+
+export interface ScheduleExceptionItem {
+  doctorScheduleExceptionId: number;
+  doctorId: number;
+  date: string;
+  isClosed: boolean;
+  startTime?: string;
+  endTime?: string;
+  visitDurationMinutes?: number;
+  note?: string;
+}
+
+export interface AppointmentSlotItem {
+  appointmentSlotId: number;
+  doctorId: number;
+  doctorName?: string;
+  startAt: string;
+  endAt: string;
+  status: number;
+  source: number;
+  note?: string;
+  booking?: AppointmentBookingItem | null;
+}
+
+export interface AppointmentBookingItem {
+  appointmentBookingId: number;
+  appointmentSlotId: number;
+  doctorId: number;
+  doctorName?: string;
+  patientId?: number;
+  nationalCode: string;
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  note?: string;
+  status: number;
+  appointmentId?: number;
+  bookedByStaff: boolean;
+  createdAt: string;
+  startAt: string;
+  endAt: string;
+  requestedServiceTypeIds: number[];
+  requestedServiceTitles: string[];
+}
+
+export interface BookingAcceptResult {
+  appointmentBookingId: number;
+  patientId?: number;
+  doctorId: number;
+  appointmentDate: string;
+  durationMinutes?: number;
+  note?: string;
+  suggestedServiceTypeIds: number[];
+  registerPath: string;
+}

@@ -175,10 +175,59 @@ function AppointmentsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   }, []);
 
   useEffect(() => {
-    const editId = new URLSearchParams(location.search).get('edit');
+    const params = new URLSearchParams(location.search);
+    const editId = params.get('edit');
     if (editId) {
       void openEdit(+editId);
+      return;
     }
+
+    const bookingId = params.get('bookingId');
+    if (!bookingId) return;
+
+    void (async () => {
+      try {
+        const activeServices = await healanApi.services.listActive();
+        setServices(activeServices);
+
+        let patientId = Number(params.get('patientId') || 0);
+        const nationalCode = params.get('nationalCode') || '';
+        if (patientId <= 0 && nationalCode) {
+          try {
+            const found = await healanApi.patients.byNationalCode(nationalCode);
+            patientId = found?.patientId ?? 0;
+            if (patientId > 0) {
+              setPatients((prev) =>
+                prev.some((p) => p.patientId === patientId) ? prev : [...prev, found]
+              );
+            }
+          } catch {
+            // patient may not exist yet — secretary can quick-add
+          }
+        }
+
+        const serviceTypeIds = (params.get('serviceTypeIds') || '')
+          .split(',')
+          .map((x) => Number(x))
+          .filter((x) => x > 0);
+
+        const appointmentDateRaw = params.get('appointmentDate');
+        setForm({
+          ...createInitialAppointmentForm(),
+          patientId,
+          doctorId: Number(params.get('doctorId') || 0),
+          durationMinutes: Number(params.get('durationMinutes') || 30) || 30,
+          note: params.get('note') || `رزرو پورتال #${bookingId}`,
+          serviceTypeIds,
+          appointmentDate: appointmentDateRaw
+            ? toDateTimeLocalValue(appointmentDateRaw) || nowDateTimeLocal()
+            : nowDateTimeLocal(),
+        });
+        setShowForm(true);
+      } catch (err) {
+        onAlert(err);
+      }
+    })();
   }, [location.search]);
 
   const toggleService = (id: number) => {

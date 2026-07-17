@@ -23,6 +23,8 @@ const UsersPage = lazy(() => import('../pages/BasicData/Users'));
 const AccessFormsPage = lazy(() => import('../pages/BasicData/AccessForms'));
 const AccessRolesPage = lazy(() => import('../pages/BasicData/AccessRoles'));
 const AssistantSettingsPage = lazy(() => import('../pages/BasicData/AssistantSettings'));
+const BookingSchedulesPage = lazy(() => import('../pages/Booking/Schedules'));
+const BookingReservationsPage = lazy(() => import('../pages/Booking/Reservations'));
 const SiteContentLayout = lazy(() => import('../pages/SiteContent/Layout'));
 const SiteContentSettingsPage = lazy(() => import('../pages/SiteContent/Settings'));
 const SiteContentSectionsPage = lazy(() => import('../pages/SiteContent/Sections'));
@@ -73,6 +75,8 @@ export default function AppRoutes() {
           <Route path="queue" element={guarded('/queue', <QueuePage />)} />
           <Route path="appointments" element={guarded('/appointments', <AppointmentsPage />)} />
           <Route path="appointments/:id" element={guarded('/appointments', <AppointmentDetailPage />)} />
+          <Route path="booking/schedules" element={guarded('/booking/schedules', <BookingSchedulesPage />)} />
+          <Route path="booking/reservations" element={guarded('/booking/reservations', <BookingReservationsPage />)} />
           <Route path="patients" element={guarded('/patients', <PatientsPage />)} />
           <Route path="doctors" element={guarded('/doctors', <DoctorsPage />)} />
           <Route path="prescriptions" element={guarded('/prescriptions', <PrescriptionsPage />)} />

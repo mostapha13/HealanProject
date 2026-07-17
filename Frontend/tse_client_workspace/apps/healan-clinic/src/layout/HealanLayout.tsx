@@ -9,6 +9,8 @@ const navItems: Array<{ path: string; label: string; icon: string; end?: boolean
   { path: '/', label: 'داشبورد', end: true, icon: '📊' },
   { path: '/queue', label: 'صف انتظار', icon: '⏳' },
   { path: '/appointments', label: 'پذیرش و نوبت', icon: '📋' },
+  { path: '/booking/schedules', label: 'برنامه حضور', icon: '🗓️' },
+  { path: '/booking/reservations', label: 'رزروهای نوبت', icon: '📅' },
   { path: '/patients', label: 'بیماران', icon: '👤' },
   { path: '/doctors', label: 'پزشکان', icon: '🩺' },
   { path: '/prescriptions', label: 'نسخه‌ها', icon: '💊' },

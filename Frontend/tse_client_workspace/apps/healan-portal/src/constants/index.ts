@@ -14,6 +14,10 @@ export function goToClinicLogin() {
 }
 
 export function callForAppointment() {
+  window.location.href = '/booking';
+}
+
+export function callClinicPhone() {
   window.location.href = `tel:${environment.phone}`;
 }
 

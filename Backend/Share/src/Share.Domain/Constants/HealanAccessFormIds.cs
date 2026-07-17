@@ -38,4 +38,6 @@ public static class HealanAccessFormIds
     public const int SmsSettings = 5027;
     public const int AssistantSettings = 5028;
     public const int PortalRagLogs = 5029;
+    public const int BookingSchedules = 5030;
+    public const int BookingReservations = 5031;
 }

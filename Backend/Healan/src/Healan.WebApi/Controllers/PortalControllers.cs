@@ -1,3 +1,5 @@
+using Healan.Application.Booking.Commands.PortalBook;
+using Healan.Application.Booking.Queries.PortalBooking;
 using Healan.Application.Portal.Commands.BlogPostDelete;
 using Healan.Application.Portal.Commands.BlogPostRegister;
 using Healan.Application.Portal.Commands.PatientReviewDelete;
@@ -195,6 +197,46 @@ public class PortalPublicController : ControllerBase
 
     [HttpPost("[action]")]
     public async Task<IActionResult> RagOtpVerify([FromBody] PortalOtpVerifyCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingDoctors() =>
+        Ok(await Mediator.Send(new PortalHeartDoctorsQuery()));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingOpenSlots([FromQuery] PortalOpenSlotsQuery query) =>
+        Ok(await Mediator.Send(query));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingServices() =>
+        Ok(await Mediator.Send(new PortalBookingServicesQuery()));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingLookupPatient([FromQuery] string nationalCode) =>
+        Ok(await Mediator.Send(new BookingLookupPatientQuery { NationalCode = nationalCode }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingOtpRequest([FromBody] BookingOtpRequestCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingOtpVerify([FromBody] BookingOtpVerifyCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingCreate([FromBody] PortalBookCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingMyList([FromQuery] PortalMyBookingsQuery query) =>
+        Ok(await Mediator.Send(query));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingCancel([FromBody] PortalCancelBookingCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> BookingReschedule([FromBody] PortalRescheduleBookingCommand request) =>
         Ok(await Mediator.Send(request));
 
     private string? ExtractBearerToken()

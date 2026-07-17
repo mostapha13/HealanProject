@@ -84,6 +84,8 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.SmsSettings, "تنظیمات پیامک", "/reports/sms-settings"),
             new FormDef(HealanAccessFormIds.AssistantSettings, "تنظیمات دستیار هوشمند", "/basic-data/assistant"),
             new FormDef(HealanAccessFormIds.PortalRagLogs, "گفتگوهای دستیار", "/site-content/rag-logs"),
+            new FormDef(HealanAccessFormIds.BookingSchedules, "برنامه حضور", "/booking/schedules"),
+            new FormDef(HealanAccessFormIds.BookingReservations, "رزروهای نوبت", "/booking/reservations"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -154,6 +156,9 @@ public static class HealanAccessSeed
             new MenuDef(5130, HealanAccessFormIds.SmsSettings, 5117, 2),
             new MenuDef(5131, HealanAccessFormIds.AssistantSettings, 5108, 5),
             new MenuDef(5132, HealanAccessFormIds.PortalRagLogs, 5120, 5),
+            new MenuDef(5133, null, null, 8, "نوبت‌دهی"),
+            new MenuDef(5134, HealanAccessFormIds.BookingSchedules, 5133, 1),
+            new MenuDef(5135, HealanAccessFormIds.BookingReservations, 5133, 2),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();

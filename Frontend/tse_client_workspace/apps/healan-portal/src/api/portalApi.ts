@@ -201,6 +201,118 @@ export async function verifyRagOtp(phoneNumber: string, code: string): Promise<P
   return result;
 }
 
+export interface PortalBookingDoctor {
+  doctorId: number;
+  firstName: string;
+  lastName: string;
+}
+
+export interface PortalOpenSlot {
+  appointmentSlotId: number;
+  doctorId: number;
+  doctorName: string;
+  startAt: string;
+  endAt: string;
+}
+
+export interface PortalBookingService {
+  serviceTypeId: number;
+  title: string;
+}
+
+export interface PortalBookingItem {
+  appointmentBookingId: number;
+  appointmentSlotId: number;
+  doctorId: number;
+  doctorName?: string;
+  startAt: string;
+  endAt: string;
+  status: number;
+  firstName: string;
+  lastName: string;
+}
+
+export function bookingDoctors() {
+  return request.get({ baseUrl: BASE, url: 'BookingDoctors' }) as Promise<PortalBookingDoctor[]>;
+}
+
+export function bookingOpenSlots(params?: { doctorId?: number; fromDate?: string; toDate?: string }) {
+  return request.get({
+    baseUrl: BASE,
+    url: 'BookingOpenSlots',
+    options: params ?? {},
+  }) as Promise<PortalOpenSlot[]>;
+}
+
+export function bookingServices() {
+  return request.get({ baseUrl: BASE, url: 'BookingServices' }) as Promise<PortalBookingService[]>;
+}
+
+export function bookingLookupPatient(nationalCode: string) {
+  return request.get({
+    baseUrl: BASE,
+    url: 'BookingLookupPatient',
+    options: { nationalCode },
+  }) as Promise<{
+    found: boolean;
+    patientId?: number;
+    nationalCode: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+  }>;
+}
+
+export function bookingOtpRequest(phoneNumber: string) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingOtpRequest',
+    options: { phoneNumber },
+  }) as Promise<{ sent: boolean; phoneMasked?: string; expiresInSeconds?: number; reused?: boolean }>;
+}
+
+export function bookingOtpVerify(payload: { phoneNumber: string; code: string; nationalCode: string }) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingOtpVerify',
+    options: payload,
+  }) as Promise<{
+    verified: boolean;
+    bookingToken: string;
+    expiresInSeconds: number;
+    nationalCode: string;
+    phoneNumber: string;
+  }>;
+}
+
+export function bookingCreate(payload: Record<string, unknown>) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingCreate',
+    options: payload,
+  }) as Promise<PortalBookingItem>;
+}
+
+export function bookingMyList(nationalCode: string, phoneNumber: string) {
+  return request.get({
+    baseUrl: BASE,
+    url: 'BookingMyList',
+    options: { nationalCode, phoneNumber },
+  }) as Promise<PortalBookingItem[]>;
+}
+
+export function bookingCancel(payload: Record<string, unknown>) {
+  return request.post({ baseUrl: BASE, url: 'BookingCancel', options: payload });
+}
+
+export function bookingReschedule(payload: Record<string, unknown>) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'BookingReschedule',
+    options: payload,
+  }) as Promise<PortalBookingItem>;
+}
+
 export function portalSetting(site: PublishedPortalSite | null, key: string, fallback = ''): string {
   return site?.settings?.[key] ?? fallback;
 }

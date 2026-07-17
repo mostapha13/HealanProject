@@ -32,6 +32,11 @@ import type {
   RagChatLogItem,
   SmsOutboxItem,
   SmsSetting,
+  ScheduleTemplateItem,
+  ScheduleExceptionItem,
+  AppointmentSlotItem,
+  AppointmentBookingItem,
+  BookingAcceptResult,
 } from './types';
 
 const BASE = HEALAN_API_URL;
@@ -336,6 +341,41 @@ export const healanApi = {
       pageNumber?: number;
       pageSize?: number;
     }) => get<PaginatedResponse<RagChatLogItem>>('RagKnowledge/ChatLogList', pagedParams(params)),
+  },
+
+  booking: {
+    templateList: (doctorId?: number) =>
+      get<ScheduleTemplateItem[]>('BookingSchedule/TemplateList', doctorId ? { doctorId } : {}),
+    templateSave: (data: Record<string, unknown>) =>
+      post<ScheduleTemplateItem>('BookingSchedule/TemplateSave', data),
+    templateDelete: (doctorScheduleTemplateId: number) =>
+      post('BookingSchedule/TemplateDelete', { doctorScheduleTemplateId }),
+    templateCopy: (data: { doctorId: number; sourceDayOfWeek: number; targetDayOfWeeks: number[] }) =>
+      post('BookingSchedule/TemplateCopy', data),
+    generateSlots: (data: { doctorId: number; fromDate: string; toDate: string }) =>
+      post<{ added: number }>('BookingSchedule/GenerateSlots', data),
+    exceptionList: (params: { doctorId: number; fromDate?: string; toDate?: string }) =>
+      get<ScheduleExceptionItem[]>('BookingSchedule/ExceptionList', params),
+    exceptionSave: (data: Record<string, unknown>) =>
+      post<ScheduleExceptionItem>('BookingSchedule/ExceptionSave', data),
+    slotList: (params: Record<string, unknown> = {}) =>
+      get<PaginatedResponse<AppointmentSlotItem>>('BookingSchedule/SlotList', pagedParams(params)),
+    slotBlock: (data: { appointmentSlotId: number; block: boolean; note?: string }) =>
+      post('BookingSchedule/SlotBlock', data),
+    slotManualCreate: (data: Record<string, unknown>) =>
+      post<AppointmentSlotItem>('BookingSchedule/SlotManualCreate', data),
+    reservationList: (params: Record<string, unknown> = {}) =>
+      get<PaginatedResponse<AppointmentBookingItem>>('BookingReservation/List', pagedParams(params)),
+    reservationCreate: (data: Record<string, unknown>) =>
+      post<AppointmentBookingItem>('BookingReservation/Create', data),
+    reservationCancel: (appointmentBookingId: number) =>
+      post('BookingReservation/Cancel', { appointmentBookingId, byStaff: true }),
+    reservationMove: (data: { appointmentBookingId: number; newAppointmentSlotId: number }) =>
+      post<AppointmentBookingItem>('BookingReservation/Move', data),
+    reservationUpdateNote: (data: { appointmentBookingId: number; note?: string }) =>
+      post('BookingReservation/UpdateNote', data),
+    reservationAccept: (appointmentBookingId: number) =>
+      post<BookingAcceptResult>('BookingReservation/Accept', { appointmentBookingId }),
   },
 };
 

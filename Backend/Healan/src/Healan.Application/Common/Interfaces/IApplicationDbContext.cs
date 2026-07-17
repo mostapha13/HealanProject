@@ -1,5 +1,6 @@
 ﻿using Healan.Domain.Appointments.Entities;
 using Healan.Domain.Attachments.Entities;
+using Healan.Domain.Booking.Entities;
 using Healan.Domain.Companies.Entities;
 using Healan.Domain.Doctors.Entities;
 using Healan.Domain.Insurances.Entities;
@@ -54,6 +55,10 @@ public interface IApplicationDbContext : IDisposable
      DbSet<RagSetting> RagSettings { get; set; }
      DbSet<RagChatLog> RagChatLogs { get; set; }
      DbSet<SmsSetting> SmsSettings { get; set; }
+     DbSet<DoctorScheduleTemplate> DoctorScheduleTemplates { get; set; }
+     DbSet<DoctorScheduleException> DoctorScheduleExceptions { get; set; }
+     DbSet<AppointmentSlot> AppointmentSlots { get; set; }
+     DbSet<AppointmentBooking> AppointmentBookings { get; set; }
     //DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 
