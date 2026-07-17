@@ -336,46 +336,6 @@ services:
       - identity-server
       - identity-usermanager
 
-  cash-market:
-    build:
-      context: .
-      dockerfile: docker/frontend-nx.Dockerfile
-      args:
-        APP_NAME: cash-market
-    container_name: healan-cash-market
-    ports:
-      - "4203:80"
-
-  regions-hall:
-    build:
-      context: .
-      dockerfile: docker/frontend-nx.Dockerfile
-      args:
-        APP_NAME: regions-hall
-    container_name: healan-regions-hall
-    ports:
-      - "4204:80"
-
-  modern-instrumentations:
-    build:
-      context: .
-      dockerfile: docker/frontend-nx.Dockerfile
-      args:
-        APP_NAME: modern-instrumentations
-    container_name: healan-modern-instrumentations
-    ports:
-      - "4205:80"
-
-  tax-front:
-    build:
-      context: .
-      dockerfile: docker/frontend-nx.Dockerfile
-      args:
-        APP_NAME: tax-front
-    container_name: healan-tax-front
-    ports:
-      - "4206:80"
-
 volumes:
   sqlserver_data:
   filemanager_attachments:

@@ -17,7 +17,7 @@ When giving the user **server commands**, follow this checklist **before** the f
 
 ## Never do these on production
 
-1. **Do not** `docker compose down` then `up -d --build` for the whole stack — it takes everything down and rebuilds unrelated apps (`modern-instrumentations`, `tax-front`, …) which often fail and leave the site offline.
+1. **Do not** `docker compose down` then `up -d --build` for the whole stack — it takes everything down and rebuilds unrelated services, which often fail and leave the site offline.
 2. **Do not** rebuild all services when only SMS/auth/clinic changed.
 3. **Do not** hardcode a guessed SQL password; always `source .env`.
 

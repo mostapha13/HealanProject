@@ -11,7 +11,7 @@
         "compiler": "swc",
         "outputPath": "dist/apps/login",
         "index": "apps/login/src/index.html",
-        "styles": ["apps/regions-hall/src/styles.scss"],
+        "styles": ["apps/login/src/style.scss"],
         "baseHref": "/",
         "main": "apps/login/src/main.tsx",
         "polyfills": "apps/login/src/polyfills.ts",
