@@ -444,7 +444,7 @@ export default function AssistantPage() {
                 ? `وارد شده${quota.phoneMasked ? ` · ${quota.phoneMasked}` : ''}`
                 : 'مهمان · پاسخ بر اساس اطلاعات رسمی مطب'}
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                · build-v3
+                · build-v4
               </span>
             </p>
           </div>

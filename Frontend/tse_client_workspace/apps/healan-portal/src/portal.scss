@@ -1756,9 +1756,11 @@
     linear-gradient(180deg, #fff9f5 0%, #f7f8fb 42%, #f3f4f8 100%);
   color: var(--p-text);
   overflow: hidden;
-  padding-top: env(safe-area-inset-top, 0px);
+  /* فضای بالای صفحه — بدون این، هدر و پیام خوش‌آمد زیر لبه مرورگر بریده می‌شود */
+  padding-top: 10%;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
 }
 
 .portal-assistant__glow {
