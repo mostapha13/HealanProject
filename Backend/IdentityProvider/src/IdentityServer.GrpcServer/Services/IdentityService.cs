@@ -217,6 +217,27 @@ namespace IdentityServer.GrpcServer.Services
         {
             UserHasAccessResonse userHasAccessResonse = new UserHasAccessResonse();
 
+            var userId = request.UserId.ToGuid();
+            if (!userId.HasValue)
+            {
+                userHasAccessResonse.HasAccess = false;
+                return userHasAccessResonse;
+            }
+
+            // Admin always has full access to every AccessForm in all systems.
+            var isAdmin = await (
+                from ur in _applicationDbContext.UserRoles
+                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
+                where ur.UserId == userId.Value && role.Name == ConstUserInfo.AdminRole
+                select ur.RoleId
+            ).AnyAsync();
+
+            if (isAdmin)
+            {
+                userHasAccessResonse.HasAccess = true;
+                return userHasAccessResonse;
+            }
+
             bool persianAccess = request.LanguageId == 1;
             // LanguageId 0 = caller did not specify — do not filter by HasPersianAccess
             // (otherwise Persian-only AccessRoles are denied for endpoints without {lang}).
@@ -227,7 +248,7 @@ namespace IdentityServer.GrpcServer.Services
                     join m in _applicationDbContext.AccessMenus on a.AccessMenuId equals m.AccessMenuId
                     join f in _applicationDbContext.AccessForms on m.AccessFormId equals f.AccessFormId
                     where
-                    r.UserId == request.UserId.ToGuid() &&
+                    r.UserId == userId.Value &&
                     (ignorePersianFlag || !a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
                     request.AccessFormId.Contains(f.AccessFormId)
                     select a.AccessRoleId;

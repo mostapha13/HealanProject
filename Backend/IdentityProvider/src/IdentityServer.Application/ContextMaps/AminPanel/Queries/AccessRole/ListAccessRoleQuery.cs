@@ -21,6 +21,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
             [5108] = "اطلاعات پایه",
             [5113] = "مدیریت کاربران",
             [5120] = "محتوای سایت",
+            [5133] = "نوبت‌دهی",
         };
 
         private readonly ApplicationDbContext _applicationDbContext;

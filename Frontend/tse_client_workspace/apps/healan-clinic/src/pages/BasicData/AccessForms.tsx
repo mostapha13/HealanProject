@@ -15,6 +15,7 @@ const FOLDER_TITLES: Record<number, string> = {
   5108: 'اطلاعات پایه',
   5113: 'مدیریت کاربران',
   5120: 'محتوای سایت',
+  5133: 'نوبت‌دهی',
 };
 
 type FlatRow = {
@@ -62,7 +63,7 @@ function flattenMenus(
       return;
     }
     const isAction = /\/(add|edit|delete|publish)$/.test(url);
-    const isSystem = item.accessMenuId >= 5101 && item.accessMenuId <= 5132;
+    const isSystem = item.accessMenuId >= 5101 && item.accessMenuId < 5200;
     rows.push({
       accessMenuId: item.accessMenuId,
       accessFormId: item.accessFormId,

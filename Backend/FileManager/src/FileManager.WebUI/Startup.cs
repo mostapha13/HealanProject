@@ -1,18 +1,16 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using FileManager.Infrastructure.Persistence;
 using FileManager.Domain.Services;
 using FileManager.Infrastructure.Services;
 using Share.Application.Common.Interfaces;
@@ -36,18 +34,20 @@ namespace FileManager.WebUI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             IdentityModelEventSource.ShowPII = true;
-          
+
             services.Configure<UploadFileConfig>(Configuration.GetSection("UploadFileConfig"));
             services.Configure<GatewayInfoConfig>(Configuration.GetSection("ApiGateway"));
             services.Configure<IpRateLimitOptions>(options =>
@@ -58,32 +58,32 @@ namespace FileManager.WebUI
                 options.RealIpHeader = "X-Real-IP";
                 options.ClientIdHeader = "X-ClientId";
                 options.GeneralRules = new List<RateLimitRule>
-        {
-            new RateLimitRule
-            {
-                Endpoint = "GET:/File/Download/*",
-                Period = "20s",
-                Limit = 20,
-            },
-            new RateLimitRule
-            {
-                Endpoint = "GET:/File/DownloadAll/*",
-                Period = "20s",
-                Limit = 5,
-            },
-            new RateLimitRule
-            {
-                Endpoint = "POST:/File/Upload",
-                Period = "20s",
-                Limit = 20,
-            },
-                     new RateLimitRule
-            {
-                Endpoint = "POST:/File/EncryptedUpload",
-                Period = "20s",
-                Limit = 3,
-            }
-        };
+                {
+                    new RateLimitRule
+                    {
+                        Endpoint = "GET:/File/Download/*",
+                        Period = "20s",
+                        Limit = 20,
+                    },
+                    new RateLimitRule
+                    {
+                        Endpoint = "GET:/File/DownloadAll/*",
+                        Period = "20s",
+                        Limit = 5,
+                    },
+                    new RateLimitRule
+                    {
+                        Endpoint = "POST:/File/Upload",
+                        Period = "20s",
+                        Limit = 20,
+                    },
+                    new RateLimitRule
+                    {
+                        Endpoint = "POST:/File/EncryptedUpload",
+                        Period = "20s",
+                        Limit = 3,
+                    }
+                };
             });
             services.AddMemoryCache();
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
@@ -96,13 +96,13 @@ namespace FileManager.WebUI
             services.AddHttpContextAccessor();
             services.AddHtmlSanitizer();
             services.AddControllers(options =>
-          options.Filters.Add<ApiExceptionFilterAttribute>())
-              .AddFluentValidation(x => x.AutomaticValidationEnabled = true)
-              .AddJsonOptions(opts =>
-              {
-                  var enumConverter = new JsonStringEnumConverter();
-                  opts.JsonSerializerOptions.Converters.Add(enumConverter);
-              });
+                options.Filters.Add<ApiExceptionFilterAttribute>())
+                .AddFluentValidation(x => x.AutomaticValidationEnabled = true)
+                .AddJsonOptions(opts =>
+                {
+                    var enumConverter = new JsonStringEnumConverter();
+                    opts.JsonSerializerOptions.Converters.Add(enumConverter);
+                });
             services.AddFileAccessStatusServices(Configuration);
             services.AddLoginProviderServices(Configuration);
             services.AddScoped<ILinkMaker, LinkMaker>();
@@ -118,22 +118,81 @@ namespace FileManager.WebUI
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FileManager.WebUI", Version = "v1" });
                 c.OperationFilter<SwaggerFileOperationFilter>();
                 c.IncludeXmlComments("FileManager.WebUI.xml");
-
             });
 
-
             #region Identity Server Connection Configuration
-            // Align with Healan/UserManager: clinic Bearer tokens typically list WorkFlowWebApi in aud.
-            var builder = services.AddAuthentication("Bearer")
+            // Same clinic Bearer as Healan/UserManager (audience WorkFlowWebApi).
+            // Authority is internal docker host; token iss is the public auth URL.
+            var authority = Configuration["IdentityServer:Url"]?.Trim();
+            if (_env.IsProduction()
+                && (string.IsNullOrWhiteSpace(authority)
+                    || authority.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
+            {
+                Console.Error.WriteLine(
+                    $"[FileManagerAuth] WARN IdentityServer:Url was '{authority}' — forcing http://identity-server:8080/");
+                authority = "http://identity-server:8080/";
+            }
+
+            var validIssuer = Configuration["IdentityServer:ValidIssuer"]?.Trim()
+                ?? "http://auth.drshahrooei.ir";
+
+            Console.WriteLine(
+                $"[FileManagerAuth] Configure Authority={authority} ValidIssuer={validIssuer} ApiName=WorkFlowWebApi Env={_env.EnvironmentName}");
+
+            services.AddAuthentication("Bearer")
               .AddIdentityServerAuthentication("Bearer", options =>
               {
-                  options.Authority = Configuration["IdentityServer:Url"];
+                  options.Authority = authority;
                   options.ApiName = "WorkFlowWebApi";
                   options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
                   options.RequireHttpsMetadata = false;
-                  options.SaveToken=true;
+                  options.SaveToken = true;
+                  options.JwtBearerEvents = new JwtBearerEvents
+                  {
+                      OnAuthenticationFailed = ctx =>
+                      {
+                          Console.Error.WriteLine($"[FileManagerAuth] FAIL {ctx.Exception.GetType().Name}: {ctx.Exception.Message}");
+                          return Task.CompletedTask;
+                      },
+                      OnTokenValidated = ctx =>
+                      {
+                          var sub = ctx.Principal?.FindFirst("sub")?.Value ?? "(none)";
+                          Console.WriteLine($"[FileManagerAuth] OK sub={sub}");
+                          return Task.CompletedTask;
+                      },
+                      OnChallenge = ctx =>
+                      {
+                          Console.Error.WriteLine($"[FileManagerAuth] Challenge error={ctx.Error} desc={ctx.ErrorDescription}");
+                          return Task.CompletedTask;
+                      },
+                  };
               });
 
+            // Accept public issuer on JWTs while Authority hostname is identity-server.
+            services.PostConfigureAll<JwtBearerOptions>(opts =>
+            {
+                opts.TokenValidationParameters ??= new TokenValidationParameters();
+                opts.TokenValidationParameters.ValidateIssuer = true;
+                var issuers = new List<string>
+                {
+                    validIssuer,
+                    validIssuer.TrimEnd('/') + "/",
+                    "http://auth.drshahrooei.ir",
+                    "http://auth.drshahrooei.ir/",
+                    "https://auth.drshahrooei.ir",
+                    "https://auth.drshahrooei.ir/",
+                };
+                if (!string.IsNullOrWhiteSpace(authority))
+                {
+                    issuers.Add(authority);
+                    issuers.Add(authority.TrimEnd('/'));
+                    issuers.Add(authority.TrimEnd('/') + "/");
+                }
+                opts.TokenValidationParameters.ValidIssuers = issuers
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            });
 
             services.AddAuthorization(options =>
             {
@@ -145,39 +204,43 @@ namespace FileManager.WebUI
                     policy.RequireClaim("scope", "profile");
                 });
             });
-            var origins = Configuration["ClientBaseUrl"].Split(",");
+            var origins = (Configuration["ClientBaseUrl"] ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Concat(new[]
+                {
+                    "http://clinic.drshahrooei.ir",
+                    "https://clinic.drshahrooei.ir",
+                    "http://www.drshahrooei.ir",
+                    "https://www.drshahrooei.ir",
+                    "http://auth.drshahrooei.ir",
+                    "https://auth.drshahrooei.ir",
+                })
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
             services.AddCors(options =>
             {
                 options.AddPolicy("default",
-                builder => builder
-                .WithOrigins(origins)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-                //.SetIsOriginAllowed((host) => true)
-                .WithExposedHeaders("FileTitle")
-                );
+                    builder => builder
+                        .WithOrigins(origins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithExposedHeaders("FileTitle"));
             });
             #endregion
 
-
             services.AddHostedService<HostedFileBackgroundService>();
-
-        
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FileManager.WebUI v1"));
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FileManager.WebUI v1"));
             app.UseStaticFiles();
-            //app.UseHsts();
-            //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("default");
             app.UseIpRateLimiting();
@@ -187,7 +250,6 @@ namespace FileManager.WebUI
 
             app.UseMiddleware<SecurityHeaderMiddleware>();
             app.UseMiddleware<QueryValidationMiddleware>();
-            //app.UseMiddleware<InputValidationMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

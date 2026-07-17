@@ -36,6 +36,12 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
 
             var userRoles = _applicationDbContext.UserRoles.Where(x => x.UserId == userId).Select(s => s.RoleId).ToList();
 
+            var isAdmin = (
+                from ur in _applicationDbContext.UserRoles
+                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
+                where ur.UserId == userId && role.Name == ConstUserInfo.AdminRole
+                select ur.RoleId
+            ).Any();
 
             var result = (from m in _applicationDbContext.AccessForms
                           join r in _applicationDbContext.AccessMenus on m.AccessFormId equals r.AccessFormId
@@ -46,8 +52,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                           select new
                           {
                               m.AccessSystemId,
-                              HasAccess = myAccessRole != null,
-                              HasPersianAccess = myAccessRole == null ? null : myAccessRole.HasPersianAccess,
+                              HasAccess = isAdmin || myAccessRole != null,
+                              HasPersianAccess = isAdmin ? true : (myAccessRole == null ? null : myAccessRole.HasPersianAccess),
                               m.FormTitle,
                               m.URL
                           }).GroupBy(g => new { g.AccessSystemId, g.URL, g.FormTitle, g.HasAccess, g.HasPersianAccess }).Select(s => new AccessUserRoleResponse { AccessSystemId = s.Key.AccessSystemId, FormTitle = s.Key.FormTitle, HasAccess = s.Key.HasAccess, URL = s.Key.URL, HasPersianAccess = s.Key.HasPersianAccess }).ToList();

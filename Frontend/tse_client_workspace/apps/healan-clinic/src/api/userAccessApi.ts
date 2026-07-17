@@ -50,6 +50,7 @@ const FOLDER_TITLES: Record<number, string> = {
   5108: 'اطلاعات پایه',
   5113: 'مدیریت کاربران',
   5120: 'محتوای سایت',
+  5133: 'نوبت‌دهی',
 };
 
 async function accessToken(): Promise<string | undefined> {
