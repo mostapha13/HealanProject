@@ -29,6 +29,23 @@ public class Program
                             UpdatedAt datetime2 NOT NULL
                         );
                     END
+
+                    IF OBJECT_ID(N'dbo.SmsOutboxLogs', N'U') IS NULL
+                    BEGIN
+                        CREATE TABLE dbo.SmsOutboxLogs (
+                            Id bigint IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                            CreatedAt datetime2 NOT NULL,
+                            PhoneNumber nvarchar(20) NOT NULL,
+                            Message nvarchar(2000) NOT NULL,
+                            ExtractedCode nvarchar(32) NULL,
+                            Success bit NOT NULL,
+                            ErrorMessage nvarchar(1000) NULL,
+                            TraceNumber nvarchar(100) NULL,
+                            Channel nvarchar(40) NOT NULL
+                        );
+                        CREATE INDEX IX_SmsOutboxLogs_CreatedAt ON dbo.SmsOutboxLogs (CreatedAt);
+                        CREATE INDEX IX_SmsOutboxLogs_PhoneNumber ON dbo.SmsOutboxLogs (PhoneNumber);
+                    END
                     """);
             }
             catch (Exception ex)

@@ -28,6 +28,7 @@ const WELCOME =
   'سلام! من دستیار هوشمند مطب دکتر شهرویی هستم. درباره آدرس، ساعات کاری، خدمات و نوبت‌دهی از من بپرسید.';
 
 const GUEST_COOKIE = 'healan_rag_guest';
+const OTP_TTL_SECONDS = 120;
 
 function createSessionId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -64,6 +65,13 @@ function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+function formatCountdown(totalSeconds: number): string {
+  const s = Math.max(0, totalSeconds);
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${r.toString().padStart(2, '0')}`;
+}
+
 export default function AssistantPage() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -77,14 +85,18 @@ export default function AssistantPage() {
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [otpSecondsLeft, setOtpSecondsLeft] = useState(0);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState('');
   const sessionIdRef = useRef(createSessionId());
   const guestKeyRef = useRef(ensureGuestKey());
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messagesRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const streamTimerRef = useRef<number | null>(null);
   const streamCancelRef = useRef(false);
+  const skipInitialScrollRef = useRef(true);
+  const otpExpireAtRef = useRef<number>(0);
 
   const busy = loading || streaming;
   const showSuggestions = messages.length <= 1 && !busy;
@@ -105,7 +117,12 @@ export default function AssistantPage() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (skipInitialScrollRef.current) {
+      skipInitialScrollRef.current = false;
+      if (messagesRef.current) messagesRef.current.scrollTop = 0;
+      return;
+    }
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, loading, streaming]);
 
   useEffect(() => {
@@ -115,11 +132,29 @@ export default function AssistantPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!otpSent || otpExpireAtRef.current <= 0) return;
+    const tick = () => {
+      const left = Math.ceil((otpExpireAtRef.current - Date.now()) / 1000);
+      setOtpSecondsLeft(Math.max(0, left));
+    };
+    tick();
+    const id = window.setInterval(tick, 250);
+    return () => window.clearInterval(id);
+  }, [otpSent]);
+
   const resizeTextarea = () => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  };
+
+  const startOtpTimer = (expiresInSeconds: number) => {
+    const seconds = expiresInSeconds > 0 ? expiresInSeconds : OTP_TTL_SECONDS;
+    otpExpireAtRef.current = Date.now() + seconds * 1000;
+    setOtpSecondsLeft(seconds);
+    setOtpSent(true);
   };
 
   const streamAssistantReply = (fullText: string) =>
@@ -170,12 +205,17 @@ export default function AssistantPage() {
       streamTimerRef.current = window.setTimeout(tick, 40);
     });
 
+  const openLogin = () => {
+    setAuthError('');
+    setLoginOpen(true);
+  };
+
   const send = async (raw?: string) => {
     const question = (raw ?? input).trim();
     if (!question || busy) return;
 
     if (blocked) {
-      setLoginOpen(true);
+      openLogin();
       return;
     }
 
@@ -201,8 +241,16 @@ export default function AssistantPage() {
                 requiresLogin: true,
               }
         );
-        setLoginOpen(true);
-      } else if (typeof res.remainingCount === 'number') {
+        await streamAssistantReply(
+          res.answer ||
+            'سقف سوالات رایگان امروز تمام شد. در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.'
+        );
+        openLogin();
+        void refreshQuota();
+        return;
+      }
+
+      if (typeof res.remainingCount === 'number') {
         setQuota((prev) =>
           prev
             ? {
@@ -238,8 +286,14 @@ export default function AssistantPage() {
     setAuthError('');
     setAuthBusy(true);
     try {
-      await requestRagOtp(phone.trim());
-      setOtpSent(true);
+      const res = (await requestRagOtp(phone.trim())) as {
+        sent?: boolean;
+        expiresInSeconds?: number;
+        reused?: boolean;
+        phoneMasked?: string;
+      };
+      startOtpTimer(res.expiresInSeconds ?? OTP_TTL_SECONDS);
+      // اگر کد قبلی هنوز معتبر است، SMS جدید نمی‌رود؛ همان کد را وارد کنید
     } catch (err: unknown) {
       const response = err as { data?: { detail?: string; message?: string; title?: string } };
       setAuthError(response?.data?.detail || response?.data?.message || response?.data?.title || 'ارسال کد ناموفق بود');
@@ -256,13 +310,16 @@ export default function AssistantPage() {
       setLoginOpen(false);
       setOtpSent(false);
       setOtpCode('');
+      setOtpSecondsLeft(0);
+      otpExpireAtRef.current = 0;
       await refreshQuota();
+      // تاریخچه چت حفظ می‌شود؛ فقط پیام موفقیت اضافه می‌شود
       setMessages((prev) => [
         ...prev,
         {
           id: `a-login-${Date.now()}`,
           role: 'assistant',
-          text: 'ورود موفق بود. حالا می‌توانید سوالات بیشتری بپرسید.',
+          text: 'ورود موفق بود. تاریخچه گفتگو حفظ شد و می‌توانید سوالات بیشتری بپرسید.',
         },
       ]);
     } catch (err: unknown) {
@@ -323,17 +380,22 @@ export default function AssistantPage() {
               خروج
             </button>
           ) : (
-            <button type="button" className="portal-assistant__linkbtn" onClick={() => setLoginOpen(true)}>
+            <button type="button" className="portal-assistant__linkbtn" onClick={openLogin}>
               ورود
             </button>
           )}
         </div>
       </header>
 
-      <div className="portal-assistant__messages" role="log" aria-live="polite">
+      <div className="portal-assistant__messages" ref={messagesRef} role="log" aria-live="polite">
         <div className="portal-assistant__thread">
           {messages.map((msg) => (
-            <div key={msg.id} className={`portal-assistant__row portal-assistant__row--${msg.role}`}>
+            <div
+              key={msg.id}
+              className={`portal-assistant__row portal-assistant__row--${msg.role}${
+                msg.id === 'welcome' ? ' portal-assistant__row--static' : ''
+              }`}
+            >
               {msg.role === 'assistant' && (
                 <div className="portal-assistant__msg-avatar" aria-hidden>
                   <svg viewBox="0 0 24 24" width="16" height="16">
@@ -394,9 +456,12 @@ export default function AssistantPage() {
       <div className="portal-assistant__composer-wrap">
         {blocked && (
           <div className="portal-assistant__limit-banner">
-            سقف سوالات رایگان امروز تمام شد.
-            <button type="button" onClick={() => setLoginOpen(true)}>
-              ورود با موبایل
+            <div className="portal-assistant__limit-banner-text">
+              سقف سوالات رایگان امروز تمام شد.
+              <strong> در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.</strong>
+            </div>
+            <button type="button" className="portal-assistant__limit-login" onClick={openLogin}>
+              ورود / لاگین
             </button>
           </div>
         )}
@@ -443,7 +508,7 @@ export default function AssistantPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2>ورود به دستیار هوشمند</h2>
-            <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید.</p>
+            <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید. تاریخچه گفتگو حفظ می‌شود.</p>
 
             <label className="portal-assistant__field">
               شماره موبایل
@@ -457,16 +522,23 @@ export default function AssistantPage() {
             </label>
 
             {otpSent && (
-              <label className="portal-assistant__field">
-                کد تأیید
-                <input
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="کد ۶ رقمی"
-                  inputMode="numeric"
-                  disabled={authBusy}
-                />
-              </label>
+              <>
+                <label className="portal-assistant__field">
+                  کد تأیید
+                  <input
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="کد ۶ رقمی"
+                    inputMode="numeric"
+                    disabled={authBusy}
+                  />
+                </label>
+                <p className={`portal-assistant__otp-timer${otpSecondsLeft <= 0 ? ' is-expired' : ''}`}>
+                  {otpSecondsLeft > 0
+                    ? `اعتبار کد: ${formatCountdown(otpSecondsLeft)} — می‌توانید همان کد قبلی را وارد کنید`
+                    : 'اعتبار کد تمام شد. دوباره «ارسال کد» را بزنید'}
+                </p>
+              </>
             )}
 
             {authError && <p className="portal-assistant__auth-error">{authError}</p>}
@@ -475,14 +547,34 @@ export default function AssistantPage() {
               <button type="button" className="portal-assistant__ghost" onClick={() => setLoginOpen(false)}>
                 انصراف
               </button>
-              {!otpSent ? (
-                <button type="button" className="portal-assistant__primary" disabled={authBusy || !phone.trim()} onClick={() => void sendOtp()}>
+              {!otpSent || otpSecondsLeft <= 0 ? (
+                <button
+                  type="button"
+                  className="portal-assistant__primary"
+                  disabled={authBusy || !phone.trim()}
+                  onClick={() => void sendOtp()}
+                >
                   ارسال کد
                 </button>
               ) : (
-                <button type="button" className="portal-assistant__primary" disabled={authBusy || !otpCode.trim()} onClick={() => void verifyOtp()}>
-                  تأیید و ورود
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="portal-assistant__ghost"
+                    disabled={authBusy}
+                    onClick={() => void sendOtp()}
+                  >
+                    ارسال مجدد
+                  </button>
+                  <button
+                    type="button"
+                    className="portal-assistant__primary"
+                    disabled={authBusy || !otpCode.trim()}
+                    onClick={() => void verifyOtp()}
+                  >
+                    تأیید و ورود
+                  </button>
+                </>
               )}
             </div>
           </div>

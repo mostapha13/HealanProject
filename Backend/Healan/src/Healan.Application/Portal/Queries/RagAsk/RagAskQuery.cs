@@ -74,7 +74,7 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             {
                 Answer = userId.HasValue
                     ? $"سقف سوالات روزانه شما ({limit}) به پایان رسیده است. فردا دوباره تلاش کنید."
-                    : $"سقف سوالات رایگان امروز ({limit}) تمام شد. برای ادامه با موبایل وارد شوید.",
+                    : $"سقف سوالات رایگان امروز ({limit}) تمام شد. در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.",
                 WasAnswered = false,
                 RequiresLogin = !userId.HasValue,
                 UsedCount = usedCount,

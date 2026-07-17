@@ -1,4 +1,3 @@
-using Healan.Application.Portal.Dtos;
 using Healan.Application.Portal.Services;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,6 +12,9 @@ public class PortalOtpRequestCommand : IRequest<object>
 
 public class PortalOtpRequestCommandHandler : IRequestHandler<PortalOtpRequestCommand, object>
 {
+    private static readonly TimeSpan OtpTtl = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(90);
+
     private readonly IMemoryCache _cache;
     private readonly IPortalSmsSender _smsSender;
 
@@ -28,13 +30,35 @@ public class PortalOtpRequestCommandHandler : IRequestHandler<PortalOtpRequestCo
         if (phone.Length != 11 || !phone.StartsWith("09", StringComparison.Ordinal))
             throw new BadRequestExceptions("شماره موبایل معتبر نیست (مثال: 09123456789)");
 
+        var otpKey = $"portal_otp_{phone}";
+        var metaKey = $"portal_otp_meta_{phone}";
         var cooldownKey = $"portal_otp_cd_{phone}";
+
+        // اگر کد قبلی هنوز معتبر است، همان را نگه دار و SMS جدید نفرست
+        if (_cache.TryGetValue(otpKey, out string? existingCode)
+            && !string.IsNullOrWhiteSpace(existingCode)
+            && _cache.TryGetValue(metaKey, out OtpMeta? meta)
+            && meta != null
+            && meta.ExpiresAtUtc > DateTime.UtcNow)
+        {
+            var remaining = (int)Math.Ceiling((meta.ExpiresAtUtc - DateTime.UtcNow).TotalSeconds);
+            return new
+            {
+                sent = true,
+                reused = true,
+                expiresInSeconds = Math.Max(1, remaining),
+                phoneMasked = RagQuotaHelper.MaskPhone(phone),
+            };
+        }
+
         if (_cache.TryGetValue(cooldownKey, out _))
-            throw new BadRequestExceptions("کد قبلی هنوز معتبر است. لطفاً کمی صبر کنید.");
+            throw new BadRequestExceptions("لطفاً کمی صبر کنید و دوباره تلاش کنید.");
 
         var code = Random.Shared.Next(100000, 999999).ToString();
-        _cache.Set($"portal_otp_{phone}", code, TimeSpan.FromMinutes(2));
-        _cache.Set(cooldownKey, true, TimeSpan.FromSeconds(90));
+        var expiresAt = DateTime.UtcNow.Add(OtpTtl);
+        _cache.Set(otpKey, code, OtpTtl);
+        _cache.Set(metaKey, new OtpMeta(expiresAt), OtpTtl);
+        _cache.Set(cooldownKey, true, ResendCooldown);
 
         var (ok, error) = await _smsSender.SendAsync(
             phone,
@@ -44,6 +68,14 @@ public class PortalOtpRequestCommandHandler : IRequestHandler<PortalOtpRequestCo
         if (!ok)
             throw new BadRequestExceptions(error ?? "ارسال پیامک ناموفق بود.");
 
-        return new { sent = true, expiresInSeconds = 120, phoneMasked = RagQuotaHelper.MaskPhone(phone) };
+        return new
+        {
+            sent = true,
+            reused = false,
+            expiresInSeconds = (int)OtpTtl.TotalSeconds,
+            phoneMasked = RagQuotaHelper.MaskPhone(phone),
+        };
     }
+
+    private sealed record OtpMeta(DateTime ExpiresAtUtc);
 }

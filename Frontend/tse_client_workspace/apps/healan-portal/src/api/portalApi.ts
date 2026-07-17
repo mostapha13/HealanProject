@@ -173,12 +173,22 @@ export async function fetchRagQuota(guestKey?: string): Promise<RagQuotaStatus> 
   }) as Promise<RagQuotaStatus>;
 }
 
-export async function requestRagOtp(phoneNumber: string): Promise<{ sent: boolean; phoneMasked?: string }> {
+export async function requestRagOtp(phoneNumber: string): Promise<{
+  sent: boolean;
+  phoneMasked?: string;
+  expiresInSeconds?: number;
+  reused?: boolean;
+}> {
   return request.post({
     baseUrl: BASE,
     url: 'RagOtpRequest',
     options: { phoneNumber },
-  }) as Promise<{ sent: boolean; phoneMasked?: string }>;
+  }) as Promise<{
+    sent: boolean;
+    phoneMasked?: string;
+    expiresInSeconds?: number;
+    reused?: boolean;
+  }>;
 }
 
 export async function verifyRagOtp(phoneNumber: string, code: string): Promise<PortalAuthResult> {
