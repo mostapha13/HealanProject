@@ -31,8 +31,8 @@ public class ScheduleTemplateListQueryHandler : IRequestHandler<ScheduleTemplate
                 DoctorId = x.DoctorId,
                 DoctorName = (x.Doctor.FirstName + " " + x.Doctor.LastName).Trim(),
                 DayOfWeek = x.DayOfWeek,
-                StartTime = x.StartTime.ToString(@"hh\:mm"),
-                EndTime = x.EndTime.ToString(@"hh\:mm"),
+                StartTime = Booking.Services.BookingTimeHelper.FormatTime(x.StartTime),
+                EndTime = Booking.Services.BookingTimeHelper.FormatTime(x.EndTime),
                 VisitDurationMinutes = x.VisitDurationMinutes,
                 IsActive = x.IsActive,
             })
@@ -67,8 +67,8 @@ public class ScheduleExceptionListQueryHandler : IRequestHandler<ScheduleExcepti
                 DoctorId = x.DoctorId,
                 Date = x.Date.ToString("yyyy-MM-dd"),
                 IsClosed = x.IsClosed,
-                StartTime = x.StartTime == null ? null : x.StartTime.Value.ToString(@"hh\:mm"),
-                EndTime = x.EndTime == null ? null : x.EndTime.Value.ToString(@"hh\:mm"),
+                StartTime = x.StartTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.StartTime.Value),
+                EndTime = x.EndTime == null ? null : Booking.Services.BookingTimeHelper.FormatTime(x.EndTime.Value),
                 VisitDurationMinutes = x.VisitDurationMinutes,
                 Note = x.Note,
             })
@@ -198,23 +198,35 @@ public class AppointmentBookingListQueryHandler : IRequestHandler<AppointmentBoo
             return page;
 
         var ids = page.Items.Select(x => x.AppointmentBookingId).ToList();
-        var services = await _db.AppointmentBookings.AsNoTracking()
-            .Where(x => ids.Contains(x.AppointmentBookingId))
-            .Select(x => new
-            {
-                x.AppointmentBookingId,
-                Ids = x.RequestedServices.Select(s => s.ServiceTypeId).ToArray(),
-                Titles = x.RequestedServices.Select(s => s.Title).ToArray(),
-            })
-            .ToListAsync(cancellationToken);
-
-        var map = services.ToDictionary(x => x.AppointmentBookingId);
-        foreach (var item in page.Items)
+        try
         {
-            if (!map.TryGetValue(item.AppointmentBookingId, out var svc))
-                continue;
-            item.RequestedServiceTypeIds = svc.Ids.ToList();
-            item.RequestedServiceTitles = svc.Titles.ToList();
+            // Flatten join instead of projecting collection (.ToList/.ToArray) which can 500 on SQL Server.
+            var serviceRows = await (
+                from b in _db.AppointmentBookings.AsNoTracking()
+                where ids.Contains(b.AppointmentBookingId)
+                from s in b.RequestedServices
+                select new { b.AppointmentBookingId, s.ServiceTypeId, s.Title }
+            ).ToListAsync(cancellationToken);
+
+            var grouped = serviceRows.GroupBy(x => x.AppointmentBookingId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var item in page.Items)
+            {
+                if (!grouped.TryGetValue(item.AppointmentBookingId, out var svc))
+                    continue;
+                item.RequestedServiceTypeIds = svc.Select(x => x.ServiceTypeId).ToList();
+                item.RequestedServiceTitles = svc.Select(x => x.Title).ToList();
+            }
+        }
+        catch
+        {
+            // Keep list usable even if join-table/M2M is missing or misconfigured.
+            foreach (var item in page.Items)
+            {
+                item.RequestedServiceTypeIds ??= new List<long>();
+                item.RequestedServiceTitles ??= new List<string>();
+            }
         }
 
         return page;

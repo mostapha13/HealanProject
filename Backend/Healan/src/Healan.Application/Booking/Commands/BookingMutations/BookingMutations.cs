@@ -265,6 +265,8 @@ public class BookingUpdateNoteCommandHandler : IRequestHandler<BookingUpdateNote
 public class BookingAcceptCommand : IRequest<BookingAcceptResultDto>
 {
     public long AppointmentBookingId { get; set; }
+    /// <summary>When set, marks booking Accepted and links the created appointment.</summary>
+    public long? AppointmentId { get; set; }
 }
 
 public class BookingAcceptCommandHandler : IRequestHandler<BookingAcceptCommand, BookingAcceptResultDto>
@@ -280,12 +282,16 @@ public class BookingAcceptCommandHandler : IRequestHandler<BookingAcceptCommand,
             .FirstOrDefaultAsync(x => x.AppointmentBookingId == request.AppointmentBookingId, cancellationToken)
             ?? throw new NotFoundExceptions("رزرو یافت نشد.");
 
-        if (booking.Status != AppointmentBookingStatus.Booked)
+        if (booking.Status is not AppointmentBookingStatus.Booked and not AppointmentBookingStatus.Accepted)
             throw new BadRequestExceptions("فقط رزرو فعال قابل پذیرش است.");
 
-        booking.Status = AppointmentBookingStatus.Accepted;
-        booking.UpdatedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync(cancellationToken);
+        if (request.AppointmentId is > 0)
+        {
+            booking.AppointmentId = request.AppointmentId;
+            booking.Status = AppointmentBookingStatus.Accepted;
+            booking.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+        }
 
         var duration = (int)(booking.Slot.EndAt - booking.Slot.StartAt).TotalMinutes;
         var query = new List<string>
@@ -301,6 +307,8 @@ public class BookingAcceptCommandHandler : IRequestHandler<BookingAcceptCommand,
         };
         if (booking.PatientId is > 0)
             query.Add($"patientId={booking.PatientId}");
+        if (!string.IsNullOrWhiteSpace(booking.Note))
+            query.Add($"note={Uri.EscapeDataString(booking.Note)}");
         if (booking.RequestedServices.Count > 0)
             query.Add($"serviceTypeIds={string.Join(',', booking.RequestedServices.Select(s => s.ServiceTypeId))}");
 

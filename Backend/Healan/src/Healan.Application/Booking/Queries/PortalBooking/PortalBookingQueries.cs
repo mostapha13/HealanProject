@@ -264,16 +264,20 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
 
         var code = Random.Shared.Next(100000, 999999).ToString();
 
+        // Persist OTP before SMS so verify never races a missing store entry.
+        await _otpStore.SetAsync(phone, code, OtpTtl, cancellationToken);
+        await _otpStore.SetCooldownAsync(phone, ResendCooldown, cancellationToken);
+
         var (ok, error) = await _smsSender.SendAsync(
             phone,
             $"کلینیک قلب دکتر معصومه شهرویی\nکد تأیید رزرو نوبت: {code}",
             cancellationToken);
 
         if (!ok)
+        {
+            await _otpStore.RemoveAsync(phone, cancellationToken);
             throw new BadRequestExceptions(error ?? "ارسال پیامک ناموفق بود.");
-
-        await _otpStore.SetAsync(phone, code, OtpTtl, cancellationToken);
-        await _otpStore.SetCooldownAsync(phone, ResendCooldown, cancellationToken);
+        }
 
         return new
         {

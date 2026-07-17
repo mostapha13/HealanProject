@@ -28,6 +28,7 @@ export interface QuickAddPatientModalProps {
   onClose: () => void;
   onSuccess: (patientId: number) => void;
   onAlert: (msg: unknown) => void;
+  initialValues?: Partial<QuickAddPatientForm>;
 }
 
 function validate(form: QuickAddPatientForm): FieldErrors {
@@ -45,17 +46,24 @@ function validate(form: QuickAddPatientForm): FieldErrors {
   return errors;
 }
 
-export function QuickAddPatientModal({ open, onClose, onSuccess, onAlert }: QuickAddPatientModalProps) {
+export function QuickAddPatientModal({
+  open,
+  onClose,
+  onSuccess,
+  onAlert,
+  initialValues,
+}: QuickAddPatientModalProps) {
   const [form, setForm] = useState<QuickAddPatientForm>(EMPTY_FORM);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      setForm(EMPTY_FORM);
-      setErrors({});
-      setSaving(false);
-    }
+    if (!open) return;
+    setForm({ ...EMPTY_FORM, ...initialValues });
+    setErrors({});
+    setSaving(false);
+    // Only hydrate when the modal opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const update = (key: keyof QuickAddPatientForm, value: string) => {

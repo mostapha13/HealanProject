@@ -9,12 +9,25 @@ public static class BookingTimeHelper
 {
     public static TimeSpan ParseTime(string value)
     {
-        if (TimeSpan.TryParse(value, out var ts))
+        var raw = (value ?? string.Empty).Trim();
+        // SQL Server `time` cannot store 24:00 — map to end-of-day.
+        if (raw is "24:00" or "24:00:00")
+            return new TimeSpan(23, 59, 0);
+        if (TimeSpan.TryParse(raw, out var ts))
+        {
+            if (ts >= TimeSpan.FromHours(24))
+                return new TimeSpan(23, 59, 0);
             return ts;
-        throw new ArgumentException($"ساعت نامعتبر: {value}");
+        }
+        throw new Share.Domain.Exceptions.BadRequestExceptions($"ساعت نامعتبر: {value}");
     }
 
-    public static string FormatTime(TimeSpan ts) => ts.ToString(@"hh\:mm");
+    public static string FormatTime(TimeSpan ts)
+    {
+        if (ts.Hours == 23 && ts.Minutes >= 59)
+            return "24:00";
+        return ts.ToString(@"HH\:mm");
+    }
 
     public static DateTime Combine(DateOnly date, TimeSpan time) =>
         date.ToDateTime(TimeOnly.FromTimeSpan(time));

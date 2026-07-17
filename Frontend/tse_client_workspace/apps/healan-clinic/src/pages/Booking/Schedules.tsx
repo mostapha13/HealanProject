@@ -4,6 +4,7 @@ import healanApi from '../../api/healanApi';
 import type { DoctorSummary, ScheduleTemplateItem } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { JalaliDateInput } from '../../components/JalaliDateInput';
 
 const DAY_LABELS: Record<number, string> = {
   0: 'یکشنبه',
@@ -15,15 +16,34 @@ const DAY_LABELS: Record<number, string> = {
   6: 'شنبه',
 };
 
+const HOUR_OPTIONS = Array.from({ length: 25 }, (_, h) => h); // 0..24
+
+function pad2(n: number) {
+  return String(n).padStart(2, '0');
+}
+
+function timeToHour(value: string): number {
+  const raw = (value || '').trim();
+  if (raw.startsWith('24')) return 24;
+  const hour = Number(raw.split(':')[0]);
+  return Number.isFinite(hour) ? Math.min(24, Math.max(0, hour)) : 0;
+}
+
+function hourToTime(hour: number): string {
+  if (hour >= 24) return '24:00';
+  return `${pad2(hour)}:00`;
+}
+
 function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
   const [doctorId, setDoctorId] = useState(0);
   const [templates, setTemplates] = useState<ScheduleTemplateItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(0);
   const [form, setForm] = useState({
     dayOfWeek: 6,
-    startTime: '17:00',
-    endTime: '21:00',
+    startHour: 17,
+    endHour: 21,
     visitDurationMinutes: 30,
     isActive: true,
   });
@@ -58,34 +78,73 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   };
 
   useEffect(() => {
-    healanApi.doctors.listAll().then(setDoctors).catch(onAlert);
+    healanApi.doctors
+      .listAll()
+      .then((list) => {
+        setDoctors(list);
+        if (list.length === 1) setDoctorId(list[0].doctorId);
+      })
+      .catch(onAlert);
   }, [onAlert]);
 
   useEffect(() => {
     void load(doctorId);
   }, [doctorId]);
 
+  const resetForm = () => {
+    setEditingId(0);
+    setForm({
+      dayOfWeek: 6,
+      startHour: 17,
+      endHour: 21,
+      visitDurationMinutes: 30,
+      isActive: true,
+    });
+  };
+
   const saveTemplate = async () => {
     if (!doctorId) {
       onAlert({ type: 'error', message: 'پزشک را انتخاب کنید.' });
       return;
     }
+    if (form.endHour < form.startHour) {
+      onAlert({ type: 'error', message: 'ساعت پایان نباید قبل از شروع باشد.' });
+      return;
+    }
     try {
       await healanApi.booking.templateSave({
-        doctorScheduleTemplateId: 0,
+        doctorScheduleTemplateId: editingId || 0,
         doctorId,
-        ...form,
+        dayOfWeek: form.dayOfWeek,
+        startTime: hourToTime(form.startHour),
+        endTime: hourToTime(form.endHour),
+        visitDurationMinutes: form.visitDurationMinutes,
+        isActive: form.isActive,
       });
       onAlert({ type: 'success', message: 'قالب برنامه ذخیره شد.' });
+      resetForm();
       await load(doctorId);
     } catch (err) {
       onAlert(err);
     }
   };
 
+  const editTemplate = (t: ScheduleTemplateItem) => {
+    setEditingId(t.doctorScheduleTemplateId);
+    setForm({
+      dayOfWeek: t.dayOfWeek,
+      startHour: timeToHour(t.startTime),
+      endHour: timeToHour(t.endTime),
+      visitDurationMinutes: t.visitDurationMinutes || 30,
+      isActive: t.isActive,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const removeTemplate = async (id: number) => {
     try {
       await healanApi.booking.templateDelete(id);
+      if (editingId === id) resetForm();
       await load(doctorId);
     } catch (err) {
       onAlert(err);
@@ -136,7 +195,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
     <>
       <PageHeader
         title="برنامه حضور پزشک"
-        subtitle="قالب هفتگی ساعات حضور، کپی به روزهای دیگر، و تولید اسلات در بازه تاریخ"
+        subtitle="قالب هفتگی ساعات حضور (۲۴ ساعته)، کپی به روزهای دیگر، و تولید اسلات با تاریخ شمسی"
       />
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
@@ -157,7 +216,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
         <div className="healan-card__header">
-          <h3>ثبت / ویرایش قالب روز</h3>
+          <h3>{editingId ? 'ویرایش قالب روز' : 'ثبت قالب روز'}</h3>
         </div>
         <div className="healan-card__body">
           <div className="healan-form-grid">
@@ -176,22 +235,32 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
               </select>
             </div>
             <div className="healan-form-field">
-              <label>از ساعت</label>
-              <input
+              <label>از ساعت (۰–۲۴)</label>
+              <select
                 className="healan-input"
-                type="time"
-                value={form.startTime}
-                onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-              />
+                value={form.startHour}
+                onChange={(e) => setForm({ ...form, startHour: Number(e.target.value) })}
+              >
+                {HOUR_OPTIONS.filter((h) => h < 24).map((h) => (
+                  <option key={h} value={h}>
+                    {pad2(h)}:00
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="healan-form-field">
-              <label>تا ساعت</label>
-              <input
+              <label>تا ساعت (۰–۲۴)</label>
+              <select
                 className="healan-input"
-                type="time"
-                value={form.endTime}
-                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-              />
+                value={form.endHour}
+                onChange={(e) => setForm({ ...form, endHour: Number(e.target.value) })}
+              >
+                {HOUR_OPTIONS.filter((h) => h > 0).map((h) => (
+                  <option key={h} value={h}>
+                    {pad2(h)}:00
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="healan-form-field">
               <label>مدت ویزیت (دقیقه)</label>
@@ -209,8 +278,13 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
           </div>
           <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="button" className="healan-btn healan-btn--primary" onClick={() => void saveTemplate()}>
-              ذخیره قالب
+              {editingId ? 'ذخیره تغییرات' : 'ذخیره قالب'}
             </button>
+            {editingId > 0 && (
+              <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>
+                انصراف از ویرایش
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -247,17 +321,17 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
         <div className="healan-card__header">
-          <h3>تولید اسلات در بازه تاریخ</h3>
+          <h3>تولید اسلات در بازه تاریخ (شمسی)</h3>
         </div>
         <div className="healan-card__body">
           <div className="healan-form-grid">
             <div className="healan-form-field">
               <label>از تاریخ</label>
-              <input className="healan-input" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+              <JalaliDateInput value={fromDate} onChange={setFromDate} placeholder="انتخاب از تاریخ" />
             </div>
             <div className="healan-form-field">
               <label>تا تاریخ</label>
-              <input className="healan-input" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+              <JalaliDateInput value={toDate} onChange={setToDate} placeholder="انتخاب تا تاریخ" />
             </div>
           </div>
           <button
@@ -277,7 +351,9 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
           <h3>قالب‌های ذخیره‌شده</h3>
         </div>
         <div className="healan-card__body">
-          {loading ? (
+          {!doctorId ? (
+            <div className="healan-empty">برای مشاهده قالب‌ها، پزشک را انتخاب کنید.</div>
+          ) : loading ? (
             <div className="healan-empty">در حال بارگذاری…</div>
           ) : templates.length === 0 ? (
             <div className="healan-empty">قالبی ثبت نشده است.</div>
@@ -290,7 +366,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                   <th>تا</th>
                   <th>مدت</th>
                   <th>فعال</th>
-                  <th></th>
+                  <th>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -302,13 +378,22 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                     <td>{t.visitDurationMinutes} دقیقه</td>
                     <td>{t.isActive ? 'بله' : 'خیر'}</td>
                     <td>
-                      <button
-                        type="button"
-                        className="healan-btn healan-btn--ghost healan-btn--sm"
-                        onClick={() => void removeTemplate(t.doctorScheduleTemplateId)}
-                      >
-                        حذف
-                      </button>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="healan-btn healan-btn--outline healan-btn--sm"
+                          onClick={() => editTemplate(t)}
+                        >
+                          ویرایش
+                        </button>
+                        <button
+                          type="button"
+                          className="healan-btn healan-btn--ghost healan-btn--sm"
+                          onClick={() => void removeTemplate(t.doctorScheduleTemplateId)}
+                        >
+                          حذف
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

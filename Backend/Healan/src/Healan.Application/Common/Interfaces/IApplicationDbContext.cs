@@ -59,6 +59,7 @@ public interface IApplicationDbContext : IDisposable
      DbSet<DoctorScheduleException> DoctorScheduleExceptions { get; set; }
      DbSet<AppointmentSlot> AppointmentSlots { get; set; }
      DbSet<AppointmentBooking> AppointmentBookings { get; set; }
+     DbSet<BookingAuthToken> BookingAuthTokens { get; set; }
     //DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 

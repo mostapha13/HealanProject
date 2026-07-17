@@ -374,8 +374,11 @@ export const healanApi = {
       post<AppointmentBookingItem>('BookingReservation/Move', data),
     reservationUpdateNote: (data: { appointmentBookingId: number; note?: string }) =>
       post('BookingReservation/UpdateNote', data),
-    reservationAccept: (appointmentBookingId: number) =>
-      post<BookingAcceptResult>('BookingReservation/Accept', { appointmentBookingId }),
+    reservationAccept: (appointmentBookingId: number, appointmentId?: number) =>
+      post<BookingAcceptResult>('BookingReservation/Accept', {
+        appointmentBookingId,
+        ...(appointmentId ? { appointmentId } : {}),
+      }),
   },
 };
 

@@ -72,6 +72,20 @@ public class AppointmentBookingConfiguration : IEntityTypeConfiguration<Appointm
         builder.HasOne(x => x.Appointment).WithMany().HasForeignKey(x => x.AppointmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(x => x.RequestedServices)
             .WithMany()
-            .UsingEntity(j => j.ToTable("AppointmentBookingServiceTypes"));
+            .UsingEntity<Dictionary<string, object>>(
+                "AppointmentBookingServiceTypes",
+                right => right.HasOne<Healan.Domain.PublicInfos.Entities.ServiceType>()
+                    .WithMany()
+                    .HasForeignKey("ServiceTypeId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                left => left.HasOne<AppointmentBooking>()
+                    .WithMany()
+                    .HasForeignKey("AppointmentBookingId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                join =>
+                {
+                    join.HasKey("AppointmentBookingId", "ServiceTypeId");
+                    join.ToTable("AppointmentBookingServiceTypes");
+                });
     }
 }
