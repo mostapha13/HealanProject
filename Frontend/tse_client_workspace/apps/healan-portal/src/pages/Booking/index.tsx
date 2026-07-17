@@ -23,9 +23,9 @@ function asArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[];
   if (value && typeof value === 'object') {
     const obj = value as Record<string, unknown>;
-    if (Array.isArray(obj.items)) return obj.items as T[];
-    if (Array.isArray(obj.data)) return obj.data as T[];
-    if (Array.isArray(obj.result)) return obj.result as T[];
+    if (Array.isArray(obj['items'])) return obj['items'] as T[];
+    if (Array.isArray(obj['data'])) return obj['data'] as T[];
+    if (Array.isArray(obj['result'])) return obj['result'] as T[];
   }
   return [];
 }
@@ -145,17 +145,17 @@ class BookingErrorBoundary extends Component<
   { children: ReactNode; onReset?: () => void },
   { hasError: boolean; message: string }
 > {
-  state = { hasError: false, message: '' };
+  override state = { hasError: false, message: '' };
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, message: error?.message || 'خطای نمایش' };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Booking page crash', error, info);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="portal-booking__card">
@@ -358,7 +358,7 @@ export default function BookingPage() {
       const patient = (pickField(res, 'patient', 'Patient') ?? undefined) as
         | Record<string, unknown>
         | undefined;
-      const known = !!(patient && (patient.found === true || patient.Found === true));
+      const known = pickField(patient, 'found', 'Found') === true;
       const nextForm = {
         ...form,
         phoneNumber: verifiedPhone,
