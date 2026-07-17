@@ -26,7 +26,8 @@ namespace Healan.Infrastructure
                options.UseSqlServer(
                    configuration.GetConnectionString("DefaultConnection"),
                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
-               //.LogTo(Console.WriteLine, LogLevel.Information)
+               // Hand-written SQL migrations (no Designer) can trip EF9 PendingModelChangesWarning.
+               .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning))
                );
             services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 

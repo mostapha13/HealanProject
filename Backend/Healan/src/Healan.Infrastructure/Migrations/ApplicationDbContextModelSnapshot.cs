@@ -2178,6 +2178,13 @@ namespace Healan.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("GuestKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid?>("IdentityUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<long?>("MatchedKnowledgeItemId")
                         .HasColumnType("bigint");
 
@@ -2203,6 +2210,10 @@ namespace Healan.Infrastructure.Migrations
                     b.HasKey("RagChatLogId");
 
                     b.HasIndex("CreatedAt");
+
+                    b.HasIndex("GuestKey", "CreatedAt");
+
+                    b.HasIndex("IdentityUserId", "CreatedAt");
 
                     b.ToTable("RagChatLogs", (string)null);
                 });
@@ -2333,6 +2344,16 @@ namespace Healan.Infrastructure.Migrations
                 {
                     b.Property<int>("RagSettingId")
                         .HasColumnType("int");
+
+                    b.Property<int>("AuthenticatedDailyLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(200);
+
+                    b.Property<int>("GuestDailyLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(10);
 
                     b.Property<bool>("IsEnabled")
                         .ValueGeneratedOnAdd()
