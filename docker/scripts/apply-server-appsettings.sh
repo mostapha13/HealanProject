@@ -48,6 +48,10 @@ write_json docker/config/healan-webapi/appsettings.Production.json <<'EOF'
   },
   "WorkFlowBaseUrl": "http://workflow-webui:8080/",
   "SMSProviderBaseUrl": "http://smsprovider-webapp:8080/api/v1/SMS/",
+  "PortalAuth": {
+    "SigningKey": "HealanPortalAuth-ProdKey-ChangeIfNeeded-64b!",
+    "TokenHours": 720
+  },
   "IdentityServer": {
     "Url": "http://identity-server:8080/",
     "ValidIssuer": "http://auth.drshahrooei.ir",

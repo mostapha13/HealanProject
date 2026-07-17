@@ -458,5 +458,7 @@ export interface RagSetting {
   similarityThresholdPercent: number;
   pythonApiUrl: string;
   isEnabled: boolean;
+  guestDailyLimit: number;
+  authenticatedDailyLimit: number;
   lastSyncedAt?: string;
 }

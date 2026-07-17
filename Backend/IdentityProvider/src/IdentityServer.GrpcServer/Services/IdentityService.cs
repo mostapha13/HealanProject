@@ -77,8 +77,8 @@ namespace IdentityServer.GrpcServer.Services
                 user = new ApplicationUser();
                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password);
                 user.DepartmentId = Share.Domain.Enums.DepartmentId.MarketMaker;
-                user.FirstName = request.FirstName;
-                user.LastName = request.LastName;
+                user.FirstName = string.IsNullOrWhiteSpace(request.FirstName) ? "کاربر" : request.FirstName;
+                user.LastName = string.IsNullOrWhiteSpace(request.LastName) ? "سایت" : request.LastName;
                 user.IsActive = request.IsActive;
                 user.PhoneNumber = request.PhoneNumber;
                 user.PhoneNumberConfirmed = true;
@@ -95,8 +95,10 @@ namespace IdentityServer.GrpcServer.Services
             else
             {
                 user.DepartmentId = Share.Domain.Enums.DepartmentId.MarketMaker;
-                user.FirstName = request.FirstName;
-                user.LastName = request.LastName;
+                if (!string.IsNullOrWhiteSpace(request.FirstName))
+                    user.FirstName = request.FirstName;
+                if (!string.IsNullOrWhiteSpace(request.LastName))
+                    user.LastName = request.LastName;
                 user.IsActive = request.IsActive;
                 user.PhoneNumber = request.PhoneNumber;
                 user.PhoneNumberConfirmed = true;
@@ -131,7 +133,9 @@ namespace IdentityServer.GrpcServer.Services
                     request.PhoneNumber);
             }
 
-            await UpdateUserRoles(user.Id, request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
+            // Empty RoleNames must not wipe existing roles (portal SiteUser + clinic roles coexist).
+            if (request.RoleNames != null && request.RoleNames.Count > 0)
+                await UpdateUserRoles(user.Id, request.RoleNames.ToList());
 
             var result = await GetUserSummaryReply(user.Id);
             return result;
@@ -401,15 +405,35 @@ namespace IdentityServer.GrpcServer.Services
             if (userId == Guid.Empty)
                 return;
 
-            var allRoleId = _applicationDbContext.AccessSystemRoles.Where(w => w.AccessSystemId == accessSystemId).Select(s => s.RoleId).ToList();
-            var mustRemovedRoles = (from ur in _applicationDbContext.UserRoles
-                                    join r in _applicationDbContext.Roles on ur.RoleId equals r.Id
-                                    where allRoleId.Contains(r.Id) && ur.UserId == userId
-                                    select ur).ToList();
-            if (mustRemovedRoles.Any())
-                _applicationDbContext.UserRoles.RemoveRange(mustRemovedRoles);
-            await _applicationDbContext.SaveChangesAsync();
-            await UpdateUserRoles(userId, roleNames);
+            var allRoleId = _applicationDbContext.AccessSystemRoles
+                .Where(w => w.AccessSystemId == accessSystemId)
+                .Select(s => s.RoleId)
+                .ToList();
+
+            var systemRoleNames = _applicationDbContext.Roles
+                .Where(r => allRoleId.Contains(r.Id))
+                .Select(r => r.Name)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var currentRoleNames = (
+                from ur in _applicationDbContext.UserRoles
+                join r in _applicationDbContext.Roles on ur.RoleId equals r.Id
+                where ur.UserId == userId && r.Name != null
+                select r.Name).ToList();
+
+            // Keep portal SiteUser (and any other non-system roles) when assigning Healan/Doctor/etc.
+            var preserved = currentRoleNames
+                .Where(n => !systemRoleNames.Contains(n))
+                .ToList();
+
+            var finalRoles = preserved
+                .Concat(roleNames ?? new List<string>())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            await UpdateUserRoles(userId, finalRoles);
         }
 
         public async override Task<UserPhoneNumberReply> GetRelatedUserRolePhoneNumber(GetRelatedUserRolePhoneNumberRequest request, ServerCallContext context)

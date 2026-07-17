@@ -94,6 +94,8 @@ public class RagSettingDto
     public int SimilarityThresholdPercent { get; set; }
     public string PythonApiUrl { get; set; } = "http://python-rag:8000";
     public bool IsEnabled { get; set; }
+    public int GuestDailyLimit { get; set; } = 10;
+    public int AuthenticatedDailyLimit { get; set; } = 200;
     public DateTime? LastSyncedAt { get; set; }
 }
 
@@ -101,6 +103,7 @@ public class RagAskRequestDto
 {
     public string Question { get; set; } = string.Empty;
     public string? SessionId { get; set; }
+    public string? GuestKey { get; set; }
 }
 
 public class RagAskResponseDto
@@ -110,4 +113,39 @@ public class RagAskResponseDto
     public double? SimilarityScore { get; set; }
     public long? MatchedKnowledgeItemId { get; set; }
     public string? SourceType { get; set; }
+    public bool RequiresLogin { get; set; }
+    public int UsedCount { get; set; }
+    public int DailyLimit { get; set; }
+    public int RemainingCount { get; set; }
+    public bool IsAuthenticated { get; set; }
+}
+
+public class RagQuotaStatusDto
+{
+    public bool IsAuthenticated { get; set; }
+    public int UsedCount { get; set; }
+    public int DailyLimit { get; set; }
+    public int RemainingCount { get; set; }
+    public bool RequiresLogin { get; set; }
+    public string? PhoneMasked { get; set; }
+}
+
+public class PortalOtpRequestDto
+{
+    public string PhoneNumber { get; set; } = string.Empty;
+}
+
+public class PortalOtpVerifyDto
+{
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
+}
+
+public class PortalAuthResultDto
+{
+    public string AccessToken { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string PhoneMasked { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public DateTime ExpiresAtUtc { get; set; }
 }

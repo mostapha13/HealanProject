@@ -13,6 +13,8 @@ public class RagAskQuery : IRequest<RagAskResponseDto>
 {
     public string Question { get; set; } = string.Empty;
     public string? SessionId { get; set; }
+    public string? GuestKey { get; set; }
+    public string? AccessToken { get; set; }
 }
 
 public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto>
@@ -21,15 +23,18 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
 
     private readonly IApplicationDbContext _db;
     private readonly IRagPythonService _ragPythonService;
+    private readonly IPortalAuthTokenService _tokenService;
     private readonly ILogger<RagAskQueryHandler> _logger;
 
     public RagAskQueryHandler(
         IApplicationDbContext db,
         IRagPythonService ragPythonService,
+        IPortalAuthTokenService tokenService,
         ILogger<RagAskQueryHandler> logger)
     {
         _db = db;
         _ragPythonService = ragPythonService;
+        _tokenService = tokenService;
         _logger = logger;
     }
 
@@ -42,22 +47,53 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
         var setting = await _db.RagSettings.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
         if (setting is { IsEnabled: false })
         {
-            return await LogAndReturnAsync(question, request.SessionId, new RagAskResponseDto
+            return await LogAndReturnAsync(
+                question, request, null, null,
+                new RagAskResponseDto
+                {
+                    Answer = "سرویس پاسخ‌گویی هوشمند در حال حاضر غیرفعال است.",
+                    WasAnswered = false,
+                },
+                cancellationToken);
+        }
+
+        Guid? userId = null;
+        if (_tokenService.TryValidate(request.AccessToken, out var uid, out _))
+            userId = uid;
+
+        var guestKey = string.IsNullOrWhiteSpace(request.GuestKey) ? null : request.GuestKey.Trim();
+        if (!userId.HasValue && string.IsNullOrWhiteSpace(guestKey))
+            throw new BadRequestExceptions("شناسه نشست نامعتبر است. صفحه را رفرش کنید.");
+
+        var used = await RagQuotaHelper.CountTodayAsync(_db, userId, guestKey, cancellationToken);
+        var (limit, usedCount, remaining, requiresLogin) = RagQuotaHelper.Evaluate(setting, userId.HasValue, used);
+
+        if (requiresLogin || remaining <= 0)
+        {
+            return new RagAskResponseDto
             {
-                Answer = "سرویس پاسخ‌گویی هوشمند در حال حاضر غیرفعال است.",
+                Answer = userId.HasValue
+                    ? $"سقف سوالات روزانه شما ({limit}) به پایان رسیده است. فردا دوباره تلاش کنید."
+                    : $"سقف سوالات رایگان امروز ({limit}) تمام شد. برای ادامه با موبایل وارد شوید.",
                 WasAnswered = false,
-            }, cancellationToken);
+                RequiresLogin = !userId.HasValue,
+                UsedCount = usedCount,
+                DailyLimit = limit,
+                RemainingCount = 0,
+                IsAuthenticated = userId.HasValue,
+            };
         }
 
         var threshold = setting?.SimilarityThresholdPercent ?? 55;
         var pythonUrl = ResolvePythonApiUrl(setting?.PythonApiUrl);
 
         _logger.LogInformation(
-            "RAG request received. Question={Question}, PythonUrl={PythonUrl}, ThresholdPercent={ThresholdPercent}, RagEnabled={RagEnabled}",
+            "RAG request received. Question={Question}, PythonUrl={PythonUrl}, Auth={Auth}, Used={Used}/{Limit}",
             question,
             pythonUrl,
-            threshold,
-            setting?.IsEnabled ?? true);
+            userId.HasValue,
+            usedCount,
+            limit);
 
         var result = await _ragPythonService.AskAsync(pythonUrl, question, threshold, cancellationToken);
         var response = new RagAskResponseDto
@@ -69,21 +105,16 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             SimilarityScore = result.SimilarityScore,
             MatchedKnowledgeItemId = result.MatchedKnowledgeItemId,
             SourceType = result.SourceType,
+            RequiresLogin = false,
+            UsedCount = usedCount + 1,
+            DailyLimit = limit,
+            RemainingCount = Math.Max(0, remaining - 1),
+            IsAuthenticated = userId.HasValue,
         };
 
-        _logger.LogInformation(
-            "RAG response prepared. WasAnswered={WasAnswered}, SimilarityScore={SimilarityScore}, MatchedKnowledgeItemId={MatchedKnowledgeItemId}, SourceType={SourceType}",
-            response.WasAnswered,
-            response.SimilarityScore,
-            response.MatchedKnowledgeItemId,
-            response.SourceType);
-
-        return await LogAndReturnAsync(question, request.SessionId, response, cancellationToken);
+        return await LogAndReturnAsync(question, request, userId, guestKey, response, cancellationToken);
     }
 
-    /// <summary>
-    /// In Docker, localhost:8000 inside healan-webapi is the API container itself — rewrite to python-rag.
-    /// </summary>
     internal static string ResolvePythonApiUrl(string? configured)
     {
         const string dockerDefault = "http://python-rag:8000";
@@ -108,7 +139,9 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
 
     private async Task<RagAskResponseDto> LogAndReturnAsync(
         string question,
-        string? sessionId,
+        RagAskQuery request,
+        Guid? identityUserId,
+        string? guestKey,
         RagAskResponseDto response,
         CancellationToken cancellationToken)
     {
@@ -119,7 +152,9 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             MatchedKnowledgeItemId = response.MatchedKnowledgeItemId,
             SimilarityScore = response.SimilarityScore,
             SourceType = response.SourceType,
-            SessionId = string.IsNullOrWhiteSpace(sessionId) ? null : sessionId.Trim(),
+            SessionId = string.IsNullOrWhiteSpace(request.SessionId) ? null : request.SessionId.Trim(),
+            GuestKey = identityUserId.HasValue ? null : guestKey,
+            IdentityUserId = identityUserId,
             WasAnswered = response.WasAnswered,
             CreatedAt = DateTime.UtcNow,
         });

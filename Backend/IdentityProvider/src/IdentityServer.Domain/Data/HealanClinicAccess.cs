@@ -8,6 +8,8 @@ public static class HealanClinicAccess
     public const string SecretaryRole = "Secretary";
     public const string DoctorRole = "Doctor";
     public const string AccountantRole = "Accountant";
+    /// <summary>نقش پورتال عمومی — بدون منوی کلینیک؛ با نقش‌های کلینیک قابل جمع است.</summary>
+    public const string SiteUserRole = "SiteUser";
     public const string ClinicDefaultPassword = "aA@123456";
 
     public static class Menus

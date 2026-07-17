@@ -5,6 +5,8 @@ using Healan.Application.Portal.Commands.PatientReviewModerate;
 using Healan.Application.Portal.Commands.PatientReviewSubmit;
 using Healan.Application.Portal.Commands.PortalContentItemDelete;
 using Healan.Application.Portal.Commands.PortalContentItemRegister;
+using Healan.Application.Portal.Commands.PortalOtpRequest;
+using Healan.Application.Portal.Commands.PortalOtpVerify;
 using Healan.Application.Portal.Commands.PortalSiteSettingSave;
 using Healan.Application.Portal.Commands.RagKnowledgeDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeRegister;
@@ -20,6 +22,7 @@ using Healan.Application.Portal.Queries.PublishedPortalSite;
 using Healan.Application.Portal.Queries.RagAsk;
 using Healan.Application.Portal.Queries.RagKnowledgeInfo;
 using Healan.Application.Portal.Queries.RagKnowledgeList;
+using Healan.Application.Portal.Queries.RagQuotaStatus;
 using Healan.Application.Portal.Queries.RagSettingGet;
 using Healan.Domain.Portal.Enums;
 using MediatR;
@@ -166,6 +169,36 @@ public class PortalPublicController : ControllerBase
         Ok(await Mediator.Send(new PublishedBlogPostBySlugQuery { Slug = slug }));
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> RagAsk([FromBody] RagAskQuery query) =>
-        Ok(await Mediator.Send(query));
+    public async Task<IActionResult> RagAsk([FromBody] RagAskQuery query)
+    {
+        query.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(query));
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> RagQuota([FromQuery] string? guestKey) =>
+        Ok(await Mediator.Send(new RagQuotaStatusQuery
+        {
+            GuestKey = guestKey,
+            AccessToken = ExtractBearerToken(),
+        }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> RagOtpRequest([FromBody] PortalOtpRequestCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> RagOtpVerify([FromBody] PortalOtpVerifyCommand request) =>
+        Ok(await Mediator.Send(request));
+
+    private string? ExtractBearerToken()
+    {
+        var header = Request.Headers.Authorization.ToString();
+        if (string.IsNullOrWhiteSpace(header))
+            return null;
+        const string prefix = "Bearer ";
+        return header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? header[prefix.Length..].Trim()
+            : header.Trim();
+    }
 }

@@ -44,6 +44,9 @@ namespace Healan.Application
             {
                 client.Timeout = TimeSpan.FromSeconds(120);
             });
+            services.AddMemoryCache();
+            services.AddSingleton<Portal.Services.IPortalAuthTokenService, Portal.Services.PortalAuthTokenService>();
+            services.AddScoped<Portal.Services.IPortalSmsSender, Portal.Services.PortalSmsSender>();
 
             #region Caching
             //Behavior

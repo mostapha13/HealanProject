@@ -71,6 +71,8 @@ public static class RagKnowledgeSeed
             SimilarityThresholdPercent = 55,
             PythonApiUrl = dockerUrl,
             IsEnabled = true,
+            GuestDailyLimit = 10,
+            AuthenticatedDailyLimit = 200,
             UpdatedAt = DateTime.UtcNow,
         });
         await context.SaveChangesAsync();

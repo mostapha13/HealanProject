@@ -9,6 +9,10 @@ public class RagChatLog
     public double? SimilarityScore { get; set; }
     public string? SourceType { get; set; }
     public string? SessionId { get; set; }
+    /// <summary>کلید پایدار مهمان (cookie) برای سهمیه روزانه.</summary>
+    public string? GuestKey { get; set; }
+    /// <summary>کاربر Identity پس از لاگین پورتال.</summary>
+    public Guid? IdentityUserId { get; set; }
     public bool WasAnswered { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

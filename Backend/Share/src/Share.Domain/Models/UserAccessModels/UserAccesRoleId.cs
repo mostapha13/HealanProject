@@ -68,5 +68,7 @@ namespace Share.Domain.Models.UserAccessModels
         Doctor = 28,
         [Display(Name = "حسابدار")]
         Accountant = 29,
+        [Display(Name = "کاربر سایت")]
+        SiteUser = 30,
     }
 }

@@ -15,5 +15,7 @@ public class RagSettingConfiguration : IEntityTypeConfiguration<RagSetting>
         builder.Property(x => x.SyncIntervalMinutes).HasDefaultValue(10);
         builder.Property(x => x.SimilarityThresholdPercent).HasDefaultValue(55);
         builder.Property(x => x.IsEnabled).HasDefaultValue(true);
+        builder.Property(x => x.GuestDailyLimit).HasDefaultValue(10);
+        builder.Property(x => x.AuthenticatedDailyLimit).HasDefaultValue(200);
     }
 }

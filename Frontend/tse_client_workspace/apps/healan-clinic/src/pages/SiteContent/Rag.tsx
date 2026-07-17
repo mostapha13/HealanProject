@@ -237,6 +237,28 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 />
               </div>
               <div className="healan-form-field">
+                <label>سقف سوال مهمان (روزانه)</label>
+                <input
+                  className="healan-input"
+                  type="number"
+                  min={0}
+                  max={1000}
+                  value={settings.guestDailyLimit ?? 10}
+                  onChange={(e) => setSettings({ ...settings, guestDailyLimit: Number(e.target.value) })}
+                />
+              </div>
+              <div className="healan-form-field">
+                <label>سقف سوال کاربر لاگین‌شده (روزانه)</label>
+                <input
+                  className="healan-input"
+                  type="number"
+                  min={1}
+                  max={5000}
+                  value={settings.authenticatedDailyLimit ?? 200}
+                  onChange={(e) => setSettings({ ...settings, authenticatedDailyLimit: Number(e.target.value) })}
+                />
+              </div>
+              <div className="healan-form-field">
                 <label>
                   <input
                     type="checkbox"

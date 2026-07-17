@@ -34,6 +34,8 @@ public class RagSettingGetQueryHandler : IRequestHandler<RagSettingGetQuery, Rag
         SimilarityThresholdPercent = setting.SimilarityThresholdPercent,
         PythonApiUrl = setting.PythonApiUrl,
         IsEnabled = setting.IsEnabled,
+        GuestDailyLimit = setting.GuestDailyLimit,
+        AuthenticatedDailyLimit = setting.AuthenticatedDailyLimit,
         LastSyncedAt = setting.LastSyncedAt,
     };
 }

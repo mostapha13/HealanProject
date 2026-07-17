@@ -79,6 +79,47 @@ export interface RagAskResult {
   similarityScore?: number;
   matchedKnowledgeItemId?: number;
   sourceType?: string;
+  requiresLogin?: boolean;
+  usedCount?: number;
+  dailyLimit?: number;
+  remainingCount?: number;
+  isAuthenticated?: boolean;
+}
+
+export interface RagQuotaStatus {
+  isAuthenticated: boolean;
+  usedCount: number;
+  dailyLimit: number;
+  remainingCount: number;
+  requiresLogin: boolean;
+  phoneMasked?: string;
+}
+
+export interface PortalAuthResult {
+  accessToken: string;
+  phoneNumber: string;
+  phoneMasked: string;
+  userId: string;
+  expiresAtUtc: string;
+}
+
+const PORTAL_TOKEN_KEY = 'portal_rag_access_token';
+
+export function getPortalRagToken(): string | undefined {
+  try {
+    return localStorage.getItem(PORTAL_TOKEN_KEY) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setPortalRagToken(token: string | null) {
+  try {
+    if (!token) localStorage.removeItem(PORTAL_TOKEN_KEY);
+    else localStorage.setItem(PORTAL_TOKEN_KEY, token);
+  } catch {
+    /* ignore */
+  }
 }
 
 export async function fetchPublishedSite(): Promise<PublishedPortalSite> {
@@ -110,12 +151,44 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetail 
   return (result ?? null) as BlogPostDetail | null;
 }
 
-export async function fetchRagAnswer(question: string, sessionId?: string): Promise<RagAskResult> {
+export async function fetchRagAnswer(
+  question: string,
+  sessionId?: string,
+  guestKey?: string
+): Promise<RagAskResult> {
   return request.post({
     baseUrl: BASE,
     url: 'RagAsk',
-    options: { question, sessionId },
+    options: { question, sessionId, guestKey },
+    token: getPortalRagToken(),
   }) as Promise<RagAskResult>;
+}
+
+export async function fetchRagQuota(guestKey?: string): Promise<RagQuotaStatus> {
+  return request.get({
+    baseUrl: BASE,
+    url: 'RagQuota',
+    options: { guestKey },
+    token: getPortalRagToken(),
+  }) as Promise<RagQuotaStatus>;
+}
+
+export async function requestRagOtp(phoneNumber: string): Promise<{ sent: boolean; phoneMasked?: string }> {
+  return request.post({
+    baseUrl: BASE,
+    url: 'RagOtpRequest',
+    options: { phoneNumber },
+  }) as Promise<{ sent: boolean; phoneMasked?: string }>;
+}
+
+export async function verifyRagOtp(phoneNumber: string, code: string): Promise<PortalAuthResult> {
+  const result = (await request.post({
+    baseUrl: BASE,
+    url: 'RagOtpVerify',
+    options: { phoneNumber, code },
+  })) as PortalAuthResult;
+  if (result?.accessToken) setPortalRagToken(result.accessToken);
+  return result;
 }
 
 export function portalSetting(site: PublishedPortalSite | null, key: string, fallback = ''): string {

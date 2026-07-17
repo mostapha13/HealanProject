@@ -13,6 +13,8 @@ public class RagSettingSaveCommand : IRequest<RagSettingDto>
     public int SimilarityThresholdPercent { get; set; } = 55;
     public string PythonApiUrl { get; set; } = "http://python-rag:8000";
     public bool IsEnabled { get; set; } = true;
+    public int GuestDailyLimit { get; set; } = 10;
+    public int AuthenticatedDailyLimit { get; set; } = 200;
 }
 
 public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveCommand, RagSettingDto>
@@ -29,6 +31,10 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
             throw new BadRequestExceptions("آستانه شباهت باید بین ۱ تا ۱۰۰ باشد");
         if (string.IsNullOrWhiteSpace(request.PythonApiUrl))
             throw new BadRequestExceptions("آدرس سرویس Python الزامی است");
+        if (request.GuestDailyLimit < 0 || request.GuestDailyLimit > 1000)
+            throw new BadRequestExceptions("سقف سوال مهمان باید بین ۰ تا ۱۰۰۰ باشد");
+        if (request.AuthenticatedDailyLimit < 1 || request.AuthenticatedDailyLimit > 5000)
+            throw new BadRequestExceptions("سقف سوال کاربر لاگین‌شده باید بین ۱ تا ۵۰۰۰ باشد");
 
         var setting = await _db.RagSettings.FirstOrDefaultAsync(cancellationToken);
         if (setting == null)
@@ -41,6 +47,8 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
         setting.SimilarityThresholdPercent = request.SimilarityThresholdPercent;
         setting.PythonApiUrl = request.PythonApiUrl.Trim().TrimEnd('/');
         setting.IsEnabled = request.IsEnabled;
+        setting.GuestDailyLimit = request.GuestDailyLimit;
+        setting.AuthenticatedDailyLimit = request.AuthenticatedDailyLimit;
         setting.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
