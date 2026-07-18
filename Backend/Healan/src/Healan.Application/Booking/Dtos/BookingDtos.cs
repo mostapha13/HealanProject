@@ -51,7 +51,8 @@ public class AppointmentBookingDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string? Note { get; set; }
-    public AppointmentBookingStatus Status { get; set; }
+    /// <summary>Numeric status for stable portal/clinic clients (1=Booked … 5=NoShow).</summary>
+    public byte Status { get; set; }
     public long? AppointmentId { get; set; }
     public bool BookedByStaff { get; set; }
     public DateTime CreatedAt { get; set; }

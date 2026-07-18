@@ -29,6 +29,26 @@ const STATUS_LABEL: Record<number, string> = {
   5: 'عدم حضور',
 };
 
+const STATUS_NAME: Record<string, number> = {
+  Booked: 1,
+  Cancelled: 2,
+  Rescheduled: 3,
+  Accepted: 4,
+  NoShow: 5,
+};
+
+/** API may return status as number, numeric string, or enum name (JsonStringEnumConverter). */
+function bookingStatus(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const asNum = Number(trimmed);
+    if (!Number.isNaN(asNum) && asNum > 0) return asNum;
+    return STATUS_NAME[trimmed] ?? 0;
+  }
+  return 0;
+}
+
 type AdmitForm = {
   bookingId: number;
   patientId: number;
@@ -146,7 +166,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   }, [filter, nationalCode, doctorId, status, selectedDate, setPage]);
 
   const openAdmit = async (item: AppointmentBookingItem) => {
-    let patientId = item.patientId ?? 0;
+    let patientId = Number(item.patientId) || 0;
     if (patientId <= 0 && item.nationalCode) {
       try {
         const found = await healanApi.patients.byNationalCode(item.nationalCode);
@@ -155,8 +175,16 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
           setPatients((prev) => (prev.some((p) => p.patientId === patientId) ? prev : [...prev, found]));
         }
       } catch {
-        // secretary can quick-add
+        // handled below
       }
+    }
+
+    if (patientId <= 0) {
+      onAlert({
+        type: 'error',
+        message: 'بیمار در سیستم یافت نشد. رزرو بدون بیمار معتبر نیست.',
+      });
+      return;
     }
 
     const duration =
@@ -183,9 +211,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       doctorName: item.doctorName || '',
     });
     setAdmitOpen(true);
-    if (patientId <= 0) {
-      setPatientModalOpen(true);
-    }
   };
 
   const toggleService = (id: number) => {
@@ -289,7 +314,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
     <>
       <PageHeader
         title="رزروهای نوبت"
-        subtitle="به‌صورت پیش‌فرض نوبت‌های امروز — با «پذیرش جدید» فرم پذیرش را با اطلاعات بیمار باز کنید"
+        subtitle="به‌صورت پیش‌فرض نوبت‌های امروز نمایش داده می‌شود — با «پذیرش بیمار» فرم پذیرش را باز کنید"
       />
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
@@ -342,15 +367,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                 placeholder="نام، موبایل"
               />
             </div>
-            <div className="healan-form-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <button
-                type="button"
-                className="healan-btn healan-btn--outline"
-                onClick={() => setSelectedDate(todayDateInput())}
-              >
-                امروز
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -368,13 +384,15 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                   <th>زمان</th>
                   <th>بیمار</th>
                   <th>پزشک</th>
-                  <th>خدمات درخواستی</th>
+                  <th>یادداشت / خدمات</th>
                   <th>وضعیت</th>
                   <th>عملیات</th>
                 </tr>
               </thead>
               <tbody>
-                {items.map((item) => (
+                {items.map((item) => {
+                  const st = bookingStatus(item.status);
+                  return (
                   <tr key={item.appointmentBookingId}>
                     <td>{convertDateAndTimeToJalali(item.startAt)}</td>
                     <td>
@@ -384,18 +402,18 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                       </div>
                     </td>
                     <td>{item.doctorName}</td>
-                    <td>{(item.requestedServiceTitles ?? []).join('، ') || '—'}</td>
-                    <td>{STATUS_LABEL[item.status] ?? item.status}</td>
+                    <td>{item.note?.trim() || (item.requestedServiceTitles ?? []).join('، ') || '—'}</td>
+                    <td>{STATUS_LABEL[st] ?? String(item.status)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {item.status === 1 && (
+                        {st === 1 && (
                           <>
                             <button
                               type="button"
                               className="healan-btn healan-btn--primary healan-btn--sm"
                               onClick={() => void openAdmit(item)}
                             >
-                              پذیرش جدید
+                              پذیرش بیمار
                             </button>
                             <button
                               type="button"
@@ -413,7 +431,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                             </button>
                           </>
                         )}
-                        {item.status !== 4 && (
+                        {st !== 4 && (
                           <button
                             type="button"
                             className="healan-btn healan-btn--ghost healan-btn--sm"
@@ -426,7 +444,8 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -441,8 +460,8 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
 
       <HealanModal
         open={admitOpen}
-        title="پذیرش جدید"
-        subtitle="اطلاعات بیمار از رزرو پیش‌پر شده — بیمه و خدمات را تکمیل و ثبت کنید"
+        title="پذیرش بیمار"
+        subtitle="اطلاعات رزرو پیش‌پر شده است — بیمه و خدمات را تکمیل و ثبت کنید"
         width={760}
         onClose={() => setAdmitOpen(false)}
         footer={

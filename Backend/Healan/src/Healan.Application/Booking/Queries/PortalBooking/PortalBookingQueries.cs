@@ -216,7 +216,7 @@ public class PortalMyBookingsQueryHandler : IRequestHandler<PortalMyBookingsQuer
                 FirstName = x.FirstName,
                 LastName = x.LastName,
                 Note = x.Note,
-                Status = x.Status,
+                Status = (byte)x.Status,
                 AppointmentId = x.AppointmentId,
                 BookedByStaff = x.BookedByStaff,
                 CreatedAt = x.CreatedAt,
