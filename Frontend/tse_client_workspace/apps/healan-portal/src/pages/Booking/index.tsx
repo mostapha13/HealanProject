@@ -8,16 +8,15 @@ import {
   bookingOpenSlots,
   bookingProfileStatus,
   bookingReschedule,
-  bookingServices,
   getPortalRagToken,
   type PortalBookingDoctor,
   type PortalBookingItem,
-  type PortalBookingService,
   type PortalOpenSlot,
 } from '../../api/portalApi';
 import { PortalAuthModal, resolveBookingEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
 import { callClinicPhone } from '../../constants';
 
+const NOTE_MAX = 100;
 function asArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[];
   if (value && typeof value === 'object') {
@@ -168,7 +167,6 @@ export default function BookingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<PortalAuthModalMode>('register');
   const [doctors, setDoctors] = useState<PortalBookingDoctor[]>([]);
-  const [services, setServices] = useState<PortalBookingService[]>([]);
   const [slots, setSlots] = useState<PortalOpenSlot[]>([]);
   const [myBookings, setMyBookings] = useState<PortalBookingItem[]>([]);
   const [error, setError] = useState('');
@@ -186,9 +184,7 @@ export default function BookingPage() {
     doctorId: 0,
     appointmentSlotId: 0,
     note: '',
-    serviceTypeIds: [] as number[],
   });
-
   const bootstrap = async () => {
     setError('');
     setView('loading');
@@ -223,12 +219,10 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (view !== 'book') return;
-    Promise.all([bookingDoctors(), bookingServices()])
-      .then(([d, s]) => {
+    void bookingDoctors()
+      .then((d) => {
         const docs = asArray<PortalBookingDoctor>(d);
-        const svcs = asArray<PortalBookingService>(s);
         setDoctors(docs);
-        setServices(svcs);
         if (docs.length === 1) {
           setForm((prev) => ({ ...prev, doctorId: Number(docs[0].doctorId) || 0 }));
         }
@@ -239,7 +233,6 @@ export default function BookingPage() {
       .then((mine) => setMyBookings(asArray<PortalBookingItem>(mine)))
       .catch(() => setMyBookings([]));
   }, [view]);
-
   useEffect(() => {
     if (view !== 'book') return;
     let cancelled = false;
@@ -281,21 +274,14 @@ export default function BookingPage() {
     return slots.filter((s) => slotDayKey(s?.startAt) === selectedDay);
   }, [slots, selectedDay]);
 
-  const toggleService = (id: number) => {
-    setForm((prev) => ({
-      ...prev,
-      serviceTypeIds: prev.serviceTypeIds.includes(id)
-        ? prev.serviceTypeIds.filter((x) => x !== id)
-        : [...prev.serviceTypeIds, id],
-    }));
-  };
-
   const submitBook = async () => {
     setError('');
     setBusy(true);
     try {
       if (!getPortalRagToken()) throw new Error('جلسه منقضی شده است. دوباره وارد شوید.');
       if (!form.appointmentSlotId) throw new Error('یک نوبت آزاد انتخاب کنید.');
+      const note = form.note.trim();
+      if (note.length > NOTE_MAX) throw new Error(`یادداشت حداکثر ${NOTE_MAX} کاراکتر است.`);
 
       if (rescheduleBookingId > 0) {
         await bookingReschedule({
@@ -305,8 +291,7 @@ export default function BookingPage() {
       } else {
         await bookingCreate({
           appointmentSlotId: form.appointmentSlotId,
-          note: form.note,
-          requestedServiceTypeIds: form.serviceTypeIds,
+          note: note || undefined,
         });
       }
       setView('done');
@@ -316,7 +301,6 @@ export default function BookingPage() {
       setBusy(false);
     }
   };
-
   const cancelMine = async (id: number) => {
     setBusy(true);
     try {
@@ -343,7 +327,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v11-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v12-booking</span>
           <h1 className="portal-booking__title">انتخاب نوبت قلب</h1>
           <p className="portal-booking__lead">
             روز و ساعت مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
@@ -430,21 +414,24 @@ export default function BookingPage() {
               <div className="portal-booking__card">
                 <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'انتخاب زمان مراجعه'}</h3>
 
-                {!rescheduleBookingId && services.length > 0 && (
+                {!rescheduleBookingId && (
                   <div style={{ marginBottom: 12 }}>
-                    <label className="portal-booking__label">عنوان خدمت درخواستی (اختیاری)</label>
-                    <div className="portal-booking__services">
-                      {services.map((s) => (
-                        <label key={s.serviceTypeId} className="portal-booking__chip">
-                          <input
-                            type="checkbox"
-                            checked={form.serviceTypeIds.includes(Number(s.serviceTypeId))}
-                            onChange={() => toggleService(Number(s.serviceTypeId))}
-                          />
-                          {s.title}
-                        </label>
-                      ))}
-                    </div>
+                    <label className="portal-booking__label" htmlFor="booking-note">
+                      یادداشت (اختیاری)
+                    </label>
+                    <textarea
+                      id="booking-note"
+                      className="portal-booking__input"
+                      rows={3}
+                      maxLength={NOTE_MAX}
+                      value={form.note}
+                      onChange={(e) => setForm({ ...form, note: e.target.value.slice(0, NOTE_MAX) })}
+                      placeholder="در صورت تمایل توضیح کوتاه بنویسید…"
+                      style={{ resize: 'vertical', minHeight: 72 }}
+                    />
+                    <p className="portal-booking__hint" style={{ marginTop: 4 }}>
+                      {form.note.length}/{NOTE_MAX}
+                    </p>
                   </div>
                 )}
 

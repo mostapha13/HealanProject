@@ -40,6 +40,10 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
         if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
             throw new BadRequestExceptions("نام و نام خانوادگی الزامی است.");
 
+        var note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim();
+        if (note != null && note.Length > 100)
+            throw new BadRequestExceptions("یادداشت نباید بیشتر از ۱۰۰ کاراکتر باشد.");
+
         var now = DateTime.Now;
         var slot = await _db.AppointmentSlots
             .Include(x => x.Booking)
@@ -80,7 +84,7 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
             PhoneNumber = phone,
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Note = request.Note,
+            Note = note,
             Status = AppointmentBookingStatus.Booked,
             BookedByStaff = request.BookedByStaff,
             CreatedAt = DateTime.UtcNow,
