@@ -364,7 +364,7 @@ export function parseBookingIntent(rawInput: string): BookingIntent {
     };
   }
 
-  if (hasBookingKeyword(text) && day.error) {
+  if (hasBookingKeyword(text) && !day.ok && day.error) {
     return {
       kind: 'list_slots',
       dateParseError: day.error,

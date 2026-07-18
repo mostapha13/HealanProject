@@ -19,15 +19,21 @@ function toAsciiDigits(value: unknown): string {
 function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object') {
     const anyErr = err as Record<string, unknown>;
-    const data = (anyErr.data ?? anyErr.response ?? anyErr) as Record<string, unknown> | undefined;
-    const nested = (data?.data && typeof data.data === 'object' ? (data.data as Record<string, unknown>) : data) ?? {};
-    const errors = (nested.errors ?? nested.Errors ?? nested.errorMessages) as unknown;
+    const data = (anyErr['data'] ?? anyErr['response'] ?? anyErr) as Record<string, unknown> | undefined;
+    const inner = data?.['data'];
+    const nested =
+      (inner && typeof inner === 'object' ? (inner as Record<string, unknown>) : data) ?? {};
+    const errors = (nested['errors'] ?? nested['Errors'] ?? nested['errorMessages']) as unknown;
     if (Array.isArray(errors) && errors[0]) return String(errors[0]);
-    if (typeof nested.message === 'string' && nested.message.trim()) return nested.message;
-    if (typeof nested.title === 'string' && nested.title.trim()) return nested.title;
-    if (typeof nested.detail === 'string' && nested.detail.trim()) return nested.detail;
-    if (typeof anyErr.message === 'string' && anyErr.message.trim() && !/^request failed/i.test(anyErr.message)) {
-      return anyErr.message;
+    const message = nested['message'];
+    if (typeof message === 'string' && message.trim()) return message;
+    const title = nested['title'];
+    if (typeof title === 'string' && title.trim()) return title;
+    const detail = nested['detail'];
+    if (typeof detail === 'string' && detail.trim()) return detail;
+    const topMessage = anyErr['message'];
+    if (typeof topMessage === 'string' && topMessage.trim() && !/^request failed/i.test(topMessage)) {
+      return topMessage;
     }
   }
   if (err instanceof Error && err.message && !/^request failed/i.test(err.message)) return err.message;

@@ -871,7 +871,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v12-intent-falsepos-fix
+                build-v13-portal-ts-fix
               </span>
             </p>
           </div>
