@@ -110,6 +110,12 @@ public sealed class RedisBookingOtpStore : IBookingOtpStore, IDisposable
 
     public async Task SetCooldownAsync(string phone, TimeSpan ttl, CancellationToken cancellationToken = default)
     {
+        if (ttl <= TimeSpan.Zero)
+        {
+            await ClearCooldownAsync(phone, cancellationToken);
+            return;
+        }
+
         var redis = TryGetDb();
         if (redis is not null)
         {
@@ -126,6 +132,25 @@ public sealed class RedisBookingOtpStore : IBookingOtpStore, IDisposable
         }
 
         await _fallback.SetCooldownAsync(phone, ttl, cancellationToken);
+    }
+
+    public async Task ClearCooldownAsync(string phone, CancellationToken cancellationToken = default)
+    {
+        var redis = TryGetDb();
+        if (redis is not null)
+        {
+            try
+            {
+                await redis.KeyDeleteAsync(CdKey(phone));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis OTP cooldown clear failed");
+                DisableRedisTemporarily();
+            }
+        }
+
+        await _fallback.ClearCooldownAsync(phone, cancellationToken);
     }
 
     public async Task SetSessionAsync(string token, string phone, TimeSpan ttl, CancellationToken cancellationToken = default)

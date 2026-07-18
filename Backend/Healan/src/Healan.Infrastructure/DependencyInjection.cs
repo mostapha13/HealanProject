@@ -39,6 +39,7 @@ namespace Healan.Infrastructure
 
             services.AddScoped<Healan.Application.Portal.Services.IRagChatLogPublisher, RagChatLogPublisher>();
             services.AddScoped<Healan.Application.Portal.Services.IRagQuotaCounter, RagQuotaCounter>();
+            services.AddSingleton<Healan.Application.Booking.Services.MemoryBookingOtpStore>();
             services.AddSingleton<Healan.Application.Booking.Services.IBookingOtpStore, DbBookingOtpStore>();
             services.AddHostedService<RagChatLogConsumerService>();
         }

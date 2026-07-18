@@ -297,6 +297,7 @@ public class BookingOtpRequestCommandHandler : IRequestHandler<BookingOtpRequest
         if (!ok)
         {
             await _otpStore.RemoveAsync(phone, cancellationToken);
+            await _otpStore.ClearCooldownAsync(phone, cancellationToken);
             throw new BadRequestExceptions(error ?? "ارسال پیامک ناموفق بود.");
         }
 

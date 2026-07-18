@@ -53,12 +53,13 @@ interface ChatMessage {
 const SUGGESTIONS = [
   'نوبت‌های امروز',
   'نوبت‌های فردا',
+  'نوبت‌های ۳۱ تیر',
   'نوبت‌های من',
   'آدرس مطب کجاست؟',
 ];
 
 const WELCOME =
-  'سلام! من دستیار هوشمند مطب دکتر شهرویی هستم. می‌توانید درباره آدرس و خدمات بپرسید یا بگویید «نوبت‌های فردا» تا ساعات آزاد را با دکمه انتخاب کنید.';
+  'سلام! من دستیار هوشمند مطب دکتر شهرویی هستم. می‌توانید درباره آدرس و خدمات بپرسید، بگویید «نوبت‌های فردا» یا تاریخ شمسی مثل «نوبت‌های ۳۱ تیر ۱۴۰۵» تا ساعات آزاد را ببینید.';
 
 const GUEST_COOKIE = 'healan_rag_guest';
 const OTP_TTL_SECONDS = 120;
@@ -460,6 +461,11 @@ export default function AssistantPage() {
   const runBookingIntent = async (intent: BookingIntent) => {
     setBookingBusy(true);
     try {
+      if (intent.dateParseError) {
+        pushAssistant(intent.dateParseError);
+        return;
+      }
+
       const ok = await ensureBookingAuth();
       if (!ok) {
         pendingIntentRef.current = intent;
@@ -865,7 +871,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v8-booking-auth-mobile
+                build-v12-intent-falsepos-fix
               </span>
             </p>
           </div>

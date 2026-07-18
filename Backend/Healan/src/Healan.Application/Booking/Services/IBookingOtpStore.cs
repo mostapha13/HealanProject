@@ -9,6 +9,7 @@ public interface IBookingOtpStore
     Task RemoveAsync(string phone, CancellationToken cancellationToken = default);
     Task<bool> IsInCooldownAsync(string phone, CancellationToken cancellationToken = default);
     Task SetCooldownAsync(string phone, TimeSpan ttl, CancellationToken cancellationToken = default);
+    Task ClearCooldownAsync(string phone, CancellationToken cancellationToken = default);
     Task SetSessionAsync(string token, string phone, TimeSpan ttl, CancellationToken cancellationToken = default);
     Task<string?> GetSessionPhoneAsync(string token, CancellationToken cancellationToken = default);
 }
@@ -47,7 +48,19 @@ public sealed class MemoryBookingOtpStore : IBookingOtpStore
 
     public Task SetCooldownAsync(string phone, TimeSpan ttl, CancellationToken cancellationToken = default)
     {
+        if (ttl <= TimeSpan.Zero)
+        {
+            _cache.Remove(CdKey(phone));
+            return Task.CompletedTask;
+        }
+
         _cache.Set(CdKey(phone), true, ttl);
+        return Task.CompletedTask;
+    }
+
+    public Task ClearCooldownAsync(string phone, CancellationToken cancellationToken = default)
+    {
+        _cache.Remove(CdKey(phone));
         return Task.CompletedTask;
     }
 
