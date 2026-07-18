@@ -1,23 +1,37 @@
 # RAG — Healan Doctor
 
-سرویس AI برای Healan Doctor: **RAG فارسی** با پاسخ مستقیم از دیتابیس (بدون LLM).
+سرویس AI برای Healan Doctor: **RAG فارسی** با پاسخ مستقیم از دیتابیس (حالت `direct`).
 
-## مدل Embedding (وکتورسازی فارسی)
+## مستندات کامل
 
-| مورد | مقدار |
+- **Markdown:** [`Docs/RAG-Healan-Guide.md`](../Docs/RAG-Healan-Guide.md)
+- **Word (RTL):** با اجرای `python Docs/generate_rag_guide_docx.py` فایل `Docs/راهنمای-ساخت-چت‌بات-RAG-Healan.docx` ساخته می‌شود.
+
+## خلاصه سریع
+
+| موضوع | مقدار |
 |------|--------|
-| **مدل** | `heydariAI/persian-embeddings` |
-| **لینک HuggingFace** | https://huggingface.co/heydariAI/persian-embeddings |
-| **نوع** | Sentence Transformer مخصوص فارسی |
-| **ChromaDB** | ذخیره وکتورها با فاصله cosine |
+| Embedding | `heydariAI/persian-embeddings` (قابل تغییر از UI / RagSettings) |
+| خلاصه بلاگ/نظر | `qwen2.5:3b` روی Ollama (قابل تغییر از UI) |
+| Vector DB | Chroma · کالکشن `healan_rag` · cosine |
+| Ask | برگرداندن `metadata.answer` بدون LLM |
 
-پاسخ نهایی از فیلد `Answer` رکورد بازیابی‌شده برگردانده می‌شود (حالت `direct`).
+جریان:
+
+```
+SQL (FAQ + CMS + بلاگ + نظرات)
+  → خلاصه LLM فقط برای بلاگ و نظرات
+  → Embedding → Chroma
+  → sync هر N دقیقه از RagSettings
+سوال → Healan API → Python /rag/ask → پاسخ مستقیم
+```
 
 ## پیش‌نیاز
 
 - Python 3.11+
 - SQL Server با جداول `RagKnowledgeItems`, `RagSettings`, ...
-- ODBC Driver 17 for SQL Server
+- ODBC Driver 17/18 for SQL Server
+- برای خلاصه بلاگ: Ollama + `qwen2.5:3b` (اختیاری ولی توصیه‌شده)
 - اولین اجرا مدل embedding را از HuggingFace دانلود می‌کند
 
 ## نصب
@@ -28,7 +42,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
-# ویرایش SQL_SERVER_CONNECTION_STRING
+# ویرایش SQL_SERVER_CONNECTION_STRING و در صورت نیاز OPENAI_* برای Ollama
 ```
 
 ## اجرا
@@ -39,15 +53,6 @@ python run.py
 
 Swagger: http://localhost:8000/docs
 
-## جریان کار
-
-```
-SQL Server (FAQ + محتوای سایت + بلاگ + نظرات) 
-  → خلاصه LLM فقط برای بلاگ و نظرات (OPENAI_MODEL)
-  → Embedding فارسی → ChromaDB
-  → Background sync هر N دقیقه (از RagSettings)
-سوال کاربر → Healan API → Python /rag/ask → پاسخ مستقیم (برای بلاگ/نظر = همان خلاصه)```
-
 ## API
 
 | مسیر | توضیح |
@@ -56,22 +61,11 @@ SQL Server (FAQ + محتوای سایت + بلاگ + نظرات)
 | `POST /api/v1/rag/ingest` | همگام‌سازی دستی |
 | `POST /api/v1/rag/ask` | پرسش (حالت direct) |
 
-## تنظیمات (.env)
-
-```env
-DATA_SOURCE=sqlserver
-EMBEDDING_MODEL=heydariAI/persian-embeddings
-SQL_SERVER_CONNECTION_STRING=mssql+pyodbc://...
-RAG_ANSWER_MODE=direct
-RAG_SYNC_ENABLED=true
-RAG_SYNC_INTERVAL_MINUTES=10
-```
-
-فاصله sync و آستانه شباهت از جدول `RagSettings` در SQL نیز خوانده می‌شود.
-
 ## پنل کلینیک
 
-`/site-content/rag` — مدیریت سوال/جواب و تنظیمات RAG
+- `/site-content/rag` — سوال/جواب FAQ
+- `/basic-data/assistant` — سقف سوال + مدل Embedding + مدل خلاصه‌ساز
+- `/site-content/rag-logs` — گفتگوها
 
 ## پورتال
 

@@ -865,7 +865,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v7-assistant-booking
+                build-v8-booking-auth-mobile
               </span>
             </p>
           </div>

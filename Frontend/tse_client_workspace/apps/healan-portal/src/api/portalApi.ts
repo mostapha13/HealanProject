@@ -271,25 +271,42 @@ export function bookingOtpRequest(phoneNumber: string) {
   }) as Promise<{ sent: boolean; phoneMasked?: string; expiresInSeconds?: number; reused?: boolean }>;
 }
 
+export interface BookingOtpVerifyResult {
+  verified: boolean;
+  bookingToken: string;
+  accessToken: string;
+  expiresInSeconds: number;
+  expiresAtUtc?: string;
+  phoneNumber: string;
+  phoneMasked?: string;
+  userId?: string;
+  isPatient?: boolean;
+  patientId?: number;
+  firstName?: string;
+  lastName?: string;
+  nationalCode?: string;
+  patient?: {
+    found: boolean;
+    patientId?: number;
+    nationalCode?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+  };
+}
+
 export function bookingOtpVerify(payload: { phoneNumber: string; code: string }) {
-  return request.post({
-    baseUrl: BASE,
-    url: 'BookingOtpVerify',
-    options: payload,
-  }) as Promise<{
-    verified: boolean;
-    bookingToken: string;
-    expiresInSeconds: number;
-    phoneNumber: string;
-    patient?: {
-      found: boolean;
-      patientId?: number;
-      nationalCode?: string;
-      firstName?: string;
-      lastName?: string;
-      phoneNumber?: string;
-    };
-  }>;
+  return request
+    .post({
+      baseUrl: BASE,
+      url: 'BookingOtpVerify',
+      options: payload,
+    })
+    .then((result) => {
+      const res = result as BookingOtpVerifyResult;
+      if (res?.accessToken) setPortalRagToken(res.accessToken);
+      return res;
+    }) as Promise<BookingOtpVerifyResult>;
 }
 
 export interface PortalBookingAuthResult {

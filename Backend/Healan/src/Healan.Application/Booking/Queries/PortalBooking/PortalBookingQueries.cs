@@ -5,10 +5,14 @@ using Healan.Application.Portal.Services;
 using Healan.Domain.Booking.Enums;
 using Healan.Domain.Doctors.Enums;
 using Healan.Domain.Patients.Entities;
+using IdentityServer.GrpcClient;
+using IdentityServer.GrpcClient.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Share.Domain.Enums;
 using Share.Domain.Exceptions;
+using Share.Domain.Models.UserAccessModels;
 
 namespace Healan.Application.Booking.Queries.PortalBooking;
 
@@ -313,13 +317,24 @@ public class BookingOtpVerifyCommand : IRequest<BookingOtpVerifyResultDto>
 
 public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, BookingOtpVerifyResultDto>
 {
+    private const string SiteUserRole = nameof(UserAccesRoleId.SiteUser);
+    private const string DefaultPassword = "aA@123456";
+
     private readonly IBookingOtpStore _otpStore;
     private readonly IMediator _mediator;
+    private readonly IIdentityTool _identityTool;
+    private readonly IPortalAuthTokenService _tokenService;
 
-    public BookingOtpVerifyCommandHandler(IBookingOtpStore otpStore, IMediator mediator)
+    public BookingOtpVerifyCommandHandler(
+        IBookingOtpStore otpStore,
+        IMediator mediator,
+        IIdentityTool identityTool,
+        IPortalAuthTokenService tokenService)
     {
         _otpStore = otpStore;
         _mediator = mediator;
+        _identityTool = identityTool;
+        _tokenService = tokenService;
     }
 
     public async Task<BookingOtpVerifyResultDto> Handle(BookingOtpVerifyCommand request, CancellationToken cancellationToken)
@@ -339,8 +354,8 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
 
         await _otpStore.RemoveAsync(phone, cancellationToken);
 
-        var token = Guid.NewGuid().ToString("N");
-        await _otpStore.SetSessionAsync(token, phone, TimeSpan.FromMinutes(30), cancellationToken);
+        var bookingToken = Guid.NewGuid().ToString("N");
+        await _otpStore.SetSessionAsync(bookingToken, phone, TimeSpan.FromMinutes(30), cancellationToken);
 
         BookingLookupPatientDto patient;
         try
@@ -357,14 +372,70 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
             };
         }
 
+        var firstName = (patient.FirstName ?? string.Empty).Trim();
+        var lastName = (patient.LastName ?? string.Empty).Trim();
+        var national = RagQuotaHelper.ToAsciiDigits(patient.NationalCode);
+        var isPatient = patient.Found
+            && firstName.Length >= 2
+            && lastName.Length >= 2
+            && national.Length == 10;
+
+        var saved = await _identityTool.SaveUser(new SaveRequest
+        {
+            UserId = string.Empty,
+            PhoneNumber = phone,
+            FirstName = firstName,
+            LastName = lastName,
+            IsActive = true,
+            Password = DefaultPassword,
+            DepartmentId = (int)DepartmentId.Public,
+            TwoFactorEnabled = false,
+        });
+
+        if (saved == null || string.IsNullOrWhiteSpace(saved.UserId)
+            || !Guid.TryParse(saved.UserId, out var userId))
+            throw new BadRequestExceptions("امکان ایجاد/یافتن کاربر فراهم نشد. دوباره تلاش کنید.");
+
+        await EnsureSiteUserRoleAsync(userId);
+
+        var accessToken = _tokenService.CreateToken(userId, phone, out var expiresAt);
+
         return new BookingOtpVerifyResultDto
         {
             Verified = true,
-            BookingToken = token,
+            BookingToken = bookingToken,
+            AccessToken = accessToken,
+            UserId = userId,
+            ExpiresAtUtc = expiresAt,
             ExpiresInSeconds = 30 * 60,
             PhoneNumber = phone,
+            PhoneMasked = RagQuotaHelper.MaskPhone(phone),
+            IsPatient = isPatient,
+            PatientId = patient.PatientId,
+            FirstName = firstName,
+            LastName = lastName,
+            NationalCode = national,
             Patient = patient,
         };
+    }
+
+    private async Task EnsureSiteUserRoleAsync(Guid userId)
+    {
+        var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
+        var names = roleInfos?.RoleInfos_
+            ?.Select(r => r.RoleName)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList() ?? new List<string>();
+
+        if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        names.Add(SiteUserRole);
+        var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
+        foreach (var name in names)
+            setRequest.RoleNames.Add(name);
+        await _identityTool.SetUserRole(setRequest);
     }
 }
 
@@ -372,8 +443,17 @@ public class BookingOtpVerifyResultDto
 {
     public bool Verified { get; set; }
     public string BookingToken { get; set; } = string.Empty;
+    public string AccessToken { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public DateTime? ExpiresAtUtc { get; set; }
     public int ExpiresInSeconds { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;
+    public string PhoneMasked { get; set; } = string.Empty;
+    public bool IsPatient { get; set; }
+    public long? PatientId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string NationalCode { get; set; } = string.Empty;
     public BookingLookupPatientDto? Patient { get; set; }
 }
 
