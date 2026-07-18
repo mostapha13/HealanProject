@@ -161,6 +161,67 @@ public class BookingCancelCommandHandler : IRequestHandler<BookingCancelCommand,
     }
 }
 
+public class BookingNoShowCommand : IRequest<object>
+{
+    public long AppointmentBookingId { get; set; }
+}
+
+public class BookingNoShowCommandHandler : IRequestHandler<BookingNoShowCommand, object>
+{
+    private readonly IApplicationDbContext _db;
+    public BookingNoShowCommandHandler(IApplicationDbContext db) => _db = db;
+
+    public async Task<object> Handle(BookingNoShowCommand request, CancellationToken cancellationToken)
+    {
+        var booking = await _db.AppointmentBookings
+            .Include(x => x.Slot)
+            .FirstOrDefaultAsync(x => x.AppointmentBookingId == request.AppointmentBookingId, cancellationToken)
+            ?? throw new NotFoundExceptions("رزرو یافت نشد.");
+
+        if (booking.Status != AppointmentBookingStatus.Booked)
+            throw new BadRequestExceptions("فقط رزرو فعال قابل ثبت عدم حضور است.");
+
+        booking.Status = AppointmentBookingStatus.NoShow;
+        booking.UpdatedAt = DateTime.UtcNow;
+        if (booking.Slot.Status == AppointmentSlotStatus.Booked)
+            booking.Slot.Status = AppointmentSlotStatus.Open;
+
+        await _db.SaveChangesAsync(cancellationToken);
+        return new { noShow = true };
+    }
+}
+
+public class BookingDeleteCommand : IRequest<object>
+{
+    public long AppointmentBookingId { get; set; }
+}
+
+public class BookingDeleteCommandHandler : IRequestHandler<BookingDeleteCommand, object>
+{
+    private readonly IApplicationDbContext _db;
+    public BookingDeleteCommandHandler(IApplicationDbContext db) => _db = db;
+
+    public async Task<object> Handle(BookingDeleteCommand request, CancellationToken cancellationToken)
+    {
+        var booking = await _db.AppointmentBookings
+            .Include(x => x.Slot)
+            .Include(x => x.RequestedServices)
+            .FirstOrDefaultAsync(x => x.AppointmentBookingId == request.AppointmentBookingId, cancellationToken)
+            ?? throw new NotFoundExceptions("رزرو یافت نشد.");
+
+        if (booking.Status == AppointmentBookingStatus.Accepted && booking.AppointmentId is > 0)
+            throw new BadRequestExceptions("رزرو پذیرش‌شده قابل حذف نیست. ابتدا از بخش نوبت‌ها اقدام کنید.");
+
+        if (booking.Slot != null && booking.Slot.Status == AppointmentSlotStatus.Booked)
+            booking.Slot.Status = AppointmentSlotStatus.Open;
+
+        booking.RequestedServices?.Clear();
+        _db.AppointmentBookings.Remove(booking);
+        await _db.SaveChangesAsync(cancellationToken);
+        return new { deleted = true };
+    }
+}
+
 public class BookingRescheduleCommand : IRequest<AppointmentBookingDto>
 {
     public long AppointmentBookingId { get; set; }

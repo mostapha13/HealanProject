@@ -370,6 +370,10 @@ export const healanApi = {
       post<AppointmentBookingItem>('BookingReservation/Create', data),
     reservationCancel: (appointmentBookingId: number) =>
       post('BookingReservation/Cancel', { appointmentBookingId, byStaff: true }),
+    reservationNoShow: (appointmentBookingId: number) =>
+      post('BookingReservation/NoShow', { appointmentBookingId }),
+    reservationDelete: (appointmentBookingId: number) =>
+      post('BookingReservation/Delete', { appointmentBookingId }),
     reservationMove: (data: { appointmentBookingId: number; newAppointmentSlotId: number }) =>
       post<AppointmentBookingItem>('BookingReservation/Move', data),
     reservationUpdateNote: (data: { appointmentBookingId: number; note?: string }) =>

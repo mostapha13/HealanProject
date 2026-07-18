@@ -19,4 +19,5 @@ public enum AppointmentBookingStatus : byte
     Cancelled = 2,
     Rescheduled = 3,
     Accepted = 4,
+    NoShow = 5,
 }

@@ -75,6 +75,14 @@ public class BookingReservationController : ApiControllerBase
     }
 
     [HttpPost("[action]")]
+    public Task<IActionResult> NoShow([FromBody] BookingNoShowCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] BookingDeleteCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
     public Task<IActionResult> Move([FromBody] BookingMoveCommand request) =>
         SendCommand(request);
 

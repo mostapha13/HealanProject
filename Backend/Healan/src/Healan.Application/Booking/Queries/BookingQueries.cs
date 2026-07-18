@@ -1,5 +1,7 @@
 using Healan.Application.Booking.Dtos;
+using Healan.Application.Booking.Services;
 using Healan.Application.Common.Interfaces;
+using Healan.Application.Portal.Services;
 using Healan.Domain.Booking.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -184,17 +186,27 @@ public class AppointmentBookingListQueryHandler : IRequestHandler<AppointmentBoo
         if (request.Status.HasValue)
             q = q.Where(x => x.Status == request.Status);
         if (!string.IsNullOrWhiteSpace(request.NationalCode))
-            q = q.Where(x => x.NationalCode == request.NationalCode.Trim());
+        {
+            var national = RagQuotaHelper.ToAsciiDigits(request.NationalCode);
+            if (national.Length > 0)
+                q = q.Where(x => x.NationalCode.Contains(national));
+        }
         if (!string.IsNullOrWhiteSpace(request.Phone))
-            q = q.Where(x => x.PhoneNumber.Contains(request.Phone.Trim()));
-        if (DateOnly.TryParse(request.FromDate, out var from))
+            q = q.Where(x => x.PhoneNumber.Contains(RagQuotaHelper.ToAsciiDigits(request.Phone)));
+        if (BookingTimeHelper.TryParseDate(request.FromDate, out var from))
             q = q.Where(x => x.Slot.StartAt >= from.ToDateTime(TimeOnly.MinValue));
-        if (DateOnly.TryParse(request.ToDate, out var to))
+        if (BookingTimeHelper.TryParseDate(request.ToDate, out var to))
             q = q.Where(x => x.Slot.StartAt < to.AddDays(1).ToDateTime(TimeOnly.MinValue));
         if (!string.IsNullOrWhiteSpace(request.FilterText))
         {
-            var f = request.FilterText.Trim();
-            q = q.Where(x => x.FirstName.Contains(f) || x.LastName.Contains(f) || x.NationalCode.Contains(f) || x.PhoneNumber.Contains(f));
+            var text = request.FilterText.Trim();
+            var digits = RagQuotaHelper.ToAsciiDigits(request.FilterText);
+            q = q.Where(x =>
+                x.FirstName.Contains(text)
+                || x.LastName.Contains(text)
+                || x.NationalCode.Contains(text)
+                || x.PhoneNumber.Contains(text)
+                || (digits.Length > 0 && (x.NationalCode.Contains(digits) || x.PhoneNumber.Contains(digits))));
         }
 
         // Avoid EF translation failure on collection .ToList() inside Select.

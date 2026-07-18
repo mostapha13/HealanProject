@@ -11,12 +11,14 @@ import type {
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanModal } from '../../components/HealanModal';
+import { JalaliDateInput } from '../../components/JalaliDateInput';
 import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
 import { QuickAddPatientModal } from '../../components/QuickAddPatientModal';
+import { confirmDelete } from '../../components/confirmDialog';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { buildAppointmentPayload, toDateTimeLocalValue } from '../../utils/apiPayload';
-import { nowDateTimeLocal } from '../../utils/formatJalali';
+import { nowDateTimeLocal, todayDateInput } from '../../utils/formatJalali';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
 const STATUS_LABEL: Record<number, string> = {
@@ -24,6 +26,7 @@ const STATUS_LABEL: Record<number, string> = {
   2: 'لغو شده',
   3: 'جابجا شده',
   4: 'پذیرش شده',
+  5: 'عدم حضور',
 };
 
 type AdmitForm = {
@@ -78,6 +81,8 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   const [doctorId, setDoctorId] = useState(0);
   const [status, setStatus] = useState(1);
   const [filter, setFilter] = useState('');
+  const [nationalCode, setNationalCode] = useState('');
+  const [selectedDate, setSelectedDate] = useState(todayDateInput());
   const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
   const [admitOpen, setAdmitOpen] = useState(false);
   const [admitForm, setAdmitForm] = useState<AdmitForm>(emptyAdmitForm);
@@ -95,10 +100,14 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const day = selectedDate || todayDateInput();
       const res = await healanApi.booking.reservationList({
         doctorId: doctorId || undefined,
         status: status || undefined,
         filterText: filter || undefined,
+        nationalCode: nationalCode || undefined,
+        fromDate: day,
+        toDate: day,
         pageNumber: page,
         pageSize,
       });
@@ -109,7 +118,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
     } finally {
       setLoading(false);
     }
-  }, [doctorId, status, filter, page, pageSize, onAlert]);
+  }, [doctorId, status, filter, nationalCode, selectedDate, page, pageSize, onAlert]);
 
   useEffect(() => {
     Promise.all([
@@ -128,13 +137,13 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => void load(), filter ? 300 : 0);
+    const timer = setTimeout(() => void load(), filter || nationalCode ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [load, filter]);
+  }, [load, filter, nationalCode]);
 
   useEffect(() => {
     setPage(1);
-  }, [filter, doctorId, status, setPage]);
+  }, [filter, nationalCode, doctorId, status, selectedDate, setPage]);
 
   const openAdmit = async (item: AppointmentBookingItem) => {
     let patientId = item.patientId ?? 0;
@@ -174,6 +183,9 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       doctorName: item.doctorName || '',
     });
     setAdmitOpen(true);
+    if (patientId <= 0) {
+      setPatientModalOpen(true);
+    }
   };
 
   const toggleService = (id: number) => {
@@ -235,6 +247,27 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
     }
   };
 
+  const markNoShow = async (id: number) => {
+    try {
+      await healanApi.booking.reservationNoShow(id);
+      onAlert({ type: 'success', message: 'عدم حضور ثبت شد.' });
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
+  const removeBooking = async (id: number) => {
+    if (!(await confirmDelete('این رزرو حذف شود؟'))) return;
+    try {
+      await healanApi.booking.reservationDelete(id);
+      onAlert({ type: 'success', message: 'رزرو حذف شد.' });
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
   const handlePatientAdded = async (patientId: number) => {
     const list = await healanApi.patients.listAll();
     setPatients(list);
@@ -256,12 +289,20 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
     <>
       <PageHeader
         title="رزروهای نوبت"
-        subtitle="رزروهای آنلاین پورتال — با «ثبت نوبت» فرم پذیرش را باز کنید و نوبت را نهایی کنید"
+        subtitle="به‌صورت پیش‌فرض نوبت‌های امروز — با «پذیرش جدید» فرم پذیرش را با اطلاعات بیمار باز کنید"
       />
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
         <div className="healan-card__body">
           <div className="healan-form-grid">
+            <div className="healan-form-field">
+              <label>تاریخ نوبت</label>
+              <JalaliDateInput
+                value={selectedDate}
+                onChange={(v) => setSelectedDate(v || todayDateInput())}
+                placeholder="انتخاب تاریخ"
+              />
+            </div>
             <div className="healan-form-field">
               <label>پزشک</label>
               <SearchableSelect
@@ -279,7 +320,18 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                 <option value={2}>لغو شده</option>
                 <option value={3}>جابجا شده</option>
                 <option value={4}>پذیرش شده</option>
+                <option value={5}>عدم حضور</option>
               </select>
+            </div>
+            <div className="healan-form-field">
+              <label>کد ملی</label>
+              <input
+                className="healan-input"
+                value={nationalCode}
+                onChange={(e) => setNationalCode(e.target.value.replace(/[^\d۰-۹٠-٩]/g, '').slice(0, 10))}
+                placeholder="جستجو با کد ملی"
+                inputMode="numeric"
+              />
             </div>
             <div className="healan-form-field">
               <label>جستجو</label>
@@ -287,8 +339,17 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                 className="healan-input"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                placeholder="نام، کد ملی، موبایل"
+                placeholder="نام، موبایل"
               />
+            </div>
+            <div className="healan-form-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <button
+                type="button"
+                className="healan-btn healan-btn--outline"
+                onClick={() => setSelectedDate(todayDateInput())}
+              >
+                امروز
+              </button>
             </div>
           </div>
         </div>
@@ -334,7 +395,14 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                               className="healan-btn healan-btn--primary healan-btn--sm"
                               onClick={() => void openAdmit(item)}
                             >
-                              ثبت نوبت
+                              پذیرش جدید
+                            </button>
+                            <button
+                              type="button"
+                              className="healan-btn healan-btn--outline healan-btn--sm"
+                              onClick={() => void markNoShow(item.appointmentBookingId)}
+                            >
+                              عدم حضور
                             </button>
                             <button
                               type="button"
@@ -344,6 +412,16 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                               لغو
                             </button>
                           </>
+                        )}
+                        {item.status !== 4 && (
+                          <button
+                            type="button"
+                            className="healan-btn healan-btn--ghost healan-btn--sm"
+                            style={{ color: '#b91c1c' }}
+                            onClick={() => void removeBooking(item.appointmentBookingId)}
+                          >
+                            حذف
+                          </button>
                         )}
                       </div>
                     </td>
@@ -363,8 +441,8 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
 
       <HealanModal
         open={admitOpen}
-        title="فرم پذیرش بیمار"
-        subtitle="اطلاعات رزرو آنلاین پیش‌پر شده است — بقیه فیلدها را تکمیل و ثبت کنید"
+        title="پذیرش جدید"
+        subtitle="اطلاعات بیمار از رزرو پیش‌پر شده — بیمه و خدمات را تکمیل و ثبت کنید"
         width={760}
         onClose={() => setAdmitOpen(false)}
         footer={
@@ -378,7 +456,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
               disabled={submitting}
               onClick={submitAdmit}
             >
-              {submitting ? 'در حال ثبت…' : 'ثبت نوبت'}
+              {submitting ? 'در حال ثبت…' : 'ثبت پذیرش'}
             </button>
           </>
         }
