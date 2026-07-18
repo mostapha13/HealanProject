@@ -281,7 +281,7 @@ export default function BookingPage() {
       if (!getPortalRagToken()) throw new Error('جلسه منقضی شده است. دوباره وارد شوید.');
       if (!form.appointmentSlotId) throw new Error('یک نوبت آزاد انتخاب کنید.');
       const note = form.note.trim();
-      if (note.length > NOTE_MAX) throw new Error(`یادداشت حداکثر ${NOTE_MAX} کاراکتر است.`);
+      if (note.length > NOTE_MAX) throw new Error(`دلیل مراجعه حداکثر ${NOTE_MAX} کاراکتر است.`);
 
       if (rescheduleBookingId > 0) {
         await bookingReschedule({
@@ -327,7 +327,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v12-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v13-booking</span>
           <h1 className="portal-booking__title">انتخاب نوبت قلب</h1>
           <p className="portal-booking__lead">
             روز و ساعت مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
@@ -417,7 +417,7 @@ export default function BookingPage() {
                 {!rescheduleBookingId && (
                   <div style={{ marginBottom: 12 }}>
                     <label className="portal-booking__label" htmlFor="booking-note">
-                      یادداشت (اختیاری)
+                      دلیل مراجعه (اختیاری)
                     </label>
                     <textarea
                       id="booking-note"
@@ -426,7 +426,7 @@ export default function BookingPage() {
                       maxLength={NOTE_MAX}
                       value={form.note}
                       onChange={(e) => setForm({ ...form, note: e.target.value.slice(0, NOTE_MAX) })}
-                      placeholder="در صورت تمایل توضیح کوتاه بنویسید…"
+                      placeholder="در صورت تمایل دلیل مراجعه را بنویسید…"
                       style={{ resize: 'vertical', minHeight: 72 }}
                     />
                     <p className="portal-booking__hint" style={{ marginTop: 4 }}>

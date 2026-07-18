@@ -5,15 +5,11 @@ import type {
   AppointmentBookingItem,
   DoctorSummary,
   InsuranceCompany,
-  PatientSummary,
-  ServiceType,
-} from '../../api/types';
-import { PageHeader } from '../../components/Ui';
+} from '../../api/types';import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanModal } from '../../components/HealanModal';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
 import { JalaliDateTimeInput } from '../../components/JalaliDateTimeInput';
-import { QuickAddPatientModal } from '../../components/QuickAddPatientModal';
 import { confirmDelete } from '../../components/confirmDialog';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
@@ -21,6 +17,7 @@ import { buildAppointmentPayload, toDateTimeLocalValue } from '../../utils/apiPa
 import { nowDateTimeLocal, todayDateInput } from '../../utils/formatJalali';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 
+const NOTE_MAX = 100;
 const STATUS_LABEL: Record<number, string> = {
   1: 'رزرو شده',
   2: 'لغو شده',
@@ -95,8 +92,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
-  const [patients, setPatients] = useState<PatientSummary[]>([]);
-  const [services, setServices] = useState<ServiceType[]>([]);
   const [insurances, setInsurances] = useState<InsuranceCompany[]>([]);
   const [doctorId, setDoctorId] = useState(0);
   const [status, setStatus] = useState(1);
@@ -106,7 +101,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
   const [admitOpen, setAdmitOpen] = useState(false);
   const [admitForm, setAdmitForm] = useState<AdmitForm>(emptyAdmitForm);
-  const [patientModalOpen, setPatientModalOpen] = useState(false);
 
   const doctorOptions = useMemo(
     () =>
@@ -141,16 +135,9 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
   }, [doctorId, status, filter, nationalCode, selectedDate, page, pageSize, onAlert]);
 
   useEffect(() => {
-    Promise.all([
-      healanApi.doctors.listAll(),
-      healanApi.services.listActive(),
-      healanApi.patients.listAll(),
-      healanApi.insurance.listAll(),
-    ])
-      .then(([d, s, p, i]) => {
+    Promise.all([healanApi.doctors.listAll(), healanApi.insurance.listAll()])
+      .then(([d, i]) => {
         setDoctors(d);
-        setServices(s);
-        setPatients(p);
         setInsurances(i);
       })
       .catch(() => {});
@@ -171,9 +158,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       try {
         const found = await healanApi.patients.byNationalCode(item.nationalCode);
         patientId = found?.patientId ?? 0;
-        if (patientId > 0) {
-          setPatients((prev) => (prev.some((p) => p.patientId === patientId) ? prev : [...prev, found]));
-        }
       } catch {
         // handled below
       }
@@ -197,12 +181,12 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       patientId,
       doctorId: item.doctorId,
       durationMinutes: duration || 30,
-      note: item.note || `رزرو آنلاین #${item.appointmentBookingId}`,
+      note: (item.note || '').slice(0, NOTE_MAX),
       primaryInsuranceCompanyId: null,
       confirmPrimaryInsuranceCompany: false,
       secondInsuranceCompanyId: null,
       confirmSecondInsuranceCompany: false,
-      serviceTypeIds: item.requestedServiceTypeIds ?? [],
+      serviceTypeIds: [],
       appointmentDate: toDateTimeLocalValue(item.startAt) || nowDateTimeLocal(),
       nationalCode: item.nationalCode,
       phoneNumber: item.phoneNumber,
@@ -213,29 +197,17 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
     setAdmitOpen(true);
   };
 
-  const toggleService = (id: number) => {
-    setAdmitForm((prev) => ({
-      ...prev,
-      serviceTypeIds: prev.serviceTypeIds.includes(id)
-        ? prev.serviceTypeIds.filter((x) => x !== id)
-        : [...prev.serviceTypeIds, id],
-    }));
-  };
-
   const submitAdmit = () => {
     void guard(async () => {
       if (admitForm.patientId <= 0 || admitForm.doctorId <= 0) {
-        onAlert({ type: 'error', message: 'بیمار و پزشک را انتخاب کنید.' });
-        return;
-      }
-      if (admitForm.serviceTypeIds.length === 0) {
-        onAlert({ type: 'error', message: 'حداقل یک خدمت انتخاب کنید.' });
+        onAlert({ type: 'error', message: 'بیمار یا پزشک معتبر نیست.' });
         return;
       }
       if (!admitForm.appointmentDate?.trim()) {
         onAlert({ type: 'error', message: 'تاریخ و ساعت نوبت را انتخاب کنید.' });
         return;
       }
+      const note = admitForm.note.trim().slice(0, NOTE_MAX);
 
       const registered = await healanApi.appointments.register(
         buildAppointmentPayload({
@@ -243,12 +215,12 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
           patientId: admitForm.patientId,
           doctorId: admitForm.doctorId,
           durationMinutes: admitForm.durationMinutes,
-          note: admitForm.note,
+          note,
           primaryInsuranceCompanyId: admitForm.primaryInsuranceCompanyId,
           confirmPrimaryInsuranceCompany: !!admitForm.primaryInsuranceCompanyId,
           secondInsuranceCompanyId: admitForm.secondInsuranceCompanyId,
           confirmSecondInsuranceCompany: !!admitForm.secondInsuranceCompanyId,
-          serviceTypeIds: admitForm.serviceTypeIds,
+          serviceTypeIds: [],
           appointmentDate: admitForm.appointmentDate,
         })
       );
@@ -292,23 +264,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       onAlert(err);
     }
   };
-
-  const handlePatientAdded = async (patientId: number) => {
-    const list = await healanApi.patients.listAll();
-    setPatients(list);
-    setAdmitForm((prev) => ({ ...prev, patientId }));
-    setPatientModalOpen(false);
-  };
-
-  const patientInitialValues = useMemo(
-    () => ({
-      firstName: admitForm.firstName,
-      lastName: admitForm.lastName,
-      nationalCode: admitForm.nationalCode,
-      phoneNumber: admitForm.phoneNumber,
-    }),
-    [admitForm.firstName, admitForm.lastName, admitForm.nationalCode, admitForm.phoneNumber]
-  );
 
   return (
     <>
@@ -384,7 +339,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                   <th>زمان</th>
                   <th>بیمار</th>
                   <th>پزشک</th>
-                  <th>یادداشت / خدمات</th>
+                  <th>دلیل مراجعه</th>
                   <th>وضعیت</th>
                   <th>عملیات</th>
                 </tr>
@@ -402,7 +357,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                       </div>
                     </td>
                     <td>{item.doctorName}</td>
-                    <td>{item.note?.trim() || (item.requestedServiceTitles ?? []).join('، ') || '—'}</td>
+                    <td>{item.note?.trim() || '—'}</td>
                     <td>{STATUS_LABEL[st] ?? String(item.status)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -461,8 +416,8 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
       <HealanModal
         open={admitOpen}
         title="پذیرش بیمار"
-        subtitle="اطلاعات رزرو پیش‌پر شده است — بیمه و خدمات را تکمیل و ثبت کنید"
-        width={760}
+        subtitle="اطلاعات رزرو پیش‌پر شده است — در صورت نیاز بیمه و دلیل مراجعه را تکمیل کنید"
+        width={980}
         onClose={() => setAdmitOpen(false)}
         footer={
           <>
@@ -480,9 +435,9 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
           </>
         }
       >
-        <div className="healan-form-grid" style={{ marginBottom: '1rem' }}>
+        <div className="healan-form-grid" style={{ gap: '1.25rem 1.5rem', marginBottom: 0 }}>
           <div className="healan-form-field">
-            <label>نام بیمار (از رزرو)</label>
+            <label>نام بیمار</label>
             <input
               className="healan-input"
               readOnly
@@ -505,25 +460,6 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
               placeholder="انتخاب پزشک"
               options={doctorOptions}
             />
-          </div>
-          <div className="healan-form-field">
-            <label>بیمار در سیستم</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <SearchableSelect
-                  value={admitForm.patientId}
-                  onChange={(v) => setAdmitForm({ ...admitForm, patientId: v ?? 0 })}
-                  placeholder="انتخاب بیمار"
-                  options={patients.map((p) => ({
-                    value: p.patientId,
-                    label: `${p.firstName} ${p.lastName} — ${p.nationalCode}`,
-                  }))}
-                />
-              </div>
-              <button type="button" className="healan-btn healan-btn--outline" onClick={() => setPatientModalOpen(true)}>
-                + بیمار
-              </button>
-            </div>
           </div>
           <div className="healan-form-field">
             <label>تاریخ و ساعت</label>
@@ -553,42 +489,23 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
               }))}
             />
           </div>
-          <div className="healan-form-field">
-            <label>یادداشت</label>
-            <input
+          <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>
+            <label>دلیل مراجعه (اختیاری)</label>
+            <textarea
               className="healan-input"
+              rows={3}
+              maxLength={NOTE_MAX}
               value={admitForm.note}
-              onChange={(e) => setAdmitForm({ ...admitForm, note: e.target.value })}
+              onChange={(e) => setAdmitForm({ ...admitForm, note: e.target.value.slice(0, NOTE_MAX) })}
+              placeholder="در صورت تمایل دلیل مراجعه را بنویسید"
+              style={{ resize: 'vertical', minHeight: 88 }}
             />
-          </div>
-        </div>
-        <div>
-          <label style={{ fontWeight: 600, fontSize: '0.85rem' }}>خدمات</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-            {services.map((s) => (
-              <label
-                key={s.serviceTypeId}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={admitForm.serviceTypeIds.includes(s.serviceTypeId)}
-                  onChange={() => toggleService(s.serviceTypeId)}
-                />
-                {s.title}
-              </label>
-            ))}
+            <span style={{ fontSize: '0.75rem', color: 'var(--healan-muted)', marginTop: 6 }}>
+              {admitForm.note.length}/{NOTE_MAX}
+            </span>
           </div>
         </div>
       </HealanModal>
-
-      <QuickAddPatientModal
-        open={patientModalOpen}
-        onClose={() => setPatientModalOpen(false)}
-        onSuccess={(id) => void handlePatientAdded(id)}
-        onAlert={onAlert}
-        initialValues={patientInitialValues}
-      />
     </>
   );
 }
