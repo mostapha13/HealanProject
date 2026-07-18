@@ -10,7 +10,8 @@ public class AppointmentRegisterCommandValidator : AbstractValidator<Appointment
     {
         RuleFor(x => x.PatientId).GreaterThan(0).WithMessage("بیمار را انتخاب کنید");
         RuleFor(x => x.DoctorId).GreaterThan(0).WithMessage("پزشک را انتخاب کنید");
-        RuleFor(x => x.serviceTypeIds).NotNull().WithMessage("لیست خدمات نامعتبر است");
+        RuleFor(x => x.serviceTypeIds).NotNull().WithMessage("حداقل یک خدمت انتخاب کنید");
+        RuleFor(x => x.serviceTypeIds).Must(s => s != null && s.Any()).WithMessage("حداقل یک خدمت انتخاب کنید");
 
         RuleFor(x => x)
             .MustAsync(async (cmd, ct) =>

@@ -42,16 +42,17 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
 
         var note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim();
         if (note != null && note.Length > 100)
-            throw new BadRequestExceptions("یادداشت نباید بیشتر از ۱۰۰ کاراکتر باشد.");
+            throw new BadRequestExceptions("دلیل مراجعه نباید بیشتر از ۱۰۰ کاراکتر باشد.");
 
         var now = DateTime.Now;
         var slot = await _db.AppointmentSlots
             .Include(x => x.Booking)
+            .ThenInclude(b => b!.RequestedServices)
             .Include(x => x.Doctor)
             .FirstOrDefaultAsync(x => x.AppointmentSlotId == request.AppointmentSlotId, cancellationToken)
             ?? throw new NotFoundExceptions("اسلات یافت نشد.");
 
-        if (slot.Status != AppointmentSlotStatus.Open || slot.Booking != null)
+        if (slot.Status != AppointmentSlotStatus.Open || IsActiveBooking(slot.Booking))
             throw new BadRequestExceptions("این نوبت قابل رزرو نیست.");
         if (slot.StartAt <= now)
             throw new BadRequestExceptions("نوبت‌های گذشته قابل رزرو نیستند.");
@@ -75,28 +76,56 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
                 .ToListAsync(cancellationToken);
         }
 
-        var booking = new AppointmentBooking
+        // Unique FK on AppointmentSlotId: reuse cancelled/no-show row instead of inserting a second booking.
+        AppointmentBooking booking;
+        if (slot.Booking != null)
         {
-            AppointmentSlotId = slot.AppointmentSlotId,
-            DoctorId = slot.DoctorId,
-            PatientId = patientId,
-            NationalCode = national,
-            PhoneNumber = phone,
-            FirstName = request.FirstName.Trim(),
-            LastName = request.LastName.Trim(),
-            Note = note,
-            Status = AppointmentBookingStatus.Booked,
-            BookedByStaff = request.BookedByStaff,
-            CreatedAt = DateTime.UtcNow,
-            RequestedServices = services,
-        };
+            booking = slot.Booking;
+            booking.DoctorId = slot.DoctorId;
+            booking.PatientId = patientId;
+            booking.NationalCode = national;
+            booking.PhoneNumber = phone;
+            booking.FirstName = request.FirstName.Trim();
+            booking.LastName = request.LastName.Trim();
+            booking.Note = note;
+            booking.Status = AppointmentBookingStatus.Booked;
+            booking.BookedByStaff = request.BookedByStaff;
+            booking.AppointmentId = null;
+            booking.CancelledAt = null;
+            booking.UpdatedAt = DateTime.UtcNow;
+            booking.RequestedServices ??= new List<Domain.PublicInfos.Entities.ServiceType>();
+            booking.RequestedServices.Clear();
+            foreach (var s in services)
+                booking.RequestedServices.Add(s);
+        }
+        else
+        {
+            booking = new AppointmentBooking
+            {
+                AppointmentSlotId = slot.AppointmentSlotId,
+                DoctorId = slot.DoctorId,
+                PatientId = patientId,
+                NationalCode = national,
+                PhoneNumber = phone,
+                FirstName = request.FirstName.Trim(),
+                LastName = request.LastName.Trim(),
+                Note = note,
+                Status = AppointmentBookingStatus.Booked,
+                BookedByStaff = request.BookedByStaff,
+                CreatedAt = DateTime.UtcNow,
+                RequestedServices = services,
+            };
+            _db.AppointmentBookings.Add(booking);
+        }
 
         slot.Status = AppointmentSlotStatus.Booked;
-        _db.AppointmentBookings.Add(booking);
         await _db.SaveChangesAsync(cancellationToken);
 
         return Map(booking, slot);
     }
+
+    internal static bool IsActiveBooking(AppointmentBooking? booking) =>
+        booking != null && booking.Status is AppointmentBookingStatus.Booked or AppointmentBookingStatus.Accepted;
 
     internal static AppointmentBookingDto Map(AppointmentBooking booking, AppointmentSlot slot) => new()
     {
@@ -264,16 +293,24 @@ public class BookingRescheduleCommandHandler : IRequestHandler<BookingReschedule
         var now = DateTime.Now;
         var newSlot = await _db.AppointmentSlots
             .Include(x => x.Booking)
+            .ThenInclude(b => b!.RequestedServices)
             .Include(x => x.Doctor)
             .FirstOrDefaultAsync(x => x.AppointmentSlotId == request.NewAppointmentSlotId, cancellationToken)
             ?? throw new NotFoundExceptions("اسلات جدید یافت نشد.");
 
         if (newSlot.DoctorId != booking.DoctorId)
             throw new BadRequestExceptions("اسلات باید متعلق به همان پزشک باشد.");
-        if (newSlot.Status != AppointmentSlotStatus.Open || newSlot.Booking != null)
+        if (newSlot.Status != AppointmentSlotStatus.Open || BookingCreateCommandHandler.IsActiveBooking(newSlot.Booking))
             throw new BadRequestExceptions("اسلات جدید آزاد نیست.");
         if (newSlot.StartAt <= now)
             throw new BadRequestExceptions("نوبت‌های گذشته قابل انتخاب نیستند.");
+
+        // Free unique AppointmentSlotId if a cancelled/no-show row still points at the target slot.
+        if (newSlot.Booking != null)
+        {
+            newSlot.Booking.RequestedServices?.Clear();
+            _db.AppointmentBookings.Remove(newSlot.Booking);
+        }
 
         booking.Slot.Status = AppointmentSlotStatus.Open;
         booking.AppointmentSlotId = newSlot.AppointmentSlotId;
