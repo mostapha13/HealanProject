@@ -1,5 +1,6 @@
 services:
   api-gateway:
+    restart: unless-stopped
     image: nginx:1.27-alpine
     container_name: healan-api-gateway
     depends_on:
@@ -12,6 +13,7 @@ services:
       - ./docker/config/nginx/api-gateway.conf:/etc/nginx/conf.d/default.conf:ro
 
   nginx-gateway:
+    restart: unless-stopped
     image: nginx:1.27-alpine
     container_name: healan-nginx-gateway
     depends_on:
@@ -34,6 +36,7 @@ services:
       # - ./docker/config/nginx/nginx-gateway-ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
 
   sqlserver:
+    restart: unless-stopped
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: healan-sqlserver
     environment:
@@ -50,12 +53,14 @@ services:
       retries: 10
 
   redis:
+    restart: unless-stopped
     image: redis:7-alpine
     container_name: healan-redis
     ports:
       - "6379:6379"
 
   rabbitmq:
+    restart: unless-stopped
     image: rabbitmq:3-management
     container_name: healan-rabbitmq
     ports:
@@ -63,6 +68,7 @@ services:
       - "15672:15672"
 
   identity-grpc:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -81,6 +87,7 @@ services:
       - ./docker/config/identity-grpc/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   identity-server:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -103,6 +110,7 @@ services:
       - ./docker/config/identity-server/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   identity-usermanager:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -123,6 +131,7 @@ services:
       - ./docker/config/identity-usermanager/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   filemanager-grpc:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -141,6 +150,7 @@ services:
       - ./docker/config/filemanager-grpc/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   filemanager-webui:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -162,6 +172,7 @@ services:
       - filemanager_attachments:/app/Attachment
 
   workflow-webui:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -184,6 +195,7 @@ services:
       - ./docker/config/workflow-webui/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   captcha-webui:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -202,6 +214,7 @@ services:
       - ./docker/config/captcha-webui/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   notification-webapp:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -222,6 +235,7 @@ services:
       - ./docker/config/notification-webapp/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   smsprovider-webapp:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -278,6 +292,7 @@ services:
     restart: unless-stopped
 
   healan-webapi:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/dotnet-service.Dockerfile
@@ -304,6 +319,7 @@ services:
       - ./docker/config/healan-webapi/appsettings.Production.json:/app/appsettings.Production.json:ro
 
   healan-clinic:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/frontend-nx.Dockerfile
@@ -318,6 +334,7 @@ services:
       - filemanager-webui
 
   healan-portal:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/frontend-nx.Dockerfile
@@ -331,6 +348,7 @@ services:
       - filemanager-webui
 
   login:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/frontend-nx.Dockerfile
