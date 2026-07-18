@@ -2,15 +2,8 @@
 
 from __future__ import annotations
 
-import re
-from html import unescape
-
 from app.data.base import DataSource, Document
-
-
-def _strip_html(value: str) -> str:
-    text = unescape(re.sub(r"<[^>]+>", " ", value or ""))
-    return re.sub(r"\s+", " ", text).strip()
+from app.services.summarizer import strip_html
 
 
 def _meta(**kwargs: str) -> dict[str, str]:
@@ -148,6 +141,7 @@ class HealanSqlDataSource(DataSource):
         return docs
 
     def _load_blogs(self, conn, pd, text) -> list[Document]:
+        """متن کامل برای خلاصه‌ساز؛ بعد از ingest، content/answer با خلاصه جایگزین می‌شود."""
         query = text(
             """
             SELECT BlogPostId, Title, Excerpt, Body
@@ -161,11 +155,12 @@ class HealanSqlDataSource(DataSource):
             pk = str(row["BlogPostId"])
             title = str(row.get("Title") or "").strip()
             excerpt = str(row.get("Excerpt") or "").strip()
-            body = _strip_html(str(row.get("Body") or ""))
-            if not title:
+            body = strip_html(str(row.get("Body") or ""))
+            if not title and not body and not excerpt:
                 continue
-            content = " | ".join([p for p in [title, excerpt, body[:500]] if p])
-            answer = excerpt or body[:600] or title
+            raw_text = "\n\n".join(p for p in [excerpt, body] if p) or title
+            content = " | ".join(p for p in [title, excerpt, body] if p)
+            answer = excerpt or body or title
             docs.append(
                 Document(
                     id=f"blog-{pk}",
@@ -175,6 +170,8 @@ class HealanSqlDataSource(DataSource):
                         source="blog",
                         id=pk,
                         topic="بلاگ",
+                        title=title,
+                        raw_text=raw_text,
                     ),
                 )
             )
@@ -193,7 +190,7 @@ class HealanSqlDataSource(DataSource):
         for _, row in df.iterrows():
             pk = str(row["PatientReviewId"])
             name = str(row.get("DisplayName") or "بیمار").strip()
-            review = str(row.get("ReviewText") or "").strip()
+            review = strip_html(str(row.get("ReviewText") or ""))
             rating = str(row.get("Rating") or "").strip()
             if not review:
                 continue
@@ -208,6 +205,10 @@ class HealanSqlDataSource(DataSource):
                         source="review",
                         id=pk,
                         topic="نظرات بیماران",
+                        title=name,
+                        display_name=name,
+                        rating=rating,
+                        raw_text=review,
                     ),
                 )
             )
@@ -231,6 +232,8 @@ class HealanSqlDataSource(DataSource):
             "sync_interval_minutes": int(row.get("SyncIntervalMinutes") or 10),
             "similarity_threshold_percent": int(row.get("SimilarityThresholdPercent") or 55),
             "is_enabled": bool(row.get("IsEnabled", True)),
+            "embedding_model": str(row.get("EmbeddingModel") or "").strip(),
+            "summarize_model": str(row.get("SummarizeModel") or "").strip(),
         }
 
     @staticmethod

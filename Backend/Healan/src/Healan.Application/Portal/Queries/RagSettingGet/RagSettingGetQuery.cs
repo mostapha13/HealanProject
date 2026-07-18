@@ -36,6 +36,12 @@ public class RagSettingGetQueryHandler : IRequestHandler<RagSettingGetQuery, Rag
         IsEnabled = setting.IsEnabled,
         GuestDailyLimit = setting.GuestDailyLimit,
         AuthenticatedDailyLimit = setting.AuthenticatedDailyLimit,
+        EmbeddingModel = string.IsNullOrWhiteSpace(setting.EmbeddingModel)
+            ? "heydariAI/persian-embeddings"
+            : setting.EmbeddingModel,
+        SummarizeModel = string.IsNullOrWhiteSpace(setting.SummarizeModel)
+            ? "qwen2.5:3b"
+            : setting.SummarizeModel,
         LastSyncedAt = setting.LastSyncedAt,
     };
 }

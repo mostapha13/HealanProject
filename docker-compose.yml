@@ -266,6 +266,13 @@ services:
       RAG_SIMILARITY_THRESHOLD: "0.55"
       RAG_SYNC_ENABLED: "true"
       RAG_SYNC_INTERVAL_MINUTES: "10"
+      RAG_SUMMARIZE_ENABLED: "true"
+      RAG_SUMMARIZE_MODEL: "qwen2.5:3b"
+      OPENAI_API_KEY: "ollama"
+      OPENAI_BASE_URL: "http://host.docker.internal:11434/v1"
+      OPENAI_MODEL: "qwen2.5:3b"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - python_rag_chroma:/data/chroma
     restart: unless-stopped

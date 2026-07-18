@@ -2361,6 +2361,13 @@ namespace Healan.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(10);
 
+                    b.Property<string>("EmbeddingModel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasDefaultValue("heydariAI/persian-embeddings");
+
                     b.Property<bool>("IsEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2378,6 +2385,13 @@ namespace Healan.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(55);
+
+                    b.Property<string>("SummarizeModel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasDefaultValue("qwen2.5:3b");
 
                     b.Property<int>("SyncIntervalMinutes")
                         .ValueGeneratedOnAdd()

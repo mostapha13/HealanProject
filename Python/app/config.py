@@ -15,8 +15,8 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     openai_base_url: str = "https://api.openai.com/v1"
-    # gpt-4o برای فارسی قوی‌تر است؛ برای لوکال Ollama: qwen2.5:7b یا gemma2
-    openai_model: str = "gpt-4o-mini"
+    # gpt-4o برای فارسی قوی‌تر است؛ پیش‌فرض خلاصه لوکال: qwen2.5:3b (Ollama)
+    openai_model: str = "qwen2.5:3b"
 
     host: str = "0.0.0.0"
     port: int = 8000
@@ -44,6 +44,14 @@ class Settings(BaseSettings):
     rag_sync_enabled: bool = True
     rag_sync_interval_minutes: int = 10
 
+    # خلاصه‌سازی بلاگ و نظرات قبل از embed (نیاز به OPENAI_API_KEY)
+    rag_summarize_enabled: bool = True
+    rag_summarize_model: str = "qwen2.5:3b"
+    rag_summarize_max_tokens: int = 400
+    rag_summarize_max_input_chars: int = 8000
+    rag_summarize_skip_if_shorter_than: int = 280
+    rag_summarize_fallback_chars: int = 600
+
     _PLACEHOLDER_KEYS = frozenset(
         {"", "your-api-key-here", "sk-placeholder-set-your-key"}
     )
@@ -51,10 +59,14 @@ class Settings(BaseSettings):
     @property
     def llm_configured(self) -> bool:
         key = self.openai_api_key.strip()
+        base = self.openai_base_url.lower()
+        # Ollama / لوکال OpenAI-compatible
+        if "11434" in base or "ollama" in base:
+            return True
+        if key.lower() in {"ollama", "local"}:
+            return True
         if not key:
             return False
-        if key == "ollama" and "11434" in self.openai_base_url:
-            return True
         if key in self._PLACEHOLDER_KEYS or "placeholder" in key.lower():
             return False
         return key.startswith("sk-") or len(key) > 20

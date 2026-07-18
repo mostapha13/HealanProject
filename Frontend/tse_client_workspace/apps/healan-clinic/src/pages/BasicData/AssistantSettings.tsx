@@ -5,6 +5,39 @@ import type { RagSetting } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 
+const DEFAULT_EMBEDDING = 'heydariAI/persian-embeddings';
+const DEFAULT_SUMMARIZE = 'qwen2.5:3b';
+
+function emptySettings(): RagSetting {
+  return {
+    ragSettingId: 0,
+    syncIntervalMinutes: 30,
+    similarityThresholdPercent: 55,
+    pythonApiUrl: '',
+    isEnabled: true,
+    guestDailyLimit: 10,
+    authenticatedDailyLimit: 200,
+    embeddingModel: DEFAULT_EMBEDDING,
+    summarizeModel: DEFAULT_SUMMARIZE,
+  };
+}
+
+function mapSettings(res: Partial<RagSetting> | null | undefined, fallback?: RagSetting): RagSetting {
+  const base = fallback ?? emptySettings();
+  return {
+    ragSettingId: res?.ragSettingId ?? base.ragSettingId,
+    syncIntervalMinutes: res?.syncIntervalMinutes ?? base.syncIntervalMinutes,
+    similarityThresholdPercent: res?.similarityThresholdPercent ?? base.similarityThresholdPercent,
+    pythonApiUrl: res?.pythonApiUrl ?? base.pythonApiUrl,
+    isEnabled: res?.isEnabled ?? base.isEnabled,
+    guestDailyLimit: res?.guestDailyLimit ?? base.guestDailyLimit,
+    authenticatedDailyLimit: res?.authenticatedDailyLimit ?? base.authenticatedDailyLimit,
+    embeddingModel: (res?.embeddingModel || base.embeddingModel || DEFAULT_EMBEDDING).trim(),
+    summarizeModel: (res?.summarizeModel || base.summarizeModel || DEFAULT_SUMMARIZE).trim(),
+    lastSyncedAt: res?.lastSyncedAt ?? base.lastSyncedAt,
+  };
+}
+
 function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [settings, setSettings] = useState<RagSetting | null>(null);
   const [loading, setLoading] = useState(true);
@@ -14,27 +47,10 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
     setLoading(true);
     try {
       const res = await healanApi.portal.ragSettingGet();
-      setSettings({
-        ragSettingId: res.ragSettingId ?? 0,
-        syncIntervalMinutes: res.syncIntervalMinutes ?? 30,
-        similarityThresholdPercent: res.similarityThresholdPercent ?? 55,
-        pythonApiUrl: res.pythonApiUrl ?? '',
-        isEnabled: res.isEnabled ?? true,
-        guestDailyLimit: res.guestDailyLimit ?? 10,
-        authenticatedDailyLimit: res.authenticatedDailyLimit ?? 200,
-        lastSyncedAt: res.lastSyncedAt,
-      });
+      setSettings(mapSettings(res));
     } catch (err) {
       onAlert(err);
-      setSettings({
-        ragSettingId: 0,
-        syncIntervalMinutes: 30,
-        similarityThresholdPercent: 55,
-        pythonApiUrl: '',
-        isEnabled: true,
-        guestDailyLimit: 10,
-        authenticatedDailyLimit: 200,
-      });
+      setSettings(emptySettings());
     } finally {
       setLoading(false);
     }
@@ -49,16 +65,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
     setSaving(true);
     try {
       const saved = await healanApi.portal.ragSettingSave(settings);
-      setSettings({
-        ragSettingId: saved.ragSettingId ?? settings.ragSettingId,
-        syncIntervalMinutes: saved.syncIntervalMinutes ?? settings.syncIntervalMinutes,
-        similarityThresholdPercent: saved.similarityThresholdPercent ?? settings.similarityThresholdPercent,
-        pythonApiUrl: saved.pythonApiUrl ?? settings.pythonApiUrl,
-        isEnabled: saved.isEnabled ?? settings.isEnabled,
-        guestDailyLimit: saved.guestDailyLimit ?? settings.guestDailyLimit,
-        authenticatedDailyLimit: saved.authenticatedDailyLimit ?? settings.authenticatedDailyLimit,
-        lastSyncedAt: saved.lastSyncedAt ?? settings.lastSyncedAt,
-      });
+      setSettings(mapSettings(saved, settings));
       onAlert({ type: 'success', message: 'تنظیمات دستیار ذخیره شد.' });
     } catch (err) {
       onAlert(err);
@@ -75,8 +82,43 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
     <>
       <PageHeader
         title="تنظیمات دستیار هوشمند"
-        subtitle="سقف سوالات روزانه مهمان و کاربر لاگین‌شده برای ربات پاسخ‌گوی سایت"
+        subtitle="سقف سوالات، مدل embedding و مدل خلاصه‌ساز بلاگ/نظرات"
       />
+
+      <div className="healan-card" style={{ marginBottom: '1rem' }}>
+        <div className="healan-card__header">
+          <h3>مدل‌های هوش مصنوعی</h3>
+        </div>
+        <div className="healan-card__body">
+          <div className="healan-form-grid">
+            <div className="healan-form-field healan-form-field--full">
+              <label>مدل Embedding</label>
+              <input
+                className="healan-input"
+                value={settings.embeddingModel ?? ''}
+                onChange={(e) => setSettings({ ...settings, embeddingModel: e.target.value })}
+                placeholder={DEFAULT_EMBEDDING}
+              />
+              <small style={{ color: '#81858b' }}>
+                برای جستجوی معنایی. نمونه: heydariAI/persian-embeddings یا simple
+              </small>
+            </div>
+
+            <div className="healan-form-field healan-form-field--full">
+              <label>مدل خلاصه‌ساز (بلاگ و نظرات)</label>
+              <input
+                className="healan-input"
+                value={settings.summarizeModel ?? ''}
+                onChange={(e) => setSettings({ ...settings, summarizeModel: e.target.value })}
+                placeholder={DEFAULT_SUMMARIZE}
+              />
+              <small style={{ color: '#81858b' }}>
+                پیش‌فرض رایگان لوکال: qwen2.5:3b (نیاز به Ollama روی سرور). بعد از تغییر، همگام‌سازی بعدی خلاصه را دوباره می‌سازد.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="healan-card">
         <div className="healan-card__header">

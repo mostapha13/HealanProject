@@ -43,10 +43,10 @@ Swagger: http://localhost:8000/docs
 
 ```
 SQL Server (FAQ + محتوای سایت + بلاگ + نظرات) 
+  → خلاصه LLM فقط برای بلاگ و نظرات (OPENAI_MODEL)
   → Embedding فارسی → ChromaDB
   → Background sync هر N دقیقه (از RagSettings)
-سوال کاربر → Healan API → Python /rag/ask → پاسخ مستقیم
-```
+سوال کاربر → Healan API → Python /rag/ask → پاسخ مستقیم (برای بلاگ/نظر = همان خلاصه)```
 
 ## API
 

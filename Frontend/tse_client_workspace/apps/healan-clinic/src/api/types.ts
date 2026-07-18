@@ -460,6 +460,8 @@ export interface RagSetting {
   isEnabled: boolean;
   guestDailyLimit: number;
   authenticatedDailyLimit: number;
+  embeddingModel: string;
+  summarizeModel: string;
   lastSyncedAt?: string;
 }
 

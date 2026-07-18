@@ -1,31 +1,64 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  bookingCancel,
+  bookingCreate,
+  bookingMyList,
+  bookingOpenSlots,
+  bookingReschedule,
   fetchRagAnswer,
   fetchRagQuota,
   getPortalRagToken,
   requestRagOtp,
   setPortalRagToken,
   verifyRagOtp,
+  type PortalBookingItem,
+  type PortalOpenSlot,
   type RagQuotaStatus,
 } from '../../api/portalApi';
+import { PortalAuthModal, resolveBookingEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
+import {
+  apiErrorMessage,
+  formatSlotFull,
+  formatSlotTime,
+  isActiveBookingStatus,
+  normalizeBookings,
+  normalizeOpenSlots,
+  slotDayKey,
+} from './bookingHelpers';
+import {
+  formatDayLabelFa,
+  parseBookingIntent,
+  slotMatchesTime,
+  toDayKey,
+  todayLocalDate,
+  type BookingIntent,
+} from './bookingIntent';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   text: string;
   streaming?: boolean;
+  bookingUi?: {
+    type: 'slots' | 'my_bookings' | 'confirm_cancel';
+    dayKey?: string;
+    slots?: PortalOpenSlot[];
+    bookings?: PortalBookingItem[];
+    pendingCancelId?: number;
+    rescheduleBookingId?: number;
+  };
 }
 
 const SUGGESTIONS = [
+  'نوبت‌های امروز',
+  'نوبت‌های فردا',
+  'نوبت‌های من',
   'آدرس مطب کجاست؟',
-  'ساعات کاری مطب چیست؟',
-  'چطور نوبت بگیرم؟',
-  'چه خدماتی ارائه می‌دهید؟',
 ];
 
 const WELCOME =
-  'سلام! من دستیار هوشمند مطب دکتر شهرویی هستم. درباره آدرس، ساعات کاری، خدمات و نوبت‌دهی از من بپرسید.';
+  'سلام! من دستیار هوشمند مطب دکتر شهرویی هستم. می‌توانید درباره آدرس و خدمات بپرسید یا بگویید «نوبت‌های فردا» تا ساعات آزاد را با دکمه انتخاب کنید.';
 
 const GUEST_COOKIE = 'healan_rag_guest';
 const OTP_TTL_SECONDS = 120;
@@ -69,6 +102,17 @@ const BTN_LOGIN_PILL: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
+const CHIP: React.CSSProperties = {
+  backgroundColor: '#fff',
+  color: '#23254e',
+  border: '1.5px solid rgba(239, 57, 78, 0.35)',
+  borderRadius: 999,
+  padding: '0.4rem 0.85rem',
+  fontWeight: 700,
+  fontSize: '0.85rem',
+  cursor: 'pointer',
+};
+
 function RobotIcon() {
   return (
     <svg viewBox="0 0 48 48" aria-hidden>
@@ -96,23 +140,14 @@ function UserIcon() {
       <circle cx="24" cy="24" r="18" fill="#ef394e" opacity="0.12" />
       <circle cx="24" cy="18" r="7" fill="#ef394e" />
       <circle cx="24" cy="18" r="4.2" fill="#ffd6de" />
-      <path
-        d="M10.5 38.5c2.8-7.2 8.2-10.5 13.5-10.5S34.7 31.3 37.5 38.5"
-        fill="#ef394e"
-      />
-      <path
-        d="M14 37c2.2-5 6.2-7.2 10-7.2s7.8 2.2 10 7.2"
-        fill="#c6283a"
-        opacity="0.35"
-      />
+      <path d="M10.5 38.5c2.8-7.2 8.2-10.5 13.5-10.5S34.7 31.3 37.5 38.5" fill="#ef394e" />
+      <path d="M14 37c2.2-5 6.2-7.2 10-7.2s7.8 2.2 10 7.2" fill="#c6283a" opacity="0.35" />
     </svg>
   );
 }
 
 function createSessionId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
-  }
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
   return `sess-${Date.now()}`;
 }
 
@@ -151,6 +186,11 @@ function formatCountdown(totalSeconds: number): string {
   return `${m}:${r.toString().padStart(2, '0')}`;
 }
 
+function resolveDayKey(intent: BookingIntent): string {
+  if (intent.dayKey) return intent.dayKey;
+  return toDayKey(todayLocalDate());
+}
+
 export default function AssistantPage() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -167,6 +207,10 @@ export default function AssistantPage() {
   const [otpSecondsLeft, setOtpSecondsLeft] = useState(0);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [bookingAuthOpen, setBookingAuthOpen] = useState(false);
+  const [bookingAuthMode, setBookingAuthMode] = useState<PortalAuthModalMode>('register');
+  const [bookingBusy, setBookingBusy] = useState(false);
+
   const sessionIdRef = useRef(createSessionId());
   const guestKeyRef = useRef(ensureGuestKey());
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -175,8 +219,10 @@ export default function AssistantPage() {
   const streamCancelRef = useRef(false);
   const otpExpireAtRef = useRef<number>(0);
   const hasScrolledRef = useRef(false);
+  const pendingIntentRef = useRef<BookingIntent | null>(null);
+  const rescheduleIdRef = useRef<number>(0);
 
-  const busy = loading || streaming;
+  const busy = loading || streaming || bookingBusy;
   const emptyChat = messages.length <= 1 && !busy;
   const showSuggestions = emptyChat;
   const blocked = !!quota?.requiresLogin && !quota.isAuthenticated;
@@ -253,7 +299,7 @@ export default function AssistantPage() {
       return;
     }
     scrollMessagesToBottom(true);
-  }, [messages, loading, streaming, emptyChat]);
+  }, [messages, loading, streaming, emptyChat, bookingBusy]);
 
   useEffect(() => {
     return () => {
@@ -274,10 +320,8 @@ export default function AssistantPage() {
   }, [otpSent]);
 
   useEffect(() => {
-    if (!busy && !blocked && !loginOpen) {
-      focusInput();
-    }
-  }, [busy, blocked, loginOpen]);
+    if (!busy && !blocked && !loginOpen && !bookingAuthOpen) focusInput();
+  }, [busy, blocked, loginOpen, bookingAuthOpen]);
 
   const resizeTextarea = () => {
     const el = textareaRef.current;
@@ -291,6 +335,18 @@ export default function AssistantPage() {
     otpExpireAtRef.current = Date.now() + seconds * 1000;
     setOtpSecondsLeft(seconds);
     setOtpSent(true);
+  };
+
+  const pushAssistant = (text: string, bookingUi?: ChatMessage['bookingUi']) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        role: 'assistant',
+        text,
+        bookingUi,
+      },
+    ]);
   };
 
   const streamAssistantReply = (fullText: string) =>
@@ -351,9 +407,216 @@ export default function AssistantPage() {
     setLoginOpen(true);
   };
 
+  const ensureBookingAuth = async (): Promise<boolean> => {
+    const entry = await resolveBookingEntry();
+    if (entry.action === 'goto-booking') return true;
+    setBookingAuthMode(entry.mode);
+    setBookingAuthOpen(true);
+    return false;
+  };
+
+  const loadDaySlots = async (dayKey: string, doctorId?: number): Promise<PortalOpenSlot[]> => {
+    const list = await bookingOpenSlots({
+      doctorId: doctorId || undefined,
+      fromDate: dayKey,
+      toDate: dayKey,
+    });
+    return normalizeOpenSlots(list).filter((s) => slotDayKey(s.startAt) === dayKey);
+  };
+
+  const showSlotsForDay = async (dayKey: string, preface?: string, rescheduleBookingId?: number) => {
+    const slots = await loadDaySlots(dayKey);
+    const label = formatDayLabelFa(dayKey);
+    if (slots.length === 0) {
+      pushAssistant(preface || `برای ${label} نوبت آزادی پیدا نشد.`);
+      return;
+    }
+    pushAssistant(
+      preface ||
+        (rescheduleBookingId
+          ? `ساعت جدید را برای ${label} انتخاب کنید:`
+          : `نوبت‌های آزاد ${label} — روی ساعت بزنید:`),
+      {
+        type: 'slots',
+        dayKey,
+        slots,
+        rescheduleBookingId,
+      }
+    );
+  };
+
+  const showMyBookingsUi = async (preface?: string) => {
+    const mine = normalizeBookings(await bookingMyList()).filter((b) => isActiveBookingStatus(b.status));
+    if (mine.length === 0) {
+      pushAssistant(preface || 'رزرو فعالی ندارید.');
+      return;
+    }
+    pushAssistant(preface || 'رزروهای فعال شما:', {
+      type: 'my_bookings',
+      bookings: mine,
+    });
+  };
+
+  const runBookingIntent = async (intent: BookingIntent) => {
+    setBookingBusy(true);
+    try {
+      const ok = await ensureBookingAuth();
+      if (!ok) {
+        pendingIntentRef.current = intent;
+        pushAssistant('برای ادامه رزرو/لغو نوبت وارد شوید یا مشخصات بیمار را تکمیل کنید.');
+        return;
+      }
+
+      if (intent.kind === 'my_bookings') {
+        await showMyBookingsUi();
+        return;
+      }
+
+      if (intent.kind === 'cancel') {
+        await showMyBookingsUi('کدام نوبت را می‌خواهید لغو کنید؟');
+        return;
+      }
+
+      if (intent.kind === 'reschedule') {
+        rescheduleIdRef.current = 0;
+        await showMyBookingsUi('کدام نوبت را می‌خواهید جابجا کنید؟ سپس ساعت جدید را انتخاب کنید.');
+        return;
+      }
+
+      const dayKey = resolveDayKey(intent);
+
+      if (intent.kind === 'book' && intent.timeHm) {
+        const slots = await loadDaySlots(dayKey);
+        const match = slots.find((s) => slotMatchesTime(s.startAt, intent.timeHm!));
+        if (!match) {
+          pushAssistant(
+            `ساعت ${intent.timeHm} برای ${formatDayLabelFa(dayKey)} آزاد نیست. یکی از ساعات زیر را انتخاب کنید:`,
+            { type: 'slots', dayKey, slots }
+          );
+          return;
+        }
+        await bookingCreate({ appointmentSlotId: match.appointmentSlotId });
+        pushAssistant(`نوبت شما برای ${formatSlotFull(match.startAt)} ثبت شد.`);
+        return;
+      }
+
+      // list_slots or book without time
+      await showSlotsForDay(dayKey);
+    } catch (e: unknown) {
+      pushAssistant(apiErrorMessage(e, 'انجام عملیات نوبت ناموفق بود.'));
+    } finally {
+      setBookingBusy(false);
+      focusInput();
+    }
+  };
+
+  const onSelectSlot = async (slot: PortalOpenSlot, rescheduleBookingId?: number) => {
+    if (busy) return;
+    setBookingBusy(true);
+    try {
+      const ok = await ensureBookingAuth();
+      if (!ok) {
+        pendingIntentRef.current = {
+          kind: rescheduleBookingId ? 'reschedule' : 'book',
+          dayKey: slotDayKey(slot.startAt),
+          timeHm: undefined,
+          raw: '',
+        };
+        pushAssistant('برای رزرو وارد شوید.');
+        return;
+      }
+
+      if (rescheduleBookingId && rescheduleBookingId > 0) {
+        await bookingReschedule({
+          appointmentBookingId: rescheduleBookingId,
+          newAppointmentSlotId: slot.appointmentSlotId,
+        });
+        rescheduleIdRef.current = 0;
+        pushAssistant(`نوبت به ${formatSlotFull(slot.startAt)} جابجا شد.`);
+      } else {
+        await bookingCreate({ appointmentSlotId: slot.appointmentSlotId });
+        pushAssistant(`نوبت شما برای ${formatSlotFull(slot.startAt)} ثبت شد.`);
+      }
+    } catch (e: unknown) {
+      pushAssistant(apiErrorMessage(e, 'ثبت نوبت ناموفق بود.'));
+    } finally {
+      setBookingBusy(false);
+      focusInput();
+    }
+  };
+
+  const onAskCancel = (booking: PortalBookingItem) => {
+    pushAssistant(`نوبت ${formatSlotFull(booking.startAt)} لغو شود؟`, {
+      type: 'confirm_cancel',
+      pendingCancelId: booking.appointmentBookingId,
+      bookings: [booking],
+    });
+  };
+
+  const onConfirmCancel = async (bookingId: number, yes: boolean) => {
+    if (!yes) {
+      pushAssistant('لغو انجام نشد.');
+      return;
+    }
+    setBookingBusy(true);
+    try {
+      await bookingCancel({ appointmentBookingId: bookingId });
+      pushAssistant('نوبت لغو شد.');
+    } catch (e: unknown) {
+      pushAssistant(apiErrorMessage(e, 'لغو ناموفق بود.'));
+    } finally {
+      setBookingBusy(false);
+    }
+  };
+
+  const onStartReschedule = async (booking: PortalBookingItem) => {
+    setBookingBusy(true);
+    try {
+      const ok = await ensureBookingAuth();
+      if (!ok) {
+        pendingIntentRef.current = { kind: 'reschedule', raw: '' };
+        rescheduleIdRef.current = booking.appointmentBookingId;
+        pushAssistant('برای جابجایی وارد شوید.');
+        return;
+      }
+      rescheduleIdRef.current = booking.appointmentBookingId;
+      const list = await bookingOpenSlots({
+        doctorId: booking.doctorId || undefined,
+        fromDate: toDayKey(todayLocalDate()),
+      });
+      const slots = normalizeOpenSlots(list).filter(
+        (s) => !booking.doctorId || s.doctorId === booking.doctorId
+      );
+      if (slots.length === 0) {
+        pushAssistant('نوبت آزادی برای جابجایی پیدا نشد.');
+        return;
+      }
+      pushAssistant('ساعت جدید را انتخاب کنید:', {
+        type: 'slots',
+        slots,
+        rescheduleBookingId: booking.appointmentBookingId,
+      });
+    } catch (e: unknown) {
+      pushAssistant(apiErrorMessage(e, 'بارگذاری ساعات آزاد ناموفق بود.'));
+    } finally {
+      setBookingBusy(false);
+    }
+  };
+
   const send = async (raw?: string) => {
     const question = (raw ?? input).trim();
     if (!question || busy) return;
+
+    const intent = parseBookingIntent(question);
+    if (intent.kind !== 'none') {
+      // booking flows bypass RAG guest quota gate
+      const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: 'user', text: question };
+      setMessages((prev) => [...prev, userMsg]);
+      setInput('');
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
+      await runBookingIntent(intent);
+      return;
+    }
 
     if (blocked) {
       openLogin();
@@ -473,6 +736,101 @@ export default function AssistantPage() {
     void refreshQuota();
   };
 
+  const onBookingAuthSuccess = () => {
+    setBookingAuthOpen(false);
+    void refreshQuota();
+    const pending = pendingIntentRef.current;
+    pendingIntentRef.current = null;
+    pushAssistant('ورود/تکمیل مشخصات انجام شد.');
+    if (pending) {
+      void runBookingIntent(pending);
+    } else if (rescheduleIdRef.current > 0) {
+      void runBookingIntent({ kind: 'reschedule', raw: '' });
+    }
+  };
+
+  const renderBookingUi = (msg: ChatMessage) => {
+    const ui = msg.bookingUi;
+    if (!ui) return null;
+
+    if (ui.type === 'slots' && ui.slots && ui.slots.length > 0) {
+      const showDay = !!ui.rescheduleBookingId || new Set(ui.slots.map((s) => slotDayKey(s.startAt))).size > 1;
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+          {ui.slots.map((slot) => (
+            <button
+              key={slot.appointmentSlotId}
+              type="button"
+              style={CHIP}
+              disabled={busy}
+              onClick={() => void onSelectSlot(slot, ui.rescheduleBookingId)}
+            >
+              {showDay ? formatSlotFull(slot.startAt) : formatSlotTime(slot.startAt)}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    if (ui.type === 'my_bookings' && ui.bookings) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
+          {ui.bookings.map((b) => (
+            <div
+              key={b.appointmentBookingId}
+              style={{
+                border: '1px solid rgba(35,37,78,0.12)',
+                borderRadius: 12,
+                padding: '0.65rem 0.75rem',
+                background: '#fff',
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>{formatSlotFull(b.startAt)}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <button type="button" style={CHIP} disabled={busy} onClick={() => onAskCancel(b)}>
+                  لغو
+                </button>
+                <button
+                  type="button"
+                  style={CHIP}
+                  disabled={busy}
+                  onClick={() => void onStartReschedule(b)}
+                >
+                  جابجایی
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (ui.type === 'confirm_cancel' && ui.pendingCancelId) {
+      return (
+        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <button
+            type="button"
+            style={BTN_PRIMARY}
+            disabled={busy}
+            onClick={() => void onConfirmCancel(ui.pendingCancelId!, true)}
+          >
+            بله، لغو شود
+          </button>
+          <button
+            type="button"
+            style={BTN_GHOST}
+            disabled={busy}
+            onClick={() => void onConfirmCancel(ui.pendingCancelId!, false)}
+          >
+            خیر
+          </button>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="portal-assistant">
       <div className="portal-assistant__glow" aria-hidden />
@@ -504,10 +862,10 @@ export default function AssistantPage() {
               <span className="portal-assistant__status-label">
                 {quota?.isAuthenticated
                   ? `وارد شده${quota.phoneMasked ? ` · ${quota.phoneMasked}` : ''}`
-                  : 'مهمان · پاسخ بر اساس اطلاعات رسمی مطب'}
+                  : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v6
+                build-v7-assistant-booking
               </span>
             </p>
           </div>
@@ -560,6 +918,7 @@ export default function AssistantPage() {
                 )}
                 <span className="portal-assistant__bubble-text">{msg.text}</span>
                 {msg.streaming && <span className="portal-assistant__caret" aria-hidden />}
+                {renderBookingUi(msg)}
               </div>
               {msg.role === 'user' && (
                 <div className="portal-assistant__msg-avatar portal-assistant__msg-avatar--user" aria-hidden>
@@ -569,13 +928,15 @@ export default function AssistantPage() {
             </div>
           ))}
 
-          {loading && (
+          {(loading || bookingBusy) && (
             <div className="portal-assistant__row portal-assistant__row--assistant">
               <div className="portal-assistant__msg-avatar" aria-hidden>
                 <RobotIcon />
               </div>
               <div className="portal-assistant__bubble portal-assistant__bubble--assistant portal-assistant__bubble--thinking">
-                <span className="portal-assistant__thinking-label">در حال فکر کردن</span>
+                <span className="portal-assistant__thinking-label">
+                  {bookingBusy ? 'در حال نوبت‌دهی' : 'در حال فکر کردن'}
+                </span>
                 <span className="portal-assistant__dots" aria-hidden>
                   <i />
                   <i />
@@ -594,7 +955,7 @@ export default function AssistantPage() {
                     d="M12 2a7 7 0 0 0-4 12.74V18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3.26A7 7 0 0 0 12 2zm0 2a5 5 0 0 1 3.9 8.32l-.4.48V17h-3V12.8l-.4-.48A5 5 0 0 1 12 4z"
                   />
                 </svg>
-                <p>سوالات پرتکرار</p>
+                <p>پیشنهاد سریع</p>
               </div>
               <div className="portal-assistant__chips">
                 {SUGGESTIONS.map((item) => (
@@ -626,14 +987,9 @@ export default function AssistantPage() {
             </div>
             <div className="portal-assistant__limit-banner-text">
               سقف سوالات رایگان امروز تمام شد.
-              <strong> در صورتی که نیاز به سوالات بیشتر دارید، وارد شوید.</strong>
+              <strong> برای سوالات بیشتر وارد شوید. رزرو نوبت همچنان با ورود بیمار ممکن است.</strong>
             </div>
-            <button
-              type="button"
-              className="portal-assistant__limit-login"
-              style={BTN_LOGIN_PILL}
-              onClick={openLogin}
-            >
+            <button type="button" className="portal-assistant__limit-login" style={BTN_LOGIN_PILL} onClick={openLogin}>
               ورود / لاگین
             </button>
           </div>
@@ -643,8 +999,7 @@ export default function AssistantPage() {
             ref={textareaRef}
             rows={1}
             value={input}
-            placeholder={blocked ? 'برای ادامه وارد شوید…' : 'سوال خود را بنویسید…'}
-            disabled={blocked}
+            placeholder={blocked ? 'سوال FAQ نیاز به ورود دارد… یا بنویسید نوبت‌های فردا' : 'سوال یا درخواست نوبت…'}
             onChange={(e) => {
               setInput(e.target.value);
               resizeTextarea();
@@ -661,7 +1016,7 @@ export default function AssistantPage() {
             type="button"
             className="portal-assistant__send"
             onClick={() => void send()}
-            disabled={busy || blocked || !input.trim()}
+            disabled={busy || !input.trim()}
             aria-label="ارسال"
           >
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
@@ -669,7 +1024,7 @@ export default function AssistantPage() {
             </svg>
           </button>
         </div>
-        <p className="portal-assistant__hint">Enter برای ارسال · Shift+Enter خط جدید</p>
+        <p className="portal-assistant__hint">Enter برای ارسال · Shift+Enter خط جدید · نوبت با دکمه ساعت</p>
       </div>
 
       {loginOpen && (
@@ -692,7 +1047,7 @@ export default function AssistantPage() {
               </div>
               <div>
                 <h2>ورود به دستیار هوشمند</h2>
-                <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید. تاریخچه گفتگو حفظ می‌شود.</p>
+                <p>با شماره موبایل وارد شوید تا سقف سوالات بیشتری داشته باشید.</p>
               </div>
               <button
                 type="button"
@@ -700,12 +1055,7 @@ export default function AssistantPage() {
                 aria-label="بستن"
                 onClick={() => setLoginOpen(false)}
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3 1.4 1.4z"
-                  />
-                </svg>
+                ×
               </button>
             </div>
 
@@ -736,7 +1086,7 @@ export default function AssistantPage() {
                 </label>
                 <p className={`portal-assistant__otp-timer${otpSecondsLeft <= 0 ? ' is-expired' : ''}`}>
                   {otpSecondsLeft > 0
-                    ? `اعتبار کد: ${formatCountdown(otpSecondsLeft)} — می‌توانید همان کد قبلی را وارد کنید`
+                    ? `اعتبار کد: ${formatCountdown(otpSecondsLeft)}`
                     : 'اعتبار کد تمام شد. دوباره «ارسال کد» را بزنید'}
                 </p>
               </>
@@ -755,7 +1105,6 @@ export default function AssistantPage() {
                   style={{
                     ...BTN_PRIMARY,
                     opacity: authBusy || !phone.trim() ? 0.55 : 1,
-                    cursor: authBusy || !phone.trim() ? 'not-allowed' : 'pointer',
                   }}
                   disabled={authBusy || !phone.trim()}
                   onClick={() => void sendOtp()}
@@ -764,13 +1113,7 @@ export default function AssistantPage() {
                 </button>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className="portal-assistant__ghost"
-                    style={BTN_GHOST}
-                    disabled={authBusy}
-                    onClick={() => void sendOtp()}
-                  >
+                  <button type="button" className="portal-assistant__ghost" style={BTN_GHOST} disabled={authBusy} onClick={() => void sendOtp()}>
                     ارسال مجدد
                   </button>
                   <button
@@ -779,7 +1122,6 @@ export default function AssistantPage() {
                     style={{
                       ...BTN_PRIMARY,
                       opacity: authBusy || !otpCode.trim() ? 0.55 : 1,
-                      cursor: authBusy || !otpCode.trim() ? 'not-allowed' : 'pointer',
                     }}
                     disabled={authBusy || !otpCode.trim()}
                     onClick={() => void verifyOtp()}
@@ -792,6 +1134,16 @@ export default function AssistantPage() {
           </div>
         </div>
       )}
+
+      <PortalAuthModal
+        open={bookingAuthOpen}
+        onClose={() => {
+          setBookingAuthOpen(false);
+          pendingIntentRef.current = null;
+        }}
+        onSuccess={onBookingAuthSuccess}
+        initialMode={bookingAuthMode}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ from app.rag.direct_answer import ask_direct
 from app.rag.local_answer import generate_local_answer
 from app.rag.prompts import RAG_SYSTEM_PROMPT
 from app.rag.rerank import filter_and_rerank
+from app.rag.summarize_docs import enrich_documents_with_summaries
 from app.rag.vector_store import VectorStore
 from app.services.llm import chat_completion, create_client
 
@@ -60,6 +61,7 @@ class RagPipeline:
         reset_tfidf()
         source = build_data_source(self.settings)
         documents = source.load()
+        documents = enrich_documents_with_summaries(documents, self.settings)
         self.store.clear()
         count = self.store.add_documents(documents)
         return {

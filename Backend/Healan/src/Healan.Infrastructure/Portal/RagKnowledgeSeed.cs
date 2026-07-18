@@ -53,11 +53,26 @@ public static class RagKnowledgeSeed
             // Existing installs often still point at localhost — rewrite for Docker.
             var setting = await context.RagSettings.FirstAsync();
             var url = setting.PythonApiUrl?.Trim() ?? string.Empty;
+            var changed = false;
             if (url.Contains("localhost:8000", StringComparison.OrdinalIgnoreCase)
                 || url.Contains("127.0.0.1:8000", StringComparison.OrdinalIgnoreCase)
                 || string.IsNullOrWhiteSpace(url))
             {
                 setting.PythonApiUrl = dockerUrl;
+                changed = true;
+            }
+            if (string.IsNullOrWhiteSpace(setting.EmbeddingModel))
+            {
+                setting.EmbeddingModel = "heydariAI/persian-embeddings";
+                changed = true;
+            }
+            if (string.IsNullOrWhiteSpace(setting.SummarizeModel))
+            {
+                setting.SummarizeModel = "qwen2.5:3b";
+                changed = true;
+            }
+            if (changed)
+            {
                 setting.UpdatedAt = DateTime.UtcNow;
                 await context.SaveChangesAsync();
             }
@@ -73,6 +88,8 @@ public static class RagKnowledgeSeed
             IsEnabled = true,
             GuestDailyLimit = 10,
             AuthenticatedDailyLimit = 200,
+            EmbeddingModel = "heydariAI/persian-embeddings",
+            SummarizeModel = "qwen2.5:3b",
             UpdatedAt = DateTime.UtcNow,
         });
         await context.SaveChangesAsync();

@@ -96,6 +96,8 @@ public class RagSettingDto
     public bool IsEnabled { get; set; }
     public int GuestDailyLimit { get; set; } = 10;
     public int AuthenticatedDailyLimit { get; set; } = 200;
+    public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
+    public string SummarizeModel { get; set; } = "qwen2.5:3b";
     public DateTime? LastSyncedAt { get; set; }
 }
 
