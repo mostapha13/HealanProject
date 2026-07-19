@@ -16,6 +16,7 @@ import {
 import { HeroSlider } from '../../components/HeroSlider';
 import { PatientReviewForm } from '../../components/PatientReviewForm';
 import { PortalAuthModal, resolveBookingEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
+import { PortalSessionActions, usePortalSessionUser } from '../../components/PortalSessionUser';
 import { usePortalSite } from '../../hooks/usePortalSite';
 import { resolvePortalIcon } from '../../utils/portalIcons';
 
@@ -56,6 +57,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<PortalAuthModalMode>('register');
+  const { user: portalUser, refresh: refreshPortalUser, logout: logoutPortalUser } = usePortalSessionUser();
   const { doctor, contact, hero, sections, map, heroStats, heroSlides, isSectionEnabled, navItems, trustItems, services, whyItems, reviews } = usePortalSite();
 
   const startBooking = async () => {
@@ -67,6 +69,11 @@ export function LandingPage() {
     }
     setAuthMode(entry.mode);
     setAuthOpen(true);
+  };
+
+  const onPortalLogout = () => {
+    setMenuOpen(false);
+    logoutPortalUser();
   };
 
   const navList = useMemo(() => {
@@ -155,10 +162,14 @@ export function LandingPage() {
               <IconPhone className="portal-icon-sm" />
               <span>رزرو نوبت</span>
             </button>
-            <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={goToLogin}>
-              <IconLogin className="portal-icon-sm" />
-              <span>ورود</span>
-            </button>
+            {portalUser ? (
+              <PortalSessionActions user={portalUser} onLogout={onPortalLogout} />
+            ) : (
+              <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={goToLogin}>
+                <IconLogin className="portal-icon-sm" />
+                <span>ورود</span>
+              </button>
+            )}
             <button
               type="button"
               className={`portal-menu-btn${menuOpen ? ' is-open' : ''}`}
@@ -187,10 +198,18 @@ export function LandingPage() {
               <IconPhone className="portal-icon-sm" />
               تماس برای نوبت
             </button>
-            <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
-              <IconLogin className="portal-icon-sm" />
-              ورود به سامانه
-            </button>
+            {portalUser ? (
+              <PortalSessionActions
+                user={portalUser}
+                onLogout={onPortalLogout}
+                stacked
+              />
+            ) : (
+              <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
+                <IconLogin className="portal-icon-sm" />
+                ورود به سامانه
+              </button>
+            )}
           </nav>
         </div>
       </header>
@@ -465,7 +484,11 @@ export function LandingPage() {
           <div className="portal-footer__links">
             <button type="button" onClick={() => scrollTo('services')}>خدمات</button>
             <button type="button" onClick={() => scrollTo('contact')}>تماس</button>
-            <button type="button" onClick={goToLogin}>ورود</button>
+            {portalUser ? (
+              <button type="button" onClick={onPortalLogout}>خروج ({portalUser.displayName})</button>
+            ) : (
+              <button type="button" onClick={goToLogin}>ورود</button>
+            )}
           </div>
         </div>
         <div className="portal-container">
@@ -477,8 +500,9 @@ export function LandingPage() {
         open={authOpen}
         initialMode={authMode}
         onClose={() => setAuthOpen(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setAuthOpen(false);
+          await refreshPortalUser();
           navigate('/booking');
         }}
       />

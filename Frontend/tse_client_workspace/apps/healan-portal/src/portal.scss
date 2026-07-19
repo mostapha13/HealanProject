@@ -149,6 +149,37 @@
   align-items: center;
 }
 
+.portal-header__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.portal-header__user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--p-text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.portal-header__user.is-stacked {
+  max-width: none;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.portal-header__user.is-stacked .portal-header__user-name {
+  max-width: none;
+  font-size: 15px;
+  text-align: center;
+}
+
 .portal-menu-btn {
   display: none;
   flex-direction: column;
@@ -1284,6 +1315,10 @@
 
   .portal-header__actions .portal-header__call {
     display: none;
+  }
+
+  .portal-header__user-name {
+    max-width: 88px;
   }
 
   .portal-hero__stats {

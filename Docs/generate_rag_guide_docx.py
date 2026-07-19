@@ -169,7 +169,7 @@ def build():
 
     add_para(doc, "سامانه Healan — دستیار هوشمند مطب", size=22, bold=True, center=True,
              color=RGBColor(0x1F, 0x4E, 0x79))
-    add_para(doc, "راهنمای کامل RAG با نام جداول، فیلدها، کلاس‌ها و فلو مثال‌دار", size=15, bold=True, center=True)
+    add_para(doc, "راهنمای کامل RAG + رزرو نوبت (تاریخ شمسی/نسبی و OTP)", size=15, bold=True, center=True)
     add_para(doc, "نسخه Markdown: Docs/RAG-Healan-Guide.md", size=11, center=True,
              color=RGBColor(0x47, 0x55, 0x69))
     doc.add_page_break()
@@ -189,7 +189,9 @@ def build():
         "فصل ۱۱ — مدل‌ها از UI و Ollama",
         "فصل ۱۲ — نقشه فایل‌ها و کلاس‌های C# / Python",
         "فصل ۱۳ — دیپلوی و عیب‌یابی",
-        "پیوست — رزرو نوبت (جدا از RAG)",
+        "فصل ۱۴ — رزرو نوبت از چت (جدا از RAG)",
+        "فصل ۱۵ — احراز هویت رزرو (OTP موبایل)",
+        "فصل ۱۶ — ذخیره OTP رزرو و عیب‌یابی",
     ])
     doc.add_page_break()
 
@@ -418,7 +420,8 @@ def build():
     ])
     add_bullets(doc, [
         "فایل‌ها: RagQuotaHelper.cs، RagQuotaCounter.cs — fallback COUNT روی RagChatLogs",
-        "OTP: PortalOtpRequest / PortalOtpVerify · توکن portal_rag_access_token",
+        "OTP سقف RAG: PortalOtpRequest / PortalOtpVerify · توکن portal_rag_access_token",
+        "OTP رزرو نوبت جداست (فصل ۱۵): BookingOtpRequest / BookingOtpVerify · PortalAuthModal",
         "لاگ: RagChatLogPublisher → Q_RagChatLog → RagChatLogConsumerService → RagChatLogs",
     ])
 
@@ -465,6 +468,10 @@ docker exec healan-python-rag curl -s http://host.docker.internal:11434/api/tags
         ["POST", "/Healan/api/v1/PortalPublic/RagAsk"],
         ["GET", "/Healan/api/v1/PortalPublic/RagQuota"],
         ["GET/POST", "/Healan/api/v1/RagKnowledge/SettingGet|SettingSave"],
+        ["POST", "/Healan/api/v1/PortalPublic/BookingOtpRequest"],
+        ["POST", "/Healan/api/v1/PortalPublic/BookingOtpVerify"],
+        ["GET", "/Healan/api/v1/PortalPublic/BookingOpenSlots"],
+        ["POST", "/Healan/api/v1/PortalPublic/BookingCreate"],
         ["POST", "{Python}/api/v1/rag/ask"],
         ["POST/GET", "{Python}/api/v1/rag/ingest|status"],
     ])
@@ -483,8 +490,95 @@ docker exec healan-python-rag curl -s http://host.docker.internal:11434/api/tags
         ["کانتینر به Ollama نمی‌رسد", "host.docker.internal + snap start ollama"],
     ])
 
-    add_h(doc, "پیوست — رزرو نوبت از چت", 1)
-    add_para(doc, "اگر پیام درباره نوبت باشد، فرانت بدون RagAsk وارد رزرو می‌شود (bookingIntent.ts، Assistant/index.tsx). با Ingest/Chroma اشتباه گرفته نشود.")
+    add_h(doc, "فصل ۱۴ — رزرو نوبت از چت (جدا از RAG)", 1)
+    add_para(doc, "اگر پیام درباره نوبت باشد، فرانت بدون RagAsk وارد رزرو می‌شود. با Ingest/Chroma اشتباه گرفته نشود.")
+    add_code(doc, """پیام کاربر
+  → parseBookingIntent (bookingIntent.ts)
+  → kind=none → RagAsk
+  → dateParseError → پیام خطا (بدون لاگین)
+  → ensureBookingAuth → PortalAuthModal
+  → BookingOpenSlots / Create / Cancel / Reschedule""")
+    add_table(doc, ["فایل", "نقش"], [
+        ["Assistant/index.tsx", "ارکستراسیون UI و دکمه‌های اسلات"],
+        ["Assistant/bookingIntent.ts", "تشخیص kind + روز + ساعت (بدون LLM)"],
+        ["Assistant/jalaliDate.ts", "تاریخ شمسی مطلق → dayKey میلادی"],
+        ["PortalAuthModal.tsx", "OTP موبایل رزرو"],
+        ["portalApi.ts", "فراخوانی PortalPublic رزرو"],
+    ])
+    add_h(doc, "۱۴-۱. انواع قصد", 2)
+    add_table(doc, ["kind", "نمونه", "رفتار"], [
+        ["list_slots", "نوبت‌های فردا / ۳۱ تیر", "لیست اسلات با دکمه"],
+        ["book", "فردا ساعت ۱۸:۳۰ نوبت بگیر", "Create یا لیست همان روز"],
+        ["my_bookings", "نوبت‌های من", "رزروهای فعال"],
+        ["cancel", "لغو نوبت", "انتخاب برای لغو"],
+        ["reschedule", "تغییر نوبت", "جابجایی اسلات"],
+        ["none", "آدرس مطب؟", "می‌رود به RAG"],
+    ])
+    add_para(doc, "ضد مثبت کاذب: «لغو اشتراک» یا «جابجا کنید» بدون کلمه نوبت → none.", size=11)
+
+    add_h(doc, "۱۴-۲. تاریخ شمسی مطلق", 2)
+    add_table(doc, ["فرم", "مثال"], [
+        ["Y/M/D", "1405/04/31 یا ۱۴۰۵-۴-۳۱"],
+        ["D/M/Y", "31/04/1405"],
+        ["روز + ماه + سال", "۳۱ تیر ۱۴۰۵"],
+        ["روز + ماه بدون سال", "۱۵ تیر → سال جاری؛ اگر گذشته سال بعد"],
+    ])
+    add_bullets(doc, [
+        "کتابخانه jalaali-js؛ خروجی dayKey میلادی YYYY-MM-DD برای API",
+        "مرز حرفی برای تیر/مهر/دی تا «دیگر» به‌اشتباه دی نشود",
+        "روز نامعتبر → dateParseError قبل از OTP",
+    ])
+
+    add_h(doc, "۱۴-۳. تاریخ نسبی و روز هفته", 2)
+    add_table(doc, ["الگو", "مثال", "نتیجه"], [
+        ["امروز / فردا / پس‌فردا", "نوبت‌های فردا", "offset 0 / 1 / 2"],
+        ["N روز بعد", "۴ روز بعد، بعد از ۳ روز", "offset N (۰…۶۰)"],
+        ["روز هفته + بعد", "شنبه بعد، بعد از یکشنبه", "Occurance بعدی (+۷ اگر امروز همان روز)"],
+        ["این + روز هفته", "این شنبه", "نزدیک‌ترین همان روز"],
+        ["فقط روز هفته", "نوبت‌های پنجشنبه؟", "مثل mode this؛ علائم ؟ نرمال می‌شوند"],
+    ])
+    add_para(doc, "اولویت: شمسی مطلق > نسبی. N>60 → خطا (نه برگشت بی‌صدا به امروز). «هفته بعد» هنوز پشتیبانی نمی‌شود.")
+
+    add_h(doc, "۱۴-۴. مثال end-to-end", 2)
+    add_bullets(doc, [
+        "«نوبت‌های شنبه بعد» → list_slots → auth → OpenSlots → دکمه Create",
+        "«۳۲ فروردین ۱۴۰۵ نوبت» → dateParseError بدون باز شدن مودال",
+        "ساعت: ۱۸:۳۰ یا ساعت ۹ → timeHm؛ slotMatchesTime با Date محلی",
+    ])
+
+    add_h(doc, "فصل ۱۵ — احراز هویت رزرو (OTP موبایل)", 1)
+    add_para(doc, "UI: PortalAuthModal · Backend: BookingOtpRequest / BookingOtpVerify / CompleteProfile")
+    add_code(doc, "phone → otp → confirm | profile → ادامه pendingIntent")
+    add_table(doc, ["مرحله", "کار", "API"], [
+        ["phone", "موبایل 09…", "BookingOtpRequest"],
+        ["otp", "کد پیامک", "BookingOtpVerify → JWT + بیمار"],
+        ["confirm", "بیمار کامل → تأیید", "ادامه رزرو"],
+        ["profile", "نام/نام‌خانوادگی/کدملی", "BookingCompleteProfile"],
+    ])
+    add_table(doc, ["مقدار", "عدد"], [
+        ["TTL کد OTP", "۵ دقیقه"],
+        ["Cooldown ارسال مجدد", "۶۰ ثانیه"],
+        ["Session بعد از verify", "۳۰ دقیقه"],
+    ])
+    add_para(doc, "اگر SMS شکست بخورد: حذف OTP + ClearCooldownAsync تا کاربر دوباره بتواند درخواست بدهد.")
+    add_para(doc, "تفاوت با OTP سقف RAG (فصل ۱۰): توکن portal_rag_access_token فقط برای Ask است؛ JWT رزرو برای Create/Cancel است.", size=11)
+
+    add_h(doc, "فصل ۱۶ — ذخیره OTP رزرو و عیب‌یابی", 1)
+    add_para(doc, "قرارداد: IBookingOtpStore · حافظه: MemoryBookingOtpStore · SQL: DbBookingOtpStore روی جدول BookingAuthTokens")
+    add_code(doc, """SetAsync / TryGetAsync / RemoveAsync
+SetCooldownAsync / IsInCooldownAsync / ClearCooldownAsync
+SetSessionAsync / GetSessionPhoneAsync""")
+    add_bullets(doc, [
+        "DbBookingOtpStore: اگر SQL/جدول در دسترس نباشد → fallback حافظه",
+        "Get: اول SQL، بعد memory (برای writeهایی که قبلاً fallback شده‌اند)",
+        "RedisBookingOtpStore هم الگوی مشابه دارد؛ DI فعال معمولاً DB است",
+    ])
+    add_table(doc, ["علامت", "اقدام"], [
+        ["ارسال کد ناموفق + cooldown گیر", "recreate healan-webapi (ClearCooldown)"],
+        ["502 روی BookingOtpRequest", "apply-server-appsettings + recreate API"],
+        ["Verify بین instance کد را نمی‌بیند", "migrate جدول BookingAuthTokens"],
+        ["تاریخ شمسی کار نمی‌کند", "--no-cache healan-portal + nginx؛ مارکر build-v13"],
+    ])
 
     add_h(doc, "جمع‌بندی", 1)
     add_bullets(doc, [
@@ -494,6 +588,7 @@ docker exec healan-python-rag curl -s http://host.docker.internal:11434/api/tags
         "VectorStore روی healan_rag",
         "Background Python برای sync؛ Background C# برای لاگ",
         "Ask = Embedding + cosine + metadata.answer",
+        "رزرو نوبت جدا: intent فارسی + شمسی/نسبی + OTP موبایل (DB/Memory)",
     ])
 
     doc.save(str(OUT))
