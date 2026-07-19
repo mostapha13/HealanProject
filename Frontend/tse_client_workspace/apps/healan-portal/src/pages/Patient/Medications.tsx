@@ -15,7 +15,7 @@ function asList(value: unknown): PortalMedicationItem[] {
 }
 
 function previewTimes(first: string, interval: number): string {
-  if (!first || !INTERVAL) return '';
+  if (!first || !interval) return '';
   const [hStr, mStr] = first.split(':');
   const h = Number(hStr);
   const m = Number(mStr);
