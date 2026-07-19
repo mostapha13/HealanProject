@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FileManager.Domain.Services;
@@ -118,7 +119,12 @@ namespace FileManager.WebUI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FileManager.WebUI", Version = "v1" });
                 c.OperationFilter<SwaggerFileOperationFilter>();
-                c.IncludeXmlComments("FileManager.WebUI.xml");
+                // Docker image may not ship XML docs; missing file used to crash every Upload (SwaggerGen lazy resolve).
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, "FileManager.WebUI.xml");
+                if (File.Exists(xmlPath))
+                    c.IncludeXmlComments(xmlPath);
+                else
+                    Console.WriteLine($"[FileManager] WARN swagger xml missing: {xmlPath}");
             });
 
             #region Identity Server Connection Configuration
