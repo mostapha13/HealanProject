@@ -196,6 +196,15 @@ namespace Share.Application.Common.Filters
                 "Unhandled API exception. Type={ExceptionType}, Message={Message}",
                 ex.GetType().FullName, ex.Message);
 
+            Console.Error.WriteLine(
+                $"[ApiException] {context.HttpContext.Request.Method} {context.HttpContext.Request.Path} => {ex.GetType().FullName}: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Console.Error.WriteLine(
+                    $"[ApiException] inner => {ex.InnerException.GetType().FullName}: {ex.InnerException.Message}");
+            }
+            Console.Error.WriteLine(ex.ToString());
+
             var details = new CustomProblemDetails()
             {
                 Title = "The Request Is Not Correct.",

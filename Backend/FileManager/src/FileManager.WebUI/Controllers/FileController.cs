@@ -65,6 +65,8 @@ namespace FileManager.WebUI.Controllers
                     file.FileName,
                     file.Length,
                     file.ContentType);
+                Console.WriteLine(
+                    $"[FileUpload] START name={file.FileName} bytes={file.Length} ct={file.ContentType}");
 
                 var stream = file.OpenReadStream();
                 var mimetype = file.ContentType;
@@ -86,6 +88,11 @@ namespace FileManager.WebUI.Controllers
             }
             catch (Exception ex)
             {
+                Console.Error.WriteLine($"[FileUpload] FAIL name={file?.FileName} type={ex.GetType().FullName}");
+                Console.Error.WriteLine($"[FileUpload] MSG {ex.Message}");
+                if (ex.InnerException != null)
+                    Console.Error.WriteLine($"[FileUpload] INNER {ex.InnerException.GetType().FullName}: {ex.InnerException.Message}");
+                Console.Error.WriteLine(ex.ToString());
                 _logger.LogError(ex, "Upload failed name={Name}", file?.FileName);
                 throw;
             }

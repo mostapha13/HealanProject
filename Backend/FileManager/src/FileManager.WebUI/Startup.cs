@@ -13,11 +13,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using FileManager.Domain.Services;
 using FileManager.Infrastructure.Services;
-using Share.Application.Common.Interfaces;
-using Share.Infrastructure.Services;
+using FileManager.WebUI.Middleware;
 using FileManager.WebUI.OperationFilter;
 using FileManager.Domain.Configs;
 using FileManager.Infrastructure;
+using Share.Application.Common.Interfaces;
+using Share.Infrastructure.Services;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Share.MessageBroker.RabbitMQ;
@@ -238,6 +239,10 @@ namespace FileManager.WebUI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // First in pipeline so every Upload hit/error appears in `docker logs`.
+            app.UseMiddleware<UploadConsoleDiagnosticsMiddleware>();
+
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FileManager.WebUI v1"));
             app.UseStaticFiles();

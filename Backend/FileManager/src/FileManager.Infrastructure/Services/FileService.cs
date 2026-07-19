@@ -57,9 +57,11 @@ namespace FileManager.Infrastructure.Services
         }
         public async Task<UploadFileResponse> UploadFile(UploadFileRequest request)
         {
+            Console.WriteLine($"[FileService] UploadFile begin name={request.Filename} sizeKb={request.Size}");
             ValidateFileName(request.Filename);
 
             var profiles = _config.Profiles?.ToList() ?? new List<UploadFileProfile>();
+            Console.WriteLine($"[FileService] profilesCount={profiles.Count} dir={_config.DirectoryPath}");
             if (profiles.Count == 0)
                 throw new BadRequestExceptions("پروفایل آپلود فایل تنظیم نشده است.");
 
@@ -79,6 +81,7 @@ namespace FileManager.Infrastructure.Services
             ms.Position = 0;
 
             var meme = MimeDetective.InMemory.MimeExtensions.DetectMimeType(ms);
+            Console.WriteLine($"[FileService] mime={(meme?.Mime ?? "null")} ext={fileExtension}");
             if (meme == null && fileExtension != ".txt")
                 throw new BadRequestExceptions("محتوای فایل با فرمت فایل مرتبط نیست");
 
@@ -104,7 +107,9 @@ namespace FileManager.Infrastructure.Services
 
             var fileId = Guid.NewGuid();
             var fileLink = _linkMaker.MakeLink(fileId.ToString(), "File/Download");
+            Console.WriteLine($"[FileService] saving fileId={fileId} link={fileLink}");
             var savedFileName = await _fileManager.SaveFile(ms, fileId, fileExtension, request.IsEncrypted);
+            Console.WriteLine($"[FileService] saved as {savedFileName}");
 
             var file = new Domain.Entities.File()
             {
@@ -121,8 +126,20 @@ namespace FileManager.Infrastructure.Services
                 RequestIP = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
             };
 
-            dbContext.Files.Add(file);
-            await dbContext.SaveChangesAsync(CancellationToken.None);
+            try
+            {
+                dbContext.Files.Add(file);
+                await dbContext.SaveChangesAsync(CancellationToken.None);
+                Console.WriteLine($"[FileService] db ok fileId={fileId}");
+            }
+            catch (Exception dbEx)
+            {
+                Console.Error.WriteLine($"[FileService] DB FAIL {dbEx.GetType().FullName}: {dbEx.Message}");
+                if (dbEx.InnerException != null)
+                    Console.Error.WriteLine($"[FileService] DB INNER {dbEx.InnerException.Message}");
+                Console.Error.WriteLine(dbEx.ToString());
+                throw;
+            }
 
             return new UploadFileResponse()
             {
