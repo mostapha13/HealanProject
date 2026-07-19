@@ -83,27 +83,29 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
 
         foreach (var imaging in request.ImagingRequests)
         {
-            if (imaging.AttachmentId.HasValue)
-                await EnsureAttachmentAsync(imaging.AttachmentId.Value, imaging.ImageTypeId.GetDisplayName(), cancellationToken);
+            var attachmentId = NormalizeAttachmentId(imaging.AttachmentId);
+            if (attachmentId.HasValue)
+                await EnsureAttachmentAsync(attachmentId.Value, imaging.ImageTypeId.GetDisplayName() ?? "پیوست تصویر", cancellationToken);
 
             prescription.ImagingRequests.Add(new ImagingRequest
             {
                 ImageTypeId = imaging.ImageTypeId,
                 Notes = imaging.Notes ?? string.Empty,
-                AttachmentId = imaging.AttachmentId,
+                AttachmentId = attachmentId,
             });
         }
 
         foreach (var lab in request.LabTestRequests)
         {
-            if (lab.AttachmentId.HasValue)
-                await EnsureAttachmentAsync(lab.AttachmentId.Value, lab.LabTestType, cancellationToken);
+            var attachmentId = NormalizeAttachmentId(lab.AttachmentId);
+            if (attachmentId.HasValue)
+                await EnsureAttachmentAsync(attachmentId.Value, lab.LabTestType ?? "پیوست آزمایش", cancellationToken);
 
             prescription.LabTestRequests.Add(new LabTestRequest
             {
                 LabTestType = lab.LabTestType,
                 Notes = lab.Notes ?? string.Empty,
-                AttachmentId = lab.AttachmentId,
+                AttachmentId = attachmentId,
             });
         }
 
@@ -221,19 +223,48 @@ public class PrescriptionRegisterCommandHandler : IRequestHandler<PrescriptionRe
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
+    private static Guid? NormalizeAttachmentId(Guid? attachmentId)
+    {
+        if (!attachmentId.HasValue || attachmentId.Value == Guid.Empty)
+            return null;
+        return attachmentId.Value;
+    }
+
     private async Task EnsureAttachmentAsync(Guid fileId, string title, CancellationToken cancellationToken)
     {
         var exists = await _applicationDbContext.Attachments.AnyAsync(a => a.FileId == fileId, cancellationToken);
         if (exists) return;
 
         var fileInfo = await _fileManagerTool.GetFileReplyInfo(fileId);
+        var link = string.IsNullOrWhiteSpace(fileInfo?.Link)
+            ? $"/File/Download/{fileId}"
+            : fileInfo.Link.Trim();
+        var fileName = string.IsNullOrWhiteSpace(fileInfo?.FileName) ? "پیوست" : fileInfo.FileName.Trim();
+        var fileType = string.IsNullOrWhiteSpace(fileInfo?.FileType) ? "File" : fileInfo.FileType.Trim();
+
+        if (link.Length > 500)
+            link = link[..500];
+        if (fileName.Length > 150)
+            fileName = fileName[..150];
+        if (fileType.Length > 150)
+            fileType = fileType[..150];
+
+        if (string.IsNullOrWhiteSpace(fileInfo?.Link) || string.IsNullOrWhiteSpace(fileInfo?.FileName))
+        {
+            _logger.LogWarning(
+                "EnsureAttachment fallback for fileId={FileId}: Link empty={LinkEmpty}, FileName empty={NameEmpty}",
+                fileId,
+                string.IsNullOrWhiteSpace(fileInfo?.Link),
+                string.IsNullOrWhiteSpace(fileInfo?.FileName));
+        }
+
         _applicationDbContext.Attachments.Add(new Attachment
         {
-            Link = fileInfo.Link,
             FileId = fileId,
-            FileName = fileInfo.FileName,
-            FileType = fileInfo.FileType,
-            Title = title
+            Link = link,
+            FileName = fileName,
+            FileType = fileType,
+            Title = string.IsNullOrWhiteSpace(title) ? "پیوست" : title.Trim(),
         });
     }
 }

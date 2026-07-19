@@ -11,8 +11,9 @@ public class AttachmentConfiguration : IEntityTypeConfiguration<Attachment>
     {
         builder.ToTable("Attachments");
         builder.HasKey(a => a.FileId);
-        builder.Property(a => a.FileId).ValueGeneratedOnAdd().HasDefaultValueSql("newid()");
-        builder.Property(a => a.Link).HasMaxLength(100).IsRequired();
+        // FileId comes from FileManager upload — never regenerate or FK to Lab/Imaging breaks.
+        builder.Property(a => a.FileId).ValueGeneratedNever();
+        builder.Property(a => a.Link).HasMaxLength(500).IsRequired();
         builder.Property(a => a.Title).HasMaxLength(500).HasDefaultValue(null);
         builder.Property(a => a.FileName).HasMaxLength(150).IsRequired();
         builder.Property(a => a.FileType).HasMaxLength(150).IsRequired();

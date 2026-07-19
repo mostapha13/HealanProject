@@ -173,15 +173,29 @@ export interface PrescriptionForm {
   issueDate: string;
   notes: string;
   prescriptionDrugs: { drugName: string; dosage: string; usageInstructions: string }[];
-  labTestRequests: { labTestType: string; notes: string; attachmentId?: string | null }[];
-  imagingRequests: { imageTypeId: number; notes: string; attachmentId?: string | null }[];
+  labTestRequests: {
+    labTestType: string;
+    notes: string;
+    attachmentId?: string | null;
+    uploadMeta?: { fileId?: string } | null;
+  }[];
+  imagingRequests: {
+    imageTypeId: number;
+    notes: string;
+    attachmentId?: string | null;
+    uploadMeta?: { fileId?: string } | null;
+  }[];
   includeImaging?: boolean;
   echoReport?: Record<string, string> | null;
 }
 
-function withAttachmentId(attachmentId?: string | null): Record<string, string> {
-  if (!attachmentId) return {};
-  return { attachmentId };
+function withAttachmentId(
+  attachmentId?: string | null,
+  uploadMeta?: { fileId?: string } | null
+): Record<string, string> {
+  const id = (attachmentId || uploadMeta?.fileId || '').trim();
+  if (!id) return {};
+  return { attachmentId: id };
 }
 
 export function buildPrescriptionPayload(form: PrescriptionForm): ApiPayload {
@@ -200,14 +214,14 @@ export function buildPrescriptionPayload(form: PrescriptionForm): ApiPayload {
       .map((l) => ({
         labTestType: l.labTestType.trim(),
         notes: nullIfEmpty(l.notes) ?? '',
-        ...withAttachmentId(l.attachmentId),
+        ...withAttachmentId(l.attachmentId, l.uploadMeta),
       })),
     imagingRequests: form.imagingRequests
       .filter((i) => i.imageTypeId > 0)
       .map((i) => ({
         imageTypeId: i.imageTypeId,
         notes: nullIfEmpty(i.notes) ?? '',
-        ...withAttachmentId(i.attachmentId),
+        ...withAttachmentId(i.attachmentId, i.uploadMeta),
       })),
   };
   const prescriptionId = idOrUndefined(form.prescriptionId);

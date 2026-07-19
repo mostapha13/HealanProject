@@ -76,51 +76,99 @@ const initialForm = () => ({
 
 type FormState = ReturnType<typeof initialForm>;
 
-function mapDetailToForm(detail: PrescriptionDetail): FormState {
-  const drugs =
-    detail.prescriptionDrugs
-      ?.filter((d) => d.drugName?.trim())
-      .map((d) => ({
-        drugName: d.drugName ?? '',
-        dosage: d.dosage ?? '',
-        usageInstructions: d.usageInstructions ?? '',
-      })) ?? [];
-  const labs =
-    detail.labTestRequests
-      ?.filter((l) => l.labTestType?.trim())
-      .map((l) => ({
-        labTestType: l.labTestType ?? '',
-        notes: l.notes ?? '',
-        attachmentId: l.attachmentId ?? l.attachment?.fileId ?? null,
-        uploadMeta: l.attachment?.fileId
-          ? { fileId: l.attachment.fileId, fileName: l.attachment.fileName ?? 'پیوست', link: l.attachment.link }
-          : l.attachmentId
-            ? { fileId: l.attachmentId, fileName: l.attachment?.fileName ?? 'پیوست' }
-            : null,
-      })) ?? [];
-  const imaging =
-    detail.imagingRequests
-      ?.filter((i) => parseImageTypeId(i.imageTypeId) > 0)
-      .map((i) => ({
-        imageTypeId: parseImageTypeId(i.imageTypeId),
-        notes: i.notes ?? '',
-        attachmentId: i.attachmentId ?? i.attachment?.fileId ?? null,
-        uploadMeta: i.attachment?.fileId
-          ? { fileId: i.attachment.fileId, fileName: i.attachment.fileName ?? 'پیوست', link: i.attachment.link }
-          : i.attachmentId
-            ? { fileId: i.attachmentId, fileName: i.attachment?.fileName ?? 'پیوست' }
-            : null,
-      })) ?? [];
+function pickStr(source: Record<string, unknown> | null | undefined, ...keys: string[]): string {
+  if (!source) return '';
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return String(value).trim();
+    }
+  }
+  return '';
+}
+
+function pickAttachmentMeta(
+  row: Record<string, unknown> | null | undefined
+): { attachmentId: string | null; uploadMeta: PrescriptionLabRow['uploadMeta'] } {
+  if (!row) return { attachmentId: null, uploadMeta: null };
+
+  const nested = (row['attachment'] ?? row['Attachment']) as Record<string, unknown> | undefined;
+  const attachmentId =
+    pickStr(row, 'attachmentId', 'AttachmentId') ||
+    pickStr(nested, 'fileId', 'FileId') ||
+    null;
+
+  if (!attachmentId) return { attachmentId: null, uploadMeta: null };
 
   return {
-    prescriptionId: detail.prescriptionId,
-    appointmentId: detail.appointmentId,
-    issueDate: toDateTimeLocalValue(detail.issueDate) || nowDateTimeLocal(),
-    notes: detail.notes ?? '',
+    attachmentId,
+    uploadMeta: {
+      fileId: attachmentId,
+      fileName: pickStr(nested, 'fileName', 'FileName') || 'پیوست',
+      link: pickStr(nested, 'link', 'Link') || undefined,
+      fileType: pickStr(nested, 'fileType', 'FileType') || undefined,
+    },
+  };
+}
+
+function mapDetailToForm(detail: PrescriptionDetail): FormState {
+  const detailRec = detail as unknown as Record<string, unknown>;
+  const drugsRaw = (detail.prescriptionDrugs ?? detailRec['PrescriptionDrugs'] ?? []) as Array<
+    Record<string, unknown>
+  >;
+  const labsRaw = (detail.labTestRequests ?? detailRec['LabTestRequests'] ?? []) as Array<
+    Record<string, unknown>
+  >;
+  const imagingRaw = (detail.imagingRequests ?? detailRec['ImagingRequests'] ?? []) as Array<
+    Record<string, unknown>
+  >;
+
+  const drugs = drugsRaw
+    .map((d) => ({
+      drugName: pickStr(d, 'drugName', 'DrugName'),
+      dosage: pickStr(d, 'dosage', 'Dosage'),
+      usageInstructions: pickStr(d, 'usageInstructions', 'UsageInstructions'),
+    }))
+    .filter((d) => d.drugName);
+
+  const labs = labsRaw
+    .map((l) => {
+      const meta = pickAttachmentMeta(l);
+      return {
+        labTestType: pickStr(l, 'labTestType', 'LabTestType'),
+        notes: pickStr(l, 'notes', 'Notes'),
+        attachmentId: meta.attachmentId,
+        uploadMeta: meta.uploadMeta,
+      };
+    })
+    .filter((l) => l.labTestType);
+
+  const imaging = imagingRaw
+    .map((i) => {
+      const meta = pickAttachmentMeta(i);
+      return {
+        imageTypeId: parseImageTypeId(i['imageTypeId'] ?? i['ImageTypeId']),
+        notes: pickStr(i, 'notes', 'Notes'),
+        attachmentId: meta.attachmentId,
+        uploadMeta: meta.uploadMeta,
+      };
+    })
+    .filter((i) => i.imageTypeId > 0);
+
+  return {
+    prescriptionId: Number(detail.prescriptionId ?? detailRec['PrescriptionId'] ?? 0) || 0,
+    appointmentId: Number(detail.appointmentId ?? detailRec['AppointmentId'] ?? 0) || 0,
+    issueDate:
+      toDateTimeLocalValue(
+        String(detail.issueDate ?? detailRec['IssueDate'] ?? '')
+      ) || nowDateTimeLocal(),
+    notes: String(detail.notes ?? detailRec['Notes'] ?? ''),
     prescriptionDrugs: drugs,
     labTestRequests: labs,
     imagingRequests: imaging,
-    echoReport: mapEchoFromApi(detail.echoReport as Record<string, unknown> | null),
+    echoReport: mapEchoFromApi(
+      (detail.echoReport ?? detailRec['EchoReport'] ?? null) as Record<string, unknown> | null
+    ),
   };
 }
 
@@ -316,19 +364,57 @@ function PrescriptionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       return;
     }
 
+    // اگر کاربر فایل آپلود کرده ولی «افزودن» نزده، قبل از ذخیره به لیست اضافه کن
+    let labsForSave = [...form.labTestRequests];
+    let imagingForSaveList = [...form.imagingRequests];
+
+    if (newLab.uploadMeta?.fileId || newLab.labTestType.trim()) {
+      if (!newLab.labTestType.trim()) {
+        onAlert({ type: 'error', message: 'برای پیوست آزمایش، نوع آزمایش را وارد و افزودن را بزنید' });
+        return;
+      }
+      labsForSave = [
+        ...labsForSave,
+        {
+          ...newLab,
+          attachmentId: newLab.uploadMeta?.fileId ?? newLab.attachmentId ?? null,
+          uploadMeta: newLab.uploadMeta ? { ...newLab.uploadMeta } : null,
+        },
+      ];
+    }
+
+    if (newImaging.uploadMeta?.fileId || (newImaging.notes.trim() && newImaging.imageTypeId > 0)) {
+      if (newImaging.imageTypeId <= 0) {
+        onAlert({ type: 'error', message: 'برای پیوست تصویربرداری، نوع را انتخاب و افزودن را بزنید' });
+        return;
+      }
+      // فقط وقتی واقعاً چیزی در پیش‌نویس هست اضافه کن (نه imageType پیش‌فرض خالی)
+      if (newImaging.uploadMeta?.fileId || newImaging.notes.trim()) {
+        imagingForSaveList = [
+          ...imagingForSaveList,
+          {
+            ...newImaging,
+            attachmentId: newImaging.uploadMeta?.fileId ?? newImaging.attachmentId ?? null,
+            uploadMeta: newImaging.uploadMeta ? { ...newImaging.uploadMeta } : null,
+          },
+        ];
+      }
+    }
+
     // دارو و آزمایش اختیاری‌اند؛ نسخه فقط با یادداشت/اکو هم قابل ذخیره است
-    const hasImaging = form.imagingRequests.length > 0;
+    const hasImaging = imagingForSaveList.length > 0;
     const hasEcho = echoHasAnyValue(form.echoReport);
     const imagingForSave =
-      hasEcho && !form.imagingRequests.some((i) => i.imageTypeId === ECHO_TYPE_ID)
-        ? [...form.imagingRequests, { imageTypeId: ECHO_TYPE_ID, notes: '', attachmentId: null }]
-        : form.imagingRequests;
+      hasEcho && !imagingForSaveList.some((i) => i.imageTypeId === ECHO_TYPE_ID)
+        ? [...imagingForSaveList, { imageTypeId: ECHO_TYPE_ID, notes: '', attachmentId: null }]
+        : imagingForSaveList;
 
     setSaving(true);
     try {
       const result = await healanApi.prescriptions.register(
         buildPrescriptionPayload({
           ...form,
+          labTestRequests: labsForSave,
           imagingRequests: imagingForSave,
           includeImaging: imagingForSave.length > 0 || hasImaging,
           echoReport: hasEcho ? form.echoReport : null,

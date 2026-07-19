@@ -125,9 +125,7 @@ namespace Healan.Infrastructure.Migrations
             modelBuilder.Entity("Healan.Domain.Attachments.Entities.Attachment", b =>
                 {
                     b.Property<Guid>("FileId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("newid()");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -169,8 +167,8 @@ namespace Healan.Infrastructure.Migrations
 
                     b.Property<string>("Link")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uniqueidentifier");

@@ -61,7 +61,13 @@ namespace FileManager.GrpcClient.Services
             List<FileReplyInfo> fileInfosss = new List<FileReplyInfo>();
             foreach (var item in fileIds)
             {
-                fileInfosss.Add(new FileReplyInfo() { FileId = item.ToString(), FileName = "Test", FileType = "Image" });
+                fileInfosss.Add(new FileReplyInfo()
+                {
+                    FileId = item.ToString(),
+                    FileName = "Test",
+                    FileType = "Image",
+                    Link = $"/File/Download/{item}",
+                });
             }
             return fileInfosss;
 
