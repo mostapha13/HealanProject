@@ -353,11 +353,6 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
         if (!stored.Found || string.IsNullOrWhiteSpace(expected) || !string.Equals(expected, code, StringComparison.Ordinal))
             throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است. دوباره درخواست کد دهید.");
 
-        await _otpStore.RemoveAsync(phone, cancellationToken);
-
-        var bookingToken = Guid.NewGuid().ToString("N");
-        await _otpStore.SetSessionAsync(bookingToken, phone, TimeSpan.FromMinutes(30), cancellationToken);
-
         BookingLookupPatientDto patient;
         try
         {
@@ -381,21 +376,43 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
             && lastName.Length >= 2
             && national.Length == 10;
 
-        var saved = await _identityTool.SaveUser(new SaveRequest
+        UserSummaryReply? saved;
+        try
         {
-            UserId = string.Empty,
-            PhoneNumber = phone,
-            FirstName = firstName,
-            LastName = lastName,
-            IsActive = true,
-            Password = DefaultPassword,
-            DepartmentId = (int)DepartmentId.Public,
-            TwoFactorEnabled = false,
-        });
+            saved = await _identityTool.SaveUser(new SaveRequest
+            {
+                UserId = string.Empty,
+                PhoneNumber = phone,
+                FirstName = firstName,
+                LastName = lastName,
+                IsActive = true,
+                Password = DefaultPassword,
+                DepartmentId = (int)DepartmentId.Public,
+                TwoFactorEnabled = false,
+            });
+        }
+        catch (BadRequestExceptions)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BadRequestExceptions("ارتباط با سرویس احراز هویت برقرار نشد. کمی بعد دوباره تلاش کنید.");
+        }
 
         if (saved == null || string.IsNullOrWhiteSpace(saved.UserId)
             || !Guid.TryParse(saved.UserId, out var userId))
             throw new BadRequestExceptions("امکان ایجاد/یافتن کاربر فراهم نشد. دوباره تلاش کنید.");
+
+        // کد را فقط بعد از موفقیت ساخت/یافتن کاربر باطل کن تا خطای identity کد را نسوزاند
+        await _otpStore.RemoveAsync(phone, cancellationToken);
+
+        var bookingToken = Guid.NewGuid().ToString("N");
+        await _otpStore.SetSessionAsync(bookingToken, phone, TimeSpan.FromMinutes(30), cancellationToken);
 
         await EnsureSiteUserRoleAsync(userId);
 

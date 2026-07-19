@@ -49,23 +49,41 @@ public class PortalOtpVerifyCommandHandler : IRequestHandler<PortalOtpVerifyComm
             || !string.Equals(RagQuotaHelper.ToAsciiDigits(expected), code, StringComparison.Ordinal))
             throw new BadRequestExceptions("کد تأیید نادرست یا منقضی شده است");
 
-        _cache.Remove(cacheKey);
         _cache.Remove($"portal_otp_cd_{phone}");
 
-        var saved = await _identityTool.SaveUser(new SaveRequest
+        UserSummaryReply? saved;
+        try
         {
-            UserId = string.Empty,
-            PhoneNumber = phone,
-            FirstName = string.Empty,
-            LastName = string.Empty,
-            IsActive = true,
-            Password = DefaultPassword,
-            DepartmentId = (int)DepartmentId.Public,
-            TwoFactorEnabled = false,
-        });
+            saved = await _identityTool.SaveUser(new SaveRequest
+            {
+                UserId = string.Empty,
+                PhoneNumber = phone,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                IsActive = true,
+                Password = DefaultPassword,
+                DepartmentId = (int)DepartmentId.Public,
+                TwoFactorEnabled = false,
+            });
+        }
+        catch (BadRequestExceptions)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new BadRequestExceptions("ارتباط با سرویس احراز هویت برقرار نشد. کمی بعد دوباره تلاش کنید.");
+        }
 
         if (saved == null || string.IsNullOrWhiteSpace(saved.UserId) || !Guid.TryParse(saved.UserId, out var userId))
             throw new BadRequestExceptions("امکان ایجاد/یافتن کاربر فراهم نشد. دوباره تلاش کنید.");
+
+        // کد را فقط بعد از موفقیت ساخت کاربر باطل کن
+        _cache.Remove(cacheKey);
 
         await EnsureSiteUserRoleAsync(userId);
 

@@ -75,7 +75,6 @@ namespace IdentityServer.GrpcServer.Services
             if (user == null)
             {
                 user = new ApplicationUser();
-                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password);
                 user.DepartmentId = Share.Domain.Enums.DepartmentId.MarketMaker;
                 user.FirstName = string.IsNullOrWhiteSpace(request.FirstName) ? "کاربر" : request.FirstName;
                 user.LastName = string.IsNullOrWhiteSpace(request.LastName) ? "سایت" : request.LastName;
@@ -83,8 +82,9 @@ namespace IdentityServer.GrpcServer.Services
                 user.PhoneNumber = request.PhoneNumber;
                 user.PhoneNumberConfirmed = true;
                 user.UserName = request.PhoneNumber;
-                user.NormalizedUserName = request.PhoneNumber;
-                var createResult = await _userManager.CreateAsync(user, request.Password);
+                // PasswordHash را CreateAsync خودش می‌سازد؛ از پیش ست نکن (باعث خطای Identity می‌شود)
+                var password = string.IsNullOrWhiteSpace(request.Password) ? "aA@123456" : request.Password;
+                var createResult = await _userManager.CreateAsync(user, password);
                 if (!createResult.Succeeded)
                 {
                     var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
@@ -142,12 +142,22 @@ namespace IdentityServer.GrpcServer.Services
         }
         public async override Task<UserSummaryReply> SetUserRole(SetUserRoleRequest request, ServerCallContext context)
         {
-            await UpdateUserRoles(request.UserId.ToGuid().Value, request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
-            return await GetUserSummaryReply(request.UserId.ToGuid().Value);
+            var userId = request.UserId.ToGuid();
+            if (!userId.HasValue || userId.Value == Guid.Empty)
+                return new UserSummaryReply();
+
+            await UpdateUserRoles(
+                userId.Value,
+                request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
+            return await GetUserSummaryReply(userId.Value);
         }
         public async override Task<UserSummaryReply> SetUserState(SetUserStateRequest request, ServerCallContext context)
         {
-            var user = _applicationDbContext.Users.FirstOrDefault(p => p.Id == request.UserId.ToGuid().Value);
+            var userId = request.UserId.ToGuid();
+            if (!userId.HasValue || userId.Value == Guid.Empty)
+                return new UserSummaryReply();
+
+            var user = _applicationDbContext.Users.FirstOrDefault(p => p.Id == userId.Value);
             if (user == null)
                 return new UserSummaryReply();
 
