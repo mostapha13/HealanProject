@@ -179,15 +179,10 @@ export function LandingPage() {
             {portalUser ? (
               <PortalSessionActions user={portalUser} onLogout={onPortalLogout} />
             ) : (
-              <>
-                <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={() => void startPatientLogin()}>
-                  <IconLogin className="portal-icon-sm" />
-                  <span>ورود بیمار</span>
-                </button>
-                <button type="button" className="p-btn p-btn--outline p-btn--sm" onClick={goToLogin} title="ورود کارکنان کلینیک">
-                  <span>ورود کلینیک</span>
-                </button>
-              </>
+              <button type="button" className="p-btn p-btn--patient p-btn--sm" onClick={() => void startPatientLogin()}>
+                <IconLogin className="portal-icon-sm" />
+                <span>ورود بیمار</span>
+              </button>
             )}
             <button
               type="button"
@@ -224,15 +219,10 @@ export function LandingPage() {
                 stacked
               />
             ) : (
-              <>
-                <button type="button" className="p-btn p-btn--primary" onClick={() => { setMenuOpen(false); void startPatientLogin(); }}>
-                  <IconLogin className="portal-icon-sm" />
-                  ورود بیمار
-                </button>
-                <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
-                  ورود کلینیک
-                </button>
-              </>
+              <button type="button" className="p-btn p-btn--patient" onClick={() => { setMenuOpen(false); void startPatientLogin(); }}>
+                <IconLogin className="portal-icon-sm" />
+                ورود بیمار
+              </button>
             )}
           </nav>
         </div>
@@ -464,7 +454,7 @@ export function LandingPage() {
               <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={startBooking}>
                 تماس الان
               </button>
-              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={() => void startPatientLogin()}>
+              <button type="button" className="p-btn p-btn--patient p-btn--lg" onClick={() => void startPatientLogin()}>
                 <IconLogin className="portal-icon-sm" />
                 ورود بیمار
               </button>

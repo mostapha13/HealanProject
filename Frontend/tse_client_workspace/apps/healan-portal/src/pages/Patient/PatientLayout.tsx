@@ -72,7 +72,7 @@ export default function PatientLayout() {
         <div className="portal-patient__top-inner">
           <Link to="/" className="portal-patient__brand">
             ناحیه بیمار
-            <span className="portal-patient__build">build-v16-patient</span>
+            <span className="portal-patient__build">build-v17-patient</span>
           </Link>
           <div className="portal-patient__top-actions">
             {user ? (

@@ -12,6 +12,7 @@ const navItems: Array<{ path: string; label: string; icon: string; end?: boolean
   { path: '/booking/schedules', label: 'برنامه حضور', icon: '🗓️' },
   { path: '/booking/reservations', label: 'رزروهای نوبت', icon: '📅' },
   { path: '/patients', label: 'بیماران', icon: '👤' },
+  { path: '/blood-pressure', label: 'فشار خون', icon: '🩸' },
   { path: '/doctors', label: 'پزشکان', icon: '🩺' },
   { path: '/prescriptions', label: 'نسخه‌ها', icon: '💊' },
   { path: '/basic-data', label: 'اطلاعات پایه', icon: '📁' },

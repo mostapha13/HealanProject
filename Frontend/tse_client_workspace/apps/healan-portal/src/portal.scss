@@ -334,6 +334,18 @@
   color: var(--p-primary);
 }
 
+.p-btn--patient {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #d4d4d8;
+}
+
+.p-btn--patient:hover {
+  background: #fafafa;
+  color: #000;
+  border-color: #a1a1aa;
+}
+
 .p-btn--success {
   background: #16a34a;
   color: #fff;
@@ -3296,6 +3308,12 @@ button.portal-assistant__ghost:disabled {
 
 .portal-patient__form-wide {
   grid-column: 1 / -1;
+}
+
+.portal-patient__jalali-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 0.5rem;
 }
 
 .portal-patient__form select {
