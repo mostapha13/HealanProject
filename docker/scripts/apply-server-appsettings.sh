@@ -24,8 +24,15 @@ write_json() {
   local rel="$1"
   local file="$ROOT/$rel"
   mkdir -p "$(dirname "$file")"
-  # stdin = json with __SQL_PASSWORD__ placeholder
-  sed "s/__SQL_PASSWORD__/${PASS}/g" > "$file"
+  # Avoid sed — passwords often contain @ / & which break s/// substitution.
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c 'import sys; sys.stdout.write(sys.stdin.read().replace("__SQL_PASSWORD__", sys.argv[1]))' "$PASS" > "$file"
+  elif command -v python >/dev/null 2>&1; then
+    python -c 'import sys; sys.stdout.write(sys.stdin.read().replace("__SQL_PASSWORD__", sys.argv[1]))' "$PASS" > "$file"
+  else
+    # fallback: use | delimiter to survive / in password
+    sed "s|__SQL_PASSWORD__|${PASS//|/\\|}|g" > "$file"
+  fi
   echo "wrote $rel"
 }
 
@@ -33,7 +40,13 @@ write_env() {
   local rel="$1"
   local file="$ROOT/$rel"
   mkdir -p "$(dirname "$file")"
-  sed -e "s/__SQL_PASSWORD_ENC__/${PASS_ENC}/g" > "$file"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c 'import sys; sys.stdout.write(sys.stdin.read().replace("__SQL_PASSWORD_ENC__", sys.argv[1]))' "$PASS_ENC" > "$file"
+  elif command -v python >/dev/null 2>&1; then
+    python -c 'import sys; sys.stdout.write(sys.stdin.read().replace("__SQL_PASSWORD_ENC__", sys.argv[1]))' "$PASS_ENC" > "$file"
+  else
+    sed -e "s|__SQL_PASSWORD_ENC__|${PASS_ENC//|/\\|}|g" > "$file"
+  fi
   echo "wrote $rel"
 }
 
