@@ -153,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 220px;
+  max-width: 360px;
 }
 
 .portal-header__user-name {
@@ -3079,6 +3079,229 @@ button.portal-assistant__ghost:disabled {
 .portal-auth-modal__fields {
   display: grid;
   gap: 0.35rem;
+}
+
+/* —— Patient area —— */
+.portal-patient {
+  min-height: 100vh;
+  background: linear-gradient(165deg, #f0f7fb 0%, #eef2f7 45%, #f7fafc 100%);
+  color: #0f172a;
+}
+
+.portal-patient__top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.portal-patient__top-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.portal-patient__brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #0f766e;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.portal-patient__build {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.portal-patient__body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.portal-patient__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: sticky;
+  top: 4.5rem;
+}
+
+.portal-patient__nav-link {
+  text-decoration: none;
+  color: #334155;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+
+.portal-patient__nav-link:hover,
+.portal-patient__nav-link.is-active {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.portal-patient__main {
+  min-width: 0;
+}
+
+.portal-patient__panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.35rem 1.4rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.portal-patient__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.45rem;
+}
+
+.portal-patient__lead {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.portal-patient__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.portal-patient__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(145deg, #f8fafc, #f0fdfa);
+  border: 1px solid rgba(15, 118, 110, 0.12);
+}
+
+.portal-patient__tile strong {
+  color: #0f766e;
+}
+
+.portal-patient__tile span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.portal-patient__section {
+  margin-top: 1.25rem;
+}
+
+.portal-patient__section h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+}
+
+.portal-patient__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.portal-patient__list li {
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.portal-patient__list-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.portal-patient__row-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.portal-patient__hint {
+  color: #64748b;
+  margin: 0.25rem 0;
+}
+
+.portal-patient__muted {
+  color: #64748b;
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+}
+
+.portal-patient__error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  margin-bottom: 0.85rem;
+}
+
+.portal-patient__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  align-items: end;
+}
+
+.portal-patient__form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.portal-patient__form input {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.portal-patient__form-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .portal-patient__body {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-patient__nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .portal-patient__form {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {

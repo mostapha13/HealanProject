@@ -15,7 +15,7 @@ import {
 } from '../../components/Icons';
 import { HeroSlider } from '../../components/HeroSlider';
 import { PatientReviewForm } from '../../components/PatientReviewForm';
-import { PortalAuthModal, resolveBookingEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
+import { PortalAuthModal, resolveBookingEntry, resolvePatientEntry, type PortalAuthModalMode } from '../../components/PortalAuthModal';
 import { PortalSessionActions, usePortalSessionUser } from '../../components/PortalSessionUser';
 import { usePortalSite } from '../../hooks/usePortalSite';
 import { resolvePortalIcon } from '../../utils/portalIcons';
@@ -57,6 +57,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<PortalAuthModalMode>('register');
+  const [authSuccessPath, setAuthSuccessPath] = useState('/booking');
   const { user: portalUser, refresh: refreshPortalUser, logout: logoutPortalUser } = usePortalSessionUser();
   const { doctor, contact, hero, sections, map, heroStats, heroSlides, isSectionEnabled, navItems, trustItems, services, whyItems, reviews } = usePortalSite();
 
@@ -67,6 +68,19 @@ export function LandingPage() {
       navigate('/booking');
       return;
     }
+    setAuthSuccessPath('/booking');
+    setAuthMode(entry.mode);
+    setAuthOpen(true);
+  };
+
+  const startPatientLogin = async () => {
+    setMenuOpen(false);
+    const entry = await resolvePatientEntry();
+    if (entry.action === 'goto-patient') {
+      navigate('/patient');
+      return;
+    }
+    setAuthSuccessPath('/patient');
     setAuthMode(entry.mode);
     setAuthOpen(true);
   };
@@ -165,10 +179,15 @@ export function LandingPage() {
             {portalUser ? (
               <PortalSessionActions user={portalUser} onLogout={onPortalLogout} />
             ) : (
-              <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={goToLogin}>
-                <IconLogin className="portal-icon-sm" />
-                <span>ورود</span>
-              </button>
+              <>
+                <button type="button" className="p-btn p-btn--primary p-btn--sm" onClick={() => void startPatientLogin()}>
+                  <IconLogin className="portal-icon-sm" />
+                  <span>ورود بیمار</span>
+                </button>
+                <button type="button" className="p-btn p-btn--outline p-btn--sm" onClick={goToLogin} title="ورود کارکنان کلینیک">
+                  <span>ورود کلینیک</span>
+                </button>
+              </>
             )}
             <button
               type="button"
@@ -205,10 +224,15 @@ export function LandingPage() {
                 stacked
               />
             ) : (
-              <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
-                <IconLogin className="portal-icon-sm" />
-                ورود به سامانه
-              </button>
+              <>
+                <button type="button" className="p-btn p-btn--primary" onClick={() => { setMenuOpen(false); void startPatientLogin(); }}>
+                  <IconLogin className="portal-icon-sm" />
+                  ورود بیمار
+                </button>
+                <button type="button" className="p-btn p-btn--outline" onClick={() => { setMenuOpen(false); goToLogin(); }}>
+                  ورود کلینیک
+                </button>
+              </>
             )}
           </nav>
         </div>
@@ -440,9 +464,12 @@ export function LandingPage() {
               <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={startBooking}>
                 تماس الان
               </button>
-              <button type="button" className="p-btn p-btn--outline p-btn--lg" onClick={goToLogin}>
+              <button type="button" className="p-btn p-btn--primary p-btn--lg" onClick={() => void startPatientLogin()}>
                 <IconLogin className="portal-icon-sm" />
-                ورود به سامانه Healan
+                ورود بیمار
+              </button>
+              <button type="button" className="p-btn p-btn--outline p-btn--lg" onClick={goToLogin}>
+                ورود کلینیک
               </button>
             </div>
             <p className="portal-contact__hint">
@@ -487,7 +514,7 @@ export function LandingPage() {
             {portalUser ? (
               <button type="button" onClick={onPortalLogout}>خروج ({portalUser.displayName})</button>
             ) : (
-              <button type="button" onClick={goToLogin}>ورود</button>
+              <button type="button" onClick={() => void startPatientLogin()}>ورود بیمار</button>
             )}
           </div>
         </div>
@@ -503,7 +530,7 @@ export function LandingPage() {
         onSuccess={async () => {
           setAuthOpen(false);
           await refreshPortalUser();
-          navigate('/booking');
+          navigate(authSuccessPath);
         }}
       />
     </div>

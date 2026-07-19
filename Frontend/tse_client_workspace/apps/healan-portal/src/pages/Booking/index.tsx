@@ -321,13 +321,20 @@ export default function BookingPage() {
           <Link to="/" className="portal-booking__back">
             ← بازگشت به سایت
           </Link>
-          <button type="button" className="p-btn p-btn--outline p-btn--sm" onClick={callClinicPhone}>
-            تماس تلفنی
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {getPortalRagToken() ? (
+              <Link to="/patient" className="p-btn p-btn--outline p-btn--sm">
+                پنل بیمار
+              </Link>
+            ) : null}
+            <button type="button" className="p-btn p-btn--outline p-btn--sm" onClick={callClinicPhone}>
+              تماس تلفنی
+            </button>
+          </div>
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v13-booking</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v14-patient</span>
           <h1 className="portal-booking__title">انتخاب نوبت قلب</h1>
           <p className="portal-booking__lead">
             روز و ساعت مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.

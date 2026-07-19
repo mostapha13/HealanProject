@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   bookingProfileStatus,
   getPortalRagToken,
@@ -69,13 +70,16 @@ type PortalSessionActionsProps = {
   stacked?: boolean;
 };
 
-/** نام کاربر لاگین‌شده + دکمه خروج — گوشه هدر سایت عمومی. */
+/** نام کاربر لاگین‌شده + لینک پنل بیمار + دکمه خروج — گوشه هدر سایت عمومی. */
 export function PortalSessionActions({ user, onLogout, stacked }: PortalSessionActionsProps) {
   return (
     <div className={`portal-header__user${stacked ? ' is-stacked' : ''}`}>
       <span className="portal-header__user-name" title={user.phoneMasked || user.displayName}>
         {user.displayName}
       </span>
+      <Link to="/patient" className={`p-btn p-btn--outline${stacked ? '' : ' p-btn--sm'}`}>
+        پنل بیمار
+      </Link>
       <button
         type="button"
         className={`p-btn p-btn--outline${stacked ? '' : ' p-btn--sm'}`}

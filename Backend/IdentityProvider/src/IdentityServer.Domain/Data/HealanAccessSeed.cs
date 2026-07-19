@@ -86,6 +86,11 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PortalRagLogs, "گفتگوهای دستیار", "/site-content/rag-logs"),
             new FormDef(HealanAccessFormIds.BookingSchedules, "برنامه حضور", "/booking/schedules"),
             new FormDef(HealanAccessFormIds.BookingReservations, "رزروهای نوبت", "/booking/reservations"),
+            new FormDef(HealanAccessFormIds.PatientHistory, "سوابق بیمار", "/patient/history"),
+            new FormDef(HealanAccessFormIds.PatientBloodPressure, "ثبت فشار خون", "/patient/blood-pressure"),
+            new FormDef(HealanAccessFormIds.PatientMedications, "یادآوری داروها", "/patient/medications"),
+            new FormDef(HealanAccessFormIds.PatientAssistant, "چت‌بات بیمار", "/assistant"),
+            new FormDef(HealanAccessFormIds.PatientBooking, "رزرو نوبت بیمار", "/booking"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -159,6 +164,12 @@ public static class HealanAccessSeed
             new MenuDef(5133, null, null, 8, "نوبت‌دهی"),
             new MenuDef(5134, HealanAccessFormIds.BookingSchedules, 5133, 1),
             new MenuDef(5135, HealanAccessFormIds.BookingReservations, 5133, 2),
+            new MenuDef(5136, null, null, 9, "ناحیه بیمار (سایت)"),
+            new MenuDef(5137, HealanAccessFormIds.PatientHistory, 5136, 1),
+            new MenuDef(5138, HealanAccessFormIds.PatientBloodPressure, 5136, 2),
+            new MenuDef(5139, HealanAccessFormIds.PatientMedications, 5136, 3),
+            new MenuDef(5140, HealanAccessFormIds.PatientAssistant, 5136, 4),
+            new MenuDef(5141, HealanAccessFormIds.PatientBooking, 5136, 5),
         };
 
         var menuIds = menus.Select(m => m.Id).ToArray();
@@ -239,6 +250,7 @@ public static class HealanAccessSeed
             [HealanClinicAccess.SecretaryRole] = HealanClinicAccess.SecretaryMenuIds,
             [HealanClinicAccess.DoctorRole] = HealanClinicAccess.DoctorMenuIds,
             [HealanClinicAccess.AccountantRole] = HealanClinicAccess.AccountantMenuIds,
+            [HealanClinicAccess.PatientRole] = HealanClinicAccess.PatientPortalMenuIds,
         };
 
         foreach (var (roleName, menuIds) in roleMenus)

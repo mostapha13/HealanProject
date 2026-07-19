@@ -60,6 +60,8 @@ public interface IApplicationDbContext : IDisposable
      DbSet<AppointmentSlot> AppointmentSlots { get; set; }
      DbSet<AppointmentBooking> AppointmentBookings { get; set; }
      DbSet<BookingAuthToken> BookingAuthTokens { get; set; }
+     DbSet<PatientBloodPressureLog> PatientBloodPressureLogs { get; set; }
+     DbSet<PatientMedicationReminder> PatientMedicationReminders { get; set; }
     //DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 

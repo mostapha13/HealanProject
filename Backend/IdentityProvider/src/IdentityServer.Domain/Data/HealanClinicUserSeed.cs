@@ -28,6 +28,7 @@ public static class HealanClinicUserSeed
         RoleManager<ApplicationRole> roleManager)
     {
         await EnsureRoleExistsAsync(roleManager, HealanClinicAccess.SiteUserRole);
+        await EnsureRoleExistsAsync(roleManager, HealanClinicAccess.PatientRole);
 
         foreach (var def in Users)
         {
@@ -49,6 +50,7 @@ public static class HealanClinicUserSeed
                 HealanClinicAccess.DoctorRole => "پزشک",
                 HealanClinicAccess.AccountantRole => "حسابدار",
                 HealanClinicAccess.SiteUserRole => "کاربر سایت",
+                HealanClinicAccess.PatientRole => "بیمار",
                 _ => roleName,
             },
         });

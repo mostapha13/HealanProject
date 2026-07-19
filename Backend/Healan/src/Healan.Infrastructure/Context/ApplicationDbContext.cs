@@ -73,6 +73,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<AppointmentSlot> AppointmentSlots { get; set; }
     public DbSet<AppointmentBooking> AppointmentBookings { get; set; }
     public DbSet<BookingAuthToken> BookingAuthTokens { get; set; }
+    public DbSet<PatientBloodPressureLog> PatientBloodPressureLogs { get; set; }
+    public DbSet<PatientMedicationReminder> PatientMedicationReminders { get; set; }
     //public DbSet<UserCardboardRecordView> UserCardboardRecordViews { get; set; }
     //public DbSet<UserCardboardRecordView_history> UserCardboardRecordView_histories { get; set; }
 

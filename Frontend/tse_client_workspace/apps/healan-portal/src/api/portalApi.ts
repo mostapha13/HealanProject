@@ -410,6 +410,110 @@ export function bookingReschedule(payload: Record<string, unknown>) {
   }) as Promise<PortalBookingItem>;
 }
 
+export type PortalMyHistory = {
+  bookings?: PortalBookingItem[];
+  visits?: Array<{
+    appointmentId: number;
+    appointmentDate: string;
+    appointmentStatus?: string;
+    doctorName?: string;
+    prescriptionId?: number;
+    prescriptionIssueDate?: string;
+    prescriptionNotes?: string;
+    drugs?: Array<{ drugName?: string; dosage?: string; usageInstructions?: string }>;
+  }>;
+};
+
+export type PortalBloodPressureItem = {
+  id: number;
+  systolic: number;
+  diastolic: number;
+  pulse?: number | null;
+  measuredAt: string;
+  note?: string | null;
+};
+
+export type PortalMedicationItem = {
+  id: number;
+  medicationName: string;
+  dose?: string | null;
+  timesOfDay: string;
+  isActive: boolean;
+};
+
+export function patientMyHistory() {
+  return request.get({
+    baseUrl: BASE,
+    url: 'MyHistory',
+    token: getPortalRagToken(),
+  }) as Promise<PortalMyHistory>;
+}
+
+export function patientBloodPressureList() {
+  return request.get({
+    baseUrl: BASE,
+    url: 'MyBloodPressure',
+    token: getPortalRagToken(),
+  }) as Promise<PortalBloodPressureItem[]>;
+}
+
+export function patientBloodPressureSave(payload: {
+  id?: number;
+  systolic: number;
+  diastolic: number;
+  pulse?: number | null;
+  measuredAt?: string;
+  note?: string;
+}) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'MyBloodPressureSave',
+    options: payload,
+    token: getPortalRagToken(),
+  }) as Promise<PortalBloodPressureItem>;
+}
+
+export function patientBloodPressureDelete(id: number) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'MyBloodPressureDelete',
+    options: { id },
+    token: getPortalRagToken(),
+  });
+}
+
+export function patientMedicationList() {
+  return request.get({
+    baseUrl: BASE,
+    url: 'MyMedications',
+    token: getPortalRagToken(),
+  }) as Promise<PortalMedicationItem[]>;
+}
+
+export function patientMedicationSave(payload: {
+  id?: number;
+  medicationName: string;
+  dose?: string;
+  timesOfDay: string;
+  isActive?: boolean;
+}) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'MyMedicationSave',
+    options: payload,
+    token: getPortalRagToken(),
+  }) as Promise<PortalMedicationItem>;
+}
+
+export function patientMedicationDelete(id: number) {
+  return request.post({
+    baseUrl: BASE,
+    url: 'MyMedicationDelete',
+    options: { id },
+    token: getPortalRagToken(),
+  });
+}
+
 export function portalSetting(site: PublishedPortalSite | null, key: string, fallback = ''): string {
   return site?.settings?.[key] ?? fallback;
 }

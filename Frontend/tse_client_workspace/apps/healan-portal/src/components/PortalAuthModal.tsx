@@ -437,3 +437,24 @@ export async function resolveBookingEntry(): Promise<
   }
   return { action: 'open-modal', mode: 'register' };
 }
+
+/** Decide patient-area CTA: complete patient → /patient, else OTP/complete modal. */
+export async function resolvePatientEntry(): Promise<
+  | { action: 'goto-patient'; profile: PortalBookingAuthResult }
+  | { action: 'open-modal'; mode: PortalAuthModalMode; profile?: PortalBookingAuthResult }
+> {
+  const token = getPortalRagToken();
+  if (!token) return { action: 'open-modal', mode: 'register' };
+  try {
+    const status = await bookingProfileStatus();
+    if (status?.isAuthenticated && status.isPatient) {
+      return { action: 'goto-patient', profile: status };
+    }
+    if (status?.isAuthenticated) {
+      return { action: 'open-modal', mode: 'complete', profile: status };
+    }
+  } catch {
+    /* fall through */
+  }
+  return { action: 'open-modal', mode: 'register' };
+}

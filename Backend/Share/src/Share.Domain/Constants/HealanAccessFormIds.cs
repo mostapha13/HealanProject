@@ -40,4 +40,9 @@ public static class HealanAccessFormIds
     public const int PortalRagLogs = 5029;
     public const int BookingSchedules = 5030;
     public const int BookingReservations = 5031;
+    public const int PatientHistory = 5032;
+    public const int PatientBloodPressure = 5033;
+    public const int PatientMedications = 5034;
+    public const int PatientAssistant = 5035;
+    public const int PatientBooking = 5036;
 }

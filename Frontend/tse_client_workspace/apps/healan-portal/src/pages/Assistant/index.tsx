@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   bookingCancel,
   bookingCreate,
@@ -871,7 +871,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v13-portal-ts-fix
+                build-v14-patient
               </span>
             </p>
           </div>
@@ -884,9 +884,14 @@ export default function AssistantPage() {
             </span>
           )}
           {quota?.isAuthenticated || getPortalRagToken() ? (
-            <button type="button" className="portal-assistant__linkbtn" onClick={logout}>
-              خروج
-            </button>
+            <>
+              <Link to="/patient" className="portal-assistant__linkbtn">
+                پنل بیمار
+              </Link>
+              <button type="button" className="portal-assistant__linkbtn" onClick={logout}>
+                خروج
+              </button>
+            </>
           ) : (
             <button type="button" className="portal-assistant__login-btn" style={BTN_LOGIN_PILL} onClick={openLogin}>
               ورود

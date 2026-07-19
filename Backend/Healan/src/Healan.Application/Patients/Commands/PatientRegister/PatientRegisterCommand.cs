@@ -196,6 +196,8 @@ public class PatientRegisterCommandHandler : IRequestHandler<PatientRegisterComm
 
             roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Healan));
 
+            roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Patient));
+
 
 
             var userSummary = await _identityTool.SetUserSystemRole(roleRequest);

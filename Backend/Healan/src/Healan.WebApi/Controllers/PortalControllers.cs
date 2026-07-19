@@ -14,6 +14,7 @@ using Healan.Application.Portal.Commands.PortalSiteSettingSave;
 using Healan.Application.Portal.Commands.RagKnowledgeDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeRegister;
 using Healan.Application.Portal.Commands.RagSettingSave;
+using Healan.Application.Portal.PatientArea;
 using Healan.Application.Portal.Queries.BlogPostInfo;
 using Healan.Application.Portal.Queries.BlogPostList;
 using Healan.Application.Portal.Queries.PatientReviewList;
@@ -274,6 +275,47 @@ public class PortalPublicController : ControllerBase
         request.AccessToken ??= ExtractBearerToken();
         return Ok(await Mediator.Send(request));
     }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> MyHistory() =>
+        Ok(await Mediator.Send(new PortalMyHistoryQuery { AccessToken = ExtractBearerToken() }));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> MyBloodPressure() =>
+        Ok(await Mediator.Send(new PortalBloodPressureListQuery { AccessToken = ExtractBearerToken() }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> MyBloodPressureSave([FromBody] PortalBloodPressureSaveCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> MyBloodPressureDelete([FromBody] PortalBloodPressureDeleteCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> MyMedications() =>
+        Ok(await Mediator.Send(new PortalMedicationListQuery { AccessToken = ExtractBearerToken() }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> MyMedicationSave([FromBody] PortalMedicationSaveCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> MyMedicationDelete([FromBody] PortalMedicationDeleteCommand request)
+    {
+        request.AccessToken ??= ExtractBearerToken();
+        return Ok(await Mediator.Send(request));
+    }
+
     private string? ExtractBearerToken()
     {
         var header = Request.Headers.Authorization.ToString();

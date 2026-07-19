@@ -288,7 +288,6 @@ public sealed class PortalPatientRegisterResult
 /// </summary>
 public sealed class PortalPatientRegistrar
 {
-    private const string SiteUserRole = nameof(UserAccesRoleId.SiteUser);
     private readonly IApplicationDbContext _db;
     private readonly IIdentityTool _identityTool;
 
@@ -390,7 +389,7 @@ public sealed class PortalPatientRegistrar
             || !Guid.TryParse(identityUser.UserId, out var identityGuid))
             throw new BadRequestExceptions("امکان ایجاد/یافتن کاربر فراهم نشد. دوباره تلاش کنید.");
 
-        await EnsureSiteUserRoleAsync(identityGuid);
+        await PortalAspNetRoleHelper.EnsureAsync(_identityTool, identityGuid, includePatient: true);
 
         var roleRequest = new SetUserSystemRoleRequest
         {
@@ -398,6 +397,7 @@ public sealed class PortalPatientRegistrar
             AccessSystemId = (int)AccessSystemId.Healan,
         };
         roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Healan));
+        roleRequest.RoleNames.Add(nameof(UserAccesRoleId.Patient));
         var userSummary = await _identityTool.SetUserSystemRole(roleRequest);
         if (userSummary == null || string.IsNullOrWhiteSpace(userSummary.UserId))
             throw new BadRequestExceptions("خطا در تخصیص نقش بیمار.");
@@ -443,29 +443,4 @@ public sealed class PortalPatientRegistrar
         };
     }
 
-    private async Task EnsureSiteUserRoleAsync(Guid userId)
-    {
-        try
-        {
-            var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
-            var names = roleInfos?.RoleInfos_
-                ?.Select(r => r.RoleName)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList() ?? new List<string>();
-
-            if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
-                return;
-
-            names.Add(SiteUserRole);
-            var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
-            foreach (var name in names)
-                setRequest.RoleNames.Add(name);
-            await _identityTool.SetUserRole(setRequest);
-        }
-        catch
-        {
-            // نقش SiteUser نباید ثبت بیمار پورتال را بشکند.
-        }
-    }
 }

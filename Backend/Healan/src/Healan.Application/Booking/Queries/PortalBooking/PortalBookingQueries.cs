@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Share.Domain.Enums;
 using Share.Domain.Exceptions;
-using Share.Domain.Models.UserAccessModels;
 
 namespace Healan.Application.Booking.Queries.PortalBooking;
 
@@ -318,7 +317,6 @@ public class BookingOtpVerifyCommand : IRequest<BookingOtpVerifyResultDto>
 
 public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCommand, BookingOtpVerifyResultDto>
 {
-    private const string SiteUserRole = nameof(UserAccesRoleId.SiteUser);
     private const string DefaultPassword = "aA@123456";
 
     private readonly IBookingOtpStore _otpStore;
@@ -414,7 +412,7 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
         var bookingToken = Guid.NewGuid().ToString("N");
         await _otpStore.SetSessionAsync(bookingToken, phone, TimeSpan.FromMinutes(30), cancellationToken);
 
-        await EnsureSiteUserRoleAsync(userId);
+        await PortalAspNetRoleHelper.EnsureAsync(_identityTool, userId, includePatient: isPatient);
 
         var accessToken = _tokenService.CreateToken(userId, phone, out var expiresAt);
 
@@ -437,32 +435,6 @@ public class BookingOtpVerifyCommandHandler : IRequestHandler<BookingOtpVerifyCo
         };
     }
 
-    private async Task EnsureSiteUserRoleAsync(Guid userId)
-    {
-        try
-        {
-            var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
-            var names = roleInfos?.RoleInfos_
-                ?.Select(r => r.RoleName)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList() ?? new List<string>();
-
-            if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
-                return;
-
-            names.Add(SiteUserRole);
-            var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
-            foreach (var name in names)
-                setRequest.RoleNames.Add(name);
-            await _identityTool.SetUserRole(setRequest);
-        }
-        catch
-        {
-            // نقش SiteUser نباید Verify OTP را برای کاربر جدید بشکند
-            // (قبلاً GetUserRole با null باعث RpcException Cancelled می‌شد).
-        }
-    }
 }
 
 public class BookingOtpVerifyResultDto

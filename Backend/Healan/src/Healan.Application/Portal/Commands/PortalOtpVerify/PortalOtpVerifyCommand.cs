@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Share.Domain.Enums;
 using Share.Domain.Exceptions;
-using Share.Domain.Models.UserAccessModels;
 
 namespace Healan.Application.Portal.Commands.PortalOtpVerify;
 
@@ -18,7 +17,6 @@ public class PortalOtpVerifyCommand : IRequest<PortalAuthResultDto>
 
 public class PortalOtpVerifyCommandHandler : IRequestHandler<PortalOtpVerifyCommand, PortalAuthResultDto>
 {
-    private const string SiteUserRole = nameof(UserAccesRoleId.SiteUser);
     private const string DefaultPassword = "aA@123456";
 
     private readonly IMemoryCache _cache;
@@ -85,7 +83,7 @@ public class PortalOtpVerifyCommandHandler : IRequestHandler<PortalOtpVerifyComm
         // کد را فقط بعد از موفقیت ساخت کاربر باطل کن
         _cache.Remove(cacheKey);
 
-        await EnsureSiteUserRoleAsync(userId);
+        await PortalAspNetRoleHelper.EnsureAsync(_identityTool, userId, includePatient: false);
 
         var token = _tokenService.CreateToken(userId, phone, out var expiresAt);
         return new PortalAuthResultDto
@@ -98,30 +96,4 @@ public class PortalOtpVerifyCommandHandler : IRequestHandler<PortalOtpVerifyComm
         };
     }
 
-    private async Task EnsureSiteUserRoleAsync(Guid userId)
-    {
-        try
-        {
-            var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
-            var names = roleInfos?.RoleInfos_
-                ?.Select(r => r.RoleName)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList() ?? new List<string>();
-
-            if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
-                return;
-
-            names.Add(SiteUserRole);
-            var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
-            foreach (var name in names)
-                setRequest.RoleNames.Add(name);
-
-            await _identityTool.SetUserRole(setRequest);
-        }
-        catch
-        {
-            // نقش SiteUser نباید Verify OTP را برای کاربر جدید بشکند.
-        }
-    }
 }
