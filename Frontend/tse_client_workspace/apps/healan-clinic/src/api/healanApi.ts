@@ -17,6 +17,7 @@ import type {
   PatientSummary,
   EchoPrintData,
   PatientVisitHistoryItem,
+  PatientBloodPressureHistoryResult,
   PrescriptionDetail,
   PrescriptionSummary,
   ServiceType,
@@ -125,6 +126,11 @@ export const healanApi = {
       get<PatientSummary>(`Patient/PatientInfoByNationalCode/?nationalCode=${nationalCode}`),
     visitHistory: (patientId: number) =>
       get<PatientVisitHistoryItem[]>(`Patient/VisitHistory/?patientId=${patientId}`),
+    bloodPressureHistory: (params: { nationalCode?: string; patientId?: number }) =>
+      get<PatientBloodPressureHistoryResult>('Patient/BloodPressureHistory', {
+        nationalCode: params.nationalCode,
+        patientId: params.patientId,
+      }),
   },
 
   doctors: {

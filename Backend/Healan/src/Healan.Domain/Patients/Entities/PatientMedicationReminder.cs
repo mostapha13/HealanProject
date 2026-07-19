@@ -8,7 +8,11 @@ public class PatientMedicationReminder : AuditableEntity
     public long PatientId { get; set; }
     public string MedicationName { get; set; } = string.Empty;
     public string? Dose { get; set; }
-    /// <summary>Comma-separated HH:mm times (local), e.g. 08:00,14:00,20:00</summary>
+    /// <summary>فاصله مصرف به ساعت: ۴، ۶، ۸، ۱۰، ۱۲، ۲۴</summary>
+    public int IntervalHours { get; set; }
+    /// <summary>ساعت اولین مصرف</summary>
+    public TimeSpan FirstDoseTime { get; set; }
+    /// <summary>ساعات محاسبه‌شده (مثلاً 08:00,16:00,00:00+1)</summary>
     public string TimesOfDay { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 

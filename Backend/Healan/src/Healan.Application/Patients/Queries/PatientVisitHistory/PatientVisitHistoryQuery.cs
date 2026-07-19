@@ -18,6 +18,8 @@ public class PatientVisitHistoryItemResult
     public DateTime? PrescriptionIssueDate { get; set; }
     public string? PrescriptionNotes { get; set; }
     public bool HasEchoReport { get; set; }
+    public string? EchoConclusion { get; set; }
+    public string? EchoRecommendation { get; set; }
     public List<PrescriptionDrugDto> Drugs { get; set; } = new();
     public List<VisitLabItemResult> Labs { get; set; } = new();
     public List<VisitImagingItemResult> Imaging { get; set; } = new();

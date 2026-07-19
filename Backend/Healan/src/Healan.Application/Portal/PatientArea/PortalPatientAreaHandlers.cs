@@ -3,7 +3,9 @@ using Healan.Application.Common.Interfaces;
 using Healan.Application.Orders.Dtos;
 using Healan.Application.Patients.Queries.PatientVisitHistory;
 using Healan.Application.Portal.Services;
+using Healan.Domain.Booking.Enums;
 using Healan.Domain.Patients.Entities;
+using Healan.Domain.Patients.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Share.Domain.Exceptions;
@@ -40,6 +42,31 @@ public static class PortalPatientResolver
     }
 }
 
+public static class MedicationScheduleCalculator
+{
+    private static readonly int[] AllowedIntervals = { 4, 6, 8, 10, 12, 24 };
+
+    public static List<string> Calculate(TimeSpan firstDose, int intervalHours)
+    {
+        if (!AllowedIntervals.Contains(intervalHours))
+            throw new BadRequestExceptions("فاصله مصرف باید یکی از ۴، ۶، ۸، ۱۰، ۱۲ یا ۲۴ ساعت باشد.");
+
+        var start = DateTime.Today.Add(firstDose);
+        var end = start.AddHours(24);
+        var labels = new List<string>();
+        for (var t = start; t < end; t = t.AddHours(intervalHours))
+        {
+            var timePart = t.ToString("HH:mm");
+            labels.Add(t.Date > start.Date ? $"{timePart}+1" : timePart);
+        }
+
+        if (labels.Count == 0)
+            throw new BadRequestExceptions("امکان محاسبه ساعات مصرف وجود ندارد.");
+
+        return labels;
+    }
+}
+
 public class PortalMyHistoryQuery : IRequest<PortalMyHistoryResult>
 {
     public string? AccessToken { get; set; }
@@ -67,11 +94,9 @@ public class PortalMyHistoryQueryHandler : IRequestHandler<PortalMyHistoryQuery,
         var (_, phone, patientId) = await PortalPatientResolver.RequirePatientAsync(
             _db, _tokenService, request.AccessToken, cancellationToken);
 
-        var bookings = await _db.AppointmentBookings.AsNoTracking()
-            .Where(x => x.PatientId == patientId
-                        || x.PhoneNumber == phone)
-            .OrderByDescending(x => x.Slot.StartAt)
-            .Take(50)
+        var now = DateTime.Now;
+        var bookingsRaw = await _db.AppointmentBookings.AsNoTracking()
+            .Where(x => x.PatientId == patientId || x.PhoneNumber == phone)
             .Select(x => new AppointmentBookingDto
             {
                 AppointmentBookingId = x.AppointmentBookingId,
@@ -93,14 +118,33 @@ public class PortalMyHistoryQueryHandler : IRequestHandler<PortalMyHistoryQuery,
             })
             .ToListAsync(cancellationToken);
 
+        var bookings = bookingsRaw
+            .OrderBy(x => x.StartAt < now ? 1 : 0)
+            .ThenBy(x => x.StartAt < now
+                ? DateTime.MaxValue.Ticks - x.StartAt.Ticks
+                : x.StartAt.Ticks)
+            .Take(100)
+            .ToList();
+
+        foreach (var b in bookings)
+            b.StatusTitle = AppointmentBookingStatusTitles.ToPersian(b.Status);
+
         var appointments = await _db.Appointments
             .AsNoTracking()
             .Include(a => a.Doctor)
             .Include(a => a.Prescriptions)
                 .ThenInclude(p => p.PrescriptionDrugs)
+            .Include(a => a.Prescriptions)
+                .ThenInclude(p => p.LabTestRequests)
+                    .ThenInclude(l => l.Attachment)
+            .Include(a => a.Prescriptions)
+                .ThenInclude(p => p.ImagingRequests)
+                    .ThenInclude(i => i.Attachment)
+            .Include(a => a.Prescriptions)
+                .ThenInclude(p => p.EchoReport)
             .Where(a => a.PatientId == patientId && !a.IsDeleted)
             .OrderByDescending(a => a.AppointmentDate)
-            .Take(40)
+            .Take(80)
             .ToListAsync(cancellationToken);
 
         var visits = new List<PatientVisitHistoryItemResult>();
@@ -111,7 +155,7 @@ public class PortalMyHistoryQueryHandler : IRequestHandler<PortalMyHistoryQuery,
                 .OrderByDescending(p => p.IssueDate)
                 .FirstOrDefault();
 
-            visits.Add(new PatientVisitHistoryItemResult
+            var item = new PatientVisitHistoryItemResult
             {
                 AppointmentId = appointment.AppointmentId,
                 AppointmentDate = appointment.AppointmentDate,
@@ -123,16 +167,49 @@ public class PortalMyHistoryQueryHandler : IRequestHandler<PortalMyHistoryQuery,
                 PrescriptionId = prescription?.PrescriptionId,
                 PrescriptionIssueDate = prescription?.IssueDate,
                 PrescriptionNotes = prescription?.Notes,
-                HasEchoReport = false,
-                Drugs = prescription?.PrescriptionDrugs?
+                HasEchoReport = prescription?.EchoReport != null,
+                EchoConclusion = prescription?.EchoReport?.Conclusion,
+                EchoRecommendation = prescription?.EchoReport?.Recommendation,
+            };
+
+            if (prescription != null)
+            {
+                item.Drugs = prescription.PrescriptionDrugs
                     .Select(d => new PrescriptionDrugDto
                     {
                         DrugName = d.DrugName,
                         Dosage = d.Dosage,
                         UsageInstructions = d.UsageInstructions,
                     })
-                    .ToList() ?? new List<PrescriptionDrugDto>(),
-            });
+                    .ToList();
+
+                item.Labs = prescription.LabTestRequests
+                    .Where(l => !l.IsDeleted)
+                    .Select(l => new VisitLabItemResult
+                    {
+                        LabTestType = l.LabTestType,
+                        Notes = l.Notes,
+                        AttachmentId = l.AttachmentId,
+                        AttachmentLink = l.Attachment?.Link,
+                        AttachmentFileName = l.Attachment?.FileName,
+                    })
+                    .ToList();
+
+                item.Imaging = prescription.ImagingRequests
+                    .Where(i => !i.IsDeleted)
+                    .Select(i => new VisitImagingItemResult
+                    {
+                        ImageTypeId = (byte)i.ImageTypeId,
+                        ImageTypeName = i.ImageTypeId.GetDisplayName() ?? i.ImageTypeId.ToString(),
+                        Notes = i.Notes,
+                        AttachmentId = i.AttachmentId,
+                        AttachmentLink = i.Attachment?.Link,
+                        AttachmentFileName = i.Attachment?.FileName,
+                    })
+                    .ToList();
+            }
+
+            visits.Add(item);
         }
 
         return new PortalMyHistoryResult { Bookings = bookings, Visits = visits };
@@ -151,6 +228,9 @@ public class PortalBloodPressureDto
     public int Diastolic { get; set; }
     public int? Pulse { get; set; }
     public DateTime MeasuredAt { get; set; }
+    public byte? PeriodOfDay { get; set; }
+    public string? PeriodTitle { get; set; }
+    public string? MeasuredTime { get; set; }
     public string? Note { get; set; }
 }
 
@@ -173,21 +253,37 @@ public class PortalBloodPressureListQueryHandler
         var (_, _, patientId) = await PortalPatientResolver.RequirePatientAsync(
             _db, _tokenService, request.AccessToken, cancellationToken);
 
-        return await _db.PatientBloodPressureLogs.AsNoTracking()
+        var rows = await _db.PatientBloodPressureLogs.AsNoTracking()
             .Where(x => x.PatientId == patientId && !x.IsDeleted)
             .OrderByDescending(x => x.MeasuredAt)
-            .Take(100)
-            .Select(x => new PortalBloodPressureDto
-            {
-                Id = x.PatientBloodPressureLogId,
-                Systolic = x.Systolic,
-                Diastolic = x.Diastolic,
-                Pulse = x.Pulse,
-                MeasuredAt = x.MeasuredAt,
-                Note = x.Note,
-            })
+            .Take(200)
             .ToListAsync(cancellationToken);
+
+        return rows.Select(MapBp).ToList();
     }
+
+    internal static PortalBloodPressureDto MapBp(PatientBloodPressureLog x) => new()
+    {
+        Id = x.PatientBloodPressureLogId,
+        Systolic = x.Systolic,
+        Diastolic = x.Diastolic,
+        Pulse = x.Pulse,
+        MeasuredAt = x.MeasuredAt,
+        PeriodOfDay = x.PeriodOfDay.HasValue ? (byte)x.PeriodOfDay.Value : null,
+        PeriodTitle = PeriodTitle(x.PeriodOfDay),
+        MeasuredTime = x.MeasuredTime.HasValue
+            ? $"{(int)x.MeasuredTime.Value.TotalHours:00}:{x.MeasuredTime.Value.Minutes:00}"
+            : null,
+        Note = x.Note,
+    };
+
+    internal static string? PeriodTitle(BloodPressurePeriod? period) => period switch
+    {
+        BloodPressurePeriod.Morning => "صبح",
+        BloodPressurePeriod.Noon => "ظهر",
+        BloodPressurePeriod.Night => "شب",
+        _ => null,
+    };
 }
 
 public class PortalBloodPressureSaveCommand : IRequest<PortalBloodPressureDto>
@@ -198,6 +294,8 @@ public class PortalBloodPressureSaveCommand : IRequest<PortalBloodPressureDto>
     public int Diastolic { get; set; }
     public int? Pulse { get; set; }
     public DateTime? MeasuredAt { get; set; }
+    public byte? PeriodOfDay { get; set; }
+    public string? MeasuredTime { get; set; }
     public string? Note { get; set; }
 }
 
@@ -227,6 +325,27 @@ public class PortalBloodPressureSaveCommandHandler
         if (request.Pulse is < 30 or > 220)
             throw new BadRequestExceptions("نبض نامعتبر است.");
 
+        BloodPressurePeriod? period = null;
+        if (request.PeriodOfDay is byte p)
+        {
+            if (!Enum.IsDefined(typeof(BloodPressurePeriod), p))
+                throw new BadRequestExceptions("بازه زمانی نامعتبر است.");
+            period = (BloodPressurePeriod)p;
+        }
+
+        TimeSpan? measuredTime = null;
+        if (!string.IsNullOrWhiteSpace(request.MeasuredTime))
+        {
+            var ascii = RagQuotaHelper.ToAsciiDigits(request.MeasuredTime).Trim();
+            if (!TimeSpan.TryParse(ascii, out var ts)
+                && !TimeSpan.TryParseExact(ascii, @"hh\:mm", null, out ts))
+                throw new BadRequestExceptions("ساعت اندازه‌گیری نامعتبر است.");
+            measuredTime = new TimeSpan(ts.Hours, ts.Minutes, 0);
+        }
+
+        var date = (request.MeasuredAt ?? DateTime.Today).Date;
+        var measuredAt = measuredTime.HasValue ? date.Add(measuredTime.Value) : date;
+
         PatientBloodPressureLog entity;
         if (request.Id is > 0)
         {
@@ -245,20 +364,13 @@ public class PortalBloodPressureSaveCommandHandler
         entity.Systolic = request.Systolic;
         entity.Diastolic = request.Diastolic;
         entity.Pulse = request.Pulse;
-        entity.MeasuredAt = request.MeasuredAt ?? DateTime.Now;
+        entity.MeasuredAt = measuredAt;
+        entity.PeriodOfDay = period;
+        entity.MeasuredTime = measuredTime;
         entity.Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim();
 
         await _db.SaveChangesAsync(cancellationToken);
-
-        return new PortalBloodPressureDto
-        {
-            Id = entity.PatientBloodPressureLogId,
-            Systolic = entity.Systolic,
-            Diastolic = entity.Diastolic,
-            Pulse = entity.Pulse,
-            MeasuredAt = entity.MeasuredAt,
-            Note = entity.Note,
-        };
+        return PortalBloodPressureListQueryHandler.MapBp(entity);
     }
 }
 
@@ -308,6 +420,8 @@ public class PortalMedicationDto
     public long Id { get; set; }
     public string MedicationName { get; set; } = string.Empty;
     public string? Dose { get; set; }
+    public int IntervalHours { get; set; }
+    public string FirstDoseTime { get; set; } = string.Empty;
     public string TimesOfDay { get; set; } = string.Empty;
     public bool IsActive { get; set; }
 }
@@ -331,20 +445,26 @@ public class PortalMedicationListQueryHandler
         var (_, _, patientId) = await PortalPatientResolver.RequirePatientAsync(
             _db, _tokenService, request.AccessToken, cancellationToken);
 
-        return await _db.PatientMedicationReminders.AsNoTracking()
+        var rows = await _db.PatientMedicationReminders.AsNoTracking()
             .Where(x => x.PatientId == patientId && !x.IsDeleted)
             .OrderByDescending(x => x.IsActive)
             .ThenBy(x => x.MedicationName)
-            .Select(x => new PortalMedicationDto
-            {
-                Id = x.PatientMedicationReminderId,
-                MedicationName = x.MedicationName,
-                Dose = x.Dose,
-                TimesOfDay = x.TimesOfDay,
-                IsActive = x.IsActive,
-            })
+            .Take(200)
             .ToListAsync(cancellationToken);
+
+        return rows.Select(MapMed).ToList();
     }
+
+    internal static PortalMedicationDto MapMed(PatientMedicationReminder x) => new()
+    {
+        Id = x.PatientMedicationReminderId,
+        MedicationName = x.MedicationName,
+        Dose = x.Dose,
+        IntervalHours = x.IntervalHours,
+        FirstDoseTime = $"{(int)x.FirstDoseTime.TotalHours:00}:{x.FirstDoseTime.Minutes:00}",
+        TimesOfDay = x.TimesOfDay,
+        IsActive = x.IsActive,
+    };
 }
 
 public class PortalMedicationSaveCommand : IRequest<PortalMedicationDto>
@@ -353,7 +473,8 @@ public class PortalMedicationSaveCommand : IRequest<PortalMedicationDto>
     public long? Id { get; set; }
     public string MedicationName { get; set; } = string.Empty;
     public string? Dose { get; set; }
-    public string TimesOfDay { get; set; } = string.Empty;
+    public int IntervalHours { get; set; } = 8;
+    public string FirstDoseTime { get; set; } = "08:00";
     public bool IsActive { get; set; } = true;
 }
 
@@ -380,9 +501,13 @@ public class PortalMedicationSaveCommandHandler
         if (name.Length < 2)
             throw new BadRequestExceptions("نام دارو را وارد کنید.");
 
-        var times = NormalizeTimes(request.TimesOfDay);
-        if (times.Count == 0)
-            throw new BadRequestExceptions("حداقل یک ساعت مصرف وارد کنید (مثلاً 08:00).");
+        var ascii = RagQuotaHelper.ToAsciiDigits(request.FirstDoseTime).Trim();
+        if (!TimeSpan.TryParse(ascii, out var first)
+            && !TimeSpan.TryParseExact(ascii, @"hh\:mm", null, out first))
+            throw new BadRequestExceptions("ساعت اولین مصرف نامعتبر است.");
+
+        first = new TimeSpan(first.Hours, first.Minutes, 0);
+        var times = MedicationScheduleCalculator.Calculate(first, request.IntervalHours);
 
         PatientMedicationReminder entity;
         if (request.Id is > 0)
@@ -401,35 +526,13 @@ public class PortalMedicationSaveCommandHandler
 
         entity.MedicationName = name;
         entity.Dose = string.IsNullOrWhiteSpace(request.Dose) ? null : request.Dose.Trim();
+        entity.IntervalHours = request.IntervalHours;
+        entity.FirstDoseTime = first;
         entity.TimesOfDay = string.Join(",", times);
         entity.IsActive = request.IsActive;
 
         await _db.SaveChangesAsync(cancellationToken);
-
-        return new PortalMedicationDto
-        {
-            Id = entity.PatientMedicationReminderId,
-            MedicationName = entity.MedicationName,
-            Dose = entity.Dose,
-            TimesOfDay = entity.TimesOfDay,
-            IsActive = entity.IsActive,
-        };
-    }
-
-    private static List<string> NormalizeTimes(string? raw)
-    {
-        var parts = (raw ?? string.Empty)
-            .Split(new[] { ',', ';', ' ', '،' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var result = new List<string>();
-        foreach (var part in parts)
-        {
-            var ascii = RagQuotaHelper.ToAsciiDigits(part).Trim();
-            if (!TimeSpan.TryParse(ascii, out var ts) && !TimeSpan.TryParseExact(ascii, @"hh\:mm", null, out ts))
-                continue;
-            result.Add($"{(int)ts.TotalHours:00}:{ts.Minutes:00}");
-        }
-
-        return result.Distinct().OrderBy(x => x).ToList();
+        return PortalMedicationListQueryHandler.MapMed(entity);
     }
 }
 

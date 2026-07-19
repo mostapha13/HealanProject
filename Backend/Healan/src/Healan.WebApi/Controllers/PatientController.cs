@@ -1,5 +1,6 @@
 ﻿using Healan.Application.Patients.Commands.PatientRegister;
 using Healan.Application.Patients.Queries.GetPatientInfo;
+using Healan.Application.Patients.Queries.PatientBloodPressureHistory;
 using Healan.Application.Patients.Queries.PatientInfoByNationalCode;
 using Healan.Application.Patients.Queries.PatientList;
 using Healan.Application.Patients.Queries.PatientVisitHistory;
@@ -47,4 +48,17 @@ public class PatientController : ApiControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> VisitHistory([FromQuery] long patientId) =>
         Ok(await Mediator.Send(new PatientVisitHistoryQuery { PatientId = patientId }));
+
+    /// <summary>
+    /// سوابق فشار خون ثبت‌شده توسط بیمار (کد ملی یا شناسه بیمار)
+    /// </summary>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BloodPressureHistory(
+        [FromQuery] string? nationalCode,
+        [FromQuery] long? patientId) =>
+        Ok(await Mediator.Send(new PatientBloodPressureHistoryQuery
+        {
+            NationalCode = nationalCode,
+            PatientId = patientId,
+        }));
 }

@@ -21,3 +21,18 @@ public enum AppointmentBookingStatus : byte
     Accepted = 4,
     NoShow = 5,
 }
+
+public static class AppointmentBookingStatusTitles
+{
+    public static string ToPersian(byte status) => status switch
+    {
+        (byte)AppointmentBookingStatus.Booked => "رزرو شده",
+        (byte)AppointmentBookingStatus.Cancelled => "لغو شده",
+        (byte)AppointmentBookingStatus.Rescheduled => "جابه‌جا شده",
+        (byte)AppointmentBookingStatus.Accepted => "انجام شده",
+        (byte)AppointmentBookingStatus.NoShow => "حاضر نشد",
+        _ => "نامشخص",
+    };
+
+    public static string ToPersian(AppointmentBookingStatus status) => ToPersian((byte)status);
+}

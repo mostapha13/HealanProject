@@ -49,7 +49,18 @@ export default function PatientDashboard() {
               <li key={m.id}>
                 <strong>{m.medicationName}</strong>
                 {m.dose ? ` · ${m.dose}` : ''}
-                <span> · ساعات: {m.timesOfDay}</span>
+                <div className="portal-patient__muted">
+                  هر {m.intervalHours || '—'} ساعت از {m.firstDoseTime || '—'}
+                </div>
+                <span className="portal-patient__muted">
+                  ساعات:{' '}
+                  {(m.timesOfDay || '')
+                    .split(',')
+                    .map((p) => p.trim())
+                    .filter(Boolean)
+                    .map((p) => (p.endsWith('+1') ? `${p.slice(0, -2)} (روز بعد)` : p))
+                    .join('، ')}
+                </span>
               </li>
             ))}
           </ul>

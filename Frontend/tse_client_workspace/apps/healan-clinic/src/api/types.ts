@@ -330,6 +330,26 @@ export interface PatientVisitHistoryItem {
   }[];
 }
 
+export interface PatientBloodPressureItem {
+  id: number;
+  systolic: number;
+  diastolic: number;
+  pulse?: number | null;
+  measuredAt: string;
+  periodOfDay?: number | null;
+  periodTitle?: string | null;
+  measuredTime?: string | null;
+  note?: string | null;
+}
+
+export interface PatientBloodPressureHistoryResult {
+  patientId: number;
+  firstName: string;
+  lastName: string;
+  nationalCode: string;
+  items: PatientBloodPressureItem[];
+}
+
 export interface EchoPrintData {
   prescriptionId: number;
   appointmentId: number;

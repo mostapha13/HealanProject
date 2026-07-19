@@ -13,6 +13,7 @@ public class PatientMedicationReminderConfiguration : IEntityTypeConfiguration<P
         builder.Property(x => x.PatientMedicationReminderId).HasColumnType("bigint").ValueGeneratedOnAdd();
         builder.Property(x => x.MedicationName).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Dose).HasMaxLength(100);
+        builder.Property(x => x.FirstDoseTime).HasColumnType("time").IsRequired();
         builder.Property(x => x.TimesOfDay).IsRequired().HasMaxLength(200);
         builder.HasIndex(x => new { x.PatientId, x.IsActive });
         builder.HasOne(x => x.Patient)

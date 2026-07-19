@@ -70,6 +70,8 @@ public class PatientVisitHistoryQueryHandler : IRequestHandler<PatientVisitHisto
                 PrescriptionIssueDate = prescription?.IssueDate,
                 PrescriptionNotes = prescription?.Notes,
                 HasEchoReport = prescription?.EchoReport != null,
+                EchoConclusion = prescription?.EchoReport?.Conclusion,
+                EchoRecommendation = prescription?.EchoReport?.Recommendation,
             };
 
             if (prescription != null)

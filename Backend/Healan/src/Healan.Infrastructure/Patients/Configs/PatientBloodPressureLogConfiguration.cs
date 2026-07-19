@@ -12,6 +12,7 @@ public class PatientBloodPressureLogConfiguration : IEntityTypeConfiguration<Pat
         builder.HasKey(x => x.PatientBloodPressureLogId);
         builder.Property(x => x.PatientBloodPressureLogId).HasColumnType("bigint").ValueGeneratedOnAdd();
         builder.Property(x => x.Note).HasMaxLength(500);
+        builder.Property(x => x.MeasuredTime).HasColumnType("time");
         builder.HasIndex(x => new { x.PatientId, x.MeasuredAt });
         builder.HasOne(x => x.Patient)
             .WithMany()

@@ -411,7 +411,13 @@ export function bookingReschedule(payload: Record<string, unknown>) {
 }
 
 export type PortalMyHistory = {
-  bookings?: PortalBookingItem[];
+  bookings?: Array<{
+    appointmentBookingId?: number;
+    doctorName?: string;
+    startAt?: string;
+    status?: number;
+    statusTitle?: string;
+  }>;
   visits?: Array<{
     appointmentId: number;
     appointmentDate: string;
@@ -420,7 +426,24 @@ export type PortalMyHistory = {
     prescriptionId?: number;
     prescriptionIssueDate?: string;
     prescriptionNotes?: string;
+    hasEchoReport?: boolean;
+    echoConclusion?: string;
+    echoRecommendation?: string;
     drugs?: Array<{ drugName?: string; dosage?: string; usageInstructions?: string }>;
+    labs?: Array<{
+      labTestType?: string;
+      notes?: string;
+      attachmentId?: string;
+      attachmentLink?: string;
+      attachmentFileName?: string;
+    }>;
+    imaging?: Array<{
+      imageTypeName?: string;
+      notes?: string;
+      attachmentId?: string;
+      attachmentLink?: string;
+      attachmentFileName?: string;
+    }>;
   }>;
 };
 
@@ -430,6 +453,9 @@ export type PortalBloodPressureItem = {
   diastolic: number;
   pulse?: number | null;
   measuredAt: string;
+  periodOfDay?: number | null;
+  periodTitle?: string | null;
+  measuredTime?: string | null;
   note?: string | null;
 };
 
@@ -437,6 +463,8 @@ export type PortalMedicationItem = {
   id: number;
   medicationName: string;
   dose?: string | null;
+  intervalHours?: number;
+  firstDoseTime?: string;
   timesOfDay: string;
   isActive: boolean;
 };
@@ -463,6 +491,8 @@ export function patientBloodPressureSave(payload: {
   diastolic: number;
   pulse?: number | null;
   measuredAt?: string;
+  periodOfDay?: number | null;
+  measuredTime?: string | null;
   note?: string;
 }) {
   return request.post({
@@ -494,7 +524,8 @@ export function patientMedicationSave(payload: {
   id?: number;
   medicationName: string;
   dose?: string;
-  timesOfDay: string;
+  intervalHours: number;
+  firstDoseTime: string;
   isActive?: boolean;
 }) {
   return request.post({
