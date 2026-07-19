@@ -193,24 +193,31 @@ namespace IdentityServer.GrpcServer.Services
         }
         public async override Task<RoleInfos> GetUserRole(GetByIdRequest request, ServerCallContext context)
         {
-            var allRoleId = _applicationDbContext.UserRoles.Where(w => w.UserId == request.UserId.ToGuid()).Select(s => s.RoleId).ToList();
-            if (allRoleId != null && allRoleId.Any())
-            {
-                var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id)).ToList();
-                RoleInfos roleInfos = new RoleInfos();
-                foreach (var item in allRole)
-                {
-                    roleInfos.RoleInfos_.Add(new RoleInfo()
-                    {
-                        RoleId = item.Id.ToString(),
-                        RoleName = item.Name,
-                        RoleTitle = string.IsNullOrEmpty(item.DisplayName) ? " " : item.DisplayName
-                    });
-
-                }
+            // Never return null — gRPC unary must send a message (else client gets Cancelled:
+            // "No message returned from method.") New portal users often have zero roles yet.
+            var roleInfos = new RoleInfos();
+            var userId = request.UserId.ToGuid();
+            if (!userId.HasValue || userId.Value == Guid.Empty)
                 return roleInfos;
+
+            var allRoleId = _applicationDbContext.UserRoles
+                .Where(w => w.UserId == userId.Value)
+                .Select(s => s.RoleId)
+                .ToList();
+            if (allRoleId == null || !allRoleId.Any())
+                return roleInfos;
+
+            var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id)).ToList();
+            foreach (var item in allRole)
+            {
+                roleInfos.RoleInfos_.Add(new RoleInfo()
+                {
+                    RoleId = item.Id.ToString(),
+                    RoleName = item.Name,
+                    RoleTitle = string.IsNullOrEmpty(item.DisplayName) ? " " : item.DisplayName
+                });
             }
-            return null;
+            return roleInfos;
         }
 
         public async override Task<UserHasAccessResonse> UserHasAccess(UserHasAccessRequest request, ServerCallContext context)

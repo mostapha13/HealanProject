@@ -445,20 +445,27 @@ public sealed class PortalPatientRegistrar
 
     private async Task EnsureSiteUserRoleAsync(Guid userId)
     {
-        var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
-        var names = roleInfos?.RoleInfos_
-            ?.Select(r => r.RoleName)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList() ?? new List<string>();
+        try
+        {
+            var roleInfos = await _identityTool.GetUserRole(new GetByIdRequest { UserId = userId.ToString() });
+            var names = roleInfos?.RoleInfos_
+                ?.Select(r => r.RoleName)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList() ?? new List<string>();
 
-        if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
-            return;
+            if (names.Any(n => string.Equals(n, SiteUserRole, StringComparison.OrdinalIgnoreCase)))
+                return;
 
-        names.Add(SiteUserRole);
-        var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
-        foreach (var name in names)
-            setRequest.RoleNames.Add(name);
-        await _identityTool.SetUserRole(setRequest);
+            names.Add(SiteUserRole);
+            var setRequest = new SetUserRoleRequest { UserId = userId.ToString() };
+            foreach (var name in names)
+                setRequest.RoleNames.Add(name);
+            await _identityTool.SetUserRole(setRequest);
+        }
+        catch
+        {
+            // نقش SiteUser نباید ثبت بیمار پورتال را بشکند.
+        }
     }
 }
