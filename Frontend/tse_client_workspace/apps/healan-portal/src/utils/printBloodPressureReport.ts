@@ -260,14 +260,14 @@ export function buildBloodPressurePrintHtml(data: BloodPressurePrintPayload): st
     </div>
 
     <div class="body">
-      <div class="section-title">جدول ثبت‌های روزانه (صبح · ظهر · شب)</div>
+      <div class="section-title">جدول ثبت‌های روزانه (صبح · ظهر · عصر)</div>
       <table class="bp">
         <thead>
           <tr>
             <th rowspan="2" style="width:9%">تاریخ</th>
             <th colspan="5" class="period">صبح</th>
             <th colspan="5" class="period-noon">ظهر</th>
-            <th colspan="5" class="period-night">شب</th>
+            <th colspan="5" class="period-night">عصر</th>
           </tr>
           <tr>
             <th>ساعت</th><th>سیستول</th><th>دیاستول</th><th>نبض</th><th>یادداشت</th>

@@ -437,6 +437,15 @@
   min-height: 320px;
 }
 
+.healan-chart-card--embedded {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+}
+
 .healan-chart-card--empty {
   display: flex;
   flex-direction: column;
@@ -444,10 +453,11 @@
   justify-content: center;
   text-align: center;
   color: var(--healan-text-muted);
+  gap: 0.35rem;
 }
 
 .healan-chart-card--empty h4 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.25rem;
   font-size: 0.95rem;
   color: var(--healan-text);
 }
@@ -455,6 +465,14 @@
 .healan-chart-card--empty p {
   margin: 0;
   font-size: 0.85rem;
+  max-width: 16rem;
+  line-height: 1.5;
+}
+
+.healan-chart-card__empty-icon {
+  font-size: 1.6rem;
+  opacity: 0.55;
+  margin-bottom: 0.15rem;
 }
 
 .healan-bp-lookup {
@@ -485,12 +503,18 @@
 .healan-bp-summary__card {
   background: #fff;
   border: 1px solid var(--healan-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1rem 1.1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.healan-bp-summary__card:hover {
+  border-color: #99f6e4;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.08);
 }
 
 .healan-bp-summary__label {
@@ -506,7 +530,14 @@
 .healan-bp-summary__actions {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: stretch;
+}
+
+.healan-bp-summary__actions .healan-btn {
+  width: 100%;
+  min-height: 3rem;
+  font-weight: 700;
+  border-radius: 12px;
 }
 
 .healan-bp-day-table-wrap {
@@ -555,6 +586,284 @@
   text-align: right;
   font-size: 0.78rem;
   color: #64748b;
+}
+
+.healan-bp-trends {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.healan-bp-analytics {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.healan-bp-analytics__intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.healan-bp-analytics__heading {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.healan-bp-analytics__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.healan-bp-analytics__legend {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.healan-bp-analytics__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.healan-bp-analytics__chip--sys {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.healan-bp-analytics__chip--sys::before,
+.healan-bp-analytics__chip--dia::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+}
+
+.healan-bp-analytics__chip--sys::before {
+  background: #ef4444;
+}
+
+.healan-bp-analytics__chip--dia {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.healan-bp-analytics__chip--dia::before {
+  background: #3b82f6;
+}
+
+.healan-bp-overview {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+}
+
+.healan-bp-overview__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 1.1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid #eef2f7;
+  background:
+    radial-gradient(1200px 120px at 100% 0%, rgba(13, 148, 136, 0.08), transparent 55%),
+    linear-gradient(180deg, #f0fdfa 0%, #ffffff 70%);
+}
+
+.healan-bp-overview__eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0f766e;
+  background: #ccfbf1;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  margin-bottom: 0.4rem;
+}
+
+.healan-bp-overview__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.healan-bp-overview__head p {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.healan-bp-overview__stat {
+  min-width: 7rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.healan-bp-overview__stat span {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.healan-bp-overview__stat strong {
+  font-size: 1.25rem;
+  color: #0f766e;
+}
+
+.healan-bp-overview__body {
+  padding: 0.5rem 0.75rem 0.85rem;
+}
+
+.healan-bp-trend {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.healan-bp-trend:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.07);
+}
+
+.healan-bp-trend--morning {
+  border-top: 3px solid #0d9488;
+}
+
+.healan-bp-trend--noon {
+  border-top: 3px solid #0284c7;
+}
+
+.healan-bp-trend--evening {
+  border-top: 3px solid #7c3aed;
+}
+
+.healan-bp-trend__head {
+  padding: 0.95rem 1rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.healan-bp-trend__title-wrap {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.healan-bp-trend__badge {
+  flex-shrink: 0;
+  min-width: 2.6rem;
+  text-align: center;
+  padding: 0.4rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.healan-bp-trend--morning .healan-bp-trend__badge {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.healan-bp-trend--noon .healan-bp-trend__badge {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.healan-bp-trend--evening .healan-bp-trend__badge {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.healan-bp-trend__title-wrap h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.healan-bp-trend__title-wrap p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.healan-bp-trend__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.healan-bp-trend__metrics > div {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 0.45rem 0.5rem;
+  text-align: center;
+}
+
+.healan-bp-trend__metrics span {
+  display: block;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin-bottom: 0.1rem;
+}
+
+.healan-bp-trend__metrics strong {
+  font-size: 0.88rem;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.healan-bp-trend__body {
+  padding: 0.35rem 0.55rem 0.65rem;
+  flex: 1;
+}
+
+@media (min-width: 1100px) {
+  .healan-bp-trends {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1099px) and (min-width: 720px) {
+  .healan-bp-trends {
+    grid-template-columns: 1fr;
+  }
 }
 
 .healan-bp-period {

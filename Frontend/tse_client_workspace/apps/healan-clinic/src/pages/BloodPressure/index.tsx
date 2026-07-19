@@ -5,7 +5,12 @@ import type { PatientBloodPressureHistoryResult, PatientBloodPressureItem } from
 import { PageHeader } from '../../components/Ui';
 import { ReportsChart } from '../../components/ReportsChart';
 import { formatJalaliDate } from '../../utils/formatJalali';
-import { groupBloodPressureByDay, periodTitle, type BpPeriodSlot } from '../../utils/groupBloodPressureByDay';
+import {
+  groupBloodPressureByDay,
+  periodTitle,
+  type BpDayRow,
+  type BpPeriodSlot,
+} from '../../utils/groupBloodPressureByDay';
 import { openBloodPressurePrintWindow } from '../../utils/printBloodPressureReport';
 import { isValidIranNationalCode } from '../../utils/nationalCode';
 import { ListPagination, useListPagination } from '../../components/ListPagination';
@@ -20,6 +25,62 @@ function slotCell(slot: BpPeriodSlot | undefined, key: keyof BpPeriodSlot) {
   const v = slot[key];
   if (v == null || v === '') return '—';
   return String(v);
+}
+
+type PeriodKey = 'morning' | 'noon' | 'night';
+
+function buildPeriodTrend(dayRows: BpDayRow[], periodKey: PeriodKey) {
+  const chronological = [...dayRows].sort((a, b) => (a.dateKey < b.dateKey ? -1 : a.dateKey > b.dateKey ? 1 : 0));
+  const withSlot = chronological.filter((d) => d[periodKey]);
+  return {
+    categories: withSlot.map((d) => d.jalaliLabel),
+    systolic: withSlot.map((d) => d[periodKey]!.systolic),
+    diastolic: withSlot.map((d) => d[periodKey]!.diastolic),
+    count: withSlot.length,
+  };
+}
+
+const PERIOD_TRENDS: Array<{
+  key: PeriodKey;
+  title: string;
+  badge: string;
+  hint: string;
+  empty: string;
+  accent: string;
+  tone: 'morning' | 'noon' | 'evening';
+}> = [
+  {
+    key: 'morning',
+    title: 'فشارهای صبح',
+    badge: 'صبح',
+    hint: 'ترند سیستول و دیاستول در بازه صبح',
+    empty: 'هنوز ثبت صبحی برای این بیمار نیست.',
+    accent: '#0d9488',
+    tone: 'morning',
+  },
+  {
+    key: 'noon',
+    title: 'فشارهای ظهر',
+    badge: 'ظهر',
+    hint: 'ترند سیستول و دیاستول در بازه ظهر',
+    empty: 'هنوز ثبت ظهری برای این بیمار نیست.',
+    accent: '#0284c7',
+    tone: 'noon',
+  },
+  {
+    key: 'night',
+    title: 'فشارهای عصر',
+    badge: 'عصر',
+    hint: 'ترند سیستول و دیاستول در بازه عصر',
+    empty: 'هنوز ثبت عصری برای این بیمار نیست.',
+    accent: '#7c3aed',
+    tone: 'evening',
+  },
+];
+
+function avg(nums: number[]): number | null {
+  if (!nums.length) return null;
+  return Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
 }
 
 function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
@@ -52,16 +113,35 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
   const dayRows = useMemo(() => groupBloodPressureByDay(items), [items]);
   const pageDays = dayRows.slice((page - 1) * pageSize, page * pageSize);
 
+  const periodTrends = useMemo(
+    () =>
+      PERIOD_TRENDS.map((meta) => {
+        const trend = buildPeriodTrend(dayRows, meta.key);
+        const lastSys = trend.systolic.length ? trend.systolic[trend.systolic.length - 1] : null;
+        const lastDia = trend.diastolic.length ? trend.diastolic[trend.diastolic.length - 1] : null;
+        return {
+          ...meta,
+          trend,
+          lastLabel:
+            lastSys != null && lastDia != null ? `${lastSys}/${lastDia}` : '—',
+          avgSys: avg(trend.systolic),
+          avgDia: avg(trend.diastolic),
+        };
+      }),
+    [dayRows]
+  );
+
   const chartItems = useMemo(() => [...items].reverse().slice(-20), [items]);
 
-  const categories = chartItems.map((r) => {
+  const overviewCategories = chartItems.map((r) => {
     const dateLabel = formatJalaliDate(r.measuredAt) || '—';
     const period = r.periodTitle || periodTitle(r.periodOfDay) || '';
     return period ? `${dateLabel} · ${period}` : dateLabel;
   });
 
-  const systolic = chartItems.map((r) => r.systolic);
-  const diastolic = chartItems.map((r) => r.diastolic);
+  const overviewSystolic = chartItems.map((r) => r.systolic);
+  const overviewDiastolic = chartItems.map((r) => r.diastolic);
+
   const latest = items[0];
 
   const printReport = () => {
@@ -150,26 +230,104 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
           </div>
 
           {items.length > 0 && (
-            <div className="healan-card" style={{ marginBottom: '1.25rem' }}>
-              <div className="healan-card__body">
-                <ReportsChart
-                  type="column"
-                  title="روند فشار خون (حداکثر ۲۰ ثبت اخیر)"
-                  categories={categories}
-                  yAxisTitle="mmHg"
-                  series={[
-                    { name: 'سیستولیک', data: systolic, color: '#ef4444' },
-                    { name: 'دیاستولیک', data: diastolic, color: '#3b82f6' },
-                  ]}
-                  height={380}
-                />
+            <section className="healan-bp-analytics" aria-label="تحلیل نمودار فشار خون">
+              <div className="healan-bp-analytics__intro">
+                <div>
+                  <h2 className="healan-bp-analytics__heading">تحلیل نموداری</h2>
+                  <p className="healan-bp-analytics__sub">
+                    ابتدا نمای کلی همه ثبت‌ها، سپس ترند جدا برای صبح، ظهر و عصر
+                  </p>
+                </div>
+                <div className="healan-bp-analytics__legend">
+                  <span className="healan-bp-analytics__chip healan-bp-analytics__chip--sys">سیستولیک</span>
+                  <span className="healan-bp-analytics__chip healan-bp-analytics__chip--dia">دیاستولیک</span>
+                </div>
               </div>
-            </div>
+
+              <article className="healan-bp-overview">
+                <header className="healan-bp-overview__head">
+                  <div>
+                    <span className="healan-bp-overview__eyebrow">نمای کلی</span>
+                    <h3>نمودار ستونی فشار خون</h3>
+                    <p>حداکثر ۲۰ ثبت اخیر · برچسب تاریخ و بازه روز روی محور افقی</p>
+                  </div>
+                  <div className="healan-bp-overview__stat">
+                    <span>نقاط روی نمودار</span>
+                    <strong>{overviewCategories.length.toLocaleString('fa-IR')}</strong>
+                  </div>
+                </header>
+                <div className="healan-bp-overview__body">
+                  <ReportsChart
+                    type="column"
+                    title="روند کلی فشار خون"
+                    hideTitle
+                    embedded
+                    categories={overviewCategories}
+                    yAxisTitle="mmHg"
+                    height={340}
+                    series={[
+                      { name: 'سیستولیک', data: overviewSystolic, color: '#ef4444' },
+                      { name: 'دیاستولیک', data: overviewDiastolic, color: '#3b82f6' },
+                    ]}
+                  />
+                </div>
+              </article>
+
+              <div className="healan-bp-trends">
+                {periodTrends.map(
+                  ({ key, title, badge, hint, empty, accent, tone, trend, lastLabel, avgSys, avgDia }) => (
+                    <article key={key} className={`healan-bp-trend healan-bp-trend--${tone}`}>
+                      <header className="healan-bp-trend__head">
+                        <div className="healan-bp-trend__title-wrap">
+                          <span className="healan-bp-trend__badge">{badge}</span>
+                          <div>
+                            <h3>{title}</h3>
+                            <p>{hint}</p>
+                          </div>
+                        </div>
+                        <div className="healan-bp-trend__metrics">
+                          <div>
+                            <span>تعداد</span>
+                            <strong>{trend.count.toLocaleString('fa-IR')}</strong>
+                          </div>
+                          <div>
+                            <span>آخرین</span>
+                            <strong>{lastLabel}</strong>
+                          </div>
+                          <div>
+                            <span>میانگین</span>
+                            <strong>
+                              {avgSys != null && avgDia != null ? `${avgSys}/${avgDia}` : '—'}
+                            </strong>
+                          </div>
+                        </div>
+                      </header>
+                      <div className="healan-bp-trend__body">
+                        <ReportsChart
+                          type="line"
+                          title={title}
+                          hideTitle
+                          embedded
+                          categories={trend.categories}
+                          yAxisTitle="mmHg"
+                          emptyMessage={empty}
+                          height={260}
+                          series={[
+                            { name: 'سیستولیک', data: trend.systolic, color: '#ef4444' },
+                            { name: 'دیاستولیک', data: trend.diastolic, color: accent },
+                          ]}
+                        />
+                      </div>
+                    </article>
+                  )
+                )}
+              </div>
+            </section>
           )}
 
           <div className="healan-card">
             <div className="healan-card__header">
-              <h3>لیست روزانه (صبح / ظهر / شب)</h3>
+              <h3>لیست روزانه (صبح / ظهر / عصر)</h3>
             </div>
             <div className="healan-card__body" style={{ padding: 0 }}>
               {dayRows.length === 0 ? (
@@ -188,11 +346,11 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
                             ظهر
                           </th>
                           <th colSpan={5} className="healan-bp-day-table__period healan-bp-day-table__period--night">
-                            شب
+                            عصر
                           </th>
                         </tr>
                         <tr>
-                          {(['صبح', 'ظهر', 'شب'] as const).flatMap((p) =>
+                          {(['صبح', 'ظهر', 'عصر'] as const).flatMap((p) =>
                             ['ساعت', 'سیستول', 'دیاستول', 'نبض', 'یادداشت'].map((label) => (
                               <th key={`${p}-${label}`} className="healan-bp-day-table__sub">
                                 {label}
