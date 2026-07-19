@@ -55,23 +55,40 @@ namespace FileManager.WebUI.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Upload([FromForm] IFormFile file, CancellationToken cancellationToken)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest();
-            var stream = file.OpenReadStream();
-            var mimetype = file.ContentType;
-            var size = file.Length / 1000;
-            var originalFilename = file.FileName;
-
-
-            var model = new UploadFileRequest()
+            try
             {
-                Filename = originalFilename,
-                MimeType = mimetype,
-                Size = size,
-                Stream = stream,
-                IsEncrypted = false
-            };
-            return Ok(await _fileService.UploadFile(model));
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { title = "فایل خالی است." });
+
+                _logger.LogInformation(
+                    "Upload start name={Name} size={Size} contentType={ContentType}",
+                    file.FileName,
+                    file.Length,
+                    file.ContentType);
+
+                var stream = file.OpenReadStream();
+                var mimetype = file.ContentType;
+                // Keep KB rounding consistent with profile MaxSizeKB (approx KB).
+                var size = Math.Max(1, (int)(file.Length / 1024));
+                var originalFilename = file.FileName;
+
+                var model = new UploadFileRequest()
+                {
+                    Filename = originalFilename,
+                    MimeType = mimetype,
+                    Size = size,
+                    Stream = stream,
+                    IsEncrypted = false
+                };
+                var result = await _fileService.UploadFile(model);
+                _logger.LogInformation("Upload ok fileId={FileId}", result.FileId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Upload failed name={Name}", file?.FileName);
+                throw;
+            }
         }
 
 

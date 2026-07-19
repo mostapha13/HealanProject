@@ -32,9 +32,8 @@ namespace FileManager.Infrastructure.Services
 
         public async Task<string> SaveFile(Stream stream, Guid fileId, string extension, bool isEncypted)
         {
-            var directory = _config.DirectoryPath;
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
+            var directory = string.IsNullOrWhiteSpace(_config.DirectoryPath) ? "Attachment" : _config.DirectoryPath;
+            Directory.CreateDirectory(directory);
 
             if (!isEncypted)
                 return await CopyStreamToFile(fileId, directory, extension, stream);
@@ -79,16 +78,18 @@ namespace FileManager.Infrastructure.Services
                     }
                 }
             }
-            return newfilePath;
+            return encryptedFileName;
         }
 
 
         public Stream OpenFile(string savedFileName, bool isEncypted)
         {
-            
-            var directory = "Attachment";// _config.DirectoryPath;
-            var filePath = Path.Combine(directory, savedFileName);
-            var rres=Path.Combine(Directory.GetCurrentDirectory(), directory);
+            var directory = string.IsNullOrWhiteSpace(_config.DirectoryPath) ? "Attachment" : _config.DirectoryPath;
+            // SavedFileName may already be a full path (encrypted uploads).
+            var filePath = Path.IsPathRooted(savedFileName)
+                ? savedFileName
+                : Path.Combine(directory, Path.GetFileName(savedFileName));
+
             if (!File.Exists(filePath))
                 throw new NotFoundExceptions("فایل مورد نظر پیدا نشد");
             if (!isEncypted)

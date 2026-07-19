@@ -35,6 +35,8 @@ Thumbs.db
 
 # Runtime uploaded files
 Backend/FileManager/src/FileManager.WebUI/Attachment/
+docker/data/filemanager-attachments/**
+!docker/data/filemanager-attachments/.gitkeep
 
 # Docker secrets (use .env.example as template)
 .env

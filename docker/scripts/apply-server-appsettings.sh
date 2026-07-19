@@ -178,7 +178,7 @@ write_json docker/config/filemanager-grpc/appsettings.Production.json <<'EOF'
   "Kestrel": {
     "EndpointDefaults": { "Protocols": "Http2" }
   },
-  "UploadFileConfig": { "DirectoryPath": "Attachment" },
+  "UploadFileConfig": { "DirectoryPath": "/app/Attachment" },
   "Redis": {
     "Password": "",
     "Hosts": [ { "Host": "redis", "Port": "6379" } ],
@@ -210,7 +210,37 @@ write_json docker/config/filemanager-webui/appsettings.Production.json <<'EOF'
     "HostName": "rabbitmq",
     "Port": 5672
   },
-  "UploadFileConfig": { "DirectoryPath": "Attachment" },
+  "UploadFileConfig": {
+    "DirectoryPath": "/app/Attachment",
+    "Profiles": [
+      {
+        "Extension": [ ".jpg", ".png", ".jpeg", ".bmp", ".webp", ".gif" ],
+        "Type": "Image",
+        "MaxSizeKB": 7000,
+        "MinSizeKB": 0
+      },
+      {
+        "Extension": [ ".txt", ".doc", ".docx", ".zip", ".rar" ],
+        "Type": "Document",
+        "MaxSizeKB": 25000,
+        "MinSizeKB": 0
+      },
+      {
+        "Extension": [ ".xls", ".xlsx" ],
+        "Type": "Excel",
+        "MaxSizeKB": 5000,
+        "MinSizeKB": 0
+      },
+      {
+        "Extension": [ ".pdf" ],
+        "Type": "PDF",
+        "MaxSizeKB": 5000,
+        "MinSizeKB": 0
+      }
+    ]
+  },
+  "MarketMakerFileUrl": "http://localhost",
+  "CheckAccess": "0",
   "Redis": {
     "Password": "",
     "Hosts": [ { "Host": "redis", "Port": "6379" } ],

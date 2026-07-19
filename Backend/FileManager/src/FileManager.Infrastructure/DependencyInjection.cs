@@ -37,8 +37,13 @@ namespace FileManager.Infrastructure
             #region API
             services.AddTransient<AuthHeaderHandler>();
 
+            // MarketMaker access check is optional for Healan; missing URL used to throw UriFormatException → HTTP 500 on Upload DI resolve.
+            var marketMakerUrl = configuration["MarketMakerFileUrl"];
+            if (string.IsNullOrWhiteSpace(marketMakerUrl))
+                marketMakerUrl = "http://127.0.0.1";
+
             services.AddRefitClient<IRefitHasAccessApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(configuration["MarketMakerFileUrl"]))
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(marketMakerUrl))
             .AddHttpMessageHandler<AuthHeaderHandler>();
 
             #endregion

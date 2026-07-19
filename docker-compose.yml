@@ -148,6 +148,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
     volumes:
       - ./docker/config/filemanager-grpc/appsettings.Production.json:/app/appsettings.Production.json:ro
+      - ./docker/data/filemanager-attachments:/app/Attachment
 
   filemanager-webui:
     restart: unless-stopped
@@ -169,7 +170,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
     volumes:
       - ./docker/config/filemanager-webui/appsettings.Production.json:/app/appsettings.Production.json:ro
-      - filemanager_attachments:/app/Attachment
+      - ./docker/data/filemanager-attachments:/app/Attachment
 
   workflow-webui:
     restart: unless-stopped
@@ -363,5 +364,4 @@ services:
 
 volumes:
   sqlserver_data:
-  filemanager_attachments:
   python_rag_chroma:
