@@ -1,14 +1,35 @@
 #!/usr/bin/env bash
 # بازنویسی کامل همه appsettings.Production.json با رمز SQL یکسان
-# استفاده:
-#   export SQL_PASSWORD='aA@12345aA@12345'
+# استفاده (ترجیحی — از .env پروژه می‌خواند):
+#   bash docker/scripts/apply-server-appsettings.sh
+# یا دستی:
+#   export SQL_PASSWORD='...'
 #   bash docker/scripts/apply-server-appsettings.sh
 # بعد:
-#   docker compose up -d --force-recreate healan-webapi identity-server identity-grpc identity-usermanager captcha-webui filemanager-webui filemanager-grpc workflow-webui notification-webapp smsprovider-webapp
+#   docker compose up -d --force-recreate filemanager-webui filemanager-grpc ...
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-PASS="${SQL_PASSWORD:?Set SQL_PASSWORD env var first}"
+cd "$ROOT"
+
+# Load /opt/healan/.env (or repo .env) without printing secrets.
+if [[ -f "$ROOT/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT/.env"
+  set +a
+  echo "loaded .env from $ROOT/.env"
+else
+  echo "WARN: $ROOT/.env not found — relying on exported env vars"
+fi
+
+# Prefer explicit SQL_PASSWORD; otherwise use MSSQL_SA_PASSWORD from .env (compose/sqlserver).
+PASS="${SQL_PASSWORD:-${MSSQL_SA_PASSWORD:-}}"
+if [[ -z "$PASS" ]]; then
+  echo "ERROR: Set MSSQL_SA_PASSWORD in .env (or export SQL_PASSWORD)." >&2
+  exit 1
+fi
+echo "using SQL password from ${SQL_PASSWORD:+SQL_PASSWORD}${SQL_PASSWORD:-MSSQL_SA_PASSWORD} (length=${#PASS})"
 
 # URL-encode password for pyodbc connection URI
 if command -v python3 >/dev/null 2>&1; then
