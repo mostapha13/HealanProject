@@ -4,13 +4,22 @@ import healanApi from '../../api/healanApi';
 import type { PatientBloodPressureHistoryResult, PatientBloodPressureItem } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { ReportsChart } from '../../components/ReportsChart';
-import { convertDateAndTimeToJalali } from '@tse/tools';
+import { formatJalaliDate } from '../../utils/formatJalali';
+import { groupBloodPressureByDay, periodTitle, type BpPeriodSlot } from '../../utils/groupBloodPressureByDay';
+import { openBloodPressurePrintWindow } from '../../utils/printBloodPressureReport';
 import { isValidIranNationalCode } from '../../utils/nationalCode';
 import { ListPagination, useListPagination } from '../../components/ListPagination';
 
 function asItems(res: PatientBloodPressureHistoryResult | null): PatientBloodPressureItem[] {
   if (!res) return [];
   return Array.isArray(res.items) ? res.items : [];
+}
+
+function slotCell(slot: BpPeriodSlot | undefined, key: keyof BpPeriodSlot) {
+  if (!slot) return '—';
+  const v = slot[key];
+  if (v == null || v === '') return '—';
+  return String(v);
 }
 
 function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
@@ -40,25 +49,34 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
   };
 
   const items = asItems(result);
-  const pageItems = items.slice((page - 1) * pageSize, page * pageSize);
+  const dayRows = useMemo(() => groupBloodPressureByDay(items), [items]);
+  const pageDays = dayRows.slice((page - 1) * pageSize, page * pageSize);
 
-  const chartItems = useMemo(() => {
-    // نمودار از قدیم به جدید خواناتر است
-    return [...items].reverse().slice(-20);
-  }, [items]);
+  const chartItems = useMemo(() => [...items].reverse().slice(-20), [items]);
 
   const categories = chartItems.map((r) => {
-    try {
-      return convertDateAndTimeToJalali(r.measuredAt);
-    } catch {
-      return r.measuredAt;
-    }
+    const dateLabel = formatJalaliDate(r.measuredAt) || '—';
+    const period = r.periodTitle || periodTitle(r.periodOfDay) || '';
+    return period ? `${dateLabel} · ${period}` : dateLabel;
   });
 
   const systolic = chartItems.map((r) => r.systolic);
   const diastolic = chartItems.map((r) => r.diastolic);
-
   const latest = items[0];
+
+  const printReport = () => {
+    if (!result) return;
+    try {
+      openBloodPressurePrintWindow({
+        patientName: `${result.firstName} ${result.lastName}`.trim(),
+        patientNationalCode: result.nationalCode,
+        printedAtLabel: formatJalaliDate(new Date()) || '',
+        days: dayRows,
+      });
+    } catch (err) {
+      onAlert(err instanceof Error ? { type: 'error', message: err.message } : err);
+    }
+  };
 
   return (
     <>
@@ -115,9 +133,19 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
                 {latest ? `${latest.systolic}/${latest.diastolic}` : '—'}
               </strong>
               <span className="healan-bp-summary__muted">
-                {latest?.periodTitle || ''}
+                {latest?.periodTitle || periodTitle(latest?.periodOfDay) || ''}
                 {latest?.measuredTime ? ` · ${latest.measuredTime}` : ''}
               </span>
+            </div>
+            <div className="healan-bp-summary__actions">
+              <button
+                type="button"
+                className="healan-btn healan-btn--outline"
+                disabled={dayRows.length === 0}
+                onClick={printReport}
+              >
+                چاپ گزارش
+              </button>
             </div>
           </div>
 
@@ -133,7 +161,7 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
                     { name: 'سیستولیک', data: systolic, color: '#ef4444' },
                     { name: 'دیاستولیک', data: diastolic, color: '#3b82f6' },
                   ]}
-                  height={360}
+                  height={380}
                 />
               </div>
             </div>
@@ -141,48 +169,63 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
 
           <div className="healan-card">
             <div className="healan-card__header">
-              <h3>لیست ثبت‌ها</h3>
+              <h3>لیست روزانه (صبح / ظهر / شب)</h3>
             </div>
             <div className="healan-card__body" style={{ padding: 0 }}>
-              {items.length === 0 ? (
+              {dayRows.length === 0 ? (
                 <div className="healan-empty">برای این بیمار فشاری ثبت نشده است.</div>
               ) : (
                 <>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="healan-table">
+                  <div className="healan-bp-day-table-wrap">
+                    <table className="healan-table healan-bp-day-table">
                       <thead>
                         <tr>
-                          <th>تاریخ</th>
-                          <th>بازه</th>
-                          <th>ساعت</th>
-                          <th>سیستولیک</th>
-                          <th>دیاستولیک</th>
-                          <th>نبض</th>
-                          <th>یادداشت</th>
+                          <th rowSpan={2}>تاریخ</th>
+                          <th colSpan={5} className="healan-bp-day-table__period healan-bp-day-table__period--morning">
+                            صبح
+                          </th>
+                          <th colSpan={5} className="healan-bp-day-table__period healan-bp-day-table__period--noon">
+                            ظهر
+                          </th>
+                          <th colSpan={5} className="healan-bp-day-table__period healan-bp-day-table__period--night">
+                            شب
+                          </th>
+                        </tr>
+                        <tr>
+                          {(['صبح', 'ظهر', 'شب'] as const).flatMap((p) =>
+                            ['ساعت', 'سیستول', 'دیاستول', 'نبض', 'یادداشت'].map((label) => (
+                              <th key={`${p}-${label}`} className="healan-bp-day-table__sub">
+                                {label}
+                              </th>
+                            ))
+                          )}
                         </tr>
                       </thead>
                       <tbody>
-                        {pageItems.map((row) => (
-                          <tr key={row.id}>
-                            <td>{row.measuredAt ? convertDateAndTimeToJalali(row.measuredAt) : '—'}</td>
-                            <td>
-                              {row.periodTitle ? (
-                                <span className={`healan-bp-period healan-bp-period--${row.periodOfDay || 0}`}>
-                                  {row.periodTitle}
-                                </span>
-                              ) : (
-                                '—'
-                              )}
-                            </td>
-                            <td>{row.measuredTime || '—'}</td>
-                            <td>
-                              <strong style={{ color: '#dc2626' }}>{row.systolic}</strong>
-                            </td>
-                            <td>
-                              <strong style={{ color: '#2563eb' }}>{row.diastolic}</strong>
-                            </td>
-                            <td>{row.pulse ?? '—'}</td>
-                            <td>{row.note || '—'}</td>
+                        {pageDays.map((row) => (
+                          <tr key={row.dateKey}>
+                            <td className="healan-bp-day-table__date">{row.jalaliLabel}</td>
+                            {([row.morning, row.noon, row.night] as const).map((slot, idx) => (
+                              <React.Fragment key={idx}>
+                                <td>{slotCell(slot, 'measuredTime')}</td>
+                                <td>
+                                  {slot ? (
+                                    <strong style={{ color: '#dc2626' }}>{slot.systolic}</strong>
+                                  ) : (
+                                    '—'
+                                  )}
+                                </td>
+                                <td>
+                                  {slot ? (
+                                    <strong style={{ color: '#2563eb' }}>{slot.diastolic}</strong>
+                                  ) : (
+                                    '—'
+                                  )}
+                                </td>
+                                <td>{slotCell(slot, 'pulse')}</td>
+                                <td className="healan-bp-day-table__note">{slotCell(slot, 'note')}</td>
+                              </React.Fragment>
+                            ))}
                           </tr>
                         ))}
                       </tbody>
@@ -191,7 +234,7 @@ function PatientsBloodPressurePage({ onAlert }: { onAlert: (msg: unknown) => voi
                   <ListPagination
                     page={page}
                     pageSize={pageSize}
-                    totalCount={items.length}
+                    totalCount={dayRows.length}
                     onChange={onPaginationChange}
                   />
                 </>

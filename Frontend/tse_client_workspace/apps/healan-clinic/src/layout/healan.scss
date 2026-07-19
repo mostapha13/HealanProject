@@ -503,6 +503,60 @@
   color: #94a3b8;
 }
 
+.healan-bp-summary__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.healan-bp-day-table-wrap {
+  overflow-x: auto;
+}
+
+.healan-bp-day-table {
+  min-width: 980px;
+  font-size: 0.82rem;
+}
+
+.healan-bp-day-table__period {
+  text-align: center !important;
+  font-weight: 700;
+}
+
+.healan-bp-day-table__period--morning {
+  background: #ccfbf1 !important;
+  color: #0f766e;
+}
+
+.healan-bp-day-table__period--noon {
+  background: #e0f2fe !important;
+  color: #0369a1;
+}
+
+.healan-bp-day-table__period--night {
+  background: #ede9fe !important;
+  color: #5b21b6;
+}
+
+.healan-bp-day-table__sub {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background: #f8fafc !important;
+}
+
+.healan-bp-day-table__date {
+  font-weight: 700;
+  white-space: nowrap;
+  background: #f8fafc;
+}
+
+.healan-bp-day-table__note {
+  max-width: 7rem;
+  text-align: right;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
 .healan-bp-period {
   display: inline-block;
   padding: 0.15rem 0.55rem;

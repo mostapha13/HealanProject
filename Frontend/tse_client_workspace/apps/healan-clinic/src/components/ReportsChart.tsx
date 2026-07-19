@@ -60,7 +60,10 @@ export function ReportsChart({
       xAxis: {
         categories,
         crosshair: true,
-        labels: { style: { fontSize: '11px' } },
+        labels: {
+          style: { fontSize: '10px' },
+          rotation: categories.some((c) => c.length > 14) ? -35 : 0,
+        },
       },
       yAxis: {
         min: 0,

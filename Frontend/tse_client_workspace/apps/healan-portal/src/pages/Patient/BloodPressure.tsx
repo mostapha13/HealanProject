@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { jalaaliMonthLength, toJalaali } from 'jalaali-js';
 import {
   patientBloodPressureDelete,
   patientBloodPressureList,
   patientBloodPressureSave,
   type PortalBloodPressureItem,
 } from '../../api/portalApi';
-import { jalaliToDayKey, todayJalali } from '../Assistant/jalaliDate';
+import { JalaliDateInput } from '../../components/JalaliDateInput';
+import { usePortalSessionUser } from '../../components/PortalSessionUser';
+import { formatJalaliDate, todayDateInput } from '../../utils/formatJalali';
+import { groupBloodPressureByDay } from '../../utils/groupBloodPressureByDay';
+import { openBloodPressurePrintWindow } from '../../utils/printBloodPressureReport';
 import { PatientPagedList } from './PatientPagedList';
 
 const PERIODS = [
@@ -15,78 +18,37 @@ const PERIODS = [
   { value: 3, label: 'شب' },
 ] as const;
 
-const JALALI_MONTHS = [
-  'فروردین',
-  'اردیبهشت',
-  'خرداد',
-  'تیر',
-  'مرداد',
-  'شهریور',
-  'مهر',
-  'آبان',
-  'آذر',
-  'دی',
-  'بهمن',
-  'اسفند',
-] as const;
-
-type JalaliParts = { jy: number; jm: number; jd: number };
-
-function isoToJalali(iso?: string): JalaliParts {
-  if (!iso) return todayJalali();
-  try {
-    const d = new Date(iso);
-    return toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
-  } catch {
-    return todayJalali();
-  }
-}
-
-function fmtJalali(iso?: string) {
-  if (!iso) return '—';
-  try {
-    const { jy, jm, jd } = isoToJalali(iso);
-    return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
-  } catch {
-    return iso;
-  }
-}
-
-function clampJalali(parts: JalaliParts): JalaliParts {
-  const maxDay = jalaaliMonthLength(parts.jy, parts.jm);
-  return { ...parts, jd: Math.min(parts.jd, maxDay) };
-}
-
 function asList(value: unknown): PortalBloodPressureItem[] {
   if (Array.isArray(value)) return value as PortalBloodPressureItem[];
   return [];
 }
 
+function isoToDateInput(iso?: string): string {
+  if (!iso) return todayDateInput();
+  try {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  } catch {
+    return todayDateInput();
+  }
+}
+
 export default function PatientBloodPressurePage() {
+  const { user } = usePortalSessionUser();
   const [items, setItems] = useState<PortalBloodPressureItem[]>([]);
   const [editId, setEditId] = useState<number | null>(null);
   const [systolic, setSystolic] = useState('120');
   const [diastolic, setDiastolic] = useState('80');
   const [pulse, setPulse] = useState('');
-  const [jalali, setJalali] = useState<JalaliParts>(() => todayJalali());
+  const [date, setDate] = useState(todayDateInput());
   const [period, setPeriod] = useState<number>(1);
   const [time, setTime] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const yearOptions = useMemo(() => {
-    const current = todayJalali().jy;
-    const years = new Set<number>();
-    for (let y = current; y >= current - 5; y -= 1) years.add(y);
-    years.add(jalali.jy);
-    return Array.from(years).sort((a, b) => b - a);
-  }, [jalali.jy]);
-
-  const dayOptions = useMemo(() => {
-    const max = jalaaliMonthLength(jalali.jy, jalali.jm);
-    return Array.from({ length: max }, (_, i) => i + 1);
-  }, [jalali.jy, jalali.jm]);
+  const dayRows = useMemo(() => groupBloodPressureByDay(items), [items]);
 
   const reload = async () => {
     const list = await patientBloodPressureList();
@@ -104,7 +66,7 @@ export default function PatientBloodPressurePage() {
     setSystolic('120');
     setDiastolic('80');
     setPulse('');
-    setJalali(todayJalali());
+    setDate(todayDateInput());
     setPeriod(1);
     setTime('');
     setNote('');
@@ -115,7 +77,7 @@ export default function PatientBloodPressurePage() {
     setSystolic(String(item.systolic));
     setDiastolic(String(item.diastolic));
     setPulse(item.pulse != null ? String(item.pulse) : '');
-    setJalali(isoToJalali(item.measuredAt));
+    setDate(isoToDateInput(item.measuredAt));
     setPeriod(item.periodOfDay || 1);
     setTime(item.measuredTime || '');
     setNote(item.note || '');
@@ -126,9 +88,8 @@ export default function PatientBloodPressurePage() {
     setBusy(true);
     setError('');
     try {
-      const dayKey = jalaliToDayKey(jalali.jy, jalali.jm, jalali.jd);
-      if (!dayKey) {
-        setError('تاریخ شمسی معتبر نیست.');
+      if (!date.trim()) {
+        setError('تاریخ را انتخاب کنید.');
         return;
       }
       await patientBloodPressureSave({
@@ -136,7 +97,7 @@ export default function PatientBloodPressurePage() {
         systolic: Number(systolic),
         diastolic: Number(diastolic),
         pulse: pulse ? Number(pulse) : null,
-        measuredAt: `${dayKey}T00:00:00`,
+        measuredAt: `${date}T00:00:00`,
         periodOfDay: period,
         measuredTime: time.trim() || null,
         note: note.trim() || undefined,
@@ -163,57 +124,47 @@ export default function PatientBloodPressurePage() {
     }
   };
 
-  const updateJalali = (patch: Partial<JalaliParts>) => {
-    setJalali((prev) => clampJalali({ ...prev, ...patch }));
+  const printReport = () => {
+    try {
+      openBloodPressurePrintWindow({
+        patientName: user?.displayName || 'بیمار',
+        patientNationalCode: null,
+        printedAtLabel: formatJalaliDate(new Date()) || '',
+        days: dayRows,
+      });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'چاپ ناموفق بود');
+    }
   };
 
   return (
     <div className="portal-patient__panel">
-      <h1 className="portal-patient__title">ثبت فشار خون</h1>
-      <p className="portal-patient__lead">تاریخ شمسی، بازه روز و در صورت نیاز ساعت را مشخص کنید.</p>
+      <div className="portal-patient__title-row">
+        <div>
+          <h1 className="portal-patient__title">ثبت فشار خون</h1>
+          <p className="portal-patient__lead">تاریخ شمسی، بازه روز و در صورت نیاز ساعت را مشخص کنید.</p>
+        </div>
+        <button
+          type="button"
+          className="p-btn p-btn--outline"
+          disabled={busy || items.length === 0}
+          onClick={printReport}
+        >
+          چاپ گزارش
+        </button>
+      </div>
       {error && <div className="portal-patient__error">{error}</div>}
 
       <form className="portal-patient__form" onSubmit={save}>
-        <label className="portal-patient__form-wide">
+        <label>
           تاریخ شمسی
-          <div className="portal-patient__jalali-row">
-            <select
-              aria-label="روز"
-              value={jalali.jd}
-              onChange={(e) => updateJalali({ jd: Number(e.target.value) })}
-              required
-            >
-              {dayOptions.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="ماه"
-              value={jalali.jm}
-              onChange={(e) => updateJalali({ jm: Number(e.target.value) })}
-              required
-            >
-              {JALALI_MONTHS.map((name, idx) => (
-                <option key={name} value={idx + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="سال"
-              value={jalali.jy}
-              onChange={(e) => updateJalali({ jy: Number(e.target.value) })}
-              required
-            >
-              {yearOptions.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
+          <JalaliDateInput
+            value={date}
+            onChange={setDate}
+            disabled={busy}
+            placeholder="انتخاب تاریخ"
+            calendarPopperPosition="bottom"
+          />
         </label>
         <label>
           بازه روز
@@ -271,7 +222,7 @@ export default function PatientBloodPressurePage() {
                 </strong>
                 {item.pulse != null ? ` · نبض ${item.pulse}` : ''}
                 <div className="portal-patient__muted">
-                  {fmtJalali(item.measuredAt)}
+                  {formatJalaliDate(item.measuredAt) || '—'}
                   {item.periodTitle ? ` · ${item.periodTitle}` : ''}
                   {item.measuredTime ? ` · ساعت ${item.measuredTime}` : ''}
                 </div>

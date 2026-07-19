@@ -334,7 +334,7 @@ export default function BookingPage() {
         </div>
 
         <header className="portal-booking__hero">
-          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v17-patient</span>
+          <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v19-patient</span>
           <h1 className="portal-booking__title">انتخاب نوبت قلب</h1>
           <p className="portal-booking__lead">
             روز و ساعت مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
