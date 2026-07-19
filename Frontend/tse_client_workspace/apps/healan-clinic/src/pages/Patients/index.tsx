@@ -7,7 +7,6 @@ import { convertDateToJalali } from '@tse/tools';
 import { buildPatientPayload, toDateInputValue } from '../../utils/apiPayload';
 import { isValidIranNationalCode } from '../../utils/nationalCode';
 import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryDrawer';
-import { PatientBloodPressureLookup } from '../../components/PatientBloodPressureLookup';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
@@ -21,7 +20,6 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [historyPatient, setHistoryPatient] = useState<PatientSummary | null>(null);
-  const [bpLookupCode, setBpLookupCode] = useState<string | null>(null);
   const [form, setForm] = useState({
     patientId: 0,
     userId: 0,
@@ -114,7 +112,7 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     <>
       <PageHeader
         title="مدیریت بیماران"
-        subtitle="ثبت، ویرایش، سوابق ویزیت و فشار خون"
+        subtitle="ثبت، ویرایش و مشاهده سوابق ویزیت"
         action={
           <button
             type="button"
@@ -127,12 +125,6 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             + بیمار جدید
           </button>
         }
-      />
-
-      <PatientBloodPressureLookup
-        key={bpLookupCode ?? 'bp-lookup'}
-        onAlert={onAlert}
-        initialNationalCode={bpLookupCode ?? ''}
       />
 
       {showForm && (
@@ -222,13 +214,6 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         </button>
                         <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => setHistoryPatient(p)}>
                           سوابق
-                        </button>
-                        <button
-                          type="button"
-                          className="healan-btn healan-btn--outline healan-btn--sm"
-                          onClick={() => setBpLookupCode(p.nationalCode || '')}
-                        >
-                          فشار خون
                         </button>
                       </div>
                     </td>

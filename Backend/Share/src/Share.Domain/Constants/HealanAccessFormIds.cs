@@ -45,4 +45,6 @@ public static class HealanAccessFormIds
     public const int PatientMedications = 5034;
     public const int PatientAssistant = 5035;
     public const int PatientBooking = 5036;
+    /// <summary>کلینیک — مشاهده فشار خون بیماران با کد ملی</summary>
+    public const int ClinicBloodPressure = 5037;
 }

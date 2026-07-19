@@ -871,7 +871,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v15-patient
+                build-v16-patient
               </span>
             </p>
           </div>

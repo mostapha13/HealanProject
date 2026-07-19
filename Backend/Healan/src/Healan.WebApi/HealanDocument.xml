@@ -14,6 +14,16 @@
             Public probe to confirm which auth build is live in Docker.
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.ClinicBloodPressureController">
+            <summary>
+            مشاهده فشار خون ثبت‌شده توسط بیمار (کلینیک)
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.ClinicBloodPressureController.History(System.String,System.Nullable{System.Int64})">
+            <summary>
+            لیست فشار خون با کد ملی یا شناسه بیمار
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.ClinicReportsController">
             <summary>
             گزارش‌های تحلیلی کلینیک
@@ -229,6 +239,11 @@
         <member name="M:Healan.WebApi.Controllers.PatientController.VisitHistory(System.Int64)">
             <summary>
             سوابق ویزیت بیمار (فقط مشاهده)
+            </summary>
+        </member>
+        <member name="M:Healan.WebApi.Controllers.PatientController.BloodPressureHistory(System.String,System.Nullable{System.Int64})">
+            <summary>
+            سوابق فشار خون ثبت‌شده توسط بیمار (کد ملی یا شناسه بیمار)
             </summary>
         </member>
         <member name="T:Healan.WebApi.Controllers.PortalContentController">

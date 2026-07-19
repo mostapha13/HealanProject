@@ -127,7 +127,7 @@ export const healanApi = {
     visitHistory: (patientId: number) =>
       get<PatientVisitHistoryItem[]>(`Patient/VisitHistory/?patientId=${patientId}`),
     bloodPressureHistory: (params: { nationalCode?: string; patientId?: number }) =>
-      get<PatientBloodPressureHistoryResult>('Patient/BloodPressureHistory', {
+      get<PatientBloodPressureHistoryResult>('ClinicBloodPressure/History', {
         nationalCode: params.nationalCode,
         patientId: params.patientId,
       }),

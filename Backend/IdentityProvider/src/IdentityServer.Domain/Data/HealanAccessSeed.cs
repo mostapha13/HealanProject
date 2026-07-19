@@ -91,6 +91,7 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PatientMedications, "یادآوری داروها", "/patient/medications"),
             new FormDef(HealanAccessFormIds.PatientAssistant, "چت‌بات بیمار", "/assistant"),
             new FormDef(HealanAccessFormIds.PatientBooking, "رزرو نوبت بیمار", "/booking"),
+            new FormDef(HealanAccessFormIds.ClinicBloodPressure, "فشار خون", "/blood-pressure"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -134,8 +135,9 @@ public static class HealanAccessSeed
             new MenuDef(5103, HealanAccessFormIds.Queue, 5102, 1),
             new MenuDef(5104, HealanAccessFormIds.Appointments, 5102, 2),
             new MenuDef(5105, HealanAccessFormIds.Patients, 5102, 3),
-            new MenuDef(5106, HealanAccessFormIds.Doctors, 5102, 4),
-            new MenuDef(5107, HealanAccessFormIds.Prescriptions, 5102, 5),
+            new MenuDef(5142, HealanAccessFormIds.ClinicBloodPressure, 5102, 4),
+            new MenuDef(5106, HealanAccessFormIds.Doctors, 5102, 5),
+            new MenuDef(5107, HealanAccessFormIds.Prescriptions, 5102, 6),
             new MenuDef(5108, null, null, 3, "اطلاعات پایه"),
             // 5109 Companies (مرکز درمانی) removed from clinic menus — company still auto-assigned internally
             new MenuDef(5110, HealanAccessFormIds.Insurance, 5108, 1),

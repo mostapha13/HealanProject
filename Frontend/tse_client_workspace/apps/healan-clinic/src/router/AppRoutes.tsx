@@ -10,6 +10,7 @@ import { setClinicBearerToken } from '../utils/setClinicBearerToken';
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const PatientsPage = lazy(() => import('../pages/Patients'));
+const BloodPressurePage = lazy(() => import('../pages/BloodPressure'));
 const DoctorsPage = lazy(() => import('../pages/Doctors'));
 const QueuePage = lazy(() => import('../pages/Queue'));
 const AppointmentsPage = lazy(() => import('../pages/Appointments'));
@@ -78,6 +79,7 @@ export default function AppRoutes() {
           <Route path="booking/schedules" element={guarded('/booking/schedules', <BookingSchedulesPage />)} />
           <Route path="booking/reservations" element={guarded('/booking/reservations', <BookingReservationsPage />)} />
           <Route path="patients" element={guarded('/patients', <PatientsPage />)} />
+          <Route path="blood-pressure" element={guarded('/blood-pressure', <BloodPressurePage />)} />
           <Route path="doctors" element={guarded('/doctors', <DoctorsPage />)} />
           <Route path="prescriptions" element={guarded('/prescriptions', <PrescriptionsPage />)} />
           <Route path="basic-data" element={guarded('/basic-data', <BasicDataLayout />)}>

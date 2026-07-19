@@ -90,7 +90,15 @@ export default function PatientHistoryPage() {
                   <strong>{fmt(b.startAt)}</strong>
                   {b.doctorName ? ` · ${b.doctorName}` : ''}
                   {(b.statusTitle || b.status != null) && (
-                    <span className="portal-patient__badge">
+                    <span
+                      className={`portal-patient__badge${
+                        b.status === 1
+                          ? ' portal-patient__badge--ok'
+                          : b.status === 2
+                            ? ' portal-patient__badge--danger'
+                            : ''
+                      }`}
+                    >
                       {statusTitle(b.status, b.statusTitle)}
                     </span>
                   )}

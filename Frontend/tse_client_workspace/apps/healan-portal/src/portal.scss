@@ -3310,6 +3310,7 @@ button.portal-assistant__ghost:disabled {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .portal-patient__badge {
@@ -3321,6 +3322,30 @@ button.portal-assistant__ghost:disabled {
   color: #047857;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.portal-patient__badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.portal-patient__badge--danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.portal-patient__form-actions .p-btn--success {
+  min-width: 140px;
+  padding: 0.7rem 1.35rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.28);
+}
+
+.portal-patient__form-actions .p-btn--success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35);
 }
 
 .portal-patient__pager-bar,

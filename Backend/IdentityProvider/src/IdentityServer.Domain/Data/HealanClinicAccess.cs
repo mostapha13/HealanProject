@@ -53,6 +53,7 @@ public static class HealanClinicAccess
         public const int PatientMedications = 5139;
         public const int PatientAssistant = 5140;
         public const int PatientBooking = 5141;
+        public const int ClinicBloodPressure = 5142;
     }
 
     /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه (فولدرها + زیرمنوها).</summary>
@@ -61,13 +62,14 @@ public static class HealanClinicAccess
         5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113,
         5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128,
         5129, 5130, 5131, 5132, 5133, 5134, 5135,
-        5136, 5137, 5138, 5139, 5140, 5141,
+        5136, 5137, 5138, 5139, 5140, 5141, 5142,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>
     public static readonly int[] SecretaryMenuIds =
     {
         Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients,
+        Menus.ClinicBloodPressure,
         Menus.Insurance, Menus.Services, Menus.MedicalFees,
         Menus.PortalContent, Menus.PortalReviews, Menus.PortalBlog, Menus.PortalRag,
         Menus.AssistantSettings, Menus.PortalRagLogs,
@@ -77,7 +79,8 @@ public static class HealanClinicAccess
     /// <summary>پزشک — ویزیت، نسخه، سوابق و صف بیماران.</summary>
     public static readonly int[] DoctorMenuIds =
     {
-        Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients, Menus.Prescriptions,
+        Menus.Dashboard, Menus.Queue, Menus.Appointments, Menus.Patients,
+        Menus.ClinicBloodPressure, Menus.Prescriptions,
     };
 
     /// <summary>حسابدار — گزارش مالی، تعرفه، پرداخت‌ها.</summary>
