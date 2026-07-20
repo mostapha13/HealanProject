@@ -52,6 +52,14 @@ class Settings(BaseSettings):
     rag_summarize_skip_if_shorter_than: int = 280
     rag_summarize_fallback_chars: int = 600
 
+    # Speech-to-text (faster-whisper) — فارسی رایگان و self-host
+    stt_enabled: bool = True
+    stt_model: str = "small"
+    stt_device: str = "cpu"
+    stt_compute_type: str = "int8"
+    stt_language: str = "fa"
+    stt_max_upload_bytes: int = 8 * 1024 * 1024
+
     _PLACEHOLDER_KEYS = frozenset(
         {"", "your-api-key-here", "sk-placeholder-set-your-key"}
     )

@@ -23,6 +23,7 @@ using Healan.Application.Portal.Queries.PortalSiteSettingList;
 using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
 using Healan.Application.Portal.Queries.PublishedBlogPostList;
 using Healan.Application.Portal.Queries.PublishedPortalSite;
+using Healan.Application.Portal.Commands.RagSpeechToText;
 using Healan.Application.Portal.Queries.RagAsk;
 using Healan.Application.Portal.Queries.RagChatLogList;
 using Healan.Application.Portal.Queries.RagKnowledgeInfo;
@@ -32,6 +33,7 @@ using Healan.Application.Portal.Queries.RagSettingGet;
 using Healan.Domain.Portal.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Share.Domain.Constants;
@@ -183,6 +185,28 @@ public class PortalPublicController : ControllerBase
     {
         query.AccessToken ??= ExtractBearerToken();
         return Ok(await Mediator.Send(query));
+    }
+
+    /// <summary>
+    /// تبدیل گفتار فارسی به متن (Whisper روی python-rag) — متن برمی‌گردد تا کاربر تأیید/ویرایش کند.
+    /// </summary>
+    [HttpPost("[action]")]
+    [RequestSizeLimit(8 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 8 * 1024 * 1024)]
+    public async Task<IActionResult> RagSpeechToText(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { title = "فایل صوتی ارسال نشده است." });
+
+        await using var ms = new MemoryStream();
+        await file.CopyToAsync(ms);
+        var result = await Mediator.Send(new RagSpeechToTextCommand
+        {
+            Content = ms.ToArray(),
+            FileName = string.IsNullOrWhiteSpace(file.FileName) ? "voice.webm" : file.FileName,
+            ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "audio/webm" : file.ContentType,
+        });
+        return Ok(result);
     }
 
     [HttpGet("[action]")]

@@ -2298,6 +2298,76 @@
   box-shadow: 0 4px 12px rgba(239, 57, 78, 0.12);
 }
 
+.portal-assistant__mic {
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1.5px solid rgba(25, 191, 211, 0.4);
+  border-radius: 999px;
+  background: #e8f9fc;
+  color: #0f766e;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.portal-assistant__mic:hover:not(:disabled) {
+  transform: scale(1.04);
+  background: #d5f3f8;
+}
+
+.portal-assistant__mic.is-recording {
+  background: #ffe8ec;
+  border-color: rgba(239, 57, 78, 0.55);
+  color: #c6283a;
+  box-shadow: 0 0 0 0 rgba(239, 57, 78, 0.35);
+  animation: portal-mic-pulse 1.2s ease-out infinite;
+}
+
+.portal-assistant__mic.is-busy,
+.portal-assistant__mic:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.portal-assistant__mic-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(15, 118, 110, 0.25);
+  border-top-color: #0f766e;
+  border-radius: 50%;
+  animation: portal-mic-spin 0.7s linear infinite;
+}
+
+@keyframes portal-mic-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 57, 78, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 57, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 57, 78, 0);
+  }
+}
+
+@keyframes portal-mic-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.portal-assistant__voice-hint {
+  margin: 0.4rem auto 0;
+  width: min(100%, var(--assistant-max));
+  text-align: center;
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 .portal-assistant__send:hover:not(:disabled) {
   transform: scale(1.04);
   background: #ffd6de;

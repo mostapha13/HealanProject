@@ -77,3 +77,18 @@ class RagStatusResponse(BaseModel):
     excel_exists: bool
     embedding_model: str
     llm_model: str
+
+
+class SttResponse(BaseModel):
+    text: str
+    language: str = "fa"
+    duration_seconds: float | None = None
+    model: str | None = None
+
+
+class SttStatusResponse(BaseModel):
+    enabled: bool
+    model: str
+    device: str
+    language: str
+    model_loaded: bool

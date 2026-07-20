@@ -271,6 +271,11 @@
             API عمومی سایت مطب — بدون نیاز به ورود
             </summary>
         </member>
+        <member name="M:Healan.WebApi.Controllers.PortalPublicController.RagSpeechToText(Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            تبدیل گفتار فارسی به متن (Whisper روی python-rag) — متن برمی‌گردد تا کاربر تأیید/ویرایش کند.
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.PublicInfoController">
             <summary>
             سرویس های عمومی

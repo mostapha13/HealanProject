@@ -164,6 +164,59 @@ export async function fetchRagAnswer(
   }) as Promise<RagAskResult>;
 }
 
+export interface RagSpeechToTextResult {
+  text: string;
+  language?: string;
+  durationSeconds?: number;
+  model?: string;
+}
+
+/** Whisper STT via Healan → python-rag. User should review text before sending. */
+export async function fetchRagSpeechToText(
+  blob: Blob,
+  fileName = 'voice.webm'
+): Promise<RagSpeechToTextResult> {
+  const formData = new FormData();
+  formData.append('file', blob, fileName);
+  const token = getPortalRagToken();
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}RagSpeechToText`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+    headers,
+  });
+
+  const raw = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const title =
+      (raw as { title?: string; detail?: string; message?: string })?.title ||
+      (raw as { detail?: string })?.detail ||
+      (raw as { message?: string })?.message ||
+      'تبدیل گفتار به متن ناموفق بود';
+    throw { data: raw, status: res.status, message: title };
+  }
+
+  const rec = raw as Record<string, unknown>;
+  const text = String(rec.text ?? rec.Text ?? '').trim();
+  if (!text) {
+    throw { message: 'گفتاری تشخیص داده نشد. لطفاً دوباره صحبت کنید.' };
+  }
+  return {
+    text,
+    language: String(rec.language ?? rec.Language ?? 'fa'),
+    durationSeconds:
+      typeof rec.durationSeconds === 'number'
+        ? rec.durationSeconds
+        : typeof rec.DurationSeconds === 'number'
+          ? rec.DurationSeconds
+          : undefined,
+    model: (rec.model ?? rec.Model) as string | undefined,
+  };
+}
+
 export async function fetchRagQuota(guestKey?: string): Promise<RagQuotaStatus> {
   return request.get({
     baseUrl: BASE,

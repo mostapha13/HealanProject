@@ -8,6 +8,7 @@ import {
   bookingReschedule,
   fetchRagAnswer,
   fetchRagQuota,
+  fetchRagSpeechToText,
   getPortalRagToken,
   requestRagOtp,
   setPortalRagToken,
@@ -211,22 +212,144 @@ export default function AssistantPage() {
   const [bookingAuthOpen, setBookingAuthOpen] = useState(false);
   const [bookingAuthMode, setBookingAuthMode] = useState<PortalAuthModalMode>('register');
   const [bookingBusy, setBookingBusy] = useState(false);
+  const [voiceState, setVoiceState] = useState<'idle' | 'recording' | 'transcribing'>('idle');
+  const [voiceHint, setVoiceHint] = useState('');
 
   const sessionIdRef = useRef(createSessionId());
   const guestKeyRef = useRef(ensureGuestKey());
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const streamTimerRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const voiceChunksRef = useRef<Blob[]>([]);
+  const voiceMaxTimerRef = useRef<number | null>(null);
   const streamCancelRef = useRef(false);
   const otpExpireAtRef = useRef<number>(0);
   const hasScrolledRef = useRef(false);
   const pendingIntentRef = useRef<BookingIntent | null>(null);
   const rescheduleIdRef = useRef<number>(0);
 
-  const busy = loading || streaming || bookingBusy;
+  const busy = loading || streaming || bookingBusy || voiceState !== 'idle';
   const emptyChat = messages.length <= 1 && !busy;
   const showSuggestions = emptyChat;
   const blocked = !!quota?.requiresLogin && !quota.isAuthenticated;
+  const voiceSupported =
+    typeof window !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    !!navigator.mediaDevices?.getUserMedia &&
+    typeof MediaRecorder !== 'undefined';
+
+  const stopVoiceTracks = () => {
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
+  };
+
+  const clearVoiceMaxTimer = () => {
+    if (voiceMaxTimerRef.current != null) {
+      window.clearTimeout(voiceMaxTimerRef.current);
+      voiceMaxTimerRef.current = null;
+    }
+  };
+
+  const finishVoiceRecording = () => {
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.stop();
+    }
+  };
+
+  const toggleVoice = async () => {
+    if (busy && voiceState === 'idle') return;
+    if (voiceState === 'transcribing') return;
+
+    if (voiceState === 'recording') {
+      clearVoiceMaxTimer();
+      finishVoiceRecording();
+      return;
+    }
+
+    if (!voiceSupported) {
+      setVoiceHint('مرورگر شما از ضبط صدا پشتیبانی نمی‌کند.');
+      return;
+    }
+
+    try {
+      setVoiceHint('دسترسی به میکروفون…');
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      voiceChunksRef.current = [];
+
+      const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : '';
+      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) voiceChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        clearVoiceMaxTimer();
+        stopVoiceTracks();
+        mediaRecorderRef.current = null;
+        const chunks = voiceChunksRef.current;
+        voiceChunksRef.current = [];
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+        if (!blob.size) {
+          setVoiceState('idle');
+          setVoiceHint('صدایی ضبط نشد. دوباره تلاش کنید.');
+          return;
+        }
+        setVoiceState('transcribing');
+        setVoiceHint('در حال تبدیل گفتار به متن… (اولین بار ممکن است کمی طول بکشد)');
+        void (async () => {
+          try {
+            const result = await fetchRagSpeechToText(blob, 'voice.webm');
+            setInput((prev) => {
+              const next = prev.trim() ? `${prev.trim()} ${result.text}` : result.text;
+              return next;
+            });
+            setVoiceHint('متن در کادر قرار گرفت — در صورت نیاز ویرایش کنید و ارسال کنید.');
+            requestAnimationFrame(() => {
+              resizeTextarea();
+              focusInput();
+            });
+          } catch (err) {
+            setVoiceHint(apiErrorMessage(err) || 'تبدیل گفتار به متن ناموفق بود.');
+          } finally {
+            setVoiceState('idle');
+          }
+        })();
+      };
+
+      recorder.start(250);
+      setVoiceState('recording');
+      setVoiceHint('در حال ضبط… دوباره بزنید تا متوقف شود (حداکثر ۴۵ ثانیه)');
+      voiceMaxTimerRef.current = window.setTimeout(() => {
+        finishVoiceRecording();
+      }, 45_000);
+    } catch {
+      stopVoiceTracks();
+      setVoiceState('idle');
+      setVoiceHint('دسترسی میکروفون داده نشد یا خطایی رخ داد.');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearVoiceMaxTimer();
+      try {
+        mediaRecorderRef.current?.stop();
+      } catch {
+        /* ignore */
+      }
+      stopVoiceTracks();
+    };
+  }, []);
 
   const focusInput = () => {
     const apply = () => {
@@ -871,7 +994,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v19-patient
+                build-v20-voice
               </span>
             </p>
           </div>
@@ -1010,7 +1133,16 @@ export default function AssistantPage() {
             ref={textareaRef}
             rows={1}
             value={input}
-            placeholder={blocked ? 'سوال FAQ نیاز به ورود دارد… یا بنویسید نوبت‌های فردا' : 'سوال یا درخواست نوبت…'}
+            placeholder={
+              voiceState === 'recording'
+                ? 'در حال ضبط صدا…'
+                : voiceState === 'transcribing'
+                  ? 'در حال تبدیل گفتار به متن…'
+                  : blocked
+                    ? 'سوال FAQ نیاز به ورود دارد… یا بنویسید نوبت‌های فردا'
+                    : 'سوال یا درخواست نوبت… (متن یا صدا)'
+            }
+            disabled={voiceState === 'transcribing'}
             onChange={(e) => {
               setInput(e.target.value);
               resizeTextarea();
@@ -1023,6 +1155,29 @@ export default function AssistantPage() {
               }
             }}
           />
+          {voiceSupported && (
+            <button
+              type="button"
+              className={`portal-assistant__mic${voiceState === 'recording' ? ' is-recording' : ''}${
+                voiceState === 'transcribing' ? ' is-busy' : ''
+              }`}
+              onClick={() => void toggleVoice()}
+              disabled={loading || streaming || bookingBusy || voiceState === 'transcribing'}
+              aria-label={voiceState === 'recording' ? 'توقف ضبط' : 'ضبط صدا'}
+              title={voiceState === 'recording' ? 'توقف و تبدیل به متن' : 'صحبت کنید (فارسی)'}
+            >
+              {voiceState === 'transcribing' ? (
+                <span className="portal-assistant__mic-spinner" aria-hidden />
+              ) : (
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                  <path
+                    fill="currentColor"
+                    d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
           <button
             type="button"
             className="portal-assistant__send"
@@ -1035,7 +1190,10 @@ export default function AssistantPage() {
             </svg>
           </button>
         </div>
-        <p className="portal-assistant__hint">Enter برای ارسال · Shift+Enter خط جدید · نوبت با دکمه ساعت</p>
+        {voiceHint && <p className="portal-assistant__voice-hint">{voiceHint}</p>}
+        <p className="portal-assistant__hint">
+          Enter ارسال · میکروفون گفتار فارسی · متن را قبل از ارسال بررسی کنید
+        </p>
       </div>
 
       {loginOpen && (

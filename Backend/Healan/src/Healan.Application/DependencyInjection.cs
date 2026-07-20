@@ -42,7 +42,8 @@ namespace Healan.Application
             });
             services.AddHttpClient<Portal.Services.IRagPythonService, Portal.Services.RagPythonService>(client =>
             {
-                client.Timeout = TimeSpan.FromSeconds(120);
+                // Whisper STT on CPU can take >60s on first load / longer clips
+                client.Timeout = TimeSpan.FromSeconds(180);
             });
             services.AddMemoryCache();
             services.AddSingleton<Portal.Services.IPortalAuthTokenService, Portal.Services.PortalAuthTokenService>();

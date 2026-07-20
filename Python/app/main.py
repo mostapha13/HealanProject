@@ -11,7 +11,7 @@ from app import __version__
 from app.config import get_settings
 from app.rag.background_sync import run_background_sync
 from app.rag.service import get_rag_pipeline, init_rag
-from app.routers import chat, rag
+from app.routers import chat, rag, stt
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -70,6 +70,7 @@ app.add_middleware(
 
 app.include_router(chat.router)
 app.include_router(rag.router)
+app.include_router(stt.router)
 
 if STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -99,4 +100,6 @@ async def health():
         "embedding_model": settings.embedding_model,
         "rag_documents": rag_documents,
         "data_source": settings.data_source,
+        "stt_enabled": settings.stt_enabled,
+        "stt_model": settings.stt_model,
     }

@@ -286,10 +286,18 @@ services:
       OPENAI_API_KEY: "ollama"
       OPENAI_BASE_URL: "http://host.docker.internal:11434/v1"
       OPENAI_MODEL: "qwen2.5:3b"
+      STT_ENABLED: "true"
+      STT_MODEL: "small"
+      STT_DEVICE: "cpu"
+      STT_COMPUTE_TYPE: "int8"
+      STT_LANGUAGE: "fa"
+      HF_HOME: "/data/hf-cache"
+      TRANSFORMERS_CACHE: "/data/hf-cache"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - python_rag_chroma:/data/chroma
+      - python_rag_hf:/data/hf-cache
     restart: unless-stopped
 
   healan-webapi:
@@ -365,3 +373,4 @@ services:
 volumes:
   sqlserver_data:
   python_rag_chroma:
+  python_rag_hf:
