@@ -68,7 +68,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
           <h1>Healan</h1>
           <p>{error}</p>
           <p>
-            <a href="http://auth.drshahrooei.ir/">رفتن به صفحه ورود</a>
+            <a href="https://auth.drshahrooei.ir/">رفتن به صفحه ورود</a>
           </p>
         </div>
       </div>

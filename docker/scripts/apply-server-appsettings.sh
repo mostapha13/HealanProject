@@ -88,7 +88,7 @@ write_json docker/config/healan-webapi/appsettings.Production.json <<'EOF'
   },
   "IdentityServer": {
     "Url": "http://identity-server:8080/",
-    "ValidIssuer": "http://auth.drshahrooei.ir",
+    "ValidIssuer": "https://auth.drshahrooei.ir",
     "RequireHttpsMetadata": false
   },
   "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir",
@@ -125,13 +125,13 @@ write_json docker/config/identity-server/appsettings.Production.json <<'EOF'
   "GrpcServer": {
     "IdentityServer": "http://identity-grpc:8080"
   },
-  "IssuerUri": "http://auth.drshahrooei.ir",
+  "IssuerUri": "https://auth.drshahrooei.ir",
   "CaptchaBaseUrl": "http://captcha-webui:8080/CaptchaProvider/api/v1/Captcha/",
   "SMSBaseUrl": "http://smsprovider-webapp:8080/api/v1/SMS/",
   "SMSSkipAuthToken": "true",
   "IdentityServer": {
-    "BaseUrl": "http://auth.drshahrooei.ir",
-    "HealanClinicUrl": "http://clinic.drshahrooei.ir/",
+    "BaseUrl": "https://auth.drshahrooei.ir",
+    "HealanClinicUrl": "https://clinic.drshahrooei.ir/",
     "HealanRedirectUriCallback": "https://clinic.drshahrooei.ir/callback,http://clinic.drshahrooei.ir/callback,https://portal.drshahrooei.ir/callback,http://portal.drshahrooei.ir/callback",
     "HealanRedirectUriSilentRenew": "https://clinic.drshahrooei.ir/silentRenew.html,http://clinic.drshahrooei.ir/silentRenew.html,https://portal.drshahrooei.ir/silentRenew,http://portal.drshahrooei.ir/silentRenew",
     "HealanPostLogoutRedirectUri": "https://clinic.drshahrooei.ir/loggedout.html,http://clinic.drshahrooei.ir/loggedout.html,https://portal.drshahrooei.ir/loggedout.html,http://portal.drshahrooei.ir/loggedout.html",
@@ -174,7 +174,7 @@ write_json docker/config/identity-usermanager/appsettings.Production.json <<'EOF
   },
   "IdentityServer": {
     "Url": "http://identity-server:8080/",
-    "ValidIssuer": "http://auth.drshahrooei.ir",
+    "ValidIssuer": "https://auth.drshahrooei.ir",
     "RequireHttpsMetadata": false
   },
   "GrpcServer": {
@@ -235,7 +235,7 @@ write_json docker/config/filemanager-webui/appsettings.Production.json <<'EOF'
   "ApiGateway": { "Url": "http://clinic.drshahrooei.ir" },
   "IdentityServer": {
     "Url": "http://identity-server:8080/",
-    "ValidIssuer": "http://auth.drshahrooei.ir",
+    "ValidIssuer": "https://auth.drshahrooei.ir",
     "RequireHttpsMetadata": false
   },
   "GrpcServer": {
@@ -297,7 +297,7 @@ write_json docker/config/workflow-webui/appsettings.Production.json <<'EOF'
   "FileManagerBaseUrl": "http://filemanager-webui:8080/File",
   "IdentityServer": {
     "Url": "http://identity-server:8080/",
-    "ValidIssuer": "http://auth.drshahrooei.ir",
+    "ValidIssuer": "https://auth.drshahrooei.ir",
     "RequireHttpsMetadata": false
   },
   "GrpcServer": {
