@@ -1010,7 +1010,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v21-voice
+                build-v22-voice
               </span>
             </p>
           </div>
@@ -1171,7 +1171,7 @@ export default function AssistantPage() {
               }
             }}
           />
-<button
+          <button
             type="button"
             className={`portal-assistant__mic${voiceState === 'recording' ? ' is-recording' : ''}${
               voiceState === 'transcribing' ? ' is-busy' : ''
@@ -1190,8 +1190,8 @@ export default function AssistantPage() {
                   d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"
                 />
               </svg>
-            </button>
-          )}
+            )}
+          </button>
           <button
             type="button"
             className="portal-assistant__send"
