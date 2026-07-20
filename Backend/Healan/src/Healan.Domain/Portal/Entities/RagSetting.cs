@@ -17,6 +17,8 @@ public class RagSetting
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
     /// <summary>مدل گفتار به متن Whisper (مثلاً small / base / tiny).</summary>
     public string SttModel { get; set; } = "small";
+    /// <summary>اگر true باشد، سوال/جواب دستیار در «گفتگوهای دستیار» ذخیره می‌شود.</summary>
+    public bool SaveChatLogs { get; set; } = true;
     public DateTime? LastSyncedAt { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

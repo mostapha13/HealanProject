@@ -106,6 +106,12 @@ write_json docker/config/healan-webapi/appsettings.Production.json <<'EOF'
     "Password": "",
     "Hosts": [ { "Host": "redis", "Port": "6379" } ],
     "KeyPrefix": "_Healan_"
+  },
+  "RabbitMQ": {
+    "UserName": "guest",
+    "Password": "guest",
+    "HostName": "rabbitmq",
+    "Port": 5672
   }
 }
 EOF

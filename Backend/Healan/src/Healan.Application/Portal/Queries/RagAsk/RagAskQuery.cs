@@ -72,7 +72,7 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
                 WasAnswered = false,
                 IsAuthenticated = userId.HasValue,
             };
-            PublishLog(question, request, userId, guestKey, phone, disabled);
+            PublishLog(question, request, userId, guestKey, phone, disabled, setting);
             return disabled;
         }
 
@@ -124,7 +124,7 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
             IsAuthenticated = userId.HasValue,
         };
 
-        PublishLog(question, request, userId, guestKey, phone, response);
+        PublishLog(question, request, userId, guestKey, phone, response, setting);
         return response;
     }
 
@@ -156,8 +156,12 @@ public class RagAskQueryHandler : IRequestHandler<RagAskQuery, RagAskResponseDto
         Guid? identityUserId,
         string? guestKey,
         string? phone,
-        RagAskResponseDto response)
+        RagAskResponseDto response,
+        Domain.Portal.Entities.RagSetting? setting)
     {
+        if (setting is { SaveChatLogs: false })
+            return;
+
         _logPublisher.Publish(new RagChatLogMessage
         {
             Question = question,

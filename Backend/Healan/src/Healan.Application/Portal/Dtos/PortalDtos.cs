@@ -99,6 +99,7 @@ public class RagSettingDto
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
     public string SttModel { get; set; } = "small";
+    public bool SaveChatLogs { get; set; } = true;
     public DateTime? LastSyncedAt { get; set; }
 }
 

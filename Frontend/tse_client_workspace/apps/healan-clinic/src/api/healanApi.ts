@@ -347,6 +347,8 @@ export const healanApi = {
       pageNumber?: number;
       pageSize?: number;
     }) => get<PaginatedResponse<RagChatLogItem>>('RagKnowledge/ChatLogList', pagedParams(params)),
+    ragChatLogDelete: (ragChatLogIds: number[]) =>
+      post<{ id: number }>('RagKnowledge/ChatLogDelete', { ragChatLogIds }),
   },
 
   booking: {

@@ -483,6 +483,7 @@ export interface RagSetting {
   embeddingModel: string;
   summarizeModel: string;
   sttModel: string;
+  saveChatLogs: boolean;
   lastSyncedAt?: string;
 }
 

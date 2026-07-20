@@ -20,5 +20,6 @@ public class RagSettingConfiguration : IEntityTypeConfiguration<RagSetting>
         builder.Property(x => x.EmbeddingModel).HasMaxLength(200).HasDefaultValue("heydariAI/persian-embeddings");
         builder.Property(x => x.SummarizeModel).HasMaxLength(200).HasDefaultValue("qwen2.5:3b");
         builder.Property(x => x.SttModel).HasMaxLength(200).HasDefaultValue("small");
+        builder.Property(x => x.SaveChatLogs).HasDefaultValue(true);
     }
 }

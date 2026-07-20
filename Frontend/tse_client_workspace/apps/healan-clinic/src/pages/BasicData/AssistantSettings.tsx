@@ -21,6 +21,7 @@ function emptySettings(): RagSetting {
     embeddingModel: DEFAULT_EMBEDDING,
     summarizeModel: DEFAULT_SUMMARIZE,
     sttModel: DEFAULT_STT,
+    saveChatLogs: true,
   };
 }
 
@@ -37,6 +38,7 @@ function mapSettings(res: Partial<RagSetting> | null | undefined, fallback?: Rag
     embeddingModel: (res?.embeddingModel || base.embeddingModel || DEFAULT_EMBEDDING).trim(),
     summarizeModel: (res?.summarizeModel || base.summarizeModel || DEFAULT_SUMMARIZE).trim(),
     sttModel: (res?.sttModel || base.sttModel || DEFAULT_STT).trim(),
+    saveChatLogs: res?.saveChatLogs ?? base.saveChatLogs ?? true,
     lastSyncedAt: res?.lastSyncedAt ?? base.lastSyncedAt,
   };
 }
@@ -181,6 +183,20 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 />{' '}
                 ربات فعال باشد
               </label>
+            </div>
+
+            <div className="healan-form-field">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={settings.saveChatLogs !== false}
+                  onChange={(e) => setSettings({ ...settings, saveChatLogs: e.target.checked })}
+                />{' '}
+                ذخیره سوال و جواب در «گفتگوهای دستیار»
+              </label>
+              <small style={{ color: '#81858b', display: 'block', marginTop: 4 }}>
+                اگر خاموش باشد، مکالمات در لیست گفتگوها ثبت نمی‌شوند.
+              </small>
             </div>
 
             <div className="healan-form-field">

@@ -45,6 +45,7 @@ public class RagSettingGetQueryHandler : IRequestHandler<RagSettingGetQuery, Rag
         SttModel = string.IsNullOrWhiteSpace(setting.SttModel)
             ? "small"
             : setting.SttModel,
+        SaveChatLogs = setting.SaveChatLogs,
         LastSyncedAt = setting.LastSyncedAt,
     };
 }

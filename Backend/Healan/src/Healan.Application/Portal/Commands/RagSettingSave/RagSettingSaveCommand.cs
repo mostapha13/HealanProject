@@ -18,6 +18,7 @@ public class RagSettingSaveCommand : IRequest<RagSettingDto>
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
     public string SttModel { get; set; } = "small";
+    public bool SaveChatLogs { get; set; } = true;
 }
 
 public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveCommand, RagSettingDto>
@@ -61,6 +62,7 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
         setting.EmbeddingModel = request.EmbeddingModel.Trim();
         setting.SummarizeModel = request.SummarizeModel.Trim();
         setting.SttModel = request.SttModel.Trim();
+        setting.SaveChatLogs = request.SaveChatLogs;
         setting.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);

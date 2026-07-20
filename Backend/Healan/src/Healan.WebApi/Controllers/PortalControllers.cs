@@ -11,6 +11,7 @@ using Healan.Application.Portal.Commands.PortalContentItemRegister;
 using Healan.Application.Portal.Commands.PortalOtpRequest;
 using Healan.Application.Portal.Commands.PortalOtpVerify;
 using Healan.Application.Portal.Commands.PortalSiteSettingSave;
+using Healan.Application.Portal.Commands.RagChatLogDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeRegister;
 using Healan.Application.Portal.Commands.RagSettingSave;
@@ -131,6 +132,11 @@ public class RagKnowledgeController : ApiControllerBase
     [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
     public async Task<IActionResult> ChatLogList([FromQuery] RagChatLogListQuery query) =>
         Ok(await Mediator.Send(query));
+
+    [HttpPost("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
+    public Task<IActionResult> ChatLogDelete([FromBody] RagChatLogDeleteCommand request) =>
+        SendCommand(request);
 }
 
 /// <summary>

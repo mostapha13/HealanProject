@@ -96,6 +96,7 @@ public static class RagKnowledgeSeed
             EmbeddingModel = "heydariAI/persian-embeddings",
             SummarizeModel = "qwen2.5:3b",
             SttModel = "small",
+            SaveChatLogs = true,
             UpdatedAt = DateTime.UtcNow,
         });
         await context.SaveChangesAsync();

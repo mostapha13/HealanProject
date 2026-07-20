@@ -2391,6 +2391,11 @@ namespace Healan.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("small");
 
+                    b.Property<bool>("SaveChatLogs")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("SummarizeModel")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
