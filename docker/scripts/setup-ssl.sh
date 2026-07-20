@@ -27,9 +27,18 @@ certbot certonly --webroot -w "${WEBROOT}" \
   -d "auth.${DOMAIN}"
 
 echo ""
-echo "گواهی صادر شد. حالا در docker-compose.yml برای nginx-gateway:"
-echo "  - پورت 443:443"
-echo "  - volume: /etc/letsencrypt:/etc/letsencrypt:ro"
-echo "  - volume: ./docker/config/nginx/nginx-gateway-ssl.conf:/etc/nginx/conf.d/ssl.conf:ro"
+echo "گواهی صادر شد. حالا در docker-compose.yml برای nginx-gateway این دو خط را از کامنت دربیاورید:"
+echo "  - /etc/letsencrypt:/etc/letsencrypt:ro"
+echo "  - ./docker/config/nginx/nginx-gateway-ssl.conf:/etc/nginx/conf.d/ssl.conf:ro"
 echo ""
-echo "سپس: docker compose up -d nginx-gateway"
+echo "سپس:"
+echo "  docker compose up -d --force-recreate nginx-gateway"
+echo ""
+
+# تمدید خودکار (cron دو بار در روز)
+chmod +x "${PROJECT_DIR}/docker/scripts/renew-ssl.sh"
+chmod +x "${PROJECT_DIR}/docker/scripts/install-ssl-renew-cron.sh"
+"${PROJECT_DIR}/docker/scripts/install-ssl-renew-cron.sh"
+
+echo ""
+echo "تمدید خودکار SSL فعال شد (رایگان). لاگ: ${PROJECT_DIR}/docker/data/ssl-logs/"

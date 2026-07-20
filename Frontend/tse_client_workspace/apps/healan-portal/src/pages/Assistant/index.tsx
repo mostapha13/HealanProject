@@ -234,11 +234,6 @@ export default function AssistantPage() {
   const emptyChat = messages.length <= 1 && !busy;
   const showSuggestions = emptyChat;
   const blocked = !!quota?.requiresLogin && !quota.isAuthenticated;
-  const voiceSupported =
-    typeof window !== 'undefined' &&
-    typeof navigator !== 'undefined' &&
-    !!navigator.mediaDevices?.getUserMedia &&
-    typeof MediaRecorder !== 'undefined';
 
   const stopVoiceTracks = () => {
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -259,6 +254,18 @@ export default function AssistantPage() {
     }
   };
 
+  const canRecordVoice = () => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    // روی HTTP معمولی mediaDevices معمولاً undefined است؛ فقط HTTPS / localhost
+    const secure =
+      window.isSecureContext ||
+      window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    if (!secure) return false;
+    return !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined';
+  };
+
   const toggleVoice = async () => {
     if (busy && voiceState === 'idle') return;
     if (voiceState === 'transcribing') return;
@@ -269,8 +276,17 @@ export default function AssistantPage() {
       return;
     }
 
-    if (!voiceSupported) {
-      setVoiceHint('مرورگر شما از ضبط صدا پشتیبانی نمی‌کند.');
+    if (!canRecordVoice()) {
+      const onHttp =
+        typeof window !== 'undefined' &&
+        window.location.protocol === 'http:' &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1';
+      setVoiceHint(
+        onHttp
+          ? 'برای ضبط صدا باید سایت با HTTPS باز باشد. بعد از فعال‌سازی SSL دوباره امتحان کنید.'
+          : 'مرورگر شما از ضبط صدا پشتیبانی نمی‌کند (Chrome/Edge پیشنهاد می‌شود).'
+      );
       return;
     }
 
@@ -994,7 +1010,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v20-voice
+                build-v21-voice
               </span>
             </p>
           </div>
@@ -1155,27 +1171,25 @@ export default function AssistantPage() {
               }
             }}
           />
-          {voiceSupported && (
-            <button
-              type="button"
-              className={`portal-assistant__mic${voiceState === 'recording' ? ' is-recording' : ''}${
-                voiceState === 'transcribing' ? ' is-busy' : ''
-              }`}
-              onClick={() => void toggleVoice()}
-              disabled={loading || streaming || bookingBusy || voiceState === 'transcribing'}
-              aria-label={voiceState === 'recording' ? 'توقف ضبط' : 'ضبط صدا'}
-              title={voiceState === 'recording' ? 'توقف و تبدیل به متن' : 'صحبت کنید (فارسی)'}
-            >
-              {voiceState === 'transcribing' ? (
-                <span className="portal-assistant__mic-spinner" aria-hidden />
-              ) : (
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-                  <path
-                    fill="currentColor"
-                    d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"
-                  />
-                </svg>
-              )}
+<button
+            type="button"
+            className={`portal-assistant__mic${voiceState === 'recording' ? ' is-recording' : ''}${
+              voiceState === 'transcribing' ? ' is-busy' : ''
+            }`}
+            onClick={() => void toggleVoice()}
+            disabled={loading || streaming || bookingBusy || voiceState === 'transcribing'}
+            aria-label={voiceState === 'recording' ? 'توقف ضبط' : 'ضبط صدا'}
+            title={voiceState === 'recording' ? 'توقف و تبدیل به متن' : 'صحبت کنید (فارسی)'}
+          >
+            {voiceState === 'transcribing' ? (
+              <span className="portal-assistant__mic-spinner" aria-hidden />
+            ) : (
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                <path
+                  fill="currentColor"
+                  d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"
+                />
+              </svg>
             </button>
           )}
           <button

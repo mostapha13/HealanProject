@@ -38,6 +38,9 @@ Backend/FileManager/src/FileManager.WebUI/Attachment/
 docker/data/filemanager-attachments/**
 !docker/data/filemanager-attachments/.gitkeep
 
+# SSL renew logs
+docker/data/ssl-logs/
+
 # Docker secrets (use .env.example as template)
 .env
 docker/config/python/.env
