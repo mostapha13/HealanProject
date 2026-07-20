@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.config import get_settings
 from app.rag.background_sync import run_background_sync
+from app.rag.runtime_settings import apply_rag_sql_overrides
 from app.rag.service import get_rag_pipeline, init_rag
 from app.routers import chat, rag, stt
 from app.services.stt import warmup_stt
@@ -38,7 +39,8 @@ async def lifespan(_: FastAPI):
             print(f"RAG: data source not ready ({settings.data_source}).")
 
     async def _warmup_stt() -> None:
-        await asyncio.to_thread(warmup_stt, settings)
+        runtime = apply_rag_sql_overrides(settings)
+        await asyncio.to_thread(warmup_stt, runtime)
 
     ingest_task = asyncio.create_task(_run_initial_ingest())
     stt_task = asyncio.create_task(_warmup_stt())

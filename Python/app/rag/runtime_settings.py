@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def apply_rag_sql_overrides(settings: Settings) -> Settings:
-    """مدل embedding و خلاصه‌ساز را از جدول RagSettings می‌خواند (اگر موجود باشد)."""
+    """مدل embedding / خلاصه‌ساز / STT را از جدول RagSettings می‌خواند (اگر موجود باشد)."""
     if settings.data_source.lower().strip() != "sqlserver":
         return settings
     if not settings.sql_server_connection_string.strip():
@@ -33,6 +33,10 @@ def apply_rag_sql_overrides(settings: Settings) -> Settings:
         # اگر OPENAI_MODEL جدا ست نشده، خلاصه‌ساز از همین مدل استفاده کند
         if not (settings.openai_model or "").strip() or settings.openai_model == "gpt-4o-mini":
             settings.openai_model = summarize
+
+    stt = (sql.get("stt_model") or "").strip()
+    if stt:
+        settings.stt_model = stt
 
     threshold_pct = sql.get("similarity_threshold_percent")
     if threshold_pct is not None:

@@ -98,6 +98,7 @@ public class RagSettingDto
     public int AuthenticatedDailyLimit { get; set; } = 200;
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    public string SttModel { get; set; } = "small";
     public DateTime? LastSyncedAt { get; set; }
 }
 

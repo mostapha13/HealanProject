@@ -2384,6 +2384,13 @@ namespace Healan.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(55);
 
+                    b.Property<string>("SttModel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasDefaultValue("small");
+
                     b.Property<string>("SummarizeModel")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

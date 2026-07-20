@@ -15,6 +15,8 @@ public class RagSetting
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     /// <summary>مدل خلاصه‌ساز بلاگ/نظرات (مثلاً qwen2.5:3b روی Ollama).</summary>
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    /// <summary>مدل گفتار به متن Whisper (مثلاً small / base / tiny).</summary>
+    public string SttModel { get; set; } = "small";
     public DateTime? LastSyncedAt { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

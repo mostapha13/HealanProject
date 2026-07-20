@@ -482,6 +482,7 @@ export interface RagSetting {
   authenticatedDailyLimit: number;
   embeddingModel: string;
   summarizeModel: string;
+  sttModel: string;
   lastSyncedAt?: string;
 }
 

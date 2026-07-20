@@ -7,6 +7,7 @@ import { convertDateAndTimeToJalali } from '@tse/tools';
 
 const DEFAULT_EMBEDDING = 'heydariAI/persian-embeddings';
 const DEFAULT_SUMMARIZE = 'qwen2.5:3b';
+const DEFAULT_STT = 'small';
 
 function emptySettings(): RagSetting {
   return {
@@ -19,6 +20,7 @@ function emptySettings(): RagSetting {
     authenticatedDailyLimit: 200,
     embeddingModel: DEFAULT_EMBEDDING,
     summarizeModel: DEFAULT_SUMMARIZE,
+    sttModel: DEFAULT_STT,
   };
 }
 
@@ -34,6 +36,7 @@ function mapSettings(res: Partial<RagSetting> | null | undefined, fallback?: Rag
     authenticatedDailyLimit: res?.authenticatedDailyLimit ?? base.authenticatedDailyLimit,
     embeddingModel: (res?.embeddingModel || base.embeddingModel || DEFAULT_EMBEDDING).trim(),
     summarizeModel: (res?.summarizeModel || base.summarizeModel || DEFAULT_SUMMARIZE).trim(),
+    sttModel: (res?.sttModel || base.sttModel || DEFAULT_STT).trim(),
     lastSyncedAt: res?.lastSyncedAt ?? base.lastSyncedAt,
   };
 }
@@ -82,7 +85,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
     <>
       <PageHeader
         title="تنظیمات دستیار هوشمند"
-        subtitle="سقف سوالات، مدل embedding و مدل خلاصه‌ساز بلاگ/نظرات"
+        subtitle="سقف سوالات، مدل embedding، خلاصه‌ساز و گفتار به متن (Whisper)"
       />
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
@@ -114,6 +117,20 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
               />
               <small style={{ color: '#81858b' }}>
                 پیش‌فرض رایگان لوکال: qwen2.5:3b (نیاز به Ollama روی سرور). بعد از تغییر، همگام‌سازی بعدی خلاصه را دوباره می‌سازد.
+              </small>
+            </div>
+
+            <div className="healan-form-field healan-form-field--full">
+              <label>مدل گفتار به متن (Whisper)</label>
+              <input
+                className="healan-input"
+                value={settings.sttModel ?? ''}
+                onChange={(e) => setSettings({ ...settings, sttModel: e.target.value })}
+                placeholder={DEFAULT_STT}
+              />
+              <small style={{ color: '#81858b' }}>
+                برای میکروفون ربات پورتال. نمونه‌ها: tiny (سریع/کم‌دقت)، base، small (پیشنهادی)، medium (دقیق‌تر/کندتر روی CPU).
+                بعد از تغییر، اولین تبدیل ممکن است مدل را دوباره بارگذاری کند.
               </small>
             </div>
           </div>

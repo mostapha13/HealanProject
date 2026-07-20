@@ -6,6 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.config import Settings, get_settings
+from app.rag.runtime_settings import apply_rag_sql_overrides
 from app.schemas import SttResponse, SttStatusResponse
 from app.services.stt import stt_status, transcribe_audio
 
@@ -13,8 +14,12 @@ router = APIRouter(prefix="/api/v1/rag", tags=["rag-stt"])
 logger = logging.getLogger(__name__)
 
 
+def get_runtime_settings() -> Settings:
+    return apply_rag_sql_overrides(get_settings())
+
+
 @router.get("/stt/status", response_model=SttStatusResponse)
-async def speech_to_text_status(settings: Settings = Depends(get_settings)):
+async def speech_to_text_status(settings: Settings = Depends(get_runtime_settings)):
     info = stt_status(settings)
     return SttStatusResponse(**info)
 
@@ -22,7 +27,7 @@ async def speech_to_text_status(settings: Settings = Depends(get_settings)):
 @router.post("/stt", response_model=SttResponse)
 async def speech_to_text(
     file: UploadFile = File(...),
-    settings: Settings = Depends(get_settings),
+    settings: Settings = Depends(get_runtime_settings),
 ):
     if not settings.stt_enabled:
         raise HTTPException(status_code=503, detail="سرویس گفتار به متن غیرفعال است.")

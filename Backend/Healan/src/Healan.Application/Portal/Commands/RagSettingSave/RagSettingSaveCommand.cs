@@ -17,6 +17,7 @@ public class RagSettingSaveCommand : IRequest<RagSettingDto>
     public int AuthenticatedDailyLimit { get; set; } = 200;
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    public string SttModel { get; set; } = "small";
 }
 
 public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveCommand, RagSettingDto>
@@ -41,6 +42,8 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
             throw new BadRequestExceptions("مدل embedding نامعتبر است");
         if (string.IsNullOrWhiteSpace(request.SummarizeModel) || request.SummarizeModel.Trim().Length > 200)
             throw new BadRequestExceptions("مدل خلاصه‌ساز نامعتبر است");
+        if (string.IsNullOrWhiteSpace(request.SttModel) || request.SttModel.Trim().Length > 200)
+            throw new BadRequestExceptions("مدل گفتار به متن نامعتبر است");
 
         var setting = await _db.RagSettings.FirstOrDefaultAsync(cancellationToken);
         if (setting == null)
@@ -57,6 +60,7 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
         setting.AuthenticatedDailyLimit = request.AuthenticatedDailyLimit;
         setting.EmbeddingModel = request.EmbeddingModel.Trim();
         setting.SummarizeModel = request.SummarizeModel.Trim();
+        setting.SttModel = request.SttModel.Trim();
         setting.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);

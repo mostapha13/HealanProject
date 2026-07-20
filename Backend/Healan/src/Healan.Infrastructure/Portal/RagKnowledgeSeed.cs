@@ -71,6 +71,11 @@ public static class RagKnowledgeSeed
                 setting.SummarizeModel = "qwen2.5:3b";
                 changed = true;
             }
+            if (string.IsNullOrWhiteSpace(setting.SttModel))
+            {
+                setting.SttModel = "small";
+                changed = true;
+            }
             if (changed)
             {
                 setting.UpdatedAt = DateTime.UtcNow;
@@ -90,6 +95,7 @@ public static class RagKnowledgeSeed
             AuthenticatedDailyLimit = 200,
             EmbeddingModel = "heydariAI/persian-embeddings",
             SummarizeModel = "qwen2.5:3b",
+            SttModel = "small",
             UpdatedAt = DateTime.UtcNow,
         });
         await context.SaveChangesAsync();
