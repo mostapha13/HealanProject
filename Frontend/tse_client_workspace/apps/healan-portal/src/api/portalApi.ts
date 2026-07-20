@@ -181,7 +181,7 @@ export async function fetchRagSpeechToText(
   formData.append('file', blob, fileName);
   const token = getPortalRagToken();
   const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}RagSpeechToText`, {
     method: 'POST',
@@ -211,7 +211,16 @@ export async function fetchRagSpeechToText(
     throw { data: raw, status: res.status, message: title };
   }
 
-  const rec = raw as Record<string, unknown>;
+  const rec = raw as {
+    text?: unknown;
+    Text?: unknown;
+    language?: unknown;
+    Language?: unknown;
+    durationSeconds?: unknown;
+    DurationSeconds?: unknown;
+    model?: unknown;
+    Model?: unknown;
+  };
   const text = String(rec.text ?? rec.Text ?? '').trim();
   if (!text) {
     throw { message: 'گفتاری تشخیص داده نشد. لطفاً دوباره صحبت کنید.' };
