@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.rag.background_sync import run_background_sync
 from app.rag.service import get_rag_pipeline, init_rag
 from app.routers import chat, rag, stt
+from app.services.stt import warmup_stt
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -36,7 +37,11 @@ async def lifespan(_: FastAPI):
         else:
             print(f"RAG: data source not ready ({settings.data_source}).")
 
+    async def _warmup_stt() -> None:
+        await asyncio.to_thread(warmup_stt, settings)
+
     ingest_task = asyncio.create_task(_run_initial_ingest())
+    stt_task = asyncio.create_task(_warmup_stt())
 
     stop_event = asyncio.Event()
     sync_task = asyncio.create_task(run_background_sync(settings, stop_event))
@@ -45,8 +50,9 @@ async def lifespan(_: FastAPI):
 
     stop_event.set()
     ingest_task.cancel()
+    stt_task.cancel()
     sync_task.cancel()
-    for task in (ingest_task, sync_task):
+    for task in (ingest_task, stt_task, sync_task):
         try:
             await task
         except asyncio.CancelledError:

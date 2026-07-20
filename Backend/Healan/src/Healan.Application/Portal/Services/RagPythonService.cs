@@ -133,6 +133,12 @@ public class RagPythonService : IRagPythonService
         var url = $"{baseUrl.TrimEnd('/')}/api/v1/rag/stt";
         var safeName = string.IsNullOrWhiteSpace(fileName) ? "voice.webm" : fileName.Trim();
         var mediaType = string.IsNullOrWhiteSpace(contentType) ? "audio/webm" : contentType.Trim();
+        // Browsers often send "audio/webm;codecs=opus" — keep only the media type for HttpClient
+        var semi = mediaType.IndexOf(';');
+        if (semi >= 0)
+            mediaType = mediaType[..semi].Trim();
+        if (string.IsNullOrWhiteSpace(mediaType))
+            mediaType = "audio/webm";
 
         _logger.LogInformation(
             "RAG STT started. Url={Url}, Bytes={Bytes}, FileName={FileName}",

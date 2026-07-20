@@ -77,6 +77,16 @@ def transcribe_audio(data: bytes, filename: str, settings: Settings) -> tuple[st
     return text, duration
 
 
+def warmup_stt(settings: Settings) -> None:
+    """Load Whisper model in background so first user request is not a cold start."""
+    if not settings.stt_enabled:
+        return
+    try:
+        _load_model(settings)
+    except Exception:
+        logger.exception("STT warmup failed (will retry on first request)")
+
+
 def stt_status(settings: Settings) -> dict:
     loaded = _model is not None and _model_key is not None
     return {

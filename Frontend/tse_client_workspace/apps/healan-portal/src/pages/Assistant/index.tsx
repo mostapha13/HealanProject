@@ -224,6 +224,8 @@ export default function AssistantPage() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const voiceChunksRef = useRef<Blob[]>([]);
   const voiceMaxTimerRef = useRef<number | null>(null);
+  /** جلوگیری از دابل‌کلیک هنگام getUserMedia / شروع ضبط */
+  const voiceStartingRef = useRef(false);
   const streamCancelRef = useRef(false);
   const otpExpireAtRef = useRef<number>(0);
   const hasScrolledRef = useRef(false);
@@ -276,6 +278,8 @@ export default function AssistantPage() {
       return;
     }
 
+    if (voiceStartingRef.current) return;
+
     if (!canRecordVoice()) {
       const onHttp =
         typeof window !== 'undefined' &&
@@ -290,6 +294,7 @@ export default function AssistantPage() {
       return;
     }
 
+    voiceStartingRef.current = true;
     try {
       setVoiceHint('دسترسی به میکروفون…');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -360,6 +365,8 @@ export default function AssistantPage() {
       stopVoiceTracks();
       setVoiceState('idle');
       setVoiceHint('دسترسی میکروفون داده نشد یا خطایی رخ داد.');
+    } finally {
+      voiceStartingRef.current = false;
     }
   };
 
@@ -1018,7 +1025,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v23-voice
+                build-v24-voice
               </span>
             </p>
           </div>

@@ -191,10 +191,20 @@ export async function fetchRagSpeechToText(
 
   const raw = await res.json().catch(() => ({}));
   if (!res.ok) {
+    const body = raw as {
+      title?: string;
+      detail?: string;
+      message?: string;
+      errors?: string[];
+      Errors?: string[];
+    };
+    const fromErrors = body.errors?.[0] || body.Errors?.[0];
+    // Prefer Errors[] (Persian) over Title ("The Request Is Not Correct.")
     const title =
-      (raw as { title?: string; detail?: string; message?: string })?.title ||
-      (raw as { detail?: string })?.detail ||
-      (raw as { message?: string })?.message ||
+      (typeof fromErrors === 'string' && fromErrors.trim()) ||
+      body.detail ||
+      body.message ||
+      body.title ||
       'تبدیل گفتار به متن ناموفق بود';
     throw { data: raw, status: res.status, message: title };
   }
