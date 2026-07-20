@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 _model = None
 _model_lock = threading.Lock()
+_infer_lock = threading.Lock()
 _model_key: tuple[str, str, str] | None = None
 
 
@@ -40,6 +41,27 @@ def _load_model(settings: Settings):
         return _model
 
 
+def _run_transcribe(model, path: str, settings: Settings, *, vad_filter: bool) -> tuple[str, float | None]:
+    segments, info = model.transcribe(
+        path,
+        language=settings.stt_language or "fa",
+        vad_filter=vad_filter,
+        beam_size=1,
+    )
+    parts: list[str] = []
+    for segment in segments:
+        text = (segment.text or "").strip()
+        if text:
+            parts.append(text)
+    duration: float | None = None
+    if info is not None and getattr(info, "duration", None) is not None:
+        try:
+            duration = float(info.duration)
+        except (TypeError, ValueError):
+            duration = None
+    return " ".join(parts).strip(), duration
+
+
 def transcribe_audio(data: bytes, filename: str, settings: Settings) -> tuple[str, float | None]:
     """Return (text, duration_seconds). Raises ValueError on empty/invalid audio."""
     if not data:
@@ -50,28 +72,16 @@ def transcribe_audio(data: bytes, filename: str, settings: Settings) -> tuple[st
         suffix = ".webm"
 
     model = _load_model(settings)
-    duration: float | None = None
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as tmp:
-        tmp.write(data)
-        tmp.flush()
-        segments, info = model.transcribe(
-            tmp.name,
-            language=settings.stt_language or "fa",
-            vad_filter=True,
-            beam_size=1,
-        )
-        parts: list[str] = []
-        for segment in segments:
-            text = (segment.text or "").strip()
-            if text:
-                parts.append(text)
-        if info is not None and getattr(info, "duration", None) is not None:
-            try:
-                duration = float(info.duration)
-            except (TypeError, ValueError):
-                duration = None
+    with _infer_lock:
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as tmp:
+            tmp.write(data)
+            tmp.flush()
+            text, duration = _run_transcribe(model, tmp.name, settings, vad_filter=True)
+            # Quiet/short Persian clips sometimes get wiped by VAD — retry once without it
+            if not text:
+                logger.info("STT empty with VAD; retrying without vad_filter (%s bytes)", len(data))
+                text, duration = _run_transcribe(model, tmp.name, settings, vad_filter=False)
 
-    text = " ".join(parts).strip()
     if not text:
         raise ValueError("گفتاری تشخیص داده نشد. لطفاً دوباره واضح‌تر صحبت کنید.")
     return text, duration

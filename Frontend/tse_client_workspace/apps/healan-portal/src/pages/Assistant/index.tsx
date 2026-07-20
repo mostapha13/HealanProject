@@ -226,6 +226,8 @@ export default function AssistantPage() {
   const voiceMaxTimerRef = useRef<number | null>(null);
   /** جلوگیری از دابل‌کلیک هنگام getUserMedia / شروع ضبط */
   const voiceStartingRef = useRef(false);
+  const voiceAbortRef = useRef<AbortController | null>(null);
+  const voiceMountedRef = useRef(true);
   const streamCancelRef = useRef(false);
   const otpExpireAtRef = useRef<number>(0);
   const hasScrolledRef = useRef(false);
@@ -301,11 +303,16 @@ export default function AssistantPage() {
       mediaStreamRef.current = stream;
       voiceChunksRef.current = [];
 
+      // Chrome/Firefox: webm/opus؛ Safari/iOS معمولاً فقط mp4
       const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm')
           ? 'audio/webm'
-          : '';
+          : MediaRecorder.isTypeSupported('audio/mp4')
+            ? 'audio/mp4'
+            : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+              ? 'audio/ogg;codecs=opus'
+              : '';
       const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
 
@@ -317,9 +324,10 @@ export default function AssistantPage() {
         clearVoiceMaxTimer();
         stopVoiceTracks();
         mediaRecorderRef.current = null;
+        if (!voiceMountedRef.current) return;
         const chunks = voiceChunksRef.current;
         voiceChunksRef.current = [];
-        const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+        const blob = new Blob(chunks, { type: recorder.mimeType || mime || 'audio/webm' });
         if (!blob.size) {
           setVoiceState('idle');
           setVoiceHint('صدایی ضبط نشد. دوباره تلاش کنید.');
@@ -327,9 +335,12 @@ export default function AssistantPage() {
         }
         setVoiceState('transcribing');
         setVoiceHint('در حال تبدیل گفتار به متن… (اولین بار ممکن است کمی طول بکشد)');
+        voiceAbortRef.current?.abort();
+        const abort = new AbortController();
+        voiceAbortRef.current = abort;
         void (async () => {
           try {
-            const mimeType = (blob.type || recorder.mimeType || 'audio/webm').toLowerCase();
+            const mimeType = (blob.type || recorder.mimeType || mime || 'audio/webm').toLowerCase();
             const ext = mimeType.includes('mp4') || mimeType.includes('m4a') || mimeType.includes('aac')
               ? 'mp4'
               : mimeType.includes('ogg')
@@ -337,7 +348,8 @@ export default function AssistantPage() {
                 : mimeType.includes('wav')
                   ? 'wav'
                   : 'webm';
-            const result = await fetchRagSpeechToText(blob, `voice.${ext}`);
+            const result = await fetchRagSpeechToText(blob, `voice.${ext}`, abort.signal);
+            if (!voiceMountedRef.current || abort.signal.aborted) return;
             setInput((prev) => {
               const next = prev.trim() ? `${prev.trim()} ${result.text}` : result.text;
               return next;
@@ -348,9 +360,13 @@ export default function AssistantPage() {
               focusInput();
             });
           } catch (err) {
+            if (!voiceMountedRef.current || abort.signal.aborted) return;
+            if (err && typeof err === 'object' && (err as { name?: string }).name === 'AbortError') return;
             setVoiceHint(apiErrorMessage(err, 'تبدیل گفتار به متن ناموفق بود.'));
           } finally {
-            setVoiceState('idle');
+            if (voiceMountedRef.current && !abort.signal.aborted) {
+              setVoiceState('idle');
+            }
           }
         })();
       };
@@ -371,7 +387,11 @@ export default function AssistantPage() {
   };
 
   useEffect(() => {
+    voiceMountedRef.current = true;
     return () => {
+      voiceMountedRef.current = false;
+      voiceAbortRef.current?.abort();
+      voiceAbortRef.current = null;
       clearVoiceMaxTimer();
       try {
         mediaRecorderRef.current?.stop();
@@ -1025,7 +1045,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v24-voice
+                build-v25-voice
               </span>
             </p>
           </div>

@@ -174,7 +174,8 @@ export interface RagSpeechToTextResult {
 /** Whisper STT via Healan → python-rag. User should review text before sending. */
 export async function fetchRagSpeechToText(
   blob: Blob,
-  fileName = 'voice.webm'
+  fileName = 'voice.webm',
+  signal?: AbortSignal
 ): Promise<RagSpeechToTextResult> {
   const formData = new FormData();
   formData.append('file', blob, fileName);
@@ -187,6 +188,7 @@ export async function fetchRagSpeechToText(
     body: formData,
     credentials: 'include',
     headers,
+    signal,
   });
 
   const raw = await res.json().catch(() => ({}));
