@@ -324,7 +324,15 @@ export default function AssistantPage() {
         setVoiceHint('در حال تبدیل گفتار به متن… (اولین بار ممکن است کمی طول بکشد)');
         void (async () => {
           try {
-            const result = await fetchRagSpeechToText(blob, 'voice.webm');
+            const mimeType = (blob.type || recorder.mimeType || 'audio/webm').toLowerCase();
+            const ext = mimeType.includes('mp4') || mimeType.includes('m4a') || mimeType.includes('aac')
+              ? 'mp4'
+              : mimeType.includes('ogg')
+                ? 'ogg'
+                : mimeType.includes('wav')
+                  ? 'wav'
+                  : 'webm';
+            const result = await fetchRagSpeechToText(blob, `voice.${ext}`);
             setInput((prev) => {
               const next = prev.trim() ? `${prev.trim()} ${result.text}` : result.text;
               return next;
@@ -335,7 +343,7 @@ export default function AssistantPage() {
               focusInput();
             });
           } catch (err) {
-            setVoiceHint(apiErrorMessage(err) || 'تبدیل گفتار به متن ناموفق بود.');
+            setVoiceHint(apiErrorMessage(err, 'تبدیل گفتار به متن ناموفق بود.'));
           } finally {
             setVoiceState('idle');
           }
@@ -1010,7 +1018,7 @@ export default function AssistantPage() {
                   : 'مهمان · پاسخ و رزرو نوبت'}
               </span>
               <span className="portal-assistant__build" title="نسخه UI برای تأیید دیپلوی">
-                build-v22-voice
+                build-v23-voice
               </span>
             </p>
           </div>

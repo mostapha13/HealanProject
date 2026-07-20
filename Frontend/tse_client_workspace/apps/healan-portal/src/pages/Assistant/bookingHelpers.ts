@@ -113,6 +113,7 @@ export function formatSlotFull(iso: unknown): string {
 export function apiErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object') {
     const data = err as {
+      message?: string;
       data?: { errors?: string[]; title?: string; message?: string; detail?: string; Errors?: string[] };
     };
     const errors = data.data?.errors ?? data.data?.Errors;
@@ -120,6 +121,7 @@ export function apiErrorMessage(err: unknown, fallback: string): string {
     if (data.data?.detail) return String(data.data.detail);
     if (data.data?.message) return String(data.data.message);
     if (data.data?.title) return String(data.data.title);
+    if (typeof data.message === 'string' && data.message.trim()) return data.message.trim();
   }
   if (err instanceof Error && err.message) return err.message;
   return fallback;
