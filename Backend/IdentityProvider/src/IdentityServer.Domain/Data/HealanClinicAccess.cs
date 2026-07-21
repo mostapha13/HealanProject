@@ -1,3 +1,5 @@
+using Share.Domain.Constants;
+
 namespace IdentityServer.Domain.Data;
 
 /// <summary>
@@ -55,6 +57,8 @@ public static class HealanClinicAccess
         public const int PatientAssistant = 5140;
         public const int PatientBooking = 5141;
         public const int ClinicBloodPressure = 5142;
+        public const int SmsFolder = 5143;
+        public const int ReportsFolder = 5144;
     }
 
     /// <summary>ادمین — دسترسی کامل به همه بخش‌های سامانه (فولدرها + زیرمنوها).</summary>
@@ -63,7 +67,7 @@ public static class HealanClinicAccess
         5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113,
         5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128,
         5129, 5130, 5131, 5132, 5133, 5134, 5135,
-        5136, 5137, 5138, 5139, 5140, 5141, 5142,
+        5136, 5137, 5138, 5139, 5140, 5141, 5142, 5143, 5144,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>
@@ -87,8 +91,9 @@ public static class HealanClinicAccess
     /// <summary>حسابدار — گزارش مالی، تعرفه، پرداخت‌ها.</summary>
     public static readonly int[] AccountantMenuIds =
     {
-        Menus.Dashboard, Menus.Appointments, Menus.Patients, Menus.MedicalFees, Menus.Reports,
-        Menus.SmsOutbox, Menus.SmsSettings,
+        Menus.Dashboard, Menus.Appointments, Menus.Patients, Menus.MedicalFees,
+        Menus.ReportsFolder, Menus.Reports,
+        Menus.SmsFolder, Menus.SmsOutbox, Menus.SmsSettings,
     };
 
     /// <summary>تولیدکننده محتوا — محتوای سایت، بلاگ و دانش/گفتگوهای RAG.</summary>

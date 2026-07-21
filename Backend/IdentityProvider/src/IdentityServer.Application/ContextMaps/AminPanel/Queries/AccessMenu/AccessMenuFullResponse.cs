@@ -17,6 +17,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
         public int? AccessFormId { get; set; }
         public int? ParentRef { get; set; }
         public int Order { get; set; }
+        public string? Title { get; set; }
+        public bool IsActive { get; set; } = true;
         public int Level { get; set; }
         public AccessFormResponse AccessForm { get; set; }
         public ICollection<AccessMenuFullResponse> Children { get; set; }

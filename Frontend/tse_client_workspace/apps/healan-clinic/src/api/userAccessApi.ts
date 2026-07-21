@@ -51,6 +51,9 @@ export interface AccessMenuTreeItem {
   accessMenuId: number;
   accessFormId?: number;
   title?: string;
+  isActive?: boolean;
+  order?: number;
+  parentRef?: number | null;
   children?: AccessMenuTreeItem[];
   accessForm?: { formTitle?: string; url?: string };
 }
@@ -66,6 +69,9 @@ const FOLDER_TITLES: Record<number, string> = {
   5113: 'مدیریت کاربران',
   5120: 'محتوای سایت',
   5133: 'نوبت‌دهی',
+  5136: 'ناحیه بیمار (سایت)',
+  5143: 'مدیریت پیامک',
+  5144: 'گزارش‌ها',
 };
 
 async function accessToken(): Promise<string | undefined> {
@@ -103,14 +109,25 @@ function normalizeTreeItem(raw: Record<string, unknown>): AccessRoleTreeItem {
 function normalizeMenuItem(raw: Record<string, unknown>): AccessMenuTreeItem {
   const accessMenuId = Number(raw['accessMenuId'] ?? raw['AccessMenuId'] ?? 0);
   const childrenRaw = (raw['children'] ?? raw['Children']) as Record<string, unknown>[] | undefined;
-  const accessForm = (raw['accessForm'] ?? raw['AccessForm']) as AccessMenuTreeItem['accessForm'];
+  const accessFormRaw = (raw['accessForm'] ?? raw['AccessForm']) as Record<string, unknown> | undefined;
+  const accessForm = accessFormRaw
+    ? {
+        formTitle: String(accessFormRaw['formTitle'] ?? accessFormRaw['FormTitle'] ?? ''),
+        url: String(accessFormRaw['url'] ?? accessFormRaw['URL'] ?? accessFormRaw['Url'] ?? ''),
+      }
+    : undefined;
+  const title =
+    String(raw['title'] ?? raw['Title'] ?? '') ||
+    accessForm?.formTitle ||
+    FOLDER_TITLES[accessMenuId] ||
+    undefined;
   return {
     accessMenuId,
     accessFormId: (raw['accessFormId'] ?? raw['AccessFormId']) as number | undefined,
-    title:
-      (raw['title'] as string | undefined) ||
-      accessForm?.formTitle ||
-      FOLDER_TITLES[accessMenuId],
+    title,
+    isActive: Boolean(raw['isActive'] ?? raw['IsActive'] ?? true),
+    order: Number(raw['order'] ?? raw['Order'] ?? 0),
+    parentRef: (raw['parentRef'] ?? raw['ParentRef']) as number | null | undefined,
     accessForm,
     children: Array.isArray(childrenRaw) ? childrenRaw.map(normalizeMenuItem) : [],
   };
@@ -278,6 +295,21 @@ export async function fetchAccessMenuTree(): Promise<AccessMenuTreeItem[]> {
   return Array.isArray(list) ? list.map(normalizeMenuItem) : [];
 }
 
+/** Current user nav tree (union of roles + direct grants, active only). */
+export async function fetchMyAccessMenus(): Promise<AccessMenuTreeItem[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: 'UserAccess/MyMenus',
+    options: {
+      AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
+    },
+    token,
+  });
+  const list = (res ?? []) as Record<string, unknown>[];
+  return Array.isArray(list) ? list.map(normalizeMenuItem) : [];
+}
+
 export async function saveAccessForm(payload: {
   accessFormId?: number;
   accessMenuId?: number;
@@ -286,6 +318,7 @@ export async function saveAccessForm(payload: {
   parentMenuId?: number | null;
   order?: number;
   isFolder?: boolean;
+  isActive?: boolean;
   accessSystemId?: number;
 }): Promise<{
   accessFormId: number;
@@ -305,6 +338,7 @@ export async function saveAccessForm(payload: {
       parentMenuId: payload.parentMenuId ?? null,
       order: payload.order ?? 0,
       isFolder: Boolean(payload.isFolder),
+      isActive: payload.isActive,
       accessSystemId: payload.accessSystemId ?? HEALAN_ACCESS_SYSTEM_ID,
     },
     token,

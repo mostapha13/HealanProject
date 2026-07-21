@@ -5,4 +5,5 @@ export const environment = {
   userManagerApiUrl: '/UserManager/api/v1/',
   identityUrl: 'https://auth.drshahrooei.ir',
   clientUrl: 'https://clinic.drshahrooei.ir',
+  portalUrl: 'https://www.drshahrooei.ir',
 };

@@ -19,6 +19,8 @@ namespace IdentityServer.Domain.Configuration
             builder.Property(a => a.AccessFormId);
             builder.Property(a => a.ParentRef);
             builder.Property(a => a.Order).IsRequired();
+            builder.Property(a => a.Title).HasMaxLength(200);
+            builder.Property(a => a.IsActive).HasDefaultValue(true);
 
 
             builder.HasOne(a => a.AccessForm).WithMany(b => b.AccessMenus).HasForeignKey(c => c.AccessFormId).OnDelete(DeleteBehavior.Restrict);

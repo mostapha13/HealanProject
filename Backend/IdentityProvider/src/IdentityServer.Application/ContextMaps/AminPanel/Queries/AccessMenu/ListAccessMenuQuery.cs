@@ -21,6 +21,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
             [5113] = "مدیریت کاربران",
             [5120] = "محتوای سایت",
             [5133] = "نوبت‌دهی",
+            [5136] = "ناحیه بیمار (سایت)",
+            [5143] = "مدیریت پیامک",
+            [5144] = "گزارش‌ها",
         };
 
         private readonly ApplicationDbContext _applicationDbContext;
@@ -49,6 +52,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
                         m.AccessFormId,
                         m.ParentRef,
                         m.Order,
+                        m.Title,
+                        m.IsActive,
                         FormId = m.AccessForm != null ? m.AccessForm.AccessFormId : (int?)null,
                         FormTitle = m.AccessForm != null ? m.AccessForm.FormTitle : null,
                         FormUrl = m.AccessForm != null ? m.AccessForm.URL : null,
@@ -58,7 +63,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
                     .ToListAsync(cancellationToken);
 
                 var allowedMenuIds = flat
-                    .Where(m => m.FormSystemId == request.AccessSystemId)
+                    .Where(m =>
+                        m.FormSystemId == request.AccessSystemId
+                        || (!string.IsNullOrWhiteSpace(m.Title) && m.FormId == null))
                     .Select(m => m.AccessMenuId)
                     .ToHashSet();
 
@@ -75,6 +82,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
                         AccessFormId = m.AccessFormId,
                         ParentRef = m.ParentRef,
                         Order = m.Order,
+                        Title = m.Title,
+                        IsActive = m.IsActive,
                         Level = 0,
                         Children = new List<AccessMenuFullResponse>(),
                         AccessForm = m.FormId.HasValue
@@ -82,11 +91,19 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu
                             {
                                 AccessFormId = m.FormId.Value,
                                 FormTitle = m.FormTitle
+                                    ?? m.Title
                                     ?? FolderTitles.GetValueOrDefault(m.AccessMenuId)
                                     ?? string.Empty,
                                 URL = m.FormUrl ?? string.Empty,
                             }
-                            : null,
+                            : !string.IsNullOrWhiteSpace(m.Title)
+                                ? new AccessFormResponse
+                                {
+                                    AccessFormId = 0,
+                                    FormTitle = m.Title!,
+                                    URL = string.Empty,
+                                }
+                                : null,
                     })
                     .ToList();
 

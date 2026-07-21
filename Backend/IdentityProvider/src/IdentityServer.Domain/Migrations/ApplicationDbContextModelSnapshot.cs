@@ -61,11 +61,20 @@ namespace IdentityServer.Domain.Migrations
                     b.Property<int?>("AccessFormId")
                         .HasColumnType("Int");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
                     b.Property<int?>("ParentRef")
                         .HasColumnType("Int");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("AccessMenuId");
 

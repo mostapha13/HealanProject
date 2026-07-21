@@ -23,6 +23,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
             [5113] = "مدیریت کاربران",
             [5120] = "محتوای سایت",
             [5133] = "نوبت‌دهی",
+            [5136] = "ناحیه بیمار (سایت)",
+            [5143] = "مدیریت پیامک",
+            [5144] = "گزارش‌ها",
         };
 
         private readonly ApplicationDbContext _applicationDbContext;
@@ -63,6 +66,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
                         m.AccessFormId,
                         m.ParentRef,
                         m.Order,
+                        m.Title,
+                        m.IsActive,
                         FormId = m.AccessForm != null ? m.AccessForm.AccessFormId : (int?)null,
                         FormTitle = m.AccessForm != null ? m.AccessForm.FormTitle : null,
                         FormUrl = m.AccessForm != null ? m.AccessForm.URL : null,
@@ -72,7 +77,11 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
                     .ToListAsync(cancellationToken);
 
                 var allowedMenuIds = flat
-                    .Where(m => m.FormSystemId == request.AccessSystemId)
+                    .Where(m =>
+                        m.IsActive
+                        && (m.FormSystemId == request.AccessSystemId
+                            || (m.FormId == null && !string.IsNullOrWhiteSpace(m.Title))
+                            || (m.FormId != null && string.IsNullOrEmpty(m.FormUrl) && m.FormSystemId == request.AccessSystemId)))
                     .Select(m => m.AccessMenuId)
                     .ToHashSet();
 
@@ -88,13 +97,14 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
                 IncludeAncestors(flat.Select(m => (m.AccessMenuId, m.ParentRef)).ToList(), allowedMenuIds);
 
                 var selected = flat
-                    .Where(m => allowedMenuIds.Contains(m.AccessMenuId))
+                    .Where(m => allowedMenuIds.Contains(m.AccessMenuId) && m.IsActive)
                     .Select(m => new AccessRoleFullResponseItem
                     {
                         AccessMenuId = m.AccessMenuId,
                         AccessFormId = m.AccessFormId,
                         ParentRef = m.ParentRef,
                         Order = m.Order,
+                        Title = m.Title,
                         Level = 0,
                         Children = new List<AccessRoleFullResponseItem>(),
                         AccessForm = m.FormId.HasValue
@@ -102,11 +112,19 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
                             {
                                 AccessFormId = m.FormId.Value,
                                 FormTitle = m.FormTitle
+                                    ?? m.Title
                                     ?? FolderTitles.GetValueOrDefault(m.AccessMenuId)
                                     ?? string.Empty,
                                 URL = m.FormUrl ?? string.Empty,
                             }
-                            : null,
+                            : !string.IsNullOrWhiteSpace(m.Title)
+                                ? new AccessFormResponse
+                                {
+                                    AccessFormId = 0,
+                                    FormTitle = m.Title!,
+                                    URL = string.Empty,
+                                }
+                                : null,
                     })
                     .ToList();
 
@@ -198,9 +216,11 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
             menu.HasPersianAccess = accessByMenuId.TryGetValue(menu.AccessMenuId, out var access)
                 ? access.HasPersianAccess
                 : null;
-            menu.Title = menu.AccessForm?.FormTitle
-                ?? FolderTitles.GetValueOrDefault(menu.AccessMenuId)
-                ?? string.Empty;
+            menu.Title = !string.IsNullOrWhiteSpace(menu.Title)
+                ? menu.Title
+                : menu.AccessForm?.FormTitle
+                    ?? FolderTitles.GetValueOrDefault(menu.AccessMenuId)
+                    ?? string.Empty;
 
             if (menu.Children == null)
                 return;

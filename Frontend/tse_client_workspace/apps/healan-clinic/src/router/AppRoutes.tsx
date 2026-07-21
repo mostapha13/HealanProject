@@ -21,6 +21,7 @@ const InsurancePage = lazy(() => import('../pages/BasicData/Insurance'));
 const ServicesPage = lazy(() => import('../pages/BasicData/Services'));
 const MedicalFeesPage = lazy(() => import('../pages/BasicData/MedicalFees'));
 const UsersPage = lazy(() => import('../pages/BasicData/Users'));
+const CompaniesPage = lazy(() => import('../pages/BasicData/Companies'));
 const AccessFormsPage = lazy(() => import('../pages/BasicData/AccessForms'));
 const AccessRolesPage = lazy(() => import('../pages/BasicData/AccessRoles'));
 const AssistantSettingsPage = lazy(() => import('../pages/BasicData/AssistantSettings'));
@@ -83,7 +84,8 @@ export default function AppRoutes() {
           <Route path="doctors" element={guarded('/doctors', <DoctorsPage />)} />
           <Route path="prescriptions" element={guarded('/prescriptions', <PrescriptionsPage />)} />
           <Route path="basic-data" element={guarded('/basic-data', <BasicDataLayout />)}>
-            <Route index element={guarded('/basic-data/insurance', <InsurancePage />)} />
+            <Route index element={guarded('/basic-data/companies', <CompaniesPage />)} />
+            <Route path="companies" element={guarded('/basic-data/companies', <CompaniesPage />)} />
             <Route path="insurance" element={guarded('/basic-data/insurance', <InsurancePage />)} />
             <Route path="services" element={guarded('/basic-data/services', <ServicesPage />)} />
             <Route path="fees" element={guarded('/basic-data/fees', <MedicalFeesPage />)} />

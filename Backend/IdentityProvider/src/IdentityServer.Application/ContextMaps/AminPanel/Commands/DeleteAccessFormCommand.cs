@@ -14,7 +14,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
     public class DeleteAccessFormCommandHandler : IRequestHandler<DeleteAccessFormCommand, bool>
     {
         private static readonly HashSet<int> ProtectedMenuIds =
-            Enumerable.Range(5101, 28).ToHashSet(); // 5101..5128 seeded Healan menus
+            Enumerable.Range(5101, 44).ToHashSet(); // 5101..5144 seeded Healan menus
 
         private static readonly HashSet<int> ProtectedFormIds =
             Enumerable.Range(HealanAccessFormIds.Dashboard, HealanAccessFormIds.PortalRag - HealanAccessFormIds.Dashboard + 1)
@@ -34,38 +34,21 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                 .FirstOrDefaultAsync(m => m.AccessMenuId == request.AccessMenuId, cancellationToken)
                 ?? throw new BadRequestExceptions("منو یافت نشد");
 
-            if (ProtectedMenuIds.Contains(menu.AccessMenuId))
-                throw new BadRequestExceptions("منوهای سیستمی قابل حذف نیستند");
-
-            if (menu.AccessFormId.HasValue && ProtectedFormIds.Contains(menu.AccessFormId.Value))
-                throw new BadRequestExceptions("فرم‌های سیستمی قابل حذف نیستند");
-
-            if (menu.Children != null && menu.Children.Any())
-                throw new BadRequestExceptions("ابتدا زیرمنوها را حذف کنید");
-
-            var hasRoleGrants = await _db.AccessRoles
-                .AnyAsync(r => r.AccessMenuId == menu.AccessMenuId, cancellationToken);
-            if (hasRoleGrants)
-                throw new BadRequestExceptions("این منو به نقش‌ها تخصیص داده شده؛ ابتدا از سطح دسترسی حذف کنید");
-
-            var formId = menu.AccessFormId;
-            _db.AccessMenus.Remove(menu);
-            await _db.SaveChangesAsync(cancellationToken);
-
-            if (formId.HasValue)
+            if (ProtectedMenuIds.Contains(menu.AccessMenuId)
+                || (menu.AccessFormId.HasValue && ProtectedFormIds.Contains(menu.AccessFormId.Value)))
             {
-                var stillLinked = await _db.AccessMenus
-                    .AnyAsync(m => m.AccessFormId == formId.Value, cancellationToken);
-                if (!stillLinked)
-                {
-                    var form = await _db.AccessForms
-                        .FirstOrDefaultAsync(f => f.AccessFormId == formId.Value, cancellationToken);
-                    if (form != null)
-                        _db.AccessForms.Remove(form);
-                    await _db.SaveChangesAsync(cancellationToken);
-                }
+                // Soft-disable system menus instead of hard delete
+                menu.IsActive = false;
+                await _db.SaveChangesAsync(cancellationToken);
+                return true;
             }
 
+            if (menu.Children != null && menu.Children.Any(c => c.IsActive))
+                throw new BadRequestExceptions("ابتدا زیرمنوها را حذف یا غیرفعال کنید");
+
+            // Soft-delete custom menus by default
+            menu.IsActive = false;
+            await _db.SaveChangesAsync(cancellationToken);
             return true;
         }
     }

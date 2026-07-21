@@ -93,7 +93,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                 from form in _applicationDbContext.AccessForms.AsNoTracking()
                 join menu in _applicationDbContext.AccessMenus.AsNoTracking()
                     on form.AccessFormId equals menu.AccessFormId
-                where form.AccessSystemId == request.AccessSystemId && form.URL != null
+                where form.AccessSystemId == request.AccessSystemId
+                    && form.URL != null
+                    && menu.IsActive
                 select new { form.AccessSystemId, form.FormTitle, form.URL, menu.AccessMenuId })
                 .ToListAsync(cancellationToken);
 

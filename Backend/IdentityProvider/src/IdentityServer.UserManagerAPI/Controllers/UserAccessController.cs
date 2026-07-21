@@ -123,5 +123,13 @@ namespace IdentityServer.UserManagerAPI.Controllers
 
         }
 
+        /// <summary>Nav tree for the current user (role + direct grant union, active only).</summary>
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [HttpGet("MyMenus")]
+        public async Task<IActionResult> MyMenus([FromQuery] ListMyAccessMenuQuery query)
+        {
+            return Ok(await Mediator.Send(query));
+        }
+
     }
 }

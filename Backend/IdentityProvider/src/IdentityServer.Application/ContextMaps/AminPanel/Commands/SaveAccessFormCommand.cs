@@ -17,6 +17,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
         public int AccessSystemId { get; set; } = HealanAccessFormIds.SystemId;
         /// <summary>When true, creates/updates a folder menu without AccessForm.</summary>
         public bool IsFolder { get; set; }
+        public bool? IsActive { get; set; }
     }
 
     public class SaveAccessFormResult
@@ -87,6 +88,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                         AccessFormId = form.AccessFormId,
                         ParentRef = request.ParentMenuId,
                         Order = request.Order > 0 ? request.Order : await NextOrderAsync(request.ParentMenuId, cancellationToken),
+                        Title = request.FormTitle.Trim(),
+                        IsActive = request.IsActive ?? true,
                     };
                     _db.AccessMenus.Add(menu);
                 }
@@ -96,6 +99,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                     if (request.Order > 0)
                         menu.Order = request.Order;
                     menu.AccessFormId = form.AccessFormId;
+                    menu.Title = request.FormTitle.Trim();
+                    if (request.IsActive.HasValue)
+                        menu.IsActive = request.IsActive.Value;
                 }
             }
             else
@@ -114,6 +120,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                     AccessFormId = form.AccessFormId,
                     ParentRef = request.ParentMenuId,
                     Order = request.Order > 0 ? request.Order : await NextOrderAsync(request.ParentMenuId, cancellationToken),
+                    Title = request.FormTitle.Trim(),
+                    IsActive = request.IsActive ?? true,
                 };
                 _db.AccessMenus.Add(menu);
             }
@@ -145,27 +153,22 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
                         form.FormTitle = request.FormTitle.Trim();
                 }
 
+                menu.Title = request.FormTitle.Trim();
                 menu.ParentRef = request.ParentMenuId;
                 if (request.Order > 0)
                     menu.Order = request.Order;
+                if (request.IsActive.HasValue)
+                    menu.IsActive = request.IsActive.Value;
             }
             else
             {
-                // Folder menus need a title carrier — create a form with empty URL as display title source
-                var form = new Domain.Entities.AccessForm
-                {
-                    AccessSystemId = request.AccessSystemId,
-                    FormTitle = request.FormTitle.Trim(),
-                    URL = string.Empty,
-                };
-                _db.AccessForms.Add(form);
-                await _db.SaveChangesAsync(cancellationToken);
-
                 menu = new Domain.Entities.AccessMenu
                 {
-                    AccessFormId = form.AccessFormId,
+                    AccessFormId = null,
+                    Title = request.FormTitle.Trim(),
                     ParentRef = request.ParentMenuId,
                     Order = request.Order > 0 ? request.Order : await NextOrderAsync(request.ParentMenuId, cancellationToken),
+                    IsActive = request.IsActive ?? true,
                 };
                 _db.AccessMenus.Add(menu);
             }

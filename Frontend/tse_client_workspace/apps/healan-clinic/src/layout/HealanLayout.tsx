@@ -1,47 +1,156 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from '@tse/utils';
 import { userManager } from '../store/userManager';
 import { HealanNavLink } from '../components/HealanNavLink';
 import { useUserAccess } from '../context/UserAccessContext';
-import { endImpersonation, isImpersonating } from '../api/impersonationApi';
+import {
+  getPortalHomeUrl,
+  isImpersonating,
+  logoutToPortalHome,
+  syncPortalAccessToken,
+} from '../api/impersonationApi';
+import {
+  fetchMyAccessMenus,
+  type AccessMenuTreeItem,
+} from '../api/userAccessApi';
+import { environment } from '../environments/environment';
 import './healan.scss';
 
-const navItems: Array<{ path: string; label: string; icon: string; end?: boolean; accessPath?: string }> = [
-  { path: '/', label: 'داشبورد', end: true, icon: '📊' },
-  { path: '/queue', label: 'صف انتظار', icon: '⏳' },
-  { path: '/appointments', label: 'پذیرش و نوبت', icon: '📋' },
-  { path: '/booking/schedules', label: 'برنامه حضور', icon: '🗓️' },
-  { path: '/booking/reservations', label: 'رزروهای نوبت', icon: '📅' },
-  { path: '/patients', label: 'بیماران', icon: '👤' },
-  { path: '/blood-pressure', label: 'فشار خون', icon: '🩸' },
-  { path: '/doctors', label: 'پزشکان', icon: '🩺' },
-  { path: '/prescriptions', label: 'نسخه‌ها', icon: '💊' },
-  { path: '/basic-data', label: 'اطلاعات پایه', icon: '📁' },
-  { path: '/site-content', label: 'محتوای سایت', icon: '🌐' },
-  { path: '/reports', label: 'گزارش‌ها', icon: '📈' },
-  { path: '/reports/sms', label: 'پیامک‌ها', icon: '💬' },
-  { path: '/reports/sms-settings', label: 'تنظیمات پیامک', icon: '⚙️' },
-  { path: '/signature', label: 'امضای دیجیتال', icon: '✍️' },
-  { path: '/workflow', label: 'کارتابل', icon: '🔄' },
-];
+type NavNode = {
+  key: number;
+  label: string;
+  path?: string;
+  externalUrl?: string;
+  children: NavNode[];
+};
+
+const ACTION_URL_RE = /\/(add|edit|delete|publish)$/i;
+const PORTAL_URL_RE = /^\/(assistant|booking|patient)(\/|$)/i;
+
+function isPortalPath(url: string): boolean {
+  return PORTAL_URL_RE.test(url);
+}
+
+function menuTitle(item: AccessMenuTreeItem): string {
+  return item.title || item.accessForm?.formTitle || `منو ${item.accessMenuId}`;
+}
+
+function buildNavTree(items: AccessMenuTreeItem[]): NavNode[] {
+  const portalBase = ((environment as { portalUrl?: string }).portalUrl || getPortalHomeUrl()).replace(/\/$/, '');
+
+  const mapItem = (item: AccessMenuTreeItem): NavNode | null => {
+    if (item.isActive === false) return null;
+    const url = (item.accessForm?.url || '').trim();
+    if (url && ACTION_URL_RE.test(url)) return null;
+
+    const children = (item.children ?? [])
+      .map(mapItem)
+      .filter((child): child is NavNode => child != null);
+
+    if (!url) {
+      if (children.length === 0) return null;
+      return {
+        key: item.accessMenuId,
+        label: menuTitle(item),
+        children,
+      };
+    }
+
+    if (isPortalPath(url)) {
+      return {
+        key: item.accessMenuId,
+        label: menuTitle(item),
+        externalUrl: `${portalBase}${url.startsWith('/') ? url : `/${url}`}`,
+        children,
+      };
+    }
+
+    return {
+      key: item.accessMenuId,
+      label: menuTitle(item),
+      path: url,
+      children,
+    };
+  };
+
+  return items.map(mapItem).filter((n): n is NavNode => n != null);
+}
+
+function NavTree({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
+  return (
+    <>
+      {nodes.map((node) => {
+        const hasChildren = node.children.length > 0;
+        if (node.externalUrl) {
+          return (
+            <a
+              key={node.key}
+              className="healan-nav-item"
+              href={node.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
+              onClick={() => {
+                void userManager.getUser().then((u) => {
+                  if (u?.access_token) syncPortalAccessToken(u.access_token);
+                });
+              }}
+            >
+              <span>{node.label}</span>
+            </a>
+          );
+        }
+        if (node.path) {
+          return (
+            <React.Fragment key={node.key}>
+              <HealanNavLink
+                to={node.path}
+                end={node.path === '/'}
+                className={({ isActive }: { isActive: boolean }) =>
+                  `healan-nav-item${isActive ? ' active' : ''}`
+                }
+                style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
+              >
+                <span>{node.label}</span>
+              </HealanNavLink>
+              {hasChildren ? <NavTree nodes={node.children} depth={depth + 1} /> : null}
+            </React.Fragment>
+          );
+        }
+        return (
+          <div key={node.key} className="healan-nav-group">
+            <div
+              className="healan-nav-group__title"
+              style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
+            >
+              {node.label}
+            </div>
+            {hasChildren ? <NavTree nodes={node.children} depth={depth + 1} /> : null}
+          </div>
+        );
+      })}
+    </>
+  );
+}
 
 export function HealanLayout() {
   const navigate = useNavigate();
-  const { canAccess, loading, displayName, currentUser } = useUserAccess();
+  const { loading, displayName, currentUser, authenticated } = useUserAccess();
   const [impersonationActive, setImpersonationActive] = useState(false);
-  const [endingImpersonation, setEndingImpersonation] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [navMenus, setNavMenus] = useState<AccessMenuTreeItem[]>([]);
+  const [navLoading, setNavLoading] = useState(true);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     void userManager.getUser().then((user) => {
       const active = isImpersonating(user);
       setImpersonationActive(active);
+      if (user?.access_token) syncPortalAccessToken(user.access_token);
       if (active && user) {
         const delay = Math.max(1000, (user.expires_in - 15) * 1000);
         timer = setTimeout(() => {
-          void endImpersonation()
-            .catch(() => undefined)
-            .finally(() => window.location.assign('/basic-data/users'));
+          void logoutToPortalHome();
         }, delay);
       }
     });
@@ -50,32 +159,32 @@ export function HealanLayout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!authenticated) {
+      setNavMenus([]);
+      setNavLoading(false);
+      return;
+    }
+    setNavLoading(true);
+    void fetchMyAccessMenus()
+      .then(setNavMenus)
+      .catch(() => setNavMenus([]))
+      .finally(() => setNavLoading(false));
+  }, [authenticated, currentUser?.identityUserId]);
+
+  const navTree = useMemo(() => buildNavTree(navMenus), [navMenus]);
+
   const userFullName = currentUser
     ? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim()
     : '';
   const userRole = currentUser?.roleTitle ?? '';
 
-  const visibleNavItems = loading
-    ? navItems
-    : navItems.filter((item) => canAccess(item.accessPath ?? item.path));
-
   const handleLogout = async () => {
-    if (impersonationActive) {
-      await handleEndImpersonation();
-      return;
-    }
-    await userManager.signoutRedirect();
-    await userManager.removeUser();
-    navigate('/');
-  };
-
-  const handleEndImpersonation = async () => {
-    setEndingImpersonation(true);
+    setLoggingOut(true);
     try {
-      await endImpersonation();
+      await logoutToPortalHome();
     } finally {
-      setEndingImpersonation(false);
-      window.location.assign('/basic-data/users');
+      setLoggingOut(false);
     }
   };
 
@@ -88,23 +197,23 @@ export function HealanLayout() {
             <p>سامانه مدیریت کلینیک و مطب</p>
           </div>
           <nav>
-            {visibleNavItems.map((item) => (
-              <HealanNavLink
-                key={item.path}
-                to={item.path}
-                end={item.end}
-                className={({ isActive }: { isActive: boolean }) =>
-                  `healan-nav-item${isActive ? ' active' : ''}`
-                }
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </HealanNavLink>
-            ))}
+            {navLoading || loading ? (
+              <div className="healan-nav-item" style={{ opacity: 0.7 }}>
+                در حال بارگذاری منو...
+              </div>
+            ) : navTree.length === 0 ? (
+              <div className="healan-nav-item" style={{ opacity: 0.7 }}>
+                منویی برای این کاربر تعریف نشده
+              </div>
+            ) : (
+              <NavTree nodes={navTree} />
+            )}
           </nav>
           <div className="healan-sidebar__footer">
             <div className="healan-sidebar__user">
-              <span className="healan-sidebar__user-icon" aria-hidden="true">👤</span>
+              <span className="healan-sidebar__user-icon" aria-hidden="true">
+                👤
+              </span>
               <div className="healan-sidebar__user-text">
                 <span className="healan-sidebar__user-label">کاربر فعال</span>
                 <strong>
@@ -118,13 +227,23 @@ export function HealanLayout() {
             <button
               type="button"
               className="healan-btn healan-btn--outline healan-btn--sm"
-              style={{ width: '100%', marginBottom: '0.5rem', borderColor: 'rgba(255,255,255,0.35)', color: '#fff' }}
+              style={{
+                width: '100%',
+                marginBottom: '0.5rem',
+                borderColor: 'rgba(255,255,255,0.35)',
+                color: '#fff',
+              }}
               onClick={() => navigate('/profile')}
             >
               ویرایش حساب / رمز
             </button>
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={handleLogout}>
-              خروج از حساب
+            <button
+              type="button"
+              className="healan-btn healan-btn--ghost"
+              disabled={loggingOut}
+              onClick={() => void handleLogout()}
+            >
+              {loggingOut ? 'در حال خروج...' : 'خروج از حساب'}
             </button>
           </div>
         </aside>
@@ -145,14 +264,16 @@ export function HealanLayout() {
                 gap: '1rem',
               }}
             >
-              <strong>در حال مشاهده سامانه به‌جای {userFullName || 'کاربر انتخاب‌شده'} هستید.</strong>
+              <strong>
+                در حال مشاهده سامانه دقیقاً به‌جای {userFullName || 'کاربر انتخاب‌شده'} هستید.
+              </strong>
               <button
                 type="button"
                 className="healan-btn healan-btn--danger healan-btn--sm"
-                disabled={endingImpersonation}
-                onClick={() => void handleEndImpersonation()}
+                disabled={loggingOut}
+                onClick={() => void handleLogout()}
               >
-                {endingImpersonation ? 'در حال بازگشت...' : 'بازگشت به حساب مدیر'}
+                {loggingOut ? 'در حال خروج...' : 'خروج کامل'}
               </button>
             </div>
           )}

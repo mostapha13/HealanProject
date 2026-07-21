@@ -18,6 +18,9 @@ namespace IdentityServer.Domain.Entities
         public int? AccessFormId { get; set; }
         public int? ParentRef { get; set; }
         public int Order { get; set; }
+        /// <summary>Display title for folders (and optional override for leaf menus).</summary>
+        public string? Title { get; set; }
+        public bool IsActive { get; set; } = true;
         public AccessMenu Parent { get; set; }
         public AccessForm AccessForm { get; set; }
         public ICollection<AccessMenu> Children { get; set; }

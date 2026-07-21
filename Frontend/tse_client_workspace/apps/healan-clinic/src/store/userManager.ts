@@ -24,7 +24,9 @@ const userManagerConfig: UserManagerSettings = {
   authority: identityAuthority,
   metadata: oidcMetadata,
   silent_redirect_uri: `${IDENTITY_CLIENT_BASE_URL}/silentRenew.html`,
-  post_logout_redirect_uri: `${IDENTITY_CLIENT_BASE_URL}/loggedout.html`,
+  post_logout_redirect_uri: environment.production
+    ? ((environment as { portalUrl?: string }).portalUrl || 'https://www.drshahrooei.ir')
+    : `${IDENTITY_CLIENT_BASE_URL}/loggedout.html`,
   revokeAccessTokenOnSignout: true,
   automaticSilentRenew: environment.production,
   filterProtocolClaims: true,
