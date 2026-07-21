@@ -581,6 +581,25 @@
 
 .healan-nav-group__children {
   padding: 0.1rem 0 0.2rem;
+
+  .healan-nav-item {
+    font-size: 0.82rem;
+    padding: 0.48rem 0.7rem;
+  }
+
+  .healan-nav-item__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .healan-nav-group__label {
+    font-size: 0.82rem;
+  }
+
+  .healan-nav-group__icon {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
 }
 
 .healan-impersonation-banner {
