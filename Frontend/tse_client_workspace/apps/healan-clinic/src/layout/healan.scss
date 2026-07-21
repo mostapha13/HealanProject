@@ -10,13 +10,20 @@
   --healan-text-muted: #64748b;
   --healan-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.05);
   --healan-radius: 12px;
-  --healan-sidebar-bg: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
-  --healan-sidebar-text: rgba(255, 255, 255, 0.92);
-  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
-  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
-  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
-  --healan-sidebar-accent: #5eead4;
+  /* default: white sidebar */
+  --healan-sidebar-bg: #ffffff;
+  --healan-sidebar-text: #0f172a;
+  --healan-sidebar-muted: #64748b;
+  --healan-sidebar-hover: rgba(15, 118, 110, 0.07);
+  --healan-sidebar-active: rgba(15, 118, 110, 0.12);
+  --healan-sidebar-edge: #e8eef2;
+  --healan-sidebar-accent: #0f766e;
+  --healan-sidebar-scroll: rgba(15, 23, 42, 0.22);
+  --healan-sidebar-chip: rgba(15, 23, 42, 0.05);
+  --healan-sidebar-chip-hover: rgba(15, 23, 42, 0.09);
+  --healan-sidebar-mark-bg: rgba(15, 118, 110, 0.1);
+  --healan-sidebar-mark-border: rgba(15, 118, 110, 0.18);
+  --healan-sidebar-mark-text: #0f766e;
   direction: rtl;
   font-family: 'IRANYekan', Tahoma, sans-serif;
   height: 100vh;
@@ -26,6 +33,43 @@
   color: var(--healan-text);
 }
 
+.healan-clinic[data-theme='white'] {
+  --healan-sidebar-bg: #ffffff;
+  --healan-sidebar-text: #0f172a;
+  --healan-sidebar-muted: #64748b;
+  --healan-sidebar-hover: rgba(15, 118, 110, 0.07);
+  --healan-sidebar-active: rgba(15, 118, 110, 0.12);
+  --healan-sidebar-edge: #e8eef2;
+  --healan-sidebar-accent: #0f766e;
+  --healan-sidebar-scroll: rgba(15, 23, 42, 0.22);
+  --healan-sidebar-chip: rgba(15, 23, 42, 0.05);
+  --healan-sidebar-chip-hover: rgba(15, 23, 42, 0.09);
+  --healan-sidebar-mark-bg: rgba(15, 118, 110, 0.1);
+  --healan-sidebar-mark-border: rgba(15, 118, 110, 0.18);
+  --healan-sidebar-mark-text: #0f766e;
+}
+
+.healan-clinic[data-theme='clinical'] {
+  --healan-primary: #0f766e;
+  --healan-primary-dark: #115e59;
+  --healan-primary-light: #ccfbf1;
+  --healan-accent: #2dd4bf;
+  --healan-bg: #f4f7f6;
+  --healan-sidebar-bg: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
+  --healan-sidebar-accent: #5eead4;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
+  --healan-sidebar-mark-text: #fff;
+}
+
 .healan-clinic[data-theme='navy'] {
   --healan-primary: #1e3a5f;
   --healan-primary-dark: #152a45;
@@ -33,7 +77,18 @@
   --healan-accent: #60a5fa;
   --healan-bg: #f3f6fb;
   --healan-sidebar-bg: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
   --healan-sidebar-accent: #93c5fd;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
+  --healan-sidebar-mark-text: #fff;
 }
 
 .healan-clinic[data-theme='forest'] {
@@ -43,7 +98,18 @@
   --healan-accent: #4ade80;
   --healan-bg: #f3f7f4;
   --healan-sidebar-bg: linear-gradient(180deg, #166534 0%, #14532d 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
   --healan-sidebar-accent: #86efac;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
+  --healan-sidebar-mark-text: #fff;
 }
 
 .healan-clinic[data-theme='slate'] {
@@ -53,7 +119,18 @@
   --healan-accent: #94a3b8;
   --healan-bg: #f5f6f8;
   --healan-sidebar-bg: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
   --healan-sidebar-accent: #cbd5e1;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
+  --healan-sidebar-mark-text: #fff;
 }
 
 .healan-clinic[data-theme='amber'] {
@@ -63,7 +140,18 @@
   --healan-accent: #fbbf24;
   --healan-bg: #faf7f2;
   --healan-sidebar-bg: linear-gradient(180deg, #92400e 0%, #78350f 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
   --healan-sidebar-accent: #fcd34d;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
+  --healan-sidebar-mark-text: #fff;
 }
 
 .healan-clinic[data-mode='dark'] {
@@ -74,6 +162,22 @@
   --healan-text-muted: #94a3b8;
   --healan-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 28px rgba(0, 0, 0, 0.28);
   --healan-primary-light: rgba(255, 255, 255, 0.08);
+}
+
+.healan-clinic[data-mode='dark'][data-theme='white'] {
+  --healan-sidebar-bg: #121a2b;
+  --healan-sidebar-text: #e8eef7;
+  --healan-sidebar-muted: #94a3b8;
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --healan-sidebar-active: rgba(45, 212, 191, 0.14);
+  --healan-sidebar-edge: #243044;
+  --healan-sidebar-accent: #2dd4bf;
+  --healan-sidebar-scroll: rgba(255, 255, 255, 0.22);
+  --healan-sidebar-chip: rgba(255, 255, 255, 0.06);
+  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.1);
+  --healan-sidebar-mark-bg: rgba(45, 212, 191, 0.12);
+  --healan-sidebar-mark-border: rgba(45, 212, 191, 0.22);
+  --healan-sidebar-mark-text: #5eead4;
 }
 
 .healan-shell {
@@ -89,7 +193,7 @@
   background: var(--healan-sidebar-bg);
   color: var(--healan-sidebar-text);
   padding: 1.1rem 0 0.85rem;
-  box-shadow: inset -1px 0 0 var(--healan-sidebar-edge);
+  box-shadow: 1px 0 0 var(--healan-sidebar-edge), 8px 0 24px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -112,7 +216,7 @@
 }
 
 .healan-sidebar__nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--healan-sidebar-scroll);
   border-radius: 999px;
 }
 
@@ -136,9 +240,9 @@
   font-weight: 800;
   font-size: 1rem;
   letter-spacing: -0.04em;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: var(--healan-sidebar-mark-text);
+  background: var(--healan-sidebar-mark-bg);
+  border: 1px solid var(--healan-sidebar-mark-border);
 }
 
 .healan-sidebar__brand h1 {
@@ -182,10 +286,10 @@
   width: 0.95rem;
   height: 0.95rem;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  border: 2px solid var(--healan-sidebar-edge);
   padding: 0;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
@@ -194,7 +298,7 @@
 }
 
 .healan-theme-dot.is-active {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px var(--healan-sidebar-accent);
   transform: scale(1.1);
 }
 
@@ -203,7 +307,7 @@
   height: 2rem;
   border: 0;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--healan-sidebar-chip);
   color: var(--healan-sidebar-text);
   display: inline-flex;
   align-items: center;
@@ -215,7 +319,7 @@
 
 .healan-sidebar__icon-btn:hover,
 .healan-sidebar__icon-btn.is-active {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--healan-sidebar-chip-hover);
 }
 
 .healan-sidebar__icon-btn:disabled {
@@ -233,7 +337,8 @@
   gap: 0.3rem;
   padding: 0.35rem;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--healan-sidebar-chip);
+  border: 1px solid var(--healan-sidebar-edge);
 }
 
 .healan-theme-option {
@@ -253,7 +358,7 @@
 
 .healan-theme-option:hover,
 .healan-theme-option.is-active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--healan-sidebar-chip-hover);
 }
 
 .healan-theme-option__swatch {
@@ -276,7 +381,7 @@
   align-items: center;
   gap: 0.55rem;
   border: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--healan-sidebar-chip);
   color: inherit;
   border-radius: 12px;
   padding: 0.4rem 0.55rem;
@@ -286,14 +391,15 @@
 }
 
 .healan-sidebar__user-chip:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--healan-sidebar-chip-hover);
 }
 
 .healan-sidebar__avatar {
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--healan-sidebar-mark-bg);
+  color: var(--healan-sidebar-mark-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -331,7 +437,7 @@
   gap: 0.65rem;
   padding: 0.62rem 0.75rem;
   margin: 0.08rem 0;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--healan-sidebar-text);
   text-decoration: none;
   font-size: 0.95rem;
   border-radius: 10px;
@@ -352,6 +458,7 @@
   justify-content: center;
   flex-shrink: 0;
   opacity: 0.9;
+  color: var(--healan-sidebar-accent);
 }
 
 .healan-nav-item__text {
@@ -363,12 +470,12 @@
 
 .healan-nav-item:hover {
   background: var(--healan-sidebar-hover);
-  color: #fff;
+  color: var(--healan-sidebar-text);
 }
 
 .healan-nav-item.active {
   background: var(--healan-sidebar-active);
-  color: #fff;
+  color: var(--healan-sidebar-text);
   font-weight: 700;
   box-shadow: inset 3px 0 0 var(--healan-sidebar-accent);
 }
@@ -394,7 +501,7 @@
   padding: 0.5rem 0.45rem;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--healan-sidebar-text);
   cursor: pointer;
   text-align: start;
   font: inherit;
@@ -403,7 +510,7 @@
 
 .healan-nav-group__toggle:hover {
   background: var(--healan-sidebar-hover);
-  color: #fff;
+  color: var(--healan-sidebar-text);
 }
 
 .healan-nav-group__chevron {
@@ -448,7 +555,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--healan-sidebar-muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -463,13 +570,13 @@
 }
 
 .healan-nav-group__pin:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--healan-sidebar-chip);
+  color: var(--healan-sidebar-text);
 }
 
 .healan-nav-group__pin.is-active {
-  color: #fde68a;
-  background: rgba(253, 230, 138, 0.14);
+  color: #b45309;
+  background: rgba(251, 191, 36, 0.18);
 }
 
 .healan-nav-group__children {
