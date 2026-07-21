@@ -19,9 +19,21 @@ namespace IdentityServer.Domain.Data
         {
 
             await AddRoles(dbContext, roleManager);
-            var isExistAdminUser = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == ConstUserInfo.AdminUserName);
-            if (isExistAdminUser == null)
+            var adminUser = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == ConstUserInfo.AdminUserName);
+            if (adminUser == null)
+            {
                 await AddUser(userManager, ConstUserInfo.AdminRole, ConstUserInfo.AdminUserName, ConstUserInfo.AdminPass, ConstUserInfo.AdminFirstName, ConstUserInfo.AdminLastName);
+                adminUser = await userManager.Users.FirstAsync(x => x.UserName == ConstUserInfo.AdminUserName);
+            }
+
+            // Repair this invariant on every startup; role edits or old data must never
+            // leave the emergency administrator without the protected Admin role.
+            if (!await userManager.IsInRoleAsync(adminUser, ConstUserInfo.AdminRole))
+            {
+                var result = await userManager.AddToRoleAsync(adminUser, ConstUserInfo.AdminRole);
+                if (!result.Succeeded)
+                    throw new InvalidOperationException($"Failed to repair AdminUser membership: {string.Join(", ", result.Errors.Select(x => x.Description))}");
+            }
         }
 
         private static async Task AddRoles(ApplicationDbContext dbContext, RoleManager<ApplicationRole> roleManager)
@@ -51,6 +63,16 @@ namespace IdentityServer.Domain.Data
 
             if (rolesMissingDisplayName.Count > 0)
                 await dbContext.SaveChangesAsync();
+
+            var adminRole = await dbContext.Roles.IgnoreQueryFilters()
+                .FirstAsync(r => r.NormalizedName == ConstUserInfo.AdminRole.ToUpperInvariant());
+            adminRole.IsSystem = true;
+            adminRole.IsDeleted = false;
+            adminRole.DeletedUtc = null;
+            adminRole.DeletedBy = null;
+            if (adminRole.CreatedUtc == default)
+                adminRole.CreatedUtc = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync();
         }
 
         private static async Task AddUser(UserManager<ApplicationUser> userManager, string roleName, string userName, string pass, string firstName, string lastName)

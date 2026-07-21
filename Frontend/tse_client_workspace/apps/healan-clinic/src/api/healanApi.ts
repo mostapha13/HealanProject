@@ -13,6 +13,7 @@ import type {
   EnumItem,
   InsuranceCompany,
   MedicalFeeService,
+  MasterDataDeletedItem,
   PaginatedResponse,
   PatientSummary,
   EchoPrintData,
@@ -209,6 +210,8 @@ export const healanApi = {
       get<ServiceType>(`ServiceTypes/Info/?serviceTypeId=${serviceTypeId}`),
     register: (data: Record<string, unknown>) => post('ServiceTypes/Register', data),
     delete: (serviceTypeId: number) => post('ServiceTypes/Delete', { serviceTypeId }),
+    deletedList: () => get<MasterDataDeletedItem[]>('ServiceTypes/DeletedList'),
+    restore: (id: number) => post('ServiceTypes/Restore', { id }),
     categories: () => get<EnumItem[]>('ServiceTypes/CategoryType'),
   },
 
@@ -226,6 +229,9 @@ export const healanApi = {
     info: (insuranceCompanyId: number) =>
       get(`Insurance/InsuranceInfo/?insuranceCompanyId=${insuranceCompanyId}`),
     register: (data: Record<string, unknown>) => post('Insurance/Register', data),
+    delete: (id: number) => post('Insurance/DeleteInsurance', { id }),
+    deletedList: () => get<MasterDataDeletedItem[]>('Insurance/DeletedInsuranceList'),
+    restore: (id: number) => post('Insurance/RestoreInsurance', { id }),
     types: () => get<EnumItem[]>('Insurance/InsuranceType'),
     registerContract: (data: Record<string, unknown>) =>
       post('Insurance/RegisterInsuranceContract', data),
@@ -245,6 +251,9 @@ export const healanApi = {
         })
       ),
     register: (data: Record<string, unknown>) => post('MedicalFeeServices/Register', data),
+    delete: (id: number) => post('MedicalFeeServices/Delete', { id }),
+    deletedList: () => get<MasterDataDeletedItem[]>('MedicalFeeServices/DeletedList'),
+    restore: (id: number) => post('MedicalFeeServices/Restore', { id }),
   },
 
   companies: {
@@ -260,6 +269,9 @@ export const healanApi = {
       ),
     info: (companyId: number) => get(`Company/CompanyInfo/?companyId=${companyId}`),
     register: (data: Record<string, unknown>) => post('Company/Register', data),
+    delete: (id: number) => post('Company/Delete', { id }),
+    deletedList: () => get<MasterDataDeletedItem[]>('Company/DeletedList'),
+    restore: (id: number) => post('Company/Restore', { id }),
     registrationTypes: () => get<EnumItem[]>('Company/CompanyRegistrationTypes'),
   },
 
@@ -318,24 +330,32 @@ export const healanApi = {
     contentRegister: (data: Record<string, unknown>) => post('PortalContent/ContentRegister', data),
     contentDelete: (portalContentItemId: number) =>
       post('PortalContent/ContentDelete', { portalContentItemId }),
+    contentDeletedList: () => get<MasterDataDeletedItem[]>('PortalContent/ContentDeletedList'),
+    contentRestore: (id: number) => post('PortalContent/ContentRestore', { id }),
     settingList: () => get<PortalSiteSetting[]>('PortalContent/SettingList'),
     settingSave: (settings: PortalSiteSetting[]) => post('PortalContent/SettingSave', { settings }),
     reviewList: (status?: string) =>
       get<PatientReviewItem[]>('PatientReview/List', status ? { status } : {}),
     reviewModerate: (data: Record<string, unknown>) => post('PatientReview/Moderate', data),
     reviewDelete: (patientReviewId: number) => post('PatientReview/Delete', { patientReviewId }),
+    reviewDeletedList: () => get<MasterDataDeletedItem[]>('PatientReview/DeletedList'),
+    reviewRestore: (id: number) => post('PatientReview/Restore', { id }),
     blogList: (params?: { filterText?: string; isPublished?: boolean; pageNumber?: number; pageSize?: number }) =>
       get<PaginatedResponse<BlogPostSummary>>('BlogPost/List', pagedParams(params)),
     blogInfo: (blogPostId: number) =>
       get<BlogPostDetail>(`BlogPost/Info/?blogPostId=${blogPostId}`),
     blogRegister: (data: Record<string, unknown>) => post('BlogPost/Register', data),
     blogDelete: (blogPostId: number) => post('BlogPost/Delete', { blogPostId }),
+    blogDeletedList: () => get<MasterDataDeletedItem[]>('BlogPost/DeletedList'),
+    blogRestore: (id: number) => post('BlogPost/Restore', { id }),
     ragList: (params?: { filterText?: string; topic?: string; isActive?: boolean; pageNumber?: number; pageSize?: number }) =>
       get<PaginatedResponse<RagKnowledgeItem>>('RagKnowledge/List', pagedParams(params)),
     ragInfo: (ragKnowledgeItemId: number) =>
       get<RagKnowledgeItem>(`RagKnowledge/Info/?ragKnowledgeItemId=${ragKnowledgeItemId}`),
     ragRegister: (data: Record<string, unknown>) => post('RagKnowledge/Register', data),
     ragDelete: (ragKnowledgeItemId: number) => post('RagKnowledge/Delete', { ragKnowledgeItemId }),
+    ragDeletedList: () => get<MasterDataDeletedItem[]>('RagKnowledge/DeletedList'),
+    ragRestore: (id: number) => post('RagKnowledge/Restore', { id }),
     ragSettingGet: () => get<RagSetting>('RagKnowledge/SettingGet'),
     ragSettingSave: (data: RagSetting) => post<RagSetting>('RagKnowledge/SettingSave', data),
     ragChatLogList: (params?: {

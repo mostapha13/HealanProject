@@ -7,6 +7,7 @@ import type { RagKnowledgeItem } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { confirmDelete } from '../../components/confirmDialog';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const PAGE_SIZE = 10;
 
@@ -159,10 +160,10 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         subtitle="مدیریت سوال و جواب‌های رسمی ربات سایت"
         action={
           <div className="healan-actions">
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => navigate('/basic-data/assistant')}>
+            <button type="button" className="healan-btn healan-btn--muted" onClick={() => navigate('/basic-data/assistant')}>
               تنظیمات دستیار
             </button>
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => navigate('/site-content/rag-logs')}>
+            <button type="button" className="healan-btn healan-btn--muted" onClick={() => navigate('/site-content/rag-logs')}>
               گفتگوها
             </button>
             <button type="button" className="healan-btn healan-btn--primary" onClick={openNew}>
@@ -225,7 +226,7 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               </div>
             </div>
             <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button type="button" className="healan-btn healan-btn--ghost" onClick={() => setShowForm(false)}>
+              <button type="button" className="healan-btn healan-btn--muted" onClick={() => setShowForm(false)}>
                 انصراف
               </button>
               <button type="button" className="healan-btn healan-btn--primary" disabled={saving} onClick={() => void handleSave()}>
@@ -264,7 +265,7 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
               }}
               placeholder="وضعیت"
             />
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => void load()}>
+            <button type="button" className="healan-btn healan-btn--outline" onClick={() => void load()}>
               اعمال فیلتر
             </button>
           </div>
@@ -298,13 +299,13 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                       <td>{item.isActive ? 'فعال' : 'غیرفعال'}</td>
                       <td>
                         <div className="healan-actions">
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void openEdit(item)}>
+                          <button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => void openEdit(item)}>
                             ویرایش
                           </button>
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void toggleActive(item)}>
+                          <button type="button" className={`healan-btn healan-btn--action healan-btn--sm ${item.isActive ? 'healan-btn--unpublish' : 'healan-btn--publish'}`} onClick={() => void toggleActive(item)}>
                             {item.isActive ? 'غیرفعال' : 'فعال'}
                           </button>
-                          <button type="button" className="healan-btn healan-btn--ghost healan-btn--sm" onClick={() => void remove(item.ragKnowledgeItemId)}>
+                          <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void remove(item.ragKnowledgeItemId)}>
                             حذف
                           </button>
                         </div>
@@ -323,6 +324,7 @@ function RagAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           )}
         </div>
       </div>
+      <DeletedItemsPanel loadItems={healanApi.portal.ragDeletedList} restoreItem={healanApi.portal.ragRestore} onRestored={load} onAlert={onAlert} />
     </>
   );
 }

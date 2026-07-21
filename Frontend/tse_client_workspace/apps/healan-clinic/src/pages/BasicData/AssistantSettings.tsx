@@ -104,7 +104,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 onChange={(e) => setSettings({ ...settings, embeddingModel: e.target.value })}
                 placeholder={DEFAULT_EMBEDDING}
               />
-              <small style={{ color: '#81858b' }}>
+              <small className="healan-muted">
                 برای جستجوی معنایی. نمونه: heydariAI/persian-embeddings یا simple
               </small>
             </div>
@@ -117,7 +117,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 onChange={(e) => setSettings({ ...settings, summarizeModel: e.target.value })}
                 placeholder={DEFAULT_SUMMARIZE}
               />
-              <small style={{ color: '#81858b' }}>
+              <small className="healan-muted">
                 پیش‌فرض رایگان لوکال: qwen2.5:3b (نیاز به Ollama روی سرور). بعد از تغییر، همگام‌سازی بعدی خلاصه را دوباره می‌سازد.
               </small>
             </div>
@@ -130,7 +130,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 onChange={(e) => setSettings({ ...settings, sttModel: e.target.value })}
                 placeholder={DEFAULT_STT}
               />
-              <small style={{ color: '#81858b' }}>
+              <small className="healan-muted">
                 برای میکروفون ربات پورتال. نمونه‌ها: tiny (سریع/کم‌دقت)، base، small (پیشنهادی)، medium (دقیق‌تر/کندتر روی CPU).
                 بعد از تغییر، اولین تبدیل ممکن است مدل را دوباره بارگذاری کند.
               </small>
@@ -157,7 +157,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                   setSettings({ ...settings, guestDailyLimit: Number(e.target.value) })
                 }
               />
-              <small style={{ color: '#81858b' }}>بعد از این تعداد، کاربر باید با موبایل وارد شود.</small>
+              <small className="healan-muted">بعد از این تعداد، کاربر باید با موبایل وارد شود.</small>
             </div>
 
             <div className="healan-form-field">
@@ -194,7 +194,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
                 />{' '}
                 ذخیره سوال و جواب در «گفتگوهای دستیار»
               </label>
-              <small style={{ color: '#81858b', display: 'block', marginTop: 4 }}>
+              <small className="healan-muted">
                 اگر خاموش باشد، مکالمات در لیست گفتگوها ثبت نمی‌شوند.
               </small>
             </div>
@@ -246,7 +246,7 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
           </div>
 
           <div className="healan-actions" style={{ marginTop: '1rem' }}>
-            <button type="button" className="healan-btn healan-btn--ghost" onClick={() => void load()}>
+            <button type="button" className="healan-btn healan-btn--muted" onClick={() => void load()}>
               بازخوانی
             </button>
             <button

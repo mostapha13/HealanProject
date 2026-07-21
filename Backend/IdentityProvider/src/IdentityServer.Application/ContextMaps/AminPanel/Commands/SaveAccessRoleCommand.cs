@@ -31,6 +31,10 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Commands
             {
                 throw new BadRequestExceptions("Role Not Exists");
             }
+            if (role.IsDeleted || string.Equals(role.Name, ConstUserInfo.AdminRole, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new BadRequestExceptions("This role is protected or inactive");
+            }
 
             var allSystemId = await _applicationDbContext.AccessSystemRoles
                 .Where(w => w.RoleId == role.Id)

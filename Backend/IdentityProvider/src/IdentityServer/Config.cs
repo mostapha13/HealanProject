@@ -1,6 +1,7 @@
 ﻿using IdentityServer4;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Configuration;
+using Share.Domain.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,6 +208,21 @@ namespace IdentityServer
                     "Content_Producer",
                 },
             },
+            new Client
+            {
+                ClientId = "HealanImpersonationClient",
+                ClientName = "Healan secure impersonation exchange",
+                RequireClientSecret = false,
+                AllowedGrantTypes = { Services.ImpersonationGrantValidator.GrantTypeName },
+                AllowOfflineAccess = false,
+                AccessTokenLifetime = 60 * 5,
+                AllowedCorsOrigins = configuration["IdentityServer:AllowedCorsOrigins"]
+                    .ToString().Split(",").Select(s => s.Trim()).ToList(),
+                AllowedScopes =
+                {
+                    "Content_Producer",
+                },
+            },
      };
         }
 
@@ -297,7 +313,14 @@ namespace IdentityServer
                 DisplayName = "سرویس پذیرش",
                 Scopes = new List<string> {"Content_Producer"},
                 ApiSecrets = new List<Secret> {new Secret("T$e.!R*HealanWebApi*E@M@M@A@M".Sha256())},
-                UserClaims = new List<string> {"role"}
+                UserClaims = new List<string>
+                {
+                    "role",
+                    WellKnownNames.DepartmentClaimName,
+                    ImpersonationClaimNames.ActorSubject,
+                    ImpersonationClaimNames.IsImpersonating,
+                    ImpersonationClaimNames.SessionId,
+                }
             }
         };
 

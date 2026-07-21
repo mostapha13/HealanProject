@@ -16,6 +16,7 @@ interface UserAccessContextValue {
   accessRole: AccessUserRoleItem[];
   currentUser: UserSummary | null;
   displayName: string;
+  authenticated: boolean;
   loading: boolean;
   canAccess: (path: string) => boolean;
   reload: () => Promise<void>;
@@ -25,8 +26,9 @@ const UserAccessContext = createContext<UserAccessContextValue>({
   accessRole: [],
   currentUser: null,
   displayName: '',
+  authenticated: false,
   loading: true,
-  canAccess: () => true,
+  canAccess: () => false,
   reload: async () => undefined,
 });
 
@@ -148,25 +150,29 @@ function buildDisplayName(user: UserSummary | null): string {
 export function UserAccessProvider({ children }: { children: React.ReactNode }) {
   const [accessRole, setAccessRole] = useState<AccessUserRoleItem[]>([]);
   const [currentUser, setCurrentUser] = useState<UserSummary | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [accessLoaded, setAccessLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadSession = useCallback(async () => {
     setLoading(true);
+    setAccessLoaded(false);
     try {
       const user = await ensureAuthHeader();
       const identityId = user?.profile?.sub;
       if (!identityId || user?.expired) {
+        setAuthenticated(false);
         setAccessRole([]);
         setCurrentUser(null);
         return;
       }
 
+      setAuthenticated(true);
       saveToSession('hasId', identityId);
 
       const [accessResult, profileResult] = await Promise.allSettled([
         withTimeout(
           fetchUserAccessRole({
-            IdentityId: identityId,
             AccessSystemId: HEALAN_ACCESS_SYSTEM_ID,
           })
         ),
@@ -175,6 +181,7 @@ export function UserAccessProvider({ children }: { children: React.ReactNode }) 
 
       if (accessResult.status === 'fulfilled') {
         setAccessRole(Array.isArray(accessResult.value) ? accessResult.value : []);
+        setAccessLoaded(true);
       } else {
         setAccessRole([]);
       }
@@ -192,6 +199,7 @@ export function UserAccessProvider({ children }: { children: React.ReactNode }) 
         setCurrentUser(userSummaryFromOidcProfile((user.profile ?? {}) as Record<string, unknown>));
       }
     } catch {
+      setAuthenticated(false);
       setAccessRole([]);
       setCurrentUser(null);
     } finally {
@@ -207,6 +215,8 @@ export function UserAccessProvider({ children }: { children: React.ReactNode }) 
     };
     userManager.events.addUserLoaded(onUserLoaded);
     userManager.events.addUserUnloaded(() => {
+      setAuthenticated(false);
+      setAccessLoaded(false);
       setAccessRole([]);
       setCurrentUser(null);
     });
@@ -217,8 +227,14 @@ export function UserAccessProvider({ children }: { children: React.ReactNode }) 
   }, [loadSession]);
 
   const canAccess = useCallback(
-    (path: string) => hasPathAccess(accessRole, path),
-    [accessRole]
+    (path: string) => {
+      const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
+      if (normalized === '/profile') {
+        return authenticated && !loading;
+      }
+      return authenticated && !loading && accessLoaded && hasPathAccess(accessRole, normalized);
+    },
+    [accessRole, accessLoaded, authenticated, loading]
   );
 
   const displayName = buildDisplayName(currentUser);
@@ -228,11 +244,12 @@ export function UserAccessProvider({ children }: { children: React.ReactNode }) 
       accessRole,
       currentUser,
       displayName,
+      authenticated,
       loading,
       canAccess,
       reload: loadSession,
     }),
-    [accessRole, currentUser, displayName, loading, canAccess, loadSession]
+    [accessRole, currentUser, displayName, authenticated, loading, canAccess, loadSession]
   );
 
   return <UserAccessContext.Provider value={value}>{children}</UserAccessContext.Provider>;

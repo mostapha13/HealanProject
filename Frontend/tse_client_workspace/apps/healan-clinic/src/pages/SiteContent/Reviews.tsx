@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 import { confirmDelete } from '../../components/confirmDialog';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const STATUS_OPTIONS: { value: PatientReviewStatus | ''; label: string }[] = [
   { value: '', label: 'همه' },
@@ -114,11 +115,11 @@ function ReviewsAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         <>
                           <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => void moderate(review, 'Approved')}>تأیید</button>
                           {' '}
-                          <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void moderate(review, 'Rejected')}>رد</button>
+                          <button type="button" className="healan-btn healan-btn--action healan-btn--unpublish healan-btn--sm" onClick={() => void moderate(review, 'Rejected')}>رد</button>
                           {' '}
                         </>
                       )}
-                      <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void remove(review.patientReviewId)}>حذف</button>
+                      <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void remove(review.patientReviewId)}>حذف</button>
                     </td>
                   </tr>
                 ))}
@@ -127,6 +128,7 @@ function ReviewsAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           )}
         </div>
       </div>
+      <DeletedItemsPanel loadItems={healanApi.portal.reviewDeletedList} restoreItem={healanApi.portal.reviewRestore} onRestored={load} onAlert={onAlert} />
     </>
   );
 }

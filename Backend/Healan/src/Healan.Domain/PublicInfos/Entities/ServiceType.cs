@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 
 namespace Healan.Domain.PublicInfos.Entities;
 
-public class ServiceType //: AuditableEntity
+public class ServiceType : AuditableEntity
 {
     public ServiceType()
     {

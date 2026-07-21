@@ -232,7 +232,7 @@ export default function PatientBloodPressurePage() {
                 <button type="button" className="p-btn p-btn--outline p-btn--sm" disabled={busy} onClick={() => startEdit(item)}>
                   ویرایش
                 </button>
-                <button type="button" className="p-btn p-btn--outline p-btn--sm" disabled={busy} onClick={() => void remove(item.id)}>
+                <button type="button" className="p-btn p-btn--danger p-btn--sm" disabled={busy} onClick={() => void remove(item.id)}>
                   حذف
                 </button>
               </span>

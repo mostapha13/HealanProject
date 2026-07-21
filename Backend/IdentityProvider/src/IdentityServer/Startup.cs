@@ -97,7 +97,8 @@ namespace IdentityServer
                   .AddInMemoryApiScopes(Config.ApiScopes)
                   .AddInMemoryClients(Config.GetClients(Configuration))
                   .AddDeveloperSigningCredential()
-                  .AddAspNetIdentity<ApplicationUser>();
+                  .AddAspNetIdentity<ApplicationUser>()
+                  .AddExtensionGrantValidator<ImpersonationGrantValidator>();
 
 
             services.AddTransient<IEmailSender, EmailSender>();

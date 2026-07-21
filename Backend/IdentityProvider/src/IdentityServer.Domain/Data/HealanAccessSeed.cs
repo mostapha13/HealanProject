@@ -252,6 +252,7 @@ public static class HealanAccessSeed
             [HealanClinicAccess.SecretaryRole] = HealanClinicAccess.SecretaryMenuIds,
             [HealanClinicAccess.DoctorRole] = HealanClinicAccess.DoctorMenuIds,
             [HealanClinicAccess.AccountantRole] = HealanClinicAccess.AccountantMenuIds,
+            [HealanClinicAccess.ContentProducerRole] = HealanClinicAccess.ContentProducerMenuIds,
             [HealanClinicAccess.PatientRole] = HealanClinicAccess.PatientPortalMenuIds,
         };
 

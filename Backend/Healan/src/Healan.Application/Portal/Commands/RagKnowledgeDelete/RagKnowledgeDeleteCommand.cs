@@ -23,7 +23,7 @@ public class RagKnowledgeDeleteCommandHandler : IRequestHandler<RagKnowledgeDele
             .FirstOrDefaultAsync(x => x.RagKnowledgeItemId == request.RagKnowledgeItemId, cancellationToken)
             ?? throw new NotFoundExceptions("سوال دانش پایه یافت نشد");
 
-        _db.RagKnowledgeItems.Remove(item);
+        item.IsDeleted = true;
         await _db.SaveChangesAsync(cancellationToken);
         return new PortalMutationResult { Id = item.RagKnowledgeItemId };
     }

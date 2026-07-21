@@ -169,12 +169,23 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
           .Where(e => e.Entity is AuditableEntity &&
                      (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted));
 
-        var currentUserId = _currentUserService.UserId;
+        var currentUserId = _currentUserService.ActorUserId ?? _currentUserService.UserId;
 
         foreach (var entry in entries)
         {
             var auditable = (AuditableEntity)entry.Entity;
             var now = DateTime.UtcNow;
+
+            if (entry.State == EntityState.Deleted)
+            {
+                // Auditable rows are retained. This also makes Remove/RemoveRange safe
+                // for callers that have not yet been migrated to explicit soft delete.
+                entry.State = EntityState.Modified;
+                auditable.IsDeleted = true;
+                auditable.DeletedAt = now;
+                auditable.DeletedBy = currentUserId;
+                continue;
+            }
 
             switch (entry.State)
             {
@@ -186,8 +197,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 case EntityState.Modified:
                     if (auditable.IsDeleted)
                     {
-                        auditable.DeletedAt = now;
-                        auditable.DeletedBy = currentUserId;
+                        auditable.DeletedAt ??= now;
+                        auditable.DeletedBy ??= currentUserId;
                     }
                     else
                     {

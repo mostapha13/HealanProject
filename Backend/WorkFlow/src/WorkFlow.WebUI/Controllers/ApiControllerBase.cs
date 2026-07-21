@@ -9,13 +9,7 @@ namespace WorkFlow.WebUI.Controllers
     [ApiController]
     [Route("WorkFlow/api/v1/[controller]")]
     [Produces("application/json")]
-
-#if DEBUG
-    [AllowAnonymous]
-#endif
-#if !DEBUG
     [Authorize]
-#endif
     public abstract class ApiControllerBase : ControllerBase
     {
         private ISender _mediator;

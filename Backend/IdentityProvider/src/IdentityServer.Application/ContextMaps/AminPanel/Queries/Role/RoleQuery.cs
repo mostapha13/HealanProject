@@ -39,7 +39,9 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.Role
 
                 var roles = await _applicationDbContext.Roles
                     .AsNoTracking()
-                    .Where(r => roleIds.Contains(r.Id))
+                    .Where(r => roleIds.Contains(r.Id)
+                        && !r.IsDeleted
+                        && r.Name != ConstUserInfo.AdminRole)
                     .ToListAsync(cancellationToken);
 
                 IEnumerable<ApplicationRole> filtered = roles;

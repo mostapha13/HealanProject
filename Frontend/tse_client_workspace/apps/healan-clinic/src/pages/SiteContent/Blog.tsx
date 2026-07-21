@@ -11,6 +11,7 @@ import { convertDateAndTimeToJalali } from '@tse/tools';
 import { useUserAccess } from '../../context/UserAccessContext';
 import { hasBlogAccess } from '../../api/userAccessApi';
 import { confirmDelete } from '../../components/confirmDialog';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const PAGE_SIZE = 10;
 
@@ -416,6 +417,9 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           </div>
         )}
       </div>
+      {canEdit && (
+        <DeletedItemsPanel loadItems={healanApi.portal.blogDeletedList} restoreItem={healanApi.portal.blogRestore} onRestored={load} onAlert={onAlert} />
+      )}
     </>
   );
 }

@@ -72,5 +72,7 @@ namespace Share.Domain.Models.UserAccessModels
         SiteUser = 30,
         [Display(Name = "بیمار")]
         Patient = 31,
+        [Display(Name = "تولید محتوا")]
+        ContentProducer = 32,
     }
 }

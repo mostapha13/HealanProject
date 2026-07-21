@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Share.Application.Common.Models;
+using Share.Domain.Exceptions;
 
 namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
 {
@@ -44,6 +45,16 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole
 
             try
             {
+                var roleIsAvailable = await _applicationDbContext.Roles
+                    .AsNoTracking()
+                    .AnyAsync(
+                        r => r.Id == request.RoleId.Value
+                            && !r.IsDeleted
+                            && r.Name != ConstUserInfo.AdminRole,
+                        cancellationToken);
+                if (!roleIsAvailable)
+                    throw new BadRequestExceptions("Role is protected, deleted, or does not exist");
+
                 var flat = await _applicationDbContext.AccessMenus
                     .AsNoTracking()
                     .Select(m => new

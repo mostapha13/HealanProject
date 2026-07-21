@@ -314,7 +314,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
               {editingId ? 'ذخیره تغییرات' : 'ذخیره قالب'}
             </button>
             {editingId > 0 && (
-              <button type="button" className="healan-btn healan-btn--outline" onClick={resetForm}>
+              <button type="button" className="healan-btn healan-btn--muted" onClick={resetForm}>
                 انصراف از ویرایش
               </button>
             )}
@@ -327,7 +327,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
           <h3>کپی قالب به روزهای دیگر</h3>
         </div>
         <div className="healan-card__body">
-          <p style={{ marginBottom: '0.75rem', color: '#64748b' }}>
+          <p className="healan-muted" style={{ marginBottom: '0.75rem' }}>
             روز مبدأ همان روز انتخاب‌شده در فرم بالاست. روزهای مقصد را تیک بزنید.
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -416,14 +416,14 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button
                           type="button"
-                          className="healan-btn healan-btn--outline healan-btn--sm"
+                          className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm"
                           onClick={() => editTemplate(t)}
                         >
                           ویرایش
                         </button>
                         <button
                           type="button"
-                          className="healan-btn healan-btn--ghost healan-btn--sm"
+                          className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm"
                           onClick={() => void removeTemplate(t.doctorScheduleTemplateId)}
                         >
                           حذف

@@ -1,4 +1,5 @@
-﻿using Healan.Application.MedicalFeeServices.Commands.MedicalFeeServiceRegister;
+﻿using Healan.Application.Common.MasterData;
+using Healan.Application.MedicalFeeServices.Commands.MedicalFeeServiceRegister;
 using Healan.Application.MedicalFeeServices.Queries.MedicalFeeServiceInfo;
 using Healan.Application.MedicalFeeServices.Queries.MedicalFeeServiceList;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,18 @@ public class MedicalFeeServicesController : ApiControllerBase
     [HttpPost("[action]")]
     public Task<IActionResult> Register([FromBody] MedicalFeeServiceRegisterCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.MedicalFeeService }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Delete([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataDeleteCommand { Type = MasterDataType.MedicalFeeService, Id = request.Id }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.MedicalFeeService, Id = request.Id }));
 
     /// <summary>
     /// اطلاعات تعرفه

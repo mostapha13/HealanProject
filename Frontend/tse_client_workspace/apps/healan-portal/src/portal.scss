@@ -300,7 +300,16 @@
   white-space: nowrap;
 }
 
-.p-btn:active {
+.p-btn:disabled,
+.p-btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.p-btn:active:not(:disabled) {
   transform: scale(0.98);
 }
 
@@ -354,6 +363,18 @@
 
 .p-btn--success:hover {
   background: #15803d;
+}
+
+.p-btn--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1.5px solid #fecaca;
+}
+
+.p-btn--danger:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
 }
 
 .p-btn--soft {

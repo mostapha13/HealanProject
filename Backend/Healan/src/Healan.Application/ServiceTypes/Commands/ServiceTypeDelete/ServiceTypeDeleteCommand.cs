@@ -47,10 +47,10 @@ public class ServiceTypeDeleteCommandHandler : IRequestHandler<ServiceTypeDelete
             .Where(f => f.ServiceTypeId == request.ServiceTypeId)
             .ToListAsync(cancellationToken);
 
-        if (fees.Count > 0)
-            _db.MedicalFeeServices.RemoveRange(fees);
+        foreach (var fee in fees)
+            fee.IsDeleted = true;
 
-        _db.ServiceTypes.Remove(serviceType);
+        serviceType.IsDeleted = true;
         await _db.SaveChangesAsync(cancellationToken);
 
         return new ServiceTypeResult(Id: request.ServiceTypeId);

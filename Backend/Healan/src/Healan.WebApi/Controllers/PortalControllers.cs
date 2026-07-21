@@ -1,6 +1,7 @@
 using Healan.Application.Booking.Commands.PortalBook;
 using Healan.Application.Booking.Commands.PortalPatientRegister;
 using Healan.Application.Booking.Queries.PortalBooking;
+using Healan.Application.Common.MasterData;
 using Healan.Application.Portal.Commands.BlogPostDelete;
 using Healan.Application.Portal.Commands.BlogPostRegister;
 using Healan.Application.Portal.Commands.PatientReviewDelete;
@@ -61,6 +62,14 @@ public class PortalContentController : ApiControllerBase
         SendCommand(request);
 
     [HttpGet("[action]")]
+    public async Task<IActionResult> ContentDeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.PortalContentItem }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> ContentRestore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.PortalContentItem, Id = request.Id }));
+
+    [HttpGet("[action]")]
     public async Task<IActionResult> SettingList() =>
         Ok(await Mediator.Send(new PortalSiteSettingListQuery()));
 
@@ -96,6 +105,16 @@ public class BlogPostController : ApiControllerBase
     [AccessForm(HealanAccessFormIds.PortalBlogDelete)]
     public Task<IActionResult> Delete([FromBody] BlogPostDeleteCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalBlog)]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.BlogPost }));
+
+    [HttpPost("[action]")]
+    [AccessForm(HealanAccessFormIds.PortalBlogEdit)]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.BlogPost, Id = request.Id }));
 }
 
 /// <summary>
@@ -119,6 +138,14 @@ public class RagKnowledgeController : ApiControllerBase
     [HttpPost("[action]")]
     public Task<IActionResult> Delete([FromBody] RagKnowledgeDeleteCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.RagKnowledgeItem }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.RagKnowledgeItem, Id = request.Id }));
 
     [HttpGet("[action]")]
     public async Task<IActionResult> SettingGet() =>
@@ -156,6 +183,14 @@ public class PatientReviewController : ApiControllerBase
     [HttpPost("[action]")]
     public Task<IActionResult> Delete([FromBody] PatientReviewDeleteCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.PatientReview }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.PatientReview, Id = request.Id }));
 }
 
 /// <summary>

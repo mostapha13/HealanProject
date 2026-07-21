@@ -12,6 +12,7 @@ import { buildInsurancePayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const EMPTY_FORM = { insuranceCompanyId: 0, name: '', code: '', insuranceTypeId: 2, phoneNumber: '', isActive: true };
 
@@ -105,6 +106,16 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
+  const handleDelete = async (item: InsuranceCompany) => {
+    if (!window.confirm(`بیمه «${item.name}» حذف شود؟`)) return;
+    try {
+      await healanApi.insurance.delete(item.insuranceCompanyId);
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -192,10 +203,11 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 <td>{i.isActive ? 'فعال' : 'غیرفعال'}</td>
                 <td>
                   <div className="healan-actions">
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(i)}>ویرایش</button>
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(i)}>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => openEdit(i)}>ویرایش</button>
+                    <button type="button" className={`healan-btn healan-btn--action healan-btn--sm ${i.isActive ? 'healan-btn--unpublish' : 'healan-btn--publish'}`} onClick={() => void handleToggleActive(i)}>
                       {i.isActive ? 'غیرفعال' : 'فعال'}
                     </button>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void handleDelete(i)}>حذف</button>
                   </div>
                 </td>
               </tr>)}</tbody>
@@ -208,6 +220,7 @@ function InsurancePage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
+      <DeletedItemsPanel loadItems={healanApi.insurance.deletedList} restoreItem={healanApi.insurance.restore} onRestored={load} onAlert={onAlert} />
 
     </>
 

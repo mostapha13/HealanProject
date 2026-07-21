@@ -19,6 +19,14 @@ namespace IdentityServer.Domain.Entities
             AccessSystemRoles = new Collection<AccessSystemRole>();
         }
         public string DisplayName { get; set; }
+        public bool IsSystem { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime CreatedUtc { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public DateTime? ModifiedUtc { get; set; }
+        public Guid? ModifiedBy { get; set; }
+        public DateTime? DeletedUtc { get; set; }
+        public Guid? DeletedBy { get; set; }
         public Guid? ApplicationRoleGroupId { get; set; }
         public ApplicationRoleGroup ApplicationRoleGroup { get; set; }
 

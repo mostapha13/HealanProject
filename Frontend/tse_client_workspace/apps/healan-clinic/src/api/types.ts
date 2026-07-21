@@ -7,6 +7,13 @@ export interface PaginatedResponse<T> {
   hasNextPage: boolean;
 }
 
+export interface MasterDataDeletedItem {
+  id: number;
+  displayName: string;
+  deletedAt?: string;
+  deletedBy?: string;
+}
+
 export interface DashboardStats {
   todayAppointments: number;
   waitingAppointments: number;

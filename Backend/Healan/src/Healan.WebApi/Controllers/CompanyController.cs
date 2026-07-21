@@ -1,4 +1,5 @@
-﻿using Healan.Application.Companies.Commands.CompanyRegister;
+﻿using Healan.Application.Common.MasterData;
+using Healan.Application.Companies.Commands.CompanyRegister;
 using Healan.Application.Companies.Queries.CompanyList;
 using Healan.Application.Companies.Queries.CompanyRegistrationTypes;
 using Healan.Application.Companies.Queries.GetCompanyInfo;
@@ -27,6 +28,18 @@ public class CompanyController : ApiControllerBase
     [HttpPost("[action]")]
     public Task<IActionResult> Register([FromBody] CompanyRegisterCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.Company }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Delete([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataDeleteCommand { Type = MasterDataType.Company, Id = request.Id }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.Company, Id = request.Id }));
 
     /// <summary>
     /// اطلاعات شرکت

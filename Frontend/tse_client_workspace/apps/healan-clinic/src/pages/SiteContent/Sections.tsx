@@ -7,6 +7,7 @@ import { SearchableSelect } from '../../components/SearchableSelect';
 import { HealanFileUpload, type FileUploadMeta } from '../../components/HealanFileUpload';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
 import { confirmDelete } from '../../components/confirmDialog';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const SECTION_OPTIONS: { value: PortalSectionType; label: string }[] = [
   { value: 'HeroSlide', label: 'اسلاید هیرو' },
@@ -385,17 +386,17 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                       </span>
                     </td>
                     <td>
-                      <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(item)}>ویرایش</button>
+                      <button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => openEdit(item)}>ویرایش</button>
                       {' '}
                       <button
                         type="button"
-                        className="healan-btn healan-btn--outline healan-btn--sm"
+                        className={`healan-btn healan-btn--action healan-btn--sm ${item.isPublished ? 'healan-btn--unpublish' : 'healan-btn--publish'}`}
                         onClick={() => void handleToggleActive(item)}
                       >
                         {item.isPublished ? 'غیرفعال' : 'فعال'}
                       </button>
                       {' '}
-                      <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleDelete(item.portalContentItemId)}>حذف</button>
+                      <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void handleDelete(item.portalContentItemId)}>حذف</button>
                     </td>
                   </tr>
                   );
@@ -405,6 +406,7 @@ function SectionsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           )}
         </div>
       </div>
+      <DeletedItemsPanel loadItems={healanApi.portal.contentDeletedList} restoreItem={healanApi.portal.contentRestore} onRestored={loadItems} onAlert={onAlert} />
     </>
   );
 }

@@ -8,5 +8,8 @@ namespace Share.Application.Common.Interfaces
         Guid UserId { get; }
         DepartmentId DepartmentId { get; }
         string AuthTime { get; }
+        Guid? ActorUserId => null;
+        Guid? ImpersonationSessionId => null;
+        bool IsImpersonating => false;
     }
 }

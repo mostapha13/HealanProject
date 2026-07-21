@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Share.Application.Common.Filters;
 using Share.Application.Common.Interfaces;
+using Share.Domain.Constants;
 using Share.Infrastructure;
 using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
@@ -146,6 +147,7 @@ namespace IdentityServer.UserManagerAPI
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseMiddleware<ImpersonationMutationGuardMiddleware>();
             app.UseAuthorization();
             //app.UseHttpsRedirection();
             //app.UseRequestResponseLogging();
@@ -153,7 +155,7 @@ namespace IdentityServer.UserManagerAPI
             //app.UseMiddleware<QueryValidationMiddleware>();
             app.UseMiddleware<InputValidationMiddleware>();
             //app.UseRequestResponseLogging();
-            app.UseMiddleware<AccessMiddleware>("MarketMaker");
+            app.UseMiddleware<AccessMiddleware>(HealanAccessFormIds.SystemName);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

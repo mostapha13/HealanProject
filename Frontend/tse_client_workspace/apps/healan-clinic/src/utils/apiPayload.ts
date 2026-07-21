@@ -346,6 +346,7 @@ export interface UserForm {
   userTypeId: number;
   isActive: boolean;
   twoFactorEnabled: boolean;
+  userRoles?: UserRoleDto[];
 }
 
 export function buildUserPayload(form: UserForm): ApiPayload {
@@ -356,7 +357,10 @@ export function buildUserPayload(form: UserForm): ApiPayload {
     userTypeId: form.userTypeId,
     isActive: Boolean(form.isActive),
     twoFactorEnabled: Boolean(form.twoFactorEnabled),
-    userRoles: rolesForUserType(form.userTypeId),
+    userRoles:
+      form.userRoles && form.userRoles.length > 0
+        ? form.userRoles
+        : rolesForUserType(form.userTypeId),
   };
   const userId = idOrUndefined(form.userId);
   if (userId) payload['userId'] = userId;

@@ -30,14 +30,6 @@ namespace Share.Infrastructure.SecurityMiddlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // IMPORTANT: Local Visual Studio runs as DEBUG — this entire security gate is SKIPPED.
-            // Docker publishes Release, so Production always enforces auth. That is why clinic
-            // "worked locally" but returns 401 on the server with the same token.
-#if DEBUG
-            _logger.LogDebug("AccessMiddleware SKIPPED (DEBUG build) path={Path}", context.Request.Path.Value);
-            await _next(context);
-            return;
-#endif
             var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint
                 ?? context.GetEndpoint();
 

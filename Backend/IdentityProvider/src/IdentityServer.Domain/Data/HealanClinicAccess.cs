@@ -8,6 +8,7 @@ public static class HealanClinicAccess
     public const string SecretaryRole = "Secretary";
     public const string DoctorRole = "Doctor";
     public const string AccountantRole = "Accountant";
+    public const string ContentProducerRole = "ContentProducer";
     /// <summary>نقش پورتال عمومی — بدون منوی کلینیک؛ با نقش‌های کلینیک قابل جمع است.</summary>
     public const string SiteUserRole = "SiteUser";
     /// <summary>نقش بیمار پورتال — منوهای /patient و چت/رزرو از سایت عمومی.</summary>
@@ -90,6 +91,15 @@ public static class HealanClinicAccess
         Menus.SmsOutbox, Menus.SmsSettings,
     };
 
+    /// <summary>تولیدکننده محتوا — محتوای سایت، بلاگ و دانش/گفتگوهای RAG.</summary>
+    public static readonly int[] ContentProducerMenuIds =
+    {
+        Menus.Dashboard, Menus.PortalContent, Menus.PortalReviews,
+        Menus.PortalBlog, Menus.PortalBlogAdd, Menus.PortalBlogEdit,
+        Menus.PortalBlogDelete, Menus.PortalBlogPublish,
+        Menus.PortalRag, Menus.PortalRagLogs,
+    };
+
     /// <summary>منوهای ناحیه بیمار روی سایت عمومی.</summary>
     public static readonly int[] PatientPortalMenuIds =
     {
@@ -107,6 +117,8 @@ public static class HealanClinicAccess
         SecretaryRole,
         DoctorRole,
         AccountantRole,
+        ContentProducerRole,
+        SiteUserRole,
         PatientRole,
     };
 }

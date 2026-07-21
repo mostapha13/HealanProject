@@ -29,6 +29,7 @@ public static class HealanClinicUserSeed
     {
         await EnsureRoleExistsAsync(roleManager, HealanClinicAccess.SiteUserRole);
         await EnsureRoleExistsAsync(roleManager, HealanClinicAccess.PatientRole);
+        await EnsureRoleExistsAsync(roleManager, HealanClinicAccess.ContentProducerRole);
 
         foreach (var def in Users)
         {
@@ -49,6 +50,7 @@ public static class HealanClinicUserSeed
                 HealanClinicAccess.SecretaryRole => "منشی",
                 HealanClinicAccess.DoctorRole => "پزشک",
                 HealanClinicAccess.AccountantRole => "حسابدار",
+                HealanClinicAccess.ContentProducerRole => "تولید محتوا",
                 HealanClinicAccess.SiteUserRole => "کاربر سایت",
                 HealanClinicAccess.PatientRole => "بیمار",
                 _ => roleName,
@@ -132,23 +134,22 @@ public static class HealanClinicUserSeed
             }
         }
 
-        // فقط یک نقش — حذف Admin، Healan و هر نقش اضافه
         var currentRoles = await userManager.GetRolesAsync(user);
-        if (currentRoles.Count > 0)
-            await userManager.RemoveFromRolesAsync(user, currentRoles);
-
-        var roleResult = await userManager.AddToRoleAsync(user, def.Role);
-        if (!roleResult.Succeeded)
+        if (!currentRoles.Contains(def.Role, StringComparer.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException(
-                $"Failed to assign role {def.Role} to {def.Phone}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            var roleResult = await userManager.AddToRoleAsync(user, def.Role);
+            if (!roleResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to assign role {def.Role} to {def.Phone}: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
         }
 
         await SyncHealanSystemRolesAsync(dbContext, user.Id, def.Role);
     }
 
     /// <summary>
-    /// نقش‌های سامانه Healan را به همان یک نقش کلینیک محدود می‌کند (بدون Healan/Admin اضافه).
+    /// Ensures the seeded clinic role without removing unrelated or additional roles.
     /// </summary>
     private static async Task SyncHealanSystemRolesAsync(ApplicationDbContext dbContext, Guid userId, string roleName)
     {
@@ -162,15 +163,6 @@ public static class HealanClinicUserSeed
 
         if (systemRoleIds.Count == 0)
             return;
-
-        var staleAssignments = await (
-            from ur in dbContext.UserRoles
-            join r in dbContext.Roles on ur.RoleId equals r.Id
-            where ur.UserId == userId && systemRoleIds.Contains(r.Id)
-            select ur).ToListAsync();
-
-        if (staleAssignments.Count > 0)
-            dbContext.UserRoles.RemoveRange(staleAssignments);
 
         var targetRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
         if (targetRole != null

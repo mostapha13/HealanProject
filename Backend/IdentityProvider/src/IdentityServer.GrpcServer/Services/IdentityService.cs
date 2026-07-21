@@ -135,7 +135,7 @@ namespace IdentityServer.GrpcServer.Services
 
             // Empty RoleNames must not wipe existing roles (portal SiteUser + clinic roles coexist).
             if (request.RoleNames != null && request.RoleNames.Count > 0)
-                await UpdateUserRoles(user.Id, request.RoleNames.ToList());
+                await UpdateUserSystemRoles(user.Id, Share.Domain.Constants.HealanAccessFormIds.SystemId, request.RoleNames.ToList());
 
             var result = await GetUserSummaryReply(user.Id);
             return result;
@@ -146,8 +146,9 @@ namespace IdentityServer.GrpcServer.Services
             if (!userId.HasValue || userId.Value == Guid.Empty)
                 return new UserSummaryReply();
 
-            await UpdateUserRoles(
+            await UpdateUserSystemRoles(
                 userId.Value,
+                Share.Domain.Constants.HealanAccessFormIds.SystemId,
                 request.RoleNames != null ? request.RoleNames.ToList() : new List<string>());
             return await GetUserSummaryReply(userId.Value);
         }
@@ -169,7 +170,9 @@ namespace IdentityServer.GrpcServer.Services
         public async override Task<RoleInfos> GetAllRole(Empty request, ServerCallContext context)
         {
 
-            var allRole = _applicationDbContext.Roles.ToList();
+            var allRole = _applicationDbContext.Roles
+                .Where(r => !r.IsDeleted && r.Name != ConstUserInfo.AdminRole)
+                .ToList();
             RoleInfos roleInfos = new RoleInfos();
             foreach (var item in allRole)
             {
@@ -217,7 +220,7 @@ namespace IdentityServer.GrpcServer.Services
             if (allRoleId == null || !allRoleId.Any())
                 return roleInfos;
 
-            var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id)).ToList();
+            var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id) && !w.IsDeleted).ToList();
             foreach (var item in allRole)
             {
                 roleInfos.RoleInfos_.Add(new RoleInfo()
@@ -245,7 +248,7 @@ namespace IdentityServer.GrpcServer.Services
             var isAdmin = await (
                 from ur in _applicationDbContext.UserRoles
                 join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                where ur.UserId == userId.Value && role.Name == ConstUserInfo.AdminRole
+                where ur.UserId == userId.Value && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted
                 select ur.RoleId
             ).AnyAsync();
 
@@ -260,18 +263,30 @@ namespace IdentityServer.GrpcServer.Services
             // (otherwise Persian-only AccessRoles are denied for endpoints without {lang}).
             var ignorePersianFlag = request.LanguageId == 0;
 
-            var q = from a in _applicationDbContext.AccessRoles
+            var roleAccess = await (from a in _applicationDbContext.AccessRoles
                     join r in _applicationDbContext.UserRoles on a.RoleId equals r.RoleId
+                    join role in _applicationDbContext.Roles on r.RoleId equals role.Id
                     join m in _applicationDbContext.AccessMenus on a.AccessMenuId equals m.AccessMenuId
                     join f in _applicationDbContext.AccessForms on m.AccessFormId equals f.AccessFormId
                     where
                     r.UserId == userId.Value &&
+                    !role.IsDeleted &&
                     (ignorePersianFlag || !a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
                     request.AccessFormId.Contains(f.AccessFormId)
-                    select a.AccessRoleId;
+                    select a.AccessRoleId).AnyAsync();
 
+            var directAccess = roleAccess || await (
+                from grant in _applicationDbContext.AccessUserGrants
+                join menu in _applicationDbContext.AccessMenus on grant.AccessMenuId equals menu.AccessMenuId
+                join form in _applicationDbContext.AccessForms on menu.AccessFormId equals form.AccessFormId
+                where grant.UserId == userId.Value
+                    && !grant.IsDeleted
+                    && grant.AccessSystemId == form.AccessSystemId
+                    && request.AccessFormId.Contains(form.AccessFormId)
+                select grant.AccessUserGrantId
+            ).AnyAsync();
 
-            userHasAccessResonse.HasAccess = q.Any();
+            userHasAccessResonse.HasAccess = directAccess;
             return userHasAccessResonse;
 
         }
@@ -282,7 +297,7 @@ namespace IdentityServer.GrpcServer.Services
             var q = (from u in _applicationDbContext.Users
                      join r in _applicationDbContext.UserRoles on u.Id equals r.UserId
                      join n in _applicationDbContext.Roles on r.RoleId equals n.Id
-                     where allUserId.Contains(u.Id)
+                     where allUserId.Contains(u.Id) && !n.IsDeleted
                      select new
                      {
                          u.Id,
@@ -319,25 +334,6 @@ namespace IdentityServer.GrpcServer.Services
             return new UserHasAccessResonse() { HasAccess = true };
         }
 
-        private async Task UpdateUserRoles(Guid userId, List<string> roleNames)
-        {
-            if (userId == Guid.Empty)
-                return;
-            var allCurrentUserRole = _applicationDbContext.UserRoles.Where(w => w.UserId == userId).ToList();
-            foreach (var item in allCurrentUserRole)
-            {
-                _applicationDbContext.UserRoles.Remove(item);
-            }
-            await _applicationDbContext.SaveChangesAsync();
-
-            var roles = _applicationDbContext.Roles.Where(w => roleNames.Contains(w.Name)).ToList();
-            foreach (var role in roles)
-            {
-                if (!_applicationDbContext.UserRoles.Any(a => a.RoleId == role.Id && a.UserId == userId))
-                    _applicationDbContext.UserRoles.Add(new IdentityUserRole<Guid>() { RoleId = role.Id, UserId = userId });
-            }
-            await _applicationDbContext.SaveChangesAsync();
-        }
         private async Task<UserSummaryReply> GetUserSummaryReply(Guid userId)
         {
             var user = _applicationDbContext.Users.FirstOrDefault(p => p.Id == userId);
@@ -362,7 +358,7 @@ namespace IdentityServer.GrpcServer.Services
             var allRoleId = _applicationDbContext.UserRoles.Where(w => w.UserId == user.Id).Select(s => s.RoleId).ToList();
             if (allRoleId != null && allRoleId.Any())
             {
-                var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id)).ToList();
+                var allRole = _applicationDbContext.Roles.Where(w => allRoleId.Contains(w.Id) && !w.IsDeleted).ToList();
                 foreach (var item in allRole)
                 {
                     result.RoleInfos.Add(new RoleInfo()
@@ -411,7 +407,7 @@ namespace IdentityServer.GrpcServer.Services
             var q = (from u in _applicationDbContext.Users
                      join ur in _applicationDbContext.UserRoles on u.Id equals ur.UserId
                      join r in _applicationDbContext.Roles on ur.RoleId equals r.Id
-                     where roles.Contains(r.Name)
+                     where roles.Contains(r.Name) && !r.IsDeleted
                      select u.Id).ToList();
 
             var result = new UserIdsReply();
@@ -443,35 +439,43 @@ namespace IdentityServer.GrpcServer.Services
             if (userId == Guid.Empty)
                 return;
 
-            var allRoleId = _applicationDbContext.AccessSystemRoles
-                .Where(w => w.AccessSystemId == accessSystemId)
-                .Select(s => s.RoleId)
-                .ToList();
+            var systemRoles = await (
+                from link in _applicationDbContext.AccessSystemRoles
+                join role in _applicationDbContext.Roles on link.RoleId equals role.Id
+                where link.AccessSystemId == accessSystemId && !role.IsDeleted
+                select role).ToListAsync();
 
-            var systemRoleNames = _applicationDbContext.Roles
-                .Where(r => allRoleId.Contains(r.Id))
-                .Select(r => r.Name)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
+            var protectedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ConstUserInfo.AdminRole,
+                HealanClinicAccess.PatientRole,
+                HealanClinicAccess.SiteUserRole,
+            };
+            var requestedNames = (roleNames ?? new List<string>())
+                .Where(n => !string.IsNullOrWhiteSpace(n) && !string.Equals(n, ConstUserInfo.AdminRole, StringComparison.OrdinalIgnoreCase))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var requestedRoleIds = systemRoles
+                .Where(r => r.Name != null && requestedNames.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToHashSet();
+            var systemRoleIds = systemRoles.Select(r => r.Id).ToHashSet();
 
-            var currentRoleNames = (
-                from ur in _applicationDbContext.UserRoles
-                join r in _applicationDbContext.Roles on ur.RoleId equals r.Id
-                where ur.UserId == userId && r.Name != null
-                select r.Name).ToList();
+            var current = await _applicationDbContext.UserRoles
+                .Where(x => x.UserId == userId && systemRoleIds.Contains(x.RoleId))
+                .ToListAsync();
+            var protectedRoleIds = systemRoles
+                .Where(r => r.Name != null && protectedNames.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToHashSet();
 
-            // Keep portal SiteUser (and any other non-system roles) when assigning Healan/Doctor/etc.
-            var preserved = currentRoleNames
-                .Where(n => !systemRoleNames.Contains(n))
-                .ToList();
-
-            var finalRoles = preserved
-                .Concat(roleNames ?? new List<string>())
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            await UpdateUserRoles(userId, finalRoles);
+            _applicationDbContext.UserRoles.RemoveRange(
+                current.Where(x => !protectedRoleIds.Contains(x.RoleId) && !requestedRoleIds.Contains(x.RoleId)));
+            var currentIds = current.Select(x => x.RoleId).ToHashSet();
+            foreach (var roleId in requestedRoleIds.Where(id => !currentIds.Contains(id)))
+            {
+                _applicationDbContext.UserRoles.Add(new IdentityUserRole<Guid> { UserId = userId, RoleId = roleId });
+            }
+            await _applicationDbContext.SaveChangesAsync();
         }
 
         public async override Task<UserPhoneNumberReply> GetRelatedUserRolePhoneNumber(GetRelatedUserRolePhoneNumberRequest request, ServerCallContext context)
@@ -484,7 +488,7 @@ namespace IdentityServer.GrpcServer.Services
             var q = (from u in _applicationDbContext.Users
                      join ur in _applicationDbContext.UserRoles on u.Id equals ur.UserId
                      join r in _applicationDbContext.Roles on ur.RoleId equals r.Id
-                     where roles.Contains(r.Name)
+                     where roles.Contains(r.Name) && !r.IsDeleted
                      select u.PhoneNumber).ToList();
 
             var result = new UserPhoneNumberReply();

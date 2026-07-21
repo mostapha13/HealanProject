@@ -202,7 +202,7 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         {row.isAuthenticated ? (
                           <span dir="ltr">{row.phoneNumber || 'لاگین'}</span>
                         ) : (
-                          <span style={{ color: '#81858b' }}>مهمان</span>
+                          <span className="healan-muted">مهمان</span>
                         )}
                       </td>
                       <td style={{ maxWidth: 280, whiteSpace: 'pre-wrap' }}>{row.question}</td>
@@ -211,7 +211,7 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         {answer.length > 120 && (
                           <button
                             type="button"
-                            className="healan-btn healan-btn--ghost healan-btn--sm"
+                            className="healan-btn healan-btn--muted healan-btn--sm"
                             style={{ marginTop: 4 }}
                             onClick={() => setExpandedId(expanded ? null : row.ragChatLogId)}
                           >
@@ -226,7 +226,7 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                       <td>
                         <button
                           type="button"
-                          className="healan-btn healan-btn--ghost healan-btn--sm"
+                          className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm"
                           disabled={deleting}
                           onClick={() => void deleteOne(row.ragChatLogId)}
                         >

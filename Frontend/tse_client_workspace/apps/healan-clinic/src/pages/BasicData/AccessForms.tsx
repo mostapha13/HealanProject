@@ -273,7 +273,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                       <div className="healan-actions">
                         <button
                           type="button"
-                          className="healan-btn healan-btn--outline healan-btn--sm"
+                          className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm"
                           onClick={() => openEdit(row)}
                         >
                           ویرایش
@@ -281,7 +281,7 @@ function AccessFormsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         {!row.isSystem && (
                           <button
                             type="button"
-                            className="healan-btn healan-btn--outline healan-btn--sm"
+                            className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm"
                             onClick={() => void handleDelete(row)}
                           >
                             حذف

@@ -10,8 +10,27 @@ import { PageHeader } from '../../components/Ui';
 
 import { buildUserPayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
+import { MultiSearchableSelect } from '../../components/MultiSearchableSelect';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import {
+  fetchAccessRoleTree,
+  fetchDirectUserGrants,
+  fetchManagedRoles,
+  saveDirectUserGrants,
+  type AccessRoleTreeItem,
+  type ManagedIdentityRole,
+} from '../../api/userAccessApi';
+import { startImpersonation } from '../../api/impersonationApi';
+
+function flattenMenus(items: AccessRoleTreeItem[], depth = 0): { value: number; label: string }[] {
+  return items.flatMap((item) => [
+    ...(item.accessMenuId && item.accessFormId
+      ? [{ value: item.accessMenuId, label: `${'— '.repeat(depth)}${item.title ?? `دسترسی ${item.accessMenuId}`}` }]
+      : []),
+    ...flattenMenus(item.children ?? [], depth + 1),
+  ]);
+}
 
 const USER_TYPE_OPTIONS = [
   { value: 2, label: 'مدیر' },
@@ -27,6 +46,7 @@ const EMPTY_FORM: {
   lastName: string;
   phoneNumber: string;
   userTypeId: number;
+  roleNames: string[];
   isActive: boolean;
   twoFactorEnabled: boolean;
 } = {
@@ -36,6 +56,7 @@ const EMPTY_FORM: {
   lastName: '',
   phoneNumber: '',
   userTypeId: 3,
+  roleNames: ['Secretary', 'Healan'],
   isActive: true,
   twoFactorEnabled: true,
 };
@@ -48,6 +69,13 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [roles, setRoles] = useState<ManagedIdentityRole[]>([]);
+  const [grantUser, setGrantUser] = useState<UserSummary | null>(null);
+  const [grantMenuIds, setGrantMenuIds] = useState<number[]>([]);
+  const [grantMenuOptions, setGrantMenuOptions] = useState<{ value: number; label: string }[]>([]);
+  const [loadingGrants, setLoadingGrants] = useState(false);
+  const [savingGrants, setSavingGrants] = useState(false);
+  const [impersonatingUserId, setImpersonatingUserId] = useState<number | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -66,13 +94,26 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     void load();
   }, [page, pageSize]);
 
+  useEffect(() => {
+    void fetchManagedRoles()
+      .then((result) => setRoles(result.filter((role) => !role.isDeleted)))
+      .catch((err) => onAlert(err));
+  }, []);
+
   const handleSave = () => {
     void guard(async () => {
       if (!form.firstName.trim() || !form.lastName.trim() || !form.phoneNumber.trim()) {
         onAlert({ type: 'error', message: 'نام، نام خانوادگی و موبایل الزامی است' });
         return;
       }
-      await healanApi.users.register(buildUserPayload(form));
+      const selectedRoles = roles
+        .filter((role) => form.roleNames.includes(role.name))
+        .map((role) => ({ name: role.name, displayName: role.displayName }));
+      if (selectedRoles.length === 0) {
+        onAlert({ type: 'error', message: 'حداقل یک نقش برای کاربر انتخاب کنید' });
+        return;
+      }
+      await healanApi.users.register(buildUserPayload({ ...form, userRoles: selectedRoles }));
       setShowForm(false);
       await load();
     }).catch((err) => onAlert(err));
@@ -91,6 +132,10 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       lastName: user.lastName ?? '',
       phoneNumber: user.phoneNumber ?? '',
       userTypeId: user.userTypeId ?? 3,
+      roleNames: (user.userRoles ?? [])
+        .map((role) => role.name)
+        .concat((user.roles ?? []).map((role) => role.roleName ?? ''))
+        .filter((name, index, all) => Boolean(name) && all.indexOf(name) === index),
       isActive: user.isActive ?? true,
       twoFactorEnabled: Boolean(user.twoFactorEnabled),
     });
@@ -107,6 +152,14 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
           lastName: user.lastName ?? '',
           phoneNumber: user.phoneNumber ?? '',
           userTypeId: user.userTypeId ?? 3,
+          userRoles: (user.userRoles ?? []).length
+            ? user.userRoles
+            : (user.roles ?? [])
+                .filter((role) => role.roleName)
+                .map((role) => ({
+                  name: role.roleName as string,
+                  displayName: role.roleTitle ?? (role.roleName as string),
+                })),
           isActive: !(user.isActive ?? true),
           twoFactorEnabled: Boolean(user.twoFactorEnabled),
         })
@@ -114,6 +167,59 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       await load();
     } catch (err) {
       onAlert(err);
+    }
+  };
+
+  const openDirectGrants = async (user: UserSummary) => {
+    if (!user.identityUserId) {
+      onAlert({ type: 'error', message: 'شناسه Identity این کاربر ثبت نشده است' });
+      return;
+    }
+    setGrantUser(user);
+    setLoadingGrants(true);
+    try {
+      const activeRole = roles.find((role) => !role.isDeleted);
+      const [selected, tree] = await Promise.all([
+        fetchDirectUserGrants(user.identityUserId),
+        activeRole ? fetchAccessRoleTree(activeRole.id) : Promise.resolve([]),
+      ]);
+      setGrantMenuIds(selected);
+      setGrantMenuOptions(flattenMenus(tree));
+    } catch (err) {
+      onAlert(err);
+      setGrantUser(null);
+    } finally {
+      setLoadingGrants(false);
+    }
+  };
+
+  const handleSaveGrants = async () => {
+    if (!grantUser?.identityUserId) return;
+    setSavingGrants(true);
+    try {
+      await saveDirectUserGrants(grantUser.identityUserId, grantMenuIds);
+      setGrantUser(null);
+      onAlert({ type: 'success', message: 'دسترسی‌های اختصاصی کاربر ذخیره شد' });
+    } catch (err) {
+      onAlert(err);
+    } finally {
+      setSavingGrants(false);
+    }
+  };
+
+  const handleImpersonate = async (user: UserSummary) => {
+    if (!user.identityUserId) {
+      onAlert({ type: 'error', message: 'شناسه Identity این کاربر ثبت نشده است' });
+      return;
+    }
+    if (!window.confirm(`سامانه دقیقاً با دسترسی «${user.firstName} ${user.lastName}» باز شود؟`)) return;
+    setImpersonatingUserId(user.userId);
+    try {
+      await startImpersonation(user.identityUserId);
+      window.location.assign('/');
+    } catch (err) {
+      onAlert(err);
+      setImpersonatingUserId(null);
     }
   };
 
@@ -146,13 +252,25 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 <input value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
               </div>
               <div className="healan-form-field">
-                <label>نوع کاربر</label>
+                <label>نوع پرونده کاربر</label>
                 <SearchableSelect
                   value={form.userTypeId}
                   onChange={(v) => setForm({ ...form, userTypeId: v ?? 2 })}
                   allowClear={false}
                   placeholder="نوع کاربر"
                   options={USER_TYPE_OPTIONS}
+                />
+              </div>
+              <div className="healan-form-field">
+                <label>نقش‌ها</label>
+                <MultiSearchableSelect
+                  value={form.roleNames}
+                  onChange={(roleNames) => setForm({ ...form, roleNames })}
+                  placeholder="یک یا چند نقش انتخاب کنید"
+                  options={roles.map((role) => ({
+                    value: role.name,
+                    label: role.displayName || role.name,
+                  }))}
                 />
               </div>
               <div className="healan-form-field">
@@ -188,6 +306,51 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 {submitting ? 'در حال ذخیره...' : 'ذخیره'}
               </button>
               <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {grantUser && (
+        <div className="healan-card" style={{ marginBottom: '1.5rem' }}>
+          <div className="healan-card__header">
+            <h3>
+              دسترسی اختصاصی {grantUser.firstName} {grantUser.lastName}
+            </h3>
+          </div>
+          <div className="healan-card__body">
+            <p className="healan-hint">
+              این دسترسی‌ها علاوه بر مجموع دسترسی نقش‌های کاربر اعمال می‌شوند.
+            </p>
+            {loadingGrants ? (
+              <div className="healan-empty">در حال بارگذاری دسترسی‌ها...</div>
+            ) : (
+              <div className="healan-form-field">
+                <label>دسترسی‌های اضافه</label>
+                <MultiSearchableSelect
+                  value={grantMenuIds}
+                  onChange={setGrantMenuIds}
+                  options={grantMenuOptions}
+                  placeholder="دسترسی‌های اضافه را انتخاب کنید"
+                />
+              </div>
+            )}
+            <div className="healan-actions" style={{ marginTop: '1rem' }}>
+              <button
+                type="button"
+                className="healan-btn healan-btn--primary"
+                disabled={loadingGrants || savingGrants}
+                onClick={() => void handleSaveGrants()}
+              >
+                {savingGrants ? 'در حال ذخیره...' : 'ذخیره دسترسی‌ها'}
+              </button>
+              <button
+                type="button"
+                className="healan-btn healan-btn--muted"
+                onClick={() => setGrantUser(null)}
+              >
                 انصراف
               </button>
             </div>
@@ -239,6 +402,21 @@ function UsersPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                           onClick={() => void handleToggleActive(u)}
                         >
                           {u.isActive ? 'غیرفعال' : 'فعال'}
+                        </button>
+                        <button
+                          type="button"
+                          className="healan-btn healan-btn--action healan-btn--sm"
+                          onClick={() => void openDirectGrants(u)}
+                        >
+                          دسترسی اضافه
+                        </button>
+                        <button
+                          type="button"
+                          className="healan-btn healan-btn--primary healan-btn--sm"
+                          disabled={!u.isActive || impersonatingUserId === u.userId}
+                          onClick={() => void handleImpersonate(u)}
+                        >
+                          {impersonatingUserId === u.userId ? 'در حال ورود...' : 'تغییر وضعیت'}
                         </button>
                       </div>
                     </td>

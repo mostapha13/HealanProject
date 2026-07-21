@@ -16,6 +16,21 @@ export interface IdentityRoleItem {
   roleTitle?: string;
 }
 
+export interface ManagedIdentityRole {
+  id: string;
+  name: string;
+  displayName: string;
+  isSystem: boolean;
+  isDeleted: boolean;
+  userCount: number;
+  createdUtc: string;
+  createdBy?: string;
+  modifiedUtc?: string;
+  modifiedBy?: string;
+  deletedUtc?: string;
+  deletedBy?: string;
+}
+
 export interface AccessRoleTreeItem {
   key: number;
   accessMenuId?: number;
@@ -41,7 +56,7 @@ export interface AccessMenuTreeItem {
 }
 
 interface UserAccessRequest {
-  IdentityId: string;
+  IdentityId?: string;
   AccessSystemId: number;
 }
 
@@ -129,6 +144,94 @@ export async function fetchIdentityRoles(searchText = ''): Promise<IdentityRoleI
     roleName: String(item['roleName'] ?? item['RoleName'] ?? ''),
     roleTitle: String(item['roleTitle'] ?? item['RoleTitle'] ?? item['roleName'] ?? item['RoleName'] ?? ''),
   }));
+}
+
+const ROLE_MANAGEMENT = 'HealanRoleManagement';
+
+export async function fetchManagedRoles(includeDeleted = false): Promise<ManagedIdentityRole[]> {
+  const token = await accessToken();
+  const res = await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: `${ROLE_MANAGEMENT}/roles`,
+    options: { includeDeleted },
+    token,
+  });
+  return (res ?? []) as ManagedIdentityRole[];
+}
+
+export async function createManagedRole(payload: {
+  name: string;
+  displayName: string;
+}): Promise<ManagedIdentityRole> {
+  const token = await accessToken();
+  return request.post({
+    baseUrl: USER_MANAGER_API,
+    url: `${ROLE_MANAGEMENT}/roles`,
+    options: payload,
+    token,
+  }) as Promise<ManagedIdentityRole>;
+}
+
+export async function updateManagedRole(
+  roleId: string,
+  payload: { name: string; displayName: string }
+): Promise<ManagedIdentityRole> {
+  const token = await accessToken();
+  return request.put({
+    baseUrl: USER_MANAGER_API,
+    url: `${ROLE_MANAGEMENT}/roles/${roleId}`,
+    options: payload,
+    token,
+  }) as Promise<ManagedIdentityRole>;
+}
+
+async function roleMutation(path: string, method: 'DELETE' | 'POST'): Promise<void> {
+  const token = await accessToken();
+  const response = await fetch(`${USER_MANAGER_API}${ROLE_MANAGEMENT}/${path}`, {
+    method,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw { status: response.status, data };
+  }
+}
+
+export async function deleteManagedRole(roleId: string): Promise<void> {
+  await roleMutation(`roles/${roleId}`, 'DELETE');
+}
+
+export async function restoreManagedRole(roleId: string): Promise<void> {
+  await roleMutation(`roles/${roleId}/restore`, 'POST');
+}
+
+export async function fetchDirectUserGrants(identityUserId: string): Promise<number[]> {
+  const token = await accessToken();
+  const res = (await request.get({
+    baseUrl: USER_MANAGER_API,
+    url: `${ROLE_MANAGEMENT}/users/${identityUserId}/direct-grants`,
+    options: { accessSystemId: HEALAN_ACCESS_SYSTEM_ID },
+    token,
+  })) as { accessMenuIds?: number[]; AccessMenuIds?: number[] } | undefined;
+  return res?.accessMenuIds ?? res?.AccessMenuIds ?? [];
+}
+
+export async function saveDirectUserGrants(
+  identityUserId: string,
+  accessMenuIds: number[]
+): Promise<number[]> {
+  const token = await accessToken();
+  const res = (await request.put({
+    baseUrl: USER_MANAGER_API,
+    url: `${ROLE_MANAGEMENT}/users/${identityUserId}/direct-grants`,
+    options: {
+      accessSystemId: HEALAN_ACCESS_SYSTEM_ID,
+      accessMenuIds,
+    },
+    token,
+  })) as { accessMenuIds?: number[]; AccessMenuIds?: number[] };
+  return res?.accessMenuIds ?? res?.AccessMenuIds ?? [];
 }
 
 export async function fetchAccessRoleTree(roleId: string): Promise<AccessRoleTreeItem[]> {
@@ -267,14 +370,10 @@ export function applyCheckedKeys(items: AccessRoleTreeItem[], checkedKeys: numbe
 
 export function hasPathAccess(accessRole: AccessUserRoleItem[], path: string): boolean {
   if (!accessRole?.length) {
-    return true;
+    return false;
   }
 
   const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
-
-  if (normalized === '/profile') {
-    return true;
-  }
 
   if (normalized === '/basic-data') {
     return accessRole.some((item) => item.hasAccess && item.url?.startsWith('/basic-data'));

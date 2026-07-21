@@ -5,6 +5,7 @@ using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessRole;
 using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRole;
 using IdentityServer.Application.ContextMaps.AminPanel.Queries.Role;
 using IdentityServer.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Share.Application.Common.Interfaces;
 using Share.Domain.Constants;
@@ -15,7 +16,7 @@ using System.Net;
 namespace IdentityServer.UserManagerAPI.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = false)]
-    //[Authorize]
+    [Authorize]
     public class UserAccessController : ApiControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -38,7 +39,7 @@ namespace IdentityServer.UserManagerAPI.Controllers
         /// <returns></returns>
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpGet("Role/{lang}")]
-        [AccessForm(61, 2104, 14, 2102, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine, HealanAccessFormIds.AccessRoleAssign)]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessRoleAssign)]
         public async Task<IActionResult> Role([FromQuery] RoleQuery roleQuery)
         {
             return Ok(await Mediator.Send(roleQuery));
@@ -51,7 +52,7 @@ namespace IdentityServer.UserManagerAPI.Controllers
         /// <returns></returns>
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpGet("AccessForm/{lang}")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
         public async Task<IActionResult> AccessForm([FromQuery] ListAccessFormQuery listAccessFormQuery)
         {
             return Ok(await Mediator.Send(listAccessFormQuery));
@@ -63,7 +64,7 @@ namespace IdentityServer.UserManagerAPI.Controllers
         /// <returns></returns>
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpGet("AccessMenu/{lang}")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
         public async Task<IActionResult> AccessMenu([FromQuery] ListAccessMenuQuery listAccessMenuQuery)
         {
             return Ok(await Mediator.Send(listAccessMenuQuery));
@@ -75,7 +76,7 @@ namespace IdentityServer.UserManagerAPI.Controllers
         /// <returns></returns>
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpGet("AccessRole/{lang}")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine, HealanAccessFormIds.AccessRoleAssign)]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessRoleAssign)]
         public async Task<IActionResult> AccessRole([FromQuery] ListAccessRoleQuery listAccessRoleQuery)
         {
             return Ok(await Mediator.Send(listAccessRoleQuery));
@@ -84,7 +85,8 @@ namespace IdentityServer.UserManagerAPI.Controllers
 
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpPost("SaveAccessRole")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessRoleAssign)]
+        [DisallowImpersonation]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessRoleAssign)]
         public async Task<IActionResult> SaveAccessRole([FromBody] SaveAccessRoleCommand saveAccessRoleCommand)
         {
             return Ok(await Mediator.Send(saveAccessRoleCommand));
@@ -92,7 +94,8 @@ namespace IdentityServer.UserManagerAPI.Controllers
 
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpPost("SaveAccessForm")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        [DisallowImpersonation]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
         public async Task<IActionResult> SaveAccessForm([FromBody] SaveAccessFormCommand command)
         {
             return Ok(await Mediator.Send(command));
@@ -100,7 +103,8 @@ namespace IdentityServer.UserManagerAPI.Controllers
 
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [HttpPost("DeleteAccessForm")]
-        [AccessForm(61, 2104, HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
+        [DisallowImpersonation]
+        [AccessForm(HealanAccessFormIds.AccessAdmin, HealanAccessFormIds.AccessDefine)]
         public async Task<IActionResult> DeleteAccessForm([FromBody] DeleteAccessFormCommand command)
         {
             return Ok(await Mediator.Send(command));

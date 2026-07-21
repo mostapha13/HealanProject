@@ -372,7 +372,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                     <td>{convertDateAndTimeToJalali(item.startAt)}</td>
                     <td>
                       {item.firstName} {item.lastName}
-                      <div style={{ color: '#64748b', fontSize: 12 }}>
+                      <div className="healan-muted">
                         {item.nationalCode} · {item.phoneNumber}
                       </div>
                     </td>
@@ -392,14 +392,14 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                             </button>
                             <button
                               type="button"
-                              className="healan-btn healan-btn--outline healan-btn--sm"
+                              className="healan-btn healan-btn--muted healan-btn--sm"
                               onClick={() => void markNoShow(item.appointmentBookingId)}
                             >
                               عدم حضور
                             </button>
                             <button
                               type="button"
-                              className="healan-btn healan-btn--ghost healan-btn--sm"
+                              className="healan-btn healan-btn--action healan-btn--unpublish healan-btn--sm"
                               onClick={() => void cancel(item.appointmentBookingId)}
                             >
                               لغو
@@ -409,8 +409,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
                         {st !== 4 && (
                           <button
                             type="button"
-                            className="healan-btn healan-btn--ghost healan-btn--sm"
-                            style={{ color: '#b91c1c' }}
+                            className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm"
                             onClick={() => void removeBooking(item.appointmentBookingId)}
                           >
                             حذف
@@ -520,7 +519,7 @@ function BookingReservationsPage({ onAlert }: { onAlert: (msg: unknown) => void 
               placeholder="دلیل مراجعه بیمار"
               style={{ resize: 'vertical', minHeight: 88 }}
             />
-            <span style={{ fontSize: '0.75rem', color: 'var(--healan-muted)', marginTop: 6 }}>
+            <span className="healan-muted" style={{ fontSize: '0.75rem', marginTop: 6 }}>
               {admitForm.note.length}/{NOTE_MAX}
             </span>
           </div>

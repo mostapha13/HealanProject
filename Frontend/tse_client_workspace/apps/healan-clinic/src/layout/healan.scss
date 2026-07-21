@@ -241,6 +241,15 @@
   font-family: inherit;
 }
 
+.healan-btn:disabled,
+.healan-btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
+
 .healan-btn--primary {
   background: var(--healan-primary);
   color: #fff;
@@ -279,14 +288,14 @@
   text-align: center;
 }
 
-.healan-btn--ghost {
+.healan-sidebar .healan-btn--ghost {
   width: 100%;
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.healan-btn--ghost:hover {
+.healan-sidebar .healan-btn--ghost:hover {
   background: rgba(255, 255, 255, 0.18);
 }
 
@@ -298,6 +307,17 @@
 .healan-btn--action {
   width: auto;
   border: 1px solid transparent;
+}
+
+.healan-btn--muted {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.healan-btn--muted:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .healan-btn--edit {

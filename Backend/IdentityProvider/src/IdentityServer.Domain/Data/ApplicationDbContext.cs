@@ -35,8 +35,9 @@ namespace IdentityServer.Domain.Data
             {
                 entityBuilder.Property(a => a.DisplayName).HasMaxLength(100);
                 entityBuilder.Property(a => a.ApplicationRoleGroupId);
-
-
+                entityBuilder.Property(a => a.CreatedUtc).HasDefaultValueSql("SYSUTCDATETIME()");
+                entityBuilder.Property(a => a.IsSystem).HasDefaultValue(false);
+                entityBuilder.Property(a => a.IsDeleted).HasDefaultValue(false);
                 entityBuilder.HasOne(a => a.ApplicationRoleGroup).WithMany(b => b.ApplicationRoles).HasForeignKey(c => c.ApplicationRoleGroupId).OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -57,5 +58,7 @@ namespace IdentityServer.Domain.Data
         public DbSet<AccessRole> AccessRoles { get; set; }
         public DbSet<AccessSystem> AccessSystems { get; set; }
         public DbSet<AccessSystemRole> AccessSystemRoles { get; set; }
+        public DbSet<AccessUserGrant> AccessUserGrants { get; set; }
+        public DbSet<ImpersonationAudit> ImpersonationAudits { get; set; }
     }
 }

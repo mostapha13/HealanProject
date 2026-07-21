@@ -13,6 +13,7 @@ import { SearchableSelect } from '../../components/SearchableSelect';
 import { confirmDelete } from '../../components/confirmDialog';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const EMPTY_FORM = { serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '', isActive: true };
 
@@ -204,11 +205,11 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 <td>{s.isActive ? 'فعال' : 'غیرفعال'}</td>
                 <td>
                   <div className="healan-actions">
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(s)}>ویرایش</button>
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(s)}>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => openEdit(s)}>ویرایش</button>
+                    <button type="button" className={`healan-btn healan-btn--action healan-btn--sm ${s.isActive ? 'healan-btn--unpublish' : 'healan-btn--publish'}`} onClick={() => void handleToggleActive(s)}>
                       {s.isActive ? 'غیرفعال' : 'فعال'}
                     </button>
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleDelete(s)}>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void handleDelete(s)}>
                       حذف
                     </button>
                   </div>
@@ -223,6 +224,7 @@ function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
+      <DeletedItemsPanel loadItems={healanApi.services.deletedList} restoreItem={healanApi.services.restore} onRestored={load} onAlert={onAlert} />
 
     </>
 

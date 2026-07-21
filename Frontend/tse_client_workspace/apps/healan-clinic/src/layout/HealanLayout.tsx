@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from '@tse/utils';
 import { userManager } from '../store/userManager';
 import { HealanNavLink } from '../components/HealanNavLink';
 import { useUserAccess } from '../context/UserAccessContext';
+import { endImpersonation, isImpersonating } from '../api/impersonationApi';
 import './healan.scss';
 
 const navItems: Array<{ path: string; label: string; icon: string; end?: boolean; accessPath?: string }> = [
@@ -27,6 +28,27 @@ const navItems: Array<{ path: string; label: string; icon: string; end?: boolean
 export function HealanLayout() {
   const navigate = useNavigate();
   const { canAccess, loading, displayName, currentUser } = useUserAccess();
+  const [impersonationActive, setImpersonationActive] = useState(false);
+  const [endingImpersonation, setEndingImpersonation] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    void userManager.getUser().then((user) => {
+      const active = isImpersonating(user);
+      setImpersonationActive(active);
+      if (active && user) {
+        const delay = Math.max(1000, (user.expires_in - 15) * 1000);
+        timer = setTimeout(() => {
+          void endImpersonation()
+            .catch(() => undefined)
+            .finally(() => window.location.assign('/basic-data/users'));
+        }, delay);
+      }
+    });
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
 
   const userFullName = currentUser
     ? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim()
@@ -38,9 +60,23 @@ export function HealanLayout() {
     : navItems.filter((item) => canAccess(item.accessPath ?? item.path));
 
   const handleLogout = async () => {
+    if (impersonationActive) {
+      await handleEndImpersonation();
+      return;
+    }
     await userManager.signoutRedirect();
     await userManager.removeUser();
     navigate('/');
+  };
+
+  const handleEndImpersonation = async () => {
+    setEndingImpersonation(true);
+    try {
+      await endImpersonation();
+    } finally {
+      setEndingImpersonation(false);
+      window.location.assign('/basic-data/users');
+    }
   };
 
   return (
@@ -93,6 +129,33 @@ export function HealanLayout() {
           </div>
         </aside>
         <main className="healan-main">
+          {impersonationActive && (
+            <div
+              role="alert"
+              style={{
+                marginBottom: '1rem',
+                padding: '0.8rem 1rem',
+                borderRadius: 10,
+                background: '#fff3cd',
+                border: '1px solid #f59e0b',
+                color: '#7c4a03',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <strong>در حال مشاهده سامانه به‌جای {userFullName || 'کاربر انتخاب‌شده'} هستید.</strong>
+              <button
+                type="button"
+                className="healan-btn healan-btn--danger healan-btn--sm"
+                disabled={endingImpersonation}
+                onClick={() => void handleEndImpersonation()}
+              >
+                {endingImpersonation ? 'در حال بازگشت...' : 'بازگشت به حساب مدیر'}
+              </button>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Share.Application.Common.Interfaces;
+using Share.Domain.Constants;
 using Share.Domain.Enums;
 using System;
 using System.Linq;
@@ -75,6 +76,22 @@ namespace Share.Infrastructure.Services
             {
                 return _httpContextAccessor.HttpContext?.User?.FindFirstValue("auth_time");
             }
+        }
+
+        public Guid? ActorUserId => ReadGuidClaim(ImpersonationClaimNames.ActorSubject);
+
+        public Guid? ImpersonationSessionId => ReadGuidClaim(ImpersonationClaimNames.SessionId);
+
+        public bool IsImpersonating =>
+            bool.TryParse(
+                _httpContextAccessor.HttpContext?.User?.FindFirstValue(ImpersonationClaimNames.IsImpersonating),
+                out var result)
+            && result;
+
+        private Guid? ReadGuidClaim(string claimType)
+        {
+            var raw = _httpContextAccessor.HttpContext?.User?.FindFirstValue(claimType);
+            return Guid.TryParse(raw, out var value) && value != Guid.Empty ? value : null;
         }
     }
 }

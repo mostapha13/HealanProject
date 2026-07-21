@@ -12,6 +12,7 @@ import { buildCompanyPayload } from '../../utils/apiPayload';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const EMPTY_FORM = {
   companyId: 0,
@@ -120,6 +121,16 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
+  const handleDelete = async (item: CompanySummary) => {
+    if (!window.confirm(`شرکت «${item.companyName}» حذف شود؟`)) return;
+    try {
+      await healanApi.companies.delete(item.companyId);
+      await load();
+    } catch (err) {
+      onAlert(err);
+    }
+  };
+
 
 
   return (
@@ -212,10 +223,11 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 <td>{c.isActive ? 'فعال' : 'غیرفعال'}</td>
                 <td>
                   <div className="healan-actions">
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(c)}>ویرایش</button>
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => void handleToggleActive(c)}>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => openEdit(c)}>ویرایش</button>
+                    <button type="button" className={`healan-btn healan-btn--action healan-btn--sm ${c.isActive ? 'healan-btn--unpublish' : 'healan-btn--publish'}`} onClick={() => void handleToggleActive(c)}>
                       {c.isActive ? 'غیرفعال' : 'فعال'}
                     </button>
+                    <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void handleDelete(c)}>حذف</button>
                   </div>
                 </td>
               </tr>)}</tbody>
@@ -228,6 +240,7 @@ function CompaniesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         <ListPagination page={page} pageSize={pageSize} totalCount={totalCount} onChange={onPaginationChange} />
 
       </div>
+      <DeletedItemsPanel loadItems={healanApi.companies.deletedList} restoreItem={healanApi.companies.restore} onRestored={load} onAlert={onAlert} />
 
     </>
 

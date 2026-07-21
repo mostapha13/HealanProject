@@ -146,6 +146,58 @@ namespace IdentityServer.Domain.Migrations
                     b.ToTable("AccessSystemRole", (string)null);
                 });
 
+            modelBuilder.Entity("IdentityServer.Domain.Entities.AccessUserGrant", b =>
+                {
+                    b.Property<int>("AccessUserGrantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccessUserGrantId"));
+
+                    b.Property<int>("AccessMenuId")
+                        .HasColumnType("Int");
+
+                    b.Property<int>("AccessSystemId")
+                        .HasColumnType("Int");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ModifiedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("AccessUserGrantId");
+
+                    b.HasIndex("AccessMenuId");
+
+                    b.HasIndex("AccessSystemId");
+
+                    b.HasIndex("UserId", "AccessSystemId", "AccessMenuId")
+                        .IsUnique();
+
+                    b.ToTable("AccessUserGrant", (string)null);
+                });
+
             modelBuilder.Entity("IdentityServer.Domain.Entities.ActionInfo", b =>
                 {
                     b.Property<int>("ActionInfoId")
@@ -191,10 +243,40 @@ namespace IdentityServer.Domain.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsSystem")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ModifiedUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -363,6 +445,48 @@ namespace IdentityServer.Domain.Migrations
                     b.HasIndex("ApplicationRoleId");
 
                     b.ToTable("ApplicationUserAccesses");
+                });
+
+            modelBuilder.Entity("IdentityServer.Domain.Entities.ImpersonationAudit", b =>
+                {
+                    b.Property<long>("ImpersonationAuditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ImpersonationAuditId"));
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TargetUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ImpersonationAuditId");
+
+                    b.HasIndex("ActorUserId");
+
+                    b.HasIndex("TargetUserId");
+
+                    b.HasIndex("SessionId", "Event")
+                        .IsUnique();
+
+                    b.ToTable("ImpersonationAudits", (string)null);
                 });
 
             modelBuilder.Entity("IdentityServer.Domain.Entities.SectionInfo", b =>
@@ -577,6 +701,33 @@ namespace IdentityServer.Domain.Migrations
                     b.Navigation("AccessSystem");
 
                     b.Navigation("ApplicationRole");
+                });
+
+            modelBuilder.Entity("IdentityServer.Domain.Entities.AccessUserGrant", b =>
+                {
+                    b.HasOne("IdentityServer.Domain.Entities.AccessMenu", "AccessMenu")
+                        .WithMany()
+                        .HasForeignKey("AccessMenuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("IdentityServer.Domain.Entities.AccessSystem", "AccessSystem")
+                        .WithMany()
+                        .HasForeignKey("AccessSystemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("IdentityServer.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AccessMenu");
+
+                    b.Navigation("AccessSystem");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IdentityServer.Domain.Entities.ActionInfo", b =>

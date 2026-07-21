@@ -1,4 +1,5 @@
-﻿using Healan.Application.PublicInfos.Queries.CategoryType;
+﻿using Healan.Application.Common.MasterData;
+using Healan.Application.PublicInfos.Queries.CategoryType;
 using Healan.Application.ServiceTypes.Commands.ServiceTypeDelete;
 using Healan.Application.ServiceTypes.Commands.ServiceTypeRegister;
 using Healan.Application.ServiceTypes.Queries.ServiceTypeInfo;
@@ -41,6 +42,14 @@ public class ServiceTypesController : ApiControllerBase
     [HttpPost("[action]")]
     public Task<IActionResult> Delete([FromBody] ServiceTypeDeleteCommand request) =>
         SendCommand(request);
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.ServiceType }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.ServiceType, Id = request.Id }));
 
     /// <summary>
     /// اطلاعات خدمت

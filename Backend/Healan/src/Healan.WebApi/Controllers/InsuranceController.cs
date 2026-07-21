@@ -1,4 +1,5 @@
-﻿using Healan.Application.Insurances.Commands.InsuranceRegister;
+﻿using Healan.Application.Common.MasterData;
+using Healan.Application.Insurances.Commands.InsuranceRegister;
 using Healan.Application.Insurances.Commands.RegisterInsuranceContract;
 using Healan.Application.Insurances.Queries.GetInsuranceContractInfo;
 using Healan.Application.Insurances.Queries.GetInsuranceInfo;
@@ -44,6 +45,18 @@ public class InsuranceController : ApiControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> InsuranceInfo([FromQuery] int insuranceCompanyId) => Ok(await Mediator.Send(new GetInsuranceInfoQuery { InsuranceCompanyId = insuranceCompanyId }));
 
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedInsuranceList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.InsuranceCompany }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> DeleteInsurance([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataDeleteCommand { Type = MasterDataType.InsuranceCompany, Id = request.Id }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> RestoreInsurance([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.InsuranceCompany, Id = request.Id }));
+
 
     /// <summary>
     /// نوع بیمه
@@ -78,5 +91,16 @@ public class InsuranceController : ApiControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> InsuranceContractInfo([FromQuery] int insuranceContractId) => Ok(await Mediator.Send(new GetInsuranceContractInfoQuery { InsuranceContractId = insuranceContractId }));
 
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DeletedInsuranceContractList() =>
+        Ok(await Mediator.Send(new MasterDataDeletedListQuery { Type = MasterDataType.InsuranceContract }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> DeleteInsuranceContract([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataDeleteCommand { Type = MasterDataType.InsuranceContract, Id = request.Id }));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> RestoreInsuranceContract([FromBody] MasterDataItemRequest request) =>
+        Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.InsuranceContract, Id = request.Id }));
 
 }
