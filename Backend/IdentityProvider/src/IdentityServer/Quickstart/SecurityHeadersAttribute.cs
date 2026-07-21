@@ -23,7 +23,8 @@ namespace IdentityServer.Quickstart
                     context.HttpContext.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
                 }
 
-                var csp = "default-src 'self';";
+                // Captcha is rendered as data:image/*;base64,... — must allow data: for images/styles.
+                var csp = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;";
                 // an example if you need client images to be displayed from twitter
                 //var csp = "default-src 'self'; img-src 'self' https://pbs.twimg.com";
 

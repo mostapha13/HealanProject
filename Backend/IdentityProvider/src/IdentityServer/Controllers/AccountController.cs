@@ -1,4 +1,5 @@
-﻿using IdentityServer;
+﻿using IdentityServer.Quickstart;
+using IdentityServer;
 using IdentityServer.Application.ContextMaps.Users.ForgetPasswords.Command;
 using IdentityServer.Application.ContextMaps.Users.Login.Command;
 using IdentityServer.ApplicationPolicy.Services;
@@ -36,6 +37,7 @@ namespace IdentityServer.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
+    [SecurityHeaders]
     [Route("[controller]/[action]")]
     public class AccountController : TseControllerBase
     {
