@@ -42,12 +42,27 @@ type NavNode = {
 };
 
 const ACTION_URL_RE = /\/(add|edit|delete|publish)$/i;
-const PORTAL_URL_RE = /^\/(assistant|booking|patient)(\/|$)/i;
+/**
+ * Public portal SPA paths only.
+ * Clinic booking admin is /booking/schedules|reservations — never treat as portal.
+ * Clinic assistant settings is /basic-data/assistant — not /assistant.
+ */
+const PORTAL_EXACT_PATHS = new Set([
+  '/assistant',
+  '/booking',
+  '/patient',
+  '/patient/history',
+  '/patient/blood-pressure',
+  '/patient/medications',
+]);
 const EXPANDED_KEY = 'healan.clinic.nav.expanded';
 const PINNED_KEY = 'healan.clinic.nav.pinned';
 
 function isPortalPath(url: string): boolean {
-  return PORTAL_URL_RE.test(url);
+  const path = (url.trim().replace(/\/$/, '') || '/').toLowerCase();
+  if (PORTAL_EXACT_PATHS.has(path)) return true;
+  // Allow future /patient/... pages without hijacking clinic routes.
+  return path.startsWith('/patient/');
 }
 
 function menuTitle(item: AccessMenuTreeItem): string {

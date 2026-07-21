@@ -73,7 +73,8 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.Workflow, "کارتابل", "/workflow"),
             new FormDef(HealanAccessFormIds.Signature, "امضای دیجیتال", "/signature"),
             new FormDef(HealanAccessFormIds.AccessAdmin, "مدیریت دسترسی‌ها", "/basic-data/access-roles"),
-            new FormDef(HealanAccessFormIds.PortalContent, "محتوای سایت", "/site-content"),
+            new FormDef(HealanAccessFormIds.PortalContent, "بخش‌ها و مطالب", "/site-content"),
+            new FormDef(HealanAccessFormIds.PortalSiteSettings, "تنظیمات سایت", "/site-content/settings"),
             new FormDef(HealanAccessFormIds.PortalReviews, "نظرات بیماران", "/site-content/reviews"),
             new FormDef(HealanAccessFormIds.PortalBlog, "بلاگ — مشاهده", "/site-content/blog"),
             new FormDef(HealanAccessFormIds.PortalBlogAdd, "بلاگ — افزودن", "/site-content/blog/add"),
@@ -169,14 +170,15 @@ public static class HealanAccessSeed
             new MenuDef(5116, HealanAccessFormIds.AccessRoleAssign, 5113, 3, "سطح دسترسی نقش‌ها"),
             new MenuDef(5120, null, null, 5, "محتوای سایت"),
             new MenuDef(5121, HealanAccessFormIds.PortalContent, 5120, 1, "بخش‌ها و مطالب"),
-            new MenuDef(5122, HealanAccessFormIds.PortalReviews, 5120, 2, "نظرات بیماران"),
-            new MenuDef(5123, HealanAccessFormIds.PortalBlog, 5120, 3, "بلاگ"),
+            new MenuDef(5145, HealanAccessFormIds.PortalSiteSettings, 5120, 2, "تنظیمات سایت"),
+            new MenuDef(5122, HealanAccessFormIds.PortalReviews, 5120, 3, "نظرات بیماران"),
+            new MenuDef(5123, HealanAccessFormIds.PortalBlog, 5120, 4, "بلاگ"),
             new MenuDef(5124, HealanAccessFormIds.PortalBlogAdd, 5123, 1, "بلاگ — افزودن"),
             new MenuDef(5125, HealanAccessFormIds.PortalBlogEdit, 5123, 2, "بلاگ — ویرایش"),
             new MenuDef(5126, HealanAccessFormIds.PortalBlogDelete, 5123, 3, "بلاگ — حذف"),
             new MenuDef(5127, HealanAccessFormIds.PortalBlogPublish, 5123, 4, "بلاگ — نمایش/عدم نمایش"),
-            new MenuDef(5128, HealanAccessFormIds.PortalRag, 5120, 4, "دانش پایه ربات"),
-            new MenuDef(5132, HealanAccessFormIds.PortalRagLogs, 5120, 5, "گفتگوهای دستیار"),
+            new MenuDef(5128, HealanAccessFormIds.PortalRag, 5120, 5, "دانش پایه ربات"),
+            new MenuDef(5132, HealanAccessFormIds.PortalRagLogs, 5120, 6, "گفتگوهای دستیار"),
             new MenuDef(5144, null, null, 6, "گزارش‌ها"),
             new MenuDef(5117, HealanAccessFormIds.Reports, 5144, 1, "نمودارها و آمارها"),
             new MenuDef(5143, null, null, 7, "مدیریت پیامک"),
@@ -256,14 +258,15 @@ public static class HealanAccessSeed
             [5116] = (5113, 3, "سطح دسترسی نقش‌ها", HealanAccessFormIds.AccessRoleAssign),
             [5120] = (null, 5, "محتوای سایت", null),
             [5121] = (5120, 1, "بخش‌ها و مطالب", HealanAccessFormIds.PortalContent),
-            [5122] = (5120, 2, "نظرات بیماران", HealanAccessFormIds.PortalReviews),
-            [5123] = (5120, 3, "بلاگ", HealanAccessFormIds.PortalBlog),
+            [5145] = (5120, 2, "تنظیمات سایت", HealanAccessFormIds.PortalSiteSettings),
+            [5122] = (5120, 3, "نظرات بیماران", HealanAccessFormIds.PortalReviews),
+            [5123] = (5120, 4, "بلاگ", HealanAccessFormIds.PortalBlog),
             [5124] = (5123, 1, "بلاگ — افزودن", HealanAccessFormIds.PortalBlogAdd),
             [5125] = (5123, 2, "بلاگ — ویرایش", HealanAccessFormIds.PortalBlogEdit),
             [5126] = (5123, 3, "بلاگ — حذف", HealanAccessFormIds.PortalBlogDelete),
             [5127] = (5123, 4, "بلاگ — نمایش/عدم نمایش", HealanAccessFormIds.PortalBlogPublish),
-            [5128] = (5120, 4, "دانش پایه ربات", HealanAccessFormIds.PortalRag),
-            [5132] = (5120, 5, "گفتگوهای دستیار", HealanAccessFormIds.PortalRagLogs),
+            [5128] = (5120, 5, "دانش پایه ربات", HealanAccessFormIds.PortalRag),
+            [5132] = (5120, 6, "گفتگوهای دستیار", HealanAccessFormIds.PortalRagLogs),
             [5144] = (null, 6, "گزارش‌ها", null),
             [5117] = (5144, 1, "نمودارها و آمارها", HealanAccessFormIds.Reports),
             [5143] = (null, 7, "مدیریت پیامک", null),
@@ -284,24 +287,24 @@ public static class HealanAccessSeed
             .Where(m => ids.Contains(m.AccessMenuId))
             .ToListAsync();
 
-        // Ensure new folders exist even if insert-if-missing already ran before they were added
-        var missingFolders = desired
-            .Where(kv => kv.Value.FormId == null && existing.All(e => e.AccessMenuId != kv.Key))
+        // Ensure any newly added menus (folders + leaves) exist on production DBs.
+        var missingMenus = desired
+            .Where(kv => existing.All(e => e.AccessMenuId != kv.Key))
             .ToList();
-        if (missingFolders.Count > 0)
+        if (missingMenus.Count > 0)
         {
             await SetIdentityInsertAsync(dbContext, "AccessMenu", true);
             try
             {
-                foreach (var folder in missingFolders)
+                foreach (var menu in missingMenus)
                 {
                     dbContext.AccessMenus.Add(new AccessMenu
                     {
-                        AccessMenuId = folder.Key,
-                        AccessFormId = null,
-                        ParentRef = folder.Value.Parent,
-                        Order = folder.Value.Order,
-                        Title = folder.Value.Title,
+                        AccessMenuId = menu.Key,
+                        AccessFormId = menu.Value.FormId,
+                        ParentRef = menu.Value.Parent,
+                        Order = menu.Value.Order,
+                        Title = menu.Value.Title,
                         IsActive = true,
                     });
                 }

@@ -95,9 +95,10 @@ export default function AppRoutes() {
             <Route path="access-roles" element={guarded('/basic-data/access-roles', <AccessRolesPage />)} />
           </Route>
           <Route path="site-content" element={guarded('/site-content', <SiteContentLayout />)}>
-            <Route index element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
-            <Route path="settings" element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
+            {/* Index matches AccessForm PortalContent (/site-content) → بخش‌ها و مطالب */}
+            <Route index element={guarded('/site-content', <SiteContentSectionsPage />)} />
             <Route path="sections" element={guarded('/site-content/sections', <SiteContentSectionsPage />)} />
+            <Route path="settings" element={guarded('/site-content/settings', <SiteContentSettingsPage />)} />
             <Route path="blog" element={guarded('/site-content/blog', <SiteContentBlogPage />)} />
             <Route path="rag" element={guarded('/site-content/rag', <SiteContentRagPage />)} />
             <Route path="rag-logs" element={guarded('/site-content/rag-logs', <SiteContentRagLogsPage />)} />

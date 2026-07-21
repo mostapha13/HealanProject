@@ -409,6 +409,7 @@ export function hasPathAccess(accessRole: AccessUserRoleItem[], path: string): b
 
   const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
 
+  // Layout parents: allow if user has any child form under that prefix.
   if (normalized === '/basic-data') {
     return accessRole.some((item) => item.hasAccess && item.url?.startsWith('/basic-data'));
   }
@@ -417,14 +418,27 @@ export function hasPathAccess(accessRole: AccessUserRoleItem[], path: string): b
     return accessRole.some((item) => item.hasAccess && item.url?.startsWith('/site-content'));
   }
 
-  const exact = accessRole.find((item) => item.url === normalized);
+  if (normalized === '/reports') {
+    return accessRole.some(
+      (item) =>
+        item.hasAccess && (item.url === '/reports' || item.url?.startsWith('/reports/'))
+    );
+  }
+
+  const exact = accessRole.find((item) => {
+    const itemUrl = item.url === '/' ? '/' : item.url?.replace(/\/$/, '');
+    return itemUrl === normalized;
+  });
   if (exact) {
     return exact.hasAccess;
   }
 
-  return accessRole.some(
-    (item) => item.hasAccess && normalized.startsWith(`${item.url}/`)
-  );
+  return accessRole.some((item) => {
+    if (!item.hasAccess || !item.url) return false;
+    const itemUrl = item.url === '/' ? '/' : item.url.replace(/\/$/, '');
+    if (itemUrl === '/') return false;
+    return normalized.startsWith(`${itemUrl}/`);
+  });
 }
 
 export const BLOG_ACCESS_PATHS = {
