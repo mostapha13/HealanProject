@@ -14,6 +14,23 @@ import {
   type AccessMenuTreeItem,
 } from '../api/userAccessApi';
 import { environment } from '../environments/environment';
+import {
+  CLINIC_THEMES,
+  loadClinicDarkMode,
+  loadClinicTheme,
+  saveClinicDarkMode,
+  saveClinicTheme,
+  type ClinicThemeId,
+} from './clinicTheme';
+import {
+  IconChevron,
+  IconLogout,
+  IconMoon,
+  IconPin,
+  IconSun,
+  IconUser,
+  resolveNavIcon,
+} from './navIcons';
 import './healan.scss';
 
 type NavNode = {
@@ -71,11 +88,7 @@ function buildNavTree(items: AccessMenuTreeItem[]): NavNode[] {
 
     if (!url) {
       if (children.length === 0) return null;
-      return {
-        key: item.accessMenuId,
-        label: menuTitle(item),
-        children,
-      };
+      return { key: item.accessMenuId, label: menuTitle(item), children };
     }
 
     if (isPortalPath(url)) {
@@ -102,9 +115,7 @@ function collectFolderKeys(nodes: NavNode[]): number[] {
   const keys: number[] = [];
   const walk = (list: NavNode[]) => {
     list.forEach((node) => {
-      if (node.children.length > 0 || (!node.path && !node.externalUrl)) {
-        keys.push(node.key);
-      }
+      if (node.children.length > 0 || (!node.path && !node.externalUrl)) keys.push(node.key);
       if (node.children.length) walk(node.children);
     });
   };
@@ -151,7 +162,7 @@ function NavTree({
     <>
       {nodes.map((node) => {
         const hasChildren = node.children.length > 0;
-        const pad = { paddingInlineStart: `${0.9 + depth * 0.75}rem` };
+        const indent = { paddingInlineStart: `${0.85 + depth * 0.7}rem` };
 
         if (node.externalUrl && !hasChildren) {
           return (
@@ -161,14 +172,17 @@ function NavTree({
               href={node.externalUrl}
               target="_blank"
               rel="noreferrer"
-              style={pad}
+              style={indent}
               onClick={() => {
                 void userManager.getUser().then((u) => {
                   if (u?.access_token) syncPortalAccessToken(u.access_token);
                 });
               }}
             >
-              <span>{node.label}</span>
+              <span className="healan-nav-item__icon">
+                {resolveNavIcon(node.externalUrl, node.label)}
+              </span>
+              <span className="healan-nav-item__text">{node.label}</span>
             </a>
           );
         }
@@ -182,14 +196,14 @@ function NavTree({
               className={({ isActive }: { isActive: boolean }) =>
                 `healan-nav-item${isActive ? ' active' : ''}`
               }
-              style={pad}
+              style={indent}
             >
-              <span>{node.label}</span>
+              <span className="healan-nav-item__icon">{resolveNavIcon(node.path, node.label)}</span>
+              <span className="healan-nav-item__text">{node.label}</span>
             </HealanNavLink>
           );
         }
 
-        // Folder (or parent with children): collapsible + pinnable
         const isPinned = pinned.has(node.key);
         const isOpen = isPinned || expanded.has(node.key);
 
@@ -198,7 +212,7 @@ function NavTree({
             key={node.key}
             className={`healan-nav-group${isOpen ? ' is-open' : ''}${isPinned ? ' is-pinned' : ''}`}
           >
-            <div className="healan-nav-group__header" style={pad}>
+            <div className="healan-nav-group__header" style={indent}>
               <button
                 type="button"
                 className="healan-nav-group__toggle"
@@ -206,8 +220,11 @@ function NavTree({
                 onClick={() => onToggleExpand(node.key)}
                 title={isOpen ? 'بستن گروه' : 'باز کردن گروه'}
               >
-                <span className="healan-nav-group__chevron" aria-hidden="true">
-                  {isOpen ? '▾' : '▸'}
+                <span className={`healan-nav-group__chevron${isOpen ? ' is-open' : ''}`}>
+                  <IconChevron open={isOpen} />
+                </span>
+                <span className="healan-nav-group__icon">
+                  {resolveNavIcon(node.path, node.label, true)}
                 </span>
                 <span className="healan-nav-group__label">{node.label}</span>
               </button>
@@ -221,39 +238,11 @@ function NavTree({
                   onTogglePin(node.key);
                 }}
               >
-                <span className="healan-nav-group__pin-icon" aria-hidden="true" />
+                <IconPin />
               </button>
             </div>
             {isOpen ? (
               <div className="healan-nav-group__children">
-                {node.path ? (
-                  <HealanNavLink
-                    to={node.path}
-                    end={node.path === '/'}
-                    className={({ isActive }: { isActive: boolean }) =>
-                      `healan-nav-item${isActive ? ' active' : ''}`
-                    }
-                    style={{ paddingInlineStart: `${0.9 + (depth + 1) * 0.75}rem` }}
-                  >
-                    <span>{node.label}</span>
-                  </HealanNavLink>
-                ) : null}
-                {node.externalUrl ? (
-                  <a
-                    className="healan-nav-item"
-                    href={node.externalUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ paddingInlineStart: `${0.9 + (depth + 1) * 0.75}rem` }}
-                    onClick={() => {
-                      void userManager.getUser().then((u) => {
-                        if (u?.access_token) syncPortalAccessToken(u.access_token);
-                      });
-                    }}
-                  >
-                    <span>{node.label}</span>
-                  </a>
-                ) : null}
                 {hasChildren ? (
                   <NavTree
                     nodes={node.children}
@@ -281,8 +270,15 @@ export function HealanLayout() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [navMenus, setNavMenus] = useState<AccessMenuTreeItem[]>([]);
   const [navLoading, setNavLoading] = useState(true);
-  const [expanded, setExpanded] = useState<Set<number>>(() => loadIdSet(EXPANDED_KEY));
+  const [theme, setTheme] = useState<ClinicThemeId>(() => loadClinicTheme());
+  const [darkMode, setDarkMode] = useState(() => loadClinicDarkMode());
+  const [themeOpen, setThemeOpen] = useState(false);
   const [pinned, setPinned] = useState<Set<number>>(() => loadIdSet(PINNED_KEY));
+  const [expanded, setExpanded] = useState<Set<number>>(() => {
+    const exp = loadIdSet(EXPANDED_KEY);
+    loadIdSet(PINNED_KEY).forEach((id) => exp.add(id));
+    return exp;
+  });
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -317,16 +313,15 @@ export function HealanLayout() {
 
   const navTree = useMemo(() => buildNavTree(navMenus), [navMenus]);
 
-  // First visit: expand all folders. Later visits keep user preference.
   useEffect(() => {
     if (!navTree.length) return;
     if (localStorage.getItem(EXPANDED_KEY) != null) return;
     const keys = new Set(collectFolderKeys(navTree));
+    pinned.forEach((id) => keys.add(id));
     setExpanded(keys);
     saveIdSet(EXPANDED_KEY, keys);
-  }, [navTree]);
+  }, [navTree, pinned]);
 
-  // Keep ancestors of the active route expanded (without unpinning others).
   useEffect(() => {
     if (!navTree.length) return;
     const needed = collectAncestorKeys(navTree, location.pathname);
@@ -346,7 +341,7 @@ export function HealanLayout() {
   }, [navTree, location.pathname]);
 
   const toggleExpand = (key: number) => {
-    if (pinned.has(key)) return; // pinned stays open
+    if (pinned.has(key)) return;
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -375,10 +370,29 @@ export function HealanLayout() {
     });
   };
 
+  const applyTheme = (id: ClinicThemeId) => {
+    setTheme(id);
+    saveClinicTheme(id);
+  };
+
+  const toggleDark = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      saveClinicDarkMode(next);
+      return next;
+    });
+  };
+
   const userFullName = currentUser
     ? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim()
     : '';
   const userRole = currentUser?.roleTitle ?? '';
+  const initials = (userFullName || displayName || 'ک')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('');
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -390,22 +404,28 @@ export function HealanLayout() {
   };
 
   return (
-    <div className="healan-clinic">
+    <div
+      className="healan-clinic"
+      data-theme={theme}
+      data-mode={darkMode ? 'dark' : 'light'}
+    >
       <div className="healan-shell">
         <aside className="healan-sidebar">
           <div className="healan-sidebar__brand">
-            <h1>Healan</h1>
-            <p>سامانه مدیریت کلینیک و مطب</p>
+            <div className="healan-sidebar__brand-mark" aria-hidden="true">
+              H
+            </div>
+            <div>
+              <h1>Healan</h1>
+              <p>مدیریت کلینیک</p>
+            </div>
           </div>
+
           <nav className="healan-sidebar__nav" aria-label="منوی اصلی">
             {navLoading || loading ? (
-              <div className="healan-nav-item" style={{ opacity: 0.7 }}>
-                در حال بارگذاری منو...
-              </div>
+              <div className="healan-nav-item healan-nav-item--muted">در حال بارگذاری منو...</div>
             ) : navTree.length === 0 ? (
-              <div className="healan-nav-item" style={{ opacity: 0.7 }}>
-                منویی برای این کاربر تعریف نشده
-              </div>
+              <div className="healan-nav-item healan-nav-item--muted">منویی برای این کاربر تعریف نشده</div>
             ) : (
               <NavTree
                 nodes={navTree}
@@ -416,61 +436,88 @@ export function HealanLayout() {
               />
             )}
           </nav>
+
           <div className="healan-sidebar__footer">
-            <div className="healan-sidebar__user">
-              <span className="healan-sidebar__user-icon" aria-hidden="true">
-                👤
-              </span>
-              <div className="healan-sidebar__user-text">
-                <span className="healan-sidebar__user-label">کاربر فعال</span>
-                <strong>
-                  {loading ? 'در حال بارگذاری...' : userFullName || displayName || '—'}
-                </strong>
-                {!loading && userRole && (
-                  <span className="healan-sidebar__user-meta">{userRole}</span>
-                )}
+            <div className="healan-sidebar__prefs">
+              <div className="healan-theme-row" role="group" aria-label="تم رنگ">
+                {CLINIC_THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={`healan-theme-dot${theme === t.id ? ' is-active' : ''}`}
+                    style={{ background: t.swatch }}
+                    title={t.label}
+                    aria-label={t.label}
+                    aria-pressed={theme === t.id}
+                    onClick={() => applyTheme(t.id)}
+                  />
+                ))}
               </div>
+              <button
+                type="button"
+                className={`healan-sidebar__icon-btn${darkMode ? ' is-active' : ''}`}
+                title={darkMode ? 'حالت روشن' : 'حالت تاریک'}
+                aria-pressed={darkMode}
+                onClick={toggleDark}
+              >
+                {darkMode ? <IconSun /> : <IconMoon />}
+              </button>
+              <button
+                type="button"
+                className={`healan-sidebar__icon-btn${themeOpen ? ' is-active' : ''}`}
+                title="جزئیات تم"
+                aria-expanded={themeOpen}
+                onClick={() => setThemeOpen((v) => !v)}
+              >
+                <span className="healan-sidebar__icon-btn-label">تم</span>
+              </button>
             </div>
-            <button
-              type="button"
-              className="healan-btn healan-btn--outline healan-btn--sm"
-              style={{
-                width: '100%',
-                marginBottom: '0.5rem',
-                borderColor: 'rgba(255,255,255,0.35)',
-                color: '#fff',
-              }}
-              onClick={() => navigate('/profile')}
-            >
-              ویرایش حساب / رمز
-            </button>
-            <button
-              type="button"
-              className="healan-btn healan-btn--ghost"
-              disabled={loggingOut}
-              onClick={() => void handleLogout()}
-            >
-              {loggingOut ? 'در حال خروج...' : 'خروج از حساب'}
-            </button>
+
+            {themeOpen ? (
+              <div className="healan-theme-panel">
+                {CLINIC_THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={`healan-theme-option${theme === t.id ? ' is-active' : ''}`}
+                    onClick={() => applyTheme(t.id)}
+                  >
+                    <span className="healan-theme-option__swatch" style={{ background: t.swatch }} />
+                    <span>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="healan-sidebar__user-bar">
+              <button
+                type="button"
+                className="healan-sidebar__user-chip"
+                title="ویرایش حساب و رمز"
+                onClick={() => navigate('/profile')}
+              >
+                <span className="healan-sidebar__avatar">{initials || <IconUser />}</span>
+                <span className="healan-sidebar__user-meta">
+                  <strong>{loading ? '…' : userFullName || displayName || 'کاربر'}</strong>
+                  {userRole ? <small>{userRole}</small> : null}
+                </span>
+              </button>
+              <button
+                type="button"
+                className="healan-sidebar__icon-btn"
+                title="خروج از حساب"
+                disabled={loggingOut}
+                onClick={() => void handleLogout()}
+              >
+                <IconLogout />
+              </button>
+            </div>
           </div>
         </aside>
+
         <main className="healan-main">
           {impersonationActive && (
-            <div
-              role="alert"
-              style={{
-                marginBottom: '1rem',
-                padding: '0.8rem 1rem',
-                borderRadius: 10,
-                background: '#fff3cd',
-                border: '1px solid #f59e0b',
-                color: '#7c4a03',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '1rem',
-              }}
-            >
+            <div className="healan-impersonation-banner" role="alert">
               <strong>
                 در حال مشاهده سامانه دقیقاً به‌جای {userFullName || 'کاربر انتخاب‌شده'} هستید.
               </strong>

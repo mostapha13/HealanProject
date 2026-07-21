@@ -1,25 +1,84 @@
 .healan-clinic {
-  --healan-primary: #0d9488;
-  --healan-primary-dark: #0f766e;
+  --healan-primary: #0f766e;
+  --healan-primary-dark: #115e59;
   --healan-primary-light: #ccfbf1;
-  --healan-bg: #f0fdfa;
+  --healan-accent: #2dd4bf;
+  --healan-bg: #f4f7f6;
   --healan-surface: #ffffff;
   --healan-border: #e2e8f0;
   --healan-text: #0f172a;
   --healan-text-muted: #64748b;
-  --healan-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
+  --healan-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.05);
   --healan-radius: 12px;
+  --healan-sidebar-bg: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
+  --healan-sidebar-text: rgba(255, 255, 255, 0.92);
+  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
+  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
+  --healan-sidebar-accent: #5eead4;
   direction: rtl;
   font-family: 'IRANYekan', Tahoma, sans-serif;
   height: 100vh;
   max-height: 100vh;
   overflow: hidden;
   background: var(--healan-bg);
+  color: var(--healan-text);
+}
+
+.healan-clinic[data-theme='navy'] {
+  --healan-primary: #1e3a5f;
+  --healan-primary-dark: #152a45;
+  --healan-primary-light: #dbeafe;
+  --healan-accent: #60a5fa;
+  --healan-bg: #f3f6fb;
+  --healan-sidebar-bg: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%);
+  --healan-sidebar-accent: #93c5fd;
+}
+
+.healan-clinic[data-theme='forest'] {
+  --healan-primary: #166534;
+  --healan-primary-dark: #14532d;
+  --healan-primary-light: #dcfce7;
+  --healan-accent: #4ade80;
+  --healan-bg: #f3f7f4;
+  --healan-sidebar-bg: linear-gradient(180deg, #166534 0%, #14532d 100%);
+  --healan-sidebar-accent: #86efac;
+}
+
+.healan-clinic[data-theme='slate'] {
+  --healan-primary: #334155;
+  --healan-primary-dark: #1e293b;
+  --healan-primary-light: #e2e8f0;
+  --healan-accent: #94a3b8;
+  --healan-bg: #f5f6f8;
+  --healan-sidebar-bg: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  --healan-sidebar-accent: #cbd5e1;
+}
+
+.healan-clinic[data-theme='amber'] {
+  --healan-primary: #92400e;
+  --healan-primary-dark: #78350f;
+  --healan-primary-light: #fef3c7;
+  --healan-accent: #fbbf24;
+  --healan-bg: #faf7f2;
+  --healan-sidebar-bg: linear-gradient(180deg, #92400e 0%, #78350f 100%);
+  --healan-sidebar-accent: #fcd34d;
+}
+
+.healan-clinic[data-mode='dark'] {
+  --healan-bg: #0b1220;
+  --healan-surface: #121a2b;
+  --healan-border: #243044;
+  --healan-text: #e8eef7;
+  --healan-text-muted: #94a3b8;
+  --healan-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 28px rgba(0, 0, 0, 0.28);
+  --healan-primary-light: rgba(255, 255, 255, 0.08);
 }
 
 .healan-shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 288px 1fr;
   gap: 0;
   height: 100%;
   max-height: 100vh;
@@ -27,10 +86,10 @@
 }
 
 .healan-sidebar {
-  background: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
-  color: #fff;
-  padding: 1.5rem 0;
-  box-shadow: 4px 0 24px rgba(15, 118, 110, 0.15);
+  background: var(--healan-sidebar-bg);
+  color: var(--healan-sidebar-text);
+  padding: 1.1rem 0 0.85rem;
+  box-shadow: inset -1px 0 0 var(--healan-sidebar-edge);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -45,88 +104,222 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-  padding-bottom: 0.5rem;
+  padding: 0.15rem 0.55rem 0.75rem;
 }
 
 .healan-sidebar__nav::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .healan-sidebar__nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.22);
   border-radius: 999px;
 }
 
 .healan-sidebar__brand {
   flex-shrink: 0;
-  padding: 0 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.15rem 1.1rem 1rem;
+  border-bottom: 1px solid var(--healan-sidebar-edge);
+  margin-bottom: 0.65rem;
+}
+
+.healan-sidebar__brand-mark {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -0.04em;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .healan-sidebar__brand h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
 .healan-sidebar__brand p {
-  font-size: 0.75rem;
-  opacity: 0.75;
-  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--healan-sidebar-muted);
+  margin: 0.18rem 0 0;
 }
 
 .healan-sidebar__footer {
   flex-shrink: 0;
-  padding: 1rem 1.25rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  margin-top: 0.5rem;
-}
-
-.healan-sidebar__user {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0 1rem;
-}
-
-.healan-sidebar__user-icon {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.healan-sidebar__user-text {
+  padding: 0.7rem 0.75rem 0.35rem;
+  border-top: 1px solid var(--healan-sidebar-edge);
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.55rem;
+}
+
+.healan-sidebar__prefs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.healan-theme-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
   min-width: 0;
 }
 
-.healan-sidebar__user-label {
-  font-size: 0.7rem;
-  opacity: 0.7;
+.healan-theme-dot {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.healan-sidebar__user-text strong {
-  font-size: 0.9rem;
-  font-weight: 600;
+.healan-theme-dot:hover {
+  transform: scale(1.08);
+}
+
+.healan-theme-dot.is-active {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  transform: scale(1.1);
+}
+
+.healan-sidebar__icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--healan-sidebar-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.healan-sidebar__icon-btn:hover,
+.healan-sidebar__icon-btn.is-active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.healan-sidebar__icon-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.healan-sidebar__icon-btn-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.healan-theme-panel {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.35rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.healan-theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 0;
+  background: transparent;
+  color: var(--healan-sidebar-text);
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: start;
+}
+
+.healan-theme-option:hover,
+.healan-theme-option.is-active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.healan-theme-option__swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.healan-sidebar__user-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.healan-sidebar__user-chip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  border-radius: 12px;
+  padding: 0.4rem 0.55rem;
+  cursor: pointer;
+  text-align: start;
+  transition: background 0.15s;
+}
+
+.healan-sidebar__user-chip:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.healan-sidebar__avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.healan-sidebar__user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.healan-sidebar__user-meta strong {
+  font-size: 0.88rem;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.healan-sidebar__user-meta {
-  font-size: 0.75rem;
-  opacity: 0.75;
+.healan-sidebar__user-meta small {
+  font-size: 0.72rem;
+  color: var(--healan-sidebar-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,37 +328,61 @@
 .healan-nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  color: rgba(255, 255, 255, 0.85);
+  gap: 0.65rem;
+  padding: 0.62rem 0.75rem;
+  margin: 0.08rem 0;
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  border-right: 3px solid transparent;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border-right: 0;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.healan-nav-item--muted {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.healan-nav-item__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.healan-nav-item__text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .healan-nav-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--healan-sidebar-hover);
   color: #fff;
 }
 
 .healan-nav-item.active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--healan-sidebar-active);
   color: #fff;
-  border-right-color: #5eead4;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--healan-sidebar-accent);
 }
 
 .healan-nav-group {
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
 .healan-nav-group__header {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding-inline-end: 0.5rem;
-  min-height: 2.1rem;
+  gap: 0.15rem;
+  min-height: 2.25rem;
+  border-radius: 10px;
 }
 
 .healan-nav-group__toggle {
@@ -174,30 +391,49 @@
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.75rem 0.45rem 0;
+  padding: 0.5rem 0.45rem;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.88);
   cursor: pointer;
   text-align: start;
   font: inherit;
+  border-radius: 10px;
 }
 
 .healan-nav-group__toggle:hover {
+  background: var(--healan-sidebar-hover);
   color: #fff;
 }
 
 .healan-nav-group__chevron {
-  display: inline-flex;
   width: 1rem;
-  flex-shrink: 0;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.15s;
+  transform: rotate(180deg);
+}
+
+.healan-nav-group__chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.healan-nav-group__icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   opacity: 0.85;
 }
 
 .healan-nav-group__label {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -207,8 +443,8 @@
 
 .healan-nav-group__pin {
   flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.7rem;
+  height: 1.7rem;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -217,28 +453,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.55;
+  opacity: 0;
   transition: background 0.15s, opacity 0.15s, color 0.15s;
-}
-
-.healan-nav-group__pin-icon {
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  position: relative;
-  display: inline-block;
-}
-
-.healan-nav-group__pin-icon::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 1.5px;
-  height: 0.35rem;
-  background: currentColor;
-  transform: translateX(-50%);
 }
 
 .healan-nav-group__header:hover .healan-nav-group__pin,
@@ -253,15 +469,30 @@
 
 .healan-nav-group__pin.is-active {
   color: #fde68a;
-  background: rgba(253, 230, 138, 0.12);
-}
-
-.healan-nav-group__pin.is-active .healan-nav-group__pin-icon {
-  background: currentColor;
+  background: rgba(253, 230, 138, 0.14);
 }
 
 .healan-nav-group__children {
-  padding-bottom: 0.15rem;
+  padding: 0.1rem 0 0.2rem;
+}
+
+.healan-impersonation-banner {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  background: #fff3cd;
+  border: 1px solid #f59e0b;
+  color: #7c4a03;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.healan-clinic[data-mode='dark'] .healan-impersonation-banner {
+  background: #3b2a0a;
+  border-color: #b45309;
+  color: #fde68a;
 }
 
 .healan-main {
@@ -272,6 +503,37 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  background: var(--healan-bg);
+  color: var(--healan-text);
+}
+
+.healan-clinic[data-mode='dark'] .healan-card,
+.healan-clinic[data-mode='dark'] .healan-stat-card,
+.healan-clinic[data-mode='dark'] .healan-access-tree {
+  background: var(--healan-surface);
+  border-color: var(--healan-border);
+  color: var(--healan-text);
+}
+
+.healan-clinic[data-mode='dark'] .healan-table thead {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.healan-clinic[data-mode='dark'] .healan-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.healan-clinic[data-mode='dark'] .healan-form-field input,
+.healan-clinic[data-mode='dark'] .healan-form-field select,
+.healan-clinic[data-mode='dark'] .healan-form-field textarea,
+.healan-clinic[data-mode='dark'] .healan-form-field .healan-searchable-select .ant-select-selector {
+  background: #0f172a;
+  border-color: var(--healan-border);
+  color: var(--healan-text);
+}
+
+.healan-clinic[data-mode='dark'] .healan-hint {
+  color: var(--healan-text-muted);
 }
 
 .healan-page-header {
@@ -350,7 +612,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fafafa;
+  background: var(--healan-primary-light);
 }
 
 .healan-card__header h3 {
