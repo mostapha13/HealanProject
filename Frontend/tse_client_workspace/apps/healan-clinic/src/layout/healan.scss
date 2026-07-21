@@ -11,7 +11,9 @@
   --healan-radius: 12px;
   direction: rtl;
   font-family: 'IRANYekan', Tahoma, sans-serif;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background: var(--healan-bg);
 }
 
@@ -19,7 +21,9 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 0;
-  min-height: 100vh;
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .healan-sidebar {
@@ -29,14 +33,33 @@
   box-shadow: 4px 0 24px rgba(15, 118, 110, 0.15);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  min-height: 0;
 }
 
-.healan-sidebar nav {
-  flex: 1;
+.healan-sidebar__nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-bottom: 0.5rem;
+}
+
+.healan-sidebar__nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.healan-sidebar__nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
 }
 
 .healan-sidebar__brand {
+  flex-shrink: 0;
   padding: 0 1.25rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   margin-bottom: 1rem;
@@ -56,9 +79,10 @@
 }
 
 .healan-sidebar__footer {
+  flex-shrink: 0;
   padding: 1rem 1.25rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .healan-sidebar__user {
@@ -133,21 +157,121 @@
 }
 
 .healan-nav-group {
-  margin-top: 0.35rem;
+  margin-top: 0.2rem;
 }
 
-.healan-nav-group__title {
-  padding: 0.55rem 1.25rem 0.25rem;
-  font-size: 0.72rem;
+.healan-nav-group__header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline-end: 0.5rem;
+  min-height: 2.1rem;
+}
+
+.healan-nav-group__toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem 0.45rem 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  text-align: start;
+  font: inherit;
+}
+
+.healan-nav-group__toggle:hover {
+  color: #fff;
+}
+
+.healan-nav-group__chevron {
+  display: inline-flex;
+  width: 1rem;
+  flex-shrink: 0;
+  justify-content: center;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.healan-nav-group__label {
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.healan-nav-group__pin {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
   color: rgba(255, 255, 255, 0.45);
-  text-transform: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  transition: background 0.15s, opacity 0.15s, color 0.15s;
+}
+
+.healan-nav-group__pin-icon {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+}
+
+.healan-nav-group__pin-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1.5px;
+  height: 0.35rem;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+.healan-nav-group__header:hover .healan-nav-group__pin,
+.healan-nav-group__pin.is-active {
+  opacity: 1;
+}
+
+.healan-nav-group__pin:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.healan-nav-group__pin.is-active {
+  color: #fde68a;
+  background: rgba(253, 230, 138, 0.12);
+}
+
+.healan-nav-group__pin.is-active .healan-nav-group__pin-icon {
+  background: currentColor;
+}
+
+.healan-nav-group__children {
+  padding-bottom: 0.15rem;
 }
 
 .healan-main {
   padding: 1.5rem 2rem;
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .healan-page-header {

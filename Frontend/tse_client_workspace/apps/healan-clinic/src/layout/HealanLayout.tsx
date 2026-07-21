@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Outlet, useNavigate } from '@tse/utils';
+import { Outlet, useLocation, useNavigate } from '@tse/utils';
 import { userManager } from '../store/userManager';
 import { HealanNavLink } from '../components/HealanNavLink';
 import { useUserAccess } from '../context/UserAccessContext';
@@ -26,6 +26,8 @@ type NavNode = {
 
 const ACTION_URL_RE = /\/(add|edit|delete|publish)$/i;
 const PORTAL_URL_RE = /^\/(assistant|booking|patient)(\/|$)/i;
+const EXPANDED_KEY = 'healan.clinic.nav.expanded';
+const PINNED_KEY = 'healan.clinic.nav.pinned';
 
 function isPortalPath(url: string): boolean {
   return PORTAL_URL_RE.test(url);
@@ -33,6 +35,26 @@ function isPortalPath(url: string): boolean {
 
 function menuTitle(item: AccessMenuTreeItem): string {
   return item.title || item.accessForm?.formTitle || `منو ${item.accessMenuId}`;
+}
+
+function loadIdSet(storageKey: string): Set<number> {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return new Set();
+    return new Set(parsed.map(Number).filter((n) => Number.isFinite(n)));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveIdSet(storageKey: string, ids: Set<number>): void {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify([...ids]));
+  } catch {
+    // ignore
+  }
 }
 
 function buildNavTree(items: AccessMenuTreeItem[]): NavNode[] {
@@ -76,12 +98,62 @@ function buildNavTree(items: AccessMenuTreeItem[]): NavNode[] {
   return items.map(mapItem).filter((n): n is NavNode => n != null);
 }
 
-function NavTree({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
+function collectFolderKeys(nodes: NavNode[]): number[] {
+  const keys: number[] = [];
+  const walk = (list: NavNode[]) => {
+    list.forEach((node) => {
+      if (node.children.length > 0 || (!node.path && !node.externalUrl)) {
+        keys.push(node.key);
+      }
+      if (node.children.length) walk(node.children);
+    });
+  };
+  walk(nodes);
+  return keys;
+}
+
+function collectAncestorKeys(nodes: NavNode[], pathname: string, ancestors: number[] = []): number[] {
+  const matches: number[] = [];
+  for (const node of nodes) {
+    const nextAncestors = [...ancestors, node.key];
+    if (node.path) {
+      const active =
+        node.path === '/'
+          ? pathname === '/'
+          : pathname === node.path || pathname.startsWith(`${node.path}/`);
+      if (active) matches.push(...ancestors);
+    }
+    if (node.children.length) {
+      matches.push(...collectAncestorKeys(node.children, pathname, nextAncestors));
+    }
+  }
+  return matches;
+}
+
+type NavTreeProps = {
+  nodes: NavNode[];
+  depth?: number;
+  expanded: Set<number>;
+  pinned: Set<number>;
+  onToggleExpand: (key: number) => void;
+  onTogglePin: (key: number) => void;
+};
+
+function NavTree({
+  nodes,
+  depth = 0,
+  expanded,
+  pinned,
+  onToggleExpand,
+  onTogglePin,
+}: NavTreeProps) {
   return (
     <>
       {nodes.map((node) => {
         const hasChildren = node.children.length > 0;
-        if (node.externalUrl) {
+        const pad = { paddingInlineStart: `${0.9 + depth * 0.75}rem` };
+
+        if (node.externalUrl && !hasChildren) {
           return (
             <a
               key={node.key}
@@ -89,7 +161,7 @@ function NavTree({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
               href={node.externalUrl}
               target="_blank"
               rel="noreferrer"
-              style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
+              style={pad}
               onClick={() => {
                 void userManager.getUser().then((u) => {
                   if (u?.access_token) syncPortalAccessToken(u.access_token);
@@ -100,32 +172,100 @@ function NavTree({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
             </a>
           );
         }
-        if (node.path) {
+
+        if (node.path && !hasChildren) {
           return (
-            <React.Fragment key={node.key}>
-              <HealanNavLink
-                to={node.path}
-                end={node.path === '/'}
-                className={({ isActive }: { isActive: boolean }) =>
-                  `healan-nav-item${isActive ? ' active' : ''}`
-                }
-                style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
-              >
-                <span>{node.label}</span>
-              </HealanNavLink>
-              {hasChildren ? <NavTree nodes={node.children} depth={depth + 1} /> : null}
-            </React.Fragment>
+            <HealanNavLink
+              key={node.key}
+              to={node.path}
+              end={node.path === '/'}
+              className={({ isActive }: { isActive: boolean }) =>
+                `healan-nav-item${isActive ? ' active' : ''}`
+              }
+              style={pad}
+            >
+              <span>{node.label}</span>
+            </HealanNavLink>
           );
         }
+
+        // Folder (or parent with children): collapsible + pinnable
+        const isPinned = pinned.has(node.key);
+        const isOpen = isPinned || expanded.has(node.key);
+
         return (
-          <div key={node.key} className="healan-nav-group">
-            <div
-              className="healan-nav-group__title"
-              style={{ paddingInlineStart: `${0.9 + depth * 0.75}rem` }}
-            >
-              {node.label}
+          <div
+            key={node.key}
+            className={`healan-nav-group${isOpen ? ' is-open' : ''}${isPinned ? ' is-pinned' : ''}`}
+          >
+            <div className="healan-nav-group__header" style={pad}>
+              <button
+                type="button"
+                className="healan-nav-group__toggle"
+                aria-expanded={isOpen}
+                onClick={() => onToggleExpand(node.key)}
+                title={isOpen ? 'بستن گروه' : 'باز کردن گروه'}
+              >
+                <span className="healan-nav-group__chevron" aria-hidden="true">
+                  {isOpen ? '▾' : '▸'}
+                </span>
+                <span className="healan-nav-group__label">{node.label}</span>
+              </button>
+              <button
+                type="button"
+                className={`healan-nav-group__pin${isPinned ? ' is-active' : ''}`}
+                aria-pressed={isPinned}
+                title={isPinned ? 'برداشتن پین' : 'سنجاق کردن (همیشه باز)'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTogglePin(node.key);
+                }}
+              >
+                <span className="healan-nav-group__pin-icon" aria-hidden="true" />
+              </button>
             </div>
-            {hasChildren ? <NavTree nodes={node.children} depth={depth + 1} /> : null}
+            {isOpen ? (
+              <div className="healan-nav-group__children">
+                {node.path ? (
+                  <HealanNavLink
+                    to={node.path}
+                    end={node.path === '/'}
+                    className={({ isActive }: { isActive: boolean }) =>
+                      `healan-nav-item${isActive ? ' active' : ''}`
+                    }
+                    style={{ paddingInlineStart: `${0.9 + (depth + 1) * 0.75}rem` }}
+                  >
+                    <span>{node.label}</span>
+                  </HealanNavLink>
+                ) : null}
+                {node.externalUrl ? (
+                  <a
+                    className="healan-nav-item"
+                    href={node.externalUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ paddingInlineStart: `${0.9 + (depth + 1) * 0.75}rem` }}
+                    onClick={() => {
+                      void userManager.getUser().then((u) => {
+                        if (u?.access_token) syncPortalAccessToken(u.access_token);
+                      });
+                    }}
+                  >
+                    <span>{node.label}</span>
+                  </a>
+                ) : null}
+                {hasChildren ? (
+                  <NavTree
+                    nodes={node.children}
+                    depth={depth + 1}
+                    expanded={expanded}
+                    pinned={pinned}
+                    onToggleExpand={onToggleExpand}
+                    onTogglePin={onTogglePin}
+                  />
+                ) : null}
+              </div>
+            ) : null}
           </div>
         );
       })}
@@ -135,11 +275,14 @@ function NavTree({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
 
 export function HealanLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading, displayName, currentUser, authenticated } = useUserAccess();
   const [impersonationActive, setImpersonationActive] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [navMenus, setNavMenus] = useState<AccessMenuTreeItem[]>([]);
   const [navLoading, setNavLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Set<number>>(() => loadIdSet(EXPANDED_KEY));
+  const [pinned, setPinned] = useState<Set<number>>(() => loadIdSet(PINNED_KEY));
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -174,6 +317,64 @@ export function HealanLayout() {
 
   const navTree = useMemo(() => buildNavTree(navMenus), [navMenus]);
 
+  // First visit: expand all folders. Later visits keep user preference.
+  useEffect(() => {
+    if (!navTree.length) return;
+    if (localStorage.getItem(EXPANDED_KEY) != null) return;
+    const keys = new Set(collectFolderKeys(navTree));
+    setExpanded(keys);
+    saveIdSet(EXPANDED_KEY, keys);
+  }, [navTree]);
+
+  // Keep ancestors of the active route expanded (without unpinning others).
+  useEffect(() => {
+    if (!navTree.length) return;
+    const needed = collectAncestorKeys(navTree, location.pathname);
+    if (!needed.length) return;
+    setExpanded((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      needed.forEach((id) => {
+        if (!next.has(id)) {
+          next.add(id);
+          changed = true;
+        }
+      });
+      if (changed) saveIdSet(EXPANDED_KEY, next);
+      return changed ? next : prev;
+    });
+  }, [navTree, location.pathname]);
+
+  const toggleExpand = (key: number) => {
+    if (pinned.has(key)) return; // pinned stays open
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      saveIdSet(EXPANDED_KEY, next);
+      return next;
+    });
+  };
+
+  const togglePin = (key: number) => {
+    setPinned((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+        setExpanded((exp) => {
+          const expNext = new Set(exp);
+          expNext.add(key);
+          saveIdSet(EXPANDED_KEY, expNext);
+          return expNext;
+        });
+      }
+      saveIdSet(PINNED_KEY, next);
+      return next;
+    });
+  };
+
   const userFullName = currentUser
     ? `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim()
     : '';
@@ -196,7 +397,7 @@ export function HealanLayout() {
             <h1>Healan</h1>
             <p>سامانه مدیریت کلینیک و مطب</p>
           </div>
-          <nav>
+          <nav className="healan-sidebar__nav" aria-label="منوی اصلی">
             {navLoading || loading ? (
               <div className="healan-nav-item" style={{ opacity: 0.7 }}>
                 در حال بارگذاری منو...
@@ -206,7 +407,13 @@ export function HealanLayout() {
                 منویی برای این کاربر تعریف نشده
               </div>
             ) : (
-              <NavTree nodes={navTree} />
+              <NavTree
+                nodes={navTree}
+                expanded={expanded}
+                pinned={pinned}
+                onToggleExpand={toggleExpand}
+                onTogglePin={togglePin}
+              />
             )}
           </nav>
           <div className="healan-sidebar__footer">
