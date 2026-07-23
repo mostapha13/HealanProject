@@ -5,6 +5,7 @@ using Healan.WebApi.OperationFilter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Share.Domain.Constants;
 using Share.Domain.Converters;
@@ -15,6 +16,7 @@ using Share.Infrastructure;
 using Share.Infrastructure.SecurityMiddlewares;
 using Share.Infrastructure.Services;
 using Share.MessageBroker.RabbitMQ;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
 using WorkFlow.Share;
 
@@ -90,29 +92,41 @@ namespace Healan.WebApi
                 ?? "http://auth.drshahrooei.ir";
 
             Console.WriteLine(
-                $"[HealanAuth] Configure Authority={authority} ValidIssuer={validIssuer} ApiName=WorkFlowWebApi Env={_env.EnvironmentName} BuildTag=f28a843-authdiag-v3");
+                $"[HealanAuth] Configure Authority={authority} ValidIssuer={validIssuer} JwtBearer Env={_env.EnvironmentName} BuildTag=mobile-ropc-jwt-v1");
 
-            // EXACT copy of IdentityServer.UserManagerAPI production auth — the only proven path
-            // for these clinic tokens on this Docker stack. Do NOT use custom JwtBearer here:
-            // Authority hostname (identity-server) vs token iss (auth.drshahrooei.ir) breaks JwtBearer
-            // issuer validation differently than IdentityServerAuthentication.
-            //
-            // ApiName = WorkFlowWebApi because UserManager already accepts the same Bearer token
-            // with that audience; HealanWebApi is often missing from JWT aud when Content_Producer
-            // is requested unless identity-server was rebuilt with that ApiResource.
+            // Prefer JWT validation (no introspection). Resource-owner password tokens from
+            // HealanClinicMobile are JWTs whose aud set can omit WorkFlowWebApi depending on
+            // IdentityServer scope expansion — ValidateAudience=false keeps clinic code-flow
+            // and mobile ROPC working while still verifying issuer + signature.
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-              .AddIdentityServerAuthentication("Bearer", options =>
+              .AddJwtBearer("Bearer", options =>
                {
                    options.Authority = authority;
-                   options.ApiName = "WorkFlowWebApi";
-                   options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
                    options.RequireHttpsMetadata = false;
-                   options.JwtBearerEvents = new JwtBearerEvents
+                   options.MapInboundClaims = false;
+                   options.TokenValidationParameters = new TokenValidationParameters
+                   {
+                       ValidateIssuer = true,
+                       ValidIssuers = new[]
+                       {
+                           validIssuer,
+                           "https://auth.drshahrooei.ir",
+                           "http://auth.drshahrooei.ir",
+                           "https://auth.drshahrooei.ir/",
+                           "http://auth.drshahrooei.ir/",
+                       },
+                       ValidateAudience = false,
+                       ValidateLifetime = true,
+                       NameClaimType = "sub",
+                       RoleClaimType = "role",
+                   };
+                   options.Events = new JwtBearerEvents
                    {
                        OnMessageReceived = ctx =>
                        {

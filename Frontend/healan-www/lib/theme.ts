@@ -10,8 +10,8 @@ export const THEMES: {
 }[] = [
   {
     id: 'classic',
-    label: 'کلاسیک پزشکی',
-    swatch: ['#0b1f3a', '#e11d48', '#f8fafc'],
+    label: 'لیمویی',
+    swatch: ['#C6E000', '#1A1A1A', '#F4F5F7'],
   },
   {
     id: 'warm',

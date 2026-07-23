@@ -90,8 +90,8 @@ export function buildBloodPressurePrintHtml(data: BloodPressurePrintPayload): st
       flex-direction: column;
     }
     .hero {
-      background: linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #14b8a6 100%);
-      color: #fff;
+      background: linear-gradient(135deg, #A8C200 0%, #C6E000 45%, #A8C200 100%);
+      color: #1A1A1A;
       padding: 7mm 8mm 5mm;
       position: relative;
     }
@@ -148,7 +148,7 @@ export function buildBloodPressurePrintHtml(data: BloodPressurePrintPayload): st
     .patient-card .lbl {
       display: block;
       font-size: 10px;
-      color: #0f766e;
+      color: #A8C200;
       font-weight: 700;
       margin-bottom: 2px;
     }
@@ -164,7 +164,7 @@ export function buildBloodPressurePrintHtml(data: BloodPressurePrintPayload): st
     .section-title {
       font-size: 13px;
       font-weight: 800;
-      color: #0f766e;
+      color: #A8C200;
       margin-bottom: 2.5mm;
       display: flex;
       align-items: center;
@@ -199,7 +199,7 @@ export function buildBloodPressurePrintHtml(data: BloodPressurePrintPayload): st
       color: #334155;
       background: #f8fafc;
     }
-    table.bp thead .period { background: #ccfbf1; color: #0f766e; }
+    table.bp thead .period { background: #F4FAC8; color: #A8C200; }
     table.bp thead .period-noon { background: #e0f2fe; color: #0369a1; }
     table.bp thead .period-night { background: #ede9fe; color: #5b21b6; }
     table.bp .date {

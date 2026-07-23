@@ -124,14 +124,14 @@ function RobotIcon() {
       <circle cx="27.5" cy="25" r="2.4" fill="#23254e" />
       <circle cx="20.5" cy="25" r="0.9" fill="#7dd3e0" />
       <circle cx="27.5" cy="25" r="0.9" fill="#7dd3e0" />
-      <path d="M22.2 29.2h3.6" stroke="#0f766e" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M22.2 29.2h3.6" stroke="#A8C200" strokeWidth="1.6" strokeLinecap="round" />
       <rect x="21.5" y="9" width="5" height="5" rx="2" fill="#ef394e" />
       <path d="M24 9V6.5" stroke="#ef394e" strokeWidth="2" strokeLinecap="round" />
       <circle cx="24" cy="5.2" r="1.5" fill="#ef394e" />
       <path d="M12 24H8.5a2 2 0 0 1 0-4H12" fill="#19bfd3" />
       <path d="M36 24h3.5a2 2 0 0 0 0-4H36" fill="#19bfd3" />
-      <rect x="17" y="36" width="5" height="4" rx="2" fill="#0f766e" />
-      <rect x="26" y="36" width="5" height="4" rx="2" fill="#0f766e" />
+      <rect x="17" y="36" width="5" height="4" rx="2" fill="#A8C200" />
+      <rect x="26" y="36" width="5" height="4" rx="2" fill="#A8C200" />
     </svg>
   );
 }

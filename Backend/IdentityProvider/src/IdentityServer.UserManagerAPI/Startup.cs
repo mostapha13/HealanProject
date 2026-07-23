@@ -66,18 +66,33 @@ namespace IdentityServer.UserManagerAPI
 
 
             #region Identity Server Connection Configuration
+            System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-             .AddIdentityServerAuthentication("Bearer", options =>
+             .AddJwtBearer("Bearer", options =>
              {
                  options.Authority = Configuration["IdentityServer:Url"];
-                 options.ApiName = "WorkFlowWebApi";
-                 options.ApiSecret = "T$e.!R*WorkFlowWebApi*E@M@M@A@M";
                  options.RequireHttpsMetadata = false;
+                 options.MapInboundClaims = false;
+                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                 {
+                     ValidateIssuer = true,
+                     ValidIssuers = new[]
+                     {
+                         "https://auth.drshahrooei.ir",
+                         "http://auth.drshahrooei.ir",
+                         "https://auth.drshahrooei.ir/",
+                         "http://auth.drshahrooei.ir/",
+                     },
+                     ValidateAudience = false,
+                     ValidateLifetime = true,
+                     NameClaimType = "sub",
+                     RoleClaimType = "role",
+                 };
              });
 
 
@@ -86,8 +101,12 @@ namespace IdentityServer.UserManagerAPI
                 options.AddPolicy("ApiScope", policy =>
                 {
                     policy.RequireAuthenticatedUser();
-
-                    policy.RequireClaim("scope", "Content_Producer");
+                    // JWT may emit one space-separated "scope" claim or multiple scope claims.
+                    policy.RequireAssertion(ctx =>
+                        ctx.User.FindAll("scope").Any(c =>
+                            c.Value == "Content_Producer"
+                            || c.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                .Contains("Content_Producer")));
                 });
             });
 

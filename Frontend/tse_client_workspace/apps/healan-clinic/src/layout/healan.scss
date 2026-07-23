@@ -1,9 +1,9 @@
 .healan-clinic {
-  --healan-primary: #0f766e;
-  --healan-primary-dark: #115e59;
-  --healan-primary-light: #ccfbf1;
-  --healan-accent: #2dd4bf;
-  --healan-bg: #f4f7f6;
+  --healan-primary: #C6E000;
+  --healan-primary-dark: #A8C200;
+  --healan-primary-light: #F4FAC8;
+  --healan-accent: #A8C200;
+  --healan-bg: #F4F5F7;
   --healan-surface: #ffffff;
   --healan-border: #e2e8f0;
   --healan-text: #0f172a;
@@ -14,16 +14,16 @@
   --healan-sidebar-bg: #ffffff;
   --healan-sidebar-text: #0f172a;
   --healan-sidebar-muted: #64748b;
-  --healan-sidebar-hover: rgba(15, 118, 110, 0.07);
-  --healan-sidebar-active: rgba(15, 118, 110, 0.12);
+  --healan-sidebar-hover: rgba(198, 224, 0, 0.12);
+  --healan-sidebar-active: rgba(198, 224, 0, 0.22);
   --healan-sidebar-edge: #e8eef2;
-  --healan-sidebar-accent: #0f766e;
+  --healan-sidebar-accent: #C6E000;
   --healan-sidebar-scroll: rgba(15, 23, 42, 0.22);
   --healan-sidebar-chip: rgba(15, 23, 42, 0.05);
   --healan-sidebar-chip-hover: rgba(15, 23, 42, 0.09);
-  --healan-sidebar-mark-bg: rgba(15, 118, 110, 0.1);
-  --healan-sidebar-mark-border: rgba(15, 118, 110, 0.18);
-  --healan-sidebar-mark-text: #0f766e;
+  --healan-sidebar-mark-bg: rgba(198, 224, 0, 0.18);
+  --healan-sidebar-mark-border: rgba(168, 194, 0, 0.35);
+  --healan-sidebar-mark-text: #1A1A1A;
   direction: rtl;
   font-family: 'IRANYekan', Tahoma, sans-serif;
   height: 100vh;
@@ -37,37 +37,37 @@
   --healan-sidebar-bg: #ffffff;
   --healan-sidebar-text: #0f172a;
   --healan-sidebar-muted: #64748b;
-  --healan-sidebar-hover: rgba(15, 118, 110, 0.07);
-  --healan-sidebar-active: rgba(15, 118, 110, 0.12);
+  --healan-sidebar-hover: rgba(198, 224, 0, 0.12);
+  --healan-sidebar-active: rgba(198, 224, 0, 0.22);
   --healan-sidebar-edge: #e8eef2;
-  --healan-sidebar-accent: #0f766e;
+  --healan-sidebar-accent: #C6E000;
   --healan-sidebar-scroll: rgba(15, 23, 42, 0.22);
   --healan-sidebar-chip: rgba(15, 23, 42, 0.05);
   --healan-sidebar-chip-hover: rgba(15, 23, 42, 0.09);
-  --healan-sidebar-mark-bg: rgba(15, 118, 110, 0.1);
-  --healan-sidebar-mark-border: rgba(15, 118, 110, 0.18);
-  --healan-sidebar-mark-text: #0f766e;
+  --healan-sidebar-mark-bg: rgba(198, 224, 0, 0.18);
+  --healan-sidebar-mark-border: rgba(168, 194, 0, 0.35);
+  --healan-sidebar-mark-text: #1A1A1A;
 }
 
 .healan-clinic[data-theme='clinical'] {
-  --healan-primary: #0f766e;
-  --healan-primary-dark: #115e59;
-  --healan-primary-light: #ccfbf1;
-  --healan-accent: #2dd4bf;
-  --healan-bg: #f4f7f6;
-  --healan-sidebar-bg: linear-gradient(180deg, #0f766e 0%, #134e4a 100%);
-  --healan-sidebar-text: rgba(255, 255, 255, 0.94);
-  --healan-sidebar-muted: rgba(255, 255, 255, 0.62);
-  --healan-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --healan-sidebar-active: rgba(255, 255, 255, 0.14);
-  --healan-sidebar-edge: rgba(255, 255, 255, 0.12);
-  --healan-sidebar-accent: #5eead4;
-  --healan-sidebar-scroll: rgba(255, 255, 255, 0.28);
-  --healan-sidebar-chip: rgba(255, 255, 255, 0.08);
-  --healan-sidebar-chip-hover: rgba(255, 255, 255, 0.14);
-  --healan-sidebar-mark-bg: rgba(255, 255, 255, 0.14);
-  --healan-sidebar-mark-border: rgba(255, 255, 255, 0.16);
-  --healan-sidebar-mark-text: #fff;
+  --healan-primary: #C6E000;
+  --healan-primary-dark: #A8C200;
+  --healan-primary-light: #F4FAC8;
+  --healan-accent: #A8C200;
+  --healan-bg: #F4F5F7;
+  --healan-sidebar-bg: linear-gradient(180deg, #C6E000 0%, #A8C200 100%);
+  --healan-sidebar-text: #1A1A1A;
+  --healan-sidebar-muted: rgba(26, 26, 26, 0.62);
+  --healan-sidebar-hover: rgba(26, 26, 26, 0.08);
+  --healan-sidebar-active: rgba(26, 26, 26, 0.14);
+  --healan-sidebar-edge: rgba(26, 26, 26, 0.12);
+  --healan-sidebar-accent: #1A1A1A;
+  --healan-sidebar-scroll: rgba(26, 26, 26, 0.28);
+  --healan-sidebar-chip: rgba(26, 26, 26, 0.08);
+  --healan-sidebar-chip-hover: rgba(26, 26, 26, 0.14);
+  --healan-sidebar-mark-bg: rgba(26, 26, 26, 0.1);
+  --healan-sidebar-mark-border: rgba(26, 26, 26, 0.16);
+  --healan-sidebar-mark-text: #1A1A1A;
 }
 
 .healan-clinic[data-theme='navy'] {
@@ -798,7 +798,7 @@
 
 .healan-btn--primary {
   background: var(--healan-primary);
-  color: #fff;
+  color: #1A1A1A;
 }
 
 .healan-btn--primary:hover {
@@ -836,13 +836,13 @@
 
 .healan-sidebar .healan-btn--ghost {
   width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--healan-sidebar-chip);
+  color: var(--healan-sidebar-text);
+  border: 1px solid var(--healan-sidebar-edge);
 }
 
 .healan-sidebar .healan-btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--healan-sidebar-chip-hover);
 }
 
 .healan-btn--sm {
@@ -965,7 +965,7 @@
 }
 
 .healan-workflow-steps li.active {
-  color: #0d9488;
+  color: #A8C200;
   font-weight: 600;
 }
 
@@ -979,7 +979,7 @@
   background: #f0fdfa;
   border: 1px solid #99f6e4;
   border-radius: 8px;
-  color: #0f766e;
+  color: #A8C200;
   font-size: 0.85rem;
   line-height: 1.6;
 }
@@ -1044,7 +1044,7 @@
 .healan-bp-lookup {
   margin-bottom: 1.25rem;
   background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
-  border: 1px solid #ccfbf1;
+  border: 1px solid #F4FAC8;
 }
 
 .healan-bp-lookup__search {
@@ -1121,8 +1121,8 @@
 }
 
 .healan-bp-day-table__period--morning {
-  background: #ccfbf1 !important;
-  color: #0f766e;
+  background: #F4FAC8 !important;
+  color: #A8C200;
 }
 
 .healan-bp-day-table__period--noon {
@@ -1260,8 +1260,8 @@
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: #0f766e;
-  background: #ccfbf1;
+  color: #A8C200;
+  background: #F4FAC8;
   border-radius: 999px;
   padding: 0.2rem 0.55rem;
   margin-bottom: 0.4rem;
@@ -1299,7 +1299,7 @@
 
 .healan-bp-overview__stat strong {
   font-size: 1.25rem;
-  color: #0f766e;
+  color: #A8C200;
 }
 
 .healan-bp-overview__body {
@@ -1323,7 +1323,7 @@
 }
 
 .healan-bp-trend--morning {
-  border-top: 3px solid #0d9488;
+  border-top: 3px solid #A8C200;
 }
 
 .healan-bp-trend--noon {
@@ -1360,8 +1360,8 @@
 }
 
 .healan-bp-trend--morning .healan-bp-trend__badge {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: #F4FAC8;
+  color: #A8C200;
 }
 
 .healan-bp-trend--noon .healan-bp-trend__badge {
@@ -1870,7 +1870,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f766e 0%, #134e4a 50%, #0d9488 100%);
+  background: linear-gradient(135deg, #C6E000 0%, #A8C200 55%, #8FA800 100%);
   padding: 2rem;
 }
 
@@ -1885,7 +1885,7 @@
 }
 
 .healan-auth-card h1 {
-  color: #0f766e;
+  color: #A8C200;
   margin: 0 0 0.5rem;
 }
 

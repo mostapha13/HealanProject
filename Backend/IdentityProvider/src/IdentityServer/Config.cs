@@ -235,6 +235,7 @@ namespace IdentityServer
                     .Distinct()
                     .ToList(),
                 AllowOfflineAccess = true,
+                AllowAccessTokensViaBrowser = true,
                 AbsoluteRefreshTokenLifetime = 60 * 60 * 24 * 7,
                 SlidingRefreshTokenLifetime = 0,
                 AccessTokenLifetime = 60 * 60,

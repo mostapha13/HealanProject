@@ -74,7 +74,8 @@ export async function loginWithPassword(username: string, password: string): Pro
   body.set('client_id', config.clientId);
   body.set('username', username.trim());
   body.set('password', password);
-  body.set('scope', config.scopes.join(' '));
+  // Match clinic web API access: Content_Producer (+ offline refresh).
+  body.set('scope', 'openid profile Content_Producer offline_access');
   return tokenRequest(body);
 }
 

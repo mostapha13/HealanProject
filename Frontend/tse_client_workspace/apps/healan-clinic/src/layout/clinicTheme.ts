@@ -2,7 +2,7 @@ export type ClinicThemeId = 'white' | 'clinical' | 'navy' | 'forest' | 'slate' |
 
 export const CLINIC_THEMES: { id: ClinicThemeId; label: string; swatch: string }[] = [
   { id: 'white', label: 'سفید', swatch: '#f8fafc' },
-  { id: 'clinical', label: 'کلینیکال', swatch: '#0f766e' },
+  { id: 'clinical', label: 'لیمویی', swatch: '#C6E000' },
   { id: 'navy', label: 'سرمه‌ای', swatch: '#1e3a5f' },
   { id: 'forest', label: 'سبز پزشکی', swatch: '#166534' },
   { id: 'slate', label: 'خاکستری', swatch: '#334155' },
@@ -19,7 +19,7 @@ export function loadClinicTheme(): ClinicThemeId {
   } catch {
     // ignore
   }
-  return 'white';
+  return 'clinical';
 }
 
 export function saveClinicTheme(theme: ClinicThemeId): void {
