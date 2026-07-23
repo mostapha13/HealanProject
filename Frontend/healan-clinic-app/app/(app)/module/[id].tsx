@@ -47,7 +47,7 @@ type Row = NamedRow & { badge?: string };
 
 export default function ModuleScreen() {
   const navigation = useNavigation();
-  const { canAccessModule, canAccess, loading: accessLoading } = useAccess();
+  const { canAccessModule, canAccess } = useAccess();
   const params = useLocalSearchParams<{ id?: string; title?: string; path?: string }>();
   const moduleId = (params.id || 'generic') as ClinicModuleId;
   const title = String(params.title || 'بخش');
@@ -56,14 +56,6 @@ export default function ModuleScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({ title });
   }, [navigation, title]);
-
-  if (accessLoading) {
-    return (
-      <AppScreen>
-        <LoadingBlock />
-      </AppScreen>
-    );
-  }
 
   const allowed =
     (path ? canAccess(path) : false) ||

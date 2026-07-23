@@ -61,7 +61,8 @@ export default function HomeScreen() {
     useCallback(() => {
       setLoading(true);
       void load();
-      void reload();
+      // Silent refresh — must not toggle AccessContext.loading (that remounted tabs).
+      void reload(true);
     }, [load, reload])
   );
 
@@ -109,7 +110,7 @@ export default function HomeScreen() {
             onRefresh={() => {
               setLoading(true);
               void load();
-              void reload();
+              void reload(true);
             }}
             tintColor={colors.primaryDeep}
           />

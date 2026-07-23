@@ -27,9 +27,10 @@ function TabIcon({ name, focused }: { name: Ion; focused: boolean }) {
 
 export default function TabsLayout() {
   const { session, loading } = useAuth();
-  const { canAccess, loading: accessLoading } = useAccess();
+  const { canAccess } = useAccess();
 
-  if (loading || accessLoading) {
+  // Do NOT block the whole tab tree on AccessMenu fetch — that remounts screens and loops.
+  if (loading) {
     return (
       <AppScreen>
         <LoadingBlock />

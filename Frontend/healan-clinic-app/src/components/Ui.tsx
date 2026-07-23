@@ -57,7 +57,7 @@ export function BankHeader({
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v13-access-crud</Text>
+            <Text style={styles.buildMark}>build-v14-fix-loop</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>
