@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { config } from '../config';
@@ -5,7 +6,17 @@ import { clearSession, saveSession, type StoredSession } from './session';
 
 WebBrowser.maybeCompleteAuthSession();
 
+/**
+ * Must match IdentityServer client HealanClinicMobile redirect URIs exactly.
+ * Expo web uses the page origin (http://localhost:8082), native uses the app scheme.
+ */
 export function getRedirectUri(): string {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      return window.location.origin;
+    }
+    return 'http://localhost:8082';
+  }
   return AuthSession.makeRedirectUri({
     scheme: config.scheme,
     path: 'redirect',

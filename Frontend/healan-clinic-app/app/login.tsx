@@ -37,6 +37,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.headline}>اپ پذیرش کلینیک</Text>
           <Text style={styles.sub}>طراحی موبایل‌محور · منوها از سطح دسترسی شما</Text>
+          <Text style={styles.buildMark}>build-v9-home</Text>
         </SafeAreaView>
       </View>
 
@@ -99,6 +100,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors.inkSoft,
+    textAlign: 'right',
+  },
+  buildMark: {
+    marginTop: 10,
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: 'rgba(0,0,0,0.45)',
     textAlign: 'right',
   },
   body: { flex: 1, padding: spacing.lg, justifyContent: 'center' },

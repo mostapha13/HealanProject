@@ -27,9 +27,24 @@ export const HOME_LARGE_TILES: HomeTileDef[] = [
 
 export function filterAccessibleTiles(
   defs: HomeTileDef[],
-  accessible: ClinicModule[]
+  accessible: ClinicModule[],
+  grantedUrls: string[] = []
 ): HomeTileDef[] {
   const ids = new Set(accessible.map((m) => m.id));
   const paths = new Set(accessible.map((m) => m.path));
-  return defs.filter((d) => ids.has(d.id) || paths.has(d.path));
+  const urlHit = (path: string) => {
+    const normalized = path.replace(/\/+$/, '') || '/';
+    return grantedUrls.some((u) => {
+      const nu = (u || '').replace(/\/+$/, '') || '/';
+      return nu === normalized || nu.startsWith(`${normalized}/`);
+    });
+  };
+  const filtered = defs.filter(
+    (d) => ids.has(d.id) || paths.has(d.path) || urlHit(d.path)
+  );
+  // If AccessMenu did not load / is empty, still show curated home so UI is usable in preview.
+  if (!filtered.length && !accessible.length && !grantedUrls.length) {
+    return defs;
+  }
+  return filtered;
 }

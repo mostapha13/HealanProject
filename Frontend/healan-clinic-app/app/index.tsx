@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect, type Href } from 'expo-router';
 import { useAuth } from '../src/auth/AuthContext';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { colors } from '../src/theme';
@@ -12,7 +12,7 @@ export default function Index() {
       </View>
     );
   }
-  return <Redirect href={session ? '/(app)' : '/login'} />;
+  return <Redirect href={(session ? '/(app)/(tabs)' : '/login') as Href} />;
 }
 
 const styles = StyleSheet.create({

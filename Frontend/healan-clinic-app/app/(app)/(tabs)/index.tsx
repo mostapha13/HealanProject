@@ -30,18 +30,18 @@ import { colors, spacing } from '../../../src/theme';
 export default function HomeScreen() {
   const router = useRouter();
   const { getAccessToken } = useAuth();
-  const { home, loading: menuLoading, reload } = useAccess();
+  const { home, grantedUrls, loading: menuLoading, reload } = useAccess();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [slides, setSlides] = useState<PortalHeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
 
   const smallTiles = useMemo(
-    () => filterAccessibleTiles(HOME_SMALL_TILES, home.allServices),
-    [home.allServices]
+    () => filterAccessibleTiles(HOME_SMALL_TILES, home.allServices, grantedUrls),
+    [home.allServices, grantedUrls]
   );
   const largeTiles = useMemo(
-    () => filterAccessibleTiles(HOME_LARGE_TILES, home.allServices),
-    [home.allServices]
+    () => filterAccessibleTiles(HOME_LARGE_TILES, home.allServices, grantedUrls),
+    [home.allServices, grantedUrls]
   );
 
   const load = useCallback(async () => {

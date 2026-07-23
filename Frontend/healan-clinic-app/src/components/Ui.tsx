@@ -53,7 +53,10 @@ export function BankHeader({
           <HeaderIcon name="phone-portrait-outline" onPress={onScan} />
         </View>
         <View style={styles.brandRow}>
-          <Text style={styles.brandText}>{brand}</Text>
+          <View>
+            <Text style={styles.brandText}>{brand}</Text>
+            <Text style={styles.buildMark}>build-v9-home</Text>
+          </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>
           </View>
@@ -385,6 +388,14 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 18,
     color: colors.primaryInk,
+    textAlign: 'right',
+  },
+  buildMark: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: 'rgba(0,0,0,0.45)',
+    textAlign: 'right',
+    marginTop: 2,
   },
   bankActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   headerIconBtn: { padding: 8 },

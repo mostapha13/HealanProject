@@ -39,7 +39,14 @@ export async function fetchMyAccessMenus(getToken: TokenGetter): Promise<AccessM
   const res = await apiGet<unknown>(config.userManagerApiUrl, 'UserAccess/MyMenus', getToken, {
     AccessSystemId: config.accessSystemId,
   });
-  const list = (Array.isArray(res) ? res : []) as Record<string, unknown>[];
+  let list: Record<string, unknown>[] = [];
+  if (Array.isArray(res)) {
+    list = res as Record<string, unknown>[];
+  } else if (res && typeof res === 'object') {
+    const obj = res as Record<string, unknown>;
+    const nested = obj['items'] ?? obj['Items'] ?? obj['menus'] ?? obj['Menus'] ?? obj['data'];
+    if (Array.isArray(nested)) list = nested as Record<string, unknown>[];
+  }
   return list.map(normalizeMenuItem);
 }
 

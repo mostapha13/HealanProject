@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { useEffect } from 'react';
 import { I18nManager, Text, View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
@@ -29,7 +29,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (!session && !inAuth) {
       router.replace('/login');
     } else if (session && inAuth) {
-      router.replace('/(app)');
+      router.replace('/(app)/(tabs)' as Href);
     }
   }, [loading, session, segments, router]);
 
