@@ -17,6 +17,9 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
         builder.Property(x => x.Body).HasColumnType("nvarchar(max)").IsRequired();
         builder.Property(x => x.CoverImageUrl).HasMaxLength(1000);
         builder.Property(x => x.CoverImageFileId).HasColumnType("uniqueidentifier");
+        builder.Property(x => x.MetaTitle).HasMaxLength(300);
+        builder.Property(x => x.MetaDescription).HasMaxLength(1000);
+        builder.Property(x => x.OgImageUrl).HasMaxLength(1000);
         builder.Property(x => x.IsPublished).HasDefaultValue(true);
         builder.HasIndex(x => x.Slug).IsUnique();
         builder.HasIndex(x => new { x.IsPublished, x.PublishedAt });

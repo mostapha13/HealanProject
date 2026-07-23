@@ -46,6 +46,26 @@ public class PublishedPortalSiteDto
     public Dictionary<string, string> Settings { get; set; } = new();
     public List<PortalContentItemDto> ContentItems { get; set; } = new();
     public List<PatientReviewDto> Reviews { get; set; } = new();
+    public List<PortalSeoPageDto> SeoPages { get; set; } = new();
+}
+
+public class PortalSeoPageDto
+{
+    public long PortalSeoPageId { get; set; }
+    public string PageKey { get; set; } = string.Empty;
+    public string Path { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public string? Keywords { get; set; }
+    public string? OgTitle { get; set; }
+    public string? OgDescription { get; set; }
+    public string? OgImageUrl { get; set; }
+    public Guid? OgImageFileId { get; set; }
+    public string? CanonicalUrl { get; set; }
+    public string Robots { get; set; } = "index,follow";
+    public string? JsonLdExtra { get; set; }
+    public bool IsActive { get; set; } = true;
+    public int SortOrder { get; set; }
 }
 
 public class PortalMutationResult
@@ -61,6 +81,9 @@ public class BlogPostSummaryDto
     public string? Excerpt { get; set; }
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    public string? MetaTitle { get; set; }
+    public string? MetaDescription { get; set; }
+    public string? OgImageUrl { get; set; }
     public bool IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }
     public DateTime CreatedAt { get; set; }

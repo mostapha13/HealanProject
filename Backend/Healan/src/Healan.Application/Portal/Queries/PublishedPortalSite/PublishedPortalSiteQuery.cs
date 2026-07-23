@@ -82,11 +82,36 @@ public class PublishedPortalSiteQueryHandler : IRequestHandler<PublishedPortalSi
                 .ToListAsync(cancellationToken)
             : new List<PatientReviewDto>();
 
+        var seoPages = await _db.PortalSeoPages.AsNoTracking()
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Path)
+            .Select(x => new PortalSeoPageDto
+            {
+                PortalSeoPageId = x.PortalSeoPageId,
+                PageKey = x.PageKey,
+                Path = x.Path,
+                Title = x.Title,
+                Description = x.Description,
+                Keywords = x.Keywords,
+                OgTitle = x.OgTitle,
+                OgDescription = x.OgDescription,
+                OgImageUrl = x.OgImageUrl,
+                OgImageFileId = x.OgImageFileId,
+                CanonicalUrl = x.CanonicalUrl,
+                Robots = x.Robots,
+                JsonLdExtra = x.JsonLdExtra,
+                IsActive = x.IsActive,
+                SortOrder = x.SortOrder,
+            })
+            .ToListAsync(cancellationToken);
+
         return new PublishedPortalSiteDto
         {
             Settings = settingsMap,
             ContentItems = contentItems,
             Reviews = reviews,
+            SeoPages = seoPages,
         };
     }
 }

@@ -1,4 +1,5 @@
 using Healan.Application.Portal.Dtos;
+using Healan.Application.Portal;
 using Healan.Application.Common.Interfaces;
 using FileManager.GrpcClient.Interfaces;
 using MediatR;
@@ -27,6 +28,11 @@ public class PublishedBlogPostBySlugQueryHandler : IRequestHandler<PublishedBlog
         if (string.IsNullOrWhiteSpace(request.Slug))
             return null;
 
+        var settings = await _db.PortalSiteSettings.AsNoTracking()
+            .ToDictionaryAsync(x => x.SettingKey, x => x.SettingValue, StringComparer.OrdinalIgnoreCase, cancellationToken);
+        if (!PortalSectionVisibility.IsEnabled(settings, "blog"))
+            return null;
+
         var now = DateTime.UtcNow;
         var slug = request.Slug.Trim();
 
@@ -41,6 +47,9 @@ public class PublishedBlogPostBySlugQueryHandler : IRequestHandler<PublishedBlog
                 Body = x.Body,
                 CoverImageUrl = x.CoverImageUrl,
                 CoverImageFileId = x.CoverImageFileId,
+                MetaTitle = x.MetaTitle,
+                MetaDescription = x.MetaDescription,
+                OgImageUrl = x.OgImageUrl,
                 IsPublished = x.IsPublished,
                 PublishedAt = x.PublishedAt,
                 CreatedAt = x.CreatedAt,

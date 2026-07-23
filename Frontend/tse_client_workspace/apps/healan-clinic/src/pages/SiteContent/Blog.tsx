@@ -39,6 +39,9 @@ const emptyForm = (): BlogPostDetail => ({
   body: '',
   coverImageUrl: '',
   coverImageFileId: '',
+  metaTitle: '',
+  metaDescription: '',
+  ogImageUrl: '',
   isPublished: false,
   publishedAt: '',
   createdAt: '',
@@ -144,6 +147,9 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         body: form.body,
         coverImageUrl: coverFile?.link ?? form.coverImageUrl,
         coverImageFileId: coverFile?.fileId ?? undefined,
+        metaTitle: form.metaTitle?.trim() || undefined,
+        metaDescription: form.metaDescription?.trim() || undefined,
+        ogImageUrl: form.ogImageUrl?.trim() || undefined,
         isPublished: form.isPublished,
         publishedAt: form.publishedAt || undefined,
       });
@@ -173,6 +179,9 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         body: detail.body,
         coverImageUrl: detail.coverImageUrl,
         coverImageFileId: detail.coverImageFileId,
+        metaTitle: detail.metaTitle,
+        metaDescription: detail.metaDescription,
+        ogImageUrl: detail.ogImageUrl,
         isPublished: !detail.isPublished,
         publishedAt: detail.publishedAt,
       });
@@ -256,6 +265,34 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                   value={form.excerpt ?? ''}
                   onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
                   placeholder="خلاصه کوتاه برای لیست بلاگ"
+                />
+              </div>
+              <div className="healan-form-field">
+                <label>SEO Title (اختیاری)</label>
+                <input
+                  className="healan-input"
+                  value={form.metaTitle ?? ''}
+                  onChange={(e) => setForm({ ...form, metaTitle: e.target.value })}
+                  placeholder="اگر خالی باشد از عنوان مطلب استفاده می‌شود"
+                />
+              </div>
+              <div className="healan-form-field">
+                <label>SEO Description (اختیاری)</label>
+                <input
+                  className="healan-input"
+                  value={form.metaDescription ?? ''}
+                  onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+                  placeholder="اگر خالی باشد از خلاصه استفاده می‌شود"
+                />
+              </div>
+              <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>
+                <label>OG Image URL (اختیاری)</label>
+                <input
+                  className="healan-input"
+                  dir="ltr"
+                  value={form.ogImageUrl ?? ''}
+                  onChange={(e) => setForm({ ...form, ogImageUrl: e.target.value })}
+                  placeholder="خالی = تصویر شاخص"
                 />
               </div>
               <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>

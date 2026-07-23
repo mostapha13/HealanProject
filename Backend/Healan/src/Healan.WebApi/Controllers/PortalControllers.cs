@@ -11,6 +11,8 @@ using Healan.Application.Portal.Commands.PortalContentItemDelete;
 using Healan.Application.Portal.Commands.PortalContentItemRegister;
 using Healan.Application.Portal.Commands.PortalOtpRequest;
 using Healan.Application.Portal.Commands.PortalOtpVerify;
+using Healan.Application.Portal.Commands.PortalSeoPageDelete;
+using Healan.Application.Portal.Commands.PortalSeoPageRegister;
 using Healan.Application.Portal.Commands.PortalSiteSettingSave;
 using Healan.Application.Portal.Commands.RagChatLogDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeDelete;
@@ -21,6 +23,7 @@ using Healan.Application.Portal.Queries.BlogPostInfo;
 using Healan.Application.Portal.Queries.BlogPostList;
 using Healan.Application.Portal.Queries.PatientReviewList;
 using Healan.Application.Portal.Queries.PortalContentItemList;
+using Healan.Application.Portal.Queries.PortalSeoPageList;
 using Healan.Application.Portal.Queries.PortalSiteSettingList;
 using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
 using Healan.Application.Portal.Queries.PublishedBlogPostList;
@@ -75,6 +78,25 @@ public class PortalContentController : ApiControllerBase
 
     [HttpPost("[action]")]
     public Task<IActionResult> SettingSave([FromBody] PortalSiteSettingSaveCommand request) =>
+        SendCommand(request);
+}
+
+/// <summary>
+/// مدیریت SEO صفحات سایت عمومی
+/// </summary>
+[AccessForm(HealanAccessFormIds.PortalSeo)]
+public class PortalSeoController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> List() =>
+        Ok(await Mediator.Send(new PortalSeoPageListQuery()));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Register([FromBody] PortalSeoPageRegisterCommand request) =>
+        SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] PortalSeoPageDeleteCommand request) =>
         SendCommand(request);
 }
 

@@ -17,6 +17,9 @@ public class BlogPostRegisterCommand : IRequest<PortalMutationResult>
     public string Body { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    public string? MetaTitle { get; set; }
+    public string? MetaDescription { get; set; }
+    public string? OgImageUrl { get; set; }
     public bool IsPublished { get; set; } = true;
     public DateTime? PublishedAt { get; set; }
 }
@@ -65,6 +68,9 @@ public class BlogPostRegisterCommandHandler : IRequestHandler<BlogPostRegisterCo
         post.Excerpt = request.Excerpt?.Trim();
         post.Body = request.Body.Trim();
         post.CoverImageFileId = request.CoverImageFileId;
+        post.MetaTitle = request.MetaTitle?.Trim();
+        post.MetaDescription = request.MetaDescription?.Trim();
+        post.OgImageUrl = request.OgImageUrl?.Trim();
         post.IsPublished = request.IsPublished;
 
         if (request.IsPublished)

@@ -49,4 +49,6 @@ public static class HealanAccessFormIds
     public const int ClinicBloodPressure = 5037;
     /// <summary>کلینیک — تنظیمات متن/هیرو سایت عمومی</summary>
     public const int PortalSiteSettings = 5038;
+    /// <summary>کلینیک — مدیریت SEO صفحات سایت عمومی</summary>
+    public const int PortalSeo = 5039;
 }

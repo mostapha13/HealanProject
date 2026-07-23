@@ -20,6 +20,7 @@ services:
       - api-gateway
       - healan-clinic
       - healan-portal
+      - healan-www
       - healan-webapi
       - identity-usermanager
       - filemanager-webui
@@ -352,6 +353,23 @@ services:
     container_name: healan-portal
     expose:
       - "80"
+    depends_on:
+      - healan-webapi
+      - filemanager-webui
+
+  # Public marketing site (landing + blog) — SSR/ISR for SEO
+  healan-www:
+    restart: unless-stopped
+    build:
+      context: ./Frontend/healan-www
+      dockerfile: Dockerfile
+    container_name: healan-www
+    expose:
+      - "3000"
+    environment:
+      HEALAN_API_INTERNAL_URL: http://healan-webapi:8080/Healan/api/v1/
+      NEXT_PUBLIC_SITE_URL: https://www.drshahrooei.ir
+      NEXT_PUBLIC_HEALAN_API_URL: /Healan/api/v1/
     depends_on:
       - healan-webapi
       - filemanager-webui

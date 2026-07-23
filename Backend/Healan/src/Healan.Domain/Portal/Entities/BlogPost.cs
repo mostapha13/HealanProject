@@ -11,6 +11,9 @@ public class BlogPost : AuditableEntity
     public string Body { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    public string? MetaTitle { get; set; }
+    public string? MetaDescription { get; set; }
+    public string? OgImageUrl { get; set; }
     public bool IsPublished { get; set; } = true;
     public DateTime? PublishedAt { get; set; }
 }

@@ -29,6 +29,7 @@ import type {
   PatientReviewItem,
   BlogPostSummary,
   BlogPostDetail,
+  PortalSeoPage,
   RagKnowledgeItem,
   RagSetting,
   RagChatLogItem,
@@ -348,6 +349,9 @@ export const healanApi = {
     blogDelete: (blogPostId: number) => post('BlogPost/Delete', { blogPostId }),
     blogDeletedList: () => get<MasterDataDeletedItem[]>('BlogPost/DeletedList'),
     blogRestore: (id: number) => post('BlogPost/Restore', { id }),
+    seoList: () => get<PortalSeoPage[]>('PortalSeo/List'),
+    seoRegister: (data: Record<string, unknown>) => post('PortalSeo/Register', data),
+    seoDelete: (portalSeoPageId: number) => post('PortalSeo/Delete', { portalSeoPageId }),
     ragList: (params?: { filterText?: string; topic?: string; isActive?: boolean; pageNumber?: number; pageSize?: number }) =>
       get<PaginatedResponse<RagKnowledgeItem>>('RagKnowledge/List', pagedParams(params)),
     ragInfo: (ragKnowledgeItemId: number) =>

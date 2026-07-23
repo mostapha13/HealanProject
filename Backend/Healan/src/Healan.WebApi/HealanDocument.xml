@@ -251,6 +251,11 @@
             مدیریت محتوای سایت مطب (CMS)
             </summary>
         </member>
+        <member name="T:Healan.WebApi.Controllers.PortalSeoController">
+            <summary>
+            مدیریت SEO صفحات سایت عمومی
+            </summary>
+        </member>
         <member name="T:Healan.WebApi.Controllers.BlogPostController">
             <summary>
             مدیریت بلاگ سایت مطب

@@ -1,4 +1,5 @@
 using Healan.Application.Portal.Dtos;
+using Healan.Application.Portal;
 using Healan.Application.Common.Interfaces;
 using FileManager.GrpcClient.Interfaces;
 using MediatR;
@@ -28,6 +29,17 @@ public class PublishedBlogPostListQueryHandler : IRequestHandler<PublishedBlogPo
 
     public async Task<PaginatedList<BlogPostSummaryDto>> Handle(PublishedBlogPostListQuery request, CancellationToken cancellationToken)
     {
+        var settings = await _db.PortalSiteSettings.AsNoTracking()
+            .ToDictionaryAsync(x => x.SettingKey, x => x.SettingValue, StringComparer.OrdinalIgnoreCase, cancellationToken);
+        if (!PortalSectionVisibility.IsEnabled(settings, "blog"))
+        {
+            return new PaginatedList<BlogPostSummaryDto>(
+                new List<BlogPostSummaryDto>(),
+                0,
+                request.PageNumber,
+                request.PageSize);
+        }
+
         var now = DateTime.UtcNow;
         var query = _db.BlogPosts.AsNoTracking()
             .Where(x => x.IsPublished && (x.PublishedAt == null || x.PublishedAt <= now));
@@ -51,6 +63,9 @@ public class PublishedBlogPostListQueryHandler : IRequestHandler<PublishedBlogPo
                 Excerpt = x.Excerpt,
                 CoverImageUrl = x.CoverImageUrl,
                 CoverImageFileId = x.CoverImageFileId,
+                MetaTitle = x.MetaTitle,
+                MetaDescription = x.MetaDescription,
+                OgImageUrl = x.OgImageUrl,
                 IsPublished = x.IsPublished,
                 PublishedAt = x.PublishedAt,
                 CreatedAt = x.CreatedAt,

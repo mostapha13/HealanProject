@@ -455,6 +455,9 @@ export interface BlogPostSummary {
   excerpt?: string;
   coverImageUrl?: string;
   coverImageFileId?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  ogImageUrl?: string;
   isPublished: boolean;
   publishedAt?: string;
   createdAt?: string;
@@ -462,6 +465,24 @@ export interface BlogPostSummary {
 
 export interface BlogPostDetail extends BlogPostSummary {
   body: string;
+}
+
+export interface PortalSeoPage {
+  portalSeoPageId: number;
+  pageKey: string;
+  path: string;
+  title: string;
+  description?: string;
+  keywords?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageUrl?: string;
+  ogImageFileId?: string;
+  canonicalUrl?: string;
+  robots?: string;
+  jsonLdExtra?: string;
+  isActive: boolean;
+  sortOrder: number;
 }
 
 export interface RagKnowledgeItem {
