@@ -1,18 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import {
-  fetchMyAccessMenus,
-  flattenMenuUrls,
-  resolveMvpTabs,
-  type AccessMenuTreeItem,
-  type MvpTab,
-} from '../api/access';
+import { fetchMyAccessMenus, type AccessMenuTreeItem } from '../api/access';
+import { buildHomeSections, type HomeSection } from '../navigation/catalog';
 
 type AccessContextValue = {
   loading: boolean;
   menus: AccessMenuTreeItem[];
-  urls: string[];
-  tabs: MvpTab[];
+  sections: HomeSection[];
   reload: () => Promise<void>;
 };
 
@@ -30,8 +24,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     try {
-      const tree = await fetchMyAccessMenus(getAccessToken);
-      setMenus(tree);
+      setMenus(await fetchMyAccessMenus(getAccessToken));
     } catch (err) {
       console.warn('Failed to load access menus', err);
       setMenus([]);
@@ -44,12 +37,11 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     void reload();
   }, [reload]);
 
-  const urls = useMemo(() => flattenMenuUrls(menus), [menus]);
-  const tabs = useMemo(() => resolveMvpTabs(urls), [urls]);
+  const sections = useMemo(() => buildHomeSections(menus), [menus]);
 
   const value = useMemo(
-    () => ({ loading, menus, urls, tabs, reload }),
-    [loading, menus, urls, tabs, reload]
+    () => ({ loading, menus, sections, reload }),
+    [loading, menus, sections, reload]
   );
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;

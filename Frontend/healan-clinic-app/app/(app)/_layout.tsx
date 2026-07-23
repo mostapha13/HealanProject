@@ -1,82 +1,35 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Tabs, Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/auth/AuthContext';
-import { useAccess } from '../../src/access/AccessContext';
+import { LoadingBlock, AppScreen } from '../../src/components/Ui';
 import { colors } from '../../src/theme';
-import { LoadingBlock } from '../../src/components/Ui';
-
-function HeaderLogout() {
-  const { signOut } = useAuth();
-  return (
-    <Pressable onPress={() => void signOut()} style={styles.logout}>
-      <Text style={styles.logoutText}>خروج</Text>
-    </Pressable>
-  );
-}
 
 export default function AppLayout() {
-  const { session, loading: authLoading } = useAuth();
-  const { tabs, loading: accessLoading } = useAccess();
+  const { session, loading } = useAuth();
 
-  if (authLoading) return <LoadingBlock />;
-  if (!session) return <Redirect href="/login" />;
-  if (accessLoading) {
+  if (loading) {
     return (
-      <View style={styles.boot}>
-        <LoadingBlock label="در حال بارگذاری منو..." />
-      </View>
+      <AppScreen>
+        <LoadingBlock />
+      </AppScreen>
     );
   }
-
-  const enabled = new Set(tabs.map((t) => t.key));
+  if (!session) return <Redirect href="/login" />;
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: colors.bg },
+        headerTintColor: colors.primary,
+        headerTitleStyle: { fontWeight: '700', color: colors.ink },
         headerTitleAlign: 'center',
-        headerRight: () => <HeaderLogout />,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
-        headerStyle: { backgroundColor: colors.card },
-        headerTitleStyle: { color: colors.text, fontWeight: '700' },
+        contentStyle: { backgroundColor: colors.bg },
+        headerBackTitle: 'بازگشت',
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'داشبورد',
-          href: enabled.has('index') ? undefined : null,
-        }}
-      />
-      <Tabs.Screen
-        name="queue"
-        options={{
-          title: 'صف انتظار',
-          href: enabled.has('queue') ? undefined : null,
-        }}
-      />
-      <Tabs.Screen
-        name="appointments"
-        options={{
-          title: 'نوبت‌ها',
-          href: enabled.has('appointments') ? undefined : null,
-        }}
-      />
-      <Tabs.Screen
-        name="patients"
-        options={{
-          title: 'بیماران',
-          href: enabled.has('patients') ? undefined : null,
-        }}
-      />
-    </Tabs>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="module/[id]" options={{ title: 'بخش' }} />
+    </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  boot: { flex: 1, backgroundColor: colors.bg },
-  logout: { paddingHorizontal: 14, paddingVertical: 6 },
-  logoutText: { color: colors.primary, fontWeight: '600' },
-});
