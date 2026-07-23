@@ -10,9 +10,9 @@ import {
   type TextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts, radius, spacing } from '../theme';
+import type { IconName } from '../navigation/catalog';
 
 export function AppScreen({
   children,
@@ -26,26 +26,126 @@ export function AppScreen({
   return <View style={[styles.screen, padded && styles.padded, style]}>{children}</View>;
 }
 
-export function HeroHeader({
+/** Lime bank-style top bar */
+export function BankHeader({
+  brand = 'هیلن کلینیک',
+  onBell,
+  onSupport,
+  onScan,
+}: {
+  brand?: string;
+  onBell?: () => void;
+  onSupport?: () => void;
+  onScan?: () => void;
+}) {
+  return (
+    <View style={styles.bankHeader}>
+      <View style={styles.bankHeaderInner}>
+        <View style={styles.bankActions}>
+          <HeaderIcon name="notifications-outline" onPress={onBell} />
+          <HeaderIcon name="headset-outline" onPress={onSupport} />
+          <HeaderIcon name="qr-code-outline" onPress={onScan} />
+        </View>
+        <View style={styles.brandRow}>
+          <Text style={styles.brandText}>{brand}</Text>
+          <View style={styles.logoMark}>
+            <Text style={styles.logoLetter}>H</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function HeaderIcon({ name, onPress }: { name: IconName; onPress?: () => void }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={8} style={styles.headerIconBtn}>
+      <Ionicons name={name} size={22} color={colors.primaryInk} />
+    </Pressable>
+  );
+}
+
+/** Promo / status banner under lime header */
+export function PromoBanner({
   title,
   subtitle,
-  right,
+  cta,
+  onPress,
 }: {
   title: string;
   subtitle?: string;
-  right?: React.ReactNode;
+  cta?: string;
+  onPress?: () => void;
 }) {
   return (
-    <LinearGradient colors={[colors.primaryDeep, colors.primary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-      <View style={styles.heroRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.heroEyebrow}>Healan Clinic</Text>
-          <Text style={styles.heroTitle}>{title}</Text>
-          {subtitle ? <Text style={styles.heroSub}>{subtitle}</Text> : null}
-        </View>
-        {right}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.promo, pressed && { opacity: 0.94 }]}
+    >
+      <View style={styles.promoCopy}>
+        <Text style={styles.promoTitle}>{title}</Text>
+        {subtitle ? <Text style={styles.promoSub}>{subtitle}</Text> : null}
+        {cta ? (
+          <View style={styles.promoCta}>
+            <Text style={styles.promoCtaText}>{cta}</Text>
+            <Ionicons name="chevron-back" size={14} color={colors.primaryInk} />
+          </View>
+        ) : null}
       </View>
-    </LinearGradient>
+      <View style={styles.promoArt}>
+        <Ionicons name="medkit" size={42} color={colors.primaryDeep} />
+      </View>
+    </Pressable>
+  );
+}
+
+/** 4-col quick action tile */
+export function IconGridItem({
+  title,
+  icon,
+  onPress,
+}: {
+  title: string;
+  icon: IconName;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.iconCell, pressed && { opacity: 0.85 }]}>
+      <View style={styles.iconBox}>
+        <Ionicons name={icon} size={26} color={colors.ink} />
+      </View>
+      <Text style={styles.iconLabel} numberOfLines={2}>
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Large 2-col feature card */
+export function FeatureCard({
+  title,
+  icon,
+  onPress,
+}: {
+  title: string;
+  icon: IconName;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.featureCard, pressed && styles.cardPressed]}
+    >
+      <Ionicons name="chevron-back" size={18} color={colors.muted} style={styles.featureChevron} />
+      <View style={styles.featureBody}>
+        <View style={styles.featureIconWrap}>
+          <Ionicons name={icon} size={22} color={colors.ink} />
+        </View>
+        <Text style={styles.featureTitle} numberOfLines={2}>
+          {title}
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -53,104 +153,22 @@ export function SurfaceCard({
   children,
   onPress,
   style,
-  tone = 'default',
 }: {
   children: React.ReactNode;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
-  tone?: 'default' | 'primary' | 'accent' | 'success' | 'warning';
 }) {
-  const toneStyle =
-    tone === 'primary'
-      ? styles.cardPrimary
-      : tone === 'accent'
-        ? styles.cardAccent
-        : tone === 'success'
-          ? styles.cardSuccess
-          : tone === 'warning'
-            ? styles.cardWarning
-            : null;
-
   if (onPress) {
     return (
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [styles.card, toneStyle, pressed && styles.cardPressed, style]}
+        style={({ pressed }) => [styles.card, pressed && styles.cardPressed, style]}
       >
         {children}
       </Pressable>
     );
   }
-  return <View style={[styles.card, toneStyle, style]}>{children}</View>;
-}
-
-export function StatTile({
-  label,
-  value,
-  icon,
-  tone = 'primary',
-}: {
-  label: string;
-  value: string | number;
-  icon: keyof typeof Ionicons.glyphMap;
-  tone?: 'primary' | 'accent' | 'success' | 'warning';
-}) {
-  const soft =
-    tone === 'accent'
-      ? colors.accentSoft
-      : tone === 'success'
-        ? colors.successSoft
-        : tone === 'warning'
-          ? colors.warningSoft
-          : colors.primarySoft;
-  const ink =
-    tone === 'accent'
-      ? colors.accent
-      : tone === 'success'
-        ? colors.success
-        : tone === 'warning'
-          ? colors.warning
-          : colors.primary;
-  return (
-    <SurfaceCard style={styles.statTile}>
-      <View style={[styles.iconBubble, { backgroundColor: soft }]}>
-        <Ionicons name={icon} size={18} color={ink} />
-      </View>
-      <Text style={[styles.statValue, { color: ink }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </SurfaceCard>
-  );
-}
-
-export function MenuTile({
-  title,
-  subtitle,
-  icon,
-  onPress,
-}: {
-  title: string;
-  subtitle?: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  onPress: () => void;
-}) {
-  return (
-    <SurfaceCard onPress={onPress} style={styles.menuTile}>
-      <View style={styles.menuIconWrap}>
-        <Ionicons name={icon} size={22} color={colors.primary} />
-      </View>
-      <Text style={styles.menuTitle} numberOfLines={2}>
-        {title}
-      </Text>
-      {subtitle ? (
-        <Text style={styles.menuSub} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      ) : null}
-      <View style={styles.menuChevron}>
-        <Ionicons name="chevron-back" size={16} color={colors.muted} />
-      </View>
-    </SurfaceCard>
-  );
+  return <View style={[styles.card, style]}>{children}</View>;
 }
 
 export function ListCard({
@@ -206,7 +224,7 @@ export function PrimaryButton({
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IconName;
 }) {
   return (
     <Pressable
@@ -218,25 +236,32 @@ export function PrimaryButton({
         pressed && !disabled && styles.buttonPressed,
       ]}
     >
-      {icon ? <Ionicons name={icon} size={18} color={colors.white} style={{ marginLeft: 8 }} /> : null}
+      {icon ? <Ionicons name={icon} size={18} color={colors.primaryInk} style={{ marginLeft: 8 }} /> : null}
       <Text style={styles.buttonLabel}>{label}</Text>
     </Pressable>
   );
 }
 
-export function GhostButton({ label, onPress }: { label: string; onPress: () => void }) {
+export function GhostButton({
+  label,
+  onPress,
+  dark,
+}: {
+  label: string;
+  onPress: () => void;
+  dark?: boolean;
+}) {
   return (
-    <Pressable onPress={onPress} style={styles.ghostBtn}>
-      <Text style={styles.ghostLabel}>{label}</Text>
+    <Pressable onPress={onPress} style={[styles.ghostBtn, dark && styles.ghostBtnDark]}>
+      <Text style={[styles.ghostLabel, dark && styles.ghostLabelDark]}>{label}</Text>
     </Pressable>
   );
 }
 
-export function SectionTitle({ title, action }: { title: string; action?: React.ReactNode }) {
+export function SectionTitle({ title }: { title: string }) {
   return (
     <View style={styles.sectionRow}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      {action}
     </View>
   );
 }
@@ -244,19 +269,13 @@ export function SectionTitle({ title, action }: { title: string; action?: React.
 export function LoadingBlock({ label = 'در حال بارگذاری...' }: { label?: string }) {
   return (
     <View style={styles.centerBlock}>
-      <ActivityIndicator color={colors.primary} />
+      <ActivityIndicator color={colors.primaryDeep} />
       <Text style={styles.muted}>{label}</Text>
     </View>
   );
 }
 
-export function EmptyBlock({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+export function EmptyBlock({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <SurfaceCard style={styles.centerBlock}>
       <Ionicons name="file-tray-outline" size={28} color={colors.muted} />
@@ -273,78 +292,155 @@ export function Muted({ children }: { children: React.ReactNode }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   padded: { paddingHorizontal: spacing.md },
-  hero: {
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
+  bankHeader: {
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    paddingBottom: spacing.md,
+  },
+  bankHeaderInner: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
-    borderBottomLeftRadius: radius.xl,
-    borderBottomRightRadius: radius.xl,
+    paddingTop: spacing.sm,
   },
-  heroRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: spacing.md },
-  heroEyebrow: { fontSize: 12, color: 'rgba(255,255,255,0.75)', textAlign: 'right', marginBottom: 4 },
-  heroTitle: {
-    fontSize: 30,
+  brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
+  logoMark: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.primaryInk,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoLetter: { color: colors.primary, fontFamily: fonts.bold, fontSize: 18 },
+  brandText: {
     fontFamily: fonts.bold,
-    fontWeight: '700',
-    color: colors.white,
-    textAlign: 'right',
+    fontSize: 18,
+    color: colors.primaryInk,
   },
-  heroSub: {
-    fontSize: 15,
-    fontFamily: fonts.regular,
-    color: 'rgba(255,255,255,0.85)',
-    textAlign: 'right',
-    marginTop: 6,
-  },
-  card: {
-    backgroundColor: colors.bgElevated,
-    borderRadius: radius.lg,
+  bankActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerIconBtn: { padding: 8 },
+  promo: {
+    marginTop: -spacing.sm,
+    marginHorizontal: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
     padding: spacing.md,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing.md,
     borderWidth: 1,
     borderColor: colors.line,
     shadowColor: colors.cardShadow,
     shadowOpacity: 1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  cardPressed: { opacity: 0.92, transform: [{ scale: 0.985 }] },
-  cardPrimary: { backgroundColor: colors.primarySoft, borderColor: '#C9E4E4' },
-  cardAccent: { backgroundColor: colors.accentSoft, borderColor: '#F3D5C5' },
-  cardSuccess: { backgroundColor: colors.successSoft, borderColor: '#C8E9DB' },
-  cardWarning: { backgroundColor: colors.warningSoft, borderColor: '#F3E2B8' },
-  statTile: { width: '47%', minHeight: 110 },
-  iconBubble: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: spacing.sm,
-  },
-  statValue: { fontSize: 22, fontFamily: fonts.bold, fontWeight: '700', textAlign: 'right' },
-  statLabel: { fontSize: 12, fontFamily: fonts.regular, color: colors.muted, textAlign: 'right', marginTop: 2 },
-  menuTile: { width: '47%', minHeight: 128, justify: 'relative' },
-  menuIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: spacing.sm,
-  },
-  menuTitle: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    fontWeight: '600',
+  promoCopy: { flex: 1 },
+  promoTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
     color: colors.ink,
     textAlign: 'right',
   },
-  menuSub: { fontSize: 12, fontFamily: fonts.regular, color: colors.muted, textAlign: 'right', marginTop: 4 },
-  menuChevron: { position: 'absolute', left: spacing.md, bottom: spacing.md },
+  promoSub: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.muted,
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  promoCta: {
+    marginTop: 10,
+    alignSelf: 'flex-end',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+  },
+  promoCtaText: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.primaryInk },
+  promoArt: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCell: {
+    width: '25%',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 4,
+  },
+  iconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    shadowColor: colors.cardShadow,
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  iconLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.ink,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  featureCard: {
+    width: '48%',
+    minHeight: 112,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.line,
+    padding: spacing.md,
+    shadowColor: colors.cardShadow,
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
+  },
+  featureBody: { flex: 1, justifyContent: 'space-between', alignItems: 'flex-end' },
+  featureIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  featureTitle: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    color: colors.ink,
+    textAlign: 'right',
+  },
+  featureChevron: { position: 'absolute', left: spacing.md, top: '42%' },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  cardPressed: { opacity: 0.92, transform: [{ scale: 0.985 }] },
   listCard: { marginBottom: spacing.sm },
   listCardTop: {
     flexDirection: 'row-reverse',
@@ -354,9 +450,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   listTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: fonts.bold,
-    fontWeight: '700',
     color: colors.ink,
     textAlign: 'right',
     flex: 1,
@@ -368,7 +463,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
   },
-  badgeText: { fontSize: 12, color: colors.primary, fontWeight: '600' },
+  badgeText: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.primaryInk },
   searchWrap: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -380,7 +475,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: spacing.md,
   },
-  searchInput: { flex: 1, paddingVertical: 12, fontSize: 15, color: colors.ink },
+  searchInput: { flex: 1, paddingVertical: 12, fontSize: 15, color: colors.ink, fontFamily: fonts.regular },
   button: {
     backgroundColor: colors.primary,
     borderRadius: radius.md,
@@ -392,37 +487,29 @@ const styles = StyleSheet.create({
   },
   buttonPressed: { backgroundColor: colors.primaryDeep },
   buttonDisabled: { opacity: 0.5 },
-  buttonLabel: { color: colors.white, fontSize: 16, fontFamily: fonts.bold, fontWeight: '700' },
+  buttonLabel: { color: colors.primaryInk, fontSize: 16, fontFamily: fonts.bold },
   ghostBtn: {
     borderRadius: radius.md,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(0,0,0,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.35)',
   },
-  ghostLabel: { color: colors.white, fontWeight: '600', textAlign: 'center' },
+  ghostBtnDark: { borderColor: colors.line, backgroundColor: colors.white },
+  ghostLabel: { color: colors.primaryInk, fontFamily: fonts.semiBold, textAlign: 'center' },
+  ghostLabelDark: { color: colors.ink },
   sectionRow: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontFamily: fonts.bold,
-    fontWeight: '700',
     color: colors.ink,
     textAlign: 'right',
   },
   centerBlock: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  emptyTitle: {
-    fontSize: 17,
-    fontFamily: fonts.bold,
-    fontWeight: '700',
-    color: colors.ink,
-    textAlign: 'center',
-  },
+  emptyTitle: { fontSize: 16, fontFamily: fonts.bold, color: colors.ink, textAlign: 'center' },
   muted: { fontSize: 12, fontFamily: fonts.regular, color: colors.muted, textAlign: 'center' },
 } as any);

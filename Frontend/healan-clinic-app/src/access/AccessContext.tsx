@@ -1,12 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { fetchMyAccessMenus, type AccessMenuTreeItem } from '../api/access';
-import { buildHomeSections, type HomeSection } from '../navigation/catalog';
+import {
+  buildHomeSections,
+  buildMobileHomeLayout,
+  type HomeSection,
+  type MobileHomeLayout,
+} from '../navigation/catalog';
 
 type AccessContextValue = {
   loading: boolean;
   menus: AccessMenuTreeItem[];
   sections: HomeSection[];
+  home: MobileHomeLayout;
   reload: () => Promise<void>;
 };
 
@@ -38,10 +44,11 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   }, [reload]);
 
   const sections = useMemo(() => buildHomeSections(menus), [menus]);
+  const home = useMemo(() => buildMobileHomeLayout(menus), [menus]);
 
   const value = useMemo(
-    () => ({ loading, menus, sections, reload }),
-    [loading, menus, sections, reload]
+    () => ({ loading, menus, sections, home, reload }),
+    [loading, menus, sections, home, reload]
   );
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;

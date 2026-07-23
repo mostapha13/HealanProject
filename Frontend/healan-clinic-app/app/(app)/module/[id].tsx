@@ -308,7 +308,7 @@ export default function ModuleScreen() {
       ) : null}
 
       {info ? (
-        <SurfaceCard style={styles.infoCard} tone="primary">
+        <SurfaceCard style={styles.infoCard}>
           <Text style={styles.infoTitle}>راهنما</Text>
           <Text style={styles.infoBody}>{info}</Text>
         </SurfaceCard>

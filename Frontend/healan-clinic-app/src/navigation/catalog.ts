@@ -209,3 +209,90 @@ export function buildHomeSections(tree: AccessMenuTreeItem[]): HomeSection[] {
 export function iconForModule(id: ClinicModuleId): IconName {
   return PATH_MAP.find((p) => p.id === id)?.icon ?? 'ellipse-outline';
 }
+
+/** Flatten all leaf modules from AccessMenu (deduped by path). */
+export function flattenModules(tree: AccessMenuTreeItem[]): ClinicModule[] {
+  const sections = buildHomeSections(tree);
+  const seen = new Set<string>();
+  const all: ClinicModule[] = [];
+  for (const section of sections) {
+    for (const item of section.items) {
+      if (item.id === 'dashboard') continue;
+      if (seen.has(item.path)) continue;
+      seen.add(item.path);
+      all.push(item);
+    }
+  }
+  return all;
+}
+
+/** Priority for home icon grid + feature cards (clinic ops first). */
+const HOME_PRIORITY: ClinicModuleId[] = [
+  'queue',
+  'appointments',
+  'patients',
+  'doctors',
+  'prescriptions',
+  'blood-pressure',
+  'booking-reservations',
+  'booking-schedules',
+  'sms',
+  'reports',
+  'signature',
+  'workflow',
+  'services',
+  'fees',
+  'insurance',
+  'companies',
+  'users',
+  'site-content',
+  'site-blog',
+  'site-reviews',
+  'assistant',
+  'site-rag',
+];
+
+function sortByPriority(items: ClinicModule[]): ClinicModule[] {
+  return [...items].sort((a, b) => {
+    const ia = HOME_PRIORITY.indexOf(a.id);
+    const ib = HOME_PRIORITY.indexOf(b.id);
+    const sa = ia === -1 ? 999 : ia;
+    const sb = ib === -1 ? 999 : ib;
+    return sa - sb;
+  });
+}
+
+export type MobileHomeLayout = {
+  /** 4-column quick actions (capped) */
+  quickActions: ClinicModule[];
+  /** 2-column feature cards (capped) */
+  featureCards: ClinicModule[];
+  /** Remaining menus for «خدمات» tab */
+  allServices: ClinicModule[];
+};
+
+/**
+ * Bank-app style home layout from AccessMenu API.
+ * Caps home density; full list stays available in services tab.
+ */
+export function buildMobileHomeLayout(tree: AccessMenuTreeItem[]): MobileHomeLayout {
+  const all = sortByPriority(flattenModules(tree));
+  const quickActions = all.slice(0, 8);
+  const featureIds = new Set(quickActions.slice(0, 4).map((x) => x.path));
+  // Prefer distinct high-priority cards not already filling the first row of icons conceptually —
+  // use next priority items for larger cards (ops focus).
+  const featurePool = all.filter((m) =>
+    ['queue', 'appointments', 'prescriptions', 'signature', 'patients', 'reports', 'booking-reservations', 'workflow'].includes(
+      m.id
+    )
+  );
+  const featureCards = (featurePool.length ? featurePool : all).slice(0, 4);
+  // If still empty, fall back
+  const cards = featureCards.length ? featureCards : all.slice(0, 4);
+  void featureIds;
+  return {
+    quickActions,
+    featureCards: cards,
+    allServices: all,
+  };
+}

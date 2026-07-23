@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../src/auth/AuthContext';
 import { getRedirectUri } from '../src/auth/oidc';
 import { PrimaryButton, SurfaceCard } from '../src/components/Ui';
-import { colors, radius, spacing, typography } from '../src/theme';
+import { colors, fonts, radius, spacing } from '../src/theme';
 import { config } from '../src/config';
 
 export default function LoginScreen() {
@@ -27,22 +26,27 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient colors={['#073F3F', colors.primary, '#1F8A8A']} style={styles.gradient}>
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.hero}>
-          <View style={styles.logoMark}>
-            <Ionicons name="heart" size={28} color={colors.white} />
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <SafeAreaView>
+          <View style={styles.brandRow}>
+            <Text style={styles.brand}>هیلن کلینیک</Text>
+            <View style={styles.logo}>
+              <Text style={styles.logoLetter}>H</Text>
+            </View>
           </View>
-          <Text style={styles.brand}>Healan</Text>
-          <Text style={styles.headline}>اپ حرفه‌ای پذیرش کلینیک</Text>
-          <Text style={styles.sub}>
-            طراحی موبایل‌محور، کارت‌محور و هم‌تراز با دسترسی‌های سامانه کلینیک
-          </Text>
-        </View>
+          <Text style={styles.headline}>اپ پذیرش کلینیک</Text>
+          <Text style={styles.sub}>طراحی موبایل‌محور · منوها از سطح دسترسی شما</Text>
+        </SafeAreaView>
+      </View>
 
+      <View style={styles.body}>
         <SurfaceCard style={styles.card}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="shield-checkmark-outline" size={28} color={colors.ink} />
+          </View>
           <Text style={styles.cardTitle}>ورود پرسنل</Text>
-          <Text style={styles.cardSub}>با همان حساب Identity کلینیک وارد شوید</Text>
+          <Text style={styles.cardSub}>با همان حساب Identity کلینیک</Text>
           <PrimaryButton
             label={busy || loading ? 'در حال ورود...' : 'ورود امن'}
             icon="log-in-outline"
@@ -50,66 +54,81 @@ export default function LoginScreen() {
             disabled={busy || loading}
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <View style={styles.metaBox}>
-            <Text style={styles.meta}>Identity: {config.identityUrl}</Text>
-            <Text style={styles.meta}>Redirect: {getRedirectUri()}</Text>
-          </View>
+          <Text style={styles.meta}>Redirect: {getRedirectUri()}</Text>
+          <Text style={styles.meta}>{config.identityUrl}</Text>
         </SurfaceCard>
-      </SafeAreaView>
-    </LinearGradient>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
-  safe: {
-    flex: 1,
-    padding: spacing.lg,
-    justifyContent: 'space-between',
+  root: { flex: 1, backgroundColor: colors.bg },
+  header: {
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
   },
-  hero: { marginTop: spacing.xl },
-  logoMark: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+  brandRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: spacing.lg,
+  },
+  logo: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: colors.primaryInk,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: spacing.md,
   },
-  brand: {
-    ...typography.hero,
-    color: colors.white,
-    textAlign: 'right',
-  },
+  logoLetter: { color: colors.primary, fontFamily: fonts.bold, fontSize: 20 },
+  brand: { fontFamily: fonts.bold, fontSize: 22, color: colors.primaryInk },
   headline: {
-    ...typography.title,
-    color: colors.white,
+    marginTop: spacing.md,
+    fontFamily: fonts.bold,
+    fontSize: 26,
+    color: colors.primaryInk,
     textAlign: 'right',
-    marginTop: spacing.sm,
   },
   sub: {
-    ...typography.body,
-    color: 'rgba(255,255,255,0.85)',
+    marginTop: 8,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.inkSoft,
     textAlign: 'right',
-    marginTop: spacing.sm,
   },
-  card: { marginBottom: spacing.lg },
-  cardTitle: { ...typography.section, color: colors.ink, textAlign: 'right' },
+  body: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
+  card: { borderRadius: radius.xl },
+  cardIcon: {
+    alignSelf: 'flex-end',
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  cardTitle: { fontFamily: fonts.bold, fontSize: 18, color: colors.ink, textAlign: 'right' },
   cardSub: {
-    ...typography.caption,
+    fontFamily: fonts.regular,
+    fontSize: 13,
     color: colors.muted,
     textAlign: 'right',
     marginBottom: spacing.md,
     marginTop: 4,
   },
-  error: { color: colors.danger, textAlign: 'right', marginTop: spacing.sm },
-  metaBox: { marginTop: spacing.md, gap: 4 },
+  error: { color: colors.danger, textAlign: 'right', marginTop: spacing.sm, fontFamily: fonts.regular },
   meta: {
+    marginTop: 8,
     fontSize: 10,
     color: colors.muted,
     textAlign: 'left',
     writingDirection: 'ltr',
+    fontFamily: fonts.regular,
   },
 });

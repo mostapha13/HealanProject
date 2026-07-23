@@ -36,7 +36,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <View style={styles.boot}>
-        <ActivityIndicator color={colors.primary} size="large" />
+        <ActivityIndicator color={colors.primaryDeep} size="large" />
       </View>
     );
   }
@@ -63,7 +63,7 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return (
       <View style={styles.boot}>
-        <ActivityIndicator color={colors.primary} size="large" />
+        <ActivityIndicator color={colors.primaryDeep} size="large" />
       </View>
     );
   }
