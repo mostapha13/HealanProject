@@ -9,7 +9,7 @@ import {
   Vazirmatn_600SemiBold,
   Vazirmatn_700Bold,
 } from '@expo-google-fonts/vazirmatn';
-import { AuthProvider, useAuth } from '../src/auth/AuthContext';
+import { AuthProvider, useAuth, hasOauthCallbackParams } from '../src/auth/AuthContext';
 import { AccessProvider } from '../src/access/AccessContext';
 import { colors } from '../src/theme';
 
@@ -24,7 +24,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || hasOauthCallbackParams()) return;
     const inAuth = segments[0] === 'login';
     if (!session && !inAuth) {
       router.replace('/login');
@@ -33,7 +33,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     }
   }, [loading, session, segments, router]);
 
-  if (loading) {
+  if (loading || hasOauthCallbackParams()) {
     return (
       <View style={styles.boot}>
         <ActivityIndicator color={colors.primaryDeep} size="large" />

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 const ACCESS = 'healan.access_token';
@@ -13,37 +14,72 @@ export type StoredSession = {
   expiresAt: number;
 };
 
+async function setItem(key: string, value: string): Promise<void> {
+  if (Platform.OS === 'web') {
+    try {
+      localStorage.setItem(key, value);
+      return;
+    } catch {
+      // fall through
+    }
+  }
+  await SecureStore.setItemAsync(key, value);
+}
+
+async function getItem(key: string): Promise<string | null> {
+  if (Platform.OS === 'web') {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+  return SecureStore.getItemAsync(key);
+}
+
+async function deleteItem(key: string): Promise<void> {
+  if (Platform.OS === 'web') {
+    try {
+      localStorage.removeItem(key);
+      return;
+    } catch {
+      return;
+    }
+  }
+  await SecureStore.deleteItemAsync(key).catch(() => undefined);
+}
+
 export async function saveSession(session: StoredSession): Promise<void> {
-  await SecureStore.setItemAsync(ACCESS, session.accessToken);
-  await SecureStore.setItemAsync(EXPIRES, String(session.expiresAt));
+  await setItem(ACCESS, session.accessToken);
+  await setItem(EXPIRES, String(session.expiresAt));
   if (session.refreshToken) {
-    await SecureStore.setItemAsync(REFRESH, session.refreshToken);
+    await setItem(REFRESH, session.refreshToken);
   } else {
-    await SecureStore.deleteItemAsync(REFRESH).catch(() => undefined);
+    await deleteItem(REFRESH);
   }
   if (session.idToken) {
-    await SecureStore.setItemAsync(ID_TOKEN, session.idToken);
+    await setItem(ID_TOKEN, session.idToken);
   }
 }
 
 export async function loadSession(): Promise<StoredSession | null> {
-  const accessToken = await SecureStore.getItemAsync(ACCESS);
-  const expiresRaw = await SecureStore.getItemAsync(EXPIRES);
+  const accessToken = await getItem(ACCESS);
+  const expiresRaw = await getItem(EXPIRES);
   if (!accessToken || !expiresRaw) return null;
   return {
     accessToken,
     expiresAt: Number(expiresRaw) || 0,
-    refreshToken: (await SecureStore.getItemAsync(REFRESH)) ?? undefined,
-    idToken: (await SecureStore.getItemAsync(ID_TOKEN)) ?? undefined,
+    refreshToken: (await getItem(REFRESH)) ?? undefined,
+    idToken: (await getItem(ID_TOKEN)) ?? undefined,
   };
 }
 
 export async function clearSession(): Promise<void> {
   await Promise.all([
-    SecureStore.deleteItemAsync(ACCESS).catch(() => undefined),
-    SecureStore.deleteItemAsync(REFRESH).catch(() => undefined),
-    SecureStore.deleteItemAsync(EXPIRES).catch(() => undefined),
-    SecureStore.deleteItemAsync(ID_TOKEN).catch(() => undefined),
+    deleteItem(ACCESS),
+    deleteItem(REFRESH),
+    deleteItem(EXPIRES),
+    deleteItem(ID_TOKEN),
   ]);
 }
 

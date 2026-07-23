@@ -9,7 +9,7 @@ import { colors, fonts, radius, spacing } from '../src/theme';
 import { config } from '../src/config';
 
 export default function LoginScreen() {
-  const { signIn, loading } = useAuth();
+  const { signIn, loading, lastError } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +25,8 @@ export default function LoginScreen() {
     }
   };
 
+  const displayError = error || lastError;
+
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -37,7 +39,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.headline}>اپ پذیرش کلینیک</Text>
           <Text style={styles.sub}>طراحی موبایل‌محور · منوها از سطح دسترسی شما</Text>
-          <Text style={styles.buildMark}>build-v9-home</Text>
+          <Text style={styles.buildMark}>build-v10-auth</Text>
         </SafeAreaView>
       </View>
 
@@ -54,9 +56,10 @@ export default function LoginScreen() {
             onPress={() => void onLogin()}
             disabled={busy || loading}
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {displayError ? <Text style={styles.error}>{displayError}</Text> : null}
           <Text style={styles.meta}>Redirect: {getRedirectUri()}</Text>
           <Text style={styles.meta}>{config.identityUrl}</Text>
+          <Text style={styles.meta}>build-v10-auth</Text>
         </SurfaceCard>
       </View>
     </View>

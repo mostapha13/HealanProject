@@ -1,11 +1,11 @@
 import { Redirect, type Href } from 'expo-router';
-import { useAuth } from '../src/auth/AuthContext';
+import { useAuth, hasOauthCallbackParams } from '../src/auth/AuthContext';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { colors } from '../src/theme';
 
 export default function Index() {
   const { loading, session } = useAuth();
-  if (loading) {
+  if (loading || hasOauthCallbackParams()) {
     return (
       <View style={styles.boot}>
         <ActivityIndicator color={colors.primary} />
