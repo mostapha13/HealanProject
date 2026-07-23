@@ -93,6 +93,8 @@ export default function AppRoutes() {
             <Route path="users" element={guarded('/basic-data/users', <UsersPage />)} />
             <Route path="assistant" element={guarded('/basic-data/assistant', <AssistantSettingsPage />)} />
             <Route path="access" element={guarded('/basic-data/access', <AccessFormsPage />)} />
+            <Route path="roles" element={guarded('/basic-data/roles', <AccessRolesPage />)} />
+            <Route path="access-admin" element={guarded('/basic-data/roles', <AccessRolesPage />)} />
             <Route path="access-roles" element={guarded('/basic-data/access-roles', <AccessRolesPage />)} />
           </Route>
           <Route path="site-content" element={guarded('/site-content', <SiteContentLayout />)}>

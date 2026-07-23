@@ -25,6 +25,7 @@ public static class HealanAccessFormIds
     public const int Reports = 5014;
     public const int Workflow = 5015;
     public const int Signature = 5016;
+    /// <summary>تعریف نقش (CRUD نقش‌های Identity) — منوی سطوح دسترسی</summary>
     public const int AccessAdmin = 5017;
     public const int PortalContent = 5018;
     public const int PortalReviews = 5019;

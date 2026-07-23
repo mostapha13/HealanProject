@@ -286,6 +286,7 @@ export function resolveNavIcon(path?: string, label?: string, isFolder?: boolean
   const l = (label || '').toLowerCase();
 
   if (isFolder) {
+    if (l.includes('دسترسی') || l.includes('سطوح') || l.includes('کاربر')) return <IconUsers />;
     if (l.includes('کلینیک') || l.includes('clinic')) return <IconHeart />;
     if (l.includes('نوبت') || l.includes('booking')) return <IconCalendar />;
     if (l.includes('پایه') || l.includes('basic')) return <IconFolder />;
@@ -310,7 +311,7 @@ export function resolveNavIcon(path?: string, label?: string, isFolder?: boolean
   if (p.includes('/fees') || l.includes('تعرفه')) return <IconTag />;
   if (p.includes('/assistant') && p.includes('basic')) return <IconBot />;
   if (p.includes('/users') || l.includes('کاربر')) return <IconUsers />;
-  if (p.includes('/access') || l.includes('دسترسی')) return <IconKey />;
+  if (p.includes('/roles') || p.includes('/access') || l.includes('دسترسی') || l.includes('نقش')) return <IconKey />;
   if (p.includes('/reports') || l.includes('نمودار') || l.includes('آمار')) return <IconChart />;
   if (p.includes('/sms') || l.includes('پیامک')) return <IconMessage />;
   if (p.includes('/signature') || l.includes('امضا')) return <IconPen />;

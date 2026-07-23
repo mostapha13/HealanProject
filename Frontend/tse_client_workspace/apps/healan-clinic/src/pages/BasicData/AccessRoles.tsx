@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from '@tse/utils';
 import withAlert from '../../hoc/withAlert';
 import {
   applyCheckedKeys,
@@ -56,7 +57,15 @@ function hasSelectionChanged(current: number[], baseline: number[]): boolean {
   return baseline.some((k) => !set.has(k));
 }
 
+/** تعریف نقش (/basic-data/roles) vs سطح دسترسی نقش‌ها (/basic-data/access-roles). */
+function isRoleDefinePath(pathname: string): boolean {
+  const p = pathname.replace(/\/+$/, '');
+  return p.endsWith('/roles') || p.endsWith('/access-admin');
+}
+
 function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const location = useLocation();
+  const roleDefineMode = isRoleDefinePath(location.pathname);
   const { reload: reloadUserAccess } = useUserAccess();
   const [roles, setRoles] = useState<ManagedIdentityRole[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
@@ -79,7 +88,7 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const loadRoles = async (searchText = '') => {
     setLoadingRoles(true);
     try {
-      const list = await fetchManagedRoles(includeDeleted);
+      const list = await fetchManagedRoles(roleDefineMode ? includeDeleted : false);
       const query = searchText.trim().toLowerCase();
       setRoles(
         query
@@ -117,9 +126,10 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   useEffect(() => {
     void loadRoles();
-  }, [includeDeleted]);
+  }, [includeDeleted, roleDefineMode]);
 
   useEffect(() => {
+    if (roleDefineMode) return;
     if (selectedRoleId) {
       void loadTree(selectedRoleId);
     } else {
@@ -128,7 +138,7 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       setSavedCheckedKeys([]);
       setSourceRoleId(null);
     }
-  }, [selectedRoleId]);
+  }, [selectedRoleId, roleDefineMode]);
 
   const filteredTreeItems = useMemo(
     () => filterTree(treeItems, treeSearchText),
@@ -168,11 +178,10 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       onAlert({ type: 'error', message: 'نقش مبدا و مقصد نمی‌توانند یکسان باشند' });
       return;
     }
-
     setCopying(true);
     try {
-      const sourceTree = await fetchAccessRoleTree(sourceRoleId);
-      setCheckedKeys(collectCheckedKeys(sourceTree));
+      const items = await fetchAccessRoleTree(sourceRoleId);
+      setCheckedKeys(collectCheckedKeys(items));
       onAlert({ type: 'success', message: 'دسترسی‌ها از نقش مبدا بارگذاری شد؛ برای اعمال نهایی ذخیره کنید' });
     } catch (err) {
       onAlert(err);
@@ -188,11 +197,11 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
     setSaving(true);
     try {
-      const payload = applyCheckedKeys(treeItems, checkedKeys);
-      await saveAccessRole(selectedRoleId, payload);
-      await loadTree(selectedRoleId);
+      const nextTree = applyCheckedKeys(treeItems, checkedKeys);
+      await saveAccessRole(selectedRoleId, nextTree);
+      setSavedCheckedKeys(checkedKeys);
       await reloadUserAccess();
-      onAlert({ type: 'success', message: 'سطح دسترسی با موفقیت ذخیره شد' });
+      onAlert({ type: 'success', message: 'دسترسی‌های نقش ذخیره شد' });
     } catch (err) {
       onAlert(err);
     } finally {
@@ -222,15 +231,9 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     setSavingRole(true);
     try {
       if (editingRoleId) {
-        await updateManagedRole(editingRoleId, {
-          name: roleName.trim(),
-          displayName: roleDisplayName.trim(),
-        });
+        await updateManagedRole(editingRoleId, { name: roleName.trim(), displayName: roleDisplayName.trim() });
       } else {
-        await createManagedRole({
-          name: roleName.trim(),
-          displayName: roleDisplayName.trim(),
-        });
+        await createManagedRole({ name: roleName.trim(), displayName: roleDisplayName.trim() });
       }
       setShowRoleForm(false);
       await loadRoles();
@@ -266,137 +269,150 @@ function AccessRolesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const selectedRole = roles.find((r) => r.id === selectedRoleId);
 
+  if (roleDefineMode) {
+    return (
+      <>
+        <PageHeader
+          title="تعریف نقش"
+          subtitle="ایجاد، ویرایش، حذف و بازیابی نقش‌های سامانه"
+          action={
+            <button type="button" className="healan-btn healan-btn--primary" onClick={openCreateRole}>
+              + نقش جدید
+            </button>
+          }
+        />
+
+        {showRoleForm && (
+          <div className="healan-card" style={{ marginBottom: '1rem' }}>
+            <div className="healan-card__header">
+              <h3>{editingRoleId ? 'ویرایش نقش' : 'افزودن نقش'}</h3>
+            </div>
+            <div className="healan-card__body">
+              <div className="healan-form-grid">
+                <div className="healan-form-field">
+                  <label>نام فنی نقش (انگلیسی)</label>
+                  <input
+                    className="healan-input"
+                    dir="ltr"
+                    value={roleName}
+                    onChange={(e) => setRoleName(e.target.value)}
+                    placeholder="ExampleRole"
+                  />
+                </div>
+                <div className="healan-form-field">
+                  <label>عنوان فارسی</label>
+                  <input
+                    className="healan-input"
+                    value={roleDisplayName}
+                    onChange={(e) => setRoleDisplayName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="healan-actions" style={{ marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  className="healan-btn healan-btn--primary"
+                  disabled={savingRole}
+                  onClick={() => void handleSaveRole()}
+                >
+                  {savingRole ? 'در حال ذخیره...' : 'ذخیره نقش'}
+                </button>
+                <button
+                  type="button"
+                  className="healan-btn healan-btn--muted"
+                  onClick={() => setShowRoleForm(false)}
+                >
+                  انصراف
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="healan-card" style={{ marginBottom: '1rem' }}>
+          <div className="healan-card__header">
+            <h3>نقش‌های سامانه</h3>
+            <label>
+              <input
+                type="checkbox"
+                checked={includeDeleted}
+                onChange={(e) => setIncludeDeleted(e.target.checked)}
+              />{' '}
+              نمایش حذف‌شده‌ها
+            </label>
+          </div>
+          <div className="healan-card__body" style={{ padding: 0 }}>
+            {loadingRoles ? (
+              <div className="healan-empty">در حال بارگذاری نقش‌ها...</div>
+            ) : roles.length === 0 ? (
+              <div className="healan-empty">نقشی تعریف نشده است</div>
+            ) : (
+              <table className="healan-table">
+                <thead>
+                  <tr>
+                    <th>عنوان</th>
+                    <th>نام فنی</th>
+                    <th>تعداد کاربران</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roles.map((role) => (
+                    <tr key={role.id}>
+                      <td>{role.displayName}</td>
+                      <td dir="ltr">{role.name}</td>
+                      <td>{role.userCount}</td>
+                      <td>{role.isDeleted ? 'حذف‌شده' : role.isSystem ? 'سیستمی' : 'فعال'}</td>
+                      <td>
+                        <div className="healan-actions">
+                          {!role.isDeleted && (
+                            <button
+                              type="button"
+                              className="healan-btn healan-btn--sm healan-btn--action healan-btn--edit"
+                              onClick={() => openEditRole(role)}
+                            >
+                              ویرایش
+                            </button>
+                          )}
+                          {role.isDeleted ? (
+                            <button
+                              type="button"
+                              className="healan-btn healan-btn--sm healan-btn--outline"
+                              onClick={() => void handleRestoreRole(role)}
+                            >
+                              بازیابی
+                            </button>
+                          ) : (
+                            !role.isSystem && (
+                              <button
+                                type="button"
+                                className="healan-btn healan-btn--sm healan-btn--action healan-btn--danger"
+                                onClick={() => void handleDeleteRole(role)}
+                              >
+                                حذف
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
         title="سطح دسترسی نقش‌ها"
-        subtitle="مدیریت کامل دسترسی نقش‌ها در تمام بخش‌های سامانه، بدون نیاز به تغییر مستقیم دیتابیس"
-        action={
-          <button type="button" className="healan-btn healan-btn--primary" onClick={openCreateRole}>
-            + نقش جدید
-          </button>
-        }
+        subtitle="اختصاص منوها و صفحات به هر نقش — پس از تعریف نقش در بخش «تعریف نقش»"
       />
-
-      {showRoleForm && (
-        <div className="healan-card" style={{ marginBottom: '1rem' }}>
-          <div className="healan-card__header">
-            <h3>{editingRoleId ? 'ویرایش نقش' : 'افزودن نقش'}</h3>
-          </div>
-          <div className="healan-card__body">
-            <div className="healan-form-grid">
-              <div className="healan-form-field">
-                <label>نام فنی نقش (انگلیسی)</label>
-                <input
-                  className="healan-input"
-                  dir="ltr"
-                  value={roleName}
-                  onChange={(e) => setRoleName(e.target.value)}
-                  placeholder="ExampleRole"
-                />
-              </div>
-              <div className="healan-form-field">
-                <label>عنوان فارسی</label>
-                <input
-                  className="healan-input"
-                  value={roleDisplayName}
-                  onChange={(e) => setRoleDisplayName(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="healan-actions" style={{ marginTop: '1rem' }}>
-              <button
-                type="button"
-                className="healan-btn healan-btn--primary"
-                disabled={savingRole}
-                onClick={() => void handleSaveRole()}
-              >
-                {savingRole ? 'در حال ذخیره...' : 'ذخیره نقش'}
-              </button>
-              <button
-                type="button"
-                className="healan-btn healan-btn--muted"
-                onClick={() => setShowRoleForm(false)}
-              >
-                انصراف
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="healan-card" style={{ marginBottom: '1rem' }}>
-        <div className="healan-card__header">
-          <h3>نقش‌های سامانه</h3>
-          <label>
-            <input
-              type="checkbox"
-              checked={includeDeleted}
-              onChange={(e) => setIncludeDeleted(e.target.checked)}
-            />{' '}
-            نمایش حذف‌شده‌ها
-          </label>
-        </div>
-        <div className="healan-card__body" style={{ padding: 0 }}>
-          {loadingRoles ? (
-            <div className="healan-empty">در حال بارگذاری نقش‌ها...</div>
-          ) : (
-            <table className="healan-table">
-              <thead>
-                <tr>
-                  <th>عنوان</th>
-                  <th>نام فنی</th>
-                  <th>تعداد کاربران</th>
-                  <th>وضعیت</th>
-                  <th>عملیات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roles.map((role) => (
-                  <tr key={role.id}>
-                    <td>{role.displayName}</td>
-                    <td dir="ltr">{role.name}</td>
-                    <td>{role.userCount}</td>
-                    <td>{role.isDeleted ? 'حذف‌شده' : role.isSystem ? 'سیستمی' : 'فعال'}</td>
-                    <td>
-                      <div className="healan-actions">
-                        {!role.isDeleted && (
-                          <button
-                            type="button"
-                            className="healan-btn healan-btn--sm healan-btn--action healan-btn--edit"
-                            onClick={() => openEditRole(role)}
-                          >
-                            ویرایش
-                          </button>
-                        )}
-                        {role.isDeleted ? (
-                          <button
-                            type="button"
-                            className="healan-btn healan-btn--sm healan-btn--outline"
-                            onClick={() => void handleRestoreRole(role)}
-                          >
-                            بازیابی
-                          </button>
-                        ) : (
-                          !role.isSystem && (
-                            <button
-                              type="button"
-                              className="healan-btn healan-btn--sm healan-btn--action healan-btn--danger"
-                              onClick={() => void handleDeleteRole(role)}
-                            >
-                              حذف
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
         <div className="healan-card__body">
