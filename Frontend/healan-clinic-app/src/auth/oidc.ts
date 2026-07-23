@@ -6,10 +6,6 @@ import { clearSession, saveSession, type StoredSession } from './session';
 
 WebBrowser.maybeCompleteAuthSession();
 
-/**
- * Must match IdentityServer client HealanClinicMobile redirect URIs exactly.
- * Expo web uses the page origin (http://localhost:8082), native uses the app scheme.
- */
 export function getRedirectUri(): string {
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.location?.origin) {
@@ -32,6 +28,54 @@ export function getDiscovery(): AuthSession.DiscoveryDocument {
     userInfoEndpoint: `${base}/connect/userinfo`,
     revocationEndpoint: `${base}/connect/revocation`,
   };
+}
+
+type TokenResponse = {
+  access_token: string;
+  refresh_token?: string;
+  id_token?: string;
+  expires_in?: number;
+  error?: string;
+  error_description?: string;
+};
+
+async function tokenRequest(body: URLSearchParams): Promise<StoredSession> {
+  const res = await fetch(`${config.identityUrl}/connect/token`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: body.toString(),
+  });
+  const json = (await res.json().catch(() => ({}))) as TokenResponse;
+  if (!res.ok || !json.access_token) {
+    const msg =
+      json.error_description ||
+      json.error ||
+      (res.status === 400 ? 'نام کاربری یا رمز عبور نادرست است' : `خطای ورود (${res.status})`);
+    throw new Error(msg);
+  }
+  const expiresIn = json.expires_in ?? 3600;
+  const session: StoredSession = {
+    accessToken: json.access_token,
+    refreshToken: json.refresh_token,
+    idToken: json.id_token,
+    expiresAt: Date.now() + expiresIn * 1000,
+  };
+  await saveSession(session);
+  return session;
+}
+
+/** In-app username/password login (Resource Owner Password). No Identity browser page. */
+export async function loginWithPassword(username: string, password: string): Promise<StoredSession> {
+  const body = new URLSearchParams();
+  body.set('grant_type', 'password');
+  body.set('client_id', config.clientId);
+  body.set('username', username.trim());
+  body.set('password', password);
+  body.set('scope', config.scopes.join(' '));
+  return tokenRequest(body);
 }
 
 export async function exchangeCodeForTokens(
@@ -63,33 +107,35 @@ export async function exchangeCodeForTokens(
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<StoredSession> {
-  const token = await AuthSession.refreshAsync(
-    {
-      clientId: config.clientId,
-      refreshToken,
-    },
-    getDiscovery()
-  );
-  const expiresIn = token.expiresIn ?? 3600;
-  const session: StoredSession = {
-    accessToken: token.accessToken,
-    refreshToken: token.refreshToken ?? refreshToken,
-    idToken: token.idToken,
-    expiresAt: Date.now() + expiresIn * 1000,
-  };
-  await saveSession(session);
-  return session;
+  const body = new URLSearchParams();
+  body.set('grant_type', 'refresh_token');
+  body.set('client_id', config.clientId);
+  body.set('refresh_token', refreshToken);
+  try {
+    return await tokenRequest(body);
+  } catch {
+    // fallback to expo helper
+    const token = await AuthSession.refreshAsync(
+      {
+        clientId: config.clientId,
+        refreshToken,
+      },
+      getDiscovery()
+    );
+    const expiresIn = token.expiresIn ?? 3600;
+    const session: StoredSession = {
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken ?? refreshToken,
+      idToken: token.idToken,
+      expiresAt: Date.now() + expiresIn * 1000,
+    };
+    await saveSession(session);
+    return session;
+  }
 }
 
 export async function endRemoteSession(idToken?: string): Promise<void> {
-  const discovery = getDiscovery();
-  if (discovery.endSessionEndpoint && idToken) {
-    const url = `${discovery.endSessionEndpoint}?id_token_hint=${encodeURIComponent(idToken)}&post_logout_redirect_uri=${encodeURIComponent(getRedirectUri())}`;
-    try {
-      await WebBrowser.openAuthSessionAsync(url, getRedirectUri());
-    } catch {
-      // ignore — local clear still happens
-    }
-  }
   await clearSession();
+  // Password login has no browser SSO session to clear; skip endsession redirect on purpose.
+  void idToken;
 }

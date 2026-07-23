@@ -91,7 +91,7 @@ write_json docker/config/healan-webapi/appsettings.Production.json <<'EOF'
     "ValidIssuer": "https://auth.drshahrooei.ir",
     "RequireHttpsMetadata": false
   },
-  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir",
+  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir,http://localhost:8081,http://127.0.0.1:8081,http://localhost:8082,http://127.0.0.1:8082",
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -183,7 +183,7 @@ write_json docker/config/identity-usermanager/appsettings.Production.json <<'EOF
     "IdentityServer": "http://identity-grpc:8080",
     "FileManager": "http://filemanager-grpc:8080"
   },
-  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir,http://localhost:4200,http://localhost:4201",
+  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir,http://localhost:4200,http://localhost:4201,http://localhost:8081,http://127.0.0.1:8081,http://localhost:8082,http://127.0.0.1:8082",
   "RabbitMQ": {
     "UserName": "guest",
     "Password": "guest",
@@ -244,7 +244,7 @@ write_json docker/config/filemanager-webui/appsettings.Production.json <<'EOF'
     "IdentityServer": "http://identity-grpc:8080",
     "FileManager": "http://filemanager-grpc:8080"
   },
-  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir,http://localhost:4200,http://localhost:4201",
+  "ClientBaseUrl": "http://clinic.drshahrooei.ir,https://clinic.drshahrooei.ir,http://portal.drshahrooei.ir,https://portal.drshahrooei.ir,http://auth.drshahrooei.ir,https://auth.drshahrooei.ir,http://localhost:4200,http://localhost:4201,http://localhost:8081,http://127.0.0.1:8081,http://localhost:8082,http://127.0.0.1:8082",
   "RabbitMQ": {
     "Enabled": true,
     "UserName": "guest",

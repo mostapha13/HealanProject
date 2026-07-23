@@ -147,18 +147,33 @@ namespace Healan.WebApi
 
             services.AddCors(options =>
             {
+                var configured = (Configuration["ClientBaseUrl"] ?? string.Empty)
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(o => !string.IsNullOrWhiteSpace(o));
+                var defaults = new[]
+                {
+                    "http://localhost:4200",
+                    "http://localhost:4201",
+                    "http://localhost:4202",
+                    "http://localhost:8081",
+                    "http://127.0.0.1:8081",
+                    "http://localhost:8082",
+                    "http://127.0.0.1:8082",
+                    "http://clinic.drshahrooei.ir",
+                    "https://clinic.drshahrooei.ir",
+                    "http://www.drshahrooei.ir",
+                    "https://www.drshahrooei.ir",
+                    "http://portal.drshahrooei.ir",
+                    "https://portal.drshahrooei.ir",
+                    "http://auth.drshahrooei.ir",
+                    "https://auth.drshahrooei.ir",
+                };
+                var origins = configured
+                    .Concat(defaults)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
                 options.AddPolicy("default", builder => builder
-                    .WithOrigins(
-                        Configuration["ClientBaseUrl"] ?? "http://localhost:4201",
-                        "http://localhost:4200",
-                        "http://localhost:4201",
-                        "http://localhost:4202",
-                        "http://clinic.drshahrooei.ir",
-                        "https://clinic.drshahrooei.ir",
-                        "http://www.drshahrooei.ir",
-                        "https://www.drshahrooei.ir",
-                        "http://auth.drshahrooei.ir",
-                        "https://auth.drshahrooei.ir")
+                    .WithOrigins(origins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());

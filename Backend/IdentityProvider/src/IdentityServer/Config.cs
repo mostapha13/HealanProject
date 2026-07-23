@@ -229,7 +229,11 @@ namespace IdentityServer
                 ClientName = "اپ اندروید پذیرش Healan",
                 RequirePkce = true,
                 RequireClientSecret = false,
-                AllowedGrantTypes = GrantTypes.Code,
+                // Password: in-app login fields. Code: optional native browser/PKCE flows.
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPassword
+                    .Concat(GrantTypes.Code)
+                    .Distinct()
+                    .ToList(),
                 AllowOfflineAccess = true,
                 AbsoluteRefreshTokenLifetime = 60 * 60 * 24 * 7,
                 SlidingRefreshTokenLifetime = 0,
