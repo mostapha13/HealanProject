@@ -149,15 +149,42 @@ export async function apiPost<T>(
   getToken: TokenGetter,
   data?: unknown
 ): Promise<T> {
+  return apiSend<T>('POST', baseUrl, path, getToken, data);
+}
+
+export async function apiPut<T>(
+  baseUrl: string,
+  path: string,
+  getToken: TokenGetter,
+  data?: unknown
+): Promise<T> {
+  return apiSend<T>('PUT', baseUrl, path, getToken, data);
+}
+
+export async function apiDelete<T>(
+  baseUrl: string,
+  path: string,
+  getToken: TokenGetter
+): Promise<T> {
+  return apiSend<T>('DELETE', baseUrl, path, getToken);
+}
+
+async function apiSend<T>(
+  method: 'POST' | 'PUT' | 'DELETE',
+  baseUrl: string,
+  path: string,
+  getToken: TokenGetter,
+  data?: unknown
+): Promise<T> {
   const token = await getToken();
   const res = await fetch(joinUrl(baseUrl, path), {
-    method: 'POST',
+    method,
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
+      ...(method !== 'DELETE' ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: data === undefined ? undefined : JSON.stringify(data),
+    body: method === 'DELETE' || data === undefined ? undefined : JSON.stringify(data),
   });
   const text = await res.text();
   let body: unknown = null;

@@ -28,8 +28,11 @@ import {
   type NamedRow,
 } from '../../../src/api/healan';
 import { getCrudConfig } from '../../../src/api/crud';
+import { getOpsConfig } from '../../../src/api/ops';
 import type { ClinicModuleId } from '../../../src/navigation/catalog';
 import { CrudModuleView } from '../../../src/modules/CrudModuleView';
+import { OpsModuleView } from '../../../src/modules/OpsModuleView';
+import { useAccess } from '../../../src/access/AccessContext';
 import {
   AppScreen,
   EmptyBlock,
@@ -44,13 +47,50 @@ type Row = NamedRow & { badge?: string };
 
 export default function ModuleScreen() {
   const navigation = useNavigation();
+  const { canAccessModule, canAccess, loading: accessLoading } = useAccess();
   const params = useLocalSearchParams<{ id?: string; title?: string; path?: string }>();
   const moduleId = (params.id || 'generic') as ClinicModuleId;
   const title = String(params.title || 'بخش');
+  const path = String(params.path || '');
 
   useLayoutEffect(() => {
     navigation.setOptions({ title });
   }, [navigation, title]);
+
+  if (accessLoading) {
+    return (
+      <AppScreen>
+        <LoadingBlock />
+      </AppScreen>
+    );
+  }
+
+  const allowed =
+    (path ? canAccess(path) : false) ||
+    canAccessModule(moduleId) ||
+    moduleId === 'generic' ||
+    moduleId === 'dashboard' ||
+    moduleId === 'workflow' ||
+    moduleId === 'signature';
+
+  if (!allowed) {
+    return (
+      <AppScreen>
+        <EmptyBlock
+          title="دسترسی ندارید"
+          subtitle="این بخش در سطح دسترسی شما نیست و نمایش داده نمی‌شود."
+        />
+      </AppScreen>
+    );
+  }
+
+  if (
+    moduleId === 'sms-settings' ||
+    moduleId === 'site-settings' ||
+    getOpsConfig(moduleId)
+  ) {
+    return <OpsModuleView moduleId={moduleId} title={title} />;
+  }
 
   if (getCrudConfig(moduleId)) {
     return <CrudModuleView moduleId={moduleId} title={title} />;

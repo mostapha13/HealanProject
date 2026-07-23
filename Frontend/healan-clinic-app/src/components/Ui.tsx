@@ -50,14 +50,14 @@ export function BankHeader({
     <View style={styles.bankHeader}>
       <View style={styles.bankHeaderInner}>
         <View style={styles.bankActions}>
-          <HeaderIcon name="notifications-outline" onPress={onBell} />
-          <HeaderIcon name="headset-outline" onPress={onSupport} />
-          <HeaderIcon name="phone-portrait-outline" onPress={onScan} />
+          {onBell ? <HeaderIcon name="notifications-outline" onPress={onBell} /> : null}
+          {onSupport ? <HeaderIcon name="headset-outline" onPress={onSupport} /> : null}
+          {onScan ? <HeaderIcon name="phone-portrait-outline" onPress={onScan} /> : null}
         </View>
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v12-crud</Text>
+            <Text style={styles.buildMark}>build-v13-access-crud</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>

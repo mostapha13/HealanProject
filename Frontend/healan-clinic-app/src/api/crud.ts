@@ -1,7 +1,9 @@
 import { config } from '../config';
 import {
+  apiDelete,
   apiGet,
   apiPost,
+  apiPut,
   fetchAllPaginated,
   type PaginatedPage,
   type TokenGetter,
@@ -636,6 +638,532 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         sortOrder: num(row.raw.sortOrder),
         isActive: !bool(row.raw.isActive, true),
       });
+    },
+  },
+
+  users: {
+    id: 'users',
+    canCreate: true,
+    canEdit: true,
+    canDelete: false,
+    canToggleActive: true,
+    fields: [
+      { key: 'firstName', label: 'نام', required: true },
+      { key: 'lastName', label: 'نام خانوادگی', required: true },
+      { key: 'phoneNumber', label: 'موبایل', required: true, keyboard: 'phone-pad' },
+      { key: 'userTypeId', label: 'نوع کاربر (2 مدیر / 3 منشی / 7 پزشک / 8 حسابدار)', keyboard: 'numeric', required: true },
+    ],
+    emptyForm: {
+      userId: 0,
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      userTypeId: 3,
+      isActive: true,
+      twoFactorEnabled: false,
+    },
+    load: async (getToken, filterText) => {
+      const rows = await listAll(getToken, 'User/UserList', { filterText: filterText ?? '' });
+      return rows.map((raw) => {
+        const id = num(raw.userId ?? raw.id);
+        const name = `${str(raw.firstName)} ${str(raw.lastName)}`.trim();
+        const isActive = bool(raw.isActive, true);
+        return {
+          id,
+          title: name || str(raw.userName, `کاربر #${id}`),
+          subtitle: str(raw.phoneNumber ?? raw.userTypeName ?? ''),
+          badge: activeBadge(isActive),
+          isActive,
+          raw,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      userId: row.id,
+      identityUserId: str(row.raw.identityUserId),
+      firstName: str(row.raw.firstName),
+      lastName: str(row.raw.lastName),
+      phoneNumber: str(row.raw.phoneNumber),
+      userTypeId: num(row.raw.userTypeId, 3),
+      isActive: bool(row.raw.isActive, true),
+      twoFactorEnabled: bool(row.raw.twoFactorEnabled, false),
+    }),
+    save: async (getToken, form) => {
+      const userId = idOrUndefined(num(form.userId));
+      const identityUserId = nullIfEmpty(str(form.identityUserId));
+      await healanPost(getToken, 'User/Register', {
+        ...(userId ? { userId } : {}),
+        ...(identityUserId ? { identityUserId } : {}),
+        firstName: str(form.firstName).trim(),
+        lastName: str(form.lastName).trim(),
+        phoneNumber: str(form.phoneNumber).trim(),
+        userTypeId: num(form.userTypeId, 3),
+        isActive: bool(form.isActive, true),
+        twoFactorEnabled: bool(form.twoFactorEnabled, false),
+      });
+    },
+    toggleActive: async (getToken, row) => {
+      await healanPost(getToken, 'User/Register', {
+        userId: row.id,
+        identityUserId: row.raw.identityUserId,
+        firstName: str(row.raw.firstName),
+        lastName: str(row.raw.lastName),
+        phoneNumber: str(row.raw.phoneNumber),
+        userTypeId: num(row.raw.userTypeId, 3),
+        isActive: !bool(row.raw.isActive, true),
+        twoFactorEnabled: bool(row.raw.twoFactorEnabled, false),
+      });
+    },
+  },
+
+  appointments: {
+    id: 'appointments',
+    canCreate: true,
+    canEdit: true,
+    canDelete: false,
+    canToggleActive: false,
+    fields: [
+      { key: 'patientId', label: 'شناسه بیمار', keyboard: 'numeric', required: true },
+      { key: 'doctorId', label: 'شناسه پزشک', keyboard: 'numeric', required: true },
+      { key: 'appointmentDate', label: 'تاریخ (YYYY-MM-DDTHH:mm)', required: true },
+      { key: 'durationMinutes', label: 'مدت (دقیقه)', keyboard: 'numeric', required: true },
+      { key: 'serviceTypeIds', label: 'شناسه خدمت‌ها (با ویرگول)', required: true },
+      { key: 'note', label: 'یادداشت', multiline: true },
+    ],
+    emptyForm: {
+      appointmentId: 0,
+      patientId: 0,
+      doctorId: 0,
+      appointmentDate: new Date().toISOString().slice(0, 16),
+      durationMinutes: 15,
+      serviceTypeIds: '',
+      note: '',
+    },
+    load: async (getToken, filterText) => {
+      const rows = await listAll(getToken, 'Appointment/AppointmentList', { filterText });
+      return rows.map((raw) => {
+        const id = num(raw.appointmentId ?? raw.id);
+        const patient = asRecord(raw.patient ?? {});
+        const doctor = asRecord(raw.doctor ?? {});
+        const patientName =
+          str(raw.patientName) ||
+          `${str(patient.firstName)} ${str(patient.lastName)}`.trim() ||
+          `بیمار #${raw.patientId}`;
+        const doctorName =
+          str(raw.doctorName) ||
+          `${str(doctor.firstName)} ${str(doctor.lastName)}`.trim() ||
+          `پزشک #${raw.doctorId}`;
+        return {
+          id,
+          title: patientName,
+          subtitle: `${str(raw.appointmentTypeName ?? 'نوبت')} · ${doctorName}`,
+          meta: str(raw.appointmentDate),
+          badge: str(raw.appointmentTypeName),
+          raw,
+        };
+      });
+    },
+    fromRow: (row) => {
+      const services = Array.isArray(row.raw.serviceTypes)
+        ? (row.raw.serviceTypes as Record<string, unknown>[])
+            .map((s) => num(s.serviceTypeId ?? s.id))
+            .filter(Boolean)
+            .join(',')
+        : '';
+      return {
+        appointmentId: row.id,
+        patientId: num(row.raw.patientId),
+        doctorId: num(row.raw.doctorId),
+        appointmentDate: str(row.raw.appointmentDate).slice(0, 16),
+        durationMinutes: num(row.raw.durationMinutes, 15),
+        serviceTypeIds: services,
+        note: str(row.raw.note),
+      };
+    },
+    save: async (getToken, form) => {
+      const appointmentId = idOrUndefined(num(form.appointmentId));
+      const serviceTypeIds = str(form.serviceTypeIds)
+        .split(/[,\s]+/)
+        .map((x) => Number(x))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const appointmentDate = new Date(str(form.appointmentDate)).toISOString();
+      await healanPost(getToken, 'Appointment/Register', {
+        ...(appointmentId ? { appointmentId } : {}),
+        patientId: num(form.patientId),
+        doctorId: num(form.doctorId),
+        durationMinutes: num(form.durationMinutes, 15),
+        serviceTypeIds,
+        appointmentDate,
+        note: nullIfEmpty(str(form.note)),
+        confirmPrimaryInsuranceCompany: false,
+        confirmSecondInsuranceCompany: false,
+      });
+    },
+  },
+
+  prescriptions: {
+    id: 'prescriptions',
+    canCreate: true,
+    canEdit: true,
+    canDelete: false,
+    canToggleActive: false,
+    fields: [
+      { key: 'appointmentId', label: 'شناسه نوبت', keyboard: 'numeric', required: true },
+      { key: 'issueDate', label: 'تاریخ صدور (YYYY-MM-DD)', required: true },
+      { key: 'notes', label: 'یادداشت', multiline: true },
+      { key: 'drugName', label: 'نام دارو', required: true },
+      { key: 'dosage', label: 'دوز' },
+      { key: 'usageInstructions', label: 'دستور مصرف', multiline: true },
+    ],
+    emptyForm: {
+      prescriptionId: 0,
+      appointmentId: 0,
+      issueDate: new Date().toISOString().slice(0, 10),
+      notes: '',
+      drugName: '',
+      dosage: '',
+      usageInstructions: '',
+    },
+    load: async (getToken, filterText) => {
+      const rows = await listAll(getToken, 'OrderResult/PrescriptionList', { filterText });
+      return rows.map((raw, index) => {
+        const id = num(raw.prescriptionId ?? raw.id ?? index);
+        return {
+          id,
+          title: str(raw.patientName, `نسخه #${id}`),
+          subtitle: str(raw.doctorName ?? ''),
+          meta: str(raw.prescriptionDate ?? raw.issueDate ?? raw.createDate ?? ''),
+          raw,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      prescriptionId: row.id,
+      appointmentId: num(row.raw.appointmentId),
+      issueDate: str(row.raw.issueDate ?? row.raw.prescriptionDate).slice(0, 10),
+      notes: str(row.raw.notes),
+      drugName: '',
+      dosage: '',
+      usageInstructions: '',
+    }),
+    save: async (getToken, form) => {
+      const prescriptionId = idOrUndefined(num(form.prescriptionId));
+      await healanPost(getToken, 'OrderResult/Register', {
+        ...(prescriptionId ? { prescriptionId } : {}),
+        appointmentId: num(form.appointmentId),
+        issueDate: new Date(str(form.issueDate)).toISOString(),
+        notes: nullIfEmpty(str(form.notes)),
+        prescriptionDrugs: [
+          {
+            drugName: str(form.drugName).trim(),
+            dosage: str(form.dosage).trim(),
+            usageInstructions: str(form.usageInstructions).trim(),
+          },
+        ],
+        labTestRequests: [],
+        imagingRequests: [],
+      });
+    },
+  },
+
+  'site-blog': {
+    id: 'site-blog',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+    fields: [
+      { key: 'title', label: 'عنوان', required: true },
+      { key: 'slug', label: 'اسلاگ', required: true },
+      { key: 'excerpt', label: 'خلاصه', multiline: true },
+      { key: 'body', label: 'متن', required: true, multiline: true },
+      { key: 'coverImageUrl', label: 'آدرس تصویر' },
+    ],
+    emptyForm: {
+      blogPostId: 0,
+      title: '',
+      slug: '',
+      excerpt: '',
+      body: '',
+      coverImageUrl: '',
+      isActive: true,
+    },
+    load: async (getToken, filterText) => {
+      const rows = await listAll(getToken, 'BlogPost/List', { filterText });
+      return rows.map((raw) => {
+        const id = num(raw.blogPostId ?? raw.id);
+        const published = bool(raw.isPublished, false);
+        return {
+          id,
+          title: str(raw.title, `پست #${id}`),
+          subtitle: published ? 'منتشر شده' : 'پیش‌نویس',
+          meta: str(raw.slug ?? ''),
+          badge: published ? 'منتشر' : 'پیش‌نویس',
+          isActive: published,
+          raw,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      blogPostId: row.id,
+      title: str(row.raw.title),
+      slug: str(row.raw.slug),
+      excerpt: str(row.raw.excerpt),
+      body: str(row.raw.body),
+      coverImageUrl: str(row.raw.coverImageUrl),
+      isActive: bool(row.raw.isPublished, false),
+    }),
+    save: async (getToken, form) => {
+      const blogPostId = idOrUndefined(num(form.blogPostId));
+      const published = bool(form.isActive, false);
+      await healanPost(getToken, 'BlogPost/Register', {
+        ...(blogPostId ? { blogPostId } : {}),
+        title: str(form.title).trim(),
+        slug: str(form.slug).trim(),
+        excerpt: nullIfEmpty(str(form.excerpt)),
+        body: str(form.body).trim(),
+        coverImageUrl: nullIfEmpty(str(form.coverImageUrl)),
+        isPublished: published,
+        publishedAt: published ? new Date().toISOString() : undefined,
+      });
+    },
+    remove: async (getToken, row) => {
+      await healanPost(getToken, 'BlogPost/Delete', { blogPostId: row.id });
+    },
+    toggleActive: async (getToken, row) => {
+      const published = !bool(row.raw.isPublished, false);
+      await healanPost(getToken, 'BlogPost/Register', {
+        blogPostId: row.id,
+        title: str(row.raw.title),
+        slug: str(row.raw.slug),
+        excerpt: nullIfEmpty(str(row.raw.excerpt)),
+        body: str(row.raw.body),
+        coverImageUrl: nullIfEmpty(str(row.raw.coverImageUrl)),
+        isPublished: published,
+        publishedAt: published ? new Date().toISOString() : row.raw.publishedAt,
+      });
+    },
+  },
+
+  'site-content': {
+    id: 'site-content',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+    fields: [
+      { key: 'sectionType', label: 'نوع بخش (HeroSlide / About / …)', required: true },
+      { key: 'title', label: 'عنوان', required: true },
+      { key: 'subtitle', label: 'زیرعنوان' },
+      { key: 'body', label: 'متن', multiline: true },
+      { key: 'imageUrl', label: 'آدرس تصویر' },
+      { key: 'linkUrl', label: 'لینک' },
+      { key: 'sortOrder', label: 'ترتیب', keyboard: 'numeric' },
+    ],
+    emptyForm: {
+      portalContentItemId: 0,
+      sectionType: 'HeroSlide',
+      title: '',
+      subtitle: '',
+      body: '',
+      imageUrl: '',
+      linkUrl: '',
+      sortOrder: 0,
+      isActive: true,
+    },
+    load: async (getToken) => {
+      const list = await healanGet<Record<string, unknown>[] | PaginatedPage<Record<string, unknown>>>(
+        getToken,
+        'PortalContent/ContentList'
+      );
+      const rows = Array.isArray(list) ? list : list.items ?? list.Items ?? [];
+      return rows.map((raw, index) => {
+        const r = asRecord(raw);
+        const id = num(r.portalContentItemId ?? r.id ?? index);
+        const published = bool(r.isPublished, false);
+        return {
+          id,
+          title: str(r.title, `مطلب #${id}`),
+          subtitle: str(r.sectionType ?? r.subtitle ?? ''),
+          meta: str(r.linkUrl ?? ''),
+          badge: published ? 'منتشر' : 'پیش‌نویس',
+          isActive: published,
+          raw: r,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      portalContentItemId: row.id,
+      sectionType: str(row.raw.sectionType, 'HeroSlide'),
+      title: str(row.raw.title),
+      subtitle: str(row.raw.subtitle),
+      body: str(row.raw.body),
+      imageUrl: str(row.raw.imageUrl),
+      linkUrl: str(row.raw.linkUrl),
+      sortOrder: num(row.raw.sortOrder),
+      isActive: bool(row.raw.isPublished, false),
+    }),
+    save: async (getToken, form) => {
+      const portalContentItemId = idOrUndefined(num(form.portalContentItemId));
+      await healanPost(getToken, 'PortalContent/ContentRegister', {
+        ...(portalContentItemId ? { portalContentItemId } : {}),
+        sectionType: str(form.sectionType).trim(),
+        title: str(form.title).trim(),
+        subtitle: nullIfEmpty(str(form.subtitle)),
+        body: nullIfEmpty(str(form.body)),
+        imageUrl: nullIfEmpty(str(form.imageUrl)),
+        linkUrl: nullIfEmpty(str(form.linkUrl)),
+        sortOrder: num(form.sortOrder),
+        isPublished: bool(form.isActive, true),
+      });
+    },
+    remove: async (getToken, row) => {
+      await healanPost(getToken, 'PortalContent/ContentDelete', { portalContentItemId: row.id });
+    },
+    toggleActive: async (getToken, row) => {
+      await healanPost(getToken, 'PortalContent/ContentRegister', {
+        portalContentItemId: row.id,
+        sectionType: str(row.raw.sectionType),
+        title: str(row.raw.title),
+        subtitle: nullIfEmpty(str(row.raw.subtitle)),
+        body: nullIfEmpty(str(row.raw.body)),
+        imageUrl: nullIfEmpty(str(row.raw.imageUrl)),
+        linkUrl: nullIfEmpty(str(row.raw.linkUrl)),
+        sortOrder: num(row.raw.sortOrder),
+        isPublished: !bool(row.raw.isPublished, false),
+      });
+    },
+  },
+
+  'booking-schedules': {
+    id: 'booking-schedules',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+    fields: [
+      { key: 'doctorId', label: 'شناسه پزشک', keyboard: 'numeric', required: true },
+      { key: 'dayOfWeek', label: 'روز هفته (0=یکشنبه … 6=جمعه)', keyboard: 'numeric', required: true },
+      { key: 'startTime', label: 'شروع (HH:mm)', required: true },
+      { key: 'endTime', label: 'پایان (HH:mm)', required: true },
+      { key: 'visitDurationMinutes', label: 'مدت ویزیت (دقیقه)', keyboard: 'numeric', required: true },
+    ],
+    emptyForm: {
+      doctorScheduleTemplateId: 0,
+      doctorId: 0,
+      dayOfWeek: 6,
+      startTime: '09:00',
+      endTime: '13:00',
+      visitDurationMinutes: 15,
+      isActive: true,
+    },
+    load: async (getToken) => {
+      const list = await healanGet<Record<string, unknown>[] | PaginatedPage<Record<string, unknown>>>(
+        getToken,
+        'BookingSchedule/TemplateList'
+      );
+      const rows = Array.isArray(list) ? list : list.items ?? list.Items ?? [];
+      return rows.map((raw, index) => {
+        const r = asRecord(raw);
+        const id = num(r.doctorScheduleTemplateId ?? r.templateId ?? r.id ?? index);
+        const isActive = bool(r.isActive, true);
+        return {
+          id,
+          title: str(r.doctorName, `برنامه #${id}`),
+          subtitle: `روز ${str(r.dayOfWeek)} · ${str(r.startTime)}-${str(r.endTime)}`,
+          meta: `${str(r.visitDurationMinutes)} دقیقه`,
+          badge: activeBadge(isActive),
+          isActive,
+          raw: r,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      doctorScheduleTemplateId: row.id,
+      doctorId: num(row.raw.doctorId),
+      dayOfWeek: num(row.raw.dayOfWeek, 6),
+      startTime: str(row.raw.startTime).slice(0, 5),
+      endTime: str(row.raw.endTime).slice(0, 5),
+      visitDurationMinutes: num(row.raw.visitDurationMinutes, 15),
+      isActive: bool(row.raw.isActive, true),
+    }),
+    save: async (getToken, form) => {
+      const doctorScheduleTemplateId = idOrUndefined(num(form.doctorScheduleTemplateId));
+      await healanPost(getToken, 'BookingSchedule/TemplateSave', {
+        doctorScheduleTemplateId: doctorScheduleTemplateId ?? 0,
+        doctorId: num(form.doctorId),
+        dayOfWeek: num(form.dayOfWeek, 6),
+        startTime: str(form.startTime),
+        endTime: str(form.endTime),
+        visitDurationMinutes: num(form.visitDurationMinutes, 15),
+        isActive: bool(form.isActive, true),
+      });
+    },
+    remove: async (getToken, row) => {
+      await healanPost(getToken, 'BookingSchedule/TemplateDelete', {
+        doctorScheduleTemplateId: row.id,
+      });
+    },
+    toggleActive: async (getToken, row) => {
+      await healanPost(getToken, 'BookingSchedule/TemplateSave', {
+        doctorScheduleTemplateId: row.id,
+        doctorId: num(row.raw.doctorId),
+        dayOfWeek: num(row.raw.dayOfWeek, 6),
+        startTime: str(row.raw.startTime),
+        endTime: str(row.raw.endTime),
+        visitDurationMinutes: num(row.raw.visitDurationMinutes, 15),
+        isActive: !bool(row.raw.isActive, true),
+      });
+    },
+  },
+
+  roles: {
+    id: 'roles',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: false,
+    fields: [
+      { key: 'name', label: 'نام نقش (انگلیسی)', required: true },
+      { key: 'displayName', label: 'عنوان نمایشی', required: true },
+    ],
+    emptyForm: { roleId: '', name: '', displayName: '' },
+    load: async (getToken) => {
+      const list = await apiGet<Record<string, unknown>[]>(
+        config.userManagerApiUrl,
+        'HealanRoleManagement/roles',
+        getToken,
+        { includeDeleted: false }
+      );
+      const rows = Array.isArray(list) ? list : [];
+      return rows.map((raw, index) => {
+        const r = asRecord(raw);
+        return {
+          id: index + 1,
+          title: str(r.displayName ?? r.DisplayName ?? r.name, `نقش ${index + 1}`),
+          subtitle: str(r.name ?? r.Name),
+          meta: str(r.id ?? r.roleId ?? ''),
+          raw: r,
+        };
+      });
+    },
+    fromRow: (row) => ({
+      roleId: str(row.raw.id ?? row.raw.roleId ?? row.meta),
+      name: str(row.raw.name ?? row.raw.Name),
+      displayName: str(row.raw.displayName ?? row.raw.DisplayName ?? row.title),
+    }),
+    save: async (getToken, form) => {
+      const roleId = str(form.roleId).trim();
+      const payload = { name: str(form.name).trim(), displayName: str(form.displayName).trim() };
+      if (roleId) {
+        await apiPut(config.userManagerApiUrl, `HealanRoleManagement/roles/${roleId}`, getToken, payload);
+      } else {
+        await apiPost(config.userManagerApiUrl, 'HealanRoleManagement/roles', getToken, payload);
+      }
+    },
+    remove: async (getToken, row) => {
+      const roleId = str(row.raw.id ?? row.raw.roleId ?? row.meta);
+      await apiDelete(config.userManagerApiUrl, `HealanRoleManagement/roles/${roleId}`, getToken);
     },
   },
 };

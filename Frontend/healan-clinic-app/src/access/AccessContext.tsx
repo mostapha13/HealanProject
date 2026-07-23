@@ -1,8 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import {
+  canAccessPath,
   fetchMyAccessMenus,
   flattenMenuUrls,
+  pathForModuleId,
   type AccessMenuTreeItem,
 } from '../api/access';
 import {
@@ -18,6 +20,8 @@ type AccessContextValue = {
   sections: HomeSection[];
   home: MobileHomeLayout;
   grantedUrls: string[];
+  canAccess: (path: string) => boolean;
+  canAccessModule: (moduleId: string) => boolean;
   reload: () => Promise<void>;
 };
 
@@ -52,9 +56,32 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   const home = useMemo(() => buildMobileHomeLayout(menus), [menus]);
   const grantedUrls = useMemo(() => flattenMenuUrls(menus), [menus]);
 
+  const canAccess = useCallback(
+    (path: string) => canAccessPath(grantedUrls, path),
+    [grantedUrls]
+  );
+
+  const canAccessModule = useCallback(
+    (moduleId: string) => {
+      const path = pathForModuleId(moduleId);
+      if (!path) return false;
+      return canAccessPath(grantedUrls, path);
+    },
+    [grantedUrls]
+  );
+
   const value = useMemo(
-    () => ({ loading, menus, sections, home, grantedUrls, reload }),
-    [loading, menus, sections, home, grantedUrls, reload]
+    () => ({
+      loading,
+      menus,
+      sections,
+      home,
+      grantedUrls,
+      canAccess,
+      canAccessModule,
+      reload,
+    }),
+    [loading, menus, sections, home, grantedUrls, canAccess, canAccessModule, reload]
   );
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;

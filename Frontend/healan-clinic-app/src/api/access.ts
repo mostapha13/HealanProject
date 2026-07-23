@@ -64,11 +64,51 @@ export function flattenMenuUrls(items: AccessMenuTreeItem[]): string[] {
 }
 
 export function canAccessPath(urls: string[], path: string): boolean {
-  const normalized = path.replace(/\/+$/, '') || '/';
+  const normalized = (path || '').replace(/\/+$/, '') || '/';
   return urls.some((u) => {
-    const nu = u.replace(/\/+$/, '') || '/';
-    return nu === normalized || (normalized !== '/' && nu.startsWith(normalized));
+    const nu = (u || '').replace(/\/+$/, '') || '/';
+    return (
+      nu === normalized ||
+      normalized.startsWith(`${nu}/`) ||
+      nu.startsWith(`${normalized}/`)
+    );
   });
+}
+
+export function pathForModuleId(moduleId: string): string | null {
+  const map: Record<string, string> = {
+    dashboard: '/',
+    queue: '/queue',
+    appointments: '/appointments',
+    patients: '/patients',
+    doctors: '/doctors',
+    prescriptions: '/prescriptions',
+    'blood-pressure': '/blood-pressure',
+    companies: '/basic-data/companies',
+    insurance: '/basic-data/insurance',
+    services: '/basic-data/services',
+    fees: '/basic-data/fees',
+    users: '/basic-data/users',
+    access: '/basic-data/access',
+    roles: '/basic-data/roles',
+    'access-roles': '/basic-data/access-roles',
+    assistant: '/basic-data/assistant',
+    'booking-schedules': '/booking/schedules',
+    'booking-reservations': '/booking/reservations',
+    'site-content': '/site-content',
+    'site-settings': '/site-content/settings',
+    'site-seo': '/site-content/seo',
+    'site-reviews': '/site-content/reviews',
+    'site-blog': '/site-content/blog',
+    'site-rag': '/site-content/rag',
+    'site-rag-logs': '/site-content/rag-logs',
+    reports: '/reports',
+    sms: '/reports/sms',
+    'sms-settings': '/reports/sms-settings',
+    workflow: '/workflow',
+    signature: '/signature',
+  };
+  return map[moduleId] ?? null;
 }
 
 /** MVP tabs the app implements — only show if AccessMenu grants the URL. */

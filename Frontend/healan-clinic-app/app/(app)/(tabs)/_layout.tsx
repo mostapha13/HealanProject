@@ -4,6 +4,7 @@ import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useAuth } from '../../../src/auth/AuthContext';
+import { useAccess } from '../../../src/access/AccessContext';
 import { AppScreen, LoadingBlock } from '../../../src/components/Ui';
 import { colors, fonts } from '../../../src/theme';
 
@@ -26,8 +27,9 @@ function TabIcon({ name, focused }: { name: Ion; focused: boolean }) {
 
 export default function TabsLayout() {
   const { session, loading } = useAuth();
+  const { canAccess, loading: accessLoading } = useAccess();
 
-  if (loading) {
+  if (loading || accessLoading) {
     return (
       <AppScreen>
         <LoadingBlock />
@@ -35,6 +37,9 @@ export default function TabsLayout() {
     );
   }
   if (!session) return <Redirect href="/login" />;
+
+  const showDashboard = canAccess('/') || canAccess('/reports');
+  const showBloodPressure = canAccess('/blood-pressure');
 
   return (
     <Tabs
@@ -67,6 +72,7 @@ export default function TabsLayout() {
         name="dashboard"
         options={{
           title: 'داشبورد',
+          href: showDashboard ? undefined : null,
           tabBarIcon: ({ focused }) => <TabIcon name="grid-outline" focused={focused} />,
         }}
       />
@@ -74,6 +80,7 @@ export default function TabsLayout() {
         name="blood-pressure"
         options={{
           title: 'فشار خون',
+          href: showBloodPressure ? undefined : null,
           tabBarIcon: ({ focused }) => <TabIcon name="heart-outline" focused={focused} />,
         }}
       />

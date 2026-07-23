@@ -42,6 +42,6 @@ export function filterAccessibleTiles(
   const filtered = defs.filter(
     (d) => ids.has(d.id) || paths.has(d.path) || urlHit(d.path)
   );
-  // Empty AccessMenu = no tiles (avoid opening modules that return 403).
+  // Empty AccessMenu = no tiles (never show unauthorized modules).
   return filtered;
 }

@@ -4,9 +4,10 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/auth/AuthContext';
+import { useAccess } from '../../../src/access/AccessContext';
 import { fetchDashboardStats, type DashboardStats } from '../../../src/api/healan';
-import { AppScreen, FeatureCard, LoadingBlock, SurfaceCard } from '../../../src/components/Ui';
-import { colors, fonts, radius, spacing } from '../../../src/theme';
+import { AppScreen, EmptyBlock, FeatureCard, LoadingBlock, SurfaceCard } from '../../../src/components/Ui';
+import { colors, fonts, spacing } from '../../../src/theme';
 
 function StatCard({
   label,
@@ -31,6 +32,7 @@ function StatCard({
 export default function DashboardScreen() {
   const router = useRouter();
   const { getAccessToken } = useAuth();
+  const { canAccess } = useAccess();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +53,14 @@ export default function DashboardScreen() {
     }, [load])
   );
 
+  const open = (id: string, title: string, path: string) => {
+    if (!canAccess(path)) return;
+    router.push({
+      pathname: '/(app)/module/[id]',
+      params: { id, title, path },
+    });
+  };
+
   return (
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={styles.top}>
@@ -61,7 +71,13 @@ export default function DashboardScreen() {
       <ScrollView
         contentContainerStyle={styles.body}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => { setLoading(true); void load(); }} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {
+              setLoading(true);
+              void load();
+            }}
+          />
         }
       >
         {loading && !stats ? (
@@ -69,7 +85,7 @@ export default function DashboardScreen() {
         ) : (
           <View style={styles.statGrid}>
             <StatCard label="نوبت امروز" value={stats?.todayAppointments ?? '—'} icon="calendar-outline" />
-            <StatCard label="صف انتظار" value={stats?.waitingAppointments ?? '—'} icon="people-outline" />
+            <StatCard label="در انتظار" value={stats?.waitingAppointments ?? '—'} icon="people-outline" />
             <StatCard label="در حال ویزیت" value={stats?.inProgressAppointments ?? '—'} icon="pulse-outline" />
             <StatCard label="تکمیل‌شده" value={stats?.completedToday ?? '—'} icon="checkmark-circle-outline" />
             <StatCard label="بیماران" value={stats?.totalPatients ?? '—'} icon="person-outline" />
@@ -78,26 +94,23 @@ export default function DashboardScreen() {
         )}
 
         <View style={styles.links}>
-          <FeatureCard
-            title="نمودارها و آمارها"
-            icon="bar-chart-outline"
-            onPress={() =>
-              router.push({
-                pathname: '/(app)/module/[id]',
-                params: { id: 'reports', title: 'نمودارها و آمارها', path: '/reports' },
-              })
-            }
-          />
-          <FeatureCard
-            title="صف انتظار"
-            icon="people-outline"
-            onPress={() =>
-              router.push({
-                pathname: '/(app)/module/[id]',
-                params: { id: 'queue', title: 'صف انتظار', path: '/queue' },
-              })
-            }
-          />
+          {canAccess('/reports') ? (
+            <FeatureCard
+              title="نمودارها و آمارها"
+              icon="bar-chart-outline"
+              onPress={() => open('reports', 'نمودارها و آمارها', '/reports')}
+            />
+          ) : null}
+          {canAccess('/queue') ? (
+            <FeatureCard
+              title="صف انتظار"
+              icon="people-outline"
+              onPress={() => open('queue', 'صف انتظار', '/queue')}
+            />
+          ) : null}
+          {!canAccess('/reports') && !canAccess('/queue') ? (
+            <EmptyBlock title="میانبری نیست" subtitle="بر اساس سطح دسترسی شما" />
+          ) : null}
         </View>
       </ScrollView>
     </AppScreen>
@@ -118,22 +131,16 @@ const styles = StyleSheet.create({
   statGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing.sm },
   statCard: { width: '48%', minHeight: 100 },
   statIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
+    width: 28,
+    height: 28,
+    borderRadius: 10,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-end',
     marginBottom: 8,
+    alignSelf: 'flex-end',
   },
-  statValue: { fontFamily: fonts.bold, fontSize: 22, color: colors.ink, textAlign: 'right' },
+  statValue: { fontFamily: fonts.bold, fontSize: 20, color: colors.ink, textAlign: 'right' },
   statLabel: { fontFamily: fonts.regular, fontSize: 12, color: colors.muted, textAlign: 'right', marginTop: 2 },
-  links: {
-    marginTop: spacing.lg,
-    flexDirection: 'row-reverse',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
-  },
+  links: { marginTop: spacing.lg, gap: spacing.sm },
 });

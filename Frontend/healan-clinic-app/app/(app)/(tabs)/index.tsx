@@ -30,7 +30,7 @@ import { colors, spacing } from '../../../src/theme';
 export default function HomeScreen() {
   const router = useRouter();
   const { getAccessToken } = useAuth();
-  const { home, grantedUrls, loading: menuLoading, reload } = useAccess();
+  const { home, grantedUrls, canAccess, loading: menuLoading, reload } = useAccess();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [slides, setSlides] = useState<PortalHeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,12 +76,27 @@ export default function HomeScreen() {
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: colors.primary }}>
         <BankHeader
-          onBell={() => open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })}
-          onSupport={() =>
-            open({ id: 'sms', path: '/reports/sms', title: 'پیامک‌ها', icon: 'chatbox-ellipses-outline' })
+          onBell={
+            canAccess('/queue')
+              ? () => open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })
+              : undefined
           }
-          onScan={() =>
-            open({ id: 'patients', path: '/patients', title: 'بیماران', icon: 'person-outline' })
+          onSupport={
+            canAccess('/reports/sms')
+              ? () =>
+                  open({
+                    id: 'sms',
+                    path: '/reports/sms',
+                    title: 'پیامک‌ها',
+                    icon: 'chatbox-ellipses-outline',
+                  })
+              : undefined
+          }
+          onScan={
+            canAccess('/patients')
+              ? () =>
+                  open({ id: 'patients', path: '/patients', title: 'بیماران', icon: 'person-outline' })
+              : undefined
           }
         />
       </SafeAreaView>
@@ -109,8 +124,10 @@ export default function HomeScreen() {
                 : 'میز کار پذیرش کلینیک'
             }
             fallbackSubtitle="اسلایدر سایت در دسترس نیست — وضعیت امروز"
-            onFallbackPress={() =>
-              open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })
+            onFallbackPress={
+              canAccess('/queue')
+                ? () => open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })
+                : undefined
             }
           />
         </View>
