@@ -42,7 +42,7 @@ export function BankHeader({ brand = 'هیلن بیمار' }: { brand?: string }
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v2-patient-pro</Text>
+            <Text style={styles.buildMark}>build-v3-otp-cors-fix</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>P</Text>

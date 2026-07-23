@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/auth/AuthContext';
 import { AppScreen, FormField, PrimaryButton } from '../src/components/Ui';
 import { colors, fonts, spacing } from '../src/theme';
+import { isValidMobile, normalizePhone } from '../src/utils/phone';
 
 export default function LoginScreen() {
   const { requestOtp, verifyOtp, lastError } = useAuth();
@@ -13,35 +14,44 @@ export default function LoginScreen() {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [masked, setMasked] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const sendOtp = async () => {
-    const p = phone.replace(/\D/g, '');
-    if (p.length < 10) {
-      Alert.alert('خطا', 'شماره موبایل را درست وارد کنید');
+    setError(null);
+    const p = normalizePhone(phone);
+    if (!isValidMobile(p)) {
+      setError('شماره موبایل را ۱۱ رقمی وارد کنید (مثال: 09123456789)');
       return;
     }
     setBusy(true);
     try {
       const res = await requestOtp(p);
+      setPhone(p);
       setMasked(res.phoneMasked);
       setStep('code');
     } catch (err) {
-      Alert.alert('خطا', err instanceof Error ? err.message : 'ارسال کد ناموفق بود');
+      setError(err instanceof Error ? err.message : 'ارسال کد ناموفق بود');
     } finally {
       setBusy(false);
     }
   };
 
   const confirm = async () => {
-    if (code.trim().length < 4) {
-      Alert.alert('خطا', 'کد تأیید را وارد کنید');
+    setError(null);
+    const p = normalizePhone(phone);
+    const codeAscii = code
+      .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+      .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+      .replace(/\D/g, '');
+    if (codeAscii.length < 4) {
+      setError('کد تأیید را وارد کنید');
       return;
     }
     setBusy(true);
     try {
-      await verifyOtp(phone.replace(/\D/g, ''), code.trim());
+      await verifyOtp(p, codeAscii);
     } catch (err) {
-      Alert.alert('خطا', err instanceof Error ? err.message : lastError || 'ورود ناموفق');
+      setError(err instanceof Error ? err.message : lastError || 'ورود ناموفق');
     } finally {
       setBusy(false);
     }
@@ -60,23 +70,31 @@ export default function LoginScreen() {
         <Text style={styles.title}>{step === 'phone' ? 'ورود با موبایل' : 'کد تأیید'}</Text>
         <Text style={styles.sub}>
           {step === 'phone'
-            ? 'شماره موبایلی که با آن در کلینیک ثبت شده‌اید را وارد کنید'
+            ? 'شماره موبایل ۱۱ رقمی خود را وارد کنید تا کد پیامک شود'
             : `کد ارسال‌شده به ${masked || phone} را وارد کنید`}
         </Text>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
         {step === 'phone' ? (
           <FormField
             label="موبایل"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(v) => {
+              setError(null);
+              setPhone(v);
+            }}
             keyboardType="phone-pad"
-            placeholder="09xxxxxxxxx"
+            placeholder="09123456789"
           />
         ) : (
           <FormField
             label="کد تأیید"
             value={code}
-            onChangeText={setCode}
+            onChangeText={(v) => {
+              setError(null);
+              setCode(v);
+            }}
             keyboardType="number-pad"
             placeholder="------"
           />
@@ -90,10 +108,11 @@ export default function LoginScreen() {
 
         {step === 'code' ? (
           <PrimaryButton
-            label="تغییر شماره"
+            label="تغییر شماره / ارسال مجدد"
             onPress={() => {
               setStep('phone');
               setCode('');
+              setError(null);
             }}
           />
         ) : null}
@@ -141,6 +160,16 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     textAlign: 'right',
     marginBottom: 8,
+    lineHeight: 20,
+  },
+  error: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.danger,
+    textAlign: 'right',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 12,
+    padding: 10,
     lineHeight: 20,
   },
 });

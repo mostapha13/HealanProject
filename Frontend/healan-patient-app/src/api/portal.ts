@@ -45,11 +45,21 @@ async function portalFetch<T>(
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (opts?.token) headers.Authorization = `Bearer ${opts.token}`;
   if (method === 'POST') headers['Content-Type'] = 'application/json';
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: method === 'POST' ? JSON.stringify(opts?.body ?? {}) : undefined,
-  });
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      body: method === 'POST' ? JSON.stringify(opts?.body ?? {}) : undefined,
+    });
+  } catch {
+    throw new ApiError(
+      0,
+      'ارتباط با سرور برقرار نشد. اگر روی localhost هستید، CORS پورت اپ بیمار باید روی API فعال باشد.'
+    );
+  }
+
   const raw = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(res.status, formatFailure(res.status, raw));
   return raw as T;

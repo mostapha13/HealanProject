@@ -64,13 +64,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const requestOtp = useCallback(async (phone: string) => {
     setLastError(null);
-    const res = await bookingOtpRequest(phone);
-    return { phoneMasked: res.phoneMasked };
+    try {
+      const res = await bookingOtpRequest(phone);
+      return { phoneMasked: res.phoneMasked };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'ارسال کد ناموفق بود';
+      setLastError(msg);
+      throw err;
+    }
   }, []);
 
   const verifyOtp = useCallback(async (phone: string, code: string) => {
     setLastError(null);
-    setLoading(true);
     try {
       const result = await bookingOtpVerify(phone, code);
       if (!result.accessToken) throw new Error('ورود ناموفق بود');
@@ -78,12 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await saveSession(next);
       setSession(next);
     } catch (err) {
-      setSession(null);
       const msg = err instanceof Error ? err.message : 'کد تأیید نامعتبر است';
       setLastError(msg);
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
