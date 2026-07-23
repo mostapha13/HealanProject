@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
 import type { PortalSeoPage } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
+import { HealanModal } from '../../components/HealanModal';
 import { HealanFileUpload, type FileUploadMeta } from '../../components/HealanFileUpload';
 import { confirmDelete } from '../../components/confirmDialog';
 
@@ -23,6 +24,13 @@ const emptyForm = (): PortalSeoPage => ({
   isActive: true,
   sortOrder: 0,
 });
+
+const ROBOTS_OPTIONS = [
+  { value: 'index,follow', label: 'ایندکس شود و لینک‌ها دنبال شوند (پیشنهادی)' },
+  { value: 'noindex,follow', label: 'ایندکس نشود، لینک‌ها دنبال شوند' },
+  { value: 'index,nofollow', label: 'ایندکس شود، لینک‌ها دنبال نشوند' },
+  { value: 'noindex,nofollow', label: 'ایندکس و دنبال نشود' },
+];
 
 function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   const [items, setItems] = useState<PortalSeoPage[]>([]);
@@ -63,6 +71,18 @@ function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     );
     setShowForm(true);
   };
+
+  const previewTitle = form.title || 'عنوان صفحه…';
+  const previewDesc =
+    form.description ||
+    'توضیح کوتاه صفحه اینجا در نتایج گوگل دیده می‌شود (حدود ۱۵۰–۱۶۰ کاراکتر).';
+  const titleLen = (form.title || '').length;
+  const descLen = (form.description || '').length;
+
+  const ogPreviewSrc = useMemo(
+    () => ogFile?.link || form.ogImageUrl || '',
+    [ogFile?.link, form.ogImageUrl]
+  );
 
   const handleSave = async () => {
     if (!form.pageKey.trim() || !form.path.trim() || !form.title.trim()) {
@@ -109,17 +129,30 @@ function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
     }
   };
 
+  const setField = <K extends keyof PortalSeoPage>(key: K, value: PortalSeoPage[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className="healan-page">
       <PageHeader
         title="تنظیمات SEO"
-        subtitle="عنوان، توضیحات و Open Graph صفحات سایت عمومی (www) — قابل ویرایش برای گوگل و چت‌بات‌ها"
+        subtitle="عنوان، توضیحات و Open Graph صفحات سایت عمومی (www) — قابل ویرایش برای گوگل و شبکه‌های اجتماعی"
         action={
           <button type="button" className="healan-btn" onClick={openNew}>
             افزودن صفحه
           </button>
         }
       />
+
+      <div className="seo-admin-hint healan-card">
+        <strong>راهنمای سریع:</strong>
+        <span>
+          رکوردهای <code>home</code> (مسیر /) و <code>blog</code> (مسیر /blog) روی سایت Next
+          اعمال می‌شوند. عنوان و توضیح در تگ‌های HTML و نتایج گوگل دیده می‌شوند؛ تصویر OG هنگام
+          اشتراک در واتساپ/تلگرام/ایکس نمایش داده می‌شود.
+        </span>
+      </div>
 
       {loading ? (
         <p className="healan-empty">در حال بارگذاری...</p>
@@ -138,15 +171,33 @@ function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             <tbody>
               {items.map((item) => (
                 <tr key={item.portalSeoPageId}>
-                  <td>{item.pageKey}</td>
+                  <td>
+                    <code className="seo-admin-code">{item.pageKey}</code>
+                  </td>
                   <td dir="ltr">{item.path}</td>
                   <td>{item.title}</td>
-                  <td>{item.isActive ? 'بله' : 'خیر'}</td>
+                  <td>
+                    <span
+                      className={
+                        item.isActive ? 'seo-admin-badge is-on' : 'seo-admin-badge'
+                      }
+                    >
+                      {item.isActive ? 'فعال' : 'غیرفعال'}
+                    </span>
+                  </td>
                   <td style={{ whiteSpace: 'nowrap' }}>
-                    <button type="button" className="healan-btn healan-btn--outline healan-btn--sm" onClick={() => openEdit(item)}>
+                    <button
+                      type="button"
+                      className="healan-btn healan-btn--outline healan-btn--sm"
+                      onClick={() => openEdit(item)}
+                    >
                       ویرایش
                     </button>{' '}
-                    <button type="button" className="healan-btn healan-btn--danger healan-btn--sm" onClick={() => void handleDelete(item.portalSeoPageId)}>
+                    <button
+                      type="button"
+                      className="healan-btn healan-btn--danger healan-btn--sm"
+                      onClick={() => void handleDelete(item.portalSeoPageId)}
+                    >
                       حذف
                     </button>
                   </td>
@@ -164,75 +215,212 @@ function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         </div>
       )}
 
-      {showForm ? (
-        <div className="healan-modal-backdrop" onClick={() => setShowForm(false)}>
-          <div className="healan-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 720 }}>
-            <h3>{form.portalSeoPageId ? 'ویرایش SEO' : 'افزودن SEO'}</h3>
-            <div className="healan-form-grid">
-              <label>
-                کلید صفحه
-                <input value={form.pageKey} onChange={(e) => setForm({ ...form, pageKey: e.target.value })} placeholder="home" dir="ltr" />
-              </label>
-              <label>
-                مسیر
-                <input value={form.path} onChange={(e) => setForm({ ...form, path: e.target.value })} placeholder="/" dir="ltr" />
-              </label>
-              <label className="healan-form-span-2">
-                عنوان (Title)
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              </label>
-              <label className="healan-form-span-2">
-                توضیحات (Description)
-                <textarea rows={3} value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              </label>
-              <label className="healan-form-span-2">
-                کلمات کلیدی
-                <input value={form.keywords || ''} onChange={(e) => setForm({ ...form, keywords: e.target.value })} />
-              </label>
-              <label>
-                OG Title
-                <input value={form.ogTitle || ''} onChange={(e) => setForm({ ...form, ogTitle: e.target.value })} />
-              </label>
-              <label>
-                Robots
-                <input value={form.robots || 'index,follow'} onChange={(e) => setForm({ ...form, robots: e.target.value })} dir="ltr" />
-              </label>
-              <label className="healan-form-span-2">
-                OG Description
-                <textarea rows={2} value={form.ogDescription || ''} onChange={(e) => setForm({ ...form, ogDescription: e.target.value })} />
-              </label>
-              <label className="healan-form-span-2">
-                Canonical URL
-                <input value={form.canonicalUrl || ''} onChange={(e) => setForm({ ...form, canonicalUrl: e.target.value })} dir="ltr" />
-              </label>
-              <label>
-                ترتیب
-                <input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-                فعال
-              </label>
-              <div className="healan-form-span-2">
-                <span>تصویر Open Graph</span>
-                <HealanFileUpload value={ogFile} onChange={setOgFile} />
-              </div>
-              <label className="healan-form-span-2">
-                JSON-LD اضافی (اختیاری)
-                <textarea rows={4} value={form.jsonLdExtra || ''} onChange={(e) => setForm({ ...form, jsonLdExtra: e.target.value })} dir="ltr" placeholder='{"@type":"FAQPage",...}' />
-              </label>
-            </div>
-            <div className="healan-modal__actions">
-              <button type="button" className="healan-btn healan-btn--outline" onClick={() => setShowForm(false)}>
-                انصراف
-              </button>
-              <button type="button" className="healan-btn" disabled={saving} onClick={() => void handleSave()}>
-                {saving ? '...' : 'ذخیره'}
-              </button>
-            </div>
+      <HealanModal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={form.portalSeoPageId ? 'ویرایش تنظیمات SEO' : 'افزودن صفحه SEO'}
+        subtitle="فیلدها را بخش‌بندی پر کنید؛ پیش‌نمایش گوگل در پایین به‌روز می‌شود."
+        icon="🔎"
+        width={820}
+        footer={
+          <div className="healan-modal__footer-actions">
+            <button
+              type="button"
+              className="healan-btn healan-btn--outline"
+              onClick={() => setShowForm(false)}
+            >
+              انصراف
+            </button>
+            <button
+              type="button"
+              className="healan-btn"
+              disabled={saving}
+              onClick={() => void handleSave()}
+            >
+              {saving ? 'در حال ذخیره…' : 'ذخیره SEO'}
+            </button>
           </div>
+        }
+      >
+        <div className="seo-form">
+          <section className="seo-form__section">
+            <header className="seo-form__section-head">
+              <h4>شناسه صفحه</h4>
+              <p>کلید یکتا در سیستم و مسیر واقعی روی www</p>
+            </header>
+            <div className="seo-form__grid">
+              <label className="seo-form__field">
+                <span>
+                  کلید صفحه <em>*</em>
+                </span>
+                <input
+                  value={form.pageKey}
+                  onChange={(e) => setField('pageKey', e.target.value)}
+                  placeholder="home"
+                  dir="ltr"
+                />
+                <small>مثال: home ، blog</small>
+              </label>
+              <label className="seo-form__field">
+                <span>
+                  مسیر (Path) <em>*</em>
+                </span>
+                <input
+                  value={form.path}
+                  onChange={(e) => setField('path', e.target.value)}
+                  placeholder="/"
+                  dir="ltr"
+                />
+                <small>مثال: / یا /blog</small>
+              </label>
+              <label className="seo-form__field">
+                <span>ترتیب نمایش</span>
+                <input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => setField('sortOrder', Number(e.target.value))}
+                />
+              </label>
+              <label className="seo-form__switch">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) => setField('isActive', e.target.checked)}
+                />
+                <span>فعال باشد و در سایت عمومی اعمال شود</span>
+              </label>
+            </div>
+          </section>
+
+          <section className="seo-form__section">
+            <header className="seo-form__section-head">
+              <h4>نتایج جستجو (Google)</h4>
+              <p>عنوان و توضیح متا — مهم‌ترین فیلدها برای کلیک در گوگل</p>
+            </header>
+            <div className="seo-form__grid seo-form__grid--1">
+              <label className="seo-form__field">
+                <span>
+                  عنوان (Title) <em>*</em>
+                  <b className={titleLen > 60 ? 'is-warn' : ''}>{titleLen}/60</b>
+                </span>
+                <input
+                  value={form.title}
+                  onChange={(e) => setField('title', e.target.value)}
+                  placeholder="مثلاً مطب تخصصی قلب و عروق دکتر شهرویی | شوشتر"
+                />
+                <small>پیشنهاد: حداکثر حدود ۶۰ کاراکتر</small>
+              </label>
+              <label className="seo-form__field">
+                <span>
+                  توضیحات (Meta Description)
+                  <b className={descLen > 160 ? 'is-warn' : ''}>{descLen}/160</b>
+                </span>
+                <textarea
+                  rows={3}
+                  value={form.description || ''}
+                  onChange={(e) => setField('description', e.target.value)}
+                  placeholder="یک یا دو جمله جذاب درباره خدمات مطب…"
+                />
+                <small>پیشنهاد: حدود ۱۵۰–۱۶۰ کاراکتر</small>
+              </label>
+              <label className="seo-form__field">
+                <span>کلمات کلیدی</span>
+                <input
+                  value={form.keywords || ''}
+                  onChange={(e) => setField('keywords', e.target.value)}
+                  placeholder="متخصص قلب شوشتر، اکوکاردیوگرافی، نوبت قلب"
+                />
+                <small>تأثیر مستقیم کم روی گوگل؛ برای نظم داخلی مفید است</small>
+              </label>
+              <label className="seo-form__field">
+                <span>Robots</span>
+                <select
+                  value={form.robots || 'index,follow'}
+                  onChange={(e) => setField('robots', e.target.value)}
+                >
+                  {ROBOTS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="seo-form__field">
+                <span>Canonical URL</span>
+                <input
+                  value={form.canonicalUrl || ''}
+                  onChange={(e) => setField('canonicalUrl', e.target.value)}
+                  placeholder="https://www.drshahrooei.ir/"
+                  dir="ltr"
+                />
+                <small>خالی = همان آدرس صفحه؛ برای جلوگیری از محتوای تکراری</small>
+              </label>
+            </div>
+
+            <div className="seo-serp-preview" aria-hidden>
+              <div className="seo-serp-preview__url">
+                www.drshahrooei.ir{form.path === '/' ? '' : form.path}
+              </div>
+              <div className="seo-serp-preview__title">{previewTitle}</div>
+              <div className="seo-serp-preview__desc">{previewDesc}</div>
+            </div>
+          </section>
+
+          <section className="seo-form__section">
+            <header className="seo-form__section-head">
+              <h4>اشتراک‌گذاری (Open Graph)</h4>
+              <p>وقتی لینک در واتساپ، تلگرام یا شبکه‌های اجتماعی باز می‌شود</p>
+            </header>
+            <div className="seo-form__grid">
+              <label className="seo-form__field">
+                <span>OG Title</span>
+                <input
+                  value={form.ogTitle || ''}
+                  onChange={(e) => setField('ogTitle', e.target.value)}
+                  placeholder="اگر خالی باشد همان Title استفاده می‌شود"
+                />
+              </label>
+              <label className="seo-form__field seo-form__field--span2">
+                <span>OG Description</span>
+                <textarea
+                  rows={2}
+                  value={form.ogDescription || ''}
+                  onChange={(e) => setField('ogDescription', e.target.value)}
+                  placeholder="اگر خالی باشد همان Description استفاده می‌شود"
+                />
+              </label>
+              <div className="seo-form__field seo-form__field--span2">
+                <span className="seo-form__label-text">تصویر Open Graph</span>
+                <HealanFileUpload value={ogFile} onChange={setOgFile} />
+                <small>نسبت پیشنهادی حدود ۱۲۰۰×۶۳۰ پیکسل</small>
+                {ogPreviewSrc ? (
+                  <div className="seo-og-preview">
+                    <img src={ogPreviewSrc} alt="پیش‌نمایش OG" />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          <section className="seo-form__section">
+            <header className="seo-form__section-head">
+              <h4>پیشرفته</h4>
+              <p>فقط در صورت نیاز — JSON-LD اضافی برای اسکیماهای خاص</p>
+            </header>
+            <label className="seo-form__field">
+              <span>JSON-LD اضافی (اختیاری)</span>
+              <textarea
+                rows={4}
+                value={form.jsonLdExtra || ''}
+                onChange={(e) => setField('jsonLdExtra', e.target.value)}
+                dir="ltr"
+                placeholder='[{"@type":"FAQPage", ...}]'
+              />
+              <small>باید JSON معتبر باشد؛ در صورت خطا نادیده گرفته می‌شود</small>
+            </label>
+          </section>
         </div>
-      ) : null}
+      </HealanModal>
     </div>
   );
 }
