@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +18,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts, radius, spacing } from '../theme';
 import type { IconName } from '../navigation/catalog';
+import type { PortalHeroSlide } from '../api/healan';
 
 export function AppScreen({
   children,
@@ -44,7 +50,7 @@ export function BankHeader({
         <View style={styles.bankActions}>
           <HeaderIcon name="notifications-outline" onPress={onBell} />
           <HeaderIcon name="headset-outline" onPress={onSupport} />
-          <HeaderIcon name="qr-code-outline" onPress={onScan} />
+          <HeaderIcon name="phone-portrait-outline" onPress={onScan} />
         </View>
         <View style={styles.brandRow}>
           <Text style={styles.brandText}>{brand}</Text>
@@ -65,41 +71,101 @@ function HeaderIcon({ name, onPress }: { name: IconName; onPress?: () => void })
   );
 }
 
-/** Promo / status banner under lime header */
-export function PromoBanner({
-  title,
-  subtitle,
-  cta,
-  onPress,
+/** Website hero slides in QBank-style rounded banner */
+export function SiteHeroCarousel({
+  slides,
+  fallbackTitle,
+  fallbackSubtitle,
+  onFallbackPress,
 }: {
-  title: string;
-  subtitle?: string;
-  cta?: string;
-  onPress?: () => void;
+  slides: PortalHeroSlide[];
+  fallbackTitle: string;
+  fallbackSubtitle?: string;
+  onFallbackPress?: () => void;
 }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.promo, pressed && { opacity: 0.94 }]}
-    >
-      <View style={styles.promoCopy}>
-        <Text style={styles.promoTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.promoSub}>{subtitle}</Text> : null}
-        {cta ? (
-          <View style={styles.promoCta}>
-            <Text style={styles.promoCtaText}>{cta}</Text>
-            <Ionicons name="chevron-back" size={14} color={colors.primaryInk} />
+  const width = Dimensions.get('window').width - spacing.md * 2;
+  const [index, setIndex] = useState(0);
+  const scroller = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (slides.length < 2) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => {
+        const next = (prev + 1) % slides.length;
+        scroller.current?.scrollTo({ x: next * width, animated: true });
+        return next;
+      });
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [slides.length, width]);
+
+  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x;
+    setIndex(Math.round(x / width));
+  };
+
+  if (!slides.length) {
+    return (
+      <View style={{ marginHorizontal: spacing.md }}>
+        <Pressable
+          onPress={onFallbackPress}
+          style={({ pressed }) => [styles.heroBanner, { width }, pressed && { opacity: 0.95 }]}
+        >
+          <View style={styles.heroFallbackCopy}>
+            <Text style={styles.heroTitle}>{fallbackTitle}</Text>
+            {fallbackSubtitle ? <Text style={styles.heroSub}>{fallbackSubtitle}</Text> : null}
+            <View style={styles.heroCta}>
+              <Text style={styles.heroCtaText}>مشاهده صف</Text>
+              <Ionicons name="chevron-back" size={14} color={colors.primaryInk} />
+            </View>
           </View>
-        ) : null}
+          <View style={styles.heroArt}>
+            <Ionicons name="medkit" size={40} color={colors.primaryDeep} />
+          </View>
+        </Pressable>
       </View>
-      <View style={styles.promoArt}>
-        <Ionicons name="medkit" size={42} color={colors.primaryDeep} />
-      </View>
-    </Pressable>
+    );
+  }
+
+  return (
+    <View>
+      <ScrollView
+        ref={scroller}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={onScrollEnd}
+        decelerationRate="fast"
+        style={{ marginHorizontal: spacing.md }}
+      >
+        {slides.map((slide) => (
+          <View key={slide.id} style={[styles.heroBanner, { width }]}>
+            {slide.imageUrl ? (
+              <Image source={{ uri: slide.imageUrl }} style={styles.heroImage} resizeMode="cover" />
+            ) : (
+              <View style={[styles.heroImage, styles.heroImagePlaceholder]}>
+                <Ionicons name="images-outline" size={36} color={colors.primaryDeep} />
+              </View>
+            )}
+            <View style={styles.heroOverlay}>
+              {slide.title ? <Text style={styles.heroOverlayTitle}>{slide.title}</Text> : null}
+              {slide.subtitle ? <Text style={styles.heroOverlaySub}>{slide.subtitle}</Text> : null}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+      {slides.length > 1 ? (
+        <View style={styles.dots}>
+          {slides.map((s, i) => (
+            <View key={s.id} style={[styles.dot, i === index && styles.dotActive]} />
+          ))}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
-/** 4-col quick action tile */
+/** 3-col quick action tile */
 export function IconGridItem({
   title,
   icon,
@@ -322,38 +388,61 @@ const styles = StyleSheet.create({
   },
   bankActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   headerIconBtn: { padding: 8 },
-  promo: {
-    marginTop: -spacing.sm,
-    marginHorizontal: spacing.md,
-    backgroundColor: colors.white,
+  heroBanner: {
+    height: 168,
     borderRadius: radius.xl,
-    padding: spacing.md,
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: spacing.md,
+    overflow: 'hidden',
+    backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.line,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
     shadowColor: colors.cardShadow,
     shadowOpacity: 1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  promoCopy: { flex: 1 },
-  promoTitle: {
+  heroImage: { ...StyleSheet.absoluteFill, width: '100%', height: '100%' },
+  heroImagePlaceholder: {
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.28)',
+    justifyContent: 'flex-end',
+    padding: spacing.md,
+  },
+  heroOverlayTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: colors.white,
+    textAlign: 'right',
+  },
+  heroOverlaySub: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  heroFallbackCopy: { flex: 1, padding: spacing.md },
+  heroTitle: {
     fontFamily: fonts.bold,
     fontSize: 16,
     color: colors.ink,
     textAlign: 'right',
   },
-  promoSub: {
+  heroSub: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: colors.muted,
     textAlign: 'right',
     marginTop: 4,
   },
-  promoCta: {
+  heroCta: {
     marginTop: 10,
     alignSelf: 'flex-end',
     flexDirection: 'row-reverse',
@@ -364,17 +453,31 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: radius.pill,
   },
-  promoCtaText: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.primaryInk },
-  promoArt: {
+  heroCtaText: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.primaryInk },
+  heroArt: {
     width: 72,
     height: 72,
+    marginLeft: spacing.md,
     borderRadius: radius.lg,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#D0D0D0',
+  },
+  dotActive: { backgroundColor: colors.primaryInk, width: 8, height: 8 },
   iconCell: {
-    width: '25%',
+    width: '33.33%',
     alignItems: 'center',
     paddingVertical: spacing.sm,
     paddingHorizontal: 4,

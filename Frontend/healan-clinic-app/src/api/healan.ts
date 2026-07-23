@@ -513,3 +513,48 @@ export function appointmentPatientLabel(a: AppointmentSummary): string {
 export function doctorDisplayName(d: DoctorSummary): string {
   return `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() || `پزشک ${d.doctorId}`;
 }
+
+export type PortalHeroSlide = {
+  id: number;
+  title: string;
+  subtitle?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+};
+
+/** Public site hero slides (same source as www HeroSlide). */
+export async function fetchPortalHeroSlides(): Promise<PortalHeroSlide[]> {
+  const raw = await apiGet<Record<string, unknown>>(
+    config.healanApiUrl,
+    'PortalPublic/Site',
+    async () => null
+  );
+  const r = asRecord(raw);
+  const items = (r.contentItems ?? r.ContentItems ?? []) as unknown[];
+  const list = Array.isArray(items) ? items : [];
+  const slides = list
+    .map((item, index) => {
+      const row = asRecord(item);
+      const section = row.sectionType ?? row.SectionType;
+      const isHero =
+        section === 'HeroSlide' ||
+        section === 1 ||
+        section === '1' ||
+        String(section).toLowerCase() === 'heroslide';
+      if (!isHero) return null;
+      const published = row.isPublished ?? row.IsPublished;
+      if (published === false) return null;
+      return {
+        id: Number(row.portalContentItemId ?? row.id ?? index),
+        title: String(row.title ?? row.Title ?? ''),
+        subtitle: String(row.subtitle ?? row.Subtitle ?? '') || undefined,
+        imageUrl: String(row.imageUrl ?? row.ImageUrl ?? '') || undefined,
+        linkUrl: String(row.linkUrl ?? row.LinkUrl ?? '') || undefined,
+        sortOrder: Number(row.sortOrder ?? row.SortOrder ?? index),
+      };
+    })
+    .filter(Boolean) as (PortalHeroSlide & { sortOrder: number })[];
+  return slides
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map(({ sortOrder: _s, ...rest }) => rest);
+}

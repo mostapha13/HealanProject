@@ -1,11 +1,21 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAccess } from '../../../src/access/AccessContext';
 import { useAuth } from '../../../src/auth/AuthContext';
-import { fetchDashboardStats, type DashboardStats } from '../../../src/api/healan';
-import type { ClinicModule } from '../../../src/navigation/catalog';
+import {
+  fetchDashboardStats,
+  fetchPortalHeroSlides,
+  type DashboardStats,
+  type PortalHeroSlide,
+} from '../../../src/api/healan';
+import {
+  filterAccessibleTiles,
+  HOME_LARGE_TILES,
+  HOME_SMALL_TILES,
+  type HomeTileDef,
+} from '../../../src/navigation/homeTiles';
 import {
   AppScreen,
   BankHeader,
@@ -13,7 +23,7 @@ import {
   FeatureCard,
   IconGridItem,
   LoadingBlock,
-  PromoBanner,
+  SiteHeroCarousel,
 } from '../../../src/components/Ui';
 import { colors, spacing } from '../../../src/theme';
 
@@ -22,13 +32,26 @@ export default function HomeScreen() {
   const { getAccessToken } = useAuth();
   const { home, loading: menuLoading, reload } = useAccess();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [slides, setSlides] = useState<PortalHeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const smallTiles = useMemo(
+    () => filterAccessibleTiles(HOME_SMALL_TILES, home.allServices),
+    [home.allServices]
+  );
+  const largeTiles = useMemo(
+    () => filterAccessibleTiles(HOME_LARGE_TILES, home.allServices),
+    [home.allServices]
+  );
 
   const load = useCallback(async () => {
     try {
-      setStats(await fetchDashboardStats(getAccessToken));
-    } catch {
-      setStats(null);
+      const [s, hero] = await Promise.all([
+        fetchDashboardStats(getAccessToken).catch(() => null),
+        fetchPortalHeroSlides().catch(() => [] as PortalHeroSlide[]),
+      ]);
+      setStats(s);
+      setSlides(hero);
     } finally {
       setLoading(false);
     }
@@ -42,7 +65,7 @@ export default function HomeScreen() {
     }, [load, reload])
   );
 
-  const open = (item: ClinicModule) => {
+  const open = (item: HomeTileDef) => {
     router.push({
       pathname: '/(app)/module/[id]',
       params: { id: item.id, title: item.title, path: item.path },
@@ -53,23 +76,12 @@ export default function HomeScreen() {
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: colors.primary }}>
         <BankHeader
-          onBell={() =>
-            router.push({
-              pathname: '/(app)/module/[id]',
-              params: { id: 'queue', title: 'صف انتظار', path: '/queue' },
-            })
-          }
+          onBell={() => open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })}
           onSupport={() =>
-            router.push({
-              pathname: '/(app)/module/[id]',
-              params: { id: 'sms', title: 'پیامک‌ها', path: '/reports/sms' },
-            })
+            open({ id: 'sms', path: '/reports/sms', title: 'پیامک‌ها', icon: 'chatbox-ellipses-outline' })
           }
           onScan={() =>
-            router.push({
-              pathname: '/(app)/module/[id]',
-              params: { id: 'patients', title: 'بیماران', path: '/patients' },
-            })
+            open({ id: 'patients', path: '/patients', title: 'بیماران', icon: 'person-outline' })
           }
         />
       </SafeAreaView>
@@ -88,49 +100,52 @@ export default function HomeScreen() {
           />
         }
       >
-        <PromoBanner
-          title={
-            stats
-              ? `امروز ${stats.todayAppointments} نوبت · ${stats.waitingAppointments} در صف`
-              : 'میز کار پذیرش کلینیک'
-          }
-          subtitle="وضعیت لحظه‌ای نوبت و صف انتظار"
-          cta="مشاهده صف"
-          onPress={() =>
-            router.push({
-              pathname: '/(app)/module/[id]',
-              params: { id: 'queue', title: 'صف انتظار', path: '/queue' },
-            })
-          }
-        />
+        <View style={styles.carouselWrap}>
+          <SiteHeroCarousel
+            slides={slides}
+            fallbackTitle={
+              stats
+                ? `امروز ${stats.todayAppointments} نوبت · ${stats.waitingAppointments} در صف`
+                : 'میز کار پذیرش کلینیک'
+            }
+            fallbackSubtitle="اسلایدر سایت در دسترس نیست — وضعیت امروز"
+            onFallbackPress={() =>
+              open({ id: 'queue', path: '/queue', title: 'صف انتظار', icon: 'people-outline' })
+            }
+          />
+        </View>
 
-        {menuLoading && home.quickActions.length === 0 ? (
+        {menuLoading && smallTiles.length === 0 && largeTiles.length === 0 ? (
           <LoadingBlock />
-        ) : home.quickActions.length === 0 ? (
-          <EmptyBlock title="منویی نیست" subtitle="برای این حساب منوی دسترسی تعریف نشده" />
+        ) : smallTiles.length === 0 && largeTiles.length === 0 ? (
+          <EmptyBlock title="منویی نیست" subtitle="برای این حساب دسترسی عملیاتی تعریف نشده" />
         ) : (
           <>
-            <View style={styles.iconGrid}>
-              {home.quickActions.map((item) => (
-                <IconGridItem
-                  key={item.path}
-                  title={item.title}
-                  icon={item.icon}
-                  onPress={() => open(item)}
-                />
-              ))}
-            </View>
+            {smallTiles.length ? (
+              <View style={styles.iconGrid}>
+                {smallTiles.map((item) => (
+                  <IconGridItem
+                    key={item.path}
+                    title={item.title}
+                    icon={item.icon}
+                    onPress={() => open(item)}
+                  />
+                ))}
+              </View>
+            ) : null}
 
-            <View style={styles.featureGrid}>
-              {home.featureCards.map((item) => (
-                <FeatureCard
-                  key={`f-${item.path}`}
-                  title={item.title}
-                  icon={item.icon}
-                  onPress={() => open(item)}
-                />
-              ))}
-            </View>
+            {largeTiles.length ? (
+              <View style={styles.featureGrid}>
+                {largeTiles.map((item) => (
+                  <FeatureCard
+                    key={`f-${item.path}`}
+                    title={item.title}
+                    icon={item.icon}
+                    onPress={() => open(item)}
+                  />
+                ))}
+              </View>
+            ) : null}
           </>
         )}
       </ScrollView>
@@ -142,6 +157,9 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: spacing.xxl,
     paddingTop: spacing.md,
+  },
+  carouselWrap: {
+    marginTop: -spacing.sm,
   },
   iconGrid: {
     marginTop: spacing.lg,

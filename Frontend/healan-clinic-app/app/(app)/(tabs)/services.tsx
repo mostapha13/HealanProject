@@ -28,8 +28,8 @@ export default function ServicesScreen() {
   return (
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={styles.top}>
-        <Text style={styles.title}>خدمات کلینیک</Text>
-        <Text style={styles.sub}>منوها بر اساس سطح دسترسی شما از API</Text>
+        <Text style={styles.title}>خدمات</Text>
+        <Text style={styles.sub}>همه منوها و تنظیمات بر اساس دسترسی شما</Text>
       </SafeAreaView>
       <View style={styles.body}>
         <SearchField placeholder="جستجوی منو..." value={q} onChangeText={setQ} />
