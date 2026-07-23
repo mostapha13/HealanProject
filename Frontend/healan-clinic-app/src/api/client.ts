@@ -74,6 +74,50 @@ function unwrap<T>(json: unknown): T {
 
 export type TokenGetter = () => Promise<string | null>;
 
+export type PaginatedPage<T> = {
+  items?: T[];
+  Items?: T[];
+  totalCount?: number;
+  TotalCount?: number;
+  hasNextPage?: boolean;
+  HasNextPage?: boolean;
+  pageNumber?: number;
+  PageNumber?: number;
+};
+
+export function pageItems<T>(page: PaginatedPage<T> | T[] | null | undefined): T[] {
+  if (!page) return [];
+  if (Array.isArray(page)) return page;
+  return page.items ?? page.Items ?? [];
+}
+
+export function pageHasNext(page: PaginatedPage<unknown> | null | undefined): boolean {
+  if (!page || Array.isArray(page)) return false;
+  if (typeof page.hasNextPage === 'boolean') return page.hasNextPage;
+  if (typeof page.HasNextPage === 'boolean') return page.HasNextPage;
+  const total = page.totalCount ?? page.TotalCount;
+  const pageNumber = page.pageNumber ?? page.PageNumber ?? 1;
+  if (typeof total === 'number') {
+    return pageNumber * HEALAN_MAX_PAGE_SIZE < total;
+  }
+  return pageItems(page).length >= HEALAN_MAX_PAGE_SIZE;
+}
+
+/** Load all pages (API max pageSize=20). */
+export async function fetchAllPaginated<T>(
+  fetchPage: (pageNumber: number, pageSize: number) => Promise<PaginatedPage<T> | T[]>,
+  maxPages = 50
+): Promise<T[]> {
+  const all: T[] = [];
+  for (let pageNumber = 1; pageNumber <= maxPages; pageNumber += 1) {
+    const page = await fetchPage(pageNumber, HEALAN_MAX_PAGE_SIZE);
+    const items = pageItems(page);
+    all.push(...items);
+    if (Array.isArray(page) || !pageHasNext(page) || items.length === 0) break;
+  }
+  return all;
+}
+
 export async function apiGet<T>(
   baseUrl: string,
   path: string,

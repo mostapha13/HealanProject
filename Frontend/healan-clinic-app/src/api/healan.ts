@@ -1,5 +1,10 @@
 import type { TokenGetter } from './client';
-import { apiGet, clampPageSize, HEALAN_MAX_PAGE_SIZE } from './client';
+import {
+  apiGet,
+  fetchAllPaginated,
+  pageItems,
+  type PaginatedPage,
+} from './client';
 import { config } from '../config';
 
 export type DashboardStats = {
@@ -61,18 +66,7 @@ export type PrescriptionSummary = {
   prescriptionDate?: string;
 };
 
-export type PaginatedResponse<T> = {
-  items?: T[];
-  Items?: T[];
-  totalCount?: number;
-  TotalCount?: number;
-};
-
-function pageItems<T>(page: PaginatedResponse<T> | T[] | null | undefined): T[] {
-  if (!page) return [];
-  if (Array.isArray(page)) return page;
-  return page.items ?? page.Items ?? [];
-}
+export type PaginatedResponse<T> = PaginatedPage<T>;
 
 function asRecord(item: unknown): Record<string, unknown> {
   return (item ?? {}) as Record<string, unknown>;
@@ -84,157 +78,174 @@ export async function fetchDashboardStats(getToken: TokenGetter): Promise<Dashbo
 
 export async function fetchTodayAppointments(
   getToken: TokenGetter,
-  params: { pageNumber?: number; pageSize?: number; filterText?: string } = {}
+  params: { filterText?: string } = {}
 ): Promise<AppointmentSummary[]> {
-  const page = await apiGet<PaginatedResponse<AppointmentSummary>>(
-    config.healanApiUrl,
-    'Appointment/CurrentAppointmentList',
-    getToken,
-    {
-      pageNumber: params.pageNumber ?? 1,
-      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
-      filterText: params.filterText,
-    }
+  return fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<AppointmentSummary>>(
+      config.healanApiUrl,
+      'Appointment/CurrentAppointmentList',
+      getToken,
+      {
+        pageNumber,
+        pageSize,
+        filterText: params.filterText,
+      }
+    )
   );
-  return pageItems(page);
 }
 
 export async function fetchAppointments(
   getToken: TokenGetter,
-  params: { pageNumber?: number; pageSize?: number; filterText?: string } = {}
+  params: { filterText?: string } = {}
 ): Promise<AppointmentSummary[]> {
-  const page = await apiGet<PaginatedResponse<AppointmentSummary>>(
-    config.healanApiUrl,
-    'Appointment/AppointmentList',
-    getToken,
-    {
-      pageNumber: params.pageNumber ?? 1,
-      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
-      filterText: params.filterText,
-    }
+  return fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<AppointmentSummary>>(
+      config.healanApiUrl,
+      'Appointment/AppointmentList',
+      getToken,
+      {
+        pageNumber,
+        pageSize,
+        filterText: params.filterText,
+      }
+    )
   );
-  return pageItems(page);
 }
 
 export async function fetchPatients(
   getToken: TokenGetter,
-  params: { pageNumber?: number; pageSize?: number; filterText?: string } = {}
+  params: { filterText?: string } = {}
 ): Promise<PatientSummary[]> {
-  const page = await apiGet<PaginatedResponse<PatientSummary>>(
-    config.healanApiUrl,
-    'Patient/PatientList',
-    getToken,
-    {
-      pageNumber: params.pageNumber ?? 1,
-      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
+  return fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<PatientSummary>>(config.healanApiUrl, 'Patient/PatientList', getToken, {
+      pageNumber,
+      pageSize,
       filterText: params.filterText,
-    }
+    })
   );
-  return pageItems(page);
 }
 
 export async function fetchDoctors(
   getToken: TokenGetter,
   params: { filterText?: string } = {}
 ): Promise<DoctorSummary[]> {
-  const page = await apiGet<PaginatedResponse<DoctorSummary>>(
-    config.healanApiUrl,
-    'Doctor/DoctorList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: params.filterText }
+  return fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<DoctorSummary>>(config.healanApiUrl, 'Doctor/DoctorList', getToken, {
+      pageNumber,
+      pageSize,
+      filterText: params.filterText,
+    })
   );
-  return pageItems(page);
 }
 
 export async function fetchPrescriptions(
   getToken: TokenGetter,
   params: { filterText?: string } = {}
 ): Promise<PrescriptionSummary[]> {
-  const page = await apiGet<PaginatedResponse<PrescriptionSummary>>(
-    config.healanApiUrl,
-    'OrderResult/PrescriptionList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: params.filterText }
+  return fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<PrescriptionSummary>>(
+      config.healanApiUrl,
+      'OrderResult/PrescriptionList',
+      getToken,
+      { pageNumber, pageSize, filterText: params.filterText }
+    )
   );
-  return pageItems(page);
 }
 
 export async function fetchCompanies(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'Company/CompanyList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'Company/CompanyList',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
+    const isActive = r.isActive !== false && r.IsActive !== false;
     return {
       id: Number(r.companyId ?? r.id ?? 0),
       title: String(r.companyName ?? r.name ?? r.title ?? 'مرکز'),
-      subtitle: String(r.phoneNumber ?? r.mobile ?? ''),
+      subtitle: String(r.nationalId ?? r.phoneNumber ?? r.mobile ?? ''),
+      meta: isActive ? 'فعال' : 'غیرفعال',
     };
   });
 }
 
 export async function fetchInsurance(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'Insurance/InsuranceList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'Insurance/InsuranceList',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
+    const isActive = r.isActive !== false && r.IsActive !== false;
     return {
       id: Number(r.insuranceCompanyId ?? r.id ?? 0),
-      title: String(r.insuranceCompanyName ?? r.name ?? r.title ?? 'بیمه'),
-      subtitle: String(r.insuranceTypeName ?? ''),
+      title: String(r.name ?? r.insuranceCompanyName ?? r.title ?? 'بیمه'),
+      subtitle: String(r.insuranceTypeName ?? r.code ?? ''),
+      meta: isActive ? 'فعال' : 'غیرفعال',
     };
   });
 }
 
 export async function fetchServices(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'ServiceTypes/List',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, onlyActive: true }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'ServiceTypes/List',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
+    const isActive = r.isActive !== false && r.IsActive !== false;
     return {
       id: Number(r.serviceTypeId ?? r.id ?? 0),
-      title: String(r.serviceTypeName ?? r.name ?? r.title ?? 'خدمت'),
-      subtitle: String(r.categoryTypeName ?? ''),
+      title: String(r.title ?? r.serviceTypeName ?? r.name ?? 'خدمت'),
+      subtitle: String(r.categoryTypeName ?? r.code ?? ''),
+      meta: isActive ? 'فعال' : 'غیرفعال',
     };
   });
 }
 
 export async function fetchMedicalFees(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'MedicalFeeServices/List',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'MedicalFeeServices/List',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
+    const price = r.price ?? r.fee;
+    const isActive = r.isActive !== false && r.IsActive !== false;
     return {
       id: Number(r.medicalFeeServiceId ?? r.id ?? 0),
-      title: String(r.serviceTypeName ?? r.name ?? r.title ?? 'تعرفه'),
-      subtitle: r.fee != null ? `${r.fee} ریال` : undefined,
+      title: String(r.serviceTypeName ?? r.serviceTypeTitle ?? r.name ?? r.title ?? 'تعرفه'),
+      subtitle: price != null ? `${price} ریال` : undefined,
+      meta: isActive ? 'فعال' : 'غیرفعال',
     };
   });
 }
 
 export async function fetchUsers(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'User/UserList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: '' }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(config.healanApiUrl, 'User/UserList', getToken, {
+      pageNumber,
+      pageSize,
+      filterText: '',
+    })
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
     const name = `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim();
     return {
@@ -246,13 +257,15 @@ export async function fetchUsers(getToken: TokenGetter): Promise<NamedRow[]> {
 }
 
 export async function fetchBookingReservations(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'BookingReservation/List',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'BookingReservation/List',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw, index) => {
+  return rows.map((raw, index) => {
     const r = asRecord(raw);
     return {
       id: Number(r.reservationId ?? r.id ?? index),
@@ -263,13 +276,15 @@ export async function fetchBookingReservations(getToken: TokenGetter): Promise<N
 }
 
 export async function fetchBookingSchedules(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>> | Record<string, unknown>[]>(
-    config.healanApiUrl,
-    'BookingSchedule/TemplateList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'BookingSchedule/TemplateList',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page as PaginatedResponse<Record<string, unknown>>).map((raw, index) => {
+  return rows.map((raw, index) => {
     const r = asRecord(raw);
     return {
       id: Number(r.templateId ?? r.id ?? index),
@@ -280,13 +295,15 @@ export async function fetchBookingSchedules(getToken: TokenGetter): Promise<Name
 }
 
 export async function fetchSmsOutbox(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'ClinicReports/SmsOutbox',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'ClinicReports/SmsOutbox',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  return pageItems(page).map((raw, index) => {
+  return rows.map((raw, index) => {
     const r = asRecord(raw);
     return {
       id: Number(r.id ?? index),
@@ -314,13 +331,13 @@ export async function fetchReviews(getToken: TokenGetter): Promise<NamedRow[]> {
 }
 
 export async function fetchBlogPosts(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
-    config.healanApiUrl,
-    'BlogPost/List',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(config.healanApiUrl, 'BlogPost/List', getToken, {
+      pageNumber,
+      pageSize,
+    })
   );
-  return pageItems(page).map((raw) => {
+  return rows.map((raw) => {
     const r = asRecord(raw);
     return {
       id: Number(r.blogPostId ?? r.id ?? 0),
@@ -382,13 +399,14 @@ export async function fetchSeoPages(getToken: TokenGetter): Promise<NamedRow[]> 
 }
 
 export async function fetchRagKnowledge(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>> | Record<string, unknown>[]>(
-    config.healanApiUrl,
-    'RagKnowledge/List',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'RagKnowledge/List',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  const rows = Array.isArray(page) ? page : pageItems(page);
   return rows.map((raw, index) => {
     const r = asRecord(raw);
     return {
@@ -400,13 +418,14 @@ export async function fetchRagKnowledge(getToken: TokenGetter): Promise<NamedRow
 }
 
 export async function fetchRagChatLogs(getToken: TokenGetter): Promise<NamedRow[]> {
-  const page = await apiGet<PaginatedResponse<Record<string, unknown>> | Record<string, unknown>[]>(
-    config.healanApiUrl,
-    'RagKnowledge/ChatLogList',
-    getToken,
-    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
+  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
+    apiGet<PaginatedResponse<Record<string, unknown>>>(
+      config.healanApiUrl,
+      'RagKnowledge/ChatLogList',
+      getToken,
+      { pageNumber, pageSize }
+    )
   );
-  const rows = Array.isArray(page) ? page : pageItems(page);
   return rows.map((raw, index) => {
     const r = asRecord(raw);
     return {

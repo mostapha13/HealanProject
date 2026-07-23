@@ -1,42 +1,35 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useAuth } from '../../../src/auth/AuthContext';
 import {
   appointmentDoctorLabel,
   appointmentPatientLabel,
-  doctorDisplayName,
   fetchAppointments,
   fetchBlogPosts,
   fetchBloodPressureHistory,
   fetchBookingReservations,
   fetchBookingSchedules,
   fetchClinicAnalytics,
-  fetchCompanies,
-  fetchDoctors,
-  fetchInsurance,
-  fetchMedicalFees,
-  fetchPatients,
   fetchPortalContent,
   fetchPrescriptions,
   fetchRagChatLogs,
-  fetchRagKnowledge,
   fetchRagSettingCards,
   fetchReviews,
   fetchRoles,
   fetchSeoPages,
-  fetchServices,
   fetchSiteSettings,
   fetchSmsOutbox,
   fetchSmsSettings,
   fetchTodayAppointments,
   fetchUsers,
   isTenDigitNationalCode,
-  patientDisplayName,
   toAsciiDigits,
   type NamedRow,
 } from '../../../src/api/healan';
+import { getCrudConfig } from '../../../src/api/crud';
 import type { ClinicModuleId } from '../../../src/navigation/catalog';
+import { CrudModuleView } from '../../../src/modules/CrudModuleView';
 import {
   AppScreen,
   EmptyBlock,
@@ -51,21 +44,38 @@ type Row = NamedRow & { badge?: string };
 
 export default function ModuleScreen() {
   const navigation = useNavigation();
-  const router = useRouter();
-  const { getAccessToken } = useAuth();
   const params = useLocalSearchParams<{ id?: string; title?: string; path?: string }>();
   const moduleId = (params.id || 'generic') as ClinicModuleId;
   const title = String(params.title || 'بخش');
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title });
+  }, [navigation, title]);
+
+  if (getCrudConfig(moduleId)) {
+    return <CrudModuleView moduleId={moduleId} title={title} />;
+  }
+
+  return <ReadOnlyModuleScreen moduleId={moduleId} title={title} path={params.path} />;
+}
+
+function ReadOnlyModuleScreen({
+  moduleId,
+  title,
+  path,
+}: {
+  moduleId: ClinicModuleId;
+  title: string;
+  path?: string;
+}) {
+  const router = useRouter();
+  const { getAccessToken } = useAuth();
 
   const [filter, setFilter] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({ title });
-  }, [navigation, title]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -109,30 +119,6 @@ export default function ModuleScreen() {
           );
           break;
         }
-        case 'patients': {
-          const list = await fetchPatients(getAccessToken, { filterText: q });
-          setRows(
-            list.map((p) => ({
-              id: p.patientId,
-              title: patientDisplayName(p),
-              subtitle: `کد ملی ${p.nationalCode}`,
-              meta: p.phoneNumber,
-            }))
-          );
-          break;
-        }
-        case 'doctors': {
-          const list = await fetchDoctors(getAccessToken, { filterText: q });
-          setRows(
-            list.map((d) => ({
-              id: d.doctorId,
-              title: doctorDisplayName(d),
-              subtitle: d.medicalGroupTypeName || 'پزشک',
-              meta: d.mobile,
-            }))
-          );
-          break;
-        }
         case 'prescriptions': {
           const list = await fetchPrescriptions(getAccessToken, { filterText: q });
           setRows(
@@ -145,21 +131,6 @@ export default function ModuleScreen() {
           );
           break;
         }
-        case 'companies':
-          setRows(await fetchCompanies(getAccessToken));
-          break;
-        case 'insurance':
-          setRows(await fetchInsurance(getAccessToken));
-          break;
-        case 'services':
-          setRows(await fetchServices(getAccessToken));
-          break;
-        case 'fees':
-          setRows(await fetchMedicalFees(getAccessToken));
-          break;
-        case 'users':
-          setRows(await fetchUsers(getAccessToken));
-          break;
         case 'roles':
           setInfo('نقش‌های سامانه — هم‌تراز تعریف نقش در کلینیک وب.');
           setRows(await fetchRoles(getAccessToken));
@@ -196,9 +167,6 @@ export default function ModuleScreen() {
           break;
         case 'site-seo':
           setRows(await fetchSeoPages(getAccessToken));
-          break;
-        case 'site-rag':
-          setRows(await fetchRagKnowledge(getAccessToken));
           break;
         case 'site-rag-logs':
           setRows(await fetchRagChatLogs(getAccessToken));
@@ -241,7 +209,7 @@ export default function ModuleScreen() {
           break;
         case 'generic':
         default:
-          setInfo(`بخش «${title}» با دسترسی شما باز شده است. مسیر سامانه: ${params.path || '—'}`);
+          setInfo(`بخش «${title}» با دسترسی شما باز شده است. مسیر سامانه: ${path || '—'}`);
           setRows([]);
           break;
       }
@@ -251,7 +219,7 @@ export default function ModuleScreen() {
     } finally {
       setLoading(false);
     }
-  }, [filter, getAccessToken, moduleId, params.path, title]);
+  }, [filter, getAccessToken, moduleId, path, title]);
 
   useEffect(() => {
     if (moduleId !== 'blood-pressure') return;
@@ -277,35 +245,30 @@ export default function ModuleScreen() {
     );
   }, [filter, moduleId, rows]);
 
-  const searchable = ![
-    'sms-settings',
-    'assistant',
-    'signature',
-    'generic',
-  ].includes(moduleId);
+  const searchable = !['sms-settings', 'assistant', 'signature', 'generic'].includes(moduleId);
 
   const searchPlaceholder =
     moduleId === 'blood-pressure' ? 'کد ملی بیمار...' : 'جستجو در این بخش...';
 
   const onRowPress = (item: Row) => {
     if (moduleId === 'dashboard' || moduleId === 'workflow' || moduleId === 'signature') {
-      const path = item.meta;
-      if (!path) return;
+      const itemPath = item.meta;
+      if (!itemPath) return;
       const id =
-        path === '/queue'
+        itemPath === '/queue'
           ? 'queue'
-          : path === '/appointments'
+          : itemPath === '/appointments'
             ? 'appointments'
-            : path === '/patients'
+            : itemPath === '/patients'
               ? 'patients'
-              : path === '/prescriptions'
+              : itemPath === '/prescriptions'
                 ? 'prescriptions'
-                : path === '/reports'
+                : itemPath === '/reports'
                   ? 'reports'
                   : 'generic';
       router.push({
         pathname: '/(app)/module/[id]',
-        params: { id, title: item.title, path },
+        params: { id, title: item.title, path: itemPath },
       });
     }
   };

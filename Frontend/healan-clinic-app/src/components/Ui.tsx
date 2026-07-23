@@ -3,11 +3,13 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -55,7 +57,7 @@ export function BankHeader({
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v9-home</Text>
+            <Text style={styles.buildMark}>build-v12-crud</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>
@@ -354,6 +356,143 @@ export function EmptyBlock({ title, subtitle }: { title: string; subtitle?: stri
   );
 }
 
+export function FormField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder?: string;
+  keyboardType?: TextInputProps['keyboardType'];
+  multiline?: boolean;
+}) {
+  return (
+    <View style={styles.formField}>
+      <Text style={styles.formLabel}>{label}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={colors.muted}
+        keyboardType={keyboardType}
+        multiline={multiline}
+        textAlign="right"
+        style={[styles.formInput, multiline && styles.formInputMulti]}
+      />
+    </View>
+  );
+}
+
+export function SwitchRow({
+  label,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  value: boolean;
+  onValueChange: (v: boolean) => void;
+}) {
+  return (
+    <View style={styles.switchRow}>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: colors.line, true: colors.primary }}
+        thumbColor={colors.white}
+      />
+      <Text style={styles.formLabel}>{label}</Text>
+    </View>
+  );
+}
+
+export function FormModal({
+  visible,
+  title,
+  children,
+  onClose,
+  onSave,
+  saving,
+}: {
+  visible: boolean;
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+  onSave: () => void;
+  saving?: boolean;
+}) {
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHeader}>
+            <Pressable onPress={onClose} hitSlop={8}>
+              <Text style={styles.modalClose}>بستن</Text>
+            </Pressable>
+            <Text style={styles.modalTitle}>{title}</Text>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
+          <PrimaryButton
+            label={saving ? 'در حال ذخیره...' : 'ذخیره'}
+            onPress={onSave}
+            disabled={saving}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+export type ActionSheetItem = {
+  key: string;
+  label: string;
+  danger?: boolean;
+  onPress: () => void;
+};
+
+export function ActionSheet({
+  visible,
+  title,
+  items,
+  onClose,
+}: {
+  visible: boolean;
+  title?: string;
+  items: ActionSheetItem[];
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <Pressable style={styles.actionSheet} onPress={(e) => e.stopPropagation()}>
+          {title ? <Text style={styles.actionTitle}>{title}</Text> : null}
+          {items.map((item) => (
+            <Pressable
+              key={item.key}
+              onPress={() => {
+                onClose();
+                item.onPress();
+              }}
+              style={styles.actionItem}
+            >
+              <Text style={[styles.actionLabel, item.danger && styles.actionDanger]}>{item.label}</Text>
+            </Pressable>
+          ))}
+          <Pressable onPress={onClose} style={[styles.actionItem, styles.actionCancel]}>
+            <Text style={styles.actionLabel}>انصراف</Text>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 export function Muted({ children }: { children: React.ReactNode }) {
   return <Text style={styles.muted}>{children}</Text>;
 }
@@ -626,4 +765,79 @@ const styles = StyleSheet.create({
   centerBlock: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   emptyTitle: { fontSize: 16, fontFamily: fonts.bold, color: colors.ink, textAlign: 'center' },
   muted: { fontSize: 12, fontFamily: fonts.regular, color: colors.muted, textAlign: 'center' },
+  formField: { marginBottom: spacing.sm },
+  formLabel: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.inkSoft,
+    textAlign: 'right',
+    marginBottom: 6,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    color: colors.ink,
+  },
+  formInputMulti: { minHeight: 96, textAlignVertical: 'top' },
+  switchRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+    gap: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: colors.bg,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    padding: spacing.md,
+    maxHeight: '88%',
+  },
+  modalHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  modalTitle: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },
+  modalClose: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.muted },
+  modalBody: { paddingBottom: spacing.md, gap: 4 },
+  actionSheet: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    padding: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  actionTitle: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.muted,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  actionItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+  },
+  actionCancel: { borderBottomWidth: 0, marginTop: 4 },
+  actionLabel: {
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    color: colors.ink,
+    textAlign: 'center',
+  },
+  actionDanger: { color: colors.danger },
 } as any);
