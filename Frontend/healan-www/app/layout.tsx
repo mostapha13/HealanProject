@@ -13,14 +13,30 @@ export const metadata: Metadata = {
   description: 'سایت رسمی مطب تخصصی قلب و عروق',
 };
 
+const themeBootScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('healan-theme');
+    if (t === 'classic' || t === 'warm' || t === 'minimal') {
+      document.documentElement.setAttribute('data-theme', t);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'classic');
+    }
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'classic');
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" data-theme="classic" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

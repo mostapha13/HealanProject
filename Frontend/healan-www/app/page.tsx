@@ -40,7 +40,6 @@ export default async function HomePage() {
         trustItems={portalItemsBySection(site, 'TrustBadge')}
         services={portalItemsBySection(site, 'Service')}
         whyItems={portalItemsBySection(site, 'WhyUsFeature')}
-        reviews={site.reviews ?? []}
         showAbout={portalSectionEnabled(site, 'about')}
         showTrust={portalSectionEnabled(site, 'TrustBadge')}
         showWhy={portalSectionEnabled(site, 'WhyUsFeature')}

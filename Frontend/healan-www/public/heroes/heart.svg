@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" role="img" aria-label="BD(">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1f3a"/>
+      <stop offset="100%" stop-color="#1a365d"/>
+    </linearGradient>
+    <linearGradient id="heart" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="55%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="960" height="720" fill="url(#bg)"/>
+  <circle cx="780" cy="120" r="160" fill="#1e3a5f" opacity="0.45"/>
+  <circle cx="140" cy="600" r="180" fill="#0f2744" opacity="0.55"/>
+  <path filter="url(#glow)" fill="url(#heart)" d="M480 560 C300 430 220 330 220 250 C220 180 275 140 340 140 C390 140 430 165 480 220 C530 165 570 140 620 140 C685 140 740 180 740 250 C740 330 660 430 480 560 Z"/>
+  <polyline fill="none" stroke="#7dd3fc" stroke-width="3" stroke-linecap="round" opacity="0.85"
+    points="80,520 180,520 210,520 235,470 260,570 285,520 360,520 390,520 415,455 440,585 465,520 560,520 640,520 665,490 690,550 715,520 880,520"/>
+</svg>

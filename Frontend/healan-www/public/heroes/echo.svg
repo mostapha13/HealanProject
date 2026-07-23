@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="720" viewBox="0 0 960 720" role="img" aria-label="'©H©'1/ÌH¯1'AÌ">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#bg)"/>
+  <rect x="180" y="110" width="600" height="420" rx="24" fill="#334155"/>
+  <rect x="210" y="140" width="540" height="320" rx="12" fill="#020617"/>
+  <ellipse cx="480" cy="300" rx="170" ry="120" fill="url(#screen)" opacity="0.35"/>
+  <path d="M360 300 C400 220 560 220 600 300 C560 380 400 380 360 300 Z" fill="none" stroke="#7dd3fc" stroke-width="4"/>
+  <path d="M420 300 C450 260 510 260 540 300 C510 340 450 340 420 300 Z" fill="#38bdf8" opacity="0.5"/>
+  <rect x="250" y="480" width="80" height="18" rx="6" fill="#64748b"/>
+  <rect x="350" y="480" width="80" height="18" rx="6" fill="#64748b"/>
+  <rect x="450" y="480" width="80" height="18" rx="6" fill="#94a3b8"/>
+  <rect x="550" y="480" width="120" height="18" rx="6" fill="#e11d48" opacity="0.85"/>
+  <rect x="300" y="560" width="360" height="48" rx="12" fill="#1e293b"/>
+  <text x="480" y="592" text-anchor="middle" fill="#e2e8f0" font-family="Tahoma, sans-serif" font-size="22">Echo · Ultrasound</text>
+</svg>

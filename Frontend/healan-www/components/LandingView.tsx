@@ -1,12 +1,13 @@
-import type { PortalContentItem, PatientReviewPublic } from '@/lib/api';
+import type { PortalContentItem } from '@/lib/api';
 import { BookingCta, PatientCta } from './CtaLinks';
-import { ReviewForm } from './ReviewForm';
+import { HeroSlider } from './HeroSlider';
+import { ReviewsSection } from './ReviewsSection';
 
 const FALLBACK_SERVICES = [
-  { title: 'معاینه تخصصی قلب', body: 'ارزیابی جامع علائم و وضعیت قلب و عروق', color: '#0d9488' },
-  { title: 'اکوکاردیوگرافی', body: 'بررسی دقیق عملکرد دریچه‌ها و عضله قلب', color: '#0891b2' },
-  { title: 'نوار قلب و فشارخون', body: 'پایش ریتم، فشار و تشخیص زودهنگام', color: '#0369a1' },
-  { title: 'پیگیری بیماران مزمن', body: 'مدیریت نارسایی قلب، آریتمی و عروق کرونر', color: '#059669' },
+  { title: 'معاینه تخصصی قلب', body: 'ارزیابی جامع علائم و وضعیت قلب و عروق', color: '#b91c1c' },
+  { title: 'اکوکاردیوگرافی', body: 'بررسی دقیق عملکرد دریچه‌ها و عضله قلب', color: '#1e3a5f' },
+  { title: 'نوار قلب و فشارخون', body: 'پایش ریتم، فشار و تشخیص زودهنگام', color: '#9f1239' },
+  { title: 'پیگیری بیماران مزمن', body: 'مدیریت نارسایی قلب، آریتمی و عروق کرونر', color: '#334155' },
 ];
 
 const FALLBACK_WHY = [
@@ -32,7 +33,6 @@ type Props = {
   trustItems: PortalContentItem[];
   services: PortalContentItem[];
   whyItems: PortalContentItem[];
-  reviews: PatientReviewPublic[];
   showAbout: boolean;
   showTrust: boolean;
   showWhy: boolean;
@@ -50,7 +50,6 @@ export function LandingView({
   trustItems,
   services,
   whyItems,
-  reviews,
   showAbout,
   showTrust,
   showWhy,
@@ -81,7 +80,7 @@ export function LandingView({
       ? services.map((i) => ({
           title: i.title ?? '',
           body: i.body ?? '',
-          color: i.color || '#0d9488',
+          color: i.color || 'var(--primary)',
         }))
       : FALLBACK_SERVICES;
 
@@ -90,11 +89,10 @@ export function LandingView({
       ? whyItems.map((i) => ({ title: i.title ?? '', body: i.body ?? '' }))
       : FALLBACK_WHY;
 
-  const slide = heroSlides[0];
-
   return (
     <main>
       <section className="hero">
+        <div className="hero__glow" aria-hidden />
         <div className="container hero__grid">
           <div className="hero__content">
             <div className="pill">{hero.pill}</div>
@@ -120,17 +118,11 @@ export function LandingView({
           </div>
           {showHeroSlide && (
             <div className="hero__visual">
-              <div className="hero-card">
-                {slide?.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={slide.imageUrl} alt={slide.title || doctor.specialty} />
-                ) : (
-                  <div className="hero-card__fallback">
-                    <strong>{hero.floatTitle}</strong>
-                    <span>{hero.floatSubtitle}</span>
-                  </div>
-                )}
-              </div>
+              <HeroSlider
+                slides={heroSlides}
+                floatTitle={hero.floatTitle}
+                floatSubtitle={hero.floatSubtitle}
+              />
             </div>
           )}
         </div>
@@ -214,33 +206,10 @@ export function LandingView({
       )}
 
       {showReviews && (
-        <section id="reviews" className="section section--muted">
-          <div className="container">
-            <div className="section-head">
-              <h2>{sections.reviewsTitle}</h2>
-              <p>{sections.reviewsSubtitle}</p>
-            </div>
-            <div className="reviews">
-              {reviews.length === 0 ? (
-                <p className="empty">هنوز نظری ثبت نشده است.</p>
-              ) : (
-                reviews.map((review) => (
-                  <article key={review.patientReviewId} className="review">
-                    <div className="review__head">
-                      <strong>{review.displayName}</strong>
-                      <span aria-label={`امتیاز ${review.rating}`}>
-                        {'★'.repeat(review.rating)}
-                        {'☆'.repeat(5 - review.rating)}
-                      </span>
-                    </div>
-                    <p>{review.reviewText}</p>
-                  </article>
-                ))
-              )}
-            </div>
-            <ReviewForm />
-          </div>
-        </section>
+        <ReviewsSection
+          title={sections.reviewsTitle}
+          subtitle={sections.reviewsSubtitle}
+        />
       )}
 
       {showContact && (

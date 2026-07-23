@@ -276,6 +276,12 @@
             API عمومی سایت مطب — بدون نیاز به ورود
             </summary>
         </member>
+        <member name="M:Healan.WebApi.Controllers.PortalPublicController.ReviewList(Healan.Application.Portal.Queries.PublishedPatientReviewList.PublishedPatientReviewListQuery)">
+            <summary>
+            Approved patient reviews (newest first). pageSize default 6; pageCount is accepted as alias for pageSize.
+            Response includes pageCount (= total pages).
+            </summary>
+        </member>
         <member name="M:Healan.WebApi.Controllers.PortalPublicController.RagSpeechToText(Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
             تبدیل گفتار فارسی به متن (Whisper روی python-rag) — متن برمی‌گردد تا کاربر تأیید/ویرایش کند.

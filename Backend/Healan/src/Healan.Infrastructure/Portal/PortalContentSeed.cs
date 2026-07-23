@@ -7,11 +7,14 @@ namespace Healan.Infrastructure.Portal;
 
 public static class PortalContentSeed
 {
+    private const string HeroesBase = "https://www.drshahrooei.ir/heroes";
+
     public static async Task SeedAsync(ApplicationDbContext context)
     {
         await SeedSettingsAsync(context);
         await SeedContentAsync(context);
         await SeedHeroSlidesIfMissingAsync(context);
+        await FillEmptyHeroSlideImageUrlsAsync(context);
         await SeedHeroStatsIfMissingAsync(context);
         await context.SaveChangesAsync();
     }
@@ -82,6 +85,46 @@ public static class PortalContentSeed
         }
     }
 
+    private static List<PortalContentItem> DefaultHeroSlides() =>
+    [
+        new()
+        {
+            SectionType = PortalSectionType.HeroSlide,
+            Title = "قلب انسان",
+            Subtitle = "مراقبت تخصصی از قلب",
+            Body = "تشخیص · درمان · پیشگیری",
+            IconName = "heart",
+            LinkUrl = "heart",
+            ImageUrl = $"{HeroesBase}/heart.svg",
+            SortOrder = 1,
+            IsPublished = true,
+        },
+        new()
+        {
+            SectionType = PortalSectionType.HeroSlide,
+            Title = "اکوکاردیوگرافی",
+            Subtitle = "تشخیص دقیق با اکو",
+            Body = "دستگاه اکوکاردیوگرافی در مطب",
+            LinkUrl = "echo",
+            IconName = "image",
+            ImageUrl = $"{HeroesBase}/echo.svg",
+            SortOrder = 2,
+            IsPublished = true,
+        },
+        new()
+        {
+            SectionType = PortalSectionType.HeroSlide,
+            Title = "فضای مطب",
+            Subtitle = "محیطی آرام و استاندارد",
+            Body = "فضای داخلی مطب تخصصی قلب",
+            LinkUrl = "clinic",
+            IconName = "image",
+            ImageUrl = $"{HeroesBase}/clinic.svg",
+            SortOrder = 3,
+            IsPublished = true,
+        },
+    ];
+
     private static async Task SeedContentAsync(ApplicationDbContext context)
     {
         if (await context.PortalContentItems.AnyAsync())
@@ -93,12 +136,12 @@ public static class PortalContentSeed
             new() { SectionType = PortalSectionType.TrustBadge, Title = "دانشگاه تهران", Subtitle = "دکترای عمومی", IconName = "IconHospital", SortOrder = 2, IsPublished = true },
             new() { SectionType = PortalSectionType.TrustBadge, Title = "استاندارد بالا", Subtitle = "تجهیزات تشخیصی", IconName = "IconShield", SortOrder = 3, IsPublished = true },
             new() { SectionType = PortalSectionType.TrustBadge, Title = "قلب و عروق", Subtitle = "تخصص اصلی", IconName = "IconHeart", SortOrder = 4, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "معاینه تخصصی قلب", Body = "ارزیابی جامع علائم و وضعیت قلب و عروق", IconName = "IconStethoscope", Color = "#ef394e", SortOrder = 1, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "اکوکاردیوگرافی", Body = "بررسی دقیق عملکرد دریچه‌ها و عضله قلب", IconName = "IconEcg", Color = "#19bfd3", SortOrder = 2, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "نوار قلب و فشارخون", Body = "پایش ریتم، فشار و تشخیص زودهنگام", IconName = "IconHeart", Color = "#f59e0b", SortOrder = 3, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "پیگیری بیماران مزمن", Body = "مدیریت نارسایی قلب، آریتمی و عروق کرونر", IconName = "IconShield", Color = "#10b981", SortOrder = 4, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "مشاوره درمانی", Body = "برنامه درمانی شخصی‌سازی‌شده برای هر بیمار", IconName = "IconHospital", Color = "#6366f1", SortOrder = 5, IsPublished = true },
-            new() { SectionType = PortalSectionType.Service, Title = "پیشگیری و آموزش", Body = "راهنمای سبک زندگی سالم برای سلامت قلب", IconName = "IconGraduation", Color = "#ec4899", SortOrder = 6, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "معاینه تخصصی قلب", Body = "ارزیابی جامع علائم و وضعیت قلب و عروق", IconName = "IconStethoscope", Color = "#b91c1c", SortOrder = 1, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "اکوکاردیوگرافی", Body = "بررسی دقیق عملکرد دریچه‌ها و عضله قلب", IconName = "IconEcg", Color = "#1e3a5f", SortOrder = 2, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "نوار قلب و فشارخون", Body = "پایش ریتم، فشار و تشخیص زودهنگام", IconName = "IconHeart", Color = "#9f1239", SortOrder = 3, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "پیگیری بیماران مزمن", Body = "مدیریت نارسایی قلب، آریتمی و عروق کرونر", IconName = "IconShield", Color = "#334155", SortOrder = 4, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "مشاوره درمانی", Body = "برنامه درمانی شخصی‌سازی‌شده برای هر بیمار", IconName = "IconHospital", Color = "#7f1d1d", SortOrder = 5, IsPublished = true },
+            new() { SectionType = PortalSectionType.Service, Title = "پیشگیری و آموزش", Body = "راهنمای سبک زندگی سالم برای سلامت قلب", IconName = "IconGraduation", Color = "#0f172a", SortOrder = 6, IsPublished = true },
             new() { SectionType = PortalSectionType.WhyUsFeature, Title = "تشخیص دقیق", Body = "استفاده از تجهیزات پیشرفته قلب و عروق", IconName = "IconEcg", SortOrder = 1, IsPublished = true },
             new() { SectionType = PortalSectionType.WhyUsFeature, Title = "پیگیری مستمر", Body = "برنامه درمانی و پیگیری منظم بیماران", IconName = "IconHeart", SortOrder = 2, IsPublished = true },
             new() { SectionType = PortalSectionType.WhyUsFeature, Title = "محیط آرام", Body = "فضای مطب مناسب برای بیماران قلبی", IconName = "IconShield", SortOrder = 3, IsPublished = true },
@@ -108,13 +151,15 @@ public static class PortalContentSeed
             new() { SectionType = PortalSectionType.NavLink, Title = "نظرات بیماران", LinkUrl = "reviews", SortOrder = 3, IsPublished = true },
             new() { SectionType = PortalSectionType.NavLink, Title = "چرا این مطب؟", LinkUrl = "why", SortOrder = 4, IsPublished = true },
             new() { SectionType = PortalSectionType.NavLink, Title = "تماس", LinkUrl = "contact", SortOrder = 5, IsPublished = true },
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "قلب انسان", IconName = "heart", SortOrder = 1, IsPublished = true },
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "اکوکاردیوگرافی", Subtitle = "تشخیص دقیق با اکو", Body = "دستگاه اکوکاردیوگرافی در مطب", LinkUrl = "echo", IconName = "image", SortOrder = 2, IsPublished = true },
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "فضای مطب", Subtitle = "محیطی آرام و استاندارد", Body = "فضای داخلی مطب تخصصی قلب", LinkUrl = "clinic", IconName = "image", SortOrder = 3, IsPublished = true },
+        };
+
+        items.AddRange(DefaultHeroSlides());
+        items.AddRange(
+        [
             new() { SectionType = PortalSectionType.HeroStat, Title = "+۱۰", Subtitle = "سال تجربه بالینی", SortOrder = 1, IsPublished = true },
             new() { SectionType = PortalSectionType.HeroStat, Title = "بورد", Subtitle = "تخصصی معتبر", SortOrder = 2, IsPublished = true },
             new() { SectionType = PortalSectionType.HeroStat, Title = "شوشتر", Subtitle = "پذیرش نوبتی", SortOrder = 3, IsPublished = true },
-        };
+        ]);
 
         context.PortalContentItems.AddRange(items);
     }
@@ -124,14 +169,37 @@ public static class PortalContentSeed
         if (await context.PortalContentItems.AnyAsync(x => x.SectionType == PortalSectionType.HeroSlide))
             return;
 
-        var slides = new List<PortalContentItem>
-        {
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "قلب انسان", IconName = "heart", SortOrder = 1, IsPublished = true },
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "اکوکاردیوگرافی", Subtitle = "تشخیص دقیق با اکو", Body = "دستگاه اکوکاردیوگرافی در مطب", LinkUrl = "echo", IconName = "image", SortOrder = 2, IsPublished = true },
-            new() { SectionType = PortalSectionType.HeroSlide, Title = "فضای مطب", Subtitle = "محیطی آرام و استاندارد", Body = "فضای داخلی مطب تخصصی قلب", LinkUrl = "clinic", IconName = "image", SortOrder = 3, IsPublished = true },
-        };
+        context.PortalContentItems.AddRange(DefaultHeroSlides());
+    }
 
-        context.PortalContentItems.AddRange(slides);
+    /// <summary>
+    /// For existing DBs: fill ImageUrl only when empty (do not overwrite clinic edits).
+    /// </summary>
+    private static async Task FillEmptyHeroSlideImageUrlsAsync(ApplicationDbContext context)
+    {
+        var slides = await context.PortalContentItems
+            .Where(x => x.SectionType == PortalSectionType.HeroSlide && (x.ImageUrl == null || x.ImageUrl == ""))
+            .ToListAsync();
+
+        foreach (var slide in slides)
+        {
+            var key = (slide.LinkUrl ?? slide.IconName ?? "").Trim().ToLowerInvariant();
+            slide.ImageUrl = key switch
+            {
+                "heart" or "beatingheart" => $"{HeroesBase}/heart.svg",
+                "echo" or "hero-echo" => $"{HeroesBase}/echo.svg",
+                "clinic" or "hero-clinic" => $"{HeroesBase}/clinic.svg",
+                _ => slide.SortOrder switch
+                {
+                    1 => $"{HeroesBase}/heart.svg",
+                    2 => $"{HeroesBase}/echo.svg",
+                    _ => $"{HeroesBase}/clinic.svg",
+                },
+            };
+
+            if (string.IsNullOrWhiteSpace(slide.IconName) && key is "heart" or "beatingheart")
+                slide.IconName = "heart";
+        }
     }
 
     private static async Task SeedHeroStatsIfMissingAsync(ApplicationDbContext context)

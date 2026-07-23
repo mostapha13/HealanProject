@@ -28,7 +28,18 @@ export interface PatientReviewPublic {
   displayName: string;
   reviewText: string;
   rating: number;
+  reviewedAt?: string;
   createdAt?: string;
+}
+
+export interface PaginatedReviews {
+  items: PatientReviewPublic[];
+  pageNumber: number;
+  pageCount: number;
+  totalPages?: number;
+  totalCount: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 export interface PortalSeoPage {

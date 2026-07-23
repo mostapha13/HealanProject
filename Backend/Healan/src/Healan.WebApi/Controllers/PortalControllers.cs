@@ -27,6 +27,7 @@ using Healan.Application.Portal.Queries.PortalSeoPageList;
 using Healan.Application.Portal.Queries.PortalSiteSettingList;
 using Healan.Application.Portal.Queries.PublishedBlogPostBySlug;
 using Healan.Application.Portal.Queries.PublishedBlogPostList;
+using Healan.Application.Portal.Queries.PublishedPatientReviewList;
 using Healan.Application.Portal.Queries.PublishedPortalSite;
 using Healan.Application.Portal.Commands.RagSpeechToText;
 using Healan.Application.Portal.Queries.RagAsk;
@@ -234,6 +235,26 @@ public class PortalPublicController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> SubmitReview([FromBody] PatientReviewSubmitCommand request) =>
         Ok(await Mediator.Send(request));
+
+    /// <summary>
+    /// Approved patient reviews (newest first). pageSize default 6; pageCount is accepted as alias for pageSize.
+    /// Response includes pageCount (= total pages).
+    /// </summary>
+    [HttpGet("[action]")]
+    public async Task<IActionResult> ReviewList([FromQuery] PublishedPatientReviewListQuery query)
+    {
+        var list = await Mediator.Send(query);
+        return Ok(new
+        {
+            items = list.Items,
+            pageNumber = list.PageNumber,
+            pageCount = list.TotalPages,
+            totalPages = list.TotalPages,
+            totalCount = list.TotalCount,
+            hasPreviousPage = list.HasPreviousPage,
+            hasNextPage = list.HasNextPage,
+        });
+    }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> BlogList([FromQuery] PublishedBlogPostListQuery query) =>
