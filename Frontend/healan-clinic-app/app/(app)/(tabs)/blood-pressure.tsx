@@ -22,6 +22,7 @@ import {
   SearchField,
   SurfaceCard,
 } from '../../../src/components/Ui';
+import { BloodPressureAnalytics } from '../../../src/components/BloodPressureAnalytics';
 import { colors, fonts, spacing } from '../../../src/theme';
 import {
   groupBloodPressureByDay,
@@ -31,9 +32,15 @@ import {
 } from '../../../src/utils/groupBloodPressureByDay';
 import { toPersianDigits } from '../../../src/utils/jalali';
 
-function formatSlot(slot?: BpPeriodSlot): string {
-  if (!slot) return '—';
-  return toPersianDigits(`${slot.systolic}/${slot.diastolic}`);
+function formatSlot(slot?: BpPeriodSlot): React.ReactNode {
+  if (!slot) return <Text style={styles.bpEmpty}>—</Text>;
+  return (
+    <Text style={styles.bpValue}>
+      <Text style={styles.sys}>{toPersianDigits(slot.systolic)}</Text>
+      <Text style={styles.slash}>/</Text>
+      <Text style={styles.dia}>{toPersianDigits(slot.diastolic)}</Text>
+    </Text>
+  );
 }
 
 function formatSlotMeta(slot?: BpPeriodSlot): string {
@@ -69,7 +76,7 @@ function BpTable({ days }: { days: BpDayRow[] }) {
               ['night', day.night, styles.periodNight],
             ] as const).map(([key, slot, tone]) => (
               <View key={key} style={[styles.td, styles.colPeriod, tone]}>
-                <Text style={[styles.bpValue, !slot && styles.bpEmpty]}>{formatSlot(slot)}</Text>
+                {formatSlot(slot)}
                 {slot ? <Text style={styles.bpMeta}>{formatSlotMeta(slot)}</Text> : null}
                 {slot?.note ? (
                   <Text style={styles.bpNote} numberOfLines={1}>
@@ -188,6 +195,7 @@ export default function BloodPressureTab() {
               <>
                 <Text style={styles.sectionTitle}>جدول روزانه (صبح / ظهر / شب)</Text>
                 <BpTable days={dayRows} />
+                <BloodPressureAnalytics items={items} />
               </>
             ) : (
               <EmptyBlock title="موردی نیست" subtitle="برای این بیمار فشاری ثبت نشده است" />
@@ -328,12 +336,16 @@ const styles = StyleSheet.create({
   bpValue: {
     fontFamily: fonts.bold,
     fontSize: 15,
-    color: colors.ink,
     textAlign: 'center',
   },
+  sys: { color: '#DC2626' },
+  dia: { color: '#2563EB' },
+  slash: { color: colors.muted },
   bpEmpty: {
     color: colors.muted,
     fontFamily: fonts.regular,
+    fontSize: 15,
+    textAlign: 'center',
   },
   bpMeta: {
     marginTop: 4,

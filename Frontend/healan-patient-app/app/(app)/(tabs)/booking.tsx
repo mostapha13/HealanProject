@@ -26,6 +26,7 @@ import {
   EmptyBlock,
   LoadingBlock,
   PrimaryButton,
+  ScreenHeader,
 } from '../../../src/components/Ui';
 import {
   SlotChip,
@@ -160,12 +161,8 @@ export default function BookingTabScreen() {
 
   return (
     <AppScreen padded={false}>
-      <SafeAreaView edges={['top']} style={styles.top}>
-        <Text style={styles.eyebrow}>رزرو آنلاین نوبت</Text>
-        <Text style={styles.title}>انتخاب زمان مراجعه</Text>
-        <Text style={styles.lead}>
-          {name ? `${name} عزیز، ` : ''}پزشک، روز و ساعت را مثل سایت اصلی انتخاب کنید
-        </Text>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: colors.primaryDeep }}>
+        <ScreenHeader title="رزرو نوبت" onBack={() => router.replace('/(app)/(tabs)')} />
       </SafeAreaView>
 
       <ScrollView
@@ -173,6 +170,9 @@ export default function BookingTabScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
         keyboardShouldPersistTaps="handled"
       >
+        <Text style={styles.lead}>
+          {name ? `${name} عزیز، ` : ''}پزشک، روز و ساعت را مثل سایت اصلی انتخاب کنید
+        </Text>
         {done ? (
           <View style={styles.doneCard}>
             <Text style={styles.doneTitle}>رزرو با موفقیت ثبت شد</Text>

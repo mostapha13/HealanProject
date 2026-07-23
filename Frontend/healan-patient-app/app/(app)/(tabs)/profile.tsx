@@ -1,6 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../../src/auth/AuthContext';
@@ -18,6 +19,7 @@ function Row({ label, value }: { label: string; value?: string | null }) {
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { session, signOut } = useAuth();
   const name = `${session?.firstName ?? ''} ${session?.lastName ?? ''}`.trim() || 'بیمار';
 
@@ -25,6 +27,9 @@ export default function ProfileScreen() {
     <AppScreen padded={false}>
       <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.top}>
         <SafeAreaView edges={['top']} style={styles.topInner}>
+          <Pressable onPress={() => router.replace('/(app)/(tabs)')} style={styles.backBtn}>
+            <Ionicons name="chevron-forward" size={22} color={colors.white} />
+          </Pressable>
           <View style={styles.avatar}>
             <Ionicons name="person" size={32} color={colors.primaryDeep} />
           </View>
@@ -55,9 +60,19 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
     paddingBottom: spacing.xl,
   },
-  topInner: { alignItems: 'center' },
+  topInner: { alignItems: 'center', paddingHorizontal: spacing.md },
+  backBtn: {
+    alignSelf: 'flex-start',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
   avatar: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     width: 72,
     height: 72,
     borderRadius: 24,

@@ -42,7 +42,7 @@ export function BankHeader({ brand = 'هیلن بیمار' }: { brand?: string }
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v3-otp-cors-fix</Text>
+            <Text style={styles.buildMark}>build-v4-stream-back</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>P</Text>
@@ -326,8 +326,8 @@ export function ScreenHeader({ title, onBack }: { title: string; onBack?: () => 
   return (
     <View style={styles.screenHeader}>
       {onBack ? (
-        <Pressable onPress={onBack} style={styles.backBtn}>
-          <Ionicons name="chevron-forward" size={22} color={colors.primaryInk} />
+        <Pressable onPress={onBack} style={styles.backBtn} hitSlop={8}>
+          <Ionicons name="chevron-forward" size={22} color={colors.white} />
         </Pressable>
       ) : (
         <View style={{ width: 36 }} />

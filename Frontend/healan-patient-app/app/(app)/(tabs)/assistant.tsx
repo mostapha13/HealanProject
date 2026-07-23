@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -10,13 +10,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/auth/AuthContext';
 import { ragAsk } from '../../../src/api/portal';
 import { AppScreen } from '../../../src/components/Ui';
 import { colors, fonts, spacing } from '../../../src/theme';
 
-type Msg = { id: string; role: 'user' | 'bot'; text: string };
+type Msg = { id: string; role: 'user' | 'bot'; text: string; streaming?: boolean };
 
 const SUGGESTIONS = [
   'آدرس مطب کجاست؟',
@@ -28,7 +29,13 @@ const SUGGESTIONS = [
 const WELCOME =
   'سلام! من دستیار هوشمند مطب هستم. می‌توانید درباره خدمات، آدرس و نوبت بپرسید یا از پیشنهادهای سریع استفاده کنید.';
 
+function splitWords(text: string): string[] {
+  // Keep punctuation attached; split on whitespace for Persian/English
+  return text.split(/(\s+)/).filter((w) => w.length > 0);
+}
+
 export default function AssistantTabScreen() {
+  const router = useRouter();
   const { getAccessToken, session } = useAuth();
   const [messages, setMessages] = useState<Msg[]>([
     { id: 'welcome', role: 'bot', text: WELCOME },
@@ -37,35 +44,56 @@ export default function AssistantTabScreen() {
   const [busy, setBusy] = useState(false);
   const sessionId = useRef(`patient-${Date.now()}`);
   const listRef = useRef<FlatList<Msg>>(null);
+  const streamTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (streamTimer.current) clearInterval(streamTimer.current);
+    };
+  }, []);
+
+  const streamBotReply = (fullText: string) => {
+    const id = `b-${Date.now()}`;
+    const words = splitWords(fullText);
+    setMessages((m) => [...m, { id, role: 'bot', text: '', streaming: true }]);
+    setBusy(false);
+
+    let i = 0;
+    if (streamTimer.current) clearInterval(streamTimer.current);
+    streamTimer.current = setInterval(() => {
+      i += 1;
+      const partial = words.slice(0, i).join('');
+      setMessages((m) =>
+        m.map((msg) => (msg.id === id ? { ...msg, text: partial, streaming: i < words.length } : msg))
+      );
+      listRef.current?.scrollToEnd({ animated: false });
+      if (i >= words.length) {
+        if (streamTimer.current) clearInterval(streamTimer.current);
+        streamTimer.current = null;
+        setMessages((m) => m.map((msg) => (msg.id === id ? { ...msg, streaming: false } : msg)));
+      }
+    }, 38);
+  };
 
   const send = async (question?: string) => {
     const q = (question ?? text).trim();
     if (!q || busy) return;
+    if (streamTimer.current) {
+      clearInterval(streamTimer.current);
+      streamTimer.current = null;
+    }
     setText('');
     setMessages((m) => [...m, { id: `u-${Date.now()}`, role: 'user', text: q }]);
     setBusy(true);
     try {
       const token = await getAccessToken();
       const res = await ragAsk(token, q, sessionId.current);
-      setMessages((m) => [
-        ...m,
-        {
-          id: `b-${Date.now()}`,
-          role: 'bot',
-          text: res.answer || (res.requiresLogin ? 'برای ادامه وارد شوید.' : 'پاسخی یافت نشد.'),
-        },
-      ]);
+      const answer =
+        res.answer || (res.requiresLogin ? 'برای ادامه وارد شوید.' : 'پاسخی یافت نشد.');
+      streamBotReply(answer);
     } catch (err) {
-      setMessages((m) => [
-        ...m,
-        {
-          id: `e-${Date.now()}`,
-          role: 'bot',
-          text: err instanceof Error ? err.message : 'خطا در دریافت پاسخ',
-        },
-      ]);
+      streamBotReply(err instanceof Error ? err.message : 'خطا در دریافت پاسخ');
     } finally {
-      setBusy(false);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
     }
   };
@@ -74,6 +102,9 @@ export default function AssistantTabScreen() {
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={styles.header}>
         <View style={styles.headerInner}>
+          <Pressable onPress={() => router.replace('/(app)/(tabs)')} style={styles.backBtn}>
+            <Ionicons name="chevron-forward" size={22} color={colors.white} />
+          </Pressable>
           <View style={styles.botAvatar}>
             <Ionicons name="sparkles" size={22} color={colors.white} />
           </View>
@@ -131,6 +162,7 @@ export default function AssistantTabScreen() {
                   ]}
                 >
                   {item.text}
+                  {item.streaming ? <Text style={styles.caret}>▍</Text> : null}
                 </Text>
               </View>
             </View>
@@ -183,6 +215,14 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   botAvatar: {
     width: 44,
@@ -262,6 +302,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'right',
   },
+  caret: { color: colors.primaryDeep, fontFamily: fonts.bold },
   thinking: {
     alignSelf: 'flex-end',
     backgroundColor: colors.primarySoft,

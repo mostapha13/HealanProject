@@ -9,7 +9,7 @@ import {
   patientMedicationList,
   patientMyHistory,
 } from '../../../src/api/portal';
-import { AppScreen, LoadingBlock, SurfaceCard } from '../../../src/components/Ui';
+import { AppScreen, LoadingBlock, ScreenHeader, SurfaceCard } from '../../../src/components/Ui';
 import { LargeActionCard, SmallTile } from '../../../src/components/PatientUi';
 import { colors, fonts, spacing } from '../../../src/theme';
 import { toPersianDigits } from '../../../src/utils/jalali';
@@ -52,15 +52,15 @@ export default function DashboardScreen() {
 
   return (
     <AppScreen padded={false}>
-      <SafeAreaView edges={['top']} style={styles.top}>
-        <Text style={styles.title}>داشبورد</Text>
-        <Text style={styles.sub}>خلاصه وضعیت سلامت {name}</Text>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: colors.primaryDeep }}>
+        <ScreenHeader title="داشبورد" onBack={() => router.replace('/(app)/(tabs)')} />
       </SafeAreaView>
 
       <ScrollView
         contentContainerStyle={styles.body}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
       >
+        <Text style={styles.lead}>خلاصه وضعیت سلامت {name}</Text>
         {loading ? <LoadingBlock /> : null}
 
         <View style={styles.statsRow}>
@@ -114,22 +114,14 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  top: {
-    backgroundColor: colors.primaryDeep,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  title: { fontFamily: fonts.bold, fontSize: 22, color: colors.white, textAlign: 'right' },
-  sub: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.85)',
-    textAlign: 'right',
-    marginTop: 4,
-  },
   body: { padding: spacing.md, paddingBottom: spacing.xxl },
+  lead: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.inkSoft,
+    textAlign: 'right',
+    marginBottom: spacing.md,
+  },
   statsRow: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: spacing.lg },
   statCard: { width: '47%', alignItems: 'center', paddingVertical: 16 },
   statValue: { fontFamily: fonts.bold, fontSize: 24, color: colors.primaryDeep },
