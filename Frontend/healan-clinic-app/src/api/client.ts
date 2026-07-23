@@ -5,10 +5,30 @@ export class ApiError extends Error {
   status: number;
   body: unknown;
   constructor(status: number, body: unknown, message?: string) {
-    super(message ?? `HTTP ${status}`);
+    super(message ?? formatApiFailure(status, body));
     this.status = status;
     this.body = body;
   }
+}
+
+/** Prefer server Persian message over bare "HTTP 400". */
+function formatApiFailure(status: number, body: unknown): string {
+  if (body && typeof body === 'object') {
+    const o = body as Record<string, unknown>;
+    const errors = o.Errors ?? o.errors;
+    if (Array.isArray(errors)) {
+      const usable = errors.find(
+        (e) => typeof e === 'string' && e.trim() && !e.startsWith('diag:')
+      );
+      if (typeof usable === 'string') return usable;
+    }
+    const title = o.Title ?? o.title ?? o.detail ?? o.Detail;
+    if (typeof title === 'string' && title.trim()) return title;
+  }
+  if (status === 401) return 'نشست منقضی شده. دوباره وارد شوید.';
+  if (status === 403) return 'دسترسی به این بخش ندارید.';
+  if (status === 456) return 'حساب کاربری غیرفعال است.';
+  return `HTTP ${status}`;
 }
 
 function joinUrl(base: string, path: string): string {
@@ -17,11 +37,24 @@ function joinUrl(base: string, path: string): string {
   return `${b}/${p}`;
 }
 
+/** Max pageSize allowed by Share.Application PaginatedList (server returns 400 above this). */
+export const HEALAN_MAX_PAGE_SIZE = 20;
+
+export function clampPageSize(pageSize?: number): number {
+  if (!pageSize || pageSize < 1) return HEALAN_MAX_PAGE_SIZE;
+  return Math.min(pageSize, HEALAN_MAX_PAGE_SIZE);
+}
+
 function toQuery(params?: Record<string, unknown>): string {
   if (!params) return '';
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined || v === null || v === '') continue;
+    // Server rejects pageSize > 20 with HTTP 400.
+    if (k === 'pageSize') {
+      qs.set(k, String(clampPageSize(Number(v))));
+      continue;
+    }
     qs.set(k, String(v));
   }
   const s = qs.toString();

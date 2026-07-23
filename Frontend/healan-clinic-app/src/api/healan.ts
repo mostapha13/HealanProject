@@ -1,5 +1,5 @@
 import type { TokenGetter } from './client';
-import { apiGet } from './client';
+import { apiGet, clampPageSize, HEALAN_MAX_PAGE_SIZE } from './client';
 import { config } from '../config';
 
 export type DashboardStats = {
@@ -39,6 +39,8 @@ export type AppointmentSummary = {
   appointmentDate: string;
   appointmentTypeName?: string;
   note?: string;
+  patient?: { firstName?: string; lastName?: string; nationalCode?: string };
+  doctor?: { firstName?: string; lastName?: string; medicalGroupTypeName?: string };
 };
 
 export type DoctorSummary = {
@@ -88,7 +90,11 @@ export async function fetchTodayAppointments(
     config.healanApiUrl,
     'Appointment/CurrentAppointmentList',
     getToken,
-    { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 50, filterText: params.filterText }
+    {
+      pageNumber: params.pageNumber ?? 1,
+      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
+      filterText: params.filterText,
+    }
   );
   return pageItems(page);
 }
@@ -101,7 +107,11 @@ export async function fetchAppointments(
     config.healanApiUrl,
     'Appointment/AppointmentList',
     getToken,
-    { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 50, filterText: params.filterText }
+    {
+      pageNumber: params.pageNumber ?? 1,
+      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
+      filterText: params.filterText,
+    }
   );
   return pageItems(page);
 }
@@ -114,7 +124,11 @@ export async function fetchPatients(
     config.healanApiUrl,
     'Patient/PatientList',
     getToken,
-    { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 50, filterText: params.filterText }
+    {
+      pageNumber: params.pageNumber ?? 1,
+      pageSize: clampPageSize(params.pageSize ?? HEALAN_MAX_PAGE_SIZE),
+      filterText: params.filterText,
+    }
   );
   return pageItems(page);
 }
@@ -127,7 +141,7 @@ export async function fetchDoctors(
     config.healanApiUrl,
     'Doctor/DoctorList',
     getToken,
-    { pageNumber: 1, pageSize: 100, filterText: params.filterText }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: params.filterText }
   );
   return pageItems(page);
 }
@@ -140,7 +154,7 @@ export async function fetchPrescriptions(
     config.healanApiUrl,
     'OrderResult/PrescriptionList',
     getToken,
-    { pageNumber: 1, pageSize: 50, filterText: params.filterText }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: params.filterText }
   );
   return pageItems(page);
 }
@@ -150,7 +164,7 @@ export async function fetchCompanies(getToken: TokenGetter): Promise<NamedRow[]>
     config.healanApiUrl,
     'Company/CompanyList',
     getToken,
-    { pageNumber: 1, pageSize: 100 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -167,7 +181,7 @@ export async function fetchInsurance(getToken: TokenGetter): Promise<NamedRow[]>
     config.healanApiUrl,
     'Insurance/InsuranceList',
     getToken,
-    { pageNumber: 1, pageSize: 100 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -184,7 +198,7 @@ export async function fetchServices(getToken: TokenGetter): Promise<NamedRow[]> 
     config.healanApiUrl,
     'ServiceTypes/List',
     getToken,
-    { pageNumber: 1, pageSize: 100, onlyActive: true }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, onlyActive: true }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -201,7 +215,7 @@ export async function fetchMedicalFees(getToken: TokenGetter): Promise<NamedRow[
     config.healanApiUrl,
     'MedicalFeeServices/List',
     getToken,
-    { pageNumber: 1, pageSize: 100 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -218,7 +232,7 @@ export async function fetchUsers(getToken: TokenGetter): Promise<NamedRow[]> {
     config.healanApiUrl,
     'User/UserList',
     getToken,
-    { pageNumber: 1, pageSize: 100, filterText: '' }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE, filterText: '' }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -236,14 +250,7 @@ export async function fetchBookingReservations(getToken: TokenGetter): Promise<N
     config.healanApiUrl,
     'BookingReservation/List',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
-  ).catch(async () =>
-    apiGet<PaginatedResponse<Record<string, unknown>>>(
-      config.healanApiUrl,
-      'Booking/ReservationList',
-      getToken,
-      { pageNumber: 1, pageSize: 50 }
-    )
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw, index) => {
     const r = asRecord(raw);
@@ -260,9 +267,7 @@ export async function fetchBookingSchedules(getToken: TokenGetter): Promise<Name
     config.healanApiUrl,
     'BookingSchedule/TemplateList',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
-  ).catch(async () =>
-    apiGet(config.healanApiUrl, 'BookingSchedule/List', getToken, { pageNumber: 1, pageSize: 50 })
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page as PaginatedResponse<Record<string, unknown>>).map((raw, index) => {
     const r = asRecord(raw);
@@ -279,7 +284,7 @@ export async function fetchSmsOutbox(getToken: TokenGetter): Promise<NamedRow[]>
     config.healanApiUrl,
     'ClinicReports/SmsOutbox',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw, index) => {
     const r = asRecord(raw);
@@ -313,7 +318,7 @@ export async function fetchBlogPosts(getToken: TokenGetter): Promise<NamedRow[]>
     config.healanApiUrl,
     'BlogPost/List',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   return pageItems(page).map((raw) => {
     const r = asRecord(raw);
@@ -381,7 +386,7 @@ export async function fetchRagKnowledge(getToken: TokenGetter): Promise<NamedRow
     config.healanApiUrl,
     'RagKnowledge/List',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   const rows = Array.isArray(page) ? page : pageItems(page);
   return rows.map((raw, index) => {
@@ -399,7 +404,7 @@ export async function fetchRagChatLogs(getToken: TokenGetter): Promise<NamedRow[
     config.healanApiUrl,
     'RagKnowledge/ChatLogList',
     getToken,
-    { pageNumber: 1, pageSize: 50 }
+    { pageNumber: 1, pageSize: HEALAN_MAX_PAGE_SIZE }
   );
   const rows = Array.isArray(page) ? page : pageItems(page);
   return rows.map((raw, index) => {
@@ -506,12 +511,36 @@ export function patientDisplayName(p: PatientSummary): string {
   return `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || `بیمار ${p.patientId}`;
 }
 
+function personFullName(firstName?: string, lastName?: string): string {
+  return `${firstName ?? ''} ${lastName ?? ''}`.trim();
+}
+
 export function appointmentPatientLabel(a: AppointmentSummary): string {
-  return a.patientName?.trim() || `بیمار #${a.patientId}`;
+  if (a.patientName?.trim()) return a.patientName.trim();
+  const nested = personFullName(a.patient?.firstName, a.patient?.lastName);
+  return nested || `بیمار #${a.patientId}`;
+}
+
+export function appointmentDoctorLabel(a: AppointmentSummary): string {
+  if (a.doctorName?.trim()) return a.doctorName.trim();
+  const nested = personFullName(a.doctor?.firstName, a.doctor?.lastName);
+  return nested || `پزشک #${a.doctorId}`;
 }
 
 export function doctorDisplayName(d: DoctorSummary): string {
   return `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() || `پزشک ${d.doctorId}`;
+}
+
+/** Normalize Persian/Arabic digits and keep only 0-9. */
+export function toAsciiDigits(value: string): string {
+  return value
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - '۰'.charCodeAt(0)))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - '٠'.charCodeAt(0)))
+    .replace(/\D/g, '');
+}
+
+export function isTenDigitNationalCode(value: string): boolean {
+  return toAsciiDigits(value).length === 10;
 }
 
 export type PortalHeroSlide = {

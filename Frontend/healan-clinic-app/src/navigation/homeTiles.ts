@@ -42,9 +42,6 @@ export function filterAccessibleTiles(
   const filtered = defs.filter(
     (d) => ids.has(d.id) || paths.has(d.path) || urlHit(d.path)
   );
-  // If AccessMenu did not load / is empty, still show curated home so UI is usable in preview.
-  if (!filtered.length && !accessible.length && !grantedUrls.length) {
-    return defs;
-  }
+  // Empty AccessMenu = no tiles (avoid opening modules that return 403).
   return filtered;
 }

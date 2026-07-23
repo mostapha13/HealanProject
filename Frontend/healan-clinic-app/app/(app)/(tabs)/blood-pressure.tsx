@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../src/auth/AuthContext';
-import { fetchBloodPressureHistory, type NamedRow } from '../../../src/api/healan';
+import { fetchBloodPressureHistory, isTenDigitNationalCode, toAsciiDigits, type NamedRow } from '../../../src/api/healan';
 import {
   AppScreen,
   EmptyBlock,
@@ -22,10 +22,17 @@ export default function BloodPressureTab() {
   const [searched, setSearched] = useState(false);
 
   const load = useCallback(async () => {
-    const nationalCode = q.trim();
+    const nationalCode = toAsciiDigits(q);
     if (!nationalCode) {
       setRows([]);
       setSearched(false);
+      setError(null);
+      return;
+    }
+    if (!isTenDigitNationalCode(nationalCode)) {
+      setRows([]);
+      setSearched(true);
+      setError('کد ملی باید دقیقاً ۱۰ رقم باشد.');
       return;
     }
     setLoading(true);

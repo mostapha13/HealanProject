@@ -3,6 +3,7 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useAuth } from '../../../src/auth/AuthContext';
 import {
+  appointmentDoctorLabel,
   appointmentPatientLabel,
   doctorDisplayName,
   fetchAppointments,
@@ -30,7 +31,9 @@ import {
   fetchSmsSettings,
   fetchTodayAppointments,
   fetchUsers,
+  isTenDigitNationalCode,
   patientDisplayName,
+  toAsciiDigits,
   type NamedRow,
 } from '../../../src/api/healan';
 import type { ClinicModuleId } from '../../../src/navigation/catalog';
@@ -87,7 +90,7 @@ export default function ModuleScreen() {
             list.map((a) => ({
               id: a.appointmentId,
               title: appointmentPatientLabel(a),
-              subtitle: `${a.appointmentTypeName ?? 'نوبت'} · ${a.doctorName ?? `پزشک #${a.doctorId}`}`,
+              subtitle: `${a.appointmentTypeName ?? 'نوبت'} · ${appointmentDoctorLabel(a)}`,
               meta: a.appointmentDate,
               badge: 'امروز',
             }))
@@ -100,7 +103,7 @@ export default function ModuleScreen() {
             list.map((a) => ({
               id: a.appointmentId,
               title: appointmentPatientLabel(a),
-              subtitle: `${a.appointmentTypeName ?? 'نوبت'} · ${a.doctorName ?? ''}`,
+              subtitle: `${a.appointmentTypeName ?? 'نوبت'} · ${appointmentDoctorLabel(a)}`,
               meta: a.appointmentDate,
             }))
           );
@@ -205,11 +208,15 @@ export default function ModuleScreen() {
           setRows(await fetchRagSettingCards(getAccessToken));
           break;
         case 'blood-pressure': {
-          if (!q) {
-            setInfo('کد ملی بیمار را جستجو کنید تا تاریخچه فشار خون نمایش داده شود.');
+          const code = toAsciiDigits(filter);
+          if (!code) {
+            setInfo('کد ملی ۱۰ رقمی بیمار را وارد کنید و جستجو را بزنید.');
+            setRows([]);
+          } else if (!isTenDigitNationalCode(code)) {
+            setInfo('کد ملی باید دقیقاً ۱۰ رقم باشد.');
             setRows([]);
           } else {
-            setRows(await fetchBloodPressureHistory(getAccessToken, { nationalCode: q }));
+            setRows(await fetchBloodPressureHistory(getAccessToken, { nationalCode: code }));
           }
           break;
         }
@@ -247,8 +254,17 @@ export default function ModuleScreen() {
   }, [filter, getAccessToken, moduleId, params.path, title]);
 
   useEffect(() => {
+    if (moduleId !== 'blood-pressure') return;
+    setLoading(false);
+    setError(null);
+    setInfo('کد ملی ۱۰ رقمی بیمار را وارد کنید و جستجو را بزنید.');
+    setRows([]);
+  }, [moduleId]);
+
+  useEffect(() => {
+    if (moduleId === 'blood-pressure') return;
     void load();
-  }, [load]);
+  }, [load, moduleId]);
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
