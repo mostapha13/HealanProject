@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Healan Patient",
+    "slug": "healan-patient-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "healanpatient",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6D28D9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ir.drshahrooei.healan.patient"
+    },
+    "android": {
+      "package": "ir.drshahrooei.healan.patient",
+      "adaptiveIcon": {
+        "backgroundColor": "#6D28D9",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-web-browser"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "healan-patient-app-local"
+      }
+    }
+  }
+}

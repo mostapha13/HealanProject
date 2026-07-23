@@ -57,7 +57,7 @@ export function BankHeader({
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v15-appt-profile-bp</Text>
+            <Text style={styles.buildMark}>build-v16-jalali-calendar-bp-table</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>

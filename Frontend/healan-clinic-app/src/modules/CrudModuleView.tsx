@@ -35,6 +35,7 @@ import {
 import { colors, fonts, spacing } from '../theme';
 import { ListCard } from '../components/Ui';
 import { jalaliDateTimeToLocal, localToJalaliParts, toPersianDigits } from '../utils/jalali';
+import { JalaliCalendarModal } from '../components/JalaliCalendar';
 
 function fieldValue(form: Record<string, string | boolean | number>, key: string): string {
   const v = form[key];
@@ -173,6 +174,7 @@ function JalaliDateTimeField({
   const parts = localToJalaliParts(value || null);
   const [date, setDate] = useState(parts.date);
   const [time, setTime] = useState(parts.time);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   useEffect(() => {
     const p = localToJalaliParts(value || null);
@@ -191,17 +193,10 @@ function JalaliDateTimeField({
       <View style={styles.jalaliRow}>
         <View style={styles.jalaliHalf}>
           <Text style={styles.jalaliHint}>تاریخ شمسی</Text>
-          <TextInput
-            value={date}
-            onChangeText={(v) => {
-              setDate(v);
-              commit(v, time);
-            }}
-            placeholder="1404/04/01"
-            placeholderTextColor={colors.muted}
-            textAlign="right"
-            style={styles.jalaliInput}
-          />
+          <Pressable style={styles.calendarTrigger} onPress={() => setCalendarOpen(true)}>
+            <Ionicons name="calendar-outline" size={18} color={colors.primaryDeep} />
+            <Text style={styles.calendarTriggerText}>{toPersianDigits(date)}</Text>
+          </Pressable>
         </View>
         <View style={styles.jalaliHalf}>
           <Text style={styles.jalaliHint}>ساعت</Text>
@@ -219,11 +214,16 @@ function JalaliDateTimeField({
           />
         </View>
       </View>
-      {value ? (
-        <Text style={styles.jalaliPreview}>
-          نمایش: {toPersianDigits(date)} · {toPersianDigits(time)}
-        </Text>
-      ) : null}
+
+      <JalaliCalendarModal
+        visible={calendarOpen}
+        value={date}
+        onClose={() => setCalendarOpen(false)}
+        onSelect={(nextDate) => {
+          setDate(nextDate);
+          commit(nextDate, time);
+        }}
+      />
     </View>
   );
 }
@@ -615,11 +615,22 @@ const styles = StyleSheet.create({
     color: colors.ink,
     backgroundColor: colors.white,
   },
-  jalaliPreview: {
-    marginTop: 6,
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.inkSoft,
+  calendarTrigger: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: colors.white,
+  },
+  calendarTriggerText: {
+    flex: 1,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    color: colors.ink,
     textAlign: 'right',
   },
 });

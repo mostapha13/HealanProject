@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../src/auth/AuthContext';
 import {
@@ -24,41 +31,57 @@ import {
 } from '../../../src/utils/groupBloodPressureByDay';
 import { toPersianDigits } from '../../../src/utils/jalali';
 
-function SlotCell({ label, slot }: { label: string; slot?: BpPeriodSlot }) {
-  if (!slot) {
-    return (
-      <View style={styles.slot}>
-        <Text style={styles.slotLabel}>{label}</Text>
-        <Text style={styles.slotEmpty}>—</Text>
-      </View>
-    );
-  }
-  return (
-    <View style={styles.slot}>
-      <Text style={styles.slotLabel}>{label}</Text>
-      <Text style={styles.slotValue}>
-        {toPersianDigits(`${slot.systolic}/${slot.diastolic}`)}
-      </Text>
-      {slot.pulse != null ? (
-        <Text style={styles.slotMeta}>نبض {toPersianDigits(slot.pulse)}</Text>
-      ) : null}
-      {slot.measuredTime ? (
-        <Text style={styles.slotMeta}>{toPersianDigits(slot.measuredTime)}</Text>
-      ) : null}
-    </View>
-  );
+function formatSlot(slot?: BpPeriodSlot): string {
+  if (!slot) return '—';
+  return toPersianDigits(`${slot.systolic}/${slot.diastolic}`);
 }
 
-function DayCard({ day }: { day: BpDayRow }) {
+function formatSlotMeta(slot?: BpPeriodSlot): string {
+  if (!slot) return '';
+  const bits = [
+    slot.measuredTime ? toPersianDigits(slot.measuredTime) : null,
+    slot.pulse != null ? `نبض ${toPersianDigits(slot.pulse)}` : null,
+  ].filter(Boolean);
+  return bits.join(' · ');
+}
+
+function BpTable({ days }: { days: BpDayRow[] }) {
   return (
-    <SurfaceCard style={styles.dayCard}>
-      <Text style={styles.dayTitle}>{day.jalaliLabel}</Text>
-      <View style={styles.slotsRow}>
-        <SlotCell label="صبح" slot={day.morning} />
-        <SlotCell label="ظهر" slot={day.noon} />
-        <SlotCell label="شب" slot={day.night} />
+    <ScrollView horizontal showsHorizontalScrollIndicator style={styles.tableScroll}>
+      <View style={styles.table}>
+        <View style={[styles.tr, styles.thead]}>
+          <Text style={[styles.th, styles.colDate]}>تاریخ</Text>
+          <Text style={[styles.th, styles.colPeriod, styles.periodMorning]}>صبح</Text>
+          <Text style={[styles.th, styles.colPeriod, styles.periodNoon]}>ظهر</Text>
+          <Text style={[styles.th, styles.colPeriod, styles.periodNight]}>شب</Text>
+        </View>
+        {days.map((day, index) => (
+          <View
+            key={day.dateKey}
+            style={[styles.tr, index === days.length - 1 && styles.trLast]}
+          >
+            <View style={[styles.td, styles.colDate]}>
+              <Text style={styles.dateText}>{day.jalaliLabel}</Text>
+            </View>
+            {([
+              ['morning', day.morning, styles.periodMorning],
+              ['noon', day.noon, styles.periodNoon],
+              ['night', day.night, styles.periodNight],
+            ] as const).map(([key, slot, tone]) => (
+              <View key={key} style={[styles.td, styles.colPeriod, tone]}>
+                <Text style={[styles.bpValue, !slot && styles.bpEmpty]}>{formatSlot(slot)}</Text>
+                {slot ? <Text style={styles.bpMeta}>{formatSlotMeta(slot)}</Text> : null}
+                {slot?.note ? (
+                  <Text style={styles.bpNote} numberOfLines={1}>
+                    {slot.note}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ))}
       </View>
-    </SurfaceCard>
+    </ScrollView>
   );
 }
 
@@ -108,10 +131,15 @@ export default function BloodPressureTab() {
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={styles.top}>
         <Text style={styles.title}>فشار خون</Text>
-        <Text style={styles.sub}>گزارش سوابق بیمار با کد ملی</Text>
+        <Text style={styles.sub}>گزارش جدولی سوابق بیمار</Text>
       </SafeAreaView>
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={{ paddingBottom: spacing.xxl }}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
+        keyboardShouldPersistTaps="handled"
+      >
         <SearchField
           placeholder="کد ملی ۱۰ رقمی..."
           value={q}
@@ -124,73 +152,64 @@ export default function BloodPressureTab() {
           <Text style={styles.searchBtnText}>{loading ? 'در حال جستجو...' : 'نمایش سوابق'}</Text>
         </Pressable>
 
-        {loading && !result ? (
-          <LoadingBlock />
-        ) : (
-          <FlatList
-            data={dayRows}
-            keyExtractor={(item) => item.dateKey}
-            refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
-            contentContainerStyle={{ paddingBottom: spacing.xxl }}
-            ListHeaderComponent={
-              result ? (
-                <View style={styles.summaryWrap}>
-                  <SurfaceCard style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>بیمار</Text>
-                    <Text style={styles.summaryStrong}>{patientName}</Text>
-                    <Text style={styles.summaryMuted}>
-                      کد ملی {toPersianDigits(result.nationalCode)}
-                    </Text>
-                  </SurfaceCard>
-                  <View style={styles.summaryRow}>
-                    <SurfaceCard style={styles.summaryMini}>
-                      <Text style={styles.summaryLabel}>تعداد ثبت</Text>
-                      <Text style={styles.summaryStrong}>
-                        {toPersianDigits(items.length)}
-                      </Text>
-                    </SurfaceCard>
-                    <SurfaceCard style={styles.summaryMini}>
-                      <Text style={styles.summaryLabel}>آخرین فشار</Text>
-                      <Text style={styles.summaryStrong}>
-                        {latest
-                          ? toPersianDigits(`${latest.systolic}/${latest.diastolic}`)
-                          : '—'}
-                      </Text>
-                      <Text style={styles.summaryMuted}>
-                        {[
-                          latest?.periodTitle || periodTitle(latest?.periodOfDay),
-                          latest?.measuredTime,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </Text>
-                    </SurfaceCard>
-                  </View>
-                  {dayRows.length > 0 ? (
-                    <Text style={styles.sectionTitle}>گزارش روزانه</Text>
-                  ) : null}
-                </View>
-              ) : null
-            }
-            ListEmptyComponent={
-              searched ? (
-                <EmptyBlock
-                  title={error ? 'خطا' : 'موردی نیست'}
-                  subtitle={error ?? 'برای این کد ملی ثبتی یافت نشد'}
-                />
-              ) : (
-                <SurfaceCard style={styles.hint}>
-                  <Text style={styles.hintText}>کد ملی را وارد کنید و «نمایش سوابق» را بزنید.</Text>
-                </SurfaceCard>
-              )
-            }
-            renderItem={({ item }) => <DayCard day={item} />}
+        {loading && !result ? <LoadingBlock /> : null}
+
+        {result ? (
+          <View style={styles.summaryWrap}>
+            <SurfaceCard style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>بیمار</Text>
+              <Text style={styles.summaryStrong}>{patientName}</Text>
+              <Text style={styles.summaryMuted}>
+                کد ملی {toPersianDigits(result.nationalCode)}
+              </Text>
+            </SurfaceCard>
+            <View style={styles.summaryRow}>
+              <SurfaceCard style={styles.summaryMini}>
+                <Text style={styles.summaryLabel}>تعداد ثبت</Text>
+                <Text style={styles.summaryStrong}>{toPersianDigits(items.length)}</Text>
+              </SurfaceCard>
+              <SurfaceCard style={styles.summaryMini}>
+                <Text style={styles.summaryLabel}>آخرین فشار</Text>
+                <Text style={styles.summaryStrong}>
+                  {latest ? toPersianDigits(`${latest.systolic}/${latest.diastolic}`) : '—'}
+                </Text>
+                <Text style={styles.summaryMuted}>
+                  {[
+                    latest?.periodTitle || periodTitle(latest?.periodOfDay),
+                    latest?.measuredTime,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Text>
+              </SurfaceCard>
+            </View>
+
+            {dayRows.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>جدول روزانه (صبح / ظهر / شب)</Text>
+                <BpTable days={dayRows} />
+              </>
+            ) : (
+              <EmptyBlock title="موردی نیست" subtitle="برای این بیمار فشاری ثبت نشده است" />
+            )}
+          </View>
+        ) : searched ? (
+          <EmptyBlock
+            title={error ? 'خطا' : 'موردی نیست'}
+            subtitle={error ?? 'برای این کد ملی ثبتی یافت نشد'}
           />
+        ) : (
+          <SurfaceCard style={styles.hint}>
+            <Text style={styles.hintText}>کد ملی را وارد کنید و «نمایش سوابق» را بزنید.</Text>
+          </SurfaceCard>
         )}
-      </View>
+      </ScrollView>
     </AppScreen>
   );
 }
+
+const COL_DATE = 112;
+const COL_PERIOD = 124;
 
 const styles = StyleSheet.create({
   top: {
@@ -245,47 +264,89 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: spacing.sm,
   },
-  dayCard: { marginBottom: spacing.sm },
-  dayTitle: {
+  tableScroll: {
+    marginBottom: spacing.md,
+  },
+  table: {
+    minWidth: COL_DATE + COL_PERIOD * 3,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: colors.white,
+  },
+  tr: {
+    flexDirection: 'row-reverse',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.line,
+  },
+  trLast: {
+    borderBottomWidth: 0,
+  },
+  thead: {
+    backgroundColor: '#EEF2F6',
+  },
+  th: {
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    color: colors.ink,
+    textAlign: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: colors.line,
+  },
+  td: {
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    justifyContent: 'center',
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: colors.line,
+  },
+  colDate: {
+    width: COL_DATE,
+    borderLeftWidth: 0,
+  },
+  colPeriod: {
+    width: COL_PERIOD,
+  },
+  periodMorning: {
+    backgroundColor: 'rgba(198, 224, 0, 0.14)',
+  },
+  periodNoon: {
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+  },
+  periodNight: {
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+  },
+  dateText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.ink,
+    textAlign: 'center',
+  },
+  bpValue: {
     fontFamily: fonts.bold,
     fontSize: 15,
     color: colors.ink,
-    textAlign: 'right',
-    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
-  slotsRow: { flexDirection: 'row-reverse', gap: 8 },
-  slot: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    borderRadius: 14,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  slotLabel: {
-    fontFamily: fonts.semiBold,
-    fontSize: 11,
+  bpEmpty: {
     color: colors.muted,
-    textAlign: 'center',
-    marginBottom: 6,
-  },
-  slotValue: {
-    fontFamily: fonts.bold,
-    fontSize: 16,
-    color: colors.ink,
-    textAlign: 'center',
-  },
-  slotEmpty: {
     fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.muted,
-    textAlign: 'center',
   },
-  slotMeta: {
+  bpMeta: {
+    marginTop: 4,
     fontFamily: fonts.regular,
-    fontSize: 11,
+    fontSize: 10,
     color: colors.inkSoft,
     textAlign: 'center',
-    marginTop: 4,
+  },
+  bpNote: {
+    marginTop: 2,
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.muted,
+    textAlign: 'center',
   },
 });
