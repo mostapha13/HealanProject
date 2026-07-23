@@ -77,7 +77,6 @@ namespace IdentityServer.UserManagerAPI
              {
                  options.Authority = Configuration["IdentityServer:Url"];
                  options.RequireHttpsMetadata = false;
-                 options.MapInboundClaims = false;
                  options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                  {
                      ValidateIssuer = true,
