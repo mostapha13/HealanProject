@@ -1,11 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../auth/AuthContext';
 import {
   getCrudConfig,
   type CrudModuleConfig,
   type EntityRow,
   type EnumOption,
+  type FormFieldDef,
 } from '../api/crud';
 import type { ClinicModuleId } from '../navigation/catalog';
 import {
@@ -22,6 +34,7 @@ import {
 } from '../components/Ui';
 import { colors, fonts, spacing } from '../theme';
 import { ListCard } from '../components/Ui';
+import { jalaliDateTimeToLocal, localToJalaliParts, toPersianDigits } from '../utils/jalali';
 
 function fieldValue(form: Record<string, string | boolean | number>, key: string): string {
   const v = form[key];
@@ -39,6 +52,180 @@ export function CrudModuleView({
   const config = getCrudConfig(moduleId);
   if (!config) return null;
   return <CrudModuleInner config={config} title={title} />;
+}
+
+function SelectPickerField({
+  field,
+  options,
+  value,
+  onChange,
+}: {
+  field: FormFieldDef;
+  options: EnumOption[];
+  value: number;
+  onChange: (key: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const selected = options.find((o) => o.key === value);
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return options;
+    return options.filter(
+      (o) => o.label.toLowerCase().includes(needle) || String(o.key).includes(needle)
+    );
+  }, [options, q]);
+
+  // Small enums stay as chips
+  if (options.length > 0 && options.length <= 8 && field.kind !== 'select') {
+    return (
+      <View style={styles.optionBlock}>
+        <Text style={styles.optionLabel}>{field.label}</Text>
+        <View style={styles.optionWrap}>
+          {options.map((opt) => {
+            const active = value === opt.key;
+            return (
+              <Pressable
+                key={opt.key}
+                onPress={() => onChange(opt.key)}
+                style={[styles.optionChip, active && styles.optionChipActive]}
+              >
+                <Text style={styles.optionChipText}>{opt.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.optionBlock}>
+      <Text style={styles.optionLabel}>{field.label}</Text>
+      <Pressable
+        onPress={() => {
+          setQ('');
+          setOpen(true);
+        }}
+        style={styles.selectTrigger}
+      >
+        <Ionicons name="chevron-down" size={18} color={colors.muted} />
+        <Text style={[styles.selectTriggerText, !selected && styles.selectPlaceholder]} numberOfLines={1}>
+          {selected?.label || field.placeholder || 'انتخاب کنید'}
+        </Text>
+      </Pressable>
+
+      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+        <View style={styles.pickerOverlay}>
+          <View style={styles.pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Pressable onPress={() => setOpen(false)}>
+                <Text style={styles.pickerClose}>بستن</Text>
+              </Pressable>
+              <Text style={styles.pickerTitle}>{field.label}</Text>
+            </View>
+            <TextInput
+              value={q}
+              onChangeText={setQ}
+              placeholder="جستجو..."
+              placeholderTextColor={colors.muted}
+              textAlign="right"
+              style={styles.pickerSearch}
+            />
+            <FlatList
+              data={filtered}
+              keyExtractor={(item) => String(item.key)}
+              keyboardShouldPersistTaps="handled"
+              ListEmptyComponent={
+                <Text style={styles.pickerEmpty}>موردی یافت نشد</Text>
+              }
+              renderItem={({ item }) => {
+                const active = item.key === value;
+                return (
+                  <Pressable
+                    onPress={() => {
+                      onChange(item.key);
+                      setOpen(false);
+                    }}
+                    style={[styles.pickerRow, active && styles.pickerRowActive]}
+                  >
+                    <Text style={styles.pickerRowText}>{item.label}</Text>
+                  </Pressable>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+function JalaliDateTimeField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (local: string) => void;
+}) {
+  const parts = localToJalaliParts(value || null);
+  const [date, setDate] = useState(parts.date);
+  const [time, setTime] = useState(parts.time);
+
+  useEffect(() => {
+    const p = localToJalaliParts(value || null);
+    setDate(p.date);
+    setTime(p.time);
+  }, [value]);
+
+  const commit = (nextDate: string, nextTime: string) => {
+    const local = jalaliDateTimeToLocal(nextDate, nextTime);
+    if (local) onChange(local);
+  };
+
+  return (
+    <View style={styles.optionBlock}>
+      <Text style={styles.optionLabel}>{label}</Text>
+      <View style={styles.jalaliRow}>
+        <View style={styles.jalaliHalf}>
+          <Text style={styles.jalaliHint}>تاریخ شمسی</Text>
+          <TextInput
+            value={date}
+            onChangeText={(v) => {
+              setDate(v);
+              commit(v, time);
+            }}
+            placeholder="1404/04/01"
+            placeholderTextColor={colors.muted}
+            textAlign="right"
+            style={styles.jalaliInput}
+          />
+        </View>
+        <View style={styles.jalaliHalf}>
+          <Text style={styles.jalaliHint}>ساعت</Text>
+          <TextInput
+            value={time}
+            onChangeText={(v) => {
+              setTime(v);
+              commit(date, v);
+            }}
+            placeholder="09:30"
+            placeholderTextColor={colors.muted}
+            keyboardType="numbers-and-punctuation"
+            textAlign="right"
+            style={styles.jalaliInput}
+          />
+        </View>
+      </View>
+      {value ? (
+        <Text style={styles.jalaliPreview}>
+          نمایش: {toPersianDigits(date)} · {toPersianDigits(time)}
+        </Text>
+      ) : null}
+    </View>
+  );
 }
 
 function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: string }) {
@@ -93,7 +280,7 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
     for (const field of config.fields) {
       if (!field.required) continue;
       const v = fieldValue(form, field.key).trim();
-      if (!v) {
+      if (!v || (typeof form[field.key] === 'number' && Number(form[field.key]) <= 0 && field.kind === 'select')) {
         Alert.alert('خطا', `${field.label} الزامی است`);
         return;
       }
@@ -243,28 +430,30 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
         saving={saving}
       >
         {config.fields.map((field) => {
-          const opts = options[field.key];
-          if (opts?.length) {
+          if (field.kind === 'datetime-jalali') {
             return (
-              <View key={field.key} style={styles.optionBlock}>
-                <Text style={styles.optionLabel}>{field.label}</Text>
-                <View style={styles.optionWrap}>
-                  {opts.map((opt) => {
-                    const active = Number(form[field.key]) === opt.key;
-                    return (
-                      <Pressable
-                        key={opt.key}
-                        onPress={() => setForm({ ...form, [field.key]: opt.key })}
-                        style={[styles.optionChip, active && styles.optionChipActive]}
-                      >
-                        <Text style={styles.optionChipText}>{opt.label}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
+              <JalaliDateTimeField
+                key={field.key}
+                label={field.label}
+                value={fieldValue(form, field.key)}
+                onChange={(local) => setForm({ ...form, [field.key]: local })}
+              />
             );
           }
+
+          const opts = options[field.key];
+          if (opts?.length || field.kind === 'select') {
+            return (
+              <SelectPickerField
+                key={field.key}
+                field={field}
+                options={opts ?? []}
+                value={Number(form[field.key]) || 0}
+                onChange={(key) => setForm({ ...form, [field.key]: key })}
+              />
+            );
+          }
+
           return (
             <FormField
               key={field.key}
@@ -331,5 +520,106 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors.ink,
+  },
+  selectTrigger: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: colors.white,
+  },
+  selectTriggerText: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.ink,
+    textAlign: 'right',
+  },
+  selectPlaceholder: { color: colors.muted },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  pickerSheet: {
+    maxHeight: '80%',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    paddingBottom: 24,
+  },
+  pickerHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  pickerTitle: { fontFamily: fonts.bold, fontSize: 16, color: colors.ink },
+  pickerClose: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.primaryDeep },
+  pickerSearch: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.ink,
+    backgroundColor: colors.bg,
+  },
+  pickerRow: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.line,
+  },
+  pickerRowActive: { backgroundColor: colors.primarySoft },
+  pickerRowText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.ink,
+    textAlign: 'right',
+  },
+  pickerEmpty: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.muted,
+    textAlign: 'center',
+    padding: spacing.lg,
+  },
+  jalaliRow: { flexDirection: 'row-reverse', gap: 10 },
+  jalaliHalf: { flex: 1 },
+  jalaliHint: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.muted,
+    textAlign: 'right',
+    marginBottom: 4,
+  },
+  jalaliInput: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.ink,
+    backgroundColor: colors.white,
+  },
+  jalaliPreview: {
+    marginTop: 6,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.inkSoft,
+    textAlign: 'right',
   },
 });

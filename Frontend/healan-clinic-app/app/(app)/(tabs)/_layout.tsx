@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Pressable, type GestureResponderEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
@@ -12,16 +12,41 @@ type Ion = ComponentProps<typeof Ionicons>['name'];
 
 function TabIcon({ name, focused }: { name: Ion; focused: boolean }) {
   return (
-    <View
-      style={{
-        backgroundColor: focused ? colors.primary : 'transparent',
-        borderRadius: 14,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-      }}
+    <Ionicons name={name} size={22} color={focused ? colors.primaryInk : colors.tabInactive} />
+  );
+}
+
+type TabButtonProps = {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  onPress?: (e: GestureResponderEvent) => void;
+  accessibilityState?: { selected?: boolean };
+};
+
+function TabBarButton({ children, style, onPress, accessibilityState, ...rest }: TabButtonProps) {
+  const focused = Boolean(accessibilityState?.selected);
+  return (
+    <Pressable
+      {...rest}
+      onPress={onPress}
+      accessibilityState={accessibilityState}
+      style={[
+        style,
+        {
+          flex: 1,
+          marginHorizontal: 3,
+          marginVertical: 6,
+          borderRadius: 16,
+          backgroundColor: focused ? colors.primary : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingTop: 4,
+          paddingBottom: 2,
+        },
+      ]}
     >
-      <Ionicons name={name} size={22} color={focused ? colors.primaryInk : colors.tabInactive} />
-    </View>
+      {children}
+    </Pressable>
   );
 }
 
@@ -48,6 +73,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primaryInk,
         tabBarInactiveTintColor: colors.tabInactive,
+        tabBarButton: TabBarButton,
         tabBarLabelStyle: {
           fontFamily: fonts.semiBold,
           fontSize: 11,
@@ -56,9 +82,12 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.white,
           borderTopColor: colors.line,
-          height: 68,
-          paddingBottom: 10,
-          paddingTop: 8,
+          height: 72,
+          paddingBottom: 8,
+          paddingTop: 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 0,
         },
       }}
     >

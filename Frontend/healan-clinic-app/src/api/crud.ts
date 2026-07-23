@@ -1,4 +1,5 @@
 import { config } from '../config';
+import { formatJalaliDateTime } from '../utils/jalali';
 import {
   apiDelete,
   apiGet,
@@ -29,6 +30,8 @@ export type FormFieldDef = {
   keyboard?: 'default' | 'numeric' | 'phone-pad' | 'email-address';
   multiline?: boolean;
   required?: boolean;
+  /** select = searchable list from loadOptions; datetime-jalali = شمسی */
+  kind?: 'text' | 'select' | 'datetime-jalali';
 };
 
 export type CrudModuleConfig = {
@@ -723,9 +726,9 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
     canDelete: false,
     canToggleActive: false,
     fields: [
-      { key: 'patientId', label: 'شناسه بیمار', keyboard: 'numeric', required: true },
-      { key: 'doctorId', label: 'شناسه پزشک', keyboard: 'numeric', required: true },
-      { key: 'appointmentDate', label: 'تاریخ (YYYY-MM-DDTHH:mm)', required: true },
+      { key: 'patientId', label: 'بیمار', kind: 'select', required: true },
+      { key: 'doctorId', label: 'پزشک', kind: 'select', required: true },
+      { key: 'appointmentDate', label: 'تاریخ و ساعت', kind: 'datetime-jalali', required: true },
       { key: 'durationMinutes', label: 'مدت (دقیقه)', keyboard: 'numeric', required: true },
       { key: 'serviceTypeIds', label: 'شناسه خدمت‌ها (با ویرگول)', required: true },
       { key: 'note', label: 'یادداشت', multiline: true },
@@ -738,6 +741,32 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       durationMinutes: 15,
       serviceTypeIds: '',
       note: '',
+    },
+    loadOptions: async (getToken) => {
+      const [patients, doctors] = await Promise.all([
+        listAll(getToken, 'Patient/PatientList'),
+        listAll(getToken, 'Doctor/DoctorList'),
+      ]);
+      return {
+        patientId: patients.map((raw) => {
+          const id = num(raw.patientId ?? raw.id);
+          const name = `${str(raw.firstName)} ${str(raw.lastName)}`.trim();
+          const nc = str(raw.nationalCode);
+          return {
+            key: id,
+            label: nc ? `${name || `بیمار #${id}`} · ${nc}` : name || `بیمار #${id}`,
+          };
+        }),
+        doctorId: doctors.map((raw) => {
+          const id = num(raw.doctorId ?? raw.id);
+          const name = `${str(raw.firstName)} ${str(raw.lastName)}`.trim();
+          const group = str(raw.medicalGroupTypeName);
+          return {
+            key: id,
+            label: group ? `${name || `پزشک #${id}`} · ${group}` : name || `پزشک #${id}`,
+          };
+        }),
+      };
     },
     load: async (getToken, filterText) => {
       const rows = await listAll(getToken, 'Appointment/AppointmentList', { filterText });
@@ -753,11 +782,12 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
           str(raw.doctorName) ||
           `${str(doctor.firstName)} ${str(doctor.lastName)}`.trim() ||
           `پزشک #${raw.doctorId}`;
+        const when = formatJalaliDateTime(str(raw.appointmentDate)) || str(raw.appointmentDate);
         return {
           id,
           title: patientName,
           subtitle: `${str(raw.appointmentTypeName ?? 'نوبت')} · ${doctorName}`,
-          meta: str(raw.appointmentDate),
+          meta: when,
           badge: str(raw.appointmentTypeName),
           raw,
         };
@@ -770,11 +800,20 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
             .filter(Boolean)
             .join(',')
         : '';
+      const rawDate = str(row.raw.appointmentDate);
+      let appointmentDate = rawDate.slice(0, 16);
+      if (rawDate) {
+        const d = new Date(rawDate);
+        if (!Number.isNaN(d.getTime())) {
+          const pad = (n: number) => String(n).padStart(2, '0');
+          appointmentDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+      }
       return {
         appointmentId: row.id,
         patientId: num(row.raw.patientId),
         doctorId: num(row.raw.doctorId),
-        appointmentDate: str(row.raw.appointmentDate).slice(0, 16),
+        appointmentDate,
         durationMinutes: num(row.raw.durationMinutes, 15),
         serviceTypeIds: services,
         note: str(row.raw.note),

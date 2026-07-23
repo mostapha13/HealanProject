@@ -8,6 +8,7 @@ import {
   fetchAppointments,
   fetchBlogPosts,
   fetchBloodPressureHistory,
+  bloodPressureToNamedRows,
   fetchBookingReservations,
   fetchBookingSchedules,
   fetchClinicAnalytics,
@@ -216,7 +217,11 @@ function ReadOnlyModuleScreen({
             setInfo('کد ملی باید دقیقاً ۱۰ رقم باشد.');
             setRows([]);
           } else {
-            setRows(await fetchBloodPressureHistory(getAccessToken, { nationalCode: code }));
+            setRows(
+              bloodPressureToNamedRows(
+                await fetchBloodPressureHistory(getAccessToken, { nationalCode: code })
+              )
+            );
           }
           break;
         }

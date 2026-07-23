@@ -484,28 +484,118 @@ export async function fetchClinicAnalytics(getToken: TokenGetter): Promise<Named
   }));
 }
 
+export type BloodPressureItem = {
+  id: number;
+  systolic: number;
+  diastolic: number;
+  pulse?: number | null;
+  measuredAt: string;
+  periodOfDay?: number | null;
+  periodTitle?: string | null;
+  measuredTime?: string | null;
+  note?: string | null;
+};
+
+export type BloodPressureHistory = {
+  patientId: number;
+  firstName: string;
+  lastName: string;
+  nationalCode: string;
+  items: BloodPressureItem[];
+};
+
+export type CurrentUserInfo = {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  userName?: string;
+  userTypeName?: string;
+  roleTitle?: string;
+  isActive?: boolean;
+};
+
+export async function fetchCurrentUser(getToken: TokenGetter): Promise<CurrentUserInfo | null> {
+  const raw = await apiGet<Record<string, unknown>>(
+    config.healanApiUrl,
+    'User/CurrentUser/Fa',
+    getToken
+  );
+  const summary = asRecord(raw.userSummaryReply ?? raw.UserSummaryReply ?? raw);
+  const userId = Number(summary.userId ?? summary.UserId ?? 0);
+  if (!userId && !summary.firstName && !summary.FirstName) return null;
+  return {
+    userId,
+    firstName: String(summary.firstName ?? summary.FirstName ?? ''),
+    lastName: String(summary.lastName ?? summary.LastName ?? ''),
+    phoneNumber: summary.phoneNumber != null ? String(summary.phoneNumber) : undefined,
+    userName: summary.userName != null ? String(summary.userName) : undefined,
+    userTypeName: summary.userTypeName != null ? String(summary.userTypeName) : undefined,
+    roleTitle: summary.roleTitle != null ? String(summary.roleTitle) : undefined,
+    isActive:
+      typeof summary.isActive === 'boolean'
+        ? summary.isActive
+        : typeof summary.IsActive === 'boolean'
+          ? summary.IsActive
+          : undefined,
+  };
+}
+
 export async function fetchBloodPressureHistory(
   getToken: TokenGetter,
   params: { nationalCode?: string; patientId?: number } = {}
-): Promise<NamedRow[]> {
-  const list = await apiGet<Record<string, unknown>[] | PaginatedResponse<Record<string, unknown>>>(
+): Promise<BloodPressureHistory> {
+  const raw = await apiGet<Record<string, unknown>>(
     config.healanApiUrl,
     'ClinicBloodPressure/History',
     getToken,
     { nationalCode: params.nationalCode, patientId: params.patientId }
   );
-  const rows = Array.isArray(list) ? list : pageItems(list);
-  return rows.map((raw, index) => {
-    const r = asRecord(raw);
-    const sys = r.systolic ?? r.Systolic;
-    const dia = r.diastolic ?? r.Diastolic;
+  const root = asRecord(raw);
+  const itemsRaw = root.items ?? root.Items;
+  const list = Array.isArray(itemsRaw) ? itemsRaw : [];
+  const items: BloodPressureItem[] = list.map((item, index) => {
+    const r = asRecord(item);
     return {
-      id: Number(r.patientBloodPressureId ?? r.id ?? index),
-      title: sys != null && dia != null ? `${sys}/${dia} mmHg` : `ثبت #${index + 1}`,
-      subtitle: String(r.measuredAt ?? r.createDate ?? r.note ?? ''),
-      meta: String(r.pulse ?? r.heartRate ?? ''),
+      id: Number(r.id ?? r.Id ?? index + 1),
+      systolic: Number(r.systolic ?? r.Systolic ?? 0),
+      diastolic: Number(r.diastolic ?? r.Diastolic ?? 0),
+      pulse:
+        r.pulse != null || r.Pulse != null
+          ? Number(r.pulse ?? r.Pulse)
+          : null,
+      measuredAt: String(r.measuredAt ?? r.MeasuredAt ?? ''),
+      periodOfDay:
+        r.periodOfDay != null || r.PeriodOfDay != null
+          ? Number(r.periodOfDay ?? r.PeriodOfDay)
+          : null,
+      periodTitle:
+        r.periodTitle != null || r.PeriodTitle != null
+          ? String(r.periodTitle ?? r.PeriodTitle)
+          : null,
+      measuredTime:
+        r.measuredTime != null || r.MeasuredTime != null
+          ? String(r.measuredTime ?? r.MeasuredTime)
+          : null,
+      note: r.note != null || r.Note != null ? String(r.note ?? r.Note) : null,
     };
   });
+  return {
+    patientId: Number(root.patientId ?? root.PatientId ?? 0),
+    firstName: String(root.firstName ?? root.FirstName ?? ''),
+    lastName: String(root.lastName ?? root.LastName ?? ''),
+    nationalCode: String(root.nationalCode ?? root.NationalCode ?? params.nationalCode ?? ''),
+    items,
+  };
+}
+
+export function bloodPressureToNamedRows(history: BloodPressureHistory): NamedRow[] {
+  return history.items.map((item, index) => ({
+    id: item.id || index + 1,
+    title: `${item.systolic}/${item.diastolic} mmHg`,
+    subtitle: [item.periodTitle, item.measuredTime, item.measuredAt].filter(Boolean).join(' · '),
+    meta: item.pulse != null ? `نبض ${item.pulse}` : item.note || undefined,
+  }));
 }
 
 export async function fetchRoles(getToken: TokenGetter): Promise<NamedRow[]> {
