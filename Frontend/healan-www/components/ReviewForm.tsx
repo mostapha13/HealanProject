@@ -7,6 +7,7 @@ export function ReviewForm() {
   const [contactInfo, setContactInfo] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -49,9 +50,44 @@ export function ReviewForm() {
     }
   };
 
+  const shown = hoverRating || rating;
+
   return (
     <form className="review-form" onSubmit={onSubmit}>
-      <h3>ثبت نظر شما</h3>
+      <div className="review-form__intro">
+        <h3>ثبت نظر شما</h3>
+        <p>تجربه ویزیت خود را با دیگران به اشتراک بگذارید.</p>
+      </div>
+
+      <fieldset className="star-rating">
+        <legend>امتیاز شما</legend>
+        <div
+          className="star-rating__row"
+          onMouseLeave={() => setHoverRating(0)}
+          role="radiogroup"
+          aria-label="امتیاز از ۱ تا ۵"
+        >
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={rating === n}
+              aria-label={`${n} ستاره`}
+              className={
+                n <= shown ? 'star-rating__star is-on' : 'star-rating__star'
+              }
+              onMouseEnter={() => setHoverRating(n)}
+              onFocus={() => setHoverRating(n)}
+              onClick={() => setRating(n)}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+        <span className="star-rating__hint">{shown} از ۵</span>
+      </fieldset>
+
       <label>
         نام نمایشی
         <input
@@ -59,26 +95,19 @@ export function ReviewForm() {
           onChange={(e) => setDisplayName(e.target.value)}
           required
           minLength={2}
+          placeholder="مثلاً بیمار قلب"
+          autoComplete="nickname"
         />
       </label>
       <label>
-        موبایل یا ایمیل (الزامی)
+        موبایل یا ایمیل
         <input
           value={contactInfo}
           onChange={(e) => setContactInfo(e.target.value)}
           required
           placeholder="09xxxxxxxxx یا email@example.com"
+          autoComplete="tel"
         />
-      </label>
-      <label>
-        امتیاز
-        <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
-          {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
       </label>
       <label>
         متن نظر
@@ -87,11 +116,12 @@ export function ReviewForm() {
           onChange={(e) => setReviewText(e.target.value)}
           required
           minLength={10}
-          rows={4}
+          rows={5}
+          placeholder="از تجربه معاینه، برخورد و کیفیت خدمات بنویسید..."
         />
       </label>
-      <button type="submit" className="btn btn--primary" disabled={busy}>
-        {busy ? '...' : 'ارسال نظر'}
+      <button type="submit" className="btn btn--primary btn--lg" disabled={busy}>
+        {busy ? 'در حال ارسال...' : 'ارسال نظر'}
       </button>
       {message ? (
         <p className={`review-form__msg${error ? ' is-error' : ''}`}>{message}</p>

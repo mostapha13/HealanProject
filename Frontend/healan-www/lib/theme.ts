@@ -1,4 +1,5 @@
 export const THEME_STORAGE_KEY = 'healan-theme';
+export const NIGHT_STORAGE_KEY = 'healan-night';
 
 export type ThemeId = 'classic' | 'warm' | 'minimal';
 
@@ -46,4 +47,37 @@ export function readStoredTheme(): ThemeId {
     /* ignore */
   }
   return 'classic';
+}
+
+export function applyNight(on: boolean) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.setAttribute('data-night', on ? 'true' : 'false');
+  try {
+    localStorage.setItem(NIGHT_STORAGE_KEY, on ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readStoredNight(): boolean {
+  try {
+    return localStorage.getItem(NIGHT_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Session-only font scale (not persisted). */
+export const FONT_SCALE_MIN = 0.9;
+export const FONT_SCALE_MAX = 1.25;
+export const FONT_SCALE_STEP = 0.05;
+
+export function applyFontScale(scale: number) {
+  if (typeof document === 'undefined') return;
+  const clamped = Math.min(
+    FONT_SCALE_MAX,
+    Math.max(FONT_SCALE_MIN, Number(scale.toFixed(2)))
+  );
+  document.documentElement.style.setProperty('--font-scale', String(clamped));
+  return clamped;
 }

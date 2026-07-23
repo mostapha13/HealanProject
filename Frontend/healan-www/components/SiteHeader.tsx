@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { BookingCta, PatientCta } from './CtaLinks';
-import { ThemeSwitcher } from './ThemeSwitcher';
 
 type Props = {
   brandName: string;
@@ -22,12 +21,9 @@ export function SiteHeader({
       <div className="topbar">
         <div className="container topbar__inner">
           <span>{topbar}</span>
-          <div className="topbar__end">
-            <ThemeSwitcher />
-            <a href={`tel:${phone}`} className="topbar__phone">
-              {phoneDisplay}
-            </a>
-          </div>
+          <a href={`tel:${phone}`} className="topbar__phone">
+            {phoneDisplay}
+          </a>
         </div>
       </div>
       <header className="header">

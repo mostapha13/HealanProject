@@ -80,66 +80,76 @@ export function ReviewsSection({ title, subtitle }: Props) {
           <p>{subtitle}</p>
         </div>
 
-        {loading ? (
-          <p className="empty">در حال بارگذاری نظرات...</p>
-        ) : error ? (
-          <p className="empty">بارگذاری نظرات ممکن نشد. کمی بعد دوباره تلاش کنید.</p>
-        ) : items.length === 0 ? (
-          <p className="empty">هنوز نظری ثبت نشده است.</p>
-        ) : (
-          <>
-            <div className="reviews">
-              {items.map((review) => (
-                <article key={review.patientReviewId} className="review">
-                  <div className="review__head">
-                    <div>
-                      <strong>{review.displayName}</strong>
-                      {(review.reviewedAt || review.createdAt) && (
-                        <time className="review__date">
-                          {formatDate(review.reviewedAt || review.createdAt)}
-                        </time>
-                      )}
-                    </div>
-                    <span
-                      className="review__stars"
-                      aria-label={`امتیاز ${review.rating} از ۵`}
+        <div className="reviews-layout">
+          <div className="reviews-layout__form">
+            <ReviewForm />
+          </div>
+
+          <div className="reviews-layout__list">
+            <h3 className="reviews-layout__list-title">نظرات تأیید‌شده</h3>
+
+            {loading ? (
+              <p className="empty">در حال بارگذاری نظرات...</p>
+            ) : error ? (
+              <p className="empty">
+                بارگذاری نظرات ممکن نشد. کمی بعد دوباره تلاش کنید.
+              </p>
+            ) : items.length === 0 ? (
+              <p className="empty">هنوز نظری ثبت نشده است.</p>
+            ) : (
+              <>
+                <div className="reviews reviews--stack">
+                  {items.map((review) => (
+                    <article key={review.patientReviewId} className="review">
+                      <div className="review__head">
+                        <div>
+                          <strong>{review.displayName}</strong>
+                          {(review.reviewedAt || review.createdAt) && (
+                            <time className="review__date">
+                              {formatDate(review.reviewedAt || review.createdAt)}
+                            </time>
+                          )}
+                        </div>
+                        <span
+                          className="review__stars"
+                          aria-label={`امتیاز ${review.rating} از ۵`}
+                        >
+                          {'★'.repeat(Math.max(0, Math.min(5, review.rating)))}
+                          {'☆'.repeat(Math.max(0, 5 - review.rating))}
+                        </span>
+                      </div>
+                      <p>{review.reviewText}</p>
+                    </article>
+                  ))}
+                </div>
+
+                {pageCount > 1 ? (
+                  <div className="pager reviews__pager">
+                    <button
+                      type="button"
+                      className="btn btn--outline btn--sm"
+                      disabled={page <= 1 || loading}
+                      onClick={() => void refresh(page - 1)}
                     >
-                      {'★'.repeat(Math.max(0, Math.min(5, review.rating)))}
-                      {'☆'.repeat(Math.max(0, 5 - review.rating))}
+                      قبلی
+                    </button>
+                    <span>
+                      صفحه {page} از {pageCount}
                     </span>
+                    <button
+                      type="button"
+                      className="btn btn--outline btn--sm"
+                      disabled={page >= pageCount || loading}
+                      onClick={() => void refresh(page + 1)}
+                    >
+                      بعدی
+                    </button>
                   </div>
-                  <p>{review.reviewText}</p>
-                </article>
-              ))}
-            </div>
-
-            {pageCount > 1 ? (
-              <div className="pager reviews__pager">
-                <button
-                  type="button"
-                  className="btn btn--outline btn--sm"
-                  disabled={page <= 1 || loading}
-                  onClick={() => void refresh(page - 1)}
-                >
-                  قبلی
-                </button>
-                <span>
-                  صفحه {page} از {pageCount}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn--outline btn--sm"
-                  disabled={page >= pageCount || loading}
-                  onClick={() => void refresh(page + 1)}
-                >
-                  بعدی
-                </button>
-              </div>
-            ) : null}
-          </>
-        )}
-
-        <ReviewForm />
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );

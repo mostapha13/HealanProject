@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DisplayControls } from '@/components/DisplayControls';
 import { FloatingAssistantButton } from '@/components/FloatingAssistantButton';
 import './globals.css';
 
@@ -22,8 +23,11 @@ const themeBootScript = `
     } else {
       document.documentElement.setAttribute('data-theme', 'classic');
     }
+    var n = localStorage.getItem('healan-night');
+    document.documentElement.setAttribute('data-night', n === '1' ? 'true' : 'false');
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'classic');
+    document.documentElement.setAttribute('data-night', 'false');
   }
 })();
 `;
@@ -34,7 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" data-theme="classic" suppressHydrationWarning>
+    <html
+      lang="fa"
+      dir="rtl"
+      data-theme="classic"
+      data-night="false"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,6 +60,7 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        <DisplayControls />
         <FloatingAssistantButton />
       </body>
     </html>
