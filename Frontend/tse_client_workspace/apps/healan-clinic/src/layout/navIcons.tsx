@@ -249,6 +249,22 @@ export function IconSettings(p: IconProps) {
   );
 }
 
+export function IconMenu(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </Svg>
+  );
+}
+
+export function IconClose(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </Svg>
+  );
+}
+
 export function IconPin(p: IconProps) {
   return (
     <Svg {...p}>

@@ -230,6 +230,27 @@
   margin-bottom: 0.65rem;
 }
 
+.healan-sidebar__close-mobile {
+  display: none;
+  margin-inline-start: auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--healan-sidebar-edge);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--healan-sidebar-text);
+  cursor: pointer;
+  place-items: center;
+}
+
+.healan-mobile-bar {
+  display: none;
+}
+
+.healan-nav-backdrop {
+  display: none;
+}
+
 .healan-sidebar__brand-mark {
   width: 2.35rem;
   height: 2.35rem;
@@ -1878,12 +1899,115 @@
     grid-template-columns: 1fr;
   }
 
+  .healan-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    border: 0;
+    padding: 0;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .healan-nav-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .healan-sidebar {
-    display: none;
+    display: flex;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(300px, 86vw);
+    z-index: 1200;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    box-shadow: 8px 0 32px rgba(15, 23, 42, 0.18);
+  }
+
+  html[dir='rtl'] .healan-sidebar,
+  [dir='rtl'] .healan-sidebar {
+    transform: translateX(105%);
+  }
+
+  .healan-sidebar.is-open {
+    transform: translateX(0) !important;
+  }
+
+  .healan-sidebar__close-mobile {
+    display: inline-grid;
+  }
+
+  .healan-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    margin: -1rem -1rem 1rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--healan-surface, #fff);
+    border-bottom: 1px solid var(--healan-border, #e2e8f0);
+  }
+
+  .healan-mobile-bar__menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--healan-border, #e2e8f0);
+    background: var(--healan-bg, #f8fafc);
+    color: var(--healan-text, #0f172a);
+    border-radius: 10px;
+    padding: 0.45rem 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .healan-mobile-bar__title {
+    font-size: 0.95rem;
+    color: var(--healan-text, #0f172a);
+  }
+
+  .healan-mobile-bar__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--healan-border, #e2e8f0);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--healan-text, #0f172a);
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
   }
 
   .healan-main {
     padding: 1rem;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .healan-page-header {
+    flex-wrap: wrap;
+  }
+
+  .healan-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .healan-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .seo-form__grid {
+    grid-template-columns: 1fr;
   }
 }
 

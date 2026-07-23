@@ -24,7 +24,9 @@ import {
 } from './clinicTheme';
 import {
   IconChevron,
+  IconClose,
   IconLogout,
+  IconMenu,
   IconMoon,
   IconPin,
   IconSun,
@@ -288,6 +290,7 @@ export function HealanLayout() {
   const [theme, setTheme] = useState<ClinicThemeId>(() => loadClinicTheme());
   const [darkMode, setDarkMode] = useState(() => loadClinicDarkMode());
   const [themeOpen, setThemeOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [pinned, setPinned] = useState<Set<number>>(() => loadIdSet(PINNED_KEY));
   const [expanded, setExpanded] = useState<Set<number>>(() => {
     const exp = loadIdSet(EXPANDED_KEY);
@@ -354,6 +357,24 @@ export function HealanLayout() {
       return changed ? next : prev;
     });
   }, [navTree, location.pathname]);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mobileNavOpen]);
 
   const toggleExpand = (key: number) => {
     if (pinned.has(key)) return;
@@ -424,8 +445,23 @@ export function HealanLayout() {
       data-theme={theme}
       data-mode={darkMode ? 'dark' : 'light'}
     >
-      <div className="healan-shell">
-        <aside className="healan-sidebar">
+      <div className={`healan-shell${mobileNavOpen ? ' is-nav-open' : ''}`}>
+        <button
+          type="button"
+          className={
+            mobileNavOpen
+              ? 'healan-nav-backdrop is-open'
+              : 'healan-nav-backdrop'
+          }
+          aria-label="بستن منو"
+          onClick={() => setMobileNavOpen(false)}
+        />
+        <aside
+          className={
+            mobileNavOpen ? 'healan-sidebar is-open' : 'healan-sidebar'
+          }
+          id="healan-clinic-sidebar"
+        >
           <div className="healan-sidebar__brand">
             <div className="healan-sidebar__brand-mark" aria-hidden="true">
               H
@@ -434,6 +470,14 @@ export function HealanLayout() {
               <h1>Healan</h1>
               <p>مدیریت کلینیک</p>
             </div>
+            <button
+              type="button"
+              className="healan-sidebar__close-mobile"
+              aria-label="بستن منو"
+              onClick={() => setMobileNavOpen(false)}
+            >
+              <IconClose />
+            </button>
           </div>
 
           <nav className="healan-sidebar__nav" aria-label="منوی اصلی">
@@ -531,6 +575,29 @@ export function HealanLayout() {
         </aside>
 
         <main className="healan-main">
+          <div className="healan-mobile-bar">
+            <button
+              type="button"
+              className="healan-mobile-bar__menu"
+              aria-expanded={mobileNavOpen}
+              aria-controls="healan-clinic-sidebar"
+              aria-label="باز کردن منو"
+              onClick={() => setMobileNavOpen(true)}
+            >
+              <IconMenu />
+              <span>منو</span>
+            </button>
+            <strong className="healan-mobile-bar__title">Healan</strong>
+            <button
+              type="button"
+              className="healan-mobile-bar__icon"
+              title="خروج"
+              disabled={loggingOut}
+              onClick={() => void handleLogout()}
+            >
+              <IconLogout />
+            </button>
+          </div>
           {impersonationActive && (
             <div className="healan-impersonation-banner" role="alert">
               <strong>
