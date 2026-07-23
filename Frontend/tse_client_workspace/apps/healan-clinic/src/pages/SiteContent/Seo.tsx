@@ -114,7 +114,7 @@ function SeoAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
       <PageHeader
         title="تنظیمات SEO"
         subtitle="عنوان، توضیحات و Open Graph صفحات سایت عمومی (www) — قابل ویرایش برای گوگل و چت‌بات‌ها"
-        actions={
+        action={
           <button type="button" className="healan-btn" onClick={openNew}>
             افزودن صفحه
           </button>
