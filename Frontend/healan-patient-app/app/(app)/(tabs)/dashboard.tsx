@@ -79,17 +79,17 @@ export default function DashboardScreen() {
 
         <Text style={styles.section}>میانبرها</Text>
         <View style={styles.grid}>
-          <SmallTile title="سوابق" icon="time-outline" onPress={() => router.push('/(app)/history')} />
-          <SmallTile title="رزروها" icon="list-outline" onPress={() => router.push('/(app)/bookings')} />
+          <SmallTile title="سوابق" icon="time-outline" onPress={() => router.push('/(app)/(tabs)/history')} />
+          <SmallTile title="رزروها" icon="list-outline" onPress={() => router.push('/(app)/(tabs)/bookings')} />
           <SmallTile
             title="فشار خون"
             icon="pulse-outline"
-            onPress={() => router.push('/(app)/blood-pressure-list')}
+            onPress={() => router.push('/(app)/(tabs)/blood-pressure-list')}
           />
           <SmallTile
             title="داروها"
             icon="medkit-outline"
-            onPress={() => router.push('/(app)/medications-list')}
+            onPress={() => router.push('/(app)/(tabs)/medications-list')}
           />
           <SmallTile title="چت‌بات" icon="chatbubbles-outline" onPress={() => router.push('/(app)/(tabs)/assistant')} />
           <SmallTile title="رزرو جدید" icon="calendar-outline" onPress={() => router.push('/(app)/(tabs)/booking')} />
@@ -100,13 +100,13 @@ export default function DashboardScreen() {
           title="ثبت فشار خون"
           subtitle="همین حالا اندازه‌گیری را ذخیره کنید"
           icon="heart"
-          onPress={() => router.push('/(app)/blood-pressure')}
+          onPress={() => router.push('/(app)/(tabs)/blood-pressure')}
         />
         <LargeActionCard
           title="ثبت دارو"
           subtitle="یادآور مصرف روزانه"
           icon="alarm"
-          onPress={() => router.push('/(app)/medications')}
+          onPress={() => router.push('/(app)/(tabs)/medications')}
         />
       </ScrollView>
     </AppScreen>

@@ -3,18 +3,18 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../src/auth/AuthContext';
-import { patientMyHistory, type PortalMyHistory } from '../../src/api/portal';
+import { useAuth } from '../../../src/auth/AuthContext';
+import { patientMyHistory, type PortalMyHistory } from '../../../src/api/portal';
 import {
   AppScreen,
   EmptyBlock,
   LoadingBlock,
   ScreenHeader,
   SurfaceCard,
-} from '../../src/components/Ui';
-import { PaginationBar, StatusBadge } from '../../src/components/PatientUi';
-import { colors, fonts, spacing } from '../../src/theme';
-import { formatJalaliDateTime } from '../../src/utils/jalali';
+} from '../../../src/components/Ui';
+import { PaginationBar, StatusBadge } from '../../../src/components/PatientUi';
+import { colors, fonts, spacing } from '../../../src/theme';
+import { formatJalaliDateTime } from '../../../src/utils/jalali';
 
 const PAGE_SIZE = 8;
 

@@ -1,4 +1,5 @@
 import { config } from '../config';
+import type { PortalSiteContent, PortalServiceItem } from '../site/types';
 
 export class ApiError extends Error {
   status: number;
@@ -168,11 +169,22 @@ function asRecord(v: unknown): Record<string, unknown> {
   return (v ?? {}) as Record<string, unknown>;
 }
 
-export async function fetchPortalHeroSlides(): Promise<PortalHeroSlide[]> {
+function setting(settings: Record<string, unknown>, key: string, fallback = ''): string {
+  const v = settings[key];
+  if (v == null) return fallback;
+  const s = String(v).trim();
+  return s || fallback;
+}
+
+export async function fetchPortalSite(): Promise<{
+  slides: PortalHeroSlide[];
+  content: PortalSiteContent;
+}> {
   const site = await portalFetch<Record<string, unknown>>('GET', 'Site');
-  const items = Array.isArray(site.contentItems) ? site.contentItems : [];
-  return items
-    .map((raw) => asRecord(raw))
+  const settings = asRecord(site.settings);
+  const items = Array.isArray(site.contentItems) ? site.contentItems.map(asRecord) : [];
+
+  const slides = items
     .filter((r) => String(r.sectionType ?? '') === 'HeroSlide' && r.isPublished !== false)
     .sort((a, b) => Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
     .map((r) => ({
@@ -181,6 +193,72 @@ export async function fetchPortalHeroSlides(): Promise<PortalHeroSlide[]> {
       subtitle: r.subtitle != null ? String(r.subtitle) : undefined,
       imageUrl: r.imageUrl != null ? String(r.imageUrl) : undefined,
     }));
+
+  const services: PortalServiceItem[] = items
+    .filter((r) => String(r.sectionType ?? '') === 'Service' && r.isPublished !== false)
+    .sort((a, b) => Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
+    .map((r) => ({
+      id: Number(r.portalContentItemId ?? r.id ?? 0),
+      title: String(r.title ?? 'خدمت'),
+      subtitle: r.subtitle != null ? String(r.subtitle) : undefined,
+      body: r.body != null ? String(r.body) : undefined,
+      iconName: r.iconName != null ? String(r.iconName) : undefined,
+      color: r.color != null ? String(r.color) : undefined,
+      imageUrl: r.imageUrl != null ? String(r.imageUrl) : undefined,
+      sortOrder: Number(r.sortOrder ?? 0),
+    }));
+
+  const content: PortalSiteContent = {
+    services,
+    about: {
+      badge: setting(settings, 'section.about.badge', 'درباره پزشک'),
+      title: setting(settings, 'section.about.title', 'پزشکی دقیق، همراهی صمیمانه'),
+      p1: setting(settings, 'section.about.p1'),
+      p2: setting(settings, 'section.about.p2'),
+      quote: setting(
+        settings,
+        'about.quote',
+        'سلامت قلب، پایه زندگی سالم است — پیشگیری همیشه از درمان آسان‌تر است.'
+      ),
+      doctorName: setting(settings, 'doctor.name', 'دکتر معصومه شهرویی'),
+      specialty: setting(settings, 'doctor.specialty', 'فوق تخصص قلب و عروق'),
+      board: setting(
+        settings,
+        'doctor.board',
+        'فارغ التحصیل و دارای بورد تخصصی از بیمارستان فوق تخصصی شهید رجایی تهران'
+      ),
+    },
+    contact: {
+      title: setting(settings, 'section.contact.title', 'تماس و آدرس مطب'),
+      lead: setting(
+        settings,
+        'section.contact.lead',
+        'برای رزرو نوبت تماس بگیرید یا به مطب مراجعه کنید.'
+      ),
+      address: setting(settings, 'contact.address'),
+      city: setting(settings, 'contact.city', 'شوشتر'),
+      phone: setting(settings, 'contact.phone'),
+      phoneDisplay: setting(settings, 'contact.phoneDisplay', setting(settings, 'contact.phone')),
+      hours: setting(settings, 'contact.hours'),
+    },
+    map: {
+      header: setting(settings, 'map.header'),
+      building: setting(settings, 'map.building'),
+      detail: setting(settings, 'map.detail'),
+      link: setting(
+        settings,
+        'map.link',
+        'https://www.google.com/maps/search/Shushtar+Taleghani'
+      ),
+    },
+  };
+
+  return { slides, content };
+}
+
+export async function fetchPortalHeroSlides(): Promise<PortalHeroSlide[]> {
+  const { slides } = await fetchPortalSite();
+  return slides;
 }
 
 export function bookingOtpRequest(phoneNumber: string) {

@@ -177,7 +177,7 @@ export default function BookingTabScreen() {
           <View style={styles.doneCard}>
             <Text style={styles.doneTitle}>رزرو با موفقیت ثبت شد</Text>
             <Text style={styles.doneSub}>می‌توانید رزروهای خود را در لیست ببینید</Text>
-            <PrimaryButton label="مشاهده رزروها" onPress={() => router.push('/(app)/bookings')} />
+            <PrimaryButton label="مشاهده رزروها" onPress={() => router.push('/(app)/(tabs)/bookings')} />
             <PrimaryButton label="رزرو دیگر" onPress={() => setDone(false)} />
           </View>
         ) : null}
@@ -197,7 +197,7 @@ export default function BookingTabScreen() {
                 </View>
               );
             })}
-            <Pressable onPress={() => router.push('/(app)/bookings')}>
+            <Pressable onPress={() => router.push('/(app)/(tabs)/bookings')}>
               <Text style={styles.link}>مشاهده همه رزروها</Text>
             </Pressable>
           </View>

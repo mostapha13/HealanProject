@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/auth/AuthContext';
-import { patientBloodPressureSave } from '../../src/api/portal';
+import { useAuth } from '../../../src/auth/AuthContext';
+import { patientBloodPressureSave } from '../../../src/api/portal';
 import {
   AppScreen,
   FormField,
   PrimaryButton,
   ScreenHeader,
   SurfaceCard,
-} from '../../src/components/Ui';
-import { PeriodChips } from '../../src/components/PatientUi';
-import { colors, fonts, spacing } from '../../src/theme';
+} from '../../../src/components/Ui';
+import { PeriodChips } from '../../../src/components/PatientUi';
+import { colors, fonts, spacing } from '../../../src/theme';
 
 export default function BloodPressureRegisterScreen() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function BloodPressureRegisterScreen() {
         measuredAt: new Date().toISOString(),
       });
       Alert.alert('ثبت شد', 'فشار خون با موفقیت ذخیره شد', [
-        { text: 'مشاهده لیست', onPress: () => router.replace('/(app)/blood-pressure-list') },
+        { text: 'مشاهده لیست', onPress: () => router.replace('/(app)/(tabs)/blood-pressure-list') },
         { text: 'باشه' },
       ]);
       setNote('');
@@ -121,7 +121,7 @@ export default function BloodPressureRegisterScreen() {
         />
         <PrimaryButton
           label="مشاهده جدول ثبت‌ها"
-          onPress={() => router.push('/(app)/blood-pressure-list')}
+          onPress={() => router.push('/(app)/(tabs)/blood-pressure-list')}
         />
       </ScrollView>
     </AppScreen>

@@ -61,8 +61,10 @@ export default function LoginScreen() {
     <AppScreen padded={false}>
       <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.hero}>
         <SafeAreaView edges={['top']}>
-          <Text style={styles.brand}>هیلن بیمار</Text>
-          <Text style={styles.tagline}>سوابق، فشار خون، دارو و نوبت — همه در یک اپ</Text>
+          <Text style={styles.brand}>کلینیک قلب و عروق دکتر معصومه شهرویی</Text>
+          <Text style={styles.tagline}>
+            فارغ التحصیل و دارای بورد تخصصی از بیمارستان فوق تخصصی شهید رجایی تهران
+          </Text>
         </SafeAreaView>
       </LinearGradient>
 
@@ -131,14 +133,15 @@ const styles = StyleSheet.create({
   brand: {
     marginTop: spacing.xl,
     fontFamily: fonts.bold,
-    fontSize: 28,
+    fontSize: 18,
     color: colors.white,
     textAlign: 'right',
+    lineHeight: 28,
   },
   tagline: {
-    marginTop: 8,
+    marginTop: 10,
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255,255,255,0.9)',
     textAlign: 'right',
     lineHeight: 22,

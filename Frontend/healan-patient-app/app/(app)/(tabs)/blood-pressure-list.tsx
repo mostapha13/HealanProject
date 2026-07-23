@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useAuth } from '../../src/auth/AuthContext';
-import { patientBloodPressureList, type PortalBloodPressureItem } from '../../src/api/portal';
+import { useAuth } from '../../../src/auth/AuthContext';
+import { patientBloodPressureList, type PortalBloodPressureItem } from '../../../src/api/portal';
 import {
   AppScreen,
   EmptyBlock,
@@ -11,15 +11,15 @@ import {
   PrimaryButton,
   ScreenHeader,
   SurfaceCard,
-} from '../../src/components/Ui';
-import { PaginationBar } from '../../src/components/PatientUi';
-import { colors, fonts, spacing } from '../../src/theme';
+} from '../../../src/components/Ui';
+import { PaginationBar } from '../../../src/components/PatientUi';
+import { colors, fonts, spacing } from '../../../src/theme';
 import {
   groupBloodPressureByDay,
   type BpDayRow,
   type BpPeriodSlot,
-} from '../../src/utils/groupBloodPressureByDay';
-import { toPersianDigits } from '../../src/utils/jalali';
+} from '../../../src/utils/groupBloodPressureByDay';
+import { toPersianDigits } from '../../../src/utils/jalali';
 
 const PAGE_SIZE = 10;
 
@@ -126,7 +126,7 @@ export default function BloodPressureListScreen() {
         <PrimaryButton
           label="ثبت فشار خون جدید"
           icon="add-outline"
-          onPress={() => router.push('/(app)/blood-pressure')}
+          onPress={() => router.push('/(app)/(tabs)/blood-pressure')}
         />
 
         {loading && items.length === 0 ? <LoadingBlock /> : null}

@@ -188,9 +188,18 @@ namespace Healan.WebApi
                 var origins = configured
                     .Concat(defaults)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray();
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
                 options.AddPolicy("default", builder => builder
-                    .WithOrigins(origins)
+                    .SetIsOriginAllowed(origin =>
+                    {
+                        if (string.IsNullOrWhiteSpace(origin)) return false;
+                        if (origins.Contains(origin)) return true;
+                        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+                        var host = uri.Host.Trim('[', ']');
+                        return host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                            || host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                            || host.Equals("::1", StringComparison.OrdinalIgnoreCase);
+                    })
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());

@@ -1,51 +1,38 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../src/auth/AuthContext';
-import { fetchPortalHeroSlides, type PortalHeroSlide } from '../../../src/api/portal';
+import { useSite } from '../../../src/site/SiteContext';
 import { AppScreen, BankHeader, SiteHeroCarousel } from '../../../src/components/Ui';
-import { LargeActionCard, SmallTile } from '../../../src/components/PatientUi';
+import { LargeActionCard, ServiceCard, SmallTile } from '../../../src/components/PatientUi';
 import { colors, fonts, spacing } from '../../../src/theme';
 
 const SMALL = [
-  { title: 'لیست رزروها', icon: 'list-outline' as const, href: '/(app)/bookings' },
-  { title: 'لیست فشار خون', icon: 'pulse-outline' as const, href: '/(app)/blood-pressure-list' },
-  { title: 'لیست داروها', icon: 'medkit-outline' as const, href: '/(app)/medications-list' },
-  { title: 'سوابق ویزیت', icon: 'time-outline' as const, href: '/(app)/history' },
-  { title: 'پروفایل', icon: 'person-outline' as const, href: '/(app)/(tabs)/profile' },
-  { title: 'داشبورد', icon: 'grid-outline' as const, href: '/(app)/(tabs)/dashboard' },
+  { title: 'لیست رزروها', icon: 'list-outline' as const, href: '/(app)/(tabs)/bookings' },
+  { title: 'لیست فشار خون', icon: 'pulse-outline' as const, href: '/(app)/(tabs)/blood-pressure-list' },
+  { title: 'لیست داروها', icon: 'medkit-outline' as const, href: '/(app)/(tabs)/medications-list' },
+  { title: 'سوابق ویزیت', icon: 'time-outline' as const, href: '/(app)/(tabs)/history' },
+  { title: 'درباره ما', icon: 'information-circle-outline' as const, href: '/(app)/(tabs)/about' },
+  { title: 'تماس', icon: 'call-outline' as const, href: '/(app)/(tabs)/contact' },
 ];
 
 export default function HomeScreen() {
   const router = useRouter();
   const { session } = useAuth();
-  const [slides, setSlides] = useState<PortalHeroSlide[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    try {
-      setSlides(await fetchPortalHeroSlides());
-    } catch {
-      setSlides([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
-      void load();
-    }, [load])
-  );
-
+  const { slides, content, loading, refresh } = useSite();
   const name = `${session?.firstName ?? ''} ${session?.lastName ?? ''}`.trim();
 
   return (
     <AppScreen padded={false}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: colors.primaryDeep }}>
-        <BankHeader />
+        <BankHeader
+          brand="کلینیک قلب و عروق دکتر معصومه شهرویی"
+          subtitle={
+            content.about.board ||
+            'فارغ التحصیل و دارای بورد تخصصی از بیمارستان فوق تخصصی شهید رجایی تهران'
+          }
+        />
       </SafeAreaView>
 
       <ScrollView
@@ -53,10 +40,7 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl
             refreshing={loading}
-            onRefresh={() => {
-              setLoading(true);
-              void load();
-            }}
+            onRefresh={() => void refresh()}
             tintColor={colors.primaryDeep}
           />
         }
@@ -70,6 +54,19 @@ export default function HomeScreen() {
             fallbackTitle="همراه سلامت شما"
             fallbackSubtitle="نوبت، دارو، فشار خون و گفتگو با دستیار هوشمند"
           />
+        </View>
+
+        <Text style={styles.section}>خدمات مطب</Text>
+        <View style={{ paddingHorizontal: spacing.md, marginBottom: spacing.lg }}>
+          {content.services.length ? (
+            content.services.map((s) => (
+              <ServiceCard key={s.id} title={s.title} body={s.body || s.subtitle} color={s.color} />
+            ))
+          ) : (
+            <Text style={styles.emptyHint}>
+              {loading ? 'در حال دریافت خدمات...' : 'هنوز خدمتی از سایت دریافت نشده است'}
+            </Text>
+          )}
         </View>
 
         <Text style={styles.section}>لیست‌ها</Text>
@@ -96,13 +93,13 @@ export default function HomeScreen() {
             title="ثبت فشار خون"
             subtitle="صبح، ظهر یا شب — سریع و دقیق"
             icon="heart"
-            onPress={() => router.push('/(app)/blood-pressure')}
+            onPress={() => router.push('/(app)/(tabs)/blood-pressure')}
           />
           <LargeActionCard
             title="ثبت یادآوری دارو"
             subtitle="زمان‌بندی مصرف داروهای روزانه"
             icon="alarm"
-            onPress={() => router.push('/(app)/medications')}
+            onPress={() => router.push('/(app)/(tabs)/medications')}
           />
         </View>
       </ScrollView>
@@ -135,6 +132,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 16,
     color: colors.ink,
+    textAlign: 'right',
+  },
+  emptyHint: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.muted,
     textAlign: 'right',
   },
   smallGrid: {

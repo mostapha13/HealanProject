@@ -109,6 +109,31 @@ export function LargeActionCard({
   );
 }
 
+export function ServiceCard({
+  title,
+  body,
+  color,
+}: {
+  title: string;
+  body?: string;
+  color?: string;
+}) {
+  const accent = color && /^#/.test(color) ? color : colors.primaryDeep;
+  return (
+    <View style={[styles.serviceCard, { borderRightColor: accent }]}>
+      <View style={[styles.serviceDot, { backgroundColor: accent }]} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.serviceTitle}>{title}</Text>
+        {body ? (
+          <Text style={styles.serviceBody} numberOfLines={3}>
+            {body}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export function PeriodChips({
   value,
   onChange,
@@ -295,4 +320,36 @@ const styles = StyleSheet.create({
   },
   slotChipText: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.ink },
   slotChipTextSelected: { color: '#047857', fontFamily: fonts.bold },
+  serviceCard: {
+    flexDirection: 'row-reverse',
+    alignItems: 'flex-start',
+    gap: 12,
+    backgroundColor: colors.white,
+    borderRadius: 18,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRightWidth: 4,
+  },
+  serviceDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 6,
+  },
+  serviceTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.ink,
+    textAlign: 'right',
+  },
+  serviceBody: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.inkSoft,
+    textAlign: 'right',
+    marginTop: 6,
+    lineHeight: 20,
+  },
 });

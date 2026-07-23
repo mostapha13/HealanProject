@@ -39,15 +39,32 @@ type TokenResponse = {
   error_description?: string;
 };
 
+function networkLoginHint(): string {
+  const origin =
+    Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : '';
+  const originPart = origin ? ` (Origin: ${origin})` : '';
+  return (
+    `ارتباط با سرور ورود برقرار نشد${originPart}. ` +
+    `آدرس را دقیقاً http://localhost:8082 باز کنید و فقط یک نمونه Expo کلینیک اجرا باشد. ` +
+    `Identity: ${config.identityUrl}`
+  );
+}
+
 async function tokenRequest(body: URLSearchParams): Promise<StoredSession> {
-  const res = await fetch(`${config.identityUrl}/connect/token`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: body.toString(),
-  });
+  const url = `${config.identityUrl}/connect/token`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+  } catch {
+    throw new Error(networkLoginHint());
+  }
   const json = (await res.json().catch(() => ({}))) as TokenResponse;
   if (!res.ok || !json.access_token) {
     const msg =

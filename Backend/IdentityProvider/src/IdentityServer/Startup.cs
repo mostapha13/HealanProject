@@ -100,6 +100,8 @@ namespace IdentityServer
                   .AddAspNetIdentity<ApplicationUser>()
                   .AddExtensionGrantValidator<ImpersonationGrantValidator>();
 
+            // IdentityServer's own CORS check for /connect/* (must allow Expo localhost any port).
+            services.AddSingleton<IdentityServer4.Services.ICorsPolicyService, HealanCorsPolicyService>();
 
             services.AddTransient<IEmailSender, EmailSender>();
 
@@ -109,17 +111,28 @@ namespace IdentityServer
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityServerWebApi", Version = "v1" });
             });
 
-            var origins = Configuration["IdentityServer:AllowedCorsOrigins"].Split(",");
+            var origins = (Configuration["IdentityServer:AllowedCorsOrigins"] ?? string.Empty)
+                .Split(',')
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToArray();
             services.AddCors(options =>
             {
                 options.AddPolicy("default",
                 builder => builder
-                .WithOrigins(origins)
+                .SetIsOriginAllowed(origin =>
+                {
+                    if (string.IsNullOrWhiteSpace(origin)) return false;
+                    if (origins.Contains(origin, StringComparer.OrdinalIgnoreCase)) return true;
+                    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+                    var host = uri.Host.Trim('[', ']');
+                    return host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                        || host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                        || host.Equals("::1", StringComparison.OrdinalIgnoreCase);
+                })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
-                //.SetIsOriginAllowed((host) => true)
-                //.WithExposedHeaders("FileTitle")
                 );
             });
 

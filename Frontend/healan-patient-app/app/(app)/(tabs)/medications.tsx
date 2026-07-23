@@ -2,16 +2,16 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/auth/AuthContext';
-import { patientMedicationSave } from '../../src/api/portal';
+import { useAuth } from '../../../src/auth/AuthContext';
+import { patientMedicationSave } from '../../../src/api/portal';
 import {
   AppScreen,
   FormField,
   PrimaryButton,
   ScreenHeader,
   SurfaceCard,
-} from '../../src/components/Ui';
-import { colors, fonts, spacing } from '../../src/theme';
+} from '../../../src/components/Ui';
+import { colors, fonts, spacing } from '../../../src/theme';
 
 const INTERVALS = [4, 6, 8, 10, 12, 24];
 
@@ -58,7 +58,7 @@ export default function MedicationsRegisterScreen() {
         isActive: true,
       });
       Alert.alert('ثبت شد', 'یادآور دارو ذخیره شد', [
-        { text: 'مشاهده لیست', onPress: () => router.replace('/(app)/medications-list') },
+        { text: 'مشاهده لیست', onPress: () => router.replace('/(app)/(tabs)/medications-list') },
         { text: 'باشه' },
       ]);
       setName('');
@@ -121,7 +121,7 @@ export default function MedicationsRegisterScreen() {
         />
         <PrimaryButton
           label="مشاهده داروهای ثبت‌شده"
-          onPress={() => router.push('/(app)/medications-list')}
+          onPress={() => router.push('/(app)/(tabs)/medications-list')}
         />
       </ScrollView>
     </AppScreen>

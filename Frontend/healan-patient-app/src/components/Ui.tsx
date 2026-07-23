@@ -35,17 +35,28 @@ export function AppScreen({
   return <View style={[styles.screen, padded && styles.padded, style]}>{children}</View>;
 }
 
-export function BankHeader({ brand = 'هیلن بیمار' }: { brand?: string }) {
+export function BankHeader({
+  brand,
+  subtitle,
+}: {
+  brand?: string;
+  subtitle?: string;
+}) {
+  const title = brand ?? 'کلینیک قلب و عروق دکتر معصومه شهرویی';
+  const sub =
+    subtitle ??
+    'فارغ التحصیل و دارای بورد تخصصی از بیمارستان فوق تخصصی شهید رجایی تهران';
   return (
     <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.bankHeader}>
       <View style={styles.bankHeaderInner}>
         <View style={styles.brandRow}>
-          <View>
-            <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v4-stream-back</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.brandText}>{title}</Text>
+            <Text style={styles.brandSub}>{sub}</Text>
+            <Text style={styles.buildMark}>build-v5-site-tabs</Text>
           </View>
           <View style={styles.logoMark}>
-            <Text style={styles.logoLetter}>P</Text>
+            <Text style={styles.logoLetter}>ش</Text>
           </View>
         </View>
       </View>
@@ -363,7 +374,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoLetter: { color: colors.white, fontFamily: fonts.bold, fontSize: 18 },
-  brandText: { fontFamily: fonts.bold, fontSize: 18, color: colors.white, textAlign: 'right' },
+  brandText: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.white,
+    textAlign: 'right',
+    lineHeight: 22,
+  },
+  brandSub: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'right',
+    marginTop: 6,
+    lineHeight: 18,
+  },
   buildMark: {
     fontFamily: fonts.regular,
     fontSize: 10,

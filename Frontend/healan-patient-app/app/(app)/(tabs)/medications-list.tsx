@@ -3,21 +3,21 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../src/auth/AuthContext';
+import { useAuth } from '../../../src/auth/AuthContext';
 import {
   patientMedicationDelete,
   patientMedicationList,
   type PortalMedicationItem,
-} from '../../src/api/portal';
+} from '../../../src/api/portal';
 import {
   AppScreen,
   EmptyBlock,
   LoadingBlock,
   PrimaryButton,
   ScreenHeader,
-} from '../../src/components/Ui';
-import { PaginationBar, StatusBadge } from '../../src/components/PatientUi';
-import { colors, fonts, spacing } from '../../src/theme';
+} from '../../../src/components/Ui';
+import { PaginationBar, StatusBadge } from '../../../src/components/PatientUi';
+import { colors, fonts, spacing } from '../../../src/theme';
 
 const PAGE_SIZE = 8;
 
@@ -66,7 +66,7 @@ export default function MedicationsListScreen() {
         <PrimaryButton
           label="ثبت داروی جدید"
           icon="add-outline"
-          onPress={() => router.push('/(app)/medications')}
+          onPress={() => router.push('/(app)/(tabs)/medications')}
         />
 
         {loading && items.length === 0 ? <LoadingBlock /> : null}
