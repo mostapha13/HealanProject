@@ -1,0 +1,26 @@
+# copy from .env.example for local overrides
+.env
+.env.local
+
+# Expo / EAS
+.expo/
+dist/
+web-build/
+
+# native
+android/
+ios/
+
+# deps
+node_modules/
+
+# OS / IDE
+.DS_Store
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+npm-debug.*
+*.log

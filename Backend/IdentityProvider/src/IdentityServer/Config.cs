@@ -223,6 +223,33 @@ namespace IdentityServer
                     "Content_Producer",
                 },
             },
+            new Client
+            {
+                ClientId = "HealanClinicMobile",
+                ClientName = "اپ اندروید پذیرش Healan",
+                RequirePkce = true,
+                RequireClientSecret = false,
+                AllowedGrantTypes = GrantTypes.Code,
+                AllowOfflineAccess = true,
+                AbsoluteRefreshTokenLifetime = 60 * 60 * 24 * 7,
+                SlidingRefreshTokenLifetime = 0,
+                AccessTokenLifetime = 60 * 60,
+                RedirectUris = (configuration["IdentityServer:HealanClinicMobileRedirectUriCallback"] ?? "")
+                    .ToString().Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
+                PostLogoutRedirectUris = (configuration["IdentityServer:HealanClinicMobilePostLogoutRedirectUri"]
+                        ?? configuration["IdentityServer:HealanClinicMobileRedirectUriCallback"]
+                        ?? "")
+                    .ToString().Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
+                AllowedCorsOrigins = configuration["IdentityServer:AllowedCorsOrigins"]
+                    .ToString().Split(",").Select(s => s.Trim()).ToList(),
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "Content_Producer",
+                },
+            },
      };
         }
 
