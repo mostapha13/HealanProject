@@ -25,15 +25,15 @@ function IconApple({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         fill="currentColor"
-        d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.7-2.8-.7-1.4 0-2.8.9-3.5 2.2-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.1 1.1-.1 1.5-.7 2.8-.7s1.7.7 2.8.7c1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.1-2.3 1.2-2.4-.1 0-2.2-.8-2.2-3.7Zm-2-6.3c.6-.7 1-1.7.9-2.7-0.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2Z"
+        d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.7-2.8-.7-1.4 0-2.8.9-3.5 2.2-1.5 2.6-.4 6.5 1.1 8.6.7 1 1.6 2.2 2.7 2.1 1.1-.1 1.5-.7 2.8-.7s1.7.7 2.8.7c1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.1-2.3 1.2-2.4-.1 0-2.2-.8-2.2-3.7Zm-2-6.3c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.6.6-1.1 1.6-1 2.6 1 .1 1.9-.5 2.6-1.2Z"
       />
     </svg>
   );
 }
 
 type Props = {
-  /** Compact trigger for desktop nav */
-  variant?: 'nav' | 'drawer' | 'footer';
+  /** nav = desktop text link; actions = header button; drawer/footer = stacked cards */
+  variant?: 'nav' | 'actions' | 'drawer' | 'footer';
   onNavigate?: () => void;
 };
 
@@ -43,7 +43,7 @@ export function AppDownloadMenu({ variant = 'nav', onNavigate }: Props) {
   const menuId = useId();
 
   useEffect(() => {
-    if (!open || variant === 'drawer') return undefined;
+    if (!open || variant === 'drawer' || variant === 'footer') return undefined;
     const onDoc = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -105,14 +105,21 @@ export function AppDownloadMenu({ variant = 'nav', onNavigate }: Props) {
     );
   }
 
+  const triggerClass =
+    variant === 'actions' ? 'app-dl__trigger app-dl__trigger--btn' : 'app-dl__trigger';
+
   return (
     <div
-      className={open ? 'app-dl app-dl--nav is-open' : 'app-dl app-dl--nav'}
+      className={
+        open
+          ? `app-dl app-dl--${variant} is-open`
+          : `app-dl app-dl--${variant}`
+      }
       ref={rootRef}
     >
       <button
         type="button"
-        className="app-dl__trigger"
+        className={triggerClass}
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}

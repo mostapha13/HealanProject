@@ -103,6 +103,7 @@ export function SiteHeader({
           </nav>
 
           <div className="header__actions">
+            <AppDownloadMenu variant="actions" />
             <BookingCta className="btn btn--outline btn--sm header__cta-booking" />
             <PatientCta className="btn btn--patient btn--sm" />
             <button
