@@ -7,7 +7,18 @@ export const ANDROID_APK_URL =
 
 export const IOS_PWA_URL = process.env.NEXT_PUBLIC_IOS_PWA_URL ?? '/mobile/';
 
-const BUILD = 'build-v11-menu';
+const BUILD = 'build-v12-menu';
+
+function IconDownload() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42L11 12.59V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z"
+      />
+    </svg>
+  );
+}
 
 function IconAndroid() {
   return (
@@ -45,7 +56,10 @@ function DownloadOptions({ onPick }: { onPick?: () => void }) {
         </span>
         <span className="nav-dl__text">
           <strong>دانلود برای اندروید</strong>
-          <small>فایل APK</small>
+          <small>نصب مستقیم با فایل APK</small>
+        </span>
+        <span className="nav-dl__chevron" aria-hidden>
+          ‹
         </span>
       </a>
       <a className="nav-dl__option nav-dl__option--ios" href={IOS_PWA_URL} onClick={onPick}>
@@ -54,14 +68,17 @@ function DownloadOptions({ onPick }: { onPick?: () => void }) {
         </span>
         <span className="nav-dl__text">
           <strong>دانلود برای iOS</strong>
-          <small>نسخه PWA</small>
+          <small>نسخه PWA — Add to Home Screen</small>
+        </span>
+        <span className="nav-dl__chevron" aria-hidden>
+          ‹
         </span>
       </a>
     </>
   );
 }
 
-/** Desktop nav dropdown — styled a bit differently from plain links */
+/** Desktop nav dropdown — only in menu, not a separate header CTA */
 export function NavDownloadMenu() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -96,10 +113,14 @@ export function NavDownloadMenu() {
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
       >
+        <span className="nav-dl__trigger-icon" aria-hidden>
+          <IconDownload />
+        </span>
         دانلود اپلیکیشن
         <span className="nav-dl__caret" aria-hidden />
       </button>
       <div id={menuId} className="nav-dl__panel" hidden={!open} role="menu">
+        <p className="nav-dl__panel-title">انتخاب نسخه</p>
         <DownloadOptions onPick={() => setOpen(false)} />
       </div>
     </div>
@@ -110,7 +131,12 @@ export function NavDownloadMenu() {
 export function DrawerDownloadLinks({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="nav-dl nav-dl--drawer" data-build={BUILD}>
-      <p className="nav-dl__label">دانلود اپلیکیشن</p>
+      <div className="nav-dl__drawer-head">
+        <span className="nav-dl__trigger-icon" aria-hidden>
+          <IconDownload />
+        </span>
+        <p className="nav-dl__label">دانلود اپلیکیشن</p>
+      </div>
       <div className="nav-dl__stack">
         <DownloadOptions onPick={onNavigate} />
       </div>

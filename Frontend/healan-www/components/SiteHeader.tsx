@@ -19,6 +19,8 @@ type NavItem = {
   kind: 'anchor' | 'next' | 'spa';
 };
 
+const CLINIC_URL = 'https://clinic.drshahrooei.ir/';
+
 const NAV_LINKS: NavItem[] = [
   { href: '/#about', label: 'درباره پزشک', kind: 'anchor' },
   { href: '/#services', label: 'خدمات', kind: 'anchor' },
@@ -146,6 +148,13 @@ export function SiteHeader({
         <div className="nav-drawer__actions">
           <BookingCta className="btn btn--primary btn--lg" />
           <PatientCta className="btn btn--patient btn--lg" />
+          <a
+            className="btn btn--outline btn--lg nav-drawer__clinic"
+            href={CLINIC_URL}
+            onClick={closeMenu}
+          >
+            ورود به پنل کلینیک
+          </a>
           <a href={`tel:${phone}`} className="btn btn--outline btn--lg">
             تماس {phoneDisplay}
           </a>

@@ -26,14 +26,14 @@ export function SiteFooter({ name, specialty, city }: Props) {
         </div>
         <div className="footer__clinic">
           <p>پرسنل و پزشکان</p>
-          <a className="btn btn--outline btn--sm footer__clinic-btn" href={CLINIC_URL}>
+          <a className="btn footer__clinic-btn" href={CLINIC_URL}>
             ورود به پنل کلینیک
           </a>
         </div>
       </div>
       <div className="container">
         <p className="footer__copy">
-          © {new Date().getFullYear()} — تمامی حقوق محفوظ است
+          © {new Date().getFullYear()} — تمامی حقوق محفوظ است · build-v12-menu
         </p>
       </div>
     </footer>
