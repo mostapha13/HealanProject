@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { AppDownloadLinks } from './DownloadApp';
 
 type Props = {
   name: string;
@@ -24,8 +23,6 @@ export function SiteFooter({ name, specialty, city }: Props) {
           <a href="/assistant">دستیار هوشمند</a>
           <a href="/booking">رزرو نوبت</a>
           <a href="/patient">ورود بیمار</a>
-          <a href="/#download-app">دانلود اپلیکیشن</a>
-          <AppDownloadLinks />
         </div>
         <div className="footer__clinic">
           <p>پرسنل و پزشکان</p>
