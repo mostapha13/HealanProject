@@ -13,6 +13,7 @@ import {
   SurfaceCard,
 } from '../../../src/components/Ui';
 import { PaginationBar } from '../../../src/components/PatientUi';
+import { BloodPressureAnalytics } from '../../../src/components/BloodPressureAnalytics';
 import { colors, fonts, spacing } from '../../../src/theme';
 import {
   groupBloodPressureByDay,
@@ -160,6 +161,7 @@ export default function BloodPressureListScreen() {
               total={allDays.length}
               onChange={setPage}
             />
+            <BloodPressureAnalytics items={items} />
           </>
         )}
       </ScrollView>

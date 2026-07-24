@@ -13,6 +13,7 @@ const SMALL = [
   { title: 'لیست فشار خون', icon: 'pulse-outline' as const, href: '/(app)/(tabs)/blood-pressure-list' },
   { title: 'لیست داروها', icon: 'medkit-outline' as const, href: '/(app)/(tabs)/medications-list' },
   { title: 'سوابق ویزیت', icon: 'time-outline' as const, href: '/(app)/(tabs)/history' },
+  { title: 'چت‌بات', icon: 'chatbubbles-outline' as const, href: '/(app)/(tabs)/assistant' },
   { title: 'درباره ما', icon: 'information-circle-outline' as const, href: '/(app)/(tabs)/about' },
   { title: 'تماس', icon: 'call-outline' as const, href: '/(app)/(tabs)/contact' },
 ];
@@ -56,19 +57,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        <Text style={styles.section}>خدمات مطب</Text>
-        <View style={{ paddingHorizontal: spacing.md, marginBottom: spacing.lg }}>
-          {content.services.length ? (
-            content.services.map((s) => (
-              <ServiceCard key={s.id} title={s.title} body={s.body || s.subtitle} color={s.color} />
-            ))
-          ) : (
-            <Text style={styles.emptyHint}>
-              {loading ? 'در حال دریافت خدمات...' : 'هنوز خدمتی از سایت دریافت نشده است'}
-            </Text>
-          )}
-        </View>
-
         <Text style={styles.section}>لیست‌ها</Text>
         <View style={styles.smallGrid}>
           {SMALL.map((item) => (
@@ -101,7 +89,36 @@ export default function HomeScreen() {
             icon="alarm"
             onPress={() => router.push('/(app)/(tabs)/medications')}
           />
+          <LargeActionCard
+            title="گفتگو با چت‌بات"
+            subtitle="سوال درباره نوبت، دارو و مراقبت قلب"
+            icon="chatbubbles"
+            onPress={() => router.push('/(app)/(tabs)/assistant')}
+          />
         </View>
+
+        <Text style={[styles.section, { marginTop: spacing.md }]}>خدمات مطب</Text>
+        {content.services.length ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.servicesRow}
+          >
+            {content.services.map((s) => (
+              <ServiceCard
+                key={s.id}
+                title={s.title}
+                body={s.body || s.subtitle}
+                color={s.color}
+                compact
+              />
+            ))}
+          </ScrollView>
+        ) : (
+          <Text style={[styles.emptyHint, { paddingHorizontal: spacing.md, marginBottom: spacing.lg }]}>
+            {loading ? 'در حال دریافت خدمات...' : 'هنوز خدمتی از سایت دریافت نشده است'}
+          </Text>
+        )}
       </ScrollView>
     </AppScreen>
   );
@@ -147,5 +164,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginBottom: spacing.lg,
     justifyContent: 'flex-start',
+  },
+  servicesRow: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexGrow: 1,
+    gap: 8,
   },
 });

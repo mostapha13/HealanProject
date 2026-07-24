@@ -23,11 +23,18 @@ import {
   SearchField,
   type ActionSheetItem,
 } from '../components/Ui';
+import { JalaliCalendarModal } from '../components/JalaliCalendar';
 import { colors, fonts, spacing } from '../theme';
 import { apiGet, apiPost, type TokenGetter } from '../api/client';
 import { config } from '../config';
 import { fetchSmsOutboxPage } from '../api/healan';
-import { toPersianDigits } from '../utils/jalali';
+import { jalaliDateTimeToLocal, localToJalaliParts, toPersianDigits } from '../utils/jalali';
+
+function todayIsoDate(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export function OpsModuleView({ moduleId, title }: { moduleId: ClinicModuleId; title: string }) {
   const cfg = getOpsConfig(moduleId);
@@ -42,6 +49,8 @@ export function OpsModuleView({ moduleId, title }: { moduleId: ClinicModuleId; t
 function OpsListView({ config, title }: { config: OpsModuleConfig; title: string }) {
   const { getAccessToken } = useAuth();
   const [filter, setFilter] = useState('');
+  const [dateYmd, setDateYmd] = useState(todayIsoDate);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [rows, setRows] = useState<EntityRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +61,20 @@ function OpsListView({ config, title }: { config: OpsModuleConfig; title: string
     setLoading(true);
     setError(null);
     try {
-      setRows(await config.load(getAccessToken, filter.trim() || undefined));
+      setRows(
+        await config.load(
+          getAccessToken,
+          filter.trim() || undefined,
+          config.dateFilter ? dateYmd : undefined
+        )
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطا در دریافت');
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [config, filter, getAccessToken]);
+  }, [config, filter, dateYmd, getAccessToken]);
 
   useEffect(() => {
     void load();
@@ -84,9 +99,27 @@ function OpsListView({ config, title }: { config: OpsModuleConfig; title: string
     }));
   }, [config, selected, getAccessToken, load]);
 
+  const jalaliFilterLabel = toPersianDigits(localToJalaliParts(`${dateYmd}T12:00`).date);
+
   return (
     <AppScreen>
       <Text style={styles.count}>{rows.length} مورد · لمس برای اکشن‌ها</Text>
+      {config.dateFilter ? (
+        <Pressable style={styles.dateFilterBtn} onPress={() => setCalendarOpen(true)}>
+          <Text style={styles.dateFilterLabel}>تاریخ رزرو</Text>
+          <Text style={styles.dateFilterValue}>{jalaliFilterLabel}</Text>
+        </Pressable>
+      ) : null}
+      <JalaliCalendarModal
+        visible={calendarOpen}
+        value={localToJalaliParts(`${dateYmd}T12:00`).date}
+        onClose={() => setCalendarOpen(false)}
+        onSelect={(nextDate) => {
+          const local = jalaliDateTimeToLocal(nextDate, '12:00');
+          if (local) setDateYmd(local.slice(0, 10));
+          setCalendarOpen(false);
+        }}
+      />
       <SearchField
         placeholder={`جستجو در ${title}...`}
         value={filter}
@@ -122,6 +155,7 @@ function OpsListView({ config, title }: { config: OpsModuleConfig; title: string
       <ActionSheet
         visible={sheetOpen}
         title={selected?.title}
+        subtitle={selected?.subtitle || undefined}
         items={sheetItems}
         onClose={() => setSheetOpen(false)}
       />
@@ -563,6 +597,28 @@ const styles = StyleSheet.create({
     color: colors.muted,
     textAlign: 'right',
     marginBottom: spacing.sm,
+  },
+  dateFilterBtn: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.line,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: spacing.sm,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateFilterLabel: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.muted,
+  },
+  dateFilterValue: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.ink,
   },
   heading: {
     fontFamily: fonts.bold,

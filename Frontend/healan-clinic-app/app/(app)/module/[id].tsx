@@ -37,6 +37,7 @@ import { OpsModuleView } from '../../../src/modules/OpsModuleView';
 import { PrescriptionModuleView } from '../../../src/modules/PrescriptionModuleView';
 import { QueueModuleView } from '../../../src/modules/QueueModuleView';
 import { RagChatLogsView } from '../../../src/modules/RagChatLogsView';
+import BloodPressureTab from '../(tabs)/blood-pressure';
 import { useAccess } from '../../../src/access/AccessContext';
 import {
   AppScreen,
@@ -95,6 +96,10 @@ export default function ModuleScreen() {
 
   if (moduleId === 'prescriptions') {
     return <PrescriptionModuleView title={title} />;
+  }
+
+  if (moduleId === 'blood-pressure') {
+    return <BloodPressureTab />;
   }
 
   if (

@@ -108,6 +108,12 @@ export default function DashboardScreen() {
           icon="alarm"
           onPress={() => router.push('/(app)/(tabs)/medications')}
         />
+        <LargeActionCard
+          title="گفتگو با چت‌بات"
+          subtitle="پرسش از دستیار هوشمند مطب"
+          icon="chatbubbles"
+          onPress={() => router.push('/(app)/(tabs)/assistant')}
+        />
       </ScrollView>
     </AppScreen>
   );

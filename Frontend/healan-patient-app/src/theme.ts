@@ -10,6 +10,9 @@ export const colors = {
   primaryDeep: '#6D28D9',
   primaryInk: '#FFFFFF',
   primarySoft: '#EDE4FF',
+  /** Selected tab / lemon highlight */
+  lemon: '#C6E000',
+  lemonInk: '#1A1A1A',
   accent: '#C4B5FD',
   accentSoft: '#F3EEFF',
   success: '#059669',

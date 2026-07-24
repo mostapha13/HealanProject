@@ -110,14 +110,40 @@ export function PrescriptionModuleView({ title }: { title: string }) {
         'OrderResult/GetImageType',
         getAccessToken
       );
+      const mapped = (Array.isArray(list) ? list : [])
+        .map((raw) => {
+          const id = Number(raw.key ?? raw.Key ?? raw.imageTypeId ?? raw.id);
+          const label = String(
+            raw.displayName ??
+              raw.DisplayName ??
+              raw.imageTypeName ??
+              raw.name ??
+              raw.Name ??
+              (Number.isFinite(id) && id > 0 ? `نوع #${id}` : '')
+          ).trim();
+          return { id, label };
+        })
+        .filter((t) => Number.isFinite(t.id) && t.id > 0 && t.label);
+      mapped.sort((a, b) => a.id - b.id);
       setImageTypes(
-        (Array.isArray(list) ? list : []).map((raw) => ({
-          id: Number(raw.imageTypeId ?? raw.id),
-          label: String(raw.imageTypeName ?? raw.name ?? `نوع #${raw.imageTypeId ?? raw.id}`),
-        }))
+        mapped.length
+          ? mapped
+          : [
+              { id: 1, label: 'نوار قلب' },
+              { id: ECHO_IMAGE_TYPE_ID, label: 'اکوکاردیوگرافی' },
+              { id: 3, label: 'تست ورزش' },
+              { id: 4, label: 'هولتر ریتم' },
+              { id: 5, label: 'هولتر فشار' },
+              { id: 6, label: 'ام آر آی' },
+              { id: 7, label: 'برگه گزارش کلی' },
+            ]
       );
     } catch {
-      setImageTypes([{ id: ECHO_IMAGE_TYPE_ID, label: 'اکوکاردیوگرافی' }]);
+      setImageTypes([
+        { id: 1, label: 'نوار قلب' },
+        { id: ECHO_IMAGE_TYPE_ID, label: 'اکوکاردیوگرافی' },
+        { id: 7, label: 'برگه گزارش کلی' },
+      ]);
     }
   }, [getAccessToken]);
 

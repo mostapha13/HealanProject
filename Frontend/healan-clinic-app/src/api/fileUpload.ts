@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { config } from '../config';
 import type { TokenGetter } from './client';
 
@@ -30,6 +31,26 @@ export function fileDownloadUrl(fileId: string): string {
   return `${config.fileApiUrl}/Download/${fileId}`;
 }
 
+async function appendFileToFormData(
+  formData: FormData,
+  uri: string,
+  fileName: string,
+  mimeType: string
+): Promise<void> {
+  // On web, { uri, name, type } is not a real File/Blob and FileManager returns 500.
+  if (Platform.OS === 'web') {
+    const res = await fetch(uri);
+    const blob = await res.blob();
+    formData.append('file', blob, fileName);
+    return;
+  }
+  formData.append('file', {
+    uri,
+    name: fileName,
+    type: mimeType,
+  } as unknown as Blob);
+}
+
 /** آپلود تصویر از URI (expo-image-picker) به FileManager */
 export async function uploadImageFromUri(
   getToken: TokenGetter,
@@ -38,11 +59,7 @@ export async function uploadImageFromUri(
 ): Promise<UploadedFileMeta> {
   const token = await getToken();
   const formData = new FormData();
-  formData.append('file', {
-    uri,
-    name: fileName,
-    type: 'image/jpeg',
-  } as unknown as Blob);
+  await appendFileToFormData(formData, uri, fileName, 'image/jpeg');
 
   const res = await fetch(`${config.fileApiUrl}/Upload`, {
     method: 'POST',

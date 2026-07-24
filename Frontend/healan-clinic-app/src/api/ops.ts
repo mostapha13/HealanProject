@@ -10,6 +10,13 @@ import {
 } from './client';
 import type { ClinicModuleId } from '../navigation/catalog';
 import type { EntityRow } from './crud';
+import { formatJalaliDateTime } from '../utils/jalali';
+
+function todayIsoDate(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 function asRecord(item: unknown): Record<string, unknown> {
   return (item ?? {}) as Record<string, unknown>;
@@ -91,7 +98,9 @@ export type OpsAction = {
 export type OpsModuleConfig = {
   id: ClinicModuleId;
   canCreate?: boolean;
-  load: (getToken: TokenGetter, filterText?: string) => Promise<EntityRow[]>;
+  /** When true, OpsListView shows a Jalali day filter and passes ISO date to load. */
+  dateFilter?: boolean;
+  load: (getToken: TokenGetter, filterText?: string, dateYmd?: string) => Promise<EntityRow[]>;
   actions: (row: EntityRow) => OpsAction[];
   createLabel?: string;
   createFields?: { key: string; label: string; required?: boolean; multiline?: boolean; keyboard?: 'default' | 'numeric' | 'phone-pad' }[];
@@ -177,23 +186,34 @@ export const OPS_MODULES: Partial<Record<ClinicModuleId, OpsModuleConfig>> = {
 
   'booking-reservations': {
     id: 'booking-reservations',
-    load: async (getToken, filterText) => {
+    dateFilter: true,
+    load: async (getToken, filterText, dateYmd) => {
+      const day = dateYmd || todayIsoDate();
       const rows = await fetchAllPaginated((pageNumber, pageSize) =>
         healanGet<PaginatedPage<Record<string, unknown>>>(getToken, 'BookingReservation/List', {
           pageNumber,
           pageSize,
           filterText,
+          fromDate: day,
+          toDate: day,
         })
       );
       return rows.map((raw, index) => {
         const r = asRecord(raw);
         const id = num(r.appointmentBookingId ?? r.reservationId ?? r.id ?? index);
-        const statusInfo = bookingStatusLabel(r.statusName ?? r.status ?? r.bookingStatus);
+        const statusInfo = bookingStatusLabel(
+          r.statusTitle ?? r.statusName ?? r.status ?? r.bookingStatus
+        );
+        const startAt = str(r.startAt ?? r.StartAt ?? r.slotStart ?? r.appointmentDate ?? '');
+        const jalali = formatJalaliDateTime(startAt);
+        const name =
+          `${str(r.firstName ?? r.FirstName)} ${str(r.lastName ?? r.LastName)}`.trim() ||
+          str(r.patientName ?? r.fullName);
         return {
           id,
-          title: str(r.patientName ?? r.fullName ?? `${str(r.firstName)} ${str(r.lastName)}`.trim(), `رزرو #${id}`),
+          title: name || `رزرو #${id}`,
           subtitle: statusInfo.label,
-          meta: str(r.slotStart ?? r.appointmentDate ?? r.nationalCode ?? ''),
+          meta: jalali || startAt || str(r.nationalCode ?? r.NationalCode ?? ''),
           badge: statusInfo.label,
           badgeTone: statusInfo.tone,
           raw: { ...r, appointmentBookingId: id },
@@ -285,8 +305,10 @@ export const OPS_MODULES: Partial<Record<ClinicModuleId, OpsModuleConfig>> = {
         return {
           id,
           title: str(r.patientName ?? r.fullName ?? 'نظر بیمار'),
-          subtitle: str(r.comment ?? '').slice(0, 120),
-          meta: badge,
+          subtitle: str(
+            r.reviewText ?? r.ReviewText ?? r.comment ?? r.Comment ?? r.text ?? r.Text ?? ''
+          ),
+          meta: '',
           badge,
           badgeTone,
           raw: { ...r, status: statusRaw || 'Pending' },

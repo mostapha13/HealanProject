@@ -475,11 +475,13 @@ export type ActionSheetItem = {
 export function ActionSheet({
   visible,
   title,
+  subtitle,
   items,
   onClose,
 }: {
   visible: boolean;
   title?: string;
+  subtitle?: string;
   items: ActionSheetItem[];
   onClose: () => void;
 }) {
@@ -488,6 +490,7 @@ export function ActionSheet({
       <Pressable style={styles.modalOverlay} onPress={onClose}>
         <Pressable style={styles.actionSheet} onPress={(e) => e.stopPropagation()}>
           {title ? <Text style={styles.actionTitle}>{title}</Text> : null}
+          {subtitle ? <Text style={styles.actionSubtitle}>{subtitle}</Text> : null}
           {items.map((item) => (
             <Pressable
               key={item.key}
@@ -850,6 +853,14 @@ const styles = StyleSheet.create({
     color: colors.muted,
     textAlign: 'center',
     marginBottom: spacing.sm,
+  },
+  actionSubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.ink,
+    textAlign: 'right',
+    marginBottom: spacing.md,
+    lineHeight: 22,
   },
   actionItem: {
     paddingVertical: 14,

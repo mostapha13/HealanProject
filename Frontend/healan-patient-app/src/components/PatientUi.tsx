@@ -113,19 +113,37 @@ export function ServiceCard({
   title,
   body,
   color,
+  compact = false,
 }: {
   title: string;
   body?: string;
   color?: string;
+  /** کارت فشرده برای اسکرول افقی وقتی تعداد خدمات زیاد است */
+  compact?: boolean;
 }) {
   const accent = color && /^#/.test(color) ? color : colors.primaryDeep;
+  if (compact) {
+    return (
+      <View style={[styles.serviceCompact, { borderTopColor: accent }]}>
+        <View style={[styles.serviceDot, { backgroundColor: accent, marginTop: 0 }]} />
+        <Text style={styles.serviceCompactTitle} numberOfLines={2}>
+          {title}
+        </Text>
+        {body ? (
+          <Text style={styles.serviceCompactBody} numberOfLines={2}>
+            {body}
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
   return (
     <View style={[styles.serviceCard, { borderRightColor: accent }]}>
       <View style={[styles.serviceDot, { backgroundColor: accent }]} />
       <View style={{ flex: 1 }}>
         <Text style={styles.serviceTitle}>{title}</Text>
         {body ? (
-          <Text style={styles.serviceBody} numberOfLines={3}>
+          <Text style={styles.serviceBody} numberOfLines={2}>
             {body}
           </Text>
         ) : null}
@@ -331,6 +349,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     borderRightWidth: 4,
+  },
+  serviceCompact: {
+    width: 148,
+    minHeight: 96,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderTopWidth: 3,
+  },
+  serviceCompactTitle: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.ink,
+    textAlign: 'right',
+    marginTop: 8,
+    lineHeight: 18,
+  },
+  serviceCompactBody: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.muted,
+    textAlign: 'right',
+    marginTop: 4,
+    lineHeight: 16,
   },
   serviceDot: {
     width: 10,

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +21,7 @@ type TabBarProps = {
   };
 };
 
+/** Rightmost first (row-reverse): خانه → ... → پروفایل */
 const VISIBLE_TABS: Array<{ name: string; title: string; icon: Ion }> = [
   { name: 'index', title: 'خانه', icon: 'home-outline' },
   { name: 'dashboard', title: 'داشبورد', icon: 'grid-outline' },
@@ -33,14 +34,34 @@ const VISIBLE_TABS: Array<{ name: string; title: string; icon: Ion }> = [
 
 const HIDDEN = { href: null } as const;
 
+const PARENT_TAB_BY_ROUTE: Record<string, string> = {
+  'blood-pressure': 'dashboard',
+  'blood-pressure-list': 'dashboard',
+  medications: 'dashboard',
+  'medications-list': 'dashboard',
+  bookings: 'booking',
+  history: 'dashboard',
+};
+
+function resolveFocusedTab(routeName?: string): string {
+  if (!routeName) return 'index';
+  if (VISIBLE_TABS.some((t) => t.name === routeName)) return routeName;
+  return PARENT_TAB_BY_ROUTE[routeName] ?? 'index';
+}
+
 function PurpleTabBar({ state, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
+  const pathname = usePathname();
   const currentName = state.routes[state.index]?.name;
+  const focusedName = useMemo(
+    () => resolveFocusedTab(currentName),
+    [currentName, pathname]
+  );
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 6) }]}>
       {VISIBLE_TABS.map((tab) => {
-        const focused = currentName === tab.name;
+        const focused = focusedName === tab.name;
         return (
           <Pressable
             key={tab.name}
@@ -54,7 +75,7 @@ function PurpleTabBar({ state, navigation }: TabBarProps) {
             <Ionicons
               name={tab.icon}
               size={18}
-              color={focused ? colors.white : colors.tabInactive}
+              color={focused ? colors.lemonInk : colors.tabInactive}
             />
             <Text
               numberOfLines={1}
@@ -87,6 +108,9 @@ export default function TabsLayout() {
         tabBar={(props) => <PurpleTabBar {...props} />}
         screenOptions={{
           headerShown: false,
+          tabBarStyle: {
+            display: 'flex',
+          },
         }}
       >
         <Tabs.Screen name="index" options={{ title: 'خانه' }} />
@@ -129,7 +153,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
   },
   itemFocused: {
-    backgroundColor: colors.primaryDeep,
+    backgroundColor: colors.lemon,
   },
   itemIdle: {
     backgroundColor: 'transparent',
@@ -141,7 +165,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   labelFocused: {
-    color: colors.white,
+    color: colors.lemonInk,
   },
   labelIdle: {
     color: colors.tabInactive,
