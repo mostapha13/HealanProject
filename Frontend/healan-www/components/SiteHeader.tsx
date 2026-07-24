@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { AppDownloadMenu } from './AppDownloadMenu';
 import { BookingCta, PatientCta } from './CtaLinks';
 
 type Props = {
@@ -98,6 +99,7 @@ export function SiteHeader({
             {NAV_LINKS.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
+            <AppDownloadMenu variant="nav" />
           </nav>
 
           <div className="header__actions">
@@ -140,6 +142,7 @@ export function SiteHeader({
             <NavLink key={item.href} item={item} onNavigate={closeMenu} />
           ))}
         </nav>
+        <AppDownloadMenu variant="drawer" onNavigate={closeMenu} />
         <div className="nav-drawer__actions">
           <BookingCta className="btn btn--primary btn--lg" />
           <PatientCta className="btn btn--patient btn--lg" />
