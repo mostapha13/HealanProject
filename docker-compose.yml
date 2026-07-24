@@ -21,6 +21,8 @@ services:
       - healan-clinic
       - healan-portal
       - healan-www
+      - healan-clinic-pwa
+      - healan-patient-pwa
       - healan-webapi
       - identity-usermanager
       - filemanager-webui
@@ -373,6 +375,43 @@ services:
     depends_on:
       - healan-webapi
       - filemanager-webui
+
+  # Expo PWAs (iPhone Add to Home Screen + Android installable web)
+  healan-clinic-pwa:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/expo-pwa.Dockerfile
+      args:
+        APP_DIR: Frontend/healan-clinic-app
+        THEME_COLOR: "#C6E000"
+        EXPO_PUBLIC_IDENTITY_URL: https://auth.drshahrooei.ir
+        EXPO_PUBLIC_HEALAN_API_URL: https://clinic.drshahrooei.ir/Healan/api/v1
+        EXPO_PUBLIC_USER_MANAGER_API_URL: https://clinic.drshahrooei.ir/UserManager/api/v1
+        EXPO_PUBLIC_CLIENT_ID: HealanClinicMobile
+        EXPO_PUBLIC_FILE_API_URL: https://clinic.drshahrooei.ir/File
+    container_name: healan-clinic-pwa
+    expose:
+      - "80"
+    depends_on:
+      - healan-webapi
+      - identity-server
+
+  healan-patient-pwa:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/expo-pwa.Dockerfile
+      args:
+        APP_DIR: Frontend/healan-patient-app
+        THEME_COLOR: "#6D28D9"
+        EXPO_PUBLIC_HEALAN_API_URL: https://clinic.drshahrooei.ir/Healan/api/v1
+        EXPO_PUBLIC_FILE_API_URL: https://clinic.drshahrooei.ir/File
+    container_name: healan-patient-pwa
+    expose:
+      - "80"
+    depends_on:
+      - healan-webapi
 
   login:
     restart: unless-stopped

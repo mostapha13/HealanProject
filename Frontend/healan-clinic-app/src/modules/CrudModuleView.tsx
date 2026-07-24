@@ -34,8 +34,25 @@ import {
 } from '../components/Ui';
 import { colors, fonts, spacing } from '../theme';
 import { ListCard } from '../components/Ui';
+import { PatientVisitHistoryModal } from '../components/PatientVisitHistoryModal';
 import { jalaliDateTimeToLocal, localToJalaliParts, toPersianDigits } from '../utils/jalali';
 import { JalaliCalendarModal } from '../components/JalaliCalendar';
+
+function asRaw(v: unknown): Record<string, unknown> {
+  return (v ?? {}) as Record<string, unknown>;
+}
+
+function resolveVisitHistoryPatientId(moduleId: string, row: EntityRow): number {
+  if (moduleId === 'patients') return row.id;
+  const nested = asRaw(row.raw.patient ?? row.raw.Patient);
+  return Number(
+    row.raw.patientId ?? row.raw.PatientId ?? nested.patientId ?? nested.PatientId ?? nested.id ?? 0
+  );
+}
+
+function supportsVisitHistory(moduleId: string): boolean {
+  return moduleId === 'patients' || moduleId === 'appointments';
+}
 
 function fieldValue(form: Record<string, string | boolean | number>, key: string): string {
   const v = form[key];
@@ -445,6 +462,9 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
   const [selected, setSelected] = useState<EntityRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [options, setOptions] = useState<Record<string, EnumOption[]>>({});
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyPatientId, setHistoryPatientId] = useState(0);
+  const [historyPatientName, setHistoryPatientName] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -551,6 +571,23 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
   const sheetItems: ActionSheetItem[] = useMemo(() => {
     if (!selected) return [];
     const items: ActionSheetItem[] = [];
+    if (supportsVisitHistory(config.id)) {
+      items.push({
+        key: 'history',
+        label: 'سوابق بیمار',
+        onPress: () => {
+          const pid = resolveVisitHistoryPatientId(config.id, selected);
+          if (!pid) {
+            Alert.alert('سوابق', 'شناسه بیمار برای این ردیف یافت نشد');
+            return;
+          }
+          setHistoryPatientId(pid);
+          setHistoryPatientName(selected.title);
+          setSheetOpen(false);
+          setHistoryOpen(true);
+        },
+      });
+    }
     if (config.canEdit) {
       items.push({ key: 'edit', label: 'ویرایش', onPress: () => openEdit(selected) });
     }
@@ -623,7 +660,10 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
               badge={item.badge}
               lines={[item.subtitle, item.meta].filter(Boolean) as string[]}
               onPress={
-                config.canEdit || config.canDelete || config.canToggleActive
+                config.canEdit ||
+                config.canDelete ||
+                config.canToggleActive ||
+                supportsVisitHistory(config.id)
                   ? () => {
                       setSelected(item);
                       setSheetOpen(true);
@@ -640,6 +680,13 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
         title={selected?.title}
         items={sheetItems}
         onClose={() => setSheetOpen(false)}
+      />
+
+      <PatientVisitHistoryModal
+        visible={historyOpen}
+        patientId={historyPatientId}
+        patientName={historyPatientName}
+        onClose={() => setHistoryOpen(false)}
       />
 
       <FormModal

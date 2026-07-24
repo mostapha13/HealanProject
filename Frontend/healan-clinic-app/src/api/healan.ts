@@ -129,6 +129,139 @@ export async function fetchAppointments(
   );
 }
 
+export type VisitHistoryDrug = {
+  drugName: string;
+  dosage?: string | null;
+  usageInstructions?: string | null;
+};
+
+export type VisitHistoryLab = {
+  labTestType: string;
+  notes?: string | null;
+  attachmentId?: string | null;
+  attachmentLink?: string | null;
+  attachmentFileName?: string | null;
+};
+
+export type VisitHistoryImaging = {
+  imageTypeId: number;
+  imageTypeName: string;
+  notes?: string | null;
+  attachmentId?: string | null;
+  attachmentLink?: string | null;
+  attachmentFileName?: string | null;
+};
+
+export type PatientVisitHistoryItem = {
+  appointmentId: number;
+  appointmentDate: string;
+  appointmentStatus: string;
+  doctorName?: string | null;
+  prescriptionId?: number | null;
+  prescriptionIssueDate?: string | null;
+  prescriptionNotes?: string | null;
+  hasEchoReport?: boolean;
+  echoConclusion?: string | null;
+  echoRecommendation?: string | null;
+  drugs: VisitHistoryDrug[];
+  labs: VisitHistoryLab[];
+  imaging: VisitHistoryImaging[];
+};
+
+function mapVisitHistoryItem(raw: Record<string, unknown>): PatientVisitHistoryItem {
+  const drugsRaw = (raw.drugs ?? raw.Drugs) as unknown;
+  const labsRaw = (raw.labs ?? raw.Labs) as unknown;
+  const imagingRaw = (raw.imaging ?? raw.Imaging) as unknown;
+  const asObj = (v: unknown) => (v ?? {}) as Record<string, unknown>;
+  return {
+    appointmentId: Number(raw.appointmentId ?? raw.AppointmentId ?? 0),
+    appointmentDate: String(raw.appointmentDate ?? raw.AppointmentDate ?? ''),
+    appointmentStatus: String(raw.appointmentStatus ?? raw.AppointmentStatus ?? ''),
+    doctorName: (raw.doctorName ?? raw.DoctorName) as string | null | undefined,
+    prescriptionId: (() => {
+      const v = raw.prescriptionId ?? raw.PrescriptionId;
+      if (v == null || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    })(),
+    prescriptionIssueDate: (raw.prescriptionIssueDate ?? raw.PrescriptionIssueDate) as
+      | string
+      | null
+      | undefined,
+    prescriptionNotes: (raw.prescriptionNotes ?? raw.PrescriptionNotes) as string | null | undefined,
+    hasEchoReport: Boolean(raw.hasEchoReport ?? raw.HasEchoReport),
+    echoConclusion: (raw.echoConclusion ?? raw.EchoConclusion) as string | null | undefined,
+    echoRecommendation: (raw.echoRecommendation ?? raw.EchoRecommendation) as
+      | string
+      | null
+      | undefined,
+    drugs: Array.isArray(drugsRaw)
+      ? drugsRaw.map((d) => {
+          const r = asObj(d);
+          return {
+            drugName: String(r.drugName ?? r.DrugName ?? ''),
+            dosage: (r.dosage ?? r.Dosage) as string | null | undefined,
+            usageInstructions: (r.usageInstructions ?? r.UsageInstructions) as
+              | string
+              | null
+              | undefined,
+          };
+        })
+      : [],
+    labs: Array.isArray(labsRaw)
+      ? labsRaw.map((d) => {
+          const r = asObj(d);
+          return {
+            labTestType: String(r.labTestType ?? r.LabTestType ?? ''),
+            notes: (r.notes ?? r.Notes) as string | null | undefined,
+            attachmentId: (r.attachmentId ?? r.AttachmentId) as string | null | undefined,
+            attachmentLink: (r.attachmentLink ?? r.AttachmentLink) as string | null | undefined,
+            attachmentFileName: (r.attachmentFileName ?? r.AttachmentFileName) as
+              | string
+              | null
+              | undefined,
+          };
+        })
+      : [],
+    imaging: Array.isArray(imagingRaw)
+      ? imagingRaw.map((d) => {
+          const r = asObj(d);
+          return {
+            imageTypeId: Number(r.imageTypeId ?? r.ImageTypeId ?? 0),
+            imageTypeName: String(r.imageTypeName ?? r.ImageTypeName ?? ''),
+            notes: (r.notes ?? r.Notes) as string | null | undefined,
+            attachmentId: (r.attachmentId ?? r.AttachmentId) as string | null | undefined,
+            attachmentLink: (r.attachmentLink ?? r.AttachmentLink) as string | null | undefined,
+            attachmentFileName: (r.attachmentFileName ?? r.AttachmentFileName) as
+              | string
+              | null
+              | undefined,
+          };
+        })
+      : [],
+  };
+}
+
+/** سوابق ویزیت + نسخه به تفکیک نوبت (جدیدترین اول) */
+export async function fetchPatientVisitHistory(
+  getToken: TokenGetter,
+  patientId: number
+): Promise<PatientVisitHistoryItem[]> {
+  if (!patientId || patientId <= 0) return [];
+  const list = await apiGet<Record<string, unknown>[] | { items?: Record<string, unknown>[] }>(
+    config.healanApiUrl,
+    'Patient/VisitHistory',
+    getToken,
+    { patientId }
+  );
+  const rows = Array.isArray(list)
+    ? list
+    : Array.isArray((list as { items?: unknown }).items)
+      ? ((list as { items: Record<string, unknown>[] }).items)
+      : [];
+  return rows.map((raw) => mapVisitHistoryItem((raw ?? {}) as Record<string, unknown>));
+}
+
 export async function fetchPatients(
   getToken: TokenGetter,
   params: { filterText?: string } = {}

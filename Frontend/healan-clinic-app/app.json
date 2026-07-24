@@ -36,13 +36,23 @@
               "host": "redirect"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single",
+      "name": "هیلن کلینیک",
+      "shortName": "هیلن کلینیک",
+      "themeColor": "#C6E000",
+      "backgroundColor": "#F4F5F7",
+      "display": "standalone",
+      "lang": "fa"
     },
     "plugins": [
       "expo-router",
@@ -51,12 +61,15 @@
       "expo-web-browser"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/mobile"
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "healan-clinic-app-local"
+        "projectId": "e8260473-3855-417c-b7c1-5db2bf7c06e1"
       }
-    }
+    },
+    "owner": "mostaphamahdavi"
   }
 }

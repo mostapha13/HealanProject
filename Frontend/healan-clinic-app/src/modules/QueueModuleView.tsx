@@ -23,6 +23,7 @@ import {
 } from '../components/Ui';
 import { colors, fonts, spacing } from '../theme';
 import { formatJalaliDateTime, toPersianDigits } from '../utils/jalali';
+import { PatientVisitHistoryModal } from '../components/PatientVisitHistoryModal';
 
 type QueueRow = {
   id: number;
@@ -112,6 +113,9 @@ export function QueueModuleView({ title }: { title: string }) {
   const [invoice, setInvoice] = useState<Record<string, unknown> | null>(null);
   const [busy, setBusy] = useState(false);
   const [infoText, setInfoText] = useState('');
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyPatientId, setHistoryPatientId] = useState(0);
+  const [historyPatientName, setHistoryPatientName] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -231,7 +235,26 @@ export function QueueModuleView({ title }: { title: string }) {
   const actions = useMemo(() => {
     if (!selected) return [];
     const status = selected.status;
+    const patientId = Number(
+      selected.raw.patientId ??
+        selected.raw.PatientId ??
+        asRecord(selected.raw.patient).patientId ??
+        asRecord(selected.raw.patient).PatientId ??
+        0
+    );
     const items: { key: string; label: string; danger?: boolean; run: () => Promise<void> }[] = [];
+    if (patientId > 0) {
+      items.push({
+        key: 'history',
+        label: 'سوابق بیمار',
+        run: async () => {
+          setHistoryPatientId(patientId);
+          setHistoryPatientName(selected.title);
+          setSheetOpen(false);
+          setHistoryOpen(true);
+        },
+      });
+    }
     if (status !== 'InProgress' && status !== 'Completed') {
       items.push({
         key: 'start',
@@ -322,7 +345,7 @@ export function QueueModuleView({ title }: { title: string }) {
               void (async () => {
                 try {
                   await a.run();
-                  if (a.key !== 'pay' && a.key !== 'rx') setSheetOpen(false);
+                  if (a.key !== 'pay' && a.key !== 'rx' && a.key !== 'history') setSheetOpen(false);
                 } catch (err) {
                   Alert.alert('خطا', err instanceof Error ? err.message : 'عملیات ناموفق بود');
                 }
@@ -365,6 +388,13 @@ export function QueueModuleView({ title }: { title: string }) {
             disabled={busy}
           />
       </FormModal>
+
+      <PatientVisitHistoryModal
+        visible={historyOpen}
+        patientId={historyPatientId}
+        patientName={historyPatientName}
+        onClose={() => setHistoryOpen(false)}
+      />
     </AppScreen>
   );
 }

@@ -1,0 +1,35 @@
+{
+  "id": "/mobile/",
+  "name": "کلینیک دکتر شهرویی",
+  "short_name": "دکتر شهرویی",
+  "description": "اپ بیمار — نوبت، فشار خون، دارو، چت‌بات",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/mobile/",
+  "scope": "/mobile/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F3FF",
+  "theme_color": "#6D28D9",
+  "categories": ["medical", "health"],
+  "icons": [
+    {
+      "src": "/mobile/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

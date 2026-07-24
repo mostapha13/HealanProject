@@ -10,6 +10,7 @@ import {
   Vazirmatn_700Bold,
 } from '@expo-google-fonts/vazirmatn';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
+import { IosInstallBanner } from '../src/components/IosInstallBanner';
 import { colors } from '../src/theme';
 
 if (!I18nManager.isRTL) {
@@ -72,6 +73,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <AuthGate>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+        <IosInstallBanner appName="کلینیک دکتر شهرویی" />
       </AuthGate>
     </AuthProvider>
   );

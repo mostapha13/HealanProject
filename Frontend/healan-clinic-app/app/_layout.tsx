@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/vazirmatn';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { AccessProvider } from '../src/access/AccessContext';
+import { IosInstallBanner } from '../src/components/IosInstallBanner';
 import { colors } from '../src/theme';
 
 if (!I18nManager.isRTL) {
@@ -74,6 +75,7 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <AuthGate>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+          <IosInstallBanner appName="هیلن کلینیک" />
         </AuthGate>
       </AccessProvider>
     </AuthProvider>

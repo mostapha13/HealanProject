@@ -37,6 +37,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build:pwa": "expo export -p web",
     "lint": "tsc --noEmit",
     "eas:build:android": "eas build -p android --profile preview"
   },

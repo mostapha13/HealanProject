@@ -1,0 +1,20 @@
+# Keep EAS upload small (monorepo-safe)
+.git
+.expo
+.vscode
+dist
+web-build
+node_modules
+android
+ios
+*.log
+.env
+.env.*
+!.env.example
+
+../../**
+../healan-clinic-app
+../healan-www
+../tse_client_workspace
+../../Backend
+../../docker

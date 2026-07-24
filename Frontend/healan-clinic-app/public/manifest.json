@@ -1,0 +1,35 @@
+{
+  "id": "/mobile/",
+  "name": "هیلن کلینیک",
+  "short_name": "هیلن کلینیک",
+  "description": "اپ پرسنل کلینیک — صف، پذیرش، نسخه، سوابق بیمار",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/mobile/",
+  "scope": "/mobile/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F5F7",
+  "theme_color": "#C6E000",
+  "categories": ["medical", "business"],
+  "icons": [
+    {
+      "src": "/mobile/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mobile/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
