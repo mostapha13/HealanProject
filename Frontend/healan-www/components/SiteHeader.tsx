@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { AppDownloadMenu } from './AppDownloadMenu';
+import { AppDownloadLinks } from './DownloadApp';
 import { BookingCta, PatientCta } from './CtaLinks';
 
 type Props = {
@@ -26,6 +26,8 @@ const NAV_LINKS: NavItem[] = [
   { href: '/#contact', label: 'تماس', kind: 'anchor' },
   { href: '/blog', label: 'بلاگ', kind: 'next' },
   { href: '/assistant', label: 'دستیار', kind: 'spa' },
+  // Plain <a> like other items — always in HTML after deploy
+  { href: '/#download-app', label: 'دانلود اپلیکیشن', kind: 'anchor' },
 ];
 
 function NavLink({
@@ -99,11 +101,12 @@ export function SiteHeader({
             {NAV_LINKS.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
-            <AppDownloadMenu variant="nav" />
           </nav>
 
           <div className="header__actions">
-            <AppDownloadMenu variant="actions" />
+            <a href="/#download-app" className="btn btn--soft btn--sm header__cta-download">
+              دانلود اپلیکیشن
+            </a>
             <BookingCta className="btn btn--outline btn--sm header__cta-booking" />
             <PatientCta className="btn btn--patient btn--sm" />
             <button
@@ -143,7 +146,7 @@ export function SiteHeader({
             <NavLink key={item.href} item={item} onNavigate={closeMenu} />
           ))}
         </nav>
-        <AppDownloadMenu variant="drawer" onNavigate={closeMenu} />
+        <AppDownloadLinks />
         <div className="nav-drawer__actions">
           <BookingCta className="btn btn--primary btn--lg" />
           <PatientCta className="btn btn--patient btn--lg" />

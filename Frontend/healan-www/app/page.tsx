@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DownloadAppSection } from '@/components/DownloadApp';
 import { JsonLd } from '@/components/JsonLd';
 import { LandingView } from '@/components/LandingView';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -49,6 +50,7 @@ export default async function HomePage() {
         showHeroStat={portalSectionEnabled(site, 'HeroStat')}
         showHeroSlide={portalSectionEnabled(site, 'HeroSlide')}
       />
+      <DownloadAppSection />
       <SiteFooter
         name={model.doctor.name}
         specialty={model.doctor.specialty}
