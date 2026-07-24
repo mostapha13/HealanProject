@@ -211,24 +211,50 @@ namespace FileManager.WebUI
                     policy.RequireClaim("scope", "profile");
                 });
             });
-            var origins = (Configuration["ClientBaseUrl"] ?? "")
+            var configuredOrigins = (Configuration["ClientBaseUrl"] ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Concat(new[]
-                {
-                    "http://clinic.drshahrooei.ir",
-                    "https://clinic.drshahrooei.ir",
-                    "http://www.drshahrooei.ir",
-                    "https://www.drshahrooei.ir",
-                    "http://auth.drshahrooei.ir",
-                    "https://auth.drshahrooei.ir",
-                })
+                .Where(o => !string.IsNullOrWhiteSpace(o));
+            var defaultOrigins = new[]
+            {
+                "http://clinic.drshahrooei.ir",
+                "https://clinic.drshahrooei.ir",
+                "http://www.drshahrooei.ir",
+                "https://www.drshahrooei.ir",
+                "http://portal.drshahrooei.ir",
+                "https://portal.drshahrooei.ir",
+                "http://auth.drshahrooei.ir",
+                "https://auth.drshahrooei.ir",
+                "http://localhost:4200",
+                "http://localhost:4201",
+                "http://localhost:4202",
+                "http://localhost:8081",
+                "http://127.0.0.1:8081",
+                "http://localhost:8082",
+                "http://127.0.0.1:8082",
+                "http://localhost:8083",
+                "http://127.0.0.1:8083",
+                "http://localhost:8084",
+                "http://127.0.0.1:8084",
+            };
+            var origins = configuredOrigins
+                .Concat(defaultOrigins)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
             services.AddCors(options =>
             {
                 options.AddPolicy("default",
                     builder => builder
-                        .WithOrigins(origins)
+                        .SetIsOriginAllowed(origin =>
+                        {
+                            if (string.IsNullOrWhiteSpace(origin)) return false;
+                            if (origins.Contains(origin)) return true;
+                            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+                            var host = uri.Host.Trim('[', ']');
+                            // Expo web (any port) on this machine
+                            return host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                                || host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                                || host.Equals("::1", StringComparison.OrdinalIgnoreCase);
+                        })
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
