@@ -17,6 +17,7 @@ public class BlogPostRegisterCommand : IRequest<PortalMutationResult>
     public string Body { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    public string? Tags { get; set; }
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public string? OgImageUrl { get; set; }
@@ -68,6 +69,7 @@ public class BlogPostRegisterCommandHandler : IRequestHandler<BlogPostRegisterCo
         post.Excerpt = request.Excerpt?.Trim();
         post.Body = request.Body.Trim();
         post.CoverImageFileId = request.CoverImageFileId;
+        post.Tags = string.IsNullOrWhiteSpace(request.Tags) ? null : request.Tags.Trim();
         post.MetaTitle = request.MetaTitle?.Trim();
         post.MetaDescription = request.MetaDescription?.Trim();
         post.OgImageUrl = request.OgImageUrl?.Trim();
@@ -77,10 +79,7 @@ public class BlogPostRegisterCommandHandler : IRequestHandler<BlogPostRegisterCo
         {
             post.PublishedAt = request.PublishedAt ?? post.PublishedAt ?? DateTime.UtcNow;
         }
-        else
-        {
-            post.PublishedAt = request.PublishedAt;
-        }
+        // هنگام عدم انتشار تاریخ انتشار قبلی را پاک نکن (تاریخچه بماند)
 
         if (request.CoverImageFileId.HasValue)
         {

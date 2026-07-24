@@ -26,13 +26,16 @@ import {
 import { colors, fonts, spacing } from '../theme';
 import { apiGet, apiPost, type TokenGetter } from '../api/client';
 import { config } from '../config';
+import { fetchSmsOutboxPage } from '../api/healan';
+import { toPersianDigits } from '../utils/jalali';
 
 export function OpsModuleView({ moduleId, title }: { moduleId: ClinicModuleId; title: string }) {
   const cfg = getOpsConfig(moduleId);
-  if (!cfg) return null;
   if (moduleId === 'access-roles') return <AccessRolesView title={title} />;
   if (moduleId === 'sms-settings') return <SmsSettingsView title={title} />;
   if (moduleId === 'site-settings') return <SiteSettingsView title={title} />;
+  if (moduleId === 'sms') return <SmsOutboxView title={title} />;
+  if (!cfg) return null;
   return <OpsListView config={cfg} title={title} />;
 }
 
@@ -106,6 +109,7 @@ function OpsListView({ config, title }: { config: OpsModuleConfig; title: string
             <ListCard
               title={item.title}
               badge={item.badge}
+              badgeTone={item.badgeTone}
               lines={[item.subtitle, item.meta].filter(Boolean) as string[]}
               onPress={() => {
                 setSelected(item);
@@ -248,10 +252,91 @@ function AccessRolesView({ title }: { title: string }) {
   );
 }
 
+function SmsOutboxView({ title }: { title: string }) {
+  const { getAccessToken } = useAuth();
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<{ id: number; title: string; subtitle?: string; meta?: string }[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchSmsOutboxPage(getAccessToken, page, pageSize);
+      setRows(res.items);
+      setTotal(res.totalCount);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'خطا در دریافت پیامک‌ها');
+      setRows([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [getAccessToken, page]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <AppScreen>
+      <Text style={styles.heading}>{title}</Text>
+      <Text style={styles.hint}>
+        صفحه {toPersianDigits(page)} از {toPersianDigits(totalPages)} · مجموع {toPersianDigits(total)}
+      </Text>
+      {loading ? (
+        <LoadingBlock />
+      ) : (
+        <FlatList
+          data={rows}
+          keyExtractor={(item) => `${item.id}-${item.title}`}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}
+          contentContainerStyle={{ paddingBottom: spacing.xxl }}
+          ListEmptyComponent={
+            <EmptyBlock title={error ? 'خطا' : 'پیامکی نیست'} subtitle={error ?? undefined} />
+          }
+          ListFooterComponent={
+            totalPages > 1 ? (
+              <View style={styles.pager}>
+                <Pressable
+                  disabled={page >= totalPages}
+                  onPress={() => setPage((p) => p + 1)}
+                  style={[styles.pagerBtn, page >= totalPages && { opacity: 0.4 }]}
+                >
+                  <Text style={styles.pagerText}>بعدی</Text>
+                </Pressable>
+                <Text style={styles.pagerLabel}>
+                  {toPersianDigits(page)} / {toPersianDigits(totalPages)}
+                </Text>
+                <Pressable
+                  disabled={page <= 1}
+                  onPress={() => setPage((p) => Math.max(1, p - 1))}
+                  style={[styles.pagerBtn, page <= 1 && { opacity: 0.4 }]}
+                >
+                  <Text style={styles.pagerText}>قبلی</Text>
+                </Pressable>
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <ListCard title={item.title} lines={[item.subtitle, item.meta].filter(Boolean) as string[]} />
+          )}
+        />
+      )}
+    </AppScreen>
+  );
+}
+
 function SmsSettingsView({ title }: { title: string }) {
   const { getAccessToken } = useAuth();
   const [form, setForm] = useState({
     apiKey: '',
+    apiKeyMasked: '',
+    hasApiKey: false,
     templateId: '',
     lineNumber: '',
     verifyParameterName: 'Code',
@@ -270,6 +355,8 @@ function SmsSettingsView({ title }: { title: string }) {
       );
       setForm({
         apiKey: '',
+        apiKeyMasked: String(raw.apiKeyMasked ?? raw.ApiKeyMasked ?? ''),
+        hasApiKey: Boolean(raw.hasApiKey ?? raw.HasApiKey),
         templateId: String(raw.templateId ?? raw.TemplateId ?? ''),
         lineNumber: String(raw.lineNumber ?? raw.LineNumber ?? ''),
         verifyParameterName: String(raw.verifyParameterName ?? raw.VerifyParameterName ?? 'Code'),
@@ -287,12 +374,22 @@ function SmsSettingsView({ title }: { title: string }) {
   }, [load]);
 
   const save = async () => {
+    const templateId = Number(form.templateId);
+    const lineNumber = Number(form.lineNumber);
+    if (!Number.isFinite(templateId) || templateId <= 0) {
+      Alert.alert('خطا', 'TemplateId باید عدد معتبر باشد');
+      return;
+    }
+    if (!Number.isFinite(lineNumber) || lineNumber <= 0) {
+      Alert.alert('خطا', 'شماره خط باید عدد معتبر باشد');
+      return;
+    }
     setSaving(true);
     try {
       await apiPost(config.healanApiUrl, 'ClinicReports/SmsSettingsSave', getAccessToken, {
         ...(form.apiKey.trim() ? { apiKey: form.apiKey.trim() } : {}),
-        templateId: form.templateId.trim(),
-        lineNumber: form.lineNumber.trim(),
+        templateId,
+        lineNumber,
         verifyParameterName: form.verifyParameterName.trim() || 'Code',
         sendEnabled: form.sendEnabled,
       });
@@ -317,8 +414,13 @@ function SmsSettingsView({ title }: { title: string }) {
     <AppScreen>
       <Text style={styles.heading}>{title}</Text>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxl }} keyboardShouldPersistTaps="handled">
+        <Text style={styles.metaHint}>
+          {form.hasApiKey
+            ? `کلید فعلی: ${form.apiKeyMasked || '••••••••'}`
+            : 'کلید API هنوز تنظیم نشده است'}
+        </Text>
         <FormField
-          label="ApiKey (خالی = بدون تغییر)"
+          label="ApiKey جدید (خالی = بدون تغییر)"
           value={form.apiKey}
           onChangeText={(v) => setForm({ ...form, apiKey: v })}
         />
@@ -326,12 +428,13 @@ function SmsSettingsView({ title }: { title: string }) {
           label="TemplateId"
           value={form.templateId}
           onChangeText={(v) => setForm({ ...form, templateId: v })}
+          keyboardType="numeric"
         />
         <FormField
           label="شماره خط"
           value={form.lineNumber}
           onChangeText={(v) => setForm({ ...form, lineNumber: v })}
-          keyboardType="phone-pad"
+          keyboardType="numeric"
         />
         <FormField
           label="نام پارامتر کد"
@@ -363,12 +466,20 @@ function SiteSettingsView({ title }: { title: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const list = await apiGet<Record<string, unknown>[]>(
+      const raw = await apiGet<unknown>(
         config.healanApiUrl,
         'PortalContent/SettingList',
         getAccessToken
       );
-      setRows(Array.isArray(list) ? list : []);
+      let list: Record<string, unknown>[] = [];
+      if (Array.isArray(raw)) {
+        list = raw as Record<string, unknown>[];
+      } else if (raw && typeof raw === 'object') {
+        const o = raw as Record<string, unknown>;
+        const items = o.items ?? o.Items ?? o.settings ?? o.Settings;
+        if (Array.isArray(items)) list = items as Record<string, unknown>[];
+      }
+      setRows(list);
     } catch (err) {
       Alert.alert('خطا', err instanceof Error ? err.message : 'بارگذاری ناموفق بود');
       setRows([]);
@@ -385,18 +496,18 @@ function SiteSettingsView({ title }: { title: string }) {
     if (!edit) return;
     setSaving(true);
     try {
-      const next = rows.map((r) =>
-        Number(r.portalSiteSettingId ?? r.id) === Number(edit.portalSiteSettingId ?? edit.id)
-          ? { ...r, settingValue: value, SettingValue: value }
-          : r
-      );
+      const editId = Number(edit.portalSiteSettingId ?? edit.PortalSiteSettingId ?? edit.id);
+      const next = rows.map((r) => {
+        const id = Number(r.portalSiteSettingId ?? r.PortalSiteSettingId ?? r.id);
+        return id === editId ? { ...r, settingValue: value, SettingValue: value } : r;
+      });
       await apiPost(config.healanApiUrl, 'PortalContent/SettingSave', getAccessToken, {
         settings: next.map((r) => ({
-          portalSiteSettingId: Number(r.portalSiteSettingId ?? r.id),
-          settingKey: String(r.settingKey ?? r.key ?? ''),
+          portalSiteSettingId: Number(r.portalSiteSettingId ?? r.PortalSiteSettingId ?? r.id) || undefined,
+          settingKey: String(r.settingKey ?? r.SettingKey ?? r.key ?? ''),
           settingValue: String(r.settingValue ?? r.SettingValue ?? ''),
-          settingGroup: String(r.settingGroup ?? r.group ?? ''),
-          description: String(r.description ?? ''),
+          settingGroup: (r.settingGroup ?? r.SettingGroup ?? r.group ?? null) as string | null,
+          description: (r.description ?? r.Description ?? null) as string | null,
         })),
       });
       setEdit(null);
@@ -467,6 +578,13 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: spacing.md,
   },
+  metaHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.muted,
+    textAlign: 'right',
+    marginBottom: spacing.sm,
+  },
   toolbar: {
     flexDirection: 'row-reverse',
     gap: 10,
@@ -492,4 +610,19 @@ const styles = StyleSheet.create({
     color: colors.ink,
     textAlign: 'right',
   },
+  pager: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+    gap: 8,
+  },
+  pagerBtn: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  pagerText: { fontFamily: fonts.semiBold, fontSize: 13, color: colors.primaryDeep },
+  pagerLabel: { fontFamily: fonts.regular, fontSize: 12, color: colors.inkSoft },
 });

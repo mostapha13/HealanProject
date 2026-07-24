@@ -47,6 +47,7 @@ public class PublishedBlogPostBySlugQueryHandler : IRequestHandler<PublishedBlog
                 Body = x.Body,
                 CoverImageUrl = x.CoverImageUrl,
                 CoverImageFileId = x.CoverImageFileId,
+                Tags = x.Tags,
                 MetaTitle = x.MetaTitle,
                 MetaDescription = x.MetaDescription,
                 OgImageUrl = x.OgImageUrl,

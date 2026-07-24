@@ -37,7 +37,8 @@ public class BlogPostListQueryHandler : IRequestHandler<BlogPostListQuery, Pagin
             query = query.Where(x =>
                 x.Title.Contains(filter) ||
                 x.Slug.Contains(filter) ||
-                (x.Excerpt != null && x.Excerpt.Contains(filter)));
+                (x.Excerpt != null && x.Excerpt.Contains(filter)) ||
+                (x.Tags != null && x.Tags.Contains(filter)));
         }
 
         if (request.IsPublished.HasValue)
@@ -54,6 +55,7 @@ public class BlogPostListQueryHandler : IRequestHandler<BlogPostListQuery, Pagin
                 Excerpt = x.Excerpt,
                 CoverImageUrl = x.CoverImageUrl,
                 CoverImageFileId = x.CoverImageFileId,
+                Tags = x.Tags,
                 MetaTitle = x.MetaTitle,
                 MetaDescription = x.MetaDescription,
                 OgImageUrl = x.OgImageUrl,

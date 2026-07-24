@@ -73,6 +73,7 @@ export interface BlogPostSummary {
   slug: string;
   excerpt?: string;
   coverImageUrl?: string;
+  tags?: string;
   metaTitle?: string;
   metaDescription?: string;
   ogImageUrl?: string;

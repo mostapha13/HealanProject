@@ -235,16 +235,20 @@ export async function fetchPortalSite(): Promise<{
         'section.contact.lead',
         'برای رزرو نوبت تماس بگیرید یا به مطب مراجعه کنید.'
       ),
-      address: setting(settings, 'contact.address'),
+      address: setting(
+        settings,
+        'contact.address',
+        'شوشتر، خیابان طالقانی، پایین‌تر از خیابان سادات، ساختمان پزشکان دکتر جلالی (آزمایشگاه سلامت)، طبقه دوم، واحد ۲'
+      ),
       city: setting(settings, 'contact.city', 'شوشتر'),
       phone: setting(settings, 'contact.phone'),
       phoneDisplay: setting(settings, 'contact.phoneDisplay', setting(settings, 'contact.phone')),
       hours: setting(settings, 'contact.hours'),
     },
     map: {
-      header: setting(settings, 'map.header'),
-      building: setting(settings, 'map.building'),
-      detail: setting(settings, 'map.detail'),
+      header: setting(settings, 'map.header', 'شوشتر — خیابان طالقانی'),
+      building: setting(settings, 'map.building', 'ساختمان پزشکان دکتر جلالی'),
+      detail: setting(settings, 'map.detail', 'آزمایشگاه سلامت · طبقه ۲ · واحد ۲'),
       link: setting(
         settings,
         'map.link',

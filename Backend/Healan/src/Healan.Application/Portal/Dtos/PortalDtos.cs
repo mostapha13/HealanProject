@@ -81,6 +81,7 @@ public class BlogPostSummaryDto
     public string? Excerpt { get; set; }
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    public string? Tags { get; set; }
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public string? OgImageUrl { get; set; }

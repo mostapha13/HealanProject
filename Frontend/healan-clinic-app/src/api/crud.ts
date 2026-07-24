@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { formatJalaliDateTime } from '../utils/jalali';
+import { formatJalaliDate, formatJalaliDateTime, toPersianDigits } from '../utils/jalali';
 import {
   apiDelete,
   apiGet,
@@ -17,6 +17,7 @@ export type EntityRow = {
   subtitle?: string;
   meta?: string;
   badge?: string;
+  badgeTone?: 'ok' | 'warn' | 'danger' | 'neutral' | 'info';
   isActive?: boolean;
   raw: Record<string, unknown>;
 };
@@ -30,9 +31,59 @@ export type FormFieldDef = {
   keyboard?: 'default' | 'numeric' | 'phone-pad' | 'email-address';
   multiline?: boolean;
   required?: boolean;
-  /** select = searchable list from loadOptions; datetime-jalali = شمسی */
-  kind?: 'text' | 'select' | 'datetime-jalali';
+  /** select = searchable list; multi-select = چندگزینه‌ای (مقدار CSV در فرم); datetime-jalali = تاریخ+ساعت شمسی; date-jalali = فقط تاریخ; time = HH:mm */
+  kind?: 'text' | 'select' | 'multi-select' | 'datetime-jalali' | 'date-jalali' | 'time';
 };
+
+/** نوع کاربر — مطابق UserTypeId در بک‌اند */
+export const USER_TYPE_OPTIONS: EnumOption[] = [
+  { key: 1, label: 'رئیس' },
+  { key: 2, label: 'مدیر' },
+  { key: 3, label: 'منشی' },
+  { key: 4, label: 'پرستار' },
+  { key: 5, label: 'کمک پرستار' },
+  { key: 6, label: 'کاربر عمومی' },
+  { key: 7, label: 'پزشک' },
+  { key: 8, label: 'حسابدار' },
+  { key: 9, label: 'بیمار' },
+];
+
+/** روز هفته .NET (0=یکشنبه … 6=شنبه) با ترتیب نمایش ایرانی شنبه→جمعه */
+export const WEEKDAY_OPTIONS: EnumOption[] = [
+  { key: 6, label: 'شنبه' },
+  { key: 0, label: 'یکشنبه' },
+  { key: 1, label: 'دوشنبه' },
+  { key: 2, label: 'سه‌شنبه' },
+  { key: 3, label: 'چهارشنبه' },
+  { key: 4, label: 'پنجشنبه' },
+  { key: 5, label: 'جمعه' },
+];
+
+const WEEKDAY_LABEL: Record<number, string> = Object.fromEntries(
+  WEEKDAY_OPTIONS.map((o) => [o.key, o.label])
+);
+
+function formatThousands(value: unknown): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '';
+  return Math.round(n)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/** تاریخ/ساعت محلی به صورت YYYY-MM-DDTHH:mm (نه UTC slice) */
+function localDateTimeValue(d = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** YYYY-MM-DD → ISO با ظهر محلی تا شیفت timezone روز را جابه‌جا نکند */
+function localDateOnlyToIso(ymd: string): string {
+  const m = ymd.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return new Date().toISOString();
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
+  return d.toISOString();
+}
 
 export type CrudModuleConfig = {
   id: ClinicModuleId;
@@ -117,8 +168,24 @@ async function loadEnum(
   return rows.map((item) => {
     const r = asRecord(item);
     return {
-      key: num(r.key ?? r.Key ?? r.id ?? r.value),
-      label: str(r.displayName ?? r.DisplayName ?? r.name ?? r.Name ?? r.key ?? '—'),
+      key: num(
+        r.key ??
+          r.Key ??
+          r.id ??
+          r.value ??
+          r.companyRegistrationTypeId ??
+          r.CompanyRegistrationTypeId
+      ),
+      label: str(
+        r.displayName ??
+          r.DisplayName ??
+          r.name ??
+          r.Name ??
+          r.companyRegistrationTypeName ??
+          r.CompanyRegistrationTypeName ??
+          r.key ??
+          '—'
+      ),
     };
   });
 }
@@ -202,11 +269,14 @@ function mapFee(raw: Record<string, unknown>): EntityRow {
   const id = num(raw.medicalFeeServiceId ?? raw.id);
   const isActive = bool(raw.isActive ?? raw.IsActive, true);
   const price = raw.price ?? raw.fee;
+  const priceLabel = formatThousands(price);
+  const start = formatJalaliDate(str(raw.startDate) || null);
+  const end = formatJalaliDate(str(raw.endDate) || null);
   return {
     id,
     title: str(raw.serviceTypeName ?? raw.serviceTypeTitle ?? raw.title, `تعرفه #${id}`),
-    subtitle: price != null ? `${price} ریال` : undefined,
-    meta: str(raw.startDate ?? ''),
+    subtitle: priceLabel ? `${toPersianDigits(priceLabel)} ریال` : undefined,
+    meta: start && end ? `${start} تا ${end}` : start || end || undefined,
     badge: activeBadge(isActive),
     isActive,
     raw,
@@ -359,7 +429,7 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
     fields: [
       { key: 'companyName', label: 'نام مرکز', required: true },
       { key: 'nationalId', label: 'شناسه ملی', required: true, keyboard: 'numeric' },
-      { key: 'companyRegistrationTypeId', label: 'نوع ثبت', keyboard: 'numeric', required: true },
+      { key: 'companyRegistrationTypeId', label: 'نوع ثبت', kind: 'select', required: true },
       { key: 'address', label: 'آدرس', multiline: true },
       { key: 'email', label: 'ایمیل', keyboard: 'email-address' },
     ],
@@ -376,9 +446,19 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       const rows = await listAll(getToken, 'Company/CompanyList', { filterText });
       return rows.map(mapCompany);
     },
-    loadOptions: async (getToken) => ({
-      companyRegistrationTypeId: await loadEnum(getToken, 'Company/CompanyRegistrationTypes'),
-    }),
+    loadOptions: async (getToken) => {
+      const fromApi = await loadEnum(getToken, 'Company/CompanyRegistrationTypes');
+      return {
+        companyRegistrationTypeId:
+          fromApi.length > 0
+            ? fromApi
+            : [
+                { key: 1, label: 'بیمارستان' },
+                { key: 2, label: 'کلینیک' },
+                { key: 3, label: 'مطب' },
+              ],
+      };
+    },
     fromRow: (row) => ({
       companyId: row.id,
       companyName: str(row.raw.companyName ?? row.title),
@@ -527,8 +607,8 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
     fields: [
       { key: 'serviceTypeId', label: 'شناسه خدمت', keyboard: 'numeric', required: true },
       { key: 'price', label: 'قیمت (ریال)', keyboard: 'numeric', required: true },
-      { key: 'startDate', label: 'شروع (YYYY-MM-DD)', required: true },
-      { key: 'endDate', label: 'پایان (YYYY-MM-DD)', required: true },
+      { key: 'startDate', label: 'تاریخ شروع', kind: 'date-jalali', required: true },
+      { key: 'endDate', label: 'تاریخ پایان', kind: 'date-jalali', required: true },
     ],
     emptyForm: {
       medicalFeeServiceId: 0,
@@ -558,8 +638,8 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         ...(medicalFeeServiceId ? { medicalFeeServiceId } : {}),
         serviceTypeId: num(form.serviceTypeId),
         price: num(form.price),
-        startDate: start ? new Date(start).toISOString() : new Date().toISOString(),
-        endDate: end ? new Date(end).toISOString() : new Date().toISOString(),
+        startDate: start ? localDateOnlyToIso(start) : new Date().toISOString(),
+        endDate: end ? localDateOnlyToIso(end) : new Date().toISOString(),
         isActive: bool(form.isActive, true),
       });
     },
@@ -654,7 +734,7 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       { key: 'firstName', label: 'نام', required: true },
       { key: 'lastName', label: 'نام خانوادگی', required: true },
       { key: 'phoneNumber', label: 'موبایل', required: true, keyboard: 'phone-pad' },
-      { key: 'userTypeId', label: 'نوع کاربر (2 مدیر / 3 منشی / 7 پزشک / 8 حسابدار)', keyboard: 'numeric', required: true },
+      { key: 'userTypeId', label: 'نوع کاربر', kind: 'select', required: true },
     ],
     emptyForm: {
       userId: 0,
@@ -671,16 +751,23 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         const id = num(raw.userId ?? raw.id);
         const name = `${str(raw.firstName)} ${str(raw.lastName)}`.trim();
         const isActive = bool(raw.isActive, true);
+        const typeId = num(raw.userTypeId, 0);
+        const typeLabel =
+          USER_TYPE_OPTIONS.find((o) => o.key === typeId)?.label ||
+          str(raw.userTypeName ?? '');
         return {
           id,
           title: name || str(raw.userName, `کاربر #${id}`),
-          subtitle: str(raw.phoneNumber ?? raw.userTypeName ?? ''),
+          subtitle: [str(raw.phoneNumber), typeLabel].filter(Boolean).join(' · '),
           badge: activeBadge(isActive),
           isActive,
           raw,
         };
       });
     },
+    loadOptions: async () => ({
+      userTypeId: USER_TYPE_OPTIONS,
+    }),
     fromRow: (row) => ({
       userId: row.id,
       identityUserId: str(row.raw.identityUserId),
@@ -730,22 +817,23 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       { key: 'doctorId', label: 'پزشک', kind: 'select', required: true },
       { key: 'appointmentDate', label: 'تاریخ و ساعت', kind: 'datetime-jalali', required: true },
       { key: 'durationMinutes', label: 'مدت (دقیقه)', keyboard: 'numeric', required: true },
-      { key: 'serviceTypeIds', label: 'شناسه خدمت‌ها (با ویرگول)', required: true },
+      { key: 'serviceTypeIds', label: 'خدمت‌ها', kind: 'multi-select', required: true },
       { key: 'note', label: 'یادداشت', multiline: true },
     ],
     emptyForm: {
       appointmentId: 0,
       patientId: 0,
       doctorId: 0,
-      appointmentDate: new Date().toISOString().slice(0, 16),
+      appointmentDate: localDateTimeValue(),
       durationMinutes: 15,
       serviceTypeIds: '',
       note: '',
     },
     loadOptions: async (getToken) => {
-      const [patients, doctors] = await Promise.all([
+      const [patients, doctors, services] = await Promise.all([
         listAll(getToken, 'Patient/PatientList'),
         listAll(getToken, 'Doctor/DoctorList'),
+        listAll(getToken, 'ServiceTypes/List', { onlyActive: true }),
       ]);
       return {
         patientId: patients.map((raw) => {
@@ -764,6 +852,13 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
           return {
             key: id,
             label: group ? `${name || `پزشک #${id}`} · ${group}` : name || `پزشک #${id}`,
+          };
+        }),
+        serviceTypeIds: services.map((raw) => {
+          const id = num(raw.serviceTypeId ?? raw.id);
+          return {
+            key: id,
+            label: str(raw.title ?? raw.serviceTypeName ?? raw.name, `خدمت #${id}`),
           };
         }),
       };
@@ -890,7 +985,7 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       await healanPost(getToken, 'OrderResult/Register', {
         ...(prescriptionId ? { prescriptionId } : {}),
         appointmentId: num(form.appointmentId),
-        issueDate: new Date(str(form.issueDate)).toISOString(),
+        issueDate: localDateOnlyToIso(str(form.issueDate).slice(0, 10)),
         notes: nullIfEmpty(str(form.notes)),
         prescriptionDrugs: [
           {
@@ -1082,9 +1177,9 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
     canToggleActive: true,
     fields: [
       { key: 'doctorId', label: 'شناسه پزشک', keyboard: 'numeric', required: true },
-      { key: 'dayOfWeek', label: 'روز هفته (0=یکشنبه … 6=جمعه)', keyboard: 'numeric', required: true },
-      { key: 'startTime', label: 'شروع (HH:mm)', required: true },
-      { key: 'endTime', label: 'پایان (HH:mm)', required: true },
+      { key: 'dayOfWeek', label: 'روز هفته', required: true },
+      { key: 'startTime', label: 'ساعت شروع', kind: 'time', required: true },
+      { key: 'endTime', label: 'ساعت پایان', kind: 'time', required: true },
       { key: 'visitDurationMinutes', label: 'مدت ویزیت (دقیقه)', keyboard: 'numeric', required: true },
     ],
     emptyForm: {
@@ -1106,10 +1201,12 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         const r = asRecord(raw);
         const id = num(r.doctorScheduleTemplateId ?? r.templateId ?? r.id ?? index);
         const isActive = bool(r.isActive, true);
+        const dow = num(r.dayOfWeek, 6);
+        const dayLabel = WEEKDAY_LABEL[dow] ?? str(r.dayOfWeek);
         return {
           id,
           title: str(r.doctorName, `برنامه #${id}`),
-          subtitle: `روز ${str(r.dayOfWeek)} · ${str(r.startTime)}-${str(r.endTime)}`,
+          subtitle: `${dayLabel} · ${str(r.startTime).slice(0, 5)}-${str(r.endTime).slice(0, 5)}`,
           meta: `${str(r.visitDurationMinutes)} دقیقه`,
           badge: activeBadge(isActive),
           isActive,
@@ -1117,6 +1214,9 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         };
       });
     },
+    loadOptions: async () => ({
+      dayOfWeek: WEEKDAY_OPTIONS,
+    }),
     fromRow: (row) => ({
       doctorScheduleTemplateId: row.id,
       doctorId: num(row.raw.doctorId),

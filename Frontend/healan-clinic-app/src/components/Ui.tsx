@@ -57,7 +57,7 @@ export function BankHeader({
         <View style={styles.brandRow}>
           <View>
             <Text style={styles.brandText}>{brand}</Text>
-            <Text style={styles.buildMark}>build-v18-login-cors</Text>
+            <Text style={styles.buildMark}>build-v22-phase-d</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>H</Text>
@@ -223,16 +223,19 @@ export function FeatureCard({
 export function SurfaceCard({
   children,
   onPress,
+  onLongPress,
   style,
 }: {
   children: React.ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }) {
-  if (onPress) {
+  if (onPress || onLongPress) {
     return (
       <Pressable
         onPress={onPress}
+        onLongPress={onLongPress}
         style={({ pressed }) => [styles.card, pressed && styles.cardPressed, style]}
       >
         {children}
@@ -246,20 +249,31 @@ export function ListCard({
   title,
   lines,
   badge,
+  badgeTone = 'neutral',
   onPress,
+  onLongPress,
 }: {
   title: string;
   lines?: string[];
   badge?: string;
+  badgeTone?: 'ok' | 'warn' | 'danger' | 'neutral' | 'info';
   onPress?: () => void;
+  onLongPress?: () => void;
 }) {
+  const tone = {
+    ok: { bg: '#D1FAE5', fg: '#059669' },
+    warn: { bg: '#FEF3C7', fg: '#D97706' },
+    danger: { bg: '#FEE2E2', fg: '#DC2626' },
+    info: { bg: colors.primarySoft, fg: colors.primaryDeep },
+    neutral: { bg: colors.bg, fg: colors.inkSoft },
+  }[badgeTone];
   return (
-    <SurfaceCard onPress={onPress} style={styles.listCard}>
+    <SurfaceCard onPress={onPress} onLongPress={onLongPress} style={styles.listCard}>
       <View style={styles.listCardTop}>
         <Text style={styles.listTitle}>{title}</Text>
         {badge ? (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{badge}</Text>
+          <View style={[styles.badge, { backgroundColor: tone.bg }]}>
+            <Text style={[styles.badgeText, { color: tone.fg }]}>{badge}</Text>
           </View>
         ) : null}
       </View>
@@ -417,6 +431,7 @@ export function FormModal({
   onClose,
   onSave,
   saving,
+  saveLabel = 'ذخیره',
 }: {
   visible: boolean;
   title: string;
@@ -424,14 +439,15 @@ export function FormModal({
   onClose: () => void;
   onSave: () => void;
   saving?: boolean;
+  saveLabel?: string;
 }) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalSheet}>
           <View style={styles.modalHeader}>
-            <Pressable onPress={onClose} hitSlop={8}>
-              <Text style={styles.modalClose}>بستن</Text>
+            <Pressable onPress={onClose} hitSlop={10} style={styles.closeXBtn} accessibilityLabel="بستن">
+              <Ionicons name="close" size={22} color="#DC2626" />
             </Pressable>
             <Text style={styles.modalTitle}>{title}</Text>
           </View>
@@ -439,7 +455,7 @@ export function FormModal({
             {children}
           </ScrollView>
           <PrimaryButton
-            label={saving ? 'در حال ذخیره...' : 'ذخیره'}
+            label={saving ? 'در حال ذخیره...' : saveLabel}
             onPress={onSave}
             disabled={saving}
           />
@@ -812,6 +828,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },
   modalClose: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.muted },
+  closeXBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   modalBody: { paddingBottom: spacing.md, gap: 4 },
   actionSheet: {
     backgroundColor: colors.white,

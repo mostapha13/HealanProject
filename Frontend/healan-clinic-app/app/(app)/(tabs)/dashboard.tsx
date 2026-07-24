@@ -8,6 +8,7 @@ import { useAccess } from '../../../src/access/AccessContext';
 import { fetchDashboardStats, type DashboardStats } from '../../../src/api/healan';
 import { AppScreen, EmptyBlock, FeatureCard, LoadingBlock, SurfaceCard } from '../../../src/components/Ui';
 import { colors, fonts, spacing } from '../../../src/theme';
+import { toPersianDigits } from '../../../src/utils/jalali';
 
 function StatCard({
   label,
@@ -23,7 +24,7 @@ function StatCard({
       <View style={styles.statIcon}>
         <Ionicons name={icon} size={18} color={colors.primaryInk} />
       </View>
-      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statValue}>{typeof value === 'number' ? toPersianDigits(value) : value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </SurfaceCard>
   );
@@ -90,6 +91,17 @@ export default function DashboardScreen() {
             <StatCard label="تکمیل‌شده" value={stats?.completedToday ?? '—'} icon="checkmark-circle-outline" />
             <StatCard label="بیماران" value={stats?.totalPatients ?? '—'} icon="person-outline" />
             <StatCard label="پزشکان" value={stats?.totalDoctors ?? '—'} icon="medkit-outline" />
+            <StatCard label="پرداخت معلق" value={stats?.pendingPayments ?? '—'} icon="card-outline" />
+            <StatCard label="نسخه امروز" value={stats?.todayPrescriptions ?? '—'} icon="document-text-outline" />
+            <StatCard
+              label="درآمد امروز"
+              value={
+                stats?.todayRevenue != null
+                  ? toPersianDigits(Math.round(stats.todayRevenue).toLocaleString('en-US'))
+                  : '—'
+              }
+              icon="cash-outline"
+            />
           </View>
         )}
 

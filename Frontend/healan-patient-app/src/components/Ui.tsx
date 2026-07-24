@@ -53,7 +53,7 @@ export function BankHeader({
           <View style={{ flex: 1 }}>
             <Text style={styles.brandText}>{title}</Text>
             <Text style={styles.brandSub}>{sub}</Text>
-            <Text style={styles.buildMark}>build-v5-site-tabs</Text>
+            <Text style={styles.buildMark}>build-v7-purple-tab</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>ش</Text>

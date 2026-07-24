@@ -83,6 +83,8 @@ export type PaginatedPage<T> = {
   HasNextPage?: boolean;
   pageNumber?: number;
   PageNumber?: number;
+  pageSize?: number;
+  PageSize?: number;
 };
 
 export function pageItems<T>(page: PaginatedPage<T> | T[] | null | undefined): T[] {

@@ -87,6 +87,19 @@ export default async function BlogListPage({ searchParams }: Props) {
                       <time>{formatDate(post.publishedAt || post.createdAt)}</time>
                       <h2>{post.title}</h2>
                       {post.excerpt ? <p>{post.excerpt}</p> : null}
+                      {post.tags ? (
+                        <div className="blog-card__tags">
+                          {post.tags
+                            .split(/[,،]+/)
+                            .map((t) => t.trim())
+                            .filter(Boolean)
+                            .map((tag) => (
+                              <span key={tag} className="blog-card__tag">
+                                {tag}
+                              </span>
+                            ))}
+                        </div>
+                      ) : null}
                     </div>
                   </Link>
                 ))}

@@ -39,6 +39,7 @@ const emptyForm = (): BlogPostDetail => ({
   body: '',
   coverImageUrl: '',
   coverImageFileId: '',
+  tags: '',
   metaTitle: '',
   metaDescription: '',
   ogImageUrl: '',
@@ -147,6 +148,7 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         body: form.body,
         coverImageUrl: coverFile?.link ?? form.coverImageUrl,
         coverImageFileId: coverFile?.fileId ?? undefined,
+        tags: form.tags?.trim() || undefined,
         metaTitle: form.metaTitle?.trim() || undefined,
         metaDescription: form.metaDescription?.trim() || undefined,
         ogImageUrl: form.ogImageUrl?.trim() || undefined,
@@ -179,6 +181,7 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         body: detail.body,
         coverImageUrl: detail.coverImageUrl,
         coverImageFileId: detail.coverImageFileId,
+        tags: detail.tags,
         metaTitle: detail.metaTitle,
         metaDescription: detail.metaDescription,
         ogImageUrl: detail.ogImageUrl,
@@ -248,13 +251,12 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 />
               </div>
               <div className="healan-form-field">
-                <label>نامک (Slug)</label>
+                <label>برچسب‌ها</label>
                 <input
                   className="healan-input"
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  placeholder="مثال: healthy-heart-tips"
-                  dir="ltr"
+                  value={form.tags ?? ''}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                  placeholder="مثلاً: قلب، فشارخون، پیشگیری"
                 />
               </div>
               <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>

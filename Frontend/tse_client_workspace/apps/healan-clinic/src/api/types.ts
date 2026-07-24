@@ -455,6 +455,7 @@ export interface BlogPostSummary {
   excerpt?: string;
   coverImageUrl?: string;
   coverImageFileId?: string;
+  tags?: string;
   metaTitle?: string;
   metaDescription?: string;
   ogImageUrl?: string;

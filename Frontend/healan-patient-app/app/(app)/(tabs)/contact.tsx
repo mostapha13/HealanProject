@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   Linking,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -9,11 +10,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { AppScreen, LoadingBlock, PrimaryButton, SurfaceCard } from '../../../src/components/Ui';
 import { useSite } from '../../../src/site/SiteContext';
 import { colors, fonts, spacing } from '../../../src/theme';
+
+const DEFAULT_ADDRESS =
+  'شوشتر، خیابان طالقانی، پایین‌تر از خیابان سادات، ساختمان پزشکان دکتر جلالی (آزمایشگاه سلامت)، طبقه دوم، واحد ۲';
 
 function toMapsEmbed(link: string): string {
   const raw = (link || '').trim();
@@ -32,6 +35,44 @@ function toMapsEmbed(link: string): string {
   } catch {
     return `https://maps.google.com/maps?q=${encodeURIComponent(raw)}&z=16&output=embed`;
   }
+}
+
+function MapEmbed({ uri }: { uri: string }) {
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.mapWeb}>
+        {/* react-native-webview is native-only; use iframe on web */}
+        {React.createElement('iframe', {
+          src: uri,
+          title: 'map',
+          style: {
+            border: 0,
+            width: '100%',
+            height: '100%',
+            borderRadius: 18,
+          },
+          loading: 'lazy',
+          referrerPolicy: 'no-referrer-when-downgrade',
+          allow: 'fullscreen',
+        })}
+      </View>
+    );
+  }
+
+  // Lazy require so web bundle does not throw "does not support this platform"
+  const { WebView } = require('react-native-webview') as typeof import('react-native-webview');
+  return (
+    <WebView
+      source={{ uri }}
+      style={styles.mapWeb}
+      startInLoadingState
+      renderLoading={() => (
+        <View style={styles.mapLoading}>
+          <LoadingBlock />
+        </View>
+      )}
+    />
+  );
 }
 
 function InfoRow({
@@ -65,11 +106,40 @@ function InfoRow({
   );
 }
 
+function buildFullAddress(opts: {
+  address?: string;
+  city?: string;
+  building?: string;
+  detail?: string;
+  header?: string;
+}): string {
+  const address = (opts.address || '').trim();
+  if (address && address !== (opts.city || '').trim() && address.length > 8) {
+    return address;
+  }
+  const parts = [opts.header, opts.building, opts.detail, opts.city]
+    .map((p) => (p || '').trim())
+    .filter(Boolean);
+  const unique = parts.filter((p, i) => parts.indexOf(p) === i);
+  if (unique.length) return unique.join('، ');
+  return DEFAULT_ADDRESS;
+}
+
 export default function ContactTabScreen() {
   const { content, loading, refresh } = useSite();
   const { contact, map } = content;
   const embed = useMemo(() => toMapsEmbed(map.link), [map.link]);
-  const fullAddress = [contact.address, contact.city].filter(Boolean).join(' — ');
+  const fullAddress = useMemo(
+    () =>
+      buildFullAddress({
+        address: contact.address,
+        city: contact.city,
+        building: map.building,
+        detail: map.detail,
+        header: map.header,
+      }),
+    [contact.address, contact.city, map.building, map.detail, map.header]
+  );
 
   return (
     <AppScreen padded={false}>
@@ -84,14 +154,14 @@ export default function ContactTabScreen() {
           <RefreshControl refreshing={loading} onRefresh={() => void refresh()} tintColor={colors.primaryDeep} />
         }
       >
-        {loading && !contact.address && !contact.phone ? (
+        {loading && !contact.phone && !fullAddress ? (
           <LoadingBlock />
         ) : (
           <>
             {contact.lead ? <Text style={styles.lead}>{contact.lead}</Text> : null}
 
             <SurfaceCard>
-              <InfoRow icon="location-outline" label="آدرس" value={fullAddress || contact.address} />
+              <InfoRow icon="location-outline" label="آدرس" value={fullAddress} />
               <InfoRow
                 icon="call-outline"
                 label="تماس"
@@ -113,16 +183,7 @@ export default function ContactTabScreen() {
             )}
 
             <View style={styles.mapFrame}>
-              <WebView
-                source={{ uri: embed }}
-                style={styles.mapWeb}
-                startInLoadingState
-                renderLoading={() => (
-                  <View style={styles.mapLoading}>
-                    <LoadingBlock />
-                  </View>
-                )}
-              />
+              <MapEmbed uri={embed} />
             </View>
 
             <PrimaryButton
@@ -220,7 +281,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     backgroundColor: colors.white,
   },
-  mapWeb: { flex: 1, backgroundColor: colors.bg },
+  mapWeb: { flex: 1, width: '100%', height: '100%', backgroundColor: colors.bg },
   mapLoading: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',

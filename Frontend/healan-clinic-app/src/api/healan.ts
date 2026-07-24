@@ -73,7 +73,24 @@ function asRecord(item: unknown): Record<string, unknown> {
 }
 
 export async function fetchDashboardStats(getToken: TokenGetter): Promise<DashboardStats> {
-  return apiGet<DashboardStats>(config.healanApiUrl, 'Dashboard/Stats', getToken);
+  const raw = await apiGet<Record<string, unknown>>(config.healanApiUrl, 'Dashboard/Stats', getToken);
+  const r = asRecord(raw);
+  const n = (a: unknown, b?: unknown) => {
+    const v = a ?? b;
+    const num = Number(v);
+    return Number.isFinite(num) ? num : 0;
+  };
+  return {
+    todayAppointments: n(r.todayAppointments, r.TodayAppointments),
+    waitingAppointments: n(r.waitingAppointments, r.WaitingAppointments),
+    inProgressAppointments: n(r.inProgressAppointments, r.InProgressAppointments),
+    completedToday: n(r.completedToday, r.CompletedToday),
+    totalPatients: n(r.totalPatients, r.TotalPatients),
+    totalDoctors: n(r.totalDoctors, r.TotalDoctors),
+    todayRevenue: n(r.todayRevenue, r.TodayRevenue),
+    pendingPayments: n(r.pendingPayments, r.PendingPayments),
+    todayPrescriptions: n(r.todayPrescriptions, r.TodayPrescriptions),
+  };
 }
 
 export async function fetchTodayAppointments(
@@ -294,23 +311,86 @@ export async function fetchBookingSchedules(getToken: TokenGetter): Promise<Name
   });
 }
 
-export async function fetchSmsOutbox(getToken: TokenGetter): Promise<NamedRow[]> {
-  const rows = await fetchAllPaginated((pageNumber, pageSize) =>
-    apiGet<PaginatedResponse<Record<string, unknown>>>(
-      config.healanApiUrl,
-      'ClinicReports/SmsOutbox',
-      getToken,
-      { pageNumber, pageSize }
-    )
+export async function fetchClinicAnalytics(getToken: TokenGetter): Promise<NamedRow[]> {
+  const raw = await apiGet<Record<string, unknown>>(config.healanApiUrl, 'ClinicReports/Analytics', getToken);
+  const summary = asRecord(asRecord(raw).summary ?? asRecord(raw).Summary ?? raw);
+  const labels: Record<string, string> = {
+    totalAppointments: 'کل نوبت‌ها',
+    TotalAppointments: 'کل نوبت‌ها',
+    completedAppointments: 'تکمیل‌شده',
+    CompletedAppointments: 'تکمیل‌شده',
+    scheduledAppointments: 'زمان‌بندی‌شده',
+    ScheduledAppointments: 'زمان‌بندی‌شده',
+    inProgressAppointments: 'در حال ویزیت',
+    InProgressAppointments: 'در حال ویزیت',
+    cancelledAppointments: 'لغو شده',
+    CancelledAppointments: 'لغو شده',
+    noShowAppointments: 'عدم حضور',
+    NoShowAppointments: 'عدم حضور',
+    totalRevenue: 'درآمد کل',
+    TotalRevenue: 'درآمد کل',
+    patientRevenue: 'سهم بیمار',
+    PatientRevenue: 'سهم بیمار',
+    insuranceRevenue: 'سهم بیمه',
+    InsuranceRevenue: 'سهم بیمه',
+    pendingPayments: 'پرداخت معلق',
+    PendingPayments: 'پرداخت معلق',
+    prescriptionCount: 'نسخه‌ها',
+    PrescriptionCount: 'نسخه‌ها',
+  };
+  const seen = new Set<string>();
+  return Object.entries(summary)
+    .filter(([key]) => !['$id', '$type', 'summary', 'Summary', 'charts', 'Charts'].includes(key))
+    .map(([key, value], index) => {
+      const camel = key.charAt(0).toLowerCase() + key.slice(1);
+      if (seen.has(camel)) return null;
+      seen.add(camel);
+      const numVal = typeof value === 'number' ? value : Number(value);
+      const display =
+        typeof value === 'number' || Number.isFinite(numVal)
+          ? String(numVal)
+          : String(value ?? '—');
+      return {
+        id: index + 1,
+        title: labels[key] ?? labels[camel] ?? key,
+        subtitle: display,
+      };
+    })
+    .filter(Boolean) as NamedRow[];
+}
+
+export async function fetchSmsOutboxPage(
+  getToken: TokenGetter,
+  pageNumber = 1,
+  pageSize = 20
+): Promise<{ items: NamedRow[]; totalCount: number; pageNumber: number; pageSize: number }> {
+  const page = await apiGet<PaginatedResponse<Record<string, unknown>>>(
+    config.healanApiUrl,
+    'ClinicReports/SmsOutbox',
+    getToken,
+    { pageNumber, pageSize }
   );
-  return rows.map((raw, index) => {
-    const r = asRecord(raw);
-    return {
-      id: Number(r.id ?? index),
-      title: String(r.phone ?? r.mobile ?? 'پیامک'),
-      subtitle: String(r.statusName ?? r.message ?? r.createDate ?? ''),
-    };
-  });
+  const rows = pageItems(page);
+  const totalCount = Number(page.totalCount ?? page.TotalCount ?? rows.length);
+  return {
+    pageNumber: Number(page.pageNumber ?? page.PageNumber ?? pageNumber),
+    pageSize: Number(page.pageSize ?? page.PageSize ?? pageSize),
+    totalCount,
+    items: rows.map((raw, index) => {
+      const r = asRecord(raw);
+      return {
+        id: Number(r.id ?? r.smsOutboxId ?? index),
+        title: String(r.phone ?? r.mobile ?? r.receptor ?? 'پیامک'),
+        subtitle: String(r.statusName ?? r.status ?? r.message ?? '').slice(0, 100),
+        meta: String(r.createDate ?? r.sentAt ?? r.createdAt ?? ''),
+      };
+    }),
+  };
+}
+
+export async function fetchSmsOutbox(getToken: TokenGetter): Promise<NamedRow[]> {
+  const first = await fetchSmsOutboxPage(getToken, 1, 20);
+  return first.items;
 }
 
 export async function fetchReviews(getToken: TokenGetter): Promise<NamedRow[]> {
@@ -459,29 +539,6 @@ export async function fetchSmsSettings(getToken: TokenGetter): Promise<NamedRow[
       title: key,
       subtitle: typeof value === 'object' ? JSON.stringify(value).slice(0, 120) : String(value ?? '—'),
     }));
-}
-
-export async function fetchClinicAnalytics(getToken: TokenGetter): Promise<NamedRow[]> {
-  const raw = await apiGet<Record<string, unknown>>(config.healanApiUrl, 'ClinicReports/Analytics', getToken);
-  const summary = asRecord(asRecord(raw).summary ?? asRecord(raw).Summary ?? {});
-  const labels: Record<string, string> = {
-    totalAppointments: 'کل نوبت‌ها',
-    completedAppointments: 'تکمیل‌شده',
-    scheduledAppointments: 'زمان‌بندی‌شده',
-    inProgressAppointments: 'در حال ویزیت',
-    cancelledAppointments: 'لغو شده',
-    noShowAppointments: 'عدم حضور',
-    totalRevenue: 'درآمد کل',
-    patientRevenue: 'سهم بیمار',
-    insuranceRevenue: 'سهم بیمه',
-    pendingPayments: 'پرداخت معلق',
-    prescriptionCount: 'نسخه‌ها',
-  };
-  return Object.entries(summary).map(([key, value], index) => ({
-    id: index + 1,
-    title: labels[key] ?? labels[key.charAt(0).toLowerCase() + key.slice(1)] ?? key,
-    subtitle: String(value ?? '—'),
-  }));
 }
 
 export type BloodPressureItem = {

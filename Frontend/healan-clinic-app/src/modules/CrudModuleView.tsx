@@ -43,6 +43,25 @@ function fieldValue(form: Record<string, string | boolean | number>, key: string
   return v == null ? '' : String(v);
 }
 
+function normalizeTimeValue(value: string): string {
+  const m = value.trim().match(/^(\d{1,2}):(\d{1,2})/);
+  if (!m) return '09:00';
+  const hh = Math.min(23, Math.max(0, Number(m[1])));
+  const mm = Math.min(59, Math.max(0, Number(m[2])));
+  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+function dateOnlyFromValue(value?: string | null): string {
+  if (!value) {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return dateOnlyFromValue(null);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function CrudModuleView({
   moduleId,
   title,
@@ -120,8 +139,8 @@ function SelectPickerField({
         <View style={styles.pickerOverlay}>
           <View style={styles.pickerSheet}>
             <View style={styles.pickerHeader}>
-              <Pressable onPress={() => setOpen(false)}>
-                <Text style={styles.pickerClose}>بستن</Text>
+              <Pressable onPress={() => setOpen(false)} hitSlop={10} style={styles.closeXBtn} accessibilityLabel="بستن">
+                <Ionicons name="close" size={22} color="#DC2626" />
               </Pressable>
               <Text style={styles.pickerTitle}>{field.label}</Text>
             </View>
@@ -158,6 +177,56 @@ function SelectPickerField({
           </View>
         </View>
       </Modal>
+    </View>
+  );
+}
+
+function parseCsvIds(value: string): number[] {
+  return value
+    .split(/[,\s]+/)
+    .map((x) => Number(x))
+    .filter((n) => Number.isFinite(n) && n > 0);
+}
+
+function MultiSelectField({
+  field,
+  options,
+  value,
+  onChange,
+}: {
+  field: FormFieldDef;
+  options: EnumOption[];
+  value: string;
+  onChange: (csv: string) => void;
+}) {
+  const selected = new Set(parseCsvIds(value));
+  const toggle = (key: number) => {
+    const next = new Set(selected);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    onChange([...next].join(','));
+  };
+
+  return (
+    <View style={styles.optionBlock}>
+      <Text style={styles.optionLabel}>{field.label}</Text>
+      <View style={styles.optionWrap}>
+        {options.map((opt) => {
+          const active = selected.has(opt.key);
+          return (
+            <Pressable
+              key={opt.key}
+              onPress={() => toggle(opt.key)}
+              style={[styles.optionChip, active && styles.optionChipActive]}
+            >
+              <Text style={styles.optionChipText}>{opt.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {!options.length ? (
+        <Text style={styles.jalaliHint}>خدمت فعالی برای انتخاب نیست</Text>
+      ) : null}
     </View>
   );
 }
@@ -228,6 +297,142 @@ function JalaliDateTimeField({
   );
 }
 
+function JalaliDateField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (ymd: string) => void;
+}) {
+  const ymd = dateOnlyFromValue(value);
+  const parts = localToJalaliParts(`${ymd}T12:00`);
+  const [date, setDate] = useState(parts.date);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  useEffect(() => {
+    const next = dateOnlyFromValue(value);
+    setDate(localToJalaliParts(`${next}T12:00`).date);
+  }, [value]);
+
+  return (
+    <View style={styles.optionBlock}>
+      <Text style={styles.optionLabel}>{label}</Text>
+      <Pressable style={styles.calendarTrigger} onPress={() => setCalendarOpen(true)}>
+        <Ionicons name="calendar-outline" size={18} color={colors.primaryDeep} />
+        <Text style={styles.calendarTriggerText}>{toPersianDigits(date)}</Text>
+      </Pressable>
+      <JalaliCalendarModal
+        visible={calendarOpen}
+        value={date}
+        onClose={() => setCalendarOpen(false)}
+        onSelect={(nextDate) => {
+          setDate(nextDate);
+          const local = jalaliDateTimeToLocal(nextDate, '12:00');
+          if (local) onChange(local.slice(0, 10));
+        }}
+      />
+    </View>
+  );
+}
+
+const TIME_HOURS = Array.from({ length: 24 }, (_, i) => i);
+const TIME_MINUTES = [0, 15, 30, 45];
+
+function TimePickerField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (hhmm: string) => void;
+}) {
+  const normalized = normalizeTimeValue(value || '09:00');
+  const [open, setOpen] = useState(false);
+  const [hour, setHour] = useState(Number(normalized.slice(0, 2)));
+  const [minute, setMinute] = useState(Number(normalized.slice(3, 5)));
+
+  useEffect(() => {
+    const n = normalizeTimeValue(value || '09:00');
+    const h = Number(n.slice(0, 2));
+    const rawM = Number(n.slice(3, 5));
+    const m = TIME_MINUTES.reduce((best, cur) =>
+      Math.abs(cur - rawM) < Math.abs(best - rawM) ? cur : best
+    );
+    setHour(h);
+    setMinute(m);
+  }, [value]);
+
+  const commit = (h: number, m: number) => {
+    const nearest = TIME_MINUTES.reduce((best, cur) =>
+      Math.abs(cur - m) < Math.abs(best - m) ? cur : best
+    );
+    onChange(`${String(h).padStart(2, '0')}:${String(nearest).padStart(2, '0')}`);
+  };
+
+  return (
+    <View style={styles.optionBlock}>
+      <Text style={styles.optionLabel}>{label}</Text>
+      <Pressable style={styles.selectTrigger} onPress={() => setOpen(true)}>
+        <Ionicons name="time-outline" size={18} color={colors.primaryDeep} />
+        <Text style={styles.selectTriggerText}>{toPersianDigits(normalized)}</Text>
+      </Pressable>
+
+      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+        <View style={styles.pickerOverlay}>
+          <View style={styles.pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Pressable onPress={() => setOpen(false)} hitSlop={10} style={styles.closeXBtn} accessibilityLabel="بستن">
+                <Ionicons name="close" size={22} color="#DC2626" />
+              </Pressable>
+              <Text style={styles.pickerTitle}>{label}</Text>
+            </View>
+            <Text style={styles.timeSectionHint}>ساعت</Text>
+            <View style={styles.timeChipWrap}>
+              {TIME_HOURS.map((h) => {
+                const active = hour === h;
+                return (
+                  <Pressable
+                    key={h}
+                    onPress={() => {
+                      setHour(h);
+                      commit(h, minute);
+                    }}
+                    style={[styles.optionChip, active && styles.optionChipActive]}
+                  >
+                    <Text style={styles.optionChipText}>{toPersianDigits(String(h).padStart(2, '0'))}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={styles.timeSectionHint}>دقیقه</Text>
+            <View style={styles.timeChipWrap}>
+              {TIME_MINUTES.map((m) => {
+                const active = minute === m;
+                return (
+                  <Pressable
+                    key={m}
+                    onPress={() => {
+                      setMinute(m);
+                      commit(hour, m);
+                      setOpen(false);
+                    }}
+                    style={[styles.optionChip, active && styles.optionChipActive]}
+                  >
+                    <Text style={styles.optionChipText}>{toPersianDigits(String(m).padStart(2, '0'))}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
 function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: string }) {
   const { getAccessToken } = useAuth();
   const [filter, setFilter] = useState('');
@@ -279,8 +484,23 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
   const onSave = async () => {
     for (const field of config.fields) {
       if (!field.required) continue;
+      const raw = form[field.key];
       const v = fieldValue(form, field.key).trim();
-      if (!v || (typeof form[field.key] === 'number' && Number(form[field.key]) <= 0 && field.kind === 'select')) {
+      if (!v) {
+        Alert.alert('خطا', `${field.label} الزامی است`);
+        return;
+      }
+      // شناسه‌های عددی الزامی نباید صفر باشند؛ dayOfWeek=0 (یکشنبه) مجاز است
+      if (
+        typeof raw === 'number' &&
+        raw <= 0 &&
+        field.key !== 'dayOfWeek' &&
+        (field.kind === 'select' ||
+          field.key.endsWith('Id') ||
+          field.key === 'doctorId' ||
+          field.key === 'patientId' ||
+          field.key === 'serviceTypeId')
+      ) {
         Alert.alert('خطا', `${field.label} الزامی است`);
         return;
       }
@@ -441,6 +661,40 @@ function CrudModuleInner({ config, title }: { config: CrudModuleConfig; title: s
             );
           }
 
+          if (field.kind === 'date-jalali') {
+            return (
+              <JalaliDateField
+                key={field.key}
+                label={field.label}
+                value={fieldValue(form, field.key)}
+                onChange={(ymd) => setForm({ ...form, [field.key]: ymd })}
+              />
+            );
+          }
+
+          if (field.kind === 'time') {
+            return (
+              <TimePickerField
+                key={field.key}
+                label={field.label}
+                value={fieldValue(form, field.key)}
+                onChange={(hhmm) => setForm({ ...form, [field.key]: hhmm })}
+              />
+            );
+          }
+
+          if (field.kind === 'multi-select') {
+            return (
+              <MultiSelectField
+                key={field.key}
+                field={field}
+                options={options[field.key] ?? []}
+                value={fieldValue(form, field.key)}
+                onChange={(csv) => setForm({ ...form, [field.key]: csv })}
+              />
+            );
+          }
+
           const opts = options[field.key];
           if (opts?.length || field.kind === 'select') {
             return (
@@ -562,6 +816,14 @@ const styles = StyleSheet.create({
   },
   pickerTitle: { fontFamily: fonts.bold, fontSize: 16, color: colors.ink },
   pickerClose: { fontFamily: fonts.semiBold, fontSize: 14, color: colors.primaryDeep },
+  closeXBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pickerSearch: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
@@ -632,5 +894,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.ink,
     textAlign: 'right',
+  },
+  timeSectionHint: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.inkSoft,
+    textAlign: 'right',
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: 8,
+  },
+  timeChipWrap: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
   },
 });

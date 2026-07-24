@@ -18,16 +18,17 @@ const EMPTY: PortalSiteContent = {
   contact: {
     title: 'تماس و آدرس مطب',
     lead: '',
-    address: '',
+    address:
+      'شوشتر، خیابان طالقانی، پایین‌تر از خیابان سادات، ساختمان پزشکان دکتر جلالی (آزمایشگاه سلامت)، طبقه دوم، واحد ۲',
     city: 'شوشتر',
     phone: '',
     phoneDisplay: '',
     hours: '',
   },
   map: {
-    header: '',
-    building: '',
-    detail: '',
+    header: 'شوشتر — خیابان طالقانی',
+    building: 'ساختمان پزشکان دکتر جلالی',
+    detail: 'آزمایشگاه سلامت · طبقه ۲ · واحد ۲',
     link: 'https://www.google.com/maps/search/Shushtar+Taleghani',
   },
 };

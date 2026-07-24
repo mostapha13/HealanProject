@@ -20,6 +20,13 @@ export const config = {
     process.env.EXPO_PUBLIC_USER_MANAGER_API_URL ??
       'https://clinic.drshahrooei.ir/UserManager/api/v1'
   ),
+  fileApiUrl: trimSlash(
+    process.env.EXPO_PUBLIC_FILE_API_URL ?? 'https://clinic.drshahrooei.ir/File'
+  ),
+  /** تصویر پیش‌فرض بلاگ وقتی تصویر شاخص انتخاب نشده */
+  defaultBlogCoverUrl:
+    process.env.EXPO_PUBLIC_DEFAULT_BLOG_COVER_URL ??
+    'https://www.drshahrooei.ir/assets/blog-cover-default.jpg',
   accessSystemId: 11,
   /** MVP paths shown in bottom tabs when user has access */
   mvpPaths: {

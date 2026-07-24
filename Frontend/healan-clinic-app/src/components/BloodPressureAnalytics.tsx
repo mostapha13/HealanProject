@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 import { colors, fonts, spacing } from '../theme';
 import type { BloodPressureItem } from '../api/healan';
 import {
@@ -77,28 +78,89 @@ function LineChart({
   if (!categories.length) {
     return <Text style={styles.emptyTrend}>{empty}</Text>;
   }
-  const max = Math.max(1, ...systolic, ...diastolic, 160);
+
+  const n = categories.length;
+  const padX = 16;
+  const padTop = 12;
+  const padBottom = 28;
+  const chartH = 120;
+  const step = n === 1 ? 56 : 52;
+  const width = Math.max(220, padX * 2 + step * Math.max(n - 1, 1));
+  const height = chartH + padTop + padBottom;
+  const min = Math.min(60, ...systolic, ...diastolic);
+  const max = Math.max(160, ...systolic, ...diastolic);
+  const span = Math.max(1, max - min);
+
+  const pointAt = (vals: number[], i: number) => {
+    const x = padX + (n === 1 ? 0 : (i / (n - 1)) * (width - padX * 2));
+    const y = padTop + chartH - ((vals[i] - min) / span) * chartH;
+    return { x, y };
+  };
+
+  const sysPts = systolic.map((_, i) => pointAt(systolic, i));
+  const diaPts = diastolic.map((_, i) => pointAt(diastolic, i));
+  const toPoints = (pts: { x: number; y: number }[]) =>
+    pts.map((p) => `${p.x},${p.y}`).join(' ');
+
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator>
-      <View style={styles.chartRow}>
-        {categories.map((cat, i) => {
-          const sysH = Math.max(4, (systolic[i] / max) * 100);
-          const diaH = Math.max(4, (diastolic[i] / max) * 100);
-          return (
-            <View key={`${cat}-${i}`} style={styles.colGroup}>
-              <View style={[styles.bars, { height: 100 }]}>
-                <View style={[styles.bar, { height: sysH, backgroundColor: '#EF4444' }]} />
-                <View style={[styles.bar, { height: diaH, backgroundColor: accent }]} />
-              </View>
-              <Text style={styles.cat} numberOfLines={1}>
-                {toPersianDigits(`${systolic[i]}/${diastolic[i]}`)}
-              </Text>
-              <Text style={styles.cat} numberOfLines={1}>
-                {cat}
-              </Text>
-            </View>
-          );
-        })}
+      <View>
+        <Svg width={width} height={height}>
+          {[0, 0.5, 1].map((t) => {
+            const y = padTop + chartH * (1 - t);
+            return (
+              <Line
+                key={t}
+                x1={padX}
+                y1={y}
+                x2={width - padX}
+                y2={y}
+                stroke={colors.line}
+                strokeWidth={1}
+              />
+            );
+          })}
+          <Polyline
+            points={toPoints(sysPts)}
+            fill="none"
+            stroke="#EF4444"
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+          <Polyline
+            points={toPoints(diaPts)}
+            fill="none"
+            stroke={accent}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+          {sysPts.map((p, i) => (
+            <Circle key={`s-${i}`} cx={p.x} cy={p.y} r={4} fill="#EF4444" />
+          ))}
+          {diaPts.map((p, i) => (
+            <Circle key={`d-${i}`} cx={p.x} cy={p.y} r={4} fill={accent} />
+          ))}
+        </Svg>
+        <View style={[styles.lineCats, { width }]}>
+          {categories.map((c, i) => (
+            <Text
+              key={`${c}-${i}`}
+              style={[styles.cat, { width: step, left: padX + i * (n === 1 ? 0 : step) - step / 2, position: 'absolute' }]}
+              numberOfLines={1}
+            >
+              {c}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.valueRow}>
+          {categories.map((c, i) => (
+            <Text key={`v-${c}-${i}`} style={styles.valueChip}>
+              {toPersianDigits(`${systolic[i]}/${diastolic[i]}`)}
+            </Text>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -116,7 +178,7 @@ const PERIOD_TRENDS: Array<{
     key: 'morning',
     title: 'فشارهای صبح',
     badge: 'صبح',
-    hint: 'ترند سیستول و دیاستول در بازه صبح',
+    hint: 'ترند خطی سیستول و دیاستول در بازه صبح',
     empty: 'هنوز ثبت صبحی برای این بیمار نیست.',
     accent: '#0D9488',
   },
@@ -124,31 +186,39 @@ const PERIOD_TRENDS: Array<{
     key: 'noon',
     title: 'فشارهای ظهر',
     badge: 'ظهر',
-    hint: 'ترند سیستول و دیاستول در بازه ظهر',
+    hint: 'ترند خطی سیستول و دیاستول در بازه ظهر',
     empty: 'هنوز ثبت ظهری برای این بیمار نیست.',
     accent: '#0284C7',
   },
   {
     key: 'night',
-    title: 'فشارهای عصر',
-    badge: 'عصر',
-    hint: 'ترند سیستول و دیاستول در بازه عصر',
-    empty: 'هنوز ثبت عصری برای این بیمار نیست.',
+    title: 'فشارهای شب',
+    badge: 'شب',
+    hint: 'ترند خطی سیستول و دیاستول در بازه شب',
+    empty: 'هنوز ثبت شبی برای این بیمار نیست.',
     accent: '#7C3AED',
   },
 ];
 
 export function BloodPressureAnalytics({ items }: { items: BloodPressureItem[] }) {
   const dayRows = useMemo(() => groupBloodPressureByDay(items), [items]);
-  const chartItems = useMemo(() => [...items].reverse().slice(-20), [items]);
+  // Keep API order (newest first) then take last 20 chronological for overview bars
+  const chartItems = useMemo(() => {
+    const chronological = [...items].sort((a, b) =>
+      String(a.measuredAt).localeCompare(String(b.measuredAt))
+    );
+    return chronological.slice(-20);
+  }, [items]);
 
   const overviewCategories = chartItems.map((r) => {
-    const dateLabel = r.measuredAt ? toPersianDigits(r.measuredAt.slice(5, 10).replace('-', '/')) : '—';
+    const dateLabel = r.measuredAt
+      ? toPersianDigits(r.measuredAt.slice(5, 10).replace('-', '/'))
+      : '—';
     const period = r.periodTitle || periodTitle(r.periodOfDay) || '';
     return period ? `${dateLabel} · ${period}` : dateLabel;
   });
-  const overviewSystolic = chartItems.map((r) => r.systolic);
-  const overviewDiastolic = chartItems.map((r) => r.diastolic);
+  const overviewSystolic = chartItems.map((r) => Number(r.systolic) || 0);
+  const overviewDiastolic = chartItems.map((r) => Number(r.diastolic) || 0);
 
   const periodTrends = useMemo(
     () =>
@@ -172,7 +242,7 @@ export function BloodPressureAnalytics({ items }: { items: BloodPressureItem[] }
   return (
     <View style={styles.wrap}>
       <Text style={styles.heading}>تحلیل نموداری</Text>
-      <Text style={styles.sub}>نمای کلی، سپس ترند صبح / ظهر / عصر</Text>
+      <Text style={styles.sub}>نمای کلی ستونی، سپس ترند خطی صبح / ظهر / شب</Text>
       <View style={styles.legend}>
         <View style={[styles.legendChip, { backgroundColor: '#FEE2E2' }]}>
           <Text style={[styles.legendText, { color: '#DC2626' }]}>سیستولیک</Text>
@@ -185,7 +255,7 @@ export function BloodPressureAnalytics({ items }: { items: BloodPressureItem[] }
       <View style={styles.card}>
         <Text style={styles.cardEyebrow}>نمای کلی</Text>
         <Text style={styles.cardTitle}>نمودار ستونی فشار خون</Text>
-        <Text style={styles.cardHint}>حداکثر ۲۰ ثبت اخیر</Text>
+        <Text style={styles.cardHint}>حداکثر ۲۰ ثبت اخیر (به ترتیب زمانی)</Text>
         <ColumnChart
           categories={overviewCategories}
           systolic={overviewSystolic}
@@ -267,6 +337,15 @@ const styles = StyleSheet.create({
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 120 },
   bar: { width: 12, borderRadius: 4 },
   cat: { fontFamily: fonts.regular, fontSize: 9, color: colors.muted, textAlign: 'center', marginTop: 6 },
+  lineCats: { height: 18, position: 'relative', marginTop: -22 },
+  valueRow: { flexDirection: 'row', gap: 8, marginTop: 8, paddingHorizontal: 8 },
+  valueChip: {
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+    color: colors.inkSoft,
+    minWidth: 44,
+    textAlign: 'center',
+  },
   trendHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, marginBottom: 6 },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   badgeText: { fontFamily: fonts.bold, fontSize: 11 },

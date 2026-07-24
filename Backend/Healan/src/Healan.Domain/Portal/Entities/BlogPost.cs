@@ -11,6 +11,8 @@ public class BlogPost : AuditableEntity
     public string Body { get; set; } = string.Empty;
     public string? CoverImageUrl { get; set; }
     public Guid? CoverImageFileId { get; set; }
+    /// <summary>برچسب‌ها با جداکننده ویرگول یا فاصله (مثلاً: قلب، فشارخون)</summary>
+    public string? Tags { get; set; }
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public string? OgImageUrl { get; set; }

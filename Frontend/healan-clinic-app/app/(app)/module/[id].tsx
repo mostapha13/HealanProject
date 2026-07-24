@@ -31,8 +31,12 @@ import {
 import { getCrudConfig } from '../../../src/api/crud';
 import { getOpsConfig } from '../../../src/api/ops';
 import type { ClinicModuleId } from '../../../src/navigation/catalog';
+import { BlogModuleView } from '../../../src/modules/BlogModuleView';
 import { CrudModuleView } from '../../../src/modules/CrudModuleView';
 import { OpsModuleView } from '../../../src/modules/OpsModuleView';
+import { PrescriptionModuleView } from '../../../src/modules/PrescriptionModuleView';
+import { QueueModuleView } from '../../../src/modules/QueueModuleView';
+import { RagChatLogsView } from '../../../src/modules/RagChatLogsView';
 import { useAccess } from '../../../src/access/AccessContext';
 import {
   AppScreen,
@@ -77,7 +81,24 @@ export default function ModuleScreen() {
     );
   }
 
+  if (moduleId === 'site-blog') {
+    return <BlogModuleView title={title} />;
+  }
+
+  if (moduleId === 'site-rag-logs') {
+    return <RagChatLogsView title={title} />;
+  }
+
+  if (moduleId === 'queue') {
+    return <QueueModuleView title={title} />;
+  }
+
+  if (moduleId === 'prescriptions') {
+    return <PrescriptionModuleView title={title} />;
+  }
+
   if (
+    moduleId === 'sms' ||
     moduleId === 'sms-settings' ||
     moduleId === 'site-settings' ||
     getOpsConfig(moduleId)

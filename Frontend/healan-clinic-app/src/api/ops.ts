@@ -22,6 +22,46 @@ function num(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+const BOOKING_STATUS_LABEL: Record<number, string> = {
+  1: 'رزرو شده',
+  2: 'لغو شده',
+  3: 'جابجا شده',
+  4: 'پذیرش شده',
+  5: 'عدم حضور',
+};
+
+const BOOKING_STATUS_NAME: Record<string, number> = {
+  Booked: 1,
+  Cancelled: 2,
+  Rescheduled: 3,
+  Accepted: 4,
+  NoShow: 5,
+};
+
+function bookingStatusCode(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    const asNum = Number(trimmed);
+    if (!Number.isNaN(asNum) && asNum > 0) return asNum;
+    return BOOKING_STATUS_NAME[trimmed] ?? 0;
+  }
+  return 0;
+}
+
+function bookingStatusLabel(value: unknown): {
+  label: string;
+  tone: 'ok' | 'warn' | 'danger' | 'neutral' | 'info';
+} {
+  const code = bookingStatusCode(value);
+  const label = BOOKING_STATUS_LABEL[code] ?? (value != null && String(value) ? String(value) : 'نامشخص');
+  if (code === 4) return { label, tone: 'ok' };
+  if (code === 2 || code === 5) return { label, tone: 'danger' };
+  if (code === 3) return { label, tone: 'info' };
+  if (code === 1) return { label, tone: 'warn' };
+  return { label, tone: 'neutral' };
+}
+
 async function healanGet<T>(getToken: TokenGetter, path: string, params?: Record<string, unknown>) {
   return apiGet<T>(config.healanApiUrl, path, getToken, params);
 }
@@ -148,12 +188,14 @@ export const OPS_MODULES: Partial<Record<ClinicModuleId, OpsModuleConfig>> = {
       return rows.map((raw, index) => {
         const r = asRecord(raw);
         const id = num(r.appointmentBookingId ?? r.reservationId ?? r.id ?? index);
+        const statusInfo = bookingStatusLabel(r.statusName ?? r.status ?? r.bookingStatus);
         return {
           id,
           title: str(r.patientName ?? r.fullName ?? `${str(r.firstName)} ${str(r.lastName)}`.trim(), `رزرو #${id}`),
-          subtitle: str(r.statusName ?? r.status ?? ''),
+          subtitle: statusInfo.label,
           meta: str(r.slotStart ?? r.appointmentDate ?? r.nationalCode ?? ''),
-          badge: str(r.statusName ?? r.status),
+          badge: statusInfo.label,
+          badgeTone: statusInfo.tone,
           raw: { ...r, appointmentBookingId: id },
         };
       });
@@ -213,20 +255,48 @@ export const OPS_MODULES: Partial<Record<ClinicModuleId, OpsModuleConfig>> = {
       return rows.map((raw, index) => {
         const r = asRecord(raw);
         const id = num(r.patientReviewId ?? r.id ?? index);
+        const statusRaw = str(r.status ?? r.statusName ?? r.moderationStatus ?? '');
+        const statusKey = statusRaw.toLowerCase();
+        let badge = 'بررسی نشده';
+        let badgeTone: 'ok' | 'warn' | 'danger' | 'neutral' = 'warn';
+        if (
+          statusKey === 'approved' ||
+          statusRaw === 'Approved' ||
+          /تأیید|تایید/.test(statusRaw)
+        ) {
+          badge = 'تأیید';
+          badgeTone = 'ok';
+        } else if (
+          statusKey === 'rejected' ||
+          statusRaw === 'Rejected' ||
+          /رد|عدم/.test(statusRaw)
+        ) {
+          badge = 'عدم تأیید';
+          badgeTone = 'danger';
+        } else if (
+          statusKey === 'pending' ||
+          statusRaw === 'Pending' ||
+          !statusRaw ||
+          /بررسی|pending/i.test(statusRaw)
+        ) {
+          badge = 'بررسی نشده';
+          badgeTone = 'warn';
+        }
         return {
           id,
           title: str(r.patientName ?? r.fullName ?? 'نظر بیمار'),
-          subtitle: str(r.comment ?? r.statusName ?? '').slice(0, 120),
-          meta: str(r.statusName ?? r.status ?? ''),
-          badge: str(r.statusName ?? r.status),
-          raw: r,
+          subtitle: str(r.comment ?? '').slice(0, 120),
+          meta: badge,
+          badge,
+          badgeTone,
+          raw: { ...r, status: statusRaw || 'Pending' },
         };
       });
     },
     actions: (row) => {
       const status = str(row.raw.status ?? row.raw.statusName);
       const items: OpsAction[] = [];
-      if (status !== 'Approved') {
+      if (status !== 'Approved' && status !== 'تأیید') {
         items.push({
           key: 'approve',
           label: 'تأیید',
@@ -238,7 +308,7 @@ export const OPS_MODULES: Partial<Record<ClinicModuleId, OpsModuleConfig>> = {
           },
         });
       }
-      if (status !== 'Rejected') {
+      if (status !== 'Rejected' && status !== 'عدم تأیید') {
         items.push({
           key: 'reject',
           label: 'رد',

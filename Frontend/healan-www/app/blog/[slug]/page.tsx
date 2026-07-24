@@ -103,6 +103,19 @@ export default async function BlogPostPage({ params }: Props) {
             {post.excerpt ? (
               <p className="article__excerpt">{post.excerpt}</p>
             ) : null}
+            {post.tags ? (
+              <div className="article__tags">
+                {post.tags
+                  .split(/[,،]+/)
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+                  .map((tag) => (
+                    <span key={tag} className="article__tag">
+                      {tag}
+                    </span>
+                  ))}
+              </div>
+            ) : null}
           </header>
           <div
             className="article__content"
