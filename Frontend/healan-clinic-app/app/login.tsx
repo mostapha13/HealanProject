@@ -45,7 +45,7 @@ export default function LoginScreen() {
           </View>
           <Text style={styles.headline}>ورود پرسنل</Text>
           <Text style={styles.sub}>نام کاربری و رمز عبور همان حساب کلینیک</Text>
-          <Text style={styles.buildMark}>build-v18-login-cors</Text>
+          <Text style={styles.buildMark}>build-v19-tabbar</Text>
         </SafeAreaView>
       </View>
 
