@@ -38,7 +38,7 @@ export default function LoginScreen() {
       <View style={styles.header}>
         <SafeAreaView>
           <View style={styles.brandRow}>
-            <Text style={styles.brand}>هیلن کلینیک</Text>
+            <Text style={styles.brand}>کلینیک</Text>
             <View style={styles.logo}>
               <Text style={styles.logoLetter}>H</Text>
             </View>

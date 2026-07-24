@@ -66,6 +66,7 @@ export default function TabsLayout() {
 
   const showDashboard = canAccess('/') || canAccess('/reports');
   const showBloodPressure = canAccess('/blood-pressure');
+  const showPatients = canAccess('/patients');
 
   return (
     <Tabs
@@ -104,6 +105,14 @@ export default function TabsLayout() {
           title: 'داشبورد',
           href: showDashboard ? undefined : null,
           tabBarIcon: ({ focused }) => <TabIcon name="grid-outline" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="patients"
+        options={{
+          title: 'بیماران',
+          href: showPatients ? undefined : null,
+          tabBarIcon: ({ focused }) => <TabIcon name="people-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen

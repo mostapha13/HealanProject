@@ -36,7 +36,7 @@ export function AppScreen({
 
 /** Lime bank-style top bar */
 export function BankHeader({
-  brand = 'هیلن کلینیک',
+  brand = 'کلینیک',
   onBell,
   onSupport,
   onScan,

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Healan Clinic",
+    "name": "کلینیک",
     "slug": "healan-clinic-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -47,8 +47,8 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
       "output": "single",
-      "name": "هیلن کلینیک",
-      "shortName": "هیلن کلینیک",
+      "name": "کلینیک",
+      "shortName": "کلینیک",
       "themeColor": "#C6E000",
       "backgroundColor": "#F4F5F7",
       "display": "standalone",

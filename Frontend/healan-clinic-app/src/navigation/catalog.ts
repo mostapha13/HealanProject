@@ -136,8 +136,15 @@ export function buildHomeSections(tree: AccessMenuTreeItem[]): HomeSection[] {
   const pushLeaf = (bucket: ClinicModule[], item: AccessMenuTreeItem) => {
     const url = item.accessForm?.url;
     if (!url || ACTION_RE.test(url)) return;
-    // patient portal / public site routes stay out of clinic mobile hub
-    if (url.startsWith('/patient') || url === '/assistant' || url === '/booking') return;
+    // Portal routes only (/patient/...), not clinic Patients (/patients)
+    if (
+      url === '/patient' ||
+      url.startsWith('/patient/') ||
+      url === '/assistant' ||
+      url === '/booking'
+    ) {
+      return;
+    }
     bucket.push(resolveModuleFromPath(url, menuTitle(item)));
   };
 

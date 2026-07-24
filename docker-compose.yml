@@ -388,7 +388,7 @@ services:
         EXPO_PUBLIC_USER_MANAGER_API_URL: https://clinic.drshahrooei.ir/UserManager/api/v1
         EXPO_PUBLIC_CLIENT_ID: HealanClinicMobile
         EXPO_PUBLIC_FILE_API_URL: https://clinic.drshahrooei.ir/File
-        PWA_APPLE_TITLE: هیلن کلینیک
+        PWA_APPLE_TITLE: کلینیک
     container_name: healan-clinic-pwa
     volumes:
       - ./docker/expo-pwa-nginx.conf:/etc/nginx/conf.d/default.conf:ro

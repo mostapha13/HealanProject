@@ -75,7 +75,7 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <AuthGate>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
-          <IosInstallBanner appName="هیلن کلینیک" />
+          <IosInstallBanner appName="کلینیک" />
         </AuthGate>
       </AccessProvider>
     </AuthProvider>

@@ -15,10 +15,10 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <meta name="theme-color" content="#C6E000" />
         <meta name="color-scheme" content="light" />
-        <meta name="application-name" content="هیلن کلینیک" />
+        <meta name="application-name" content="کلینیک" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="هیلن کلینیک" />
+        <meta name="apple-mobile-web-app-title" content="کلینیک" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
         <meta
@@ -29,7 +29,7 @@ export default function Root({ children }: PropsWithChildren) {
         <link rel="icon" type="image/png" href={`${BASE}/favicon.png`} />
         <link rel="apple-touch-icon" href={`${BASE}/icons/apple-touch-icon.png`} />
         <link rel="apple-touch-icon" sizes="180x180" href={`${BASE}/icons/apple-touch-icon.png`} />
-        <title>هیلن کلینیک</title>
+        <title>کلینیک</title>
         <style
           dangerouslySetInnerHTML={{
             __html: `
