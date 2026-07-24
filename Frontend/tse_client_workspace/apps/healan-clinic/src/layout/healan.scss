@@ -501,6 +501,105 @@
   box-shadow: inset 3px 0 0 var(--healan-sidebar-accent);
 }
 
+/* Download app (PWA) — sidebar */
+.clinic-dl {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--healan-sidebar-text) 12%, transparent);
+}
+
+.clinic-dl__trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: start;
+  font: inherit;
+}
+
+.clinic-dl__caret {
+  margin-inline-start: auto;
+  display: inline-flex;
+  opacity: 0.65;
+  transition: transform 0.15s ease;
+}
+
+.clinic-dl__caret svg.is-open,
+.clinic-dl.is-open .clinic-dl__caret svg {
+  transform: rotate(90deg);
+}
+
+.clinic-dl__panel {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.35rem 0.35rem 0.55rem;
+}
+
+.clinic-dl__panel[hidden] {
+  display: none;
+}
+
+.clinic-dl__hint {
+  margin: 0 0.4rem 0.15rem;
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+.clinic-dl__option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--healan-sidebar-text);
+  background: color-mix(in srgb, var(--healan-sidebar-hover) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--healan-sidebar-text) 10%, transparent);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.clinic-dl__option:hover {
+  background: var(--healan-sidebar-hover);
+  border-color: color-mix(in srgb, var(--healan-sidebar-accent) 40%, transparent);
+}
+
+.clinic-dl__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.clinic-dl__option--android .clinic-dl__icon {
+  background: color-mix(in srgb, #22c55e 22%, transparent);
+  color: #16a34a;
+}
+
+.clinic-dl__option--ios .clinic-dl__icon {
+  background: color-mix(in srgb, var(--healan-sidebar-text) 12%, transparent);
+  color: var(--healan-sidebar-text);
+}
+
+.clinic-dl__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.clinic-dl__text strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.clinic-dl__text small {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
 .healan-nav-group {
   margin-top: 0.15rem;
 }

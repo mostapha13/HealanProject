@@ -38,10 +38,21 @@
       "display": "standalone",
       "lang": "fa"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      "expo-web-browser"
+    ],
     "experiments": {
       "typedRoutes": true,
       "baseUrl": "/mobile"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "77b747ab-a8d5-45a9-9e7e-9c5f856612ad"
+      }
     }
   }
 }

@@ -2,12 +2,10 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 
-export const ANDROID_APK_URL =
-  process.env.NEXT_PUBLIC_ANDROID_APK_URL ?? '/downloads/healan-patient.apk';
+/** Patient PWA — Android & iOS until native APK is ready */
+export const PATIENT_PWA_URL = process.env.NEXT_PUBLIC_IOS_PWA_URL ?? '/mobile/';
 
-export const IOS_PWA_URL = process.env.NEXT_PUBLIC_IOS_PWA_URL ?? '/mobile/';
-
-const BUILD = 'build-v12-menu';
+const BUILD = 'build-v14-pwa';
 
 function IconDownload() {
   return (
@@ -47,28 +45,27 @@ function DownloadOptions({ onPick }: { onPick?: () => void }) {
     <>
       <a
         className="nav-dl__option nav-dl__option--android"
-        href={ANDROID_APK_URL}
-        download="healan-patient.apk"
+        href={PATIENT_PWA_URL}
         onClick={onPick}
       >
         <span className="nav-dl__icon" aria-hidden>
           <IconAndroid />
         </span>
         <span className="nav-dl__text">
-          <strong>دانلود برای اندروید</strong>
-          <small>نصب مستقیم با فایل APK</small>
+          <strong>اندروید</strong>
+          <small>وب‌اپ (PWA) — در Chrome روی Add to Home screen بزنید</small>
         </span>
         <span className="nav-dl__chevron" aria-hidden>
           ‹
         </span>
       </a>
-      <a className="nav-dl__option nav-dl__option--ios" href={IOS_PWA_URL} onClick={onPick}>
+      <a className="nav-dl__option nav-dl__option--ios" href={PATIENT_PWA_URL} onClick={onPick}>
         <span className="nav-dl__icon" aria-hidden>
           <IconApple />
         </span>
         <span className="nav-dl__text">
-          <strong>دانلود برای iOS</strong>
-          <small>نسخه PWA — Add to Home Screen</small>
+          <strong>iOS</strong>
+          <small>وب‌اپ (PWA) — Share → Add to Home Screen</small>
         </span>
         <span className="nav-dl__chevron" aria-hidden>
           ‹
@@ -120,7 +117,7 @@ export function NavDownloadMenu() {
         <span className="nav-dl__caret" aria-hidden />
       </button>
       <div id={menuId} className="nav-dl__panel" hidden={!open} role="menu">
-        <p className="nav-dl__panel-title">انتخاب نسخه</p>
+        <p className="nav-dl__panel-title">نصب وب‌اپ بیمار</p>
         <DownloadOptions onPick={() => setOpen(false)} />
       </div>
     </div>

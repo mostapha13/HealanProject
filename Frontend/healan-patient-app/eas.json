@@ -17,10 +17,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_IDENTITY_URL": "https://auth.drshahrooei.ir",
-        "EXPO_PUBLIC_HEALAN_API_URL": "https://clinic.drshahrooei.ir/Healan/api/v1",
-        "EXPO_PUBLIC_USER_MANAGER_API_URL": "https://clinic.drshahrooei.ir/UserManager/api/v1",
-        "EXPO_PUBLIC_CLIENT_ID": "HealanClinicMobile"
+        "EXPO_PUBLIC_HEALAN_API_URL": "https://clinic.drshahrooei.ir/Healan/api/v1"
       }
     },
     "production": {
@@ -28,10 +25,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_IDENTITY_URL": "https://auth.drshahrooei.ir",
-        "EXPO_PUBLIC_HEALAN_API_URL": "https://clinic.drshahrooei.ir/Healan/api/v1",
-        "EXPO_PUBLIC_USER_MANAGER_API_URL": "https://clinic.drshahrooei.ir/UserManager/api/v1",
-        "EXPO_PUBLIC_CLIENT_ID": "HealanClinicMobile"
+        "EXPO_PUBLIC_HEALAN_API_URL": "https://clinic.drshahrooei.ir/Healan/api/v1"
       }
     }
   },

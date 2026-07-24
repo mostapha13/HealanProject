@@ -33,6 +33,7 @@ import {
   IconUser,
   resolveNavIcon,
 } from './navIcons';
+import { ClinicDownloadApp } from './ClinicDownloadApp';
 import './healan.scss';
 
 type NavNode = {
@@ -494,6 +495,7 @@ export function HealanLayout() {
                 onTogglePin={togglePin}
               />
             )}
+            <ClinicDownloadApp onNavigate={() => setMobileNavOpen(false)} />
           </nav>
 
           <div className="healan-sidebar__footer">

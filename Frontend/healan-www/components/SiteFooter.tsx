@@ -33,7 +33,7 @@ export function SiteFooter({ name, specialty, city }: Props) {
       </div>
       <div className="container">
         <p className="footer__copy">
-          © {new Date().getFullYear()} — تمامی حقوق محفوظ است · build-v12-menu
+          © {new Date().getFullYear()} — تمامی حقوق محفوظ است · build-v14-pwa
         </p>
       </div>
     </footer>
