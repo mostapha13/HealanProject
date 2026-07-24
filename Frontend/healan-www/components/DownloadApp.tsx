@@ -29,12 +29,11 @@ function IconApple() {
 }
 
 type CompactProps = {
-  onNavigate?: () => void;
   className?: string;
 };
 
 /** Compact two-option block for header drawer / footer */
-export function AppDownloadLinks({ onNavigate, className }: CompactProps) {
+export function AppDownloadLinks({ className }: CompactProps) {
   return (
     <div className={className ? `app-dl-links ${className}` : 'app-dl-links'} data-build={BUILD}>
       <p className="app-dl-links__title">دانلود اپلیکیشن</p>
@@ -42,7 +41,6 @@ export function AppDownloadLinks({ onNavigate, className }: CompactProps) {
         className="app-dl-links__item app-dl-links__item--android"
         href={ANDROID_APK_URL}
         download="healan-patient.apk"
-        onClick={onNavigate}
       >
         <span className="app-dl-links__icon" aria-hidden>
           <IconAndroid />
@@ -55,7 +53,6 @@ export function AppDownloadLinks({ onNavigate, className }: CompactProps) {
       <a
         className="app-dl-links__item app-dl-links__item--ios"
         href={IOS_PWA_URL}
-        onClick={onNavigate}
       >
         <span className="app-dl-links__icon" aria-hidden>
           <IconApple />
