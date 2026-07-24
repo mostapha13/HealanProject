@@ -126,6 +126,9 @@ export function AppDownloadMenu({ variant = 'nav', onNavigate }: Props) {
       >
         دانلود اپلیکیشن
         <span className="app-dl__caret" aria-hidden />
+        <span className="app-dl__build" hidden>
+          build-v8-appdl
+        </span>
       </button>
       <div id={menuId} className="app-dl__panel" hidden={!open} role="menu">
         {options}
