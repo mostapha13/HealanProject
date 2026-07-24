@@ -246,7 +246,10 @@ const styles = StyleSheet.create({
   pagerBtnText: { fontFamily: fonts.semiBold, fontSize: 13, color: colors.primaryDeep },
   pagerLabel: { fontFamily: fonts.regular, fontSize: 12, color: colors.inkSoft },
   smallTile: {
-    width: '31%',
+    flexGrow: 1,
+    flexBasis: '30%',
+    maxWidth: '32%',
+    minWidth: 0,
     backgroundColor: colors.white,
     borderRadius: 18,
     paddingVertical: 14,

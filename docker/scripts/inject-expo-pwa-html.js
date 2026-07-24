@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Expo web.output "single" does not reliably emit app/+html.tsx.
- * Inject PWA install meta + SW registration into dist/index.html after export.
+ * Inject PWA install meta + SW + mobile-fit CSS into dist/index.html after export.
  *
  * Usage: node inject-expo-pwa-html.js <distDir> <appleTitle>
  */
@@ -19,6 +19,12 @@ if (!fs.existsSync(indexPath)) {
 
 let html = fs.readFileSync(indexPath, 'utf8');
 
+// Prefer a viewport that fits phones without forcing zoom-out recovery lock.
+html = html.replace(
+  /<meta\s+name="viewport"[^>]*>/i,
+  '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />'
+);
+
 if (!html.includes('rel="manifest"')) {
   const headBits = [
     '<link rel="manifest" href="/mobile/manifest.json" />',
@@ -31,6 +37,23 @@ if (!html.includes('rel="manifest"')) {
     '<meta name="mobile-web-app-capable" content="yes" />',
   ].join('\n');
   html = html.replace(/<\/head>/i, `${headBits}\n</head>`);
+}
+
+if (!html.includes('healan-pwa-fit')) {
+  const fitCss = `<style id="healan-pwa-fit">
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+#root { overflow-x: hidden; }
+</style>`;
+  html = html.replace(/<\/head>/i, `${fitCss}\n</head>`);
 }
 
 if (!html.includes('serviceWorker.register')) {

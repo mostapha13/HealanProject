@@ -164,6 +164,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginBottom: spacing.lg,
     justifyContent: 'flex-start',
+    width: '100%',
+    maxWidth: '100%',
   },
   servicesRow: {
     paddingHorizontal: spacing.md,
@@ -171,7 +173,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     justifyContent: 'center',
     alignItems: 'center',
-    flexGrow: 1,
     gap: 8,
   },
 });

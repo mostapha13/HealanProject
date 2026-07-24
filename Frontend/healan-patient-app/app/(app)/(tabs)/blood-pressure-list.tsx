@@ -51,32 +51,34 @@ function Cell({ slot }: { slot?: BpPeriodSlot }) {
 
 function ReportTable({ days }: { days: BpDayRow[] }) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator style={styles.tableScroll}>
-      <View style={styles.table}>
-        <View style={[styles.tr, styles.thead]}>
-          <Text style={[styles.th, styles.colDate]}>تاریخ</Text>
-          <Text style={[styles.th, styles.colPeriod, styles.morning]}>صبح</Text>
-          <Text style={[styles.th, styles.colPeriod, styles.noon]}>ظهر</Text>
-          <Text style={[styles.th, styles.colPeriod, styles.night]}>شب</Text>
-        </View>
-        {days.map((day, i) => (
-          <View key={day.dateKey} style={[styles.tr, i === days.length - 1 && styles.trLast]}>
-            <View style={[styles.td, styles.colDate]}>
-              <Text style={styles.dateText}>{day.jalaliLabel}</Text>
-            </View>
-            <View style={[styles.td, styles.colPeriod, styles.morningSoft]}>
-              <Cell slot={day.morning} />
-            </View>
-            <View style={[styles.td, styles.colPeriod, styles.noonSoft]}>
-              <Cell slot={day.noon} />
-            </View>
-            <View style={[styles.td, styles.colPeriod, styles.nightSoft]}>
-              <Cell slot={day.night} />
-            </View>
+    <View style={styles.tableClip}>
+      <ScrollView horizontal showsHorizontalScrollIndicator style={styles.tableScroll}>
+        <View style={styles.table}>
+          <View style={[styles.tr, styles.thead]}>
+            <Text style={[styles.th, styles.colDate]}>تاریخ</Text>
+            <Text style={[styles.th, styles.colPeriod, styles.morning]}>صبح</Text>
+            <Text style={[styles.th, styles.colPeriod, styles.noon]}>ظهر</Text>
+            <Text style={[styles.th, styles.colPeriod, styles.night]}>شب</Text>
           </View>
-        ))}
-      </View>
-    </ScrollView>
+          {days.map((day, i) => (
+            <View key={day.dateKey} style={[styles.tr, i === days.length - 1 && styles.trLast]}>
+              <View style={[styles.td, styles.colDate]}>
+                <Text style={styles.dateText}>{day.jalaliLabel}</Text>
+              </View>
+              <View style={[styles.td, styles.colPeriod, styles.morningSoft]}>
+                <Cell slot={day.morning} />
+              </View>
+              <View style={[styles.td, styles.colPeriod, styles.noonSoft]}>
+                <Cell slot={day.noon} />
+              </View>
+              <View style={[styles.td, styles.colPeriod, styles.nightSoft]}>
+                <Cell slot={day.night} />
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -191,7 +193,13 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: spacing.sm,
   },
-  tableScroll: { marginTop: 4 },
+  tableClip: {
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  tableScroll: { width: '100%' },
   table: {
     minWidth: COL_DATE + COL_PERIOD * 3,
     borderWidth: 1,

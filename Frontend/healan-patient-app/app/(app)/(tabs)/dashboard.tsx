@@ -129,7 +129,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statsRow: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 10, marginBottom: spacing.lg },
-  statCard: { width: '47%', alignItems: 'center', paddingVertical: 16 },
+  statCard: {
+    flexGrow: 1,
+    flexBasis: '45%',
+    maxWidth: '48%',
+    minWidth: 0,
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
   statValue: { fontFamily: fonts.bold, fontSize: 24, color: colors.primaryDeep },
   statLabel: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.muted, marginTop: 4 },
   section: {
@@ -144,5 +151,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
     marginBottom: spacing.lg,
+    width: '100%',
+    maxWidth: '100%',
   },
 });

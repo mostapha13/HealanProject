@@ -50,10 +50,14 @@ export function BankHeader({
     <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.bankHeader}>
       <View style={styles.bankHeaderInner}>
         <View style={styles.brandRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.brandText}>{title}</Text>
-            <Text style={styles.brandSub}>{sub}</Text>
-            <Text style={styles.buildMark}>build-v7-purple-tab</Text>
+          <View style={styles.brandCopy}>
+            <Text style={styles.brandText} numberOfLines={2}>
+              {title}
+            </Text>
+            <Text style={styles.brandSub} numberOfLines={2}>
+              {sub}
+            </Text>
+            <Text style={styles.buildMark}>build-v8-fit</Text>
           </View>
           <View style={styles.logoMark}>
             <Text style={styles.logoLetter}>ش</Text>
@@ -117,7 +121,7 @@ export function SiteHeroCarousel({
   }
 
   return (
-    <View>
+    <View style={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
       <ScrollView
         ref={scroller}
         horizontal
@@ -125,7 +129,7 @@ export function SiteHeroCarousel({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScrollEnd}
         decelerationRate="fast"
-        style={{ marginHorizontal: spacing.md }}
+        style={{ marginHorizontal: spacing.md, maxWidth: '100%' }}
       >
         {slides.map((slide) => (
           <View key={slide.id} style={[styles.heroBanner, { width }]}>
@@ -350,12 +354,21 @@ export function ScreenHeader({ title, onBack }: { title: string; onBack?: () => 
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
   padded: { paddingHorizontal: spacing.md },
   bankHeader: {
     borderBottomLeftRadius: radius.xxl,
     borderBottomRightRadius: radius.xxl,
     paddingBottom: spacing.md,
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
   },
   bankHeaderInner: {
     flexDirection: 'row-reverse',
@@ -363,8 +376,16 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    width: '100%',
   },
-  brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10 },
+  brandRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+    maxWidth: '100%',
+  },
+  brandCopy: { flex: 1, minWidth: 0 },
   logoMark: {
     width: 36,
     height: 36,
@@ -372,6 +393,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   logoLetter: { color: colors.white, fontFamily: fonts.bold, fontSize: 18 },
   brandText: {

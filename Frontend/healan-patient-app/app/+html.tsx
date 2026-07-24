@@ -11,7 +11,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#6D28D9" />
         <meta name="color-scheme" content="light" />
@@ -33,8 +33,16 @@ export default function Root({ children }: PropsWithChildren) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              html, body, #root { height: 100%; margin: 0; background: #F6F3FF; }
+              html, body, #root {
+                height: 100%;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                background: #F6F3FF;
+              }
               body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+              #root { overflow-x: hidden; }
             `,
           }}
         />

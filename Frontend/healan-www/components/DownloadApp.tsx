@@ -7,7 +7,7 @@ export const ANDROID_APK_URL =
 
 export const IOS_PWA_URL = process.env.NEXT_PUBLIC_IOS_PWA_URL ?? '/mobile/';
 
-const BUILD = 'build-v10-appdl';
+const BUILD = 'build-v11-menu';
 
 function IconAndroid() {
   return (

@@ -1680,9 +1680,44 @@ html[dir='rtl'] .nav-drawer {
     grid-template-columns: 1fr 1fr;
   }
 
+  .footer {
+    /* Keep clinic CTA above floating assistant FAB */
+    padding-bottom: max(96px, calc(48px + env(safe-area-inset-bottom)));
+  }
+
   .footer__links {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .footer__clinic {
+    order: -1;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .footer__clinic p {
+    margin-bottom: 10px;
+    opacity: 0.9;
+  }
+
+  .footer__clinic-btn {
+    display: inline-flex;
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+    background: var(--primary);
+    border-color: transparent;
+    color: var(--text-dark);
+    font-weight: 800;
+  }
+
+  .footer__clinic-btn:hover {
+    background: var(--primary-hover, var(--primary));
+    color: var(--text-dark);
   }
 
   .portal-robot-fab__label {
