@@ -6,6 +6,7 @@ from docx import Document
 import re
 import chromadb
 import hashlib
+import difflib
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
 class LocalEmbedding:
@@ -115,3 +116,18 @@ async def generate_contract(file: UploadFile = File(...), values: str = "{}"):
         return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": "attachment; filename=generated-contract.docx"})
     except Exception as exc:
         raise HTTPException(422, f"Contract generation failed: {exc}") from exc
+
+@app.post("/contract/compare")
+async def compare_contracts(original: UploadFile = File(...), revised: UploadFile = File(...)):
+    async def read_doc(upload: UploadFile) -> list[str]:
+        document = Document(BytesIO(await upload.read()))
+        return [p.text for p in document.paragraphs]
+    try:
+        before, after = await read_doc(original), await read_doc(revised)
+        changes = []
+        for item in difflib.ndiff(before, after):
+            if item.startswith(('+ ', '- ')):
+                changes.append({"type": "added" if item.startswith('+ ') else "removed", "text": item[2:]})
+        return {"changes": changes, "added": sum(x["type"] == "added" for x in changes), "removed": sum(x["type"] == "removed" for x in changes)}
+    except Exception as exc:
+        raise HTTPException(422, f"Contract comparison failed: {exc}") from exc
