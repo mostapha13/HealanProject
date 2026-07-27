@@ -7,6 +7,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    volumes:
+      - negareshai-chroma:/data/chroma
     networks: [negareshai]
 
   negareshai-web:
@@ -23,3 +25,6 @@ services:
 networks:
   negareshai:
     name: negareshai
+
+volumes:
+  negareshai-chroma:

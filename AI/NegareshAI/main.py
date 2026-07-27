@@ -6,6 +6,7 @@ from docx import Document
 import re
 import chromadb
 import hashlib
+import os
 import difflib
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
@@ -18,7 +19,7 @@ class LocalEmbedding:
         return [((raw[i % len(raw)] / 255.0) * 2.0) - 1.0 for i in range(128)]
 
 embedding = LocalEmbedding()
-vector_client = chromadb.EphemeralClient()
+vector_client = chromadb.PersistentClient(path=os.getenv('CHROMA_PERSIST_DIR', '/data/chroma'))
 
 @app.get("/health")
 def health():
