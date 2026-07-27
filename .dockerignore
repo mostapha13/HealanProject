@@ -14,9 +14,7 @@
 **/*.md
 **/*.pdb
 **/*.dll
-Backend
 docker/config/certbot
-Frontend/tse_client_workspace
 Frontend/healan-www/node_modules
 Frontend/healan-clinic-app/node_modules
 Frontend/healan-patient-app/node_modules
