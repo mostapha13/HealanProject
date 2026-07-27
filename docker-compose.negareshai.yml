@@ -1,0 +1,25 @@
+services:
+  negareshai-ai:
+    build:
+      context: .
+      dockerfile: AI/NegareshAI/Dockerfile
+    container_name: negareshai-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks: [negareshai]
+
+  negareshai-web:
+    build:
+      context: Frontend/negareshai
+      dockerfile: Dockerfile
+    container_name: negareshai-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on: [negareshai-ai]
+    networks: [negareshai]
+
+networks:
+  negareshai:
+    name: negareshai
