@@ -41,6 +41,7 @@ namespace Healan.WebApi
 
             services.AddApplication(Configuration);
             services.AddInfrastructure(Configuration);
+            services.AddRedisCache(Configuration);
 
             services.AddChannelService();
             services.AddHttpContextAccessor();
@@ -223,6 +224,7 @@ namespace Healan.WebApi
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseMiddleware<TokenRevocationMiddleware>();
             // Decode JWT iss/aud/sub even when auth fails — visible in docker logs as [AuthDiag]
             app.UseMiddleware<AuthDiagnosticsMiddleware>();
             // Must run after Authentication. (Local DEBUG builds skip checks inside AccessMiddleware.)

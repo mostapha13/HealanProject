@@ -43,6 +43,7 @@ namespace WorkFlow.WebUI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRedisCache(Configuration);
             services.AddApplication(Configuration);
             services.AddInfrastructure(Configuration);
             services.AddChannelService();
@@ -175,6 +176,7 @@ namespace WorkFlow.WebUI
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseMiddleware<TokenRevocationMiddleware>();
             app.UseAuthorization();
             //app.UseHttpsRedirection();
             //app.UseRequestResponseLogging();

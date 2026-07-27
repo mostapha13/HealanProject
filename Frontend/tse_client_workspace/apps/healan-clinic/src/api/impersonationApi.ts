@@ -110,6 +110,17 @@ export async function auditEndImpersonation(): Promise<void> {
 /** Full logout to the public site home (works for normal and impersonated sessions). */
 export async function logoutToPortalHome(): Promise<void> {
   await auditEndImpersonation();
+  const current = await userManager.getUser().catch(() => null);
+  if (current?.access_token) {
+    try {
+      await fetch(`${IDENTITY_BASE_URL}/api/v1/Session/revoke`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${current.access_token}` },
+      });
+    } catch {
+      // The OIDC end-session request below also revokes the server-side session.
+    }
+  }
   syncPortalAccessToken(undefined);
   setClinicBearerToken('');
   const home = getPortalHomeUrl();

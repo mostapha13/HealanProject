@@ -192,6 +192,8 @@ namespace IdentityServer.ApplicationPolicy.Implementions
             if (setAccessViewModel.SubsystemId.HasValue)
             {
                 var subSystemInfo = _applicationDbContext.SubSystemInfos.Include(a => a.SectionInfos).ThenInclude(b => b.ActionInfos).FirstOrDefault(p => p.SubSystemInfoId == setAccessViewModel.SubsystemId);
+                if (subSystemInfo == null)
+                    throw new BadRequestExceptions("Subsystem not found");
                 foreach (var ssi in subSystemInfo.SectionInfos)
                 {
                     foreach (var ai in ssi.ActionInfos)
@@ -203,6 +205,8 @@ namespace IdentityServer.ApplicationPolicy.Implementions
             else if (setAccessViewModel.SectionId.HasValue)
             {
                 var sectionInfo = _applicationDbContext.SectionInfos.Include(b => b.ActionInfos).FirstOrDefault(p => p.SectionInfoId == setAccessViewModel.SectionId);
+                if (sectionInfo == null)
+                    throw new BadRequestExceptions("Section not found");
                 foreach (var ai in sectionInfo.ActionInfos)
                 {
                     listActionId.Add(ai.ActionInfoId);
@@ -211,6 +215,8 @@ namespace IdentityServer.ApplicationPolicy.Implementions
             else if (setAccessViewModel.ActionId.HasValue)
             {
                 var ai = _applicationDbContext.ActionInfos.FirstOrDefault(p => p.ActionInfoId == setAccessViewModel.ActionId);
+                if (ai == null)
+                    throw new BadRequestExceptions("Action not found");
                 listActionId.Add(ai.ActionInfoId);
             }
             var allAccess = await _applicationDbContext.ApplicationUserAccesses.Where(w => w.ApplicationRoleId == setAccessViewModel.RoleId && w.ApplicationRoleGroupId == setAccessViewModel.GroupRoleId).ToListAsync();
@@ -225,7 +231,7 @@ namespace IdentityServer.ApplicationPolicy.Implementions
                     AccessMode = setAccessViewModel.AccessMode,
                     ActionInfoId = item,
                     ApplicationRoleGroupId = setAccessViewModel.GroupRoleId,
-                    ApplicationRoleId = setAccessViewModel.GroupRoleId,
+                    ApplicationRoleId = setAccessViewModel.RoleId,
                 });
             }
             await _applicationDbContext.SaveChangesAsync();

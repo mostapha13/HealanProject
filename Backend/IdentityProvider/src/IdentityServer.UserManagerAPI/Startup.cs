@@ -165,6 +165,7 @@ namespace IdentityServer.UserManagerAPI
             app.UseCors("default");
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseMiddleware<TokenRevocationMiddleware>();
             app.UseMiddleware<ImpersonationMutationGuardMiddleware>();
             app.UseAuthorization();
             //app.UseHttpsRedirection();

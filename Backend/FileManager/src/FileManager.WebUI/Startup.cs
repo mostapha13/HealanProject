@@ -48,6 +48,7 @@ namespace FileManager.WebUI
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRedisCache(Configuration);
             IdentityModelEventSource.ShowPII = true;
 
             services.Configure<UploadFileConfig>(Configuration.GetSection("UploadFileConfig"));
@@ -283,6 +284,7 @@ namespace FileManager.WebUI
             app.UseIpRateLimiting();
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseMiddleware<TokenRevocationMiddleware>();
             app.UseAuthorization();
 
             app.UseMiddleware<SecurityHeaderMiddleware>();

@@ -26,6 +26,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Share.Application.Common.Interfaces;
 using Share.Domain.Enums;
+using Share.Infrastructure.SecurityMiddlewares;
 using Share.MessageBroker.RabbitMQ.Service;
 using System;
 using System.Linq;
@@ -55,6 +56,7 @@ namespace IdentityServer.Controllers
         private readonly ICaptchaProviderService _captchaProviderService;
         private readonly IMemoryCache _cache;
         private readonly ICacheManager _cacheManager;
+        private readonly IPersistedGrantService _persistedGrantService;
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -66,6 +68,7 @@ namespace IdentityServer.Controllers
             IHttpContextAccessor httpContextAccessor,
             IAuthenticationSchemeProvider schemeProvider,
             ApplicationDbContext applicationDbContext,
+            IPersistedGrantService persistedGrantService,
             TestUserStore users = null
             , IConfiguration configuration = null
 , ICaptchaProviderService captchaProviderService = null, IMemoryCache cache = null, ICacheManager cacheManager = null)
@@ -84,6 +87,7 @@ namespace IdentityServer.Controllers
             _captchaProviderService = captchaProviderService;
             _cache = cache;
             _cacheManager = cacheManager;
+            _persistedGrantService = persistedGrantService;
 
         }
         private string GetClinicRedirectUrl()
@@ -351,7 +355,7 @@ namespace IdentityServer.Controllers
 
             if (Guid.TryParse(HttpContext?.User?.FindFirstValue("sub"), out result))
             {
-                AddInToBlackList();
+                AddCurrentSessionToRevocationList();
                 url = GetCashedValue(result.ToString());
             }
 
@@ -379,14 +383,33 @@ namespace IdentityServer.Controllers
         }
 
 
-        private void AddInToBlackList()
+        private void AddCurrentSessionToRevocationList()
         {
             var auth_time = HttpContext?.User?.FindFirstValue("auth_time");
             Guid result = Guid.Empty;
-            if (Guid.TryParse(HttpContext?.User?.FindFirstValue("sub"), out result))
+            if (Guid.TryParse(HttpContext?.User?.FindFirstValue("sub"), out result)
+                && !string.IsNullOrWhiteSpace(auth_time))
             {
-                _cacheManager.AddString(result.ToString() + "_" + auth_time, DateTime.Now.ToShortDateString(), TimeSpan.FromHours(12));
+                _cacheManager.AddString(
+                    TokenRevocationMiddleware.BuildSessionKey(result.ToString(), auth_time),
+                    "1",
+                    TimeSpan.FromHours(24));
             }
+        }
+
+        private async Task RevokeRefreshTokensAsync(string logoutId)
+        {
+            var subject = HttpContext?.User?.FindFirstValue("sub");
+            if (string.IsNullOrWhiteSpace(subject))
+                return;
+
+            var logoutContext = string.IsNullOrWhiteSpace(logoutId)
+                ? null
+                : await _interaction.GetLogoutContextAsync(logoutId);
+
+            await _persistedGrantService.RemoveAllGrantsAsync(
+                subject,
+                logoutContext?.ClientId);
         }
 
         [HttpPost]
@@ -394,6 +417,8 @@ namespace IdentityServer.Controllers
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             var vm = await _account.BuildLoggedOutViewModelAsync(model.LogoutId);
+            AddCurrentSessionToRevocationList();
+            await RevokeRefreshTokensAsync(model.LogoutId);
             await _signInManager.SignOutAsync();
             //await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             await HttpContext.SignOutAsync();

@@ -245,6 +245,14 @@ namespace IdentityServer.GrpcServer.Services
             }
 
             // Admin always has full access to every AccessForm in all systems.
+            var isActiveUser = await _applicationDbContext.Users
+                .AnyAsync(user => user.Id == userId.Value && user.IsActive);
+            if (!isActiveUser)
+            {
+                userHasAccessResonse.HasAccess = false;
+                return userHasAccessResonse;
+            }
+
             var isAdmin = await (
                 from ur in _applicationDbContext.UserRoles
                 join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
@@ -269,9 +277,10 @@ namespace IdentityServer.GrpcServer.Services
                     join m in _applicationDbContext.AccessMenus on a.AccessMenuId equals m.AccessMenuId
                     join f in _applicationDbContext.AccessForms on m.AccessFormId equals f.AccessFormId
                     where
-                    r.UserId == userId.Value &&
-                    !role.IsDeleted &&
-                    (ignorePersianFlag || !a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
+                     r.UserId == userId.Value &&
+                     !role.IsDeleted &&
+                     m.IsActive &&
+                     (ignorePersianFlag || !a.HasPersianAccess.HasValue || a.HasPersianAccess == persianAccess) &&
                     request.AccessFormId.Contains(f.AccessFormId)
                     select a.AccessRoleId).AnyAsync();
 
@@ -280,8 +289,9 @@ namespace IdentityServer.GrpcServer.Services
                 join menu in _applicationDbContext.AccessMenus on grant.AccessMenuId equals menu.AccessMenuId
                 join form in _applicationDbContext.AccessForms on menu.AccessFormId equals form.AccessFormId
                 where grant.UserId == userId.Value
-                    && !grant.IsDeleted
-                    && grant.AccessSystemId == form.AccessSystemId
+                     && !grant.IsDeleted
+                     && menu.IsActive
+                     && grant.AccessSystemId == form.AccessSystemId
                     && request.AccessFormId.Contains(form.AccessFormId)
                 select grant.AccessUserGrantId
             ).AnyAsync();
