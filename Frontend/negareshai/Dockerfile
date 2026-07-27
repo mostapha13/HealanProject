@@ -5,8 +5,10 @@ RUN npm ci --legacy-peer-deps
 COPY . ./
 RUN npm run build
 
-FROM nginx:1.27-alpine
-COPY --from=build /app/.next/standalone /usr/share/nginx/html
-COPY --from=build /app/.next/static /usr/share/nginx/html/.next/static
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+EXPOSE 3000
+CMD ["node", "server.js"]
