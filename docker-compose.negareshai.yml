@@ -31,6 +31,10 @@ services:
       dockerfile: AI/NegareshAI/Dockerfile
     container_name: negareshai-ai
     restart: unless-stopped
+    environment:
+      ANONYMIZED_TELEMETRY: "FALSE"
+      CHROMA_ANONYMIZED_TELEMETRY: "FALSE"
+      CHROMA_TELEMETRY: "FALSE"
     ports:
       - "8000:8000"
     volumes:
