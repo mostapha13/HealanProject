@@ -1,4 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<NegareshAI.Api.Data.NegareshDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("NegareshAI")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
