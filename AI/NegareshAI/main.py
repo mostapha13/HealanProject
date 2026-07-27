@@ -131,3 +131,22 @@ async def compare_contracts(original: UploadFile = File(...), revised: UploadFil
         return {"changes": changes, "added": sum(x["type"] == "added" for x in changes), "removed": sum(x["type"] == "removed" for x in changes)}
     except Exception as exc:
         raise HTTPException(422, f"Contract comparison failed: {exc}") from exc
+
+@app.post("/compliance/check")
+async def compliance_check(payload: dict):
+    text = str(payload.get("text", ""))
+    checklist = payload.get("checklist", [])
+    if not text.strip() or not isinstance(checklist, list) or not checklist:
+        raise HTTPException(400, "text and checklist are required")
+    findings = []
+    for item in checklist:
+        requirement = str(item.get("requirement", item) if isinstance(item, dict) else item).strip()
+        if not requirement:
+            continue
+        matched = requirement in text
+        findings.append({"requirement": requirement, "status": "met" if matched else "missing", "evidence": requirement if matched else None})
+    missing = [x for x in findings if x["status"] == "missing"]
+    decision = "rejected" if missing else "approved"
+    if missing and len(missing) < len(findings):
+        decision = "approved_with_improvements"
+    return {"decision": decision, "findings": findings, "missingCount": len(missing), "totalCount": len(findings)}
