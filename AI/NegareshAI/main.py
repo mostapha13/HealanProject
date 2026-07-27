@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import Response
 from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
@@ -85,3 +86,29 @@ async def search_chunks(payload: dict):
         raise HTTPException(400, "query is required")
     result = collection.query(query_texts=[query], n_results=min(int(payload.get("limit", 5)), 20))
     return {"documents": result.get("documents", [[]])[0], "ids": result.get("ids", [[]])[0], "distances": result.get("distances", [[]])[0]}
+
+@app.post("/contract/generate")
+async def generate_contract(file: UploadFile = File(...), values: str = "{}"):
+    import json
+    try:
+        replacements = json.loads(values)
+        source = BytesIO(await file.read())
+        document = Document(source)
+        def replace_in_paragraph(paragraph):
+            for key, value in replacements.items():
+                marker = "{{" + str(key) + "}}"
+                if marker in paragraph.text:
+                    for run in paragraph.runs:
+                        run.text = run.text.replace(marker, str(value))
+        for paragraph in document.paragraphs:
+            replace_in_paragraph(paragraph)
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        replace_in_paragraph(paragraph)
+        output = BytesIO()
+        document.save(output)
+        return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": "attachment; filename=generated-contract.docx"})
+    except Exception as exc:
+        raise HTTPException(422, f"Contract generation failed: {exc}") from exc
