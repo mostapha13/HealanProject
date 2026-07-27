@@ -1,4 +1,29 @@
 services:
+  negareshai-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: negareshai-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD}"
+    ports:
+      - "14330:1433"
+    volumes:
+      - negareshai-sql:/var/opt/mssql
+    networks: [negareshai]
+
+  negareshai-api:
+    build:
+      context: .
+      dockerfile: Backend/NegareshAI/Dockerfile
+    container_name: negareshai-api
+    environment:
+      ConnectionStrings__NegareshAI: "Server=negareshai-db;Database=NegareshAI;User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
+      Authentication__Authority: "http://identity-server:8080"
+    ports:
+      - "6129:8080"
+    depends_on: [negareshai-db]
+    networks: [negareshai]
+
   negareshai-ai:
     build:
       context: .
@@ -28,3 +53,4 @@ networks:
 
 volumes:
   negareshai-chroma:
+  negareshai-sql:
