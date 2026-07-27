@@ -143,10 +143,14 @@ async def compliance_check(payload: dict):
         requirement = str(item.get("requirement", item) if isinstance(item, dict) else item).strip()
         if not requirement:
             continue
-        matched = requirement in text
-        findings.append({"requirement": requirement, "status": "met" if matched else "missing", "evidence": requirement if matched else None})
+        position = text.find(requirement)
+        matched = position >= 0
+        evidence = text[max(0, position - 120):position + len(requirement) + 120] if matched else None
+        findings.append({"requirement": requirement, "status": "met" if matched else "missing", "evidence": evidence, "confidence": 1.0 if matched else 0.0})
     missing = [x for x in findings if x["status"] == "missing"]
     decision = "rejected" if missing else "approved"
     if missing and len(missing) < len(findings):
         decision = "approved_with_improvements"
-    return {"decision": decision, "findings": findings, "missingCount": len(missing), "totalCount": len(findings)}
+    focus = [str(x) for x in payload.get("focus", []) if str(x).strip()]
+    focus_findings = [{"topic": topic, "present": topic in text, "evidence": text[max(0, text.find(topic)-120):text.find(topic)+len(topic)+120] if topic in text else None} for topic in focus]
+    return {"decision": decision, "findings": findings, "focusFindings": focus_findings, "missingCount": len(missing), "totalCount": len(findings)}
