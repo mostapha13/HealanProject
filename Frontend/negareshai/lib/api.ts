@@ -7,5 +7,21 @@ export async function registerDocument(input: { organizationId: string; title: s
   return response.json();
 }
 
+export function uploadDocument(input: { file: File; organizationId: string; title?: string; documentType?: string }, onProgress?: (percent: number) => void): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const token = typeof window !== 'undefined' ? window.localStorage.getItem('negareshai.access_token') : null;
+    const form = new FormData();
+    form.append('file', input.file); form.append('organizationId', input.organizationId);
+    if (input.title) form.append('title', input.title);
+    form.append('documentType', input.documentType ?? 'contract');
+    const xhr = new XMLHttpRequest(); xhr.open('POST', `${API_BASE}/api/documents/upload`);
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress?.(Math.round(e.loaded / e.total * 100)); };
+    xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve(JSON.parse(xhr.responseText)) : reject(new Error(xhr.responseText || `Upload failed (${xhr.status})`));
+    xhr.onerror = () => reject(new Error('Network error while uploading document'));
+    xhr.send(form);
+  });
+}
+
 export function setAccessToken(token: string) { window.localStorage.setItem('negareshai.access_token', token); }
 export function clearAccessToken() { window.localStorage.removeItem('negareshai.access_token'); }
