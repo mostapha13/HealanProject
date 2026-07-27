@@ -20,6 +20,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__NegareshAI: "Server=negareshai-db;Database=NegareshAI;User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
       Authentication__Authority: "http://identity-server:8080"
+      FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://filemanager:8080/}"
     ports:
       - "6129:8080"
     depends_on: [negareshai-db]
