@@ -3,8 +3,20 @@ from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
 import re
+import chromadb
+import hashlib
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
+class LocalEmbedding:
+    def __call__(self, input):
+        return [self._vector(str(value)) for value in input]
+    @staticmethod
+    def _vector(value: str) -> list[float]:
+        raw = hashlib.sha256(value.encode('utf-8')).digest()
+        return [((raw[i % len(raw)] / 255.0) * 2.0) - 1.0 for i in range(128)]
+
+embedding = LocalEmbedding()
+vector_client = chromadb.EphemeralClient()
 
 @app.get("/health")
 def health():
@@ -52,3 +64,24 @@ async def chunk_document(payload: dict):
         raise HTTPException(400, "maxChars must be between 200 and 10000")
     chunks = structural_chunks(text, max_chars)
     return {"chunks": chunks, "count": len(chunks)}
+
+@app.post("/rag/index")
+async def index_chunks(payload: dict):
+    collection_name = payload.get("collection", "negareshai")
+    chunks = payload.get("chunks", [])
+    if not chunks:
+        raise HTTPException(400, "chunks is required")
+    collection = vector_client.get_or_create_collection(collection_name, embedding_function=embedding)
+    ids = [str(c.get("id", c.get("index", i))) for i, c in enumerate(chunks)]
+    documents = [str(c.get("text", "")) for c in chunks]
+    collection.upsert(ids=ids, documents=documents)
+    return {"collection": collection_name, "indexed": len(documents)}
+
+@app.post("/rag/search")
+async def search_chunks(payload: dict):
+    collection = vector_client.get_or_create_collection(payload.get("collection", "negareshai"), embedding_function=embedding)
+    query = str(payload.get("query", "")).strip()
+    if not query:
+        raise HTTPException(400, "query is required")
+    result = collection.query(query_texts=[query], n_results=min(int(payload.get("limit", 5)), 20))
+    return {"documents": result.get("documents", [[]])[0], "ids": result.get("ids", [[]])[0], "distances": result.get("distances", [[]])[0]}
