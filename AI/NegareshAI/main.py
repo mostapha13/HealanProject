@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
+import re
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
 
@@ -27,3 +28,27 @@ async def extract(file: UploadFile = File(...)):
         raise
     except Exception as exc:
         raise HTTPException(422, f"Document extraction failed: {exc}") from exc
+
+def structural_chunks(text: str, max_chars: int = 1800) -> list[dict]:
+    sections = re.split(r"(?m)(?=^\s*(?:ماده|بند|فصل|تبصره|[0-9۰-۹]+[.)-])\s*)", text)
+    chunks: list[dict] = []
+    for section in sections:
+        section = section.strip()
+        if not section:
+            continue
+        for offset in range(0, len(section), max_chars):
+            value = section[offset:offset + max_chars].strip()
+            if value:
+                chunks.append({"text": value, "index": len(chunks), "section": section[:120]})
+    return chunks
+
+@app.post("/chunk")
+async def chunk_document(payload: dict):
+    text = payload.get("text", "")
+    if not isinstance(text, str) or not text.strip():
+        raise HTTPException(400, "text is required")
+    max_chars = int(payload.get("maxChars", 1800))
+    if max_chars < 200 or max_chars > 10000:
+        raise HTTPException(400, "maxChars must be between 200 and 10000")
+    chunks = structural_chunks(text, max_chars)
+    return {"chunks": chunks, "count": len(chunks)}
