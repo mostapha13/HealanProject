@@ -17,6 +17,7 @@ services:
       dockerfile: Backend/NegareshAI/Dockerfile
     container_name: negareshai-api
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__NegareshAI: "Server=negareshai-db;Database=NegareshAI;User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
       Authentication__Authority: "http://identity-server:8080"
     ports:
