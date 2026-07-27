@@ -95,11 +95,14 @@ async def generate_contract(file: UploadFile = File(...), values: str = "{}"):
         source = BytesIO(await file.read())
         document = Document(source)
         def replace_in_paragraph(paragraph):
+            combined = ''.join(run.text or '' for run in paragraph.runs)
             for key, value in replacements.items():
                 marker = "{{" + str(key) + "}}"
-                if marker in paragraph.text:
-                    for run in paragraph.runs:
-                        run.text = run.text.replace(marker, str(value))
+                combined = combined.replace(marker, str(value))
+            if paragraph.runs and combined != ''.join(run.text or '' for run in paragraph.runs):
+                paragraph.runs[0].text = combined
+                for run in paragraph.runs[1:]:
+                    run.text = ''
         for paragraph in document.paragraphs:
             replace_in_paragraph(paragraph)
         for table in document.tables:
