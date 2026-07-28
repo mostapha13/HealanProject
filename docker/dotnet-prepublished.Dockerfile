@@ -1,0 +1,13 @@
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+
+ARG PUBLISH_DIR
+ARG DLL_NAME
+ENV APP_DLL=${DLL_NAME}
+ENV ASPNETCORE_URLS=http://+:8080
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV TZ=Asia/Tehran
+
+WORKDIR /app
+COPY ${PUBLISH_DIR}/ ./
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "dotnet ${APP_DLL}"]

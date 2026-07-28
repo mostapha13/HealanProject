@@ -1,0 +1,43 @@
+services:
+  redis:
+    container_name: healan-project-redis
+    ports: !reset []
+
+  rabbitmq:
+    container_name: healan-project-rabbitmq
+    ports: !reset []
+
+  identity-grpc:
+    build:
+      dockerfile: docker/dotnet-prepublished.Dockerfile
+      args:
+        PUBLISH_DIR: docker/local-publish/identity-grpc
+        DLL_NAME: IdentityServer.GrpcServer.dll
+
+  identity-server:
+    build:
+      dockerfile: docker/dotnet-prepublished.Dockerfile
+      args:
+        PUBLISH_DIR: docker/local-publish/identity-server
+        DLL_NAME: IdentityServer.dll
+
+  captcha-webui:
+    build:
+      dockerfile: docker/dotnet-prepublished.Dockerfile
+      args:
+        PUBLISH_DIR: docker/local-publish/captcha-webui
+        DLL_NAME: CaptchaProvider.WebUI.dll
+
+  filemanager-grpc:
+    build:
+      dockerfile: docker/dotnet-prepublished.Dockerfile
+      args:
+        PUBLISH_DIR: docker/local-publish/filemanager-grpc
+        DLL_NAME: FileManager.GrpcServer.dll
+
+  filemanager-webui:
+    build:
+      dockerfile: docker/dotnet-prepublished.Dockerfile
+      args:
+        PUBLISH_DIR: docker/local-publish/filemanager-webui
+        DLL_NAME: FileManager.WebUI.dll

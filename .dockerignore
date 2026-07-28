@@ -14,6 +14,7 @@
 **/*.md
 **/*.pdb
 **/*.dll
+!docker/local-publish/**
 docker/config/certbot
 Frontend/healan-www/node_modules
 Frontend/healan-clinic-app/node_modules

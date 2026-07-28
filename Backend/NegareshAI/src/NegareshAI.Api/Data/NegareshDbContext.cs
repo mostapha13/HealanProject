@@ -6,15 +6,52 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
 {
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Department> Departments => Set<Department>();
+    public DbSet<OrganizationMembership> OrganizationMemberships => Set<OrganizationMembership>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
+    public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
+    public DbSet<Contract> Contracts => Set<Contract>();
+    public DbSet<ContractParty> ContractParties => Set<ContractParty>();
+    public DbSet<ContractClause> ContractClauses => Set<ContractClause>();
+    public DbSet<ContractValue> ContractValues => Set<ContractValue>();
+    public DbSet<ContractDate> ContractDates => Set<ContractDate>();
+    public DbSet<ContractObligation> ContractObligations => Set<ContractObligation>();
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
-}
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
-public sealed class Organization { public Guid Id { get; set; } = Guid.NewGuid(); public required string Name { get; set; } public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow; public List<Department> Departments { get; set; } = []; }
-public sealed class Department { public Guid Id { get; set; } = Guid.NewGuid(); public Guid OrganizationId { get; set; } public required string Name { get; set; } public Organization? Organization { get; set; } }
-public sealed class Document { public Guid Id { get; set; } = Guid.NewGuid(); public Guid OrganizationId { get; set; } public required string Title { get; set; } public required string DocumentType { get; set; } public string? OwnerUserId { get; set; } public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow; public List<DocumentVersion> Versions { get; set; } = []; }
-public sealed class DocumentVersion { public Guid Id { get; set; } = Guid.NewGuid(); public Guid DocumentId { get; set; } public int VersionNumber { get; set; } public required string FileId { get; set; } public string? ExtractedText { get; set; } public Document? Document { get; set; } public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow; }
-public sealed class ContractTemplate { public Guid Id { get; set; } = Guid.NewGuid(); public Guid OrganizationId { get; set; } public required string Name { get; set; } public required string ContractType { get; set; } public required string FileId { get; set; } public bool IsActive { get; set; } = true; }
-public sealed class Checklist { public Guid Id { get; set; } = Guid.NewGuid(); public Guid OrganizationId { get; set; } public required string Name { get; set; } public required string DocumentType { get; set; } public required string ItemsJson { get; set; } public int Version { get; set; } = 1; public bool IsActive { get; set; } = true; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<OrganizationMembership>()
+            .HasIndex(item => new { item.OrganizationId, item.UserId })
+            .IsUnique();
+        modelBuilder.Entity<Document>()
+            .HasIndex(item => new { item.OrganizationId, item.IsDeleted, item.CreatedAtUtc });
+        modelBuilder.Entity<Document>()
+            .HasQueryFilter(item => !item.IsDeleted);
+        modelBuilder.Entity<DocumentVersion>()
+            .HasIndex(item => new { item.DocumentId, item.VersionNumber })
+            .IsUnique();
+        modelBuilder.Entity<Contract>()
+            .HasIndex(item => new { item.OrganizationId, item.ContractNumber })
+            .IsUnique()
+            .HasFilter("[ContractNumber] IS NOT NULL");
+        modelBuilder.Entity<Contract>()
+            .HasQueryFilter(item => !item.Document!.IsDeleted);
+        modelBuilder.Entity<Contract>()
+            .Property(item => item.Amount)
+            .HasPrecision(18, 2);
+        modelBuilder.Entity<ContractValue>()
+            .Property(item => item.Amount)
+            .HasPrecision(18, 2);
+        modelBuilder.Entity<AuditLog>()
+            .HasIndex(item => new { item.OrganizationId, item.CreatedAtUtc });
+
+        modelBuilder.Entity<Organization>().HasData(new Organization
+        {
+            Id = KnownOrganizations.Development,
+            Name = "NegareshAI Development Organization",
+            CreatedAtUtc = DateTime.UnixEpoch
+        });
+    }
+}

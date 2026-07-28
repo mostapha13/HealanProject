@@ -2,8 +2,15 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG PROJECT_PATH
 WORKDIR /src
 COPY . .
-RUN dotnet restore "${PROJECT_PATH}"
-RUN dotnet publish "${PROJECT_PATH}" -c Release -o /app/publish /p:UseAppHost=false
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    for attempt in 1 2 3; do \
+      dotnet restore "${PROJECT_PATH}" --disable-parallel && exit 0; \
+      if [ "${attempt}" = "3" ]; then exit 1; fi; \
+      echo "NuGet restore attempt ${attempt} failed; retrying in 5 seconds."; \
+      sleep 5; \
+    done
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish "${PROJECT_PATH}" -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 ARG DLL_NAME

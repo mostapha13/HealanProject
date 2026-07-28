@@ -98,6 +98,8 @@ other secrets in this file.
 
 - The repository path on the development machine is:
   `C:\SourceCode\Mst\HealanProject`
+- For NegareshAI work, read and update `Docs/NEGARESHAI-STATUS.md` as the
+  persistent handoff and resume point.
 - Never persist test or production passwords in repository documentation.
 - Inspect relevant code and dependencies before deleting legacy components.
 - Validate changes in proportion to their impact before merging into `master`.

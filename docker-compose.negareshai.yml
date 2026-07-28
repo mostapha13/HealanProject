@@ -2,13 +2,20 @@ services:
   negareshai-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: negareshai-db
+    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD}"
     ports:
       - "14330:1433"
     volumes:
-      - negareshai-sql:/var/opt/mssql
+      - negareshai-sql-v3:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 15
     networks: [negareshai]
 
   negareshai-api:
@@ -16,14 +23,19 @@ services:
       context: .
       dockerfile: Backend/NegareshAI/Dockerfile
     container_name: negareshai-api
+    restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__NegareshAI: "Server=negareshai-db;Database=NegareshAI;User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
-      Authentication__Authority: "http://identity-server:8080"
-      FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://filemanager:8080/}"
+      Authentication__Authority: "${NEGARESHAI_IDENTITY_URL:-http://host.docker.internal:5005}"
+      Tenancy__DevelopmentOrganizationId: "${NEGARESHAI_DEVELOPMENT_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}"
+      FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://host.docker.internal:6823/}"
+      Cors__AllowedOrigins__0: "${NEGARESHAI_WEB_ORIGIN:-http://localhost:3000}"
     ports:
       - "6129:8080"
-    depends_on: [negareshai-db]
+    depends_on:
+      negareshai-db:
+        condition: service_healthy
     networks: [negareshai]
 
   negareshai-ai:
@@ -46,11 +58,17 @@ services:
     build:
       context: Frontend/negareshai
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: "${NEGARESHAI_PUBLIC_API_URL:-http://localhost:6129}"
     container_name: negareshai-web
     restart: unless-stopped
     ports:
       - "3000:3000"
-    depends_on: [negareshai-ai]
+    depends_on:
+      negareshai-api:
+        condition: service_healthy
+      negareshai-ai:
+        condition: service_healthy
     networks: [negareshai]
 
 networks:
@@ -59,4 +77,4 @@ networks:
 
 volumes:
   negareshai-chroma:
-  negareshai-sql:
+  negareshai-sql-v3:

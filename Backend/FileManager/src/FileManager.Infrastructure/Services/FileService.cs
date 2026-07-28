@@ -76,11 +76,16 @@ namespace FileManager.Infrastructure.Services
             if (request.Size > profile.MaxSizeKB)
                 throw new BadRequestExceptions($"حجم فایل ارسالی نباید بیشتر از {profile.MaxSizeKB} کیلوبایت باشد");
 
-            await using var ms = new MemoryStream();
-            await request.Stream.CopyToAsync(ms);
-            ms.Position = 0;
+            await using var uploadBuffer = new MemoryStream();
+            await request.Stream.CopyToAsync(uploadBuffer);
+            var fileBytes = uploadBuffer.ToArray();
 
-            var meme = MimeDetective.InMemory.MimeExtensions.DetectMimeType(ms);
+            // MimeDetective may dispose the stream while inspecting ZIP-based
+            // formats such as DOCX. Keep detection and persistence streams
+            // independent so a successful inspection cannot close the stream
+            // later passed to the file store.
+            using var detectionStream = new MemoryStream(fileBytes, writable: false);
+            var meme = MimeDetective.InMemory.MimeExtensions.DetectMimeType(detectionStream);
             Console.WriteLine($"[FileService] mime={(meme?.Mime ?? "null")} ext={fileExtension}");
             if (meme == null && fileExtension != ".txt")
                 throw new BadRequestExceptions("محتوای فایل با فرمت فایل مرتبط نیست");
@@ -103,12 +108,11 @@ namespace FileManager.Infrastructure.Services
                 }
             }
 
-            ms.Position = 0;
-
             var fileId = Guid.NewGuid();
             var fileLink = _linkMaker.MakeLink(fileId.ToString(), "File/Download");
             Console.WriteLine($"[FileService] saving fileId={fileId} link={fileLink}");
-            var savedFileName = await _fileManager.SaveFile(ms, fileId, fileExtension, request.IsEncrypted);
+            await using var saveStream = new MemoryStream(fileBytes, writable: false);
+            var savedFileName = await _fileManager.SaveFile(saveStream, fileId, fileExtension, request.IsEncrypted);
             Console.WriteLine($"[FileService] saved as {savedFileName}");
 
             var file = new Domain.Entities.File()

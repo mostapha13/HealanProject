@@ -32,6 +32,7 @@ Thumbs.db
 *.tar
 *.tar.gz
 *.zip
+docker/local-publish/
 
 # Runtime uploaded files
 Backend/FileManager/src/FileManager.WebUI/Attachment/
