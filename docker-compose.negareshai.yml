@@ -30,6 +30,7 @@ services:
       Authentication__Authority: "${NEGARESHAI_IDENTITY_URL:-http://host.docker.internal:5005}"
       Tenancy__DevelopmentOrganizationId: "${NEGARESHAI_DEVELOPMENT_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}"
       FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://host.docker.internal:6823/}"
+      Ai__BaseUrl: "http://negareshai-ai:8000/"
       Cors__AllowedOrigins__0: "${NEGARESHAI_WEB_ORIGIN:-http://localhost:3000}"
     ports:
       - "6129:8080"

@@ -28,12 +28,16 @@ public sealed class UploadDocumentCommandHandler(
             request.BearerToken,
             cancellationToken);
 
-        return await sender.Send(
+        var document = await sender.Send(
             new RegisterDocumentCommand(
                 request.Title,
                 request.DocumentType,
                 fileId,
                 request.ConfidentialityLevel),
             cancellationToken);
+        await sender.Send(
+            new ProcessDocumentCommand(document.Id, null, request.BearerToken),
+            cancellationToken);
+        return document;
     }
 }

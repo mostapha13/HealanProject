@@ -10,6 +10,11 @@ using NegareshAI.Api.Application.Common.Mappings;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Application.Documents.Commands;
 using NegareshAI.Api.Application.Documents.Queries;
+using NegareshAI.Api.Application.Settings.Commands;
+using NegareshAI.Api.Application.Settings.Queries;
+using NegareshAI.Api.Application.Contracts.Commands;
+using NegareshAI.Api.Application.Contracts.Queries;
+using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 using Xunit;
 
@@ -128,6 +133,146 @@ public sealed class TenantIsolationTests
         Assert.Single(audit.Entries);
     }
 
+    [Fact]
+    public async Task List_and_update_are_scoped_to_the_current_tenant()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var ownDocument = CreateDocument(organizationA, "own-file");
+        ownDocument.Title = "Own searchable contract";
+        var foreignDocument = CreateDocument(organizationB, "foreign-file");
+        foreignDocument.Title = "Foreign searchable contract";
+        db.Documents.AddRange(ownDocument, foreignDocument);
+        await db.SaveChangesAsync();
+
+        var tenant = new StubTenant(organizationA, "user-a");
+        var listHandler = new ListDocumentsQueryHandler(db, tenant);
+        var list = await listHandler.Handle(
+            new ListDocumentsQuery("searchable", null, null),
+            default);
+
+        Assert.Equal(1, list.TotalCount);
+        Assert.Equal(ownDocument.Id, Assert.Single(list.Items).Id);
+
+        var audit = new RecordingAuditWriter();
+        var updateHandler = new UpdateDocumentCommandHandler(
+            db,
+            tenant,
+            audit,
+            CreateMapper());
+        Assert.Null(await updateHandler.Handle(
+            new UpdateDocumentCommand(
+                foreignDocument.Id,
+                "Hacked",
+                "contract",
+                ConfidentialityLevel.Internal),
+            default));
+
+        var updated = await updateHandler.Handle(
+            new UpdateDocumentCommand(
+                ownDocument.Id,
+                "Updated title",
+                "prospectus",
+                ConfidentialityLevel.HighlyConfidential),
+            default);
+        Assert.NotNull(updated);
+        Assert.Equal("Updated title", updated.Title);
+        Assert.Equal(ConfidentialityLevel.HighlyConfidential, updated.ConfidentialityLevel);
+        Assert.Equal("Foreign searchable contract", foreignDocument.Title);
+        Assert.Single(audit.Entries);
+    }
+
+    [Fact]
+    public async Task Runtime_settings_are_versioned_and_tenant_scoped()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var audit = new RecordingAuditWriter();
+        var tenantA = new StubTenant(organizationA, "user-a");
+        var upsert = new UpsertRuntimeSettingCommandHandler(db, tenantA, audit);
+
+        var created = await upsert.Handle(
+            new UpsertRuntimeSettingCommand(
+                "ai-model", "document-comparison", """{"model":"local-a"}""", true),
+            default);
+        var updated = await upsert.Handle(
+            new UpsertRuntimeSettingCommand(
+                "ai-model", "document-comparison", """{"model":"local-b"}""", true),
+            default);
+
+        db.RuntimeSettings.Add(new RuntimeSetting
+        {
+            OrganizationId = organizationB,
+            Category = "ai-model",
+            Key = "document-comparison",
+            ValueJson = """{"model":"foreign"}"""
+        });
+        await db.SaveChangesAsync();
+
+        var list = await new ListRuntimeSettingsQueryHandler(db, tenantA)
+            .Handle(new ListRuntimeSettingsQuery("ai-model"), default);
+
+        Assert.Equal(created.Id, updated.Id);
+        Assert.Equal(2, updated.Version);
+        Assert.Equal("""{"model":"local-b"}""", Assert.Single(list).ValueJson);
+        Assert.Equal(2, audit.Entries.Count);
+    }
+
+    [Fact]
+    public async Task Contract_crud_is_scoped_to_the_document_organization()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var ownDocument = CreateDocument(organizationA, "own-file");
+        var foreignDocument = CreateDocument(organizationB, "foreign-file");
+        db.Documents.AddRange(ownDocument, foreignDocument);
+        await db.SaveChangesAsync();
+        var tenant = new StubTenant(organizationA, "user-a");
+        var audit = new RecordingAuditWriter();
+        var handler = new CreateContractCommandHandler(db, tenant, audit);
+        var foreignRequest = ContractRequest(foreignDocument.Id, "Foreign");
+        Assert.Null(await handler.Handle(
+            new CreateContractCommand(foreignRequest), default));
+
+        var created = await handler.Handle(
+            new CreateContractCommand(ContractRequest(ownDocument.Id, "Own")),
+            default);
+        Assert.NotNull(created);
+        Assert.Equal(organizationA,
+            (await db.Contracts.SingleAsync(item => item.Id == created.Id)).OrganizationId);
+        var listed = await new ListContractsQueryHandler(db, tenant).Handle(
+            new ListContractsQuery(null, null), default);
+        Assert.Equal(created.Id, Assert.Single(listed.Items).Id);
+        Assert.Single(created.Parties);
+        Assert.Single(audit.Entries);
+    }
+
+    [Fact]
+    public async Task Restore_document_only_restores_current_tenants_archive()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var own = CreateDocument(organizationA, "own");
+        var foreign = CreateDocument(organizationB, "foreign");
+        own.IsDeleted = true;
+        foreign.IsDeleted = true;
+        db.Documents.AddRange(own, foreign);
+        await db.SaveChangesAsync();
+        var handler = new RestoreDocumentCommandHandler(
+            db, new StubTenant(organizationA, "user-a"), new RecordingAuditWriter());
+
+        Assert.False(await handler.Handle(new RestoreDocumentCommand(foreign.Id), default));
+        Assert.True(await handler.Handle(new RestoreDocumentCommand(own.Id), default));
+        Assert.False((await db.Documents.IgnoreQueryFilters()
+            .SingleAsync(item => item.Id == own.Id)).IsDeleted);
+        Assert.True((await db.Documents.IgnoreQueryFilters()
+            .SingleAsync(item => item.Id == foreign.Id)).IsDeleted);
+    }
+
     private static NegareshDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<NegareshDbContext>()
@@ -156,6 +301,14 @@ public sealed class TenantIsolationTests
         });
         return document;
     }
+
+    private static SaveContractRequest ContractRequest(Guid documentId, string subject) =>
+        new(documentId, null, subject, ContractStatus.Draft, 1_000_000, "IRR",
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow.AddYears(1)),
+            "owner-a",
+            [new ContractPartyRequest(
+                ContractPartyRole.SecondParty, "Company A", null, null)]);
 
     private sealed record StubTenant(Guid OrganizationId, string UserId) : ICurrentTenant;
 

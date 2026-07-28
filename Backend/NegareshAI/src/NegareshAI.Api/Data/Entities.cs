@@ -222,3 +222,16 @@ public sealed class AuditLog
     public string? MetadataJson { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+
+public sealed class RuntimeSetting
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Category { get; set; }
+    public required string Key { get; set; }
+    public required string ValueJson { get; set; }
+    public int Version { get; set; } = 1;
+    public bool IsActive { get; set; } = true;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}

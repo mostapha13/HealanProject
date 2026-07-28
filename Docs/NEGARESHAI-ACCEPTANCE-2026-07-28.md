@@ -114,3 +114,55 @@ Compose جدید healthcheck نمی‌شد. volume قبلی حذف نشد و ب�
 مرحلهٔ زیرساخت و P0 پذیرفته‌اند. ادامه باید مستقیماً از P1 در
 `NEGARESHAI-ROADMAP.md` آغاز شود. در Production، ورود سند منوط به صدور claim
 سازمان توسط IdentityProvider و تنظیمات بدون fallback توسعه است.
+## P1 document-management slice
+
+Validated after commit `5725fee` on branch `codex/negareshai-foundation`:
+
+| Area | Scenario | Result |
+|---|---|---|
+| Backend tests | MediatR/AutoMapper and tenant-scoped document operations | PASS (9/9) |
+| Frontend | Next.js production build | PASS |
+| Docker | NegareshAI DB, API, AI and Web health | PASS |
+| Upload | Authenticated PDF upload through FileManager | PASS |
+| Search | Tenant-scoped title search | PASS |
+| Edit | Title, type and confidentiality update | PASS |
+| Versioning | Authenticated DOCX upload as version 2 | PASS |
+| Immutability | List reports two retained versions and a new latest FileId | PASS |
+
+The first SQL run exposed an EF tracking defect: the newly constructed
+`DocumentVersion` was treated as an existing row and emitted an UPDATE. The
+handler was corrected to add the entity explicitly to `DocumentVersions`; the
+full Docker scenario then passed. No credentials or bearer tokens are retained
+in this document.
+
+## P1 completion acceptance
+
+| Area | Scenario | Result |
+|---|---|---|
+| Backend tests | CQRS/AutoMapper, tenant isolation, contracts and restore | PASS (12/12) |
+| Frontend | Next.js production build and type validation | PASS |
+| Contract | Create with document, dates, amount, currency and party | PASS |
+| Contract | Update metadata/status and persist party replacement | PASS |
+| Contract | Tenant-scoped search and archive | PASS |
+| Document | Detail and immutable version history | PASS |
+| Document | Authenticated download proxy to FileManager | PASS (149584 bytes) |
+| Document | Archive, archived listing and restore | PASS |
+| UI | Contract CRUD and complete document lifecycle connected | PASS (build) |
+
+The final Web source changed after the last running Docker image was produced.
+Rebuild/recreate needs the operator-provided `NEGARESHAI_SQL_PASSWORD` in a
+local `.env`; credentials are intentionally neither inferred nor stored here.
+
+## P2 secure-pipeline slice
+
+| Area | Scenario | Result |
+|---|---|---|
+| AI build | Build isolated AI Docker image | PASS |
+| Index security | Missing tenant/document/version metadata | PASS (HTTP 422) |
+| Tenant isolation | Search organization A with A+B indexed | PASS (only A) |
+| Citation | Result contains document, version, page and section | PASS |
+| API integration | Upload/version invokes typed private processor | PASS (build/tests) |
+| Processing state | Processing then Ready/Failed with audit | PASS (code/tests) |
+| Backend regression | Existing architecture and tenant tests | PASS (12/12) |
+| Semantic embedding | Local Persian/multilingual model | GAP |
+| OCR | Scanned PDF pages | GAP |

@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-28
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `4a432c8` (`Configure FileManager endpoint for NegareshAI`)
+Last committed baseline: `5725fee` (`Complete NegareshAI P0 foundation`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -90,6 +90,41 @@ git log --oneline --reverse -- Backend/NegareshAI AI/NegareshAI Frontend/negares
 
 ## Current uncommitted work
 
+- Database-driven configuration is now a mandatory product rule:
+  - operational UI data has no hard-coded fallback records;
+  - AI model, group-feature, comparison-rule and module settings are loaded at
+    runtime through tenant-scoped API/database records;
+  - missing configuration produces an honest empty/unconfigured state.
+- Added the tenant-scoped, versioned and audited `RuntimeSetting` entity, API,
+  MediatR handlers and `DynamicRuntimeConfiguration` migration.
+- Added a tenant-scoped dashboard query/API for organization identity, current
+  user, document/contract counts, recent documents, audit activities and
+  upcoming contract deadlines.
+- Completed working UI navigation for overview, documents, contracts,
+  comparison, AI assistant, reports and organization settings. Modules whose
+  business sprint is not implemented show a database-driven empty state rather
+  than simulated operational data.
+- A professional Persian RTL product dashboard has been implemented before P2:
+  - dedicated NegareshAI visual system and responsive navigation;
+  - document/contract KPIs, recent documents, processing states, activity and
+    upcoming contract deadlines;
+  - an on-premise AI assistant entry surface;
+  - responsive upload modal with progress and secure-processing messaging;
+  - desktop and mobile layouts with browser-based visual QA.
+- The dashboard and every operational module use live tenant data; API or
+  configuration failure produces an explicit empty/error state and never
+  simulated operational records.
+- P1 has started with the first tenant-scoped document-management slice:
+  - paginated list/search with document type and processing-status filters;
+  - document metadata edit;
+  - immutable new-version upload through FileManager;
+  - audit events for edit and version creation;
+  - document list/search UI with version counts and upload refresh.
+- The P1 handlers use MediatR, responses use AutoMapper, and controllers remain
+  thin.
+- A Docker/SQL acceptance run found and fixed an EF tracking bug that attempted
+  to update a new `DocumentVersion`; the handler now explicitly adds the new
+  version to `DbSet<DocumentVersion>`.
 - Fixed Swagger generation for `POST /api/documents/upload`.
   - Added `UploadDocumentRequest` as the multipart form model.
   - Changed `DocumentsController.Upload` to accept that model.
@@ -203,6 +238,28 @@ Performed on 2026-07-28:
   create/view/delete audits were written, and soft delete hid the document.
 - Production requires IdentityProvider to issue a trusted organization claim;
   the Development fallback is not accepted outside Development.
+- P1 first-slice validation:
+  - NegareshAI API tests passed (9/9).
+  - local Next.js production build passed.
+  - API and Web Docker images built; all four NegareshAI containers are healthy.
+  - authenticated Docker acceptance passed for upload, list/search, metadata
+    edit, and second-version upload.
+  - the final document list returned one matching row with `VersionCount = 2`;
+    the latest FileManager file ID differed from version 1.
+- UI review build:
+  - local Next.js production build passed.
+  - Docker Next.js 15.5.21 image built and the Web container was recreated.
+  - `http://localhost:3000` returned HTTP 200.
+  - browser QA passed for desktop dashboard, upload modal and the mobile
+    breakpoint without horizontal overflow.
+- Dynamic UI validation:
+  - Backend tests passed (10/10), including versioned tenant isolation for
+    runtime settings.
+  - frontend production build passed.
+  - Docker migration created `RuntimeSettings`.
+  - authenticated dashboard returned database counts and recent documents.
+  - a runtime `ui/dashboard` setting was written, versioned and read back
+    through the tenant-scoped API.
 
 ## Environment limitations and known issues
 
@@ -239,19 +296,23 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start P1 in `Docs/NEGARESHAI-ROADMAP.md`: tenant-scoped document/contract
-   list, search, create, edit, new-version and archive APIs plus management UI.
-2. Continue Docker work only for services required by NegareshAI. The verified
+1. Resume the CPU-only AI image build from the current source:
+   `docker build -t negareshai-ai:p2-persian -f AI/NegareshAI/Dockerfile .`.
+2. Run `python -m unittest -v test_rag_security.py` inside that image with
+   `EMBEDDING_BACKEND=hash`; it now includes the Persian-digit numeric-ranking
+   test.
+3. Download/cache `BAAI/bge-m3` into an organization-controlled model volume
+   and run a real semantic Persian retrieval smoke test without outbound
+   inference.
+4. Add OCR for scanned pages, user/group ACL metadata, and retrieval-quality
+   benchmarks.
+3. Continue Docker work only for services required by NegareshAI. The verified
    `docker-through-filemanager` checkpoint must not be repeated.
-3. Add a repeatable scripted Docker smoke test for Identity token acquisition,
+4. Add a repeatable scripted Docker smoke test for Identity token acquisition,
    FileManager upload, and NegareshAI document registration without logging
    credentials or bearer tokens.
-4. Review uncommitted/generated files and separate intentional source changes
+5. Review uncommitted/generated files and separate intentional source changes
    from artifacts.
-5. Commit the verified upload/Swagger, Docker, product-specification, and
-   regression-test changes with
-   only the
-   intended files after commit authorization is given.
 6. Add an integration test for the successful FileManager handoff and SQL
    document registration.
 7. Resolve or explicitly risk-accept the remaining transitive npm audit
@@ -261,6 +322,82 @@ Performed on 2026-07-28:
 
 ### 2026-07-28
 
+- Product-owner checkpoint on 2026-07-29:
+  - all production documents are Persian and contain important amounts, dates,
+    percentages and identifiers;
+  - selected `BAAI/bge-m3` for multilingual long-document retrieval;
+  - added hybrid reranking with Persian/Latin digit normalization and an exact
+    numeric-match boost;
+  - added a numeric test distinguishing `۱۵٬۰۰۰٬۰۰۰٬۰۰۰` from a nearby amount;
+  - model selection is read from tenant runtime setting
+    `ai/embedding.model`, and processing fails closed when it is absent;
+  - added the idempotent development seed for BGE-M3 runtime configuration;
+  - added lazy `sentence-transformers` semantic embeddings and per-model Chroma
+    collections so model dimensions cannot collide.
+- The first semantic image build resolved a new GPU-enabled Torch/CUDA package
+  set and began a multi-gigabyte download. It was deliberately stopped.
+  `requirements.txt` is now pinned to `torch==2.5.1+cpu` using the official CPU
+  wheel index. The next session must rebuild from this corrected source.
+- Backend regression tests after the model-setting integration pass 12/12.
+- The corrected CPU image and the new numeric retrieval test have not yet been
+  run; this is the exact continuation point.
+- Started P2 after product-owner approval.
+- Added the private `/pipeline/process` flow for PDF/DOCX extraction,
+  page-aware structural chunking and Chroma indexing.
+- Made organization, document and version metadata mandatory for indexing;
+  search now applies a mandatory organization filter and returns page/section
+  citations.
+- Connected initial upload and immutable version upload to automatic processing
+  through a typed API-to-AI client, with Processing/Ready/Failed state and
+  success/failure audit events.
+- Added a tenant-scoped manual reprocess endpoint.
+- Added Docker-executed AI tests proving missing tenant context is rejected and
+  organization A cannot retrieve organization B chunks; both tests pass.
+- Backend tests remain green (12/12).
+- P2 is not complete: the current embedding remains the explicitly documented
+  hash prototype; local semantic embedding, OCR, finer ACL and quality
+  benchmarks are the next work.
+- Completed P1 contract CRUD and tenant-scoped queries using MediatR,
+  AutoMapper, thin controllers and audit events.
+- Completed document detail/version history, metadata editing, immutable new
+  version upload, archive/restore and authenticated FileManager download proxy.
+- Connected the Persian RTL UI to contract management and the complete document
+  lifecycle, including archive and restore.
+- Fixed contract-party EF state handling and normalized FileManager upload
+  responses while keeping legacy stored identifiers downloadable.
+- Backend tests pass 12/12 and the local Next.js production build passes.
+- Full authenticated Docker/SQL acceptance passed: contract create/update/
+  search/archive, party persistence, document version listing, secure download
+  (149584 bytes), archive listing and restore.
+- Rebuilding the final Web image requires `NEGARESHAI_SQL_PASSWORD` to be
+  supplied through the operator's local `.env`; no secret is stored in history.
+- Recorded the mandatory database-driven configuration rule requested by the
+  product owner.
+- Removed demo documents, fixed KPI values, fake activities, fake deadlines,
+  fixed storage usage and fixed user/date data from the UI.
+- Added runtime settings and a real database-backed dashboard API using
+  MediatR, tenant filtering, versioning and audit.
+- Completed interactive navigation and honest empty states for modules that
+  will receive their domain implementation in later sprints.
+- Paused further sprint implementation for a user-requested UI/UX approval
+  checkpoint before P2.
+- Replaced the prototype upload page with a professional responsive Persian RTL
+  dashboard and secure upload experience.
+- Corrected corrupted Persian frontend metadata and API error messages.
+- Built locally and in Docker, then visually inspected desktop, modal and
+  mobile states in the browser.
+- Committed the completed P0 foundation as `5725fee` and pushed branch
+  `codex/negareshai-foundation` to `origin`.
+- Started P1 with document list/search/filter, metadata edit, immutable version
+  creation, audit events, and the first management-list UI.
+- Added tenant isolation coverage for P1 list and edit handlers; all 9 API tests
+  pass.
+- Built the frontend and rebuilt API/Web Docker images.
+- During real SQL acceptance, found that a new version with a client-generated
+  GUID was tracked as Modified and produced an UPDATE/concurrency exception.
+  Explicitly adding it to `DocumentVersions` corrected the operation to INSERT.
+- Re-ran authenticated Docker acceptance successfully: upload, edit, search,
+  version 2, two retained versions, and a changed latest FileManager ID.
 - Resumed from commit `4a432c8`.
 - Built the frontend and API.
 - Discovered that the Share test project contains no tests.

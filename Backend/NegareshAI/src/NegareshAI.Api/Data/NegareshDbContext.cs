@@ -19,6 +19,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<RuntimeSetting> RuntimeSettings => Set<RuntimeSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +47,9 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
             .HasPrecision(18, 2);
         modelBuilder.Entity<AuditLog>()
             .HasIndex(item => new { item.OrganizationId, item.CreatedAtUtc });
+        modelBuilder.Entity<RuntimeSetting>()
+            .HasIndex(item => new { item.OrganizationId, item.Category, item.Key })
+            .IsUnique();
 
         modelBuilder.Entity<Organization>().HasData(new Organization
         {
