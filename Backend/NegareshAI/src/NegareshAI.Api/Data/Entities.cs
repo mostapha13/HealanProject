@@ -42,6 +42,46 @@ public enum ContractPartyRole
     Other = 5
 }
 
+public enum ComparisonBasisMode
+{
+    DocumentGroup = 1,
+    RuleSets = 2,
+    ReferenceDocument = 3,
+    Combined = 4
+}
+
+public enum ComparisonRunStatus
+{
+    Running = 1,
+    Completed = 2,
+    NeedsReview = 3,
+    Failed = 4
+}
+
+public enum ComparisonOutcome
+{
+    Compliant = 1,
+    NonCompliant = 2,
+    NeedsHumanReview = 3
+}
+
+public enum FindingType
+{
+    Matched = 1,
+    Missing = 2,
+    Forbidden = 3,
+    Different = 4,
+    Extra = 5
+}
+
+public enum FindingReviewDecision
+{
+    Pending = 1,
+    Approved = 2,
+    Rejected = 3,
+    Corrected = 4
+}
+
 public sealed class Organization
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -234,4 +274,130 @@ public sealed class RuntimeSetting
     public bool IsActive { get; set; } = true;
     public string? UpdatedByUserId { get; set; }
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public sealed class DocumentGroup
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public List<DocumentGroupMember> Members { get; set; } = [];
+    public List<RuleSet> RuleSets { get; set; } = [];
+}
+
+public sealed class DocumentGroupMember
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid DocumentGroupId { get; set; }
+    public Guid DocumentId { get; set; }
+    public DocumentGroup? DocumentGroup { get; set; }
+    public Document? Document { get; set; }
+}
+
+public sealed class RuleSet
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid? DocumentGroupId { get; set; }
+    public required string Name { get; set; }
+    public int Version { get; set; } = 1;
+    public DateTime EffectiveFromUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? EffectiveToUtc { get; set; }
+    public bool IsActive { get; set; } = true;
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DocumentGroup? DocumentGroup { get; set; }
+    public List<Rule> Rules { get; set; } = [];
+}
+
+public sealed class Rule
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RuleSetId { get; set; }
+    public required string Code { get; set; }
+    public required string Title { get; set; }
+    public required string Instruction { get; set; }
+    public int Severity { get; set; } = 2;
+    public int Order { get; set; }
+    public bool IsActive { get; set; } = true;
+    public RuleSet? RuleSet { get; set; }
+    public List<RuleParameter> Parameters { get; set; } = [];
+}
+
+public sealed class RuleParameter
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RuleId { get; set; }
+    public required string Key { get; set; }
+    public required string ValueJson { get; set; }
+    public Rule? Rule { get; set; }
+}
+
+public sealed class ComparisonRun
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid TargetDocumentId { get; set; }
+    public Guid TargetVersionId { get; set; }
+    public ComparisonBasisMode BasisMode { get; set; }
+    public Guid? DocumentGroupId { get; set; }
+    public Guid? ReferenceDocumentId { get; set; }
+    public Guid? ReferenceVersionId { get; set; }
+    public string? UserInstruction { get; set; }
+    public required string RuleSetSnapshotJson { get; set; }
+    public required string SourceSnapshotJson { get; set; }
+    public required string ModelId { get; set; }
+    public required string PromptVersion { get; set; }
+    public ComparisonRunStatus Status { get; set; } = ComparisonRunStatus.Running;
+    public ComparisonOutcome? Outcome { get; set; }
+    public decimal? ScorePercent { get; set; }
+    public string? FailureReason { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? CompletedAtUtc { get; set; }
+    public Document? TargetDocument { get; set; }
+    public DocumentVersion? TargetVersion { get; set; }
+    public DocumentGroup? DocumentGroup { get; set; }
+    public Document? ReferenceDocument { get; set; }
+    public DocumentVersion? ReferenceVersion { get; set; }
+    public List<ComparisonRunRuleSet> RuleSets { get; set; } = [];
+    public List<ComparisonFinding> Findings { get; set; } = [];
+}
+
+public sealed class ComparisonRunRuleSet
+{
+    public Guid ComparisonRunId { get; set; }
+    public Guid RuleSetId { get; set; }
+    public ComparisonRun? ComparisonRun { get; set; }
+    public RuleSet? RuleSet { get; set; }
+}
+
+public sealed class ComparisonFinding
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ComparisonRunId { get; set; }
+    public Guid? RuleId { get; set; }
+    public FindingType Type { get; set; }
+    public int Severity { get; set; }
+    public required string Title { get; set; }
+    public required string Reason { get; set; }
+    public string? TargetEvidence { get; set; }
+    public int? TargetPage { get; set; }
+    public string? TargetSection { get; set; }
+    public string? ReferenceEvidence { get; set; }
+    public int? ReferencePage { get; set; }
+    public string? Suggestion { get; set; }
+    public decimal Confidence { get; set; }
+    public FindingReviewDecision ReviewDecision { get; set; } =
+        FindingReviewDecision.Pending;
+    public string? ReviewerComment { get; set; }
+    public string? CorrectedReason { get; set; }
+    public string? ReviewedByUserId { get; set; }
+    public DateTime? ReviewedAtUtc { get; set; }
+    public ComparisonRun? ComparisonRun { get; set; }
+    public Rule? Rule { get; set; }
 }

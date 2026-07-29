@@ -1,8 +1,8 @@
 # NegareshAI Development Status
 
-Last updated: 2026-07-28
+Last updated: 2026-07-30
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `5725fee` (`Complete NegareshAI P0 foundation`)
+Last committed baseline: `fe4fda9`
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -296,26 +296,11 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Resume the CPU-only AI image build from the current source:
-   `docker build -t negareshai-ai:p2-persian -f AI/NegareshAI/Dockerfile .`.
-2. Run `python -m unittest -v test_rag_security.py` inside that image with
-   `EMBEDDING_BACKEND=hash`; it now includes the Persian-digit numeric-ranking
-   test.
-3. Download/cache `BAAI/bge-m3` into an organization-controlled model volume
-   and run a real semantic Persian retrieval smoke test without outbound
-   inference.
-4. Add OCR for scanned pages, user/group ACL metadata, and retrieval-quality
-   benchmarks.
-3. Continue Docker work only for services required by NegareshAI. The verified
-   `docker-through-filemanager` checkpoint must not be repeated.
-4. Add a repeatable scripted Docker smoke test for Identity token acquisition,
-   FileManager upload, and NegareshAI document registration without logging
-   credentials or bearer tokens.
-5. Review uncommitted/generated files and separate intentional source changes
-   from artifacts.
-6. Add an integration test for the successful FileManager handoff and SQL
-   document registration.
-7. Resolve or explicitly risk-accept the remaining transitive npm audit
+1. Start P4 with organization-owned templates and letterheads.
+2. Add Persian natural-language ChangeSets for contract creation and renewal.
+3. Add deterministic date, amount and percentage calculations.
+4. Add source-backed clause generation, diff preview and human approval.
+5. Resolve or explicitly risk-accept the remaining transitive npm audit
    findings after compatibility testing.
 
 ## Session log
@@ -468,3 +453,30 @@ Performed on 2026-07-28:
 - P0 acceptance produced HTTP 201 upload, server-owned organization,
   confidentiality level 3, HTTP 204 soft delete, HTTP 404 after delete,
   three audit rows, one membership row, and 16 SQL base tables.
+- Completed P2 with private local `BAAI/bge-m3` embeddings, scanned-PDF OCR,
+  user/group ACL filtering, page citations, Persian numeric normalization and
+  a deterministic retrieval quality gate.
+- Built the final CPU image with Torch 2.6.0 and cached the model in the private
+  Docker volume; the final acceptance ran with networking disabled.
+- Passed 8/8 AI security/OCR tests, Persian Recall@1 5/5, 12/12 backend tests,
+  the production frontend build with Next.js 15.5.21, Compose validation and
+  `git diff --check`.
+- Started P3 by adding tenant-scoped document groups, document membership,
+  versioned/effective RuleSets, Rules and JSON Parameters.
+- Added authenticated create/list knowledge APIs, audit events, an EF migration,
+  and tenant/versioning coverage; backend tests now pass 13/13.
+- Completed P3 end-to-end with group/rules/reference/combined comparison bases,
+  reproducible source/rule/model/prompt snapshots, evidence-backed findings,
+  expert approve/reject/correct decisions and comparison history.
+- Added the complete comparison workspace UI, including knowledge management,
+  execution setup, findings, page evidence, review actions and report download.
+- Added Persian auditable DOCX/PDF reports. AI/report runtime tests pass 10/10;
+  Persian retrieval remains Recall@1 5/5. PDF render QA passed. DOCX structural
+  QA passed; visual DOCX rendering was unavailable because LibreOffice is not
+  installed in the host runtime.
+- Backend tests pass 15/15, frontend production and Docker builds pass, and the
+  full migration chain through `P3ComparisonEngine` passed on an isolated real
+  SQL Server instance.
+- Final P3 images were built. The already-running local stack was intentionally
+  not recreated because its SQL credential was not available through an
+  authorized source; no existing service or data was changed.

@@ -1,5 +1,6 @@
 using AutoMapper;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
@@ -14,8 +15,11 @@ using NegareshAI.Api.Application.Settings.Commands;
 using NegareshAI.Api.Application.Settings.Queries;
 using NegareshAI.Api.Application.Contracts.Commands;
 using NegareshAI.Api.Application.Contracts.Queries;
+using NegareshAI.Api.Application.Knowledge;
+using NegareshAI.Api.Application.Comparisons;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
+using NegareshAI.Api.Services;
 using Xunit;
 
 namespace NegareshAI.Api.Tests;
@@ -271,6 +275,204 @@ public sealed class TenantIsolationTests
             .SingleAsync(item => item.Id == own.Id)).IsDeleted);
         Assert.True((await db.Documents.IgnoreQueryFilters()
             .SingleAsync(item => item.Id == foreign.Id)).IsDeleted);
+    }
+
+    [Fact]
+    public async Task Knowledge_groups_and_versioned_rules_are_tenant_scoped()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var ownDocument = CreateDocument(organizationA, "own");
+        var foreignDocument = CreateDocument(organizationB, "foreign");
+        db.Documents.AddRange(ownDocument, foreignDocument);
+        await db.SaveChangesAsync();
+        var tenant = new StubTenant(organizationA, "user-a");
+        var audit = new RecordingAuditWriter();
+        var groupHandler = new CreateDocumentGroupCommandHandler(db, tenant, audit);
+
+        Assert.Null(await groupHandler.Handle(new CreateDocumentGroupCommand(
+            new CreateDocumentGroupRequest(
+                "Invalid", null, [ownDocument.Id, foreignDocument.Id])), default));
+
+        var group = await groupHandler.Handle(new CreateDocumentGroupCommand(
+            new CreateDocumentGroupRequest(
+                "فولادی", "اسناد مبنای فولاد", [ownDocument.Id])), default);
+        Assert.NotNull(group);
+        Assert.Equal(ownDocument.Id, Assert.Single(group.DocumentIds));
+
+        var ruleHandler = new CreateRuleSetCommandHandler(db, tenant, audit);
+        var request = new CreateRuleSetRequest(
+            "کنترل فنی فولاد", group.Id, DateTime.UtcNow, null,
+            [new CreateRuleRequest(
+                "STEEL-GRADE", "گرید فولاد", "گرید الزام‌شده را بررسی کن",
+                4, 1, [new CreateRuleParameterRequest("grade", """{"value":"ST37"}""")])]);
+        var versionOne = await ruleHandler.Handle(
+            new CreateRuleSetCommand(request), default);
+        var versionTwo = await ruleHandler.Handle(
+            new CreateRuleSetCommand(request), default);
+
+        Assert.NotNull(versionOne);
+        Assert.NotNull(versionTwo);
+        Assert.Equal(1, versionOne.Version);
+        Assert.Equal(2, versionTwo.Version);
+        Assert.Equal("ST37", JsonDocument.Parse(
+            Assert.Single(Assert.Single(versionTwo.Rules).Parameters).ValueJson)
+            .RootElement.GetProperty("value").GetString());
+
+        db.DocumentGroups.Add(new DocumentGroup
+        {
+            OrganizationId = organizationB,
+            Name = "Foreign",
+            CreatedByUserId = "user-b"
+        });
+        await db.SaveChangesAsync();
+        var listedGroups = await new ListDocumentGroupsQueryHandler(db, tenant)
+            .Handle(new ListDocumentGroupsQuery(), default);
+        var listedRuleSets = await new ListRuleSetsQueryHandler(db, tenant)
+            .Handle(new ListRuleSetsQuery(group.Id), default);
+
+        Assert.Equal(group.Id, Assert.Single(listedGroups).Id);
+        Assert.Equal(2, listedRuleSets.Count);
+        Assert.Equal(3, audit.Entries.Count);
+    }
+
+    [Fact]
+    public async Task Combined_comparison_is_reproducible_and_findings_are_reviewable()
+    {
+        var organizationId = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var target = CreateDocument(organizationId, "target");
+        target.Title = "امیدنامه فولاد دهدشت";
+        target.Versions[0].ExtractedText =
+            "معرفی شرکت و موضوع فعالیت\fسرمایه ثبت شده 15000000000 ریال است.";
+        var reference = CreateDocument(organizationId, "reference");
+        reference.Title = "امیدنامه شرکت B";
+        reference.Versions[0].ExtractedText =
+            "معرفی شرکت و موضوع فعالیت\fسرمایه ثبت شده 15000000000 ریال است. محرمانگی";
+        var group = new DocumentGroup
+        {
+            OrganizationId = organizationId,
+            Name = "فولادی",
+            Members = [new DocumentGroupMember { DocumentId = reference.Id }]
+        };
+        var ruleSet = new RuleSet
+        {
+            OrganizationId = organizationId,
+            DocumentGroupId = group.Id,
+            Name = "کنترل امیدنامه فولادی",
+            Rules =
+            [
+                new Rule
+                {
+                    Code = "CAPITAL", Title = "سرمایه ثبتی",
+                    Instruction = "سرمایه را اصلاح کنید.", Severity = 5,
+                    Parameters =
+                    [
+                        new RuleParameter
+                        {
+                            Key = "expectedNumber",
+                            ValueJson = """{"value":"15000000000"}"""
+                        }
+                    ]
+                },
+                new Rule
+                {
+                    Code = "CONFIDENTIALITY", Title = "بند محرمانگی",
+                    Instruction = "بند محرمانگی اضافه شود.", Severity = 3,
+                    Parameters =
+                    [
+                        new RuleParameter
+                        {
+                            Key = "requiredTerm",
+                            ValueJson = """{"value":"محرمانگی"}"""
+                        }
+                    ]
+                }
+            ]
+        };
+        db.AddRange(target, reference, group, ruleSet);
+        db.RuntimeSettings.AddRange(
+            new RuntimeSetting
+            {
+                OrganizationId = organizationId, Category = "ai",
+                Key = "embedding.model", ValueJson = """{"modelId":"BAAI/bge-m3"}"""
+            },
+            new RuntimeSetting
+            {
+                OrganizationId = organizationId, Category = "ai",
+                Key = "comparison.prompt", ValueJson = """{"template":"compare"}"""
+            });
+        await db.SaveChangesAsync();
+        var tenant = new StubTenant(organizationId, "expert-a");
+        var audit = new RecordingAuditWriter();
+        var handler = new StartComparisonCommandHandler(
+            db, tenant, new ComparisonEngine(), audit);
+
+        var run = await handler.Handle(new StartComparisonCommand(
+            new StartComparisonRequest(
+                target.Id, target.Versions[0].Id, ComparisonBasisMode.Combined,
+                group.Id, [ruleSet.Id], reference.Id, reference.Versions[0].Id,
+                null)), default);
+
+        Assert.NotNull(run);
+        Assert.Equal("BAAI/bge-m3", run.ModelId);
+        Assert.Equal("comparison.prompt:v1", run.PromptVersion);
+        Assert.Contains(ruleSet.Id.ToString(), run.RuleSetSnapshotJson);
+        Assert.Contains(reference.Versions[0].Id.ToString(), run.SourceSnapshotJson);
+        Assert.Equal(3, run.Findings.Count);
+        var missing = Assert.Single(run.Findings, item =>
+            item.Type == FindingType.Missing && item.RuleId is not null);
+        Assert.Equal(3, missing.Severity);
+        Assert.Null(missing.TargetEvidence);
+
+        var reviewed = await new ReviewFindingCommandHandler(db, tenant, audit)
+            .Handle(new ReviewFindingCommand(missing.Id,
+                new ReviewFindingRequest(
+                    FindingReviewDecision.Corrected, "با واحد حقوقی بررسی شد.",
+                    "بند محرمانگی در پیوست وجود دارد.")), default);
+        Assert.NotNull(reviewed);
+        Assert.Equal(FindingReviewDecision.Corrected, reviewed.ReviewDecision);
+        Assert.Equal("expert-a", reviewed.ReviewedByUserId);
+        Assert.Equal(2, audit.Entries.Count);
+    }
+
+    [Fact]
+    public async Task Comparison_cannot_use_another_tenants_target_or_reference()
+    {
+        var organizationA = Guid.NewGuid();
+        var organizationB = Guid.NewGuid();
+        await using var db = CreateDbContext();
+        var own = CreateDocument(organizationA, "own");
+        own.Versions[0].ExtractedText = "متن سند خودی";
+        var foreign = CreateDocument(organizationB, "foreign");
+        foreign.Versions[0].ExtractedText = "متن سند خارجی";
+        db.AddRange(own, foreign);
+        db.RuntimeSettings.AddRange(
+            new RuntimeSetting
+            {
+                OrganizationId = organizationA, Category = "ai",
+                Key = "embedding.model", ValueJson = """{"modelId":"local"}"""
+            },
+            new RuntimeSetting
+            {
+                OrganizationId = organizationA, Category = "ai",
+                Key = "comparison.prompt", ValueJson = """{"template":"compare"}"""
+            });
+        await db.SaveChangesAsync();
+        var handler = new StartComparisonCommandHandler(
+            db, new StubTenant(organizationA, "user-a"),
+            new ComparisonEngine(), new RecordingAuditWriter());
+
+        Assert.Null(await handler.Handle(new StartComparisonCommand(
+            new StartComparisonRequest(
+                foreign.Id, null, ComparisonBasisMode.ReferenceDocument,
+                null, [], own.Id, null, null)), default));
+        Assert.Null(await handler.Handle(new StartComparisonCommand(
+            new StartComparisonRequest(
+                own.Id, null, ComparisonBasisMode.ReferenceDocument,
+                null, [], foreign.Id, null, null)), default));
+        Assert.Empty(db.ComparisonRuns);
     }
 
     private static NegareshDbContext CreateDbContext()

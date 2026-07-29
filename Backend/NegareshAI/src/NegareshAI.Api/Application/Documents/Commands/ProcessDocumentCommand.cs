@@ -72,10 +72,18 @@ public sealed class ProcessDocumentCommandHandler(
                 file.FileName,
                 file.Content,
                 embeddingModel,
+                document.ConfidentialityLevel == ConfidentialityLevel.Internal
+                    ? "organization"
+                    : "restricted",
+                string.IsNullOrWhiteSpace(document.OwnerUserId)
+                    ? []
+                    : [document.OwnerUserId],
+                [],
                 cancellationToken);
             document.ProcessingStatus = result.Status == "ready"
                 ? DocumentProcessingStatus.Ready
                 : DocumentProcessingStatus.Failed;
+            version.ExtractedText = result.ExtractedText;
             auditWriter.Add("document.processed", nameof(Document), document.Id.ToString(), new
             {
                 version.Id,
@@ -83,6 +91,7 @@ public sealed class ProcessDocumentCommandHandler(
                 result.PageCount,
                 result.Characters,
                 result.ChunkCount
+                , result.OcrPageCount
                 , EmbeddingModel = embeddingModel
             });
         }

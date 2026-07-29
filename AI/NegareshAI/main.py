@@ -10,6 +10,7 @@ import chromadb
 import hashlib
 import os
 import difflib
+import logging
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
 class HashEmbedding:
@@ -24,7 +25,10 @@ class SemanticEmbedding:
     def __init__(self, model_id: str):
         from sentence_transformers import SentenceTransformer
         self.model_id = model_id
-        self.model = SentenceTransformer(model_id)
+        self.model = SentenceTransformer(
+            model_id,
+            cache_folder=os.getenv("SENTENCE_TRANSFORMERS_HOME", "/models"),
+            local_files_only=os.getenv("MODEL_OFFLINE", "true").lower() == "true")
     def __call__(self, input):
         values = [str(value) for value in input]
         return self.model.encode(
@@ -42,12 +46,16 @@ def embedding_for(model_id: str):
 vector_client = chromadb.PersistentClient(path=os.getenv('CHROMA_PERSIST_DIR', '/data/chroma'))
 RAG_COLLECTION = os.getenv("RAG_COLLECTION", "negareshai_documents")
 DEFAULT_EMBEDDING_MODEL = "BAAI/bge-m3"
+logger = logging.getLogger("negareshai-ai")
 
 class RagContext(BaseModel):
     organizationId: str = Field(min_length=36, max_length=36)
     documentId: str = Field(min_length=36, max_length=36)
     versionId: str = Field(min_length=36, max_length=36)
     embeddingModel: str = Field(default=DEFAULT_EMBEDDING_MODEL, min_length=3)
+    accessScope: str = Field(default="restricted", pattern="^(organization|restricted)$")
+    allowedUserIds: list[str] = Field(default_factory=list)
+    allowedGroupIds: list[str] = Field(default_factory=list)
 
 class PipelineRequest(RagContext):
     fileName: str
@@ -59,6 +67,8 @@ class IndexRequest(RagContext):
 
 class SearchRequest(BaseModel):
     organizationId: str = Field(min_length=36, max_length=36)
+    userId: str = Field(min_length=1, max_length=200)
+    groupIds: list[str] = Field(default_factory=list)
     query: str = Field(min_length=1)
     documentIds: list[str] | None = None
     limit: int = Field(default=5, ge=1, le=20)
@@ -87,11 +97,32 @@ async def extract(file: UploadFile = File(...)):
     except Exception as exc:
         raise HTTPException(422, f"Document extraction failed: {exc}") from exc
 
-def extract_pages(data: bytes, name: str) -> list[dict]:
+def ocr_pdf_page(data: bytes, page_index: int) -> str:
+    try:
+        import fitz
+        import pytesseract
+        from PIL import Image
+        document = fitz.open(stream=data, filetype="pdf")
+        page = document.load_page(page_index)
+        pixmap = page.get_pixmap(matrix=fitz.Matrix(2.5, 2.5), alpha=False)
+        image = Image.frombytes("RGB", [pixmap.width, pixmap.height], pixmap.samples)
+        languages = os.getenv("OCR_LANGUAGES", "fas+eng")
+        return pytesseract.image_to_string(image, lang=languages).strip()
+    except Exception as exc:
+        raise RuntimeError(f"OCR failed for page {page_index + 1}: {exc}") from exc
+
+def extract_pages(data: bytes, name: str, enable_ocr: bool = True) -> list[dict]:
     if name.lower().endswith(".pdf"):
         reader = PdfReader(BytesIO(data))
-        return [{"page": index + 1, "text": page.extract_text() or ""}
-                for index, page in enumerate(reader.pages)]
+        pages = []
+        for index, page in enumerate(reader.pages):
+            text = (page.extract_text() or "").strip()
+            used_ocr = False
+            if enable_ocr and not text:
+                text = ocr_pdf_page(data, index)
+                used_ocr = bool(text)
+            pages.append({"page": index + 1, "text": text, "ocr": used_ocr})
+        return pages
     if name.lower().endswith(".docx"):
         document = Document(BytesIO(data))
         return [{"page": 1, "text": "\n".join(p.text for p in document.paragraphs)}]
@@ -118,7 +149,11 @@ def collection_for(model_id: str):
         metadata={"embeddingModel": model_id})
 
 def normalize_persian(value: str) -> str:
-    table = str.maketrans("۰۱۲۳۴۵۶۷۸۹يك", "0123456789ییک")
+    table = str.maketrans({
+        **{character: str(index) for index, character in enumerate("۰۱۲۳۴۵۶۷۸۹")},
+        "ي": "ی",
+        "ك": "ک",
+    })
     return re.sub(r"\s+", " ", value.translate(table).replace("٬", "").replace(",", "")).strip().lower()
 
 def numeric_tokens(value: str) -> set[str]:
@@ -152,7 +187,11 @@ def index_document_chunks(context: RagContext, chunks: list[dict]) -> int:
         "page": int(chunk.get("page", 1)),
         "chunkIndex": index,
         "section": str(chunk.get("section", ""))[:500],
-        "numbers": "|".join(sorted(numeric_tokens(str(chunk["text"]))))[:1000]
+        "numbers": "|".join(sorted(numeric_tokens(str(chunk["text"]))))[:1000],
+        "accessScope": context.accessScope,
+        "allowedUserIds": "|".join(sorted(set(context.allowedUserIds)))[:4000],
+        "allowedGroupIds": "|".join(sorted(set(context.allowedGroupIds)))[:4000],
+        "embeddingModel": context.embeddingModel
     } for index, chunk in enumerate(chunks)]
     collection.upsert(ids=ids, documents=documents, metadatas=metadata)
     return len(chunks)
@@ -180,7 +219,7 @@ async def search_chunks(payload: SearchRequest):
     if payload.documentIds:
         filters.append({"documentId": {"$in": payload.documentIds}})
     where = filters[0] if len(filters) == 1 else {"$and": filters}
-    candidate_count = min(max(payload.limit * 4, payload.limit), collection.count())
+    candidate_count = collection.count()
     if candidate_count == 0:
         return {"results": [], "embeddingModel": payload.embeddingModel}
     result = collection.query(
@@ -190,10 +229,19 @@ async def search_chunks(payload: SearchRequest):
     metadatas = result.get("metadatas", [[]])[0]
     distances = result.get("distances", [[]])[0]
     query_numbers = numeric_tokens(payload.query)
+    caller_groups = set(payload.groupIds)
+    permitted = []
+    for text, metadata, distance in zip(documents, metadatas, distances):
+        allowed_users = set(filter(None, str(metadata.get("allowedUserIds", "")).split("|")))
+        allowed_groups = set(filter(None, str(metadata.get("allowedGroupIds", "")).split("|")))
+        if (metadata.get("accessScope") == "organization"
+                or payload.userId in allowed_users
+                or bool(caller_groups & allowed_groups)):
+            permitted.append((text, metadata, distance))
     ranked = [{
         "text": text,
-        "distance": distances[index],
-        "score": (1.0 - float(distances[index]))
+        "distance": distance,
+        "score": (1.0 - float(distance))
                  + (0.25 * lexical_score(payload.query, text))
                  + (0.5 if query_numbers and query_numbers.issubset(numeric_tokens(text)) else 0.0),
         "citation": {
@@ -202,7 +250,7 @@ async def search_chunks(payload: SearchRequest):
             "page": metadata["page"],
             "section": metadata.get("section", "")
         }
-    } for index, (text, metadata) in enumerate(zip(documents, metadatas))]
+    } for text, metadata, distance in permitted]
     ranked.sort(key=lambda item: item["score"], reverse=True)
     return {"results": ranked[:payload.limit], "embeddingModel": payload.embeddingModel}
 
@@ -224,7 +272,9 @@ async def process_document(payload: PipelineRequest):
         indexed = index_document_chunks(payload, chunks)
         return {"status": "ready", "pageCount": len(pages),
                 "characters": sum(len(page["text"]) for page in pages),
-                "chunkCount": indexed}
+                "chunkCount": indexed,
+                "ocrPageCount": sum(1 for page in pages if page.get("ocr")),
+                "extractedText": "\f".join(page["text"] for page in pages)}
     except HTTPException:
         raise
     except Exception as exc:
@@ -296,3 +346,196 @@ async def compliance_check(payload: dict):
     focus = [str(x) for x in payload.get("focus", []) if str(x).strip()]
     focus_findings = [{"topic": topic, "present": topic in text, "evidence": text[max(0, text.find(topic)-120):text.find(topic)+len(topic)+120] if topic in text else None} for topic in focus]
     return {"decision": decision, "findings": findings, "focusFindings": focus_findings, "missingCount": len(missing), "totalCount": len(findings)}
+
+def _report_text(value) -> str:
+    return "" if value is None else str(value)
+
+def _comparison_docx(payload: dict) -> bytes:
+    from docx import Document as WordDocument
+    from docx.enum.section import WD_SECTION
+    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    from docx.shared import Inches, Pt, RGBColor
+
+    document = WordDocument()
+    section = document.sections[0]
+    section.page_width, section.page_height = Inches(8.5), Inches(11)
+    section.top_margin = section.bottom_margin = Inches(1)
+    section.left_margin = section.right_margin = Inches(1)
+    styles = document.styles
+    normal = styles["Normal"]
+    normal.font.name, normal.font.size = "Arial", Pt(11)
+    normal.paragraph_format.space_after = Pt(6)
+    normal.paragraph_format.line_spacing = 1.1
+    for name, size in (("Heading 1", 16), ("Heading 2", 13)):
+        style = styles[name]
+        style.font.name, style.font.size = "Arial", Pt(size)
+        style.font.color.rgb = RGBColor(46, 116, 181)
+        style.font.bold = True
+
+    header = section.header.paragraphs[0]
+    header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    header.add_run("NegareshAI | گزارش محرمانه تطابق اسناد")
+    footer = section.footer.paragraphs[0]
+    footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    footer.add_run(f"شناسه اجرا: {_report_text(payload.get('id'))}")
+
+    def rtl(paragraph):
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        props = paragraph._p.get_or_add_pPr()
+        bidi = OxmlElement("w:bidi")
+        props.append(bidi)
+        for run in paragraph.runs:
+            run.font.name = "Arial"
+            run._element.get_or_add_rPr().append(OxmlElement("w:rtl"))
+        return paragraph
+
+    title = document.add_paragraph()
+    title.paragraph_format.space_after = Pt(4)
+    run = title.add_run("گزارش ممیزی تطابق اسناد")
+    run.bold, run.font.size = True, Pt(23)
+    rtl(title)
+    subtitle = document.add_paragraph(
+        f"{_report_text(payload.get('targetDocumentTitle'))} | "
+        f"{_report_text(payload.get('createdAtUtc'))}")
+    subtitle.paragraph_format.space_after = Pt(16)
+    rtl(subtitle)
+
+    metadata = [
+        ("نتیجه کلی", payload.get("outcomeLabel")),
+        ("امتیاز تطابق", f"{_report_text(payload.get('scorePercent'))}%"),
+        ("مبنای تطابق", payload.get("basisLabel")),
+        ("مدل محلی", payload.get("modelId")),
+        ("نسخه prompt", payload.get("promptVersion")),
+        ("نسخه هدف", payload.get("targetVersionId")),
+    ]
+    for label, value in metadata:
+        paragraph = document.add_paragraph()
+        paragraph.paragraph_format.space_after = Pt(2)
+        paragraph.add_run(f"{label}: ").bold = True
+        paragraph.add_run(_report_text(value))
+        rtl(paragraph)
+
+    heading = document.add_heading("یافته‌ها و شواهد", level=1)
+    rtl(heading)
+    findings = payload.get("findings") or []
+    if not findings:
+        rtl(document.add_paragraph("یافته‌ای برای این اجرا ثبت نشده است."))
+    for index, finding in enumerate(findings, start=1):
+        heading = document.add_heading(
+            f"{index}. {_report_text(finding.get('title'))}", level=2)
+        rtl(heading)
+        table = document.add_table(rows=0, cols=2)
+        table.autofit = False
+        table.columns[0].width, table.columns[1].width = Inches(1.45), Inches(5.05)
+        rows = [
+            ("وضعیت", finding.get("typeLabel")),
+            ("شدت", finding.get("severity")),
+            ("دلیل", finding.get("reason")),
+            ("شاهد هدف", finding.get("targetEvidence")),
+            ("صفحه هدف", finding.get("targetPage")),
+            ("شاهد مرجع", finding.get("referenceEvidence")),
+            ("صفحه مرجع", finding.get("referencePage")),
+            ("پیشنهاد اصلاح", finding.get("suggestion")),
+            ("اطمینان", finding.get("confidence")),
+            ("تصمیم کارشناس", finding.get("reviewLabel")),
+            ("نظر کارشناس", finding.get("reviewerComment")),
+        ]
+        for label, value in rows:
+            row = table.add_row()
+            row.cells[0].width, row.cells[1].width = Inches(1.45), Inches(5.05)
+            row.cells[0].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            row.cells[1].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            row.cells[0].text, row.cells[1].text = label, _report_text(value)
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    rtl(paragraph)
+        document.add_paragraph()
+    output = BytesIO()
+    document.save(output)
+    return output.getvalue()
+
+def _comparison_pdf(payload: dict) -> bytes:
+    from arabic_reshaper import reshape
+    from bidi.algorithm import get_display
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_RIGHT
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    pdfmetrics.registerFont(TTFont("DejaVu", font_path))
+    def fa(value):
+        return get_display(reshape(_report_text(value)))
+    output = BytesIO()
+    document = SimpleDocTemplate(output, pagesize=A4, rightMargin=20*mm,
+        leftMargin=20*mm, topMargin=18*mm, bottomMargin=18*mm,
+        title="NegareshAI Comparison Audit Report")
+    base = getSampleStyleSheet()
+    body = ParagraphStyle("PersianBody", parent=base["BodyText"], fontName="DejaVu",
+        fontSize=9, leading=15, alignment=TA_RIGHT, spaceAfter=5)
+    title = ParagraphStyle("PersianTitle", parent=body, fontSize=18,
+        leading=25, textColor=colors.HexColor("#0B2545"), spaceAfter=8)
+    heading = ParagraphStyle("PersianHeading", parent=body, fontSize=12,
+        leading=18, textColor=colors.HexColor("#2E74B5"), spaceBefore=10,
+        spaceAfter=6)
+    story = [
+        Paragraph(fa("گزارش ممیزی تطابق اسناد"), title),
+        Paragraph(fa(payload.get("targetDocumentTitle")), heading),
+        Paragraph(fa(f"شناسه اجرا: {payload.get('id')}"), body),
+        Paragraph(fa(f"نتیجه: {payload.get('outcomeLabel')} | امتیاز: {payload.get('scorePercent')} درصد"), body),
+        Paragraph(fa(f"مدل: {payload.get('modelId')} | نسخه prompt: {payload.get('promptVersion')}"), body),
+        Spacer(1, 8),
+    ]
+    for index, finding in enumerate(payload.get("findings") or [], start=1):
+        story.append(Paragraph(fa(f"{index}. {finding.get('title')}"), heading))
+        data = [[Paragraph(fa(label), body), Paragraph(fa(value), body)] for label, value in [
+            ("وضعیت", finding.get("typeLabel")), ("شدت", finding.get("severity")),
+            ("دلیل", finding.get("reason")),
+            ("شاهد هدف", finding.get("targetEvidence")),
+            ("صفحه هدف", finding.get("targetPage")),
+            ("شاهد مرجع", finding.get("referenceEvidence")),
+            ("پیشنهاد اصلاح", finding.get("suggestion")),
+            ("اطمینان", finding.get("confidence")),
+            ("تصمیم کارشناس", finding.get("reviewLabel")),
+        ]]
+        table = Table(data, colWidths=[35*mm, 125*mm], repeatRows=0)
+        table.setStyle(TableStyle([
+            ("GRID", (0,0), (-1,-1), .35, colors.HexColor("#D9DEE7")),
+            ("BACKGROUND", (0,0), (0,-1), colors.HexColor("#F2F4F7")),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("RIGHTPADDING", (0,0), (-1,-1), 7),
+            ("LEFTPADDING", (0,0), (-1,-1), 7),
+            ("TOPPADDING", (0,0), (-1,-1), 5),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+        ]))
+        story.extend([table, Spacer(1, 8)])
+    def footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont("DejaVu", 7)
+        canvas.setFillColor(colors.HexColor("#6B7280"))
+        canvas.drawCentredString(
+            A4[0] / 2, 9*mm,
+            fa(f"شناسه اجرا: {payload.get('id')} | صفحه {doc.page}"))
+        canvas.restoreState()
+    document.build(story, onFirstPage=footer, onLaterPages=footer)
+    return output.getvalue()
+
+@app.post("/comparison/report")
+async def comparison_report(payload: dict, format: str = "docx"):
+    if format not in {"docx", "pdf"}:
+        raise HTTPException(400, "format must be docx or pdf")
+    try:
+        content = _comparison_docx(payload) if format == "docx" else _comparison_pdf(payload)
+        media_type = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      if format == "docx" else "application/pdf")
+        return Response(content, media_type=media_type,
+            headers={"Content-Disposition": f"attachment; filename=comparison-report.{format}"})
+    except Exception as exc:
+        raise HTTPException(422, f"Comparison report generation failed: {exc}") from exc

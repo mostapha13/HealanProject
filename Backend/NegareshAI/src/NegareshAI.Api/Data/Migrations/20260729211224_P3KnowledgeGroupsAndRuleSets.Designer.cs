@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NegareshAI.Api.Data;
 
@@ -11,9 +12,11 @@ using NegareshAI.Api.Data;
 namespace NegareshAI.Api.Data.Migrations
 {
     [DbContext(typeof(NegareshDbContext))]
-    partial class NegareshDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729211224_P3KnowledgeGroupsAndRuleSets")]
+    partial class P3KnowledgeGroupsAndRuleSets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,179 +92,6 @@ namespace NegareshAI.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Checklists");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonFinding", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ComparisonRunId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Confidence")
-                        .HasPrecision(5, 4)
-                        .HasColumnType("decimal(5,4)");
-
-                    b.Property<string>("CorrectedReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceEvidence")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ReferencePage")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewDecision")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReviewedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReviewedByUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReviewerComment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("RuleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Severity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Suggestion")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TargetEvidence")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TargetPage")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TargetSection")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComparisonRunId");
-
-                    b.HasIndex("RuleId");
-
-                    b.ToTable("ComparisonFindings");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonRun", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("BasisMode")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CompletedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("DocumentGroupId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("FailureReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ModelId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("Outcome")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PromptVersion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ReferenceDocumentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ReferenceVersionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("RuleSetSnapshotJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("ScorePercent")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<string>("SourceSnapshotJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TargetDocumentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TargetVersionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserInstruction")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentGroupId");
-
-                    b.HasIndex("ReferenceDocumentId");
-
-                    b.HasIndex("ReferenceVersionId");
-
-                    b.HasIndex("TargetDocumentId");
-
-                    b.HasIndex("TargetVersionId");
-
-                    b.HasIndex("OrganizationId", "CreatedAtUtc");
-
-                    b.ToTable("ComparisonRuns");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonRunRuleSet", b =>
-                {
-                    b.Property<Guid>("ComparisonRunId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RuleSetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ComparisonRunId", "RuleSetId");
-
-                    b.HasIndex("RuleSetId");
-
-                    b.ToTable("ComparisonRunRuleSets");
                 });
 
             modelBuilder.Entity("NegareshAI.Api.Data.Contract", b =>
@@ -886,81 +716,6 @@ namespace NegareshAI.Api.Data.Migrations
                     b.ToTable("RuntimeSettings");
                 });
 
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonFinding", b =>
-                {
-                    b.HasOne("NegareshAI.Api.Data.ComparisonRun", "ComparisonRun")
-                        .WithMany("Findings")
-                        .HasForeignKey("ComparisonRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NegareshAI.Api.Data.Rule", "Rule")
-                        .WithMany()
-                        .HasForeignKey("RuleId");
-
-                    b.Navigation("ComparisonRun");
-
-                    b.Navigation("Rule");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonRun", b =>
-                {
-                    b.HasOne("NegareshAI.Api.Data.DocumentGroup", "DocumentGroup")
-                        .WithMany()
-                        .HasForeignKey("DocumentGroupId");
-
-                    b.HasOne("NegareshAI.Api.Data.Document", "ReferenceDocument")
-                        .WithMany()
-                        .HasForeignKey("ReferenceDocumentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("NegareshAI.Api.Data.DocumentVersion", "ReferenceVersion")
-                        .WithMany()
-                        .HasForeignKey("ReferenceVersionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("NegareshAI.Api.Data.Document", "TargetDocument")
-                        .WithMany()
-                        .HasForeignKey("TargetDocumentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("NegareshAI.Api.Data.DocumentVersion", "TargetVersion")
-                        .WithMany()
-                        .HasForeignKey("TargetVersionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DocumentGroup");
-
-                    b.Navigation("ReferenceDocument");
-
-                    b.Navigation("ReferenceVersion");
-
-                    b.Navigation("TargetDocument");
-
-                    b.Navigation("TargetVersion");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonRunRuleSet", b =>
-                {
-                    b.HasOne("NegareshAI.Api.Data.ComparisonRun", "ComparisonRun")
-                        .WithMany("RuleSets")
-                        .HasForeignKey("ComparisonRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NegareshAI.Api.Data.RuleSet", "RuleSet")
-                        .WithMany()
-                        .HasForeignKey("RuleSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ComparisonRun");
-
-                    b.Navigation("RuleSet");
-                });
-
             modelBuilder.Entity("NegareshAI.Api.Data.Contract", b =>
                 {
                     b.HasOne("NegareshAI.Api.Data.Document", "Document")
@@ -1130,13 +885,6 @@ namespace NegareshAI.Api.Data.Migrations
                         .HasForeignKey("DocumentGroupId");
 
                     b.Navigation("DocumentGroup");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ComparisonRun", b =>
-                {
-                    b.Navigation("Findings");
-
-                    b.Navigation("RuleSets");
                 });
 
             modelBuilder.Entity("NegareshAI.Api.Data.Contract", b =>

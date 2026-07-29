@@ -11,6 +11,9 @@ public interface IAiDocumentProcessor
         string fileName,
         byte[] content,
         string embeddingModel,
+        string accessScope,
+        IReadOnlyCollection<string> allowedUserIds,
+        IReadOnlyCollection<string> allowedGroupIds,
         CancellationToken cancellationToken);
 }
 
@@ -18,7 +21,9 @@ public sealed record AiProcessingResult(
     string Status,
     int PageCount,
     int Characters,
-    int ChunkCount);
+    int ChunkCount,
+    int OcrPageCount,
+    string? ExtractedText);
 
 public sealed class AiDocumentProcessor(HttpClient httpClient) : IAiDocumentProcessor
 {
@@ -29,6 +34,9 @@ public sealed class AiDocumentProcessor(HttpClient httpClient) : IAiDocumentProc
         string fileName,
         byte[] content,
         string embeddingModel,
+        string accessScope,
+        IReadOnlyCollection<string> allowedUserIds,
+        IReadOnlyCollection<string> allowedGroupIds,
         CancellationToken cancellationToken)
     {
         using var response = await httpClient.PostAsJsonAsync("pipeline/process", new
@@ -38,7 +46,10 @@ public sealed class AiDocumentProcessor(HttpClient httpClient) : IAiDocumentProc
             versionId,
             fileName,
             contentBase64 = Convert.ToBase64String(content),
-            embeddingModel
+            embeddingModel,
+            accessScope,
+            allowedUserIds,
+            allowedGroupIds
         }, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<AiProcessingResult>(

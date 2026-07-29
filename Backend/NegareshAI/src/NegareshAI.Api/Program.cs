@@ -19,6 +19,8 @@ builder.Services.AddHttpClient<IFileManagerClient, FileManagerClient>((services,
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["FileManager:BaseUrl"] ?? "http://localhost:5000/"));
 builder.Services.AddHttpClient<IAiDocumentProcessor, AiDocumentProcessor>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
+builder.Services.AddHttpClient<IComparisonReportGenerator, ComparisonReportGenerator>((services, client) =>
+    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 var authority = builder.Configuration["Authentication:Authority"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

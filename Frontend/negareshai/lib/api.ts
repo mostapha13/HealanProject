@@ -112,6 +112,43 @@ export type DocumentDetail = {
   versions: DocumentVersion[];
 };
 
+export type DocumentGroup = {
+  id: string; name: string; description?: string; isActive: boolean;
+  documentIds: string[]; createdAtUtc: string;
+};
+
+export type RuleSet = {
+  id: string; name: string; version: number; documentGroupId?: string;
+  effectiveFromUtc: string; effectiveToUtc?: string; isActive: boolean;
+  rules: Array<{
+    id: string; code: string; title: string; instruction: string;
+    severity: number; order: number; isActive: boolean;
+    parameters: Array<{id: string; key: string; valueJson: string}>;
+  }>;
+};
+
+export type ComparisonFinding = {
+  id: string; type: number; severity: number; title: string; reason: string;
+  targetEvidence?: string; targetPage?: number; targetSection?: string;
+  referenceEvidence?: string; referencePage?: number; suggestion?: string;
+  confidence: number; reviewDecision: number; reviewerComment?: string;
+  correctedReason?: string;
+};
+
+export type ComparisonRunSummary = {
+  id: string; targetDocumentId: string; targetDocumentTitle: string;
+  basisMode: number; status: number; outcome?: number; scorePercent?: number;
+  findingCount: number; pendingReviewCount: number; createdAtUtc: string;
+};
+
+export type ComparisonRun = ComparisonRunSummary & {
+  targetVersionId: string; documentGroupId?: string; referenceDocumentId?: string;
+  referenceVersionId?: string; userInstruction?: string; ruleSetSnapshotJson: string;
+  sourceSnapshotJson: string; modelId: string; promptVersion: string;
+  failureReason?: string; createdByUserId: string; completedAtUtc?: string;
+  findings: ComparisonFinding[];
+};
+
 function accessToken() {
   return typeof window !== "undefined"
     ? window.localStorage.getItem("negareshai.access_token")
@@ -146,6 +183,96 @@ export async function listRuntimeSettings(category = ""): Promise<RuntimeSetting
   });
   if (!response.ok) throw new Error("دریافت تنظیمات پویای سامانه انجام نشد");
   return response.json();
+}
+
+async function authorizedFetch(path: string, init: RequestInit = {}) {
+  const token = accessToken();
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  return fetch(`${API_BASE}${path}`, {...init, headers});
+}
+
+export async function listDocumentGroups(): Promise<DocumentGroup[]> {
+  const response = await authorizedFetch("/api/knowledge/document-groups");
+  if (!response.ok) throw new Error("دریافت گروه‌های اسناد انجام نشد");
+  return response.json();
+}
+
+export async function createDocumentGroup(input: {
+  name: string; description?: string; documentIds: string[];
+}): Promise<DocumentGroup> {
+  const response = await authorizedFetch("/api/knowledge/document-groups", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await response.text() || "ثبت گروه انجام نشد");
+  return response.json();
+}
+
+export async function listRuleSets(documentGroupId = ""): Promise<RuleSet[]> {
+  const query = documentGroupId
+    ? `?documentGroupId=${encodeURIComponent(documentGroupId)}` : "";
+  const response = await authorizedFetch(`/api/knowledge/rule-sets${query}`);
+  if (!response.ok) throw new Error("دریافت مجموعه قواعد انجام نشد");
+  return response.json();
+}
+
+export async function createRuleSet(input: {
+  name: string; documentGroupId?: string; effectiveFromUtc?: string;
+  rules: Array<{code: string; title: string; instruction: string; severity: number;
+    order: number; parameters: Array<{key: string; valueJson: string}>}>;
+}): Promise<RuleSet> {
+  const response = await authorizedFetch("/api/knowledge/rule-sets", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({...input, effectiveToUtc: null})
+  });
+  if (!response.ok) throw new Error(await response.text() || "ثبت مجموعه قواعد انجام نشد");
+  return response.json();
+}
+
+export async function listComparisonRuns(): Promise<ComparisonRunSummary[]> {
+  const response = await authorizedFetch("/api/comparisons");
+  if (!response.ok) throw new Error("دریافت تاریخچه تطابق انجام نشد");
+  return response.json();
+}
+
+export async function getComparisonRun(id: string): Promise<ComparisonRun> {
+  const response = await authorizedFetch(`/api/comparisons/${id}`);
+  if (!response.ok) throw new Error("دریافت نتیجه تطابق انجام نشد");
+  return response.json();
+}
+
+export async function startComparison(input: {
+  targetDocumentId: string; basisMode: number; documentGroupId?: string;
+  ruleSetIds: string[]; referenceDocumentId?: string; userInstruction?: string;
+}): Promise<ComparisonRun> {
+  const response = await authorizedFetch("/api/comparisons", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({...input, targetVersionId: null, referenceVersionId: null})
+  });
+  if (!response.ok) throw new Error(await response.text() || "اجرای تطابق انجام نشد");
+  return response.json();
+}
+
+export async function reviewFinding(id: string, input: {
+  decision: number; comment?: string; correctedReason?: string;
+}): Promise<ComparisonFinding> {
+  const response = await authorizedFetch(`/api/comparisons/findings/${id}/review`, {
+    method: "PUT", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await response.text() || "ثبت نظر کارشناس انجام نشد");
+  return response.json();
+}
+
+export async function downloadComparisonReport(id: string, format: "docx"|"pdf") {
+  const response = await authorizedFetch(`/api/comparisons/${id}/report.${format}`);
+  if (!response.ok) throw new Error("تولید گزارش انجام نشد");
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(await response.blob());
+  link.download = `comparison-${id}.${format}`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 export async function listContracts(search = ""): Promise<ContractListResponse> {
