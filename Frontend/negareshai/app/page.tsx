@@ -75,7 +75,7 @@ function fullCurrentDate(){return formatJalaliLongDate()}
 function activityTitle(action:string){return ({"document.uploaded":"سند جدید بارگذاری شد","document.registered":"سند جدید ثبت شد","document.updated":"مشخصات سند ویرایش شد","document.version-created":"نسخه جدید سند ایجاد شد","document.viewed":"سند مشاهده شد","document.deleted":"سند بایگانی شد","runtime-setting.upserted":"تنظیمات سامانه به‌روزرسانی شد"} as Record<string,string>)[action]??action}
 function legacyContractStatus(value:number){return ({1:"پیش‌نویس",2:"در حال بررسی",3:"نیازمند اصلاح",4:"تأییدشده",5:"امضاشده",6:"فعال",7:"منقضی‌شده",8:"فسخ‌شده",9:"بایگانی‌شده"} as Record<number,string>)[value]??"نامشخص"}
 
-export default function Home(){
+export default function Home({initialSection="overview"}:{initialSection?:string} = {}){
   const fileInput=useRef<HTMLInputElement>(null);
   const [documents,setDocuments]=useState<DocumentListItem[]>([]);
   const [archivedDocuments,setArchivedDocuments]=useState<DocumentListItem[]>([]);
@@ -119,7 +119,7 @@ export default function Home(){
   const [selectedDocument,setSelectedDocument]=useState<DocumentDetail|null>(null);
   const [contractDraft,setContractDraft]=useState<ContractDetail|null>(null);
   const [contractOpen,setContractOpen]=useState(false);
-  const [activeSection,setActiveSection]=useState("overview");
+  const [activeSection,setActiveSection]=useState(initialSection);
   const [loadError,setLoadError]=useState("");
   const [search,setSearch]=useState(""); const [loading,setLoading]=useState(true);
   const [sidebarOpen,setSidebarOpen]=useState(false); const [uploadOpen,setUploadOpen]=useState(false);

@@ -3,6 +3,7 @@ using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Tenancy;
 using System.Reflection;
 using NegareshAI.Api.Services;
+using NegareshAI.Api.Application.Access;
 
 namespace NegareshAI.Api.Application;
 
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentTenant, CurrentTenant>();
         services.AddScoped<IAuditWriter, AuditWriter>();
         services.AddScoped<IComparisonEngine, ComparisonEngine>();
+        services.AddScoped<IDataScopeAuthorizer, DataScopeAuthorizer>();
         return services;
     }
 }

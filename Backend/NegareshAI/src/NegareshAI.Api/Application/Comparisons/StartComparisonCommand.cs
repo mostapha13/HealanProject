@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NegareshAI.Api.Application.Access;
 using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Contracts;
@@ -16,7 +17,8 @@ public sealed class StartComparisonCommandHandler(
     NegareshDbContext db,
     ICurrentTenant tenant,
     IComparisonEngine engine,
-    IAuditWriter audit)
+    IAuditWriter audit,
+    IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<StartComparisonCommand, ComparisonRunResponse?>
 {
     public async Task<ComparisonRunResponse?> Handle(
@@ -40,6 +42,10 @@ public sealed class StartComparisonCommandHandler(
         var ruleSetIds = request.RuleSetIds.Distinct().ToHashSet();
         if (request.DocumentGroupId is not null)
         {
+            if (authorizer is not null && !await authorizer.CanAccessAsync(
+                    DataScopeResourceType.DocumentGroup, request.DocumentGroupId.Value,
+                    cancellationToken))
+                return null;
             var groupExists = await db.DocumentGroups.AnyAsync(item =>
                 item.Id == request.DocumentGroupId
                 && item.OrganizationId == tenant.OrganizationId && item.IsActive,

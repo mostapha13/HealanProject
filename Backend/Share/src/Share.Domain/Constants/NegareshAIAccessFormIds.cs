@@ -36,4 +36,10 @@ public static class NegareshAIAccessFormIds
     public const int Operations = 6028;
     public const int OperationsManage = 6029;
     public const int ManagementDashboard = 6030;
+    public const int ContractExpertReview = 6031;
+    public const int ContractFinalize = 6032;
+    public const int ComparisonReview = 6033;
+    public const int DocumentFinalizeRag = 6034;
+    public const int ContractGroupAccess = 6035;
+    public const int DocumentGroupAccess = 6036;
 }

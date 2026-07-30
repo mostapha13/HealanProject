@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NegareshAI.Api.Application.Access;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
@@ -8,19 +9,31 @@ namespace NegareshAI.Api.Application.Knowledge;
 
 public sealed record ListDocumentGroupsQuery : IRequest<IReadOnlyList<DocumentGroupResponse>>;
 
-public sealed class ListDocumentGroupsQueryHandler(NegareshDbContext db, ICurrentTenant tenant)
+public sealed class ListDocumentGroupsQueryHandler(
+    NegareshDbContext db, ICurrentTenant tenant, IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<ListDocumentGroupsQuery, IReadOnlyList<DocumentGroupResponse>>
 {
     public async Task<IReadOnlyList<DocumentGroupResponse>> Handle(
-        ListDocumentGroupsQuery request, CancellationToken cancellationToken) =>
-        await db.DocumentGroups.AsNoTracking()
+        ListDocumentGroupsQuery request, CancellationToken cancellationToken)
+    {
+        var groups = await db.DocumentGroups.AsNoTracking()
             .Where(item => item.OrganizationId == tenant.OrganizationId)
             .OrderBy(item => item.Name)
-            .Select(item => new DocumentGroupResponse(
-                item.Id, item.Name, item.Description, item.IsActive,
-                item.Members.Select(member => member.DocumentId).ToArray(),
-                item.CreatedAtUtc))
             .ToListAsync(cancellationToken);
+        if (authorizer is not null)
+        {
+            var visible = new List<DocumentGroup>();
+            foreach (var group in groups)
+                if (await authorizer.CanAccessAsync(
+                        DataScopeResourceType.DocumentGroup, group.Id, cancellationToken))
+                    visible.Add(group);
+            groups = visible;
+        }
+        return groups.Select(item => new DocumentGroupResponse(
+            item.Id, item.Name, item.Description, item.IsActive,
+            item.Members.Select(member => member.DocumentId).ToArray(),
+            item.CreatedAtUtc)).ToArray();
+    }
 }
 
 public sealed record ListRuleSetsQuery(Guid? DocumentGroupId)

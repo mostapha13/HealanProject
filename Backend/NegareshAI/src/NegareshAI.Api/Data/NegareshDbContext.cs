@@ -7,6 +7,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<OrganizationMembership> OrganizationMemberships => Set<OrganizationMembership>();
+    public DbSet<DataScopeAssignment> DataScopeAssignments => Set<DataScopeAssignment>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
     public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
@@ -42,6 +43,12 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<OrganizationMembership>()
             .HasIndex(item => new { item.OrganizationId, item.UserId })
             .IsUnique();
+        modelBuilder.Entity<DataScopeAssignment>()
+            .HasIndex(x => new { x.OrganizationId, x.ResourceType, x.ResourceId, x.SubjectType, x.SubjectId })
+            .IsUnique();
+        modelBuilder.Entity<DataScopeAssignment>()
+            .HasIndex(x => new { x.OrganizationId, x.SubjectType, x.SubjectId, x.ResourceType });
+        modelBuilder.Entity<DataScopeAssignment>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Document>()
             .HasIndex(item => new { item.OrganizationId, item.IsDeleted, item.CreatedAtUtc });
         modelBuilder.Entity<Document>()

@@ -7,6 +7,8 @@ namespace IdentityServer.Domain.Data;
 
 public static class NegareshAIAccessSeed
 {
+    public const string ExpertRole = "NegareshAIExpert";
+    public const string ContractManagerRole = "NegareshAIContractManager";
     private sealed record Form(int Id, string Title, string Url);
     private sealed record Menu(int Id, int? FormId, int? ParentId, int Order, string Title);
 
@@ -44,6 +46,12 @@ public static class NegareshAIAccessSeed
             new Form(NegareshAIAccessFormIds.Operations, "عملیات قرارداد", "/operations"),
             new Form(NegareshAIAccessFormIds.OperationsManage, "مدیریت عملیات قرارداد", "/operations/manage"),
             new Form(NegareshAIAccessFormIds.ManagementDashboard, "داشبورد مدیریتی قراردادها", "/management-dashboard"),
+            new Form(NegareshAIAccessFormIds.ContractExpertReview, "تأیید کارشناسی قرارداد", "/contracts/expert-review"),
+            new Form(NegareshAIAccessFormIds.ContractFinalize, "نهایی‌سازی قرارداد", "/contracts/finalize"),
+            new Form(NegareshAIAccessFormIds.ComparisonReview, "تأیید نتیجه انطباق", "/comparisons/review"),
+            new Form(NegareshAIAccessFormIds.DocumentFinalizeRag, "نهایی‌سازی سند و انتشار RAG", "/documents/finalize"),
+            new Form(NegareshAIAccessFormIds.ContractGroupAccess, "دسترسی گروه‌های قرارداد", "/access/contract-groups"),
+            new Form(NegareshAIAccessFormIds.DocumentGroupAccess, "دسترسی گروه‌های سند", "/access/document-groups"),
         };
         var menus = new[]
         {
@@ -80,6 +88,12 @@ public static class NegareshAIAccessSeed
             new Menu(6131, 6028, null, 10, "عملیات و سررسیدها"),
             new Menu(6132, 6029, 6131, 101, "مدیریت عملیات"),
             new Menu(6133, 6030, null, 11, "داشبورد مدیریتی"),
+            new Menu(6134, 6031, 6104, 104, "قراردادها — تأیید کارشناس"),
+            new Menu(6135, 6032, 6104, 105, "قراردادها — نهایی‌سازی مدیر"),
+            new Menu(6136, 6033, 6105, 101, "انطباق — تأیید نتیجه"),
+            new Menu(6137, 6034, 6103, 104, "اسناد — نهایی‌سازی و انتشار RAG"),
+            new Menu(6138, 6035, 6114, 6, "دسترسی گروه‌های قرارداد"),
+            new Menu(6139, 6036, 6114, 7, "دسترسی گروه‌های سند"),
         };
 
         if (!await db.AccessSystems.AnyAsync(x => x.AccessSystemId == NegareshAIAccessFormIds.SystemId))
@@ -124,6 +138,11 @@ public static class NegareshAIAccessSeed
         }
         await db.SaveChangesAsync();
 
+        var expert = await EnsureSystemRole(roleManager, ExpertRole, "کارشناس");
+        var manager = await EnsureSystemRole(roleManager, ContractManagerRole, "مدیر امور قراردادها");
+        await GrantRole(db, expert, new[] { 6101, 6102, 6103, 6104, 6105, 6106, 6107, 6122, 6123, 6125, 6126, 6134, 6136 });
+        await GrantRole(db, manager, new[] { 6101, 6102, 6103, 6104, 6105, 6106, 6107, 6108, 6122, 6123, 6125, 6126, 6128, 6129, 6130, 6131, 6132, 6133, 6134, 6135, 6136, 6137 });
+
         var admin = await roleManager.FindByNameAsync(ConstUserInfo.AdminRole);
         if (admin == null) return;
         if (!await db.AccessSystemRoles.AnyAsync(x => x.RoleId == admin.Id && x.AccessSystemId == NegareshAIAccessFormIds.SystemId))
@@ -131,6 +150,46 @@ public static class NegareshAIAccessSeed
         foreach (var menuId in menus.Select(x => x.Id))
             if (!await db.AccessRoles.AnyAsync(x => x.RoleId == admin.Id && x.AccessMenuId == menuId))
                 db.AccessRoles.Add(new AccessRole { RoleId = admin.Id, AccessMenuId = menuId, HasPersianAccess = true });
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task<ApplicationRole> EnsureSystemRole(
+        RoleManager<ApplicationRole> roleManager, string name, string displayName)
+    {
+        var role = await roleManager.FindByNameAsync(name);
+        if (role == null)
+        {
+            role = new ApplicationRole(name)
+            {
+                DisplayName = displayName,
+                IsSystem = true,
+                CreatedUtc = DateTime.UtcNow
+            };
+            var result = await roleManager.CreateAsync(role);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(
+                    $"Failed to create {name}: {string.Join(", ", result.Errors.Select(x => x.Description))}");
+        }
+        else
+        {
+            role.DisplayName = displayName;
+            role.IsSystem = true;
+            role.IsDeleted = false;
+            var result = await roleManager.UpdateAsync(role);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(
+                    $"Failed to update {name}: {string.Join(", ", result.Errors.Select(x => x.Description))}");
+        }
+        return role;
+    }
+
+    private static async Task GrantRole(ApplicationDbContext db, ApplicationRole role, IEnumerable<int> menuIds)
+    {
+        if (!await db.AccessSystemRoles.AnyAsync(x => x.RoleId == role.Id && x.AccessSystemId == NegareshAIAccessFormIds.SystemId))
+            db.AccessSystemRoles.Add(new AccessSystemRole { RoleId = role.Id, AccessSystemId = NegareshAIAccessFormIds.SystemId });
+        var existing = await db.AccessRoles.Where(x => x.RoleId == role.Id).Select(x => x.AccessMenuId).ToListAsync();
+        foreach (var menuId in menuIds.Except(existing))
+            db.AccessRoles.Add(new AccessRole { RoleId = role.Id, AccessMenuId = menuId, HasPersianAccess = true });
         await db.SaveChangesAsync();
     }
 }

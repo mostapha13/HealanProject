@@ -96,6 +96,8 @@ public enum WorkflowDecision { Pending = 1, Approved = 2, RevisionRequested = 3,
 public enum ContractOperationType { Deadline = 1, Renewal = 2, Payment = 3, Guarantee = 4, Notice = 5 }
 public enum ContractOperationStatus { Pending = 1, Completed = 2, Cancelled = 3, Overdue = 4 }
 public enum RiskLevel { Low = 1, Medium = 2, High = 3, Critical = 4 }
+public enum DataScopeResourceType { ContractGroup = 1, DocumentGroup = 2 }
+public enum DataScopeSubjectType { User = 1, Role = 2 }
 
 public sealed class Organization
 {
@@ -122,6 +124,24 @@ public sealed class OrganizationMembership
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public Organization? Organization { get; set; }
+}
+
+public sealed class DataScopeAssignment
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public DataScopeResourceType ResourceType { get; set; }
+    public Guid ResourceId { get; set; }
+    public DataScopeSubjectType SubjectType { get; set; }
+    public required string SubjectId { get; set; }
+    public bool IsDenied { get; set; }
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 }
 
 public sealed class Document

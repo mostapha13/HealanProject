@@ -10,9 +10,14 @@ public static class NegareshAIAccessFormIds
         ContractsCreate = 6007, ContractsEdit = 6008, ContractsDelete = 6009,
         Comparisons = 6010, ContractGeneration = 6011, Knowledge = 6012,
         Reports = 6013, ContractStatuses = 6014, BaseDocuments = 6015,
-        ContractParties = 6016, OtherCatalogs = 6017, RuntimeSettings = 6023,
+        ContractParties = 6016, OtherCatalogs = 6017, Users = 6018,
+        Roles = 6019, AccessDefinitions = 6020, RolePermissions = 6021,
+        UserPermissions = 6022, RuntimeSettings = 6023,
         Workflows = 6025, WorkflowDecision = 6026, Risk = 6027,
-        Operations = 6028, OperationsManage = 6029, ManagementDashboard = 6030;
+        Operations = 6028, OperationsManage = 6029, ManagementDashboard = 6030,
+        ContractExpertReview = 6031, ContractFinalize = 6032,
+        ComparisonReview = 6033, DocumentFinalizeRag = 6034,
+        ContractGroupAccess = 6035, DocumentGroupAccess = 6036;
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]

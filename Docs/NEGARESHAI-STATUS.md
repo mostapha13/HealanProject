@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-30
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `433d62c` (`feat(negareshai): complete P5 contract operations`)
+Last committed baseline: `a96937a` (`docs(negareshai): define approved product roadmap`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -91,9 +91,31 @@ permission; expert approval always precedes manager finalization; conformity
 review and RAG finalization remain separate; and effective authorization is
 the intersection of the Healan-style action tree and group data scope.
 
-`Docs/NEGARESHAI-ROADMAP.md` has been rebuilt as the final M0-M8 roadmap. Its
-status is **waiting for explicit product-owner approval**. Do not start M0 or
-any implementation based on that roadmap until approval is received.
+`Docs/NEGARESHAI-ROADMAP.md` is the approved M0-M8 roadmap. The product owner
+approved it and authorized implementation with «شروع کن» on 2026-07-30.
+
+### M0/M1 implementation checkpoint — 2026-07-30
+
+- Added action permissions 6031-6036 and system roles
+  `NegareshAIExpert` / `NegareshAIContractManager`; Admin retains every
+  NegareshAI permission.
+- Added tenant-scoped user/role data-scope assignments for contract and
+  document groups with grant/deny, soft delete and complete audit metadata.
+- Effective document-group authorization is enforced in group listing and
+  comparison start; Admin bypasses data scoping, direct user deny wins, direct
+  user grant wins over role evaluation, and default is deny.
+- Added paginated CQRS data-scope query/save endpoints and the
+  `M1DataScopeAssignments` EF migration.
+- Added independent access routes and a dedicated professional RTL
+  `/access/group-scopes` page.
+- Validation: API and IdentityServer builds pass; API tests pass 24/24;
+  frontend production build passes with all access routes generated.
+- Runtime: NegareshAI API, AI and Web are healthy; IdentityServer was rebuilt
+  and responds on port 5005; the shared local SQL Server remains the database.
+- Remaining M0/M1 work: complete the direct-DbContext P5 controller refactor,
+  add true server pagination to every remaining management list, implement the
+  first-class ContractGroup domain used by contract data scopes, and split the
+  four legacy access route bodies into focused list/form experiences.
 
 ## Authoritative current checkpoint — 2026-07-30
 

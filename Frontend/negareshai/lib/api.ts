@@ -273,6 +273,17 @@ export type DocumentGroup = {
   documentIds: string[]; createdAtUtc: string;
 };
 
+export type DataScopeRow = {
+  id: string; resourceType: number; resourceId: string; subjectType: number;
+  subjectId: string; isDenied: boolean; createdByUserId: string;
+  createdAtUtc: string; updatedByUserId?: string; updatedAtUtc?: string;
+};
+
+export type PagedResponse<T> = {
+  items: T[]; pageNumber: number; pageSize: number; totalCount: number;
+  totalPages: number; hasPreviousPage: boolean; hasNextPage: boolean;
+};
+
 export type RuleSet = {
   id: string; name: string; version: number; documentGroupId?: string;
   effectiveFromUtc: string; effectiveToUtc?: string; isActive: boolean;
@@ -346,6 +357,33 @@ async function authorizedFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
   return fetch(`${API_BASE}${path}`, {...init, headers});
+}
+
+export async function listDataScopes(input: {
+  resourceType: number; subjectType: number; subjectId: string;
+  pageNumber?: number; pageSize?: number;
+}): Promise<PagedResponse<DataScopeRow>> {
+  const query = new URLSearchParams({
+    resourceType: String(input.resourceType),
+    subjectType: String(input.subjectType),
+    subjectId: input.subjectId,
+    pageNumber: String(input.pageNumber ?? 1),
+    pageSize: String(input.pageSize ?? 100)
+  });
+  const response = await authorizedFetch(`/api/access/data-scopes?${query}`);
+  if (!response.ok) throw new Error("دریافت محدوده دسترسی انجام نشد.");
+  return response.json();
+}
+
+export async function saveDataScopes(input: {
+  resourceType: number; subjectType: number; subjectId: string;
+  grantedResourceIds: string[]; deniedResourceIds: string[];
+}) {
+  const response = await authorizedFetch("/api/access/data-scopes", {
+    method: "PUT", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await response.text() || "ثبت محدوده دسترسی انجام نشد.");
 }
 
 export async function listDocumentGroups(): Promise<DocumentGroup[]> {
