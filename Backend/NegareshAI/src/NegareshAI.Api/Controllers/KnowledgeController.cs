@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NegareshAI.Api.Application.Knowledge;
 using NegareshAI.Api.Contracts;
+using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
 
 [ApiController]
 [Route("api/knowledge")]
 [Authorize]
+[NegareshAccess(NegareshAIAccessFormIds.Knowledge)]
 public sealed class KnowledgeController(ISender sender) : ControllerBase
 {
     [HttpGet("document-groups")]

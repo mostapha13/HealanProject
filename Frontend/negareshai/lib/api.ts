@@ -1,5 +1,75 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:6129";
-const IDENTITY_BASE = process.env.NEXT_PUBLIC_IDENTITY_BASE_URL ?? "http://localhost:5005";
+const USER_MANAGER_BASE = process.env.NEXT_PUBLIC_USER_MANAGER_BASE_URL ?? "http://localhost:5074";
+
+export type AccessMenu = {
+  accessMenuId: number;
+  title?: string;
+  isActive: boolean;
+  accessForm?: { accessFormId: number; formTitle: string; url: string };
+  children: AccessMenu[];
+};
+
+export async function listMyMenus(accessSystemId = 12): Promise<AccessMenu[]> {
+  const token = accessToken();
+  const response = await fetch(
+    `${USER_MANAGER_BASE}/UserManager/api/v1/UserAccess/MyMenus?AccessSystemId=${accessSystemId}`,
+    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+  );
+  if (!response.ok) throw new Error("دریافت منوی دسترسی کاربر انجام نشد.");
+  return response.json();
+}
+
+export type IdentityRole = { id:string; name:string; displayName:string; isSystem:boolean; isDeleted:boolean };
+export type IdentityUser = { id:string; userName:string; firstName:string; lastName:string; email?:string; phoneNumber?:string; isActive:boolean; isDeleted:boolean; roleIds:string[] };
+const identityManagementPath = "/UserManager/api/v1/NegareshAIIdentityManagement";
+async function userManagerFetch(path:string, init:RequestInit={}) {
+  const headers=new Headers(init.headers); const token=accessToken();
+  if(token)headers.set("Authorization",`Bearer ${token}`);
+  return fetch(`${USER_MANAGER_BASE}${path}`,{...init,headers});
+}
+export async function listIdentityUsers():Promise<IdentityUser[]> {
+  const response=await userManagerFetch(`${identityManagementPath}/users`);
+  if(!response.ok)throw new Error("دریافت کاربران انجام نشد."); return response.json();
+}
+export async function listIdentityRoles():Promise<IdentityRole[]> {
+  const response=await userManagerFetch(`${identityManagementPath}/roles`);
+  if(!response.ok)throw new Error("دریافت نقش‌ها انجام نشد."); return response.json();
+}
+export async function createIdentityRole(input:{name:string;displayName:string}) {
+  const response=await userManagerFetch(`${identityManagementPath}/roles`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if(!response.ok)throw new Error(await response.text()||"ثبت نقش انجام نشد.");
+}
+export async function createIdentityUser(input:{userName:string;firstName:string;lastName:string;email?:string;phoneNumber?:string;password:string;isActive:boolean;roleIds:string[]}) {
+  const response=await userManagerFetch(`${identityManagementPath}/users`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if(!response.ok)throw new Error(await response.text()||"ثبت کاربر انجام نشد.");
+}
+export async function saveRolePermissions(roleId:string, accessMenuIds:number[]) {
+  const response=await userManagerFetch(`${identityManagementPath}/roles/${roleId}/permissions`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({accessMenuIds})});
+  if(!response.ok)throw new Error(await response.text()||"ثبت دسترسی نقش انجام نشد.");
+}
+export async function getRolePermissions(roleId:string):Promise<number[]> {
+  const response=await userManagerFetch(`${identityManagementPath}/roles/${roleId}/permissions`);
+  if(!response.ok)throw new Error("دریافت دسترسی نقش انجام نشد.");
+  return ((await response.json()) as {accessMenuIds:number[]}).accessMenuIds;
+}
+export async function saveDirectUserAccess(userId:string, grants:number[], denies:number[]) {
+  const headers={"Content-Type":"application/json"};
+  const [grantResponse,denyResponse]=await Promise.all([
+    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-grants`,{method:"PUT",headers,body:JSON.stringify({accessSystemId:12,accessMenuIds:grants})}),
+    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-denies`,{method:"PUT",headers,body:JSON.stringify({accessSystemId:12,accessMenuIds:denies})})
+  ]);
+  if(!grantResponse.ok||!denyResponse.ok)throw new Error("ثبت دسترسی مستقیم کاربر انجام نشد.");
+}
+export async function getDirectUserAccess(userId:string) {
+  const [grantResponse,denyResponse]=await Promise.all([
+    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-grants?accessSystemId=12`),
+    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-denies?accessSystemId=12`)
+  ]);
+  if(!grantResponse.ok||!denyResponse.ok)throw new Error("دریافت دسترسی مستقیم انجام نشد.");
+  const grants=await grantResponse.json() as {accessMenuIds:number[]};
+  const denies=await denyResponse.json() as {accessMenuIds:number[]};
+  return {grants:grants.accessMenuIds,denies:denies.accessMenuIds};
+}
 
 export type DocumentListItem = {
   id: string;
@@ -501,24 +571,6 @@ export async function downloadDocumentVersion(documentId: string, versionId: str
   link.download = match?.[1] ?? "document";
   link.click();
   URL.revokeObjectURL(link.href);
-}
-
-export async function login(username: string, password: string) {
-  const body = new URLSearchParams({
-    grant_type: "password",
-    client_id: "HealanClinicMobile",
-    username,
-    password,
-    scope: "openid profile Content_Producer"
-  });
-  const response = await fetch(`${IDENTITY_BASE}/connect/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  if (!response.ok) throw new Error("نام کاربری یا رمز عبور صحیح نیست");
-  const result = await response.json();
-  setAccessToken(result.access_token);
 }
 
 export async function registerDocument(input: {

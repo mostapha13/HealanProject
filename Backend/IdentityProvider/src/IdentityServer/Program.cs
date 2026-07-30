@@ -50,6 +50,7 @@ namespace IdentityServer
                     try
                     {
                         await HealanAccessSeed.SeedAsync(context, roleManager);
+                        await NegareshAIAccessSeed.SeedAsync(context, roleManager);
                     }
                     catch (Exception accessEx)
                     {

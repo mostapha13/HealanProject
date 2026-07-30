@@ -23,6 +23,8 @@ builder.Services.AddHttpClient<IComparisonReportGenerator, ComparisonReportGener
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 builder.Services.AddHttpClient<IContractDocumentGenerator, ContractDocumentGenerator>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
+builder.Services.AddHttpClient("IdentityUserManager", (services, client) =>
+    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Identity:UserManagerBaseUrl"] ?? "http://localhost:5074/"));
 var authority = builder.Configuration["Authentication:Authority"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -61,6 +63,7 @@ app.Use(async (context, next) =>
     }
 });
 app.UseAuthorization();
+app.UseMiddleware<NegareshAI.Api.Security.NegareshAccessMiddleware>();
 app.MapGet("/health", () => Results.Ok(new { service = "negareshai-api", status = "healthy" }));
 app.MapControllers();
 app.Run();

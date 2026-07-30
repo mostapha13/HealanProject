@@ -1,23 +1,4 @@
 services:
-  negareshai-db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: negareshai-db
-    restart: unless-stopped
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD}"
-    ports:
-      - "14330:1433"
-    volumes:
-      - negareshai-sql-v3:/var/opt/mssql
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
-      interval: 10s
-      timeout: 5s
-      start_period: 20s
-      retries: 15
-    networks: [negareshai]
-
   negareshai-api:
     build:
       context: .
@@ -26,17 +7,17 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__NegareshAI: "Server=${NEGARESHAI_SQL_SERVER:-negareshai-db};Database=${NEGARESHAI_SQL_DATABASE:-NegareshAI};User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__NegareshAI: "Server=${NEGARESHAI_SQL_SERVER:-host.docker.internal,1433};Database=${NEGARESHAI_SQL_DATABASE:-NegareshAI};User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
       Authentication__Authority: "${NEGARESHAI_IDENTITY_URL:-http://host.docker.internal:5005}"
+      Identity__UserManagerBaseUrl: "${NEGARESHAI_USERMANAGER_URL:-http://host.docker.internal:5074/}"
       Tenancy__DevelopmentOrganizationId: "${NEGARESHAI_DEVELOPMENT_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}"
       FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://host.docker.internal:6823/}"
       Ai__BaseUrl: "http://negareshai-ai:8000/"
       Cors__AllowedOrigins__0: "${NEGARESHAI_WEB_ORIGIN:-http://localhost:3000}"
     ports:
       - "6129:8080"
-    depends_on:
-      negareshai-db:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks: [negareshai]
 
   negareshai-ai:
@@ -66,6 +47,8 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: "${NEGARESHAI_PUBLIC_API_URL:-http://localhost:6129}"
+        NEXT_PUBLIC_IDENTITY_BASE_URL: "${NEGARESHAI_PUBLIC_IDENTITY_URL:-http://localhost:5005}"
+        NEXT_PUBLIC_USER_MANAGER_BASE_URL: "${NEGARESHAI_PUBLIC_USER_MANAGER_URL:-http://localhost:5074}"
     container_name: negareshai-web
     restart: unless-stopped
     ports:
@@ -84,4 +67,3 @@ networks:
 volumes:
   negareshai-chroma:
   negareshai-models:
-  negareshai-sql-v3:

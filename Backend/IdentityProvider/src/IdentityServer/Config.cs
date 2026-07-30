@@ -225,6 +225,30 @@ namespace IdentityServer
             },
             new Client
             {
+                ClientId = "NegareshAIWeb",
+                ClientName = "سامانه نگارش هوشمند",
+                RequirePkce = true,
+                RequireClientSecret = false,
+                AllowedGrantTypes = GrantTypes.Code,
+                AllowOfflineAccess = true,
+                AccessTokenLifetime = 60 * 60,
+                AbsoluteRefreshTokenLifetime = 60 * 60 * 8,
+                RedirectUris = (configuration["IdentityServer:NegareshAIRedirectUriCallback"] ?? "http://localhost:3000/auth/callback")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                PostLogoutRedirectUris = (configuration["IdentityServer:NegareshAIPostLogoutRedirectUri"] ?? "http://localhost:3000")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                AllowedCorsOrigins = (configuration["IdentityServer:NegareshAIAllowedCorsOrigins"] ?? "http://localhost:3000")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "Content_Producer",
+                },
+            },
+            new Client
+            {
                 ClientId = "HealanClinicMobile",
                 ClientName = "اپ اندروید پذیرش Healan",
                 RequirePkce = true,

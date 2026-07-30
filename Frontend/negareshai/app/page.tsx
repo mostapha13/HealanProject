@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ComparisonRun, ComparisonRunSummary, ContractBaseDocument, ContractDetail, ContractGeneration, ContractItem, ContractStatusDefinition, ContractTemplate, DashboardResponse, DocumentDetail, DocumentGroup, DocumentListItem, OrganizationParty, RuleSet, RuntimeSetting, archiveContract, archiveDocument, createDocumentGroup, createRuleSet, deleteContractCatalog, downloadComparisonReport, downloadDocumentVersion, generateContract, getComparisonRun, getContract, getDashboard, getDocumentDetail, listArchivedDocuments, listComparisonRuns, listContractCatalog, listContracts, listContractTemplates, listDocumentGroups, listDocuments, listRuleSets, listRuntimeSettings, login, restoreDocument, reviewContractGeneration, reviewFinding, saveContract, saveContractCatalog, startComparison, updateDocument, uploadContractTemplate, uploadDocument, uploadDocumentVersion } from "../lib/api";
+import { AccessMenu, ComparisonRun, ComparisonRunSummary, ContractBaseDocument, ContractDetail, ContractGeneration, ContractItem, ContractStatusDefinition, ContractTemplate, DashboardResponse, DocumentDetail, DocumentGroup, DocumentListItem, IdentityRole, IdentityUser, OrganizationParty, RuleSet, RuntimeSetting, archiveContract, archiveDocument, createDocumentGroup, createIdentityRole, createIdentityUser, createRuleSet, deleteContractCatalog, downloadComparisonReport, downloadDocumentVersion, generateContract, getComparisonRun, getContract, getDashboard, getDirectUserAccess, getDocumentDetail, getRolePermissions, listArchivedDocuments, listComparisonRuns, listContractCatalog, listContracts, listContractTemplates, listDocumentGroups, listDocuments, listIdentityRoles, listIdentityUsers, listMyMenus, listRuleSets, listRuntimeSettings, restoreDocument, reviewContractGeneration, reviewFinding, saveContract, saveContractCatalog, saveDirectUserAccess, saveRolePermissions, startComparison, updateDocument, uploadContractTemplate, uploadDocument, uploadDocumentVersion } from "../lib/api";
+import { requireAuthenticatedUser, signOut } from "../lib/auth";
 import { formatJalaliDate, formatJalaliLongDate, gregorianYmdToJalali, JALALI_MONTH_NAMES, toPersianDigits } from "../lib/jalali";
 import PersianCalendar from "./PersianCalendar";
 
@@ -66,8 +67,8 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-const navItems:{id:string;label:string;icon:IconName}[]=[
-  {id:"overview",label:"نمای کلی",icon:"grid"},{id:"documents",label:"اسناد",icon:"file"},{id:"contracts",label:"قراردادها",icon:"contract"},{id:"comparison",label:"تطبیق اسناد",icon:"compare"},{id:"assistant",label:"دستیار هوشمند",icon:"sparkles"},{id:"reports",label:"گزارش‌ها",icon:"chart"}
+const navItems:{id:string;label:string;icon:IconName;urls:string[]}[]=[
+  {id:"overview",label:"نمای کلی",icon:"grid",urls:["/"]},{id:"documents",label:"اسناد",icon:"file",urls:["/documents"]},{id:"contracts",label:"قراردادها",icon:"contract",urls:["/contracts"]},{id:"comparison",label:"تطبیق اسناد",icon:"compare",urls:["/comparisons"]},{id:"assistant",label:"دستیار هوشمند",icon:"sparkles",urls:["/contract-generation"]},{id:"reports",label:"گزارش‌ها",icon:"chart",urls:["/reports"]}
 ];
 function formatDate(value:string){return formatJalaliDate(value)||value}
 function fullCurrentDate(){return formatJalaliLongDate()}
@@ -80,6 +81,16 @@ export default function Home(){
   const [archivedDocuments,setArchivedDocuments]=useState<DocumentListItem[]>([]);
   const [showArchive,setShowArchive]=useState(false);
   const [dashboard,setDashboard]=useState<DashboardResponse|null>(null);
+  const [accessMenus,setAccessMenus]=useState<AccessMenu[]>([]);
+  const [identityUsers,setIdentityUsers]=useState<IdentityUser[]>([]);
+  const [identityRoles,setIdentityRoles]=useState<IdentityRole[]>([]);
+  const [userDraft,setUserDraft]=useState({userName:"",firstName:"",lastName:"",password:"",roleIds:[] as string[]});
+  const [roleDraft,setRoleDraft]=useState({name:"",displayName:""});
+  const [accessUserId,setAccessUserId]=useState("");
+  const [directGrants,setDirectGrants]=useState<number[]>([]);
+  const [directDenies,setDirectDenies]=useState<number[]>([]);
+  const [accessRoleId,setAccessRoleId]=useState("");
+  const [roleMenuIds,setRoleMenuIds]=useState<number[]>([]);
   const [settings,setSettings]=useState<RuntimeSetting[]>([]);
   const [contracts,setContracts]=useState<ContractItem[]>([]);
   const [contractTemplates,setContractTemplates]=useState<ContractTemplate[]>([]);
@@ -104,9 +115,6 @@ export default function Home(){
   const [selectedDocument,setSelectedDocument]=useState<DocumentDetail|null>(null);
   const [contractDraft,setContractDraft]=useState<ContractDetail|null>(null);
   const [contractOpen,setContractOpen]=useState(false);
-  const [loginOpen,setLoginOpen]=useState(false);
-  const [username,setUsername]=useState("");
-  const [password,setPassword]=useState("");
   const [activeSection,setActiveSection]=useState("overview");
   const [loadError,setLoadError]=useState("");
   const [search,setSearch]=useState(""); const [loading,setLoading]=useState(true);
@@ -114,11 +122,19 @@ export default function Home(){
   const [file,setFile]=useState<File|null>(null); const [title,setTitle]=useState("");
   const [versionFile,setVersionFile]=useState<File|null>(null); const [changeSummary,setChangeSummary]=useState("");
   const [progress,setProgress]=useState(0); const [notice,setNotice]=useState("");
-  const refresh=useCallback(async()=>{setLoading(true);setLoadError("");try{const [result,documentResult,runtimeSettings,contractResult,archived,groups,rules,runs,templates,statuses,baseDocs,parties]=await Promise.all([getDashboard(),listDocuments(),listRuntimeSettings(),listContracts(),listArchivedDocuments(),listDocumentGroups(),listRuleSets(),listComparisonRuns(),listContractTemplates(),listContractCatalog<ContractStatusDefinition>("statuses"),listContractCatalog<ContractBaseDocument>("base-documents"),listContractCatalog<OrganizationParty>("parties")]);setDashboard(result);setDocuments(documentResult.items);setSettings(runtimeSettings);setContracts(contractResult.items);setArchivedDocuments(archived);setDocumentGroups(groups);setRuleSets(rules);setComparisonRuns(runs);setContractTemplates(templates);setContractStatuses(statuses);setContractBaseDocuments(baseDocs);setOrganizationParties(parties)}catch{setDashboard(null);setDocuments([]);setArchivedDocuments([]);setSettings([]);setContracts([]);setDocumentGroups([]);setRuleSets([]);setComparisonRuns([]);setContractTemplates([]);setContractStatuses([]);setContractBaseDocuments([]);setOrganizationParties([]);setLoadError("برای مشاهده اطلاعات سازمان وارد سامانه شوید یا ارتباط API را بررسی کنید.")}finally{setLoading(false)}},[]);
-  useEffect(()=>{void refresh()},[refresh]);
+  const refresh=useCallback(async()=>{setLoading(true);setLoadError("");try{const [result,documentResult,runtimeSettings,contractResult,archived,groups,rules,runs,templates,statuses,baseDocs,parties,menus]=await Promise.all([getDashboard(),listDocuments(),listRuntimeSettings(),listContracts(),listArchivedDocuments(),listDocumentGroups(),listRuleSets(),listComparisonRuns(),listContractTemplates(),listContractCatalog<ContractStatusDefinition>("statuses"),listContractCatalog<ContractBaseDocument>("base-documents"),listContractCatalog<OrganizationParty>("parties"),listMyMenus()]);setDashboard(result);setDocuments(documentResult.items);setSettings(runtimeSettings);setContracts(contractResult.items);setArchivedDocuments(archived);setDocumentGroups(groups);setRuleSets(rules);setComparisonRuns(runs);setContractTemplates(templates);setContractStatuses(statuses);setContractBaseDocuments(baseDocs);setOrganizationParties(parties);setAccessMenus(menus)}catch{setDashboard(null);setDocuments([]);setArchivedDocuments([]);setSettings([]);setContracts([]);setDocumentGroups([]);setRuleSets([]);setComparisonRuns([]);setContractTemplates([]);setContractStatuses([]);setContractBaseDocuments([]);setOrganizationParties([]);setAccessMenus([]);setLoadError("دریافت اطلاعات یا سطح دسترسی کاربر انجام نشد؛ سرویس‌ها را بررسی کنید.")}finally{setLoading(false)}},[]);
+  const allowedUrls=useMemo(()=>{const values=new Set<string>();const walk=(items:AccessMenu[])=>items.forEach(item=>{if(item.accessForm?.url)values.add(item.accessForm.url);walk(item.children??[])});walk(accessMenus);return values},[accessMenus]);
+  const visibleNavItems=useMemo(()=>navItems.filter(item=>item.urls.some(url=>allowedUrls.has(url))),[allowedUrls]);
+  async function loadIdentityManagement(){try{const [users,roles]=await Promise.all([listIdentityUsers(),listIdentityRoles()]);setIdentityUsers(users);setIdentityRoles(roles)}catch(error){setNotice(error instanceof Error?error.message:"اطلاعات کاربران دریافت نشد")}}
+  async function addIdentityRole(){try{await createIdentityRole(roleDraft);setRoleDraft({name:"",displayName:""});await loadIdentityManagement()}catch(error){setNotice(error instanceof Error?error.message:"ثبت نقش انجام نشد")}}
+  async function addIdentityUser(){try{await createIdentityUser({...userDraft,isActive:true});setUserDraft({userName:"",firstName:"",lastName:"",password:"",roleIds:[]});await loadIdentityManagement()}catch(error){setNotice(error instanceof Error?error.message:"ثبت کاربر انجام نشد")}}
+  async function persistDirectAccess(){if(!accessUserId)return;try{await saveDirectUserAccess(accessUserId,directGrants,directDenies);setNotice("دسترسی مستقیم کاربر ذخیره شد.")}catch(error){setNotice(error instanceof Error?error.message:"ثبت دسترسی انجام نشد")}}
+  async function selectAccessUser(userId:string){setAccessUserId(userId);setDirectGrants([]);setDirectDenies([]);if(!userId)return;try{const value=await getDirectUserAccess(userId);setDirectGrants(value.grants);setDirectDenies(value.denies)}catch(error){setNotice(error instanceof Error?error.message:"دسترسی کاربر دریافت نشد")}}
+  async function persistRoleAccess(){if(!accessRoleId)return;try{await saveRolePermissions(accessRoleId,roleMenuIds);setNotice("دسترسی نقش ذخیره شد.")}catch(error){setNotice(error instanceof Error?error.message:"ثبت دسترسی نقش انجام نشد")}}
+  async function selectAccessRole(roleId:string){setAccessRoleId(roleId);setRoleMenuIds([]);if(!roleId)return;try{setRoleMenuIds(await getRolePermissions(roleId))}catch(error){setNotice(error instanceof Error?error.message:"دسترسی نقش دریافت نشد")}}
+  useEffect(()=>{void requireAuthenticatedUser().then(user=>{if(user)void refresh()})},[refresh]);
   const visibleDocuments=useMemo(()=>{const q=search.trim();return q?documents.filter(x=>x.title.includes(q)||x.documentType.includes(q)):documents},[documents,search]);
   async function submitUpload(){if(!file){setNotice("لطفاً یک فایل PDF یا Word انتخاب کنید.");return}setNotice("در حال انتقال امن فایل...");setProgress(0);try{await uploadDocument({file,title:title||file.name},setProgress);setNotice("سند با موفقیت ثبت شد.");setFile(null);setTitle("");await refresh();window.setTimeout(()=>setUploadOpen(false),700)}catch(error){setNotice(error instanceof Error?error.message:"ثبت سند انجام نشد.")}}
-  async function authenticate(){setNotice("");try{await login(username,password);setPassword("");setLoginOpen(false);await refresh()}catch(error){setNotice(error instanceof Error?error.message:"ورود انجام نشد")}}
   async function openDocument(documentId:string,includeArchived=false){try{setSelectedDocument(await getDocumentDetail(documentId,includeArchived));setVersionFile(null);setChangeSummary("")}catch(error){setNotice(error instanceof Error?error.message:"جزئیات سند دریافت نشد")}}
   async function removeDocument(documentId:string){if(!window.confirm("این سند بایگانی شود؟"))return;try{await archiveDocument(documentId);setSelectedDocument(null);await refresh()}catch(error){setNotice(error instanceof Error?error.message:"بایگانی انجام نشد")}}
   async function recoverDocument(documentId:string){try{await restoreDocument(documentId);setSelectedDocument(null);await refresh();setNotice("سند با موفقیت بازیابی شد.")}catch(error){setNotice(error instanceof Error?error.message:"بازیابی انجام نشد")}}
@@ -216,6 +232,7 @@ export default function Home(){
   async function addParty(){if(!partyDraft.name.trim())return;try{await saveContractCatalog("parties",{...partyDraft,isActive:true});setPartyDraft({name:"",nationalIdentifier:"",representativeName:"",contactInfo:""});await refresh()}catch(error){setNotice(error instanceof Error?error.message:"ثبت طرف قرارداد انجام نشد")}}
   async function removeCatalog(kind:"statuses"|"base-documents"|"parties",id:string){if(!window.confirm("این گزینه حذف شود؟"))return;try{await deleteContractCatalog(kind,id);await refresh()}catch(error){setNotice(error instanceof Error?error.message:"حذف انجام نشد")}}
   async function renameCatalog(kind:"statuses"|"base-documents"|"parties",item:ContractStatusDefinition|ContractBaseDocument|OrganizationParty){const name=window.prompt("نام جدید",item.name);if(!name?.trim())return;try{if(kind==="statuses"){const value=item as ContractStatusDefinition;await saveContractCatalog(kind,{name,order:value.order,color:value.color,isActive:value.isActive},value.id)}else if(kind==="base-documents"){const value=item as ContractBaseDocument;await saveContractCatalog(kind,{name,documentId:value.documentId,description:value.description,isActive:value.isActive},value.id)}else{const value=item as OrganizationParty;await saveContractCatalog(kind,{name,nationalIdentifier:value.nationalIdentifier,representativeName:value.representativeName,contactInfo:value.contactInfo,isActive:value.isActive},value.id)}await refresh()}catch(error){setNotice(error instanceof Error?error.message:"ویرایش انجام نشد")}}
+  async function toggleCatalog(kind:"statuses"|"base-documents"|"parties",item:ContractStatusDefinition|ContractBaseDocument|OrganizationParty){try{if(kind==="statuses"){const value=item as ContractStatusDefinition;await saveContractCatalog(kind,{name:value.name,order:value.order,color:value.color,isActive:!value.isActive},value.id)}else if(kind==="base-documents"){const value=item as ContractBaseDocument;await saveContractCatalog(kind,{name:value.name,documentId:value.documentId,description:value.description,isActive:!value.isActive},value.id)}else{const value=item as OrganizationParty;await saveContractCatalog(kind,{name:value.name,nationalIdentifier:value.nationalIdentifier,representativeName:value.representativeName,contactInfo:value.contactInfo,isActive:!value.isActive},value.id)}await refresh()}catch(error){setNotice(error instanceof Error?error.message:"تغییر وضعیت انجام نشد")}}
   function renderComparison(){
     const outcomeLabel=(value?:number)=>value===1?"منطبق":value===2?"نامنطبق":"نیازمند بررسی";
     const typeLabel=(value:number)=>({1:"منطبق",2:"مفقود",3:"ممنوع",4:"متفاوت",5:"اضافی"} as Record<number,string>)[value]??"نامشخص";
@@ -401,7 +418,7 @@ export default function Home(){
       </section>
     </div>
   }
-  const sectionInfo:Record<string,{title:string;description:string;icon:IconName}>={documents:{title:"مدیریت اسناد",description:"جست‌وجو، نسخه‌بندی و مدیریت امن اسناد سازمان",icon:"file"},contracts:{title:"مدیریت قراردادها",description:"چرخه کامل قراردادها، طرفین، مبالغ و سررسیدها",icon:"contract"},comparison:{title:"تطبیق هوشمند اسناد",description:"اجرای تطبیق بر اساس گروه، قواعد و سند مرجع پویا",icon:"compare"},assistant:{title:"دستیار هوشمند نگارش",description:"تولید و تمدید قرارداد با مدل‌ها و منابع مجاز سازمان",icon:"sparkles"},reports:{title:"گزارش‌های مدیریتی",description:"گزارش‌های قابل ممیزی بر پایه داده‌های جاری",icon:"chart"},settings:{title:"تنظیمات پویای سازمان",description:"مدل‌ها، ویژگی گروه‌ها و رفتار هر بخش در زمان اجرا",icon:"settings"}};
+  const sectionInfo:Record<string,{title:string;description:string;icon:IconName}>={documents:{title:"مدیریت اسناد",description:"جست‌وجو، نسخه‌بندی و مدیریت امن اسناد سازمان",icon:"file"},contracts:{title:"مدیریت قراردادها",description:"چرخه کامل قراردادها، طرفین، مبالغ و سررسیدها",icon:"contract"},comparison:{title:"تطبیق هوشمند اسناد",description:"اجرای تطبیق بر اساس گروه، قواعد و سند مرجع پویا",icon:"compare"},assistant:{title:"دستیار هوشمند نگارش",description:"تولید و تمدید قرارداد با مدل‌ها و منابع مجاز سازمان",icon:"sparkles"},reports:{title:"گزارش‌های مدیریتی",description:"گزارش‌های قابل ممیزی بر پایه داده‌های جاری",icon:"chart"},basicData:{title:"اطلاعات پایه",description:"تعریف گزینه‌های اختصاصی هر سازمان برای استفاده در قراردادها",icon:"settings"},access:{title:"کاربران و سطوح دسترسی",description:"مدیریت کاربر، نقش، دسترسی نقش و اعطا یا رد مستقیم دسترسی",icon:"shield"},settings:{title:"تنظیمات پویای سازمان",description:"مدل‌ها، ویژگی گروه‌ها و رفتار هر بخش در زمان اجرا",icon:"settings"}};
   function renderModule(){
     const info=sectionInfo[activeSection];
     return <section className="module-page">
@@ -468,6 +485,17 @@ export default function Home(){
 </article>
       :activeSection==="comparison"?renderComparison()
       :activeSection==="assistant"?renderAssistant()
+      :activeSection==="basicData"?<div className="settings-grid">
+<article className="panel"><h2>وضعیت‌های قرارداد</h2><div className="catalog-form"><input placeholder="نام وضعیت" value={statusDraft.name} onChange={e=>setStatusDraft({...statusDraft,name:e.target.value})}/><input type="number" value={statusDraft.order} onChange={e=>setStatusDraft({...statusDraft,order:Number(e.target.value)})}/><button className="primary-button compact" onClick={()=>void addStatus()}>ثبت</button></div>{contractStatuses.map(item=><div className="catalog-row" key={item.id}><span>{item.name} · {item.isActive?"فعال":"غیرفعال"}</span><button onClick={()=>void toggleCatalog("statuses",item)}>{item.isActive?"غیرفعال‌سازی":"فعال‌سازی"}</button><button onClick={()=>void renameCatalog("statuses",item)}>ویرایش</button><button onClick={()=>void removeCatalog("statuses",item.id)}>حذف</button></div>)}</article>
+<article className="panel"><h2>اسناد مبنا</h2><div className="catalog-form"><input placeholder="نام نمایشی" value={baseDocumentDraft.name} onChange={e=>setBaseDocumentDraft({...baseDocumentDraft,name:e.target.value})}/><select value={baseDocumentDraft.documentId} onChange={e=>setBaseDocumentDraft({...baseDocumentDraft,documentId:e.target.value})}><option value="">انتخاب سند</option>{documents.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select><button className="primary-button compact" onClick={()=>void addBaseDocument()}>ثبت</button></div>{contractBaseDocuments.map(item=><div className="catalog-row" key={item.id}><span>{item.name} — {item.documentTitle} · {item.isActive?"فعال":"غیرفعال"}</span><button onClick={()=>void toggleCatalog("base-documents",item)}>{item.isActive?"غیرفعال‌سازی":"فعال‌سازی"}</button><button onClick={()=>void renameCatalog("base-documents",item)}>ویرایش</button><button onClick={()=>void removeCatalog("base-documents",item.id)}>حذف</button></div>)}</article>
+<article className="panel"><h2>طرف‌های قرارداد</h2><div className="catalog-form"><input placeholder="نام شخص یا شرکت" value={partyDraft.name} onChange={e=>setPartyDraft({...partyDraft,name:e.target.value})}/><input placeholder="شناسه ملی" value={partyDraft.nationalIdentifier} onChange={e=>setPartyDraft({...partyDraft,nationalIdentifier:e.target.value})}/><button className="primary-button compact" onClick={()=>void addParty()}>ثبت</button></div>{organizationParties.map(item=><div className="catalog-row" key={item.id}><span>{item.name} · {item.isActive?"فعال":"غیرفعال"}</span><button onClick={()=>void toggleCatalog("parties",item)}>{item.isActive?"غیرفعال‌سازی":"فعال‌سازی"}</button><button onClick={()=>void renameCatalog("parties",item)}>ویرایش</button><button onClick={()=>void removeCatalog("parties",item.id)}>حذف</button></div>)}</article>
+</div>
+      :activeSection==="access"?<div className="settings-grid">
+<article className="panel"><h2>افزودن نقش</h2><div className="form-grid"><label className="field"><span>نام سیستمی</span><input value={roleDraft.name} onChange={e=>setRoleDraft({...roleDraft,name:e.target.value})}/></label><label className="field"><span>عنوان فارسی</span><input value={roleDraft.displayName} onChange={e=>setRoleDraft({...roleDraft,displayName:e.target.value})}/></label></div><button className="primary-button compact" onClick={()=>void addIdentityRole()}>ثبت نقش</button>{identityRoles.map(role=><div className="catalog-row" key={role.id}><span>{role.displayName} ({role.name})</span><b>{role.isDeleted?"حذف‌شده":"فعال"}</b></div>)}</article>
+<article className="panel"><h2>افزودن کاربر</h2><div className="form-grid"><label className="field"><span>نام کاربری</span><input value={userDraft.userName} onChange={e=>setUserDraft({...userDraft,userName:e.target.value})}/></label><label className="field"><span>رمز اولیه</span><input type="password" value={userDraft.password} onChange={e=>setUserDraft({...userDraft,password:e.target.value})}/></label><label className="field"><span>نام</span><input value={userDraft.firstName} onChange={e=>setUserDraft({...userDraft,firstName:e.target.value})}/></label><label className="field"><span>نام خانوادگی</span><input value={userDraft.lastName} onChange={e=>setUserDraft({...userDraft,lastName:e.target.value})}/></label><label className="field full"><span>نقش‌ها</span><div className="choice-grid">{identityRoles.filter(x=>!x.isDeleted).map(role=><label key={role.id}><input type="checkbox" checked={userDraft.roleIds.includes(role.id)} onChange={e=>setUserDraft({...userDraft,roleIds:e.target.checked?[...userDraft.roleIds,role.id]:userDraft.roleIds.filter(x=>x!==role.id)})}/><span>{role.displayName}</span></label>)}</div></label></div><button className="primary-button compact" onClick={()=>void addIdentityUser()}>ثبت کاربر</button>{identityUsers.map(user=><div className="catalog-row" key={user.id}><span>{user.firstName} {user.lastName} — {user.userName}</span><b>{user.isActive?"فعال":"غیرفعال"}</b></div>)}</article>
+<article className="panel"><h2>دسترسی مستقیم کاربر</h2><select value={accessUserId} onChange={e=>void selectAccessUser(e.target.value)}><option value="">انتخاب کاربر</option>{identityUsers.map(user=><option key={user.id} value={user.id}>{user.firstName} {user.lastName}</option>)}</select><div className="choice-grid">{accessMenus.flatMap(root=>root.children?.length?root.children:[root]).filter(item=>item.accessForm?.accessFormId).map(item=><div key={item.accessMenuId}><span>{item.accessForm?.formTitle||item.title}</span><label><input type="checkbox" checked={directGrants.includes(item.accessMenuId)} onChange={e=>setDirectGrants(e.target.checked?[...directGrants,item.accessMenuId]:directGrants.filter(x=>x!==item.accessMenuId))}/>اعطا</label><label><input type="checkbox" checked={directDenies.includes(item.accessMenuId)} onChange={e=>setDirectDenies(e.target.checked?[...directDenies,item.accessMenuId]:directDenies.filter(x=>x!==item.accessMenuId))}/>رد صریح</label></div>)}</div><button className="primary-button compact" onClick={()=>void persistDirectAccess()}>ذخیره دسترسی</button></article>
+<article className="panel"><h2>دسترسی نقش</h2><select value={accessRoleId} onChange={e=>void selectAccessRole(e.target.value)}><option value="">انتخاب نقش</option>{identityRoles.filter(x=>!x.isDeleted).map(role=><option key={role.id} value={role.id}>{role.displayName}</option>)}</select><div className="choice-grid">{accessMenus.flatMap(root=>root.children?.length?root.children:[root]).filter(item=>item.accessForm?.accessFormId).map(item=><label key={item.accessMenuId}><input type="checkbox" checked={roleMenuIds.includes(item.accessMenuId)} onChange={e=>setRoleMenuIds(e.target.checked?[...roleMenuIds,item.accessMenuId]:roleMenuIds.filter(x=>x!==item.accessMenuId))}/><span>{item.accessForm?.formTitle||item.title}</span></label>)}</div><button className="primary-button compact" onClick={()=>void persistRoleAccess()}>ذخیره دسترسی نقش</button></article>
+</div>
       :activeSection==="settings"?<div className="settings-grid">{settings.length?settings.map(setting=>
 <article className="setting-card" key={setting.id}>
 <div>
@@ -505,15 +533,23 @@ export default function Home(){
 </div>
       <nav className="navigation" aria-label="منوی اصلی">
 <span className="nav-caption">فضای کاری</span>
-        {navItems.map(item=>
+        {visibleNavItems.map(item=>
 <button onClick={()=>{setActiveSection(item.id);setSidebarOpen(false)}} className={`nav-item ${activeSection===item.id?"active":""}`} key={item.id}>
 <Icon name={item.icon}/>
 <span>{item.label}</span>{item.id==="contracts"&&dashboard?.activeContractCount?<b>{new Intl.NumberFormat("fa-IR").format(dashboard.activeContractCount)}</b>:null}</button>)}
         <span className="nav-caption second">مدیریت</span>
-<button onClick={()=>{setActiveSection("settings");setSidebarOpen(false)}} className={`nav-item ${activeSection==="settings"?"active":""}`}>
+{["/basic-data/statuses","/basic-data/base-documents","/basic-data/parties"].some(url=>allowedUrls.has(url))&&<button onClick={()=>{setActiveSection("basicData");setSidebarOpen(false)}} className={`nav-item ${activeSection==="basicData"?"active":""}`}>
+<Icon name="settings"/>
+<span>اطلاعات پایه</span>
+</button>}
+{["/access/users","/access/roles","/access/user-permissions"].some(url=>allowedUrls.has(url))&&<button onClick={()=>{setActiveSection("access");setSidebarOpen(false);void loadIdentityManagement()}} className={`nav-item ${activeSection==="access"?"active":""}`}>
+<Icon name="shield"/>
+<span>کاربران و دسترسی‌ها</span>
+</button>}
+{allowedUrls.has("/settings")&&<button onClick={()=>{setActiveSection("settings");setSidebarOpen(false)}} className={`nav-item ${activeSection==="settings"?"active":""}`}>
 <Icon name="settings"/>
 <span>تنظیمات سازمان</span>
-</button>
+</button>}
       </nav>
       <div className="storage-card">
 <div className="storage-icon">
@@ -543,7 +579,7 @@ export default function Home(){
 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="جست‌وجو در اسناد، قراردادها و گزارش‌ها..."/>
 <kbd>⌘ K</kbd>
 </div>
-        <div className="top-actions">{!dashboard&&<button className="login-button" onClick={()=>setLoginOpen(true)}>ورود</button>}<button className="icon-button" aria-label="اعلان‌ها">
+        <div className="top-actions"><button className="login-button" onClick={()=>void signOut()}>خروج</button><button className="icon-button" aria-label="اعلان‌ها">
 <Icon name="bell"/>
 <i/>
 </button>
@@ -826,29 +862,6 @@ export default function Home(){
 <details className="catalog-manager"><summary>مدیریت طرف‌های قرارداد</summary><div className="catalog-form"><input placeholder="نام شخص یا شرکت" value={partyDraft.name} onChange={e=>setPartyDraft({...partyDraft,name:e.target.value})}/><input placeholder="شناسه ملی" value={partyDraft.nationalIdentifier} onChange={e=>setPartyDraft({...partyDraft,nationalIdentifier:e.target.value})}/><button type="button" className="ghost-button" onClick={()=>void addParty()}>ثبت</button></div>{organizationParties.map(item=><div className="catalog-row" key={item.id}><span>{item.name}{item.nationalIdentifier?` — ${item.nationalIdentifier}`:""}</span><button type="button" onClick={()=>void renameCatalog("parties",item)}>ویرایش</button><button type="button" onClick={()=>void removeCatalog("parties",item.id)}>حذف</button></div>)}</details>
 </div>{notice&&<div className="notice">{notice}</div>}<div className="modal-actions">
 <button className="primary-button" onClick={()=>void submitContract()}>ذخیره قرارداد</button>
-</div>
-</section>
-</div>}
-    {loginOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setLoginOpen(false)}>
-<section className="upload-modal login-modal" role="dialog" aria-modal="true">
-<button className="modal-close" onClick={()=>setLoginOpen(false)} aria-label="بستن">
-<Icon name="close"/>
-</button>
-<div className="modal-icon">
-<Icon name="shield" size={25}/>
-</div>
-<h2>ورود امن سازمانی</h2>
-<p>با حساب IdentityProvider سازمان وارد شوید.</p>
-<label className="field">
-<span>نام کاربری</span>
-<input autoComplete="username" value={username} onChange={e=>setUsername(e.target.value)}/>
-</label>
-<label className="field password-field">
-<span>رمز عبور</span>
-<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)}/>
-</label>{notice&&<div className="notice">{notice}</div>}<div className="modal-actions">
-<button className="ghost-button" onClick={()=>setLoginOpen(false)}>انصراف</button>
-<button className="primary-button" onClick={()=>void authenticate()}>ورود به سامانه</button>
 </div>
 </section>
 </div>}

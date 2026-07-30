@@ -7,12 +7,14 @@ using NegareshAI.Api.Application.Comparisons;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 using NegareshAI.Api.Services;
+using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
 
 [ApiController]
 [Route("api/comparisons")]
 [Authorize]
+[NegareshAccess(NegareshAIAccessFormIds.Comparisons)]
 public sealed class ComparisonsController(
     ISender sender,
     NegareshDbContext db,

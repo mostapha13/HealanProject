@@ -7,6 +7,7 @@ using NegareshAI.Api.Application.Contracts.Generation;
 using NegareshAI.Api.Application.Contracts.Catalog;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
+using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
 
@@ -16,6 +17,7 @@ namespace NegareshAI.Api.Controllers;
 public sealed class ContractsController(ISender sender) : ControllerBase
 {
     [HttpGet]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
     public async Task<ActionResult<ContractListResponse>> List(
         [FromQuery] string? search, [FromQuery] ContractStatus? status,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
@@ -24,6 +26,7 @@ public sealed class ContractsController(ISender sender) : ControllerBase
             cancellationToken));
 
     [HttpGet("{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
     public async Task<ActionResult<ContractDetailResponse>> Get(
         Guid id, CancellationToken cancellationToken)
     {
@@ -32,6 +35,8 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractsCreate)]
     public async Task<ActionResult<ContractDetailResponse>> Create(
         SaveContractRequest request, CancellationToken cancellationToken)
     {
@@ -41,6 +46,8 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractsEdit)]
     public async Task<ActionResult<ContractDetailResponse>> Update(
         Guid id, SaveContractRequest request, CancellationToken cancellationToken)
     {
@@ -49,16 +56,20 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/archive")]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractsDelete)]
     public async Task<IActionResult> Archive(Guid id, CancellationToken cancellationToken) =>
         await sender.Send(new ArchiveContractCommand(id), cancellationToken)
             ? NoContent() : NotFound();
 
     [HttpGet("templates")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     public async Task<ActionResult<IReadOnlyList<ContractTemplateResponse>>> Templates(
         CancellationToken cancellationToken) =>
         Ok(await sender.Send(new ListContractTemplatesQuery(), cancellationToken));
 
     [HttpPost("templates")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<ContractTemplateResponse>> CreateTemplate(
         [FromForm] ContractTemplateUploadRequest request, CancellationToken cancellationToken)
@@ -73,6 +84,7 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("generations")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     public async Task<ActionResult<ContractGenerationResponse>> Generate(
         StartContractGenerationRequest request, CancellationToken cancellationToken)
     {
@@ -81,6 +93,7 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpGet("generations/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     public async Task<ActionResult<ContractGenerationResponse>> GetGeneration(
         Guid id, CancellationToken cancellationToken)
     {
@@ -89,6 +102,7 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("generations/{id:guid}/review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     public async Task<ActionResult<ContractGenerationResponse>> ReviewGeneration(
         Guid id, ReviewContractGenerationRequest request, CancellationToken cancellationToken)
     {
@@ -98,31 +112,39 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     }
 
     [HttpGet("catalog/{kind}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
     public async Task<ActionResult> ListCatalog(string kind, CancellationToken ct) =>
         Ok(await sender.Send(new ListContractCatalogQuery(kind), ct));
 
     [HttpPost("catalog/statuses")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
     public Task<ActionResult> CreateStatus(SaveContractStatusDefinitionRequest request, CancellationToken ct) =>
         SaveCatalog("statuses", null, request, ct);
     [HttpPut("catalog/statuses/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
     public Task<ActionResult> UpdateStatus(Guid id, SaveContractStatusDefinitionRequest request, CancellationToken ct) =>
         SaveCatalog("statuses", id, request, ct);
 
     [HttpPost("catalog/base-documents")]
+    [NegareshAccess(NegareshAIAccessFormIds.BaseDocuments)]
     public Task<ActionResult> CreateBaseDocument(SaveContractBaseDocumentRequest request, CancellationToken ct) =>
         SaveCatalog("base-documents", null, request, ct);
     [HttpPut("catalog/base-documents/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.BaseDocuments)]
     public Task<ActionResult> UpdateBaseDocument(Guid id, SaveContractBaseDocumentRequest request, CancellationToken ct) =>
         SaveCatalog("base-documents", id, request, ct);
 
     [HttpPost("catalog/parties")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractParties)]
     public Task<ActionResult> CreateParty(SaveOrganizationPartyRequest request, CancellationToken ct) =>
         SaveCatalog("parties", null, request, ct);
     [HttpPut("catalog/parties/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractParties)]
     public Task<ActionResult> UpdateParty(Guid id, SaveOrganizationPartyRequest request, CancellationToken ct) =>
         SaveCatalog("parties", id, request, ct);
 
     [HttpDelete("catalog/{kind}/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
     public async Task<IActionResult> DeleteCatalog(string kind, Guid id, CancellationToken ct) =>
         await sender.Send(new DeleteContractCatalogCommand(kind, id), ct) ? NoContent() : Conflict();
 

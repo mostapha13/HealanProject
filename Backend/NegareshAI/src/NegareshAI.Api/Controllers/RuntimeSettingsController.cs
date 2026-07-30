@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using NegareshAI.Api.Application.Settings.Commands;
 using NegareshAI.Api.Application.Settings.Queries;
 using NegareshAI.Api.Contracts;
+using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
 
 [ApiController]
 [Route("api/runtime-settings")]
 [Authorize]
+[NegareshAccess(NegareshAIAccessFormIds.RuntimeSettings)]
 public sealed class RuntimeSettingsController(ISender sender) : ControllerBase
 {
     [HttpGet]

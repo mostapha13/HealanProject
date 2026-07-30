@@ -59,6 +59,7 @@ namespace IdentityServer.Domain.Data
         public DbSet<AccessSystem> AccessSystems { get; set; }
         public DbSet<AccessSystemRole> AccessSystemRoles { get; set; }
         public DbSet<AccessUserGrant> AccessUserGrants { get; set; }
+        public DbSet<AccessUserDeny> AccessUserDenies { get; set; }
         public DbSet<ImpersonationAudit> ImpersonationAudits { get; set; }
     }
 }

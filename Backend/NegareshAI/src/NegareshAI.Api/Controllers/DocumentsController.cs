@@ -5,12 +5,14 @@ using NegareshAI.Api.Application.Documents.Commands;
 using NegareshAI.Api.Application.Documents.Queries;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
+using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
 
 [ApiController]
 [Route("api/documents")]
 [Authorize]
+[NegareshAccess(NegareshAIAccessFormIds.Documents)]
 public sealed class DocumentsController(ISender sender) : ControllerBase
 {
     private static readonly string[] AllowedContentTypes =
@@ -32,6 +34,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
             cancellationToken));
 
     [HttpPost("upload")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsCreate)]
     [RequestSizeLimit(52_428_800)]
     public async Task<ActionResult<DocumentResponse>> Upload([FromForm] UploadDocumentRequest upload, CancellationToken cancellationToken = default)
     {
@@ -49,6 +52,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsCreate)]
     public async Task<ActionResult<DocumentResponse>> Register(RegisterDocumentRequest request, CancellationToken cancellationToken)
     {
         var response = await sender.Send(
@@ -102,6 +106,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
     public async Task<ActionResult<DocumentResponse>> Update(
         Guid id,
         UpdateDocumentRequest request,
@@ -123,6 +128,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/versions")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
     [RequestSizeLimit(52_428_800)]
     public async Task<ActionResult<DocumentResponse>> UploadVersion(
         Guid id,
@@ -147,6 +153,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsDelete)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var deleted = await sender.Send(new DeleteDocumentCommand(id), cancellationToken);
@@ -154,6 +161,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/restore")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
     public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken) =>
         await sender.Send(new RestoreDocumentCommand(id), cancellationToken)
             ? NoContent() : NotFound();

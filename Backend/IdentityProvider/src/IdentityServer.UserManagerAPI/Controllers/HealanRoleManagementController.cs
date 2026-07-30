@@ -265,6 +265,74 @@ public class HealanRoleManagementController : ApiControllerBase
         return Ok(new DirectUserGrantsResponse(userId, request.AccessSystemId, requestedMenuIds.Order().ToList()));
     }
 
+    [HttpGet("users/{userId:guid}/direct-denies")]
+    public async Task<ActionResult<DirectUserDeniesResponse>> GetDirectDenies(
+        Guid userId,
+        [FromQuery] int accessSystemId = NegareshAIAccessFormIds.SystemId,
+        CancellationToken cancellationToken = default)
+    {
+        await RequireAccessAdministratorAsync(false, cancellationToken);
+        if (!await _dbContext.Users.AnyAsync(x => x.Id == userId, cancellationToken))
+            return NotFound();
+        var menuIds = await _dbContext.AccessUserDenies.AsNoTracking()
+            .Where(x => x.UserId == userId && x.AccessSystemId == accessSystemId && !x.IsDeleted)
+            .OrderBy(x => x.AccessMenuId)
+            .Select(x => x.AccessMenuId)
+            .ToListAsync(cancellationToken);
+        return Ok(new DirectUserDeniesResponse(userId, accessSystemId, menuIds));
+    }
+
+    [HttpPut("users/{userId:guid}/direct-denies")]
+    public async Task<ActionResult<DirectUserDeniesResponse>> SaveDirectDenies(
+        Guid userId,
+        [FromBody] SaveDirectUserDeniesRequest request,
+        CancellationToken cancellationToken)
+    {
+        var actorId = await RequireAccessAdministratorAsync(true, cancellationToken);
+        if (!await _dbContext.Users.AnyAsync(x => x.Id == userId, cancellationToken))
+            return NotFound();
+        if (!await _dbContext.AccessSystems.AnyAsync(x => x.AccessSystemId == request.AccessSystemId, cancellationToken))
+            return BadRequest("Access system does not exist.");
+
+        var requested = (request.AccessMenuIds ?? []).Distinct().ToHashSet();
+        var valid = await (
+            from menu in _dbContext.AccessMenus
+            join form in _dbContext.AccessForms on menu.AccessFormId equals form.AccessFormId
+            where form.AccessSystemId == request.AccessSystemId && requested.Contains(menu.AccessMenuId)
+            select menu.AccessMenuId).ToListAsync(cancellationToken);
+        if (valid.Count != requested.Count)
+            return BadRequest("Every denial must reference a menu in the requested access system.");
+
+        var now = DateTime.UtcNow;
+        var existing = await _dbContext.AccessUserDenies
+            .Where(x => x.UserId == userId && x.AccessSystemId == request.AccessSystemId)
+            .ToListAsync(cancellationToken);
+        foreach (var deny in existing)
+        {
+            var shouldBeActive = requested.Contains(deny.AccessMenuId);
+            if (deny.IsDeleted == shouldBeActive)
+            {
+                deny.IsDeleted = !shouldBeActive;
+                deny.ModifiedUtc = now;
+                deny.ModifiedBy = actorId;
+                deny.DeletedUtc = shouldBeActive ? null : now;
+                deny.DeletedBy = shouldBeActive ? null : actorId;
+            }
+        }
+        var existingIds = existing.Select(x => x.AccessMenuId).ToHashSet();
+        foreach (var menuId in requested.Where(x => !existingIds.Contains(x)))
+            _dbContext.AccessUserDenies.Add(new AccessUserDeny
+            {
+                UserId = userId,
+                AccessMenuId = menuId,
+                AccessSystemId = request.AccessSystemId,
+                CreatedUtc = now,
+                CreatedBy = actorId,
+            });
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Ok(new DirectUserDeniesResponse(userId, request.AccessSystemId, requested.Order().ToList()));
+    }
+
     private IQueryable<ApplicationRole> HealanRoles()
     {
         return
@@ -372,3 +440,5 @@ public sealed record HealanRoleResponse(
 public sealed record SaveDirectUserGrantsRequest(int AccessSystemId, IReadOnlyList<int>? AccessMenuIds);
 
 public sealed record DirectUserGrantsResponse(Guid UserId, int AccessSystemId, IReadOnlyList<int> AccessMenuIds);
+public sealed record SaveDirectUserDeniesRequest(int AccessSystemId, IReadOnlyList<int>? AccessMenuIds);
+public sealed record DirectUserDeniesResponse(Guid UserId, int AccessSystemId, IReadOnlyList<int> AccessMenuIds);

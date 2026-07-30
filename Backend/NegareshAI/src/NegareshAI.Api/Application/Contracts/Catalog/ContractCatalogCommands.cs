@@ -18,16 +18,16 @@ public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTen
         query.Kind switch
         {
             "statuses" => await db.ContractStatusDefinitions.AsNoTracking()
-                .Where(x => x.OrganizationId == tenant.OrganizationId)
+                .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Order).Select(x => new ContractStatusDefinitionResponse(
                     x.Id, x.Name, x.Order, x.Color, x.IsActive)).ToListAsync(ct),
             "base-documents" => await db.ContractBaseDocumentProfiles.AsNoTracking()
-                .Where(x => x.OrganizationId == tenant.OrganizationId)
+                .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Name).Select(x => new ContractBaseDocumentResponse(
                     x.Id, x.DocumentId, x.Name, x.Document!.Title, x.Description, x.IsActive))
                 .ToListAsync(ct),
             "parties" => await db.OrganizationParties.AsNoTracking()
-                .Where(x => x.OrganizationId == tenant.OrganizationId)
+                .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Name).Select(x => new OrganizationPartyResponse(
                     x.Id, x.Name, x.NationalIdentifier, x.RepresentativeName,
                     x.ContactInfo, x.IsActive)).ToListAsync(ct),
@@ -59,12 +59,13 @@ public sealed class SaveContractCatalogHandler(
     {
         var request = (SaveContractStatusDefinitionRequest)command.Request;
         var item = command.Id.HasValue ? await db.ContractStatusDefinitions.SingleOrDefaultAsync(
-            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct) : null;
+            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct) : null;
         if (command.Id.HasValue && item is null) return null;
-        item ??= new ContractStatusDefinition { OrganizationId = tenant.OrganizationId, Name = "" };
+        item ??= new ContractStatusDefinition { OrganizationId = tenant.OrganizationId, Name = "", CreatedByUserId = tenant.UserId };
         item.Name = request.Name.Trim(); item.Order = request.Order;
         item.Color = string.IsNullOrWhiteSpace(request.Color) ? "#6658df" : request.Color;
         item.IsActive = request.IsActive;
+        if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; }
         if (!command.Id.HasValue) db.ContractStatusDefinitions.Add(item);
         return new ContractStatusDefinitionResponse(item.Id, item.Name, item.Order, item.Color, item.IsActive);
     }
@@ -75,12 +76,14 @@ public sealed class SaveContractCatalogHandler(
         if (!await db.Documents.AnyAsync(x => x.Id == request.DocumentId &&
             x.OrganizationId == tenant.OrganizationId, ct)) return null;
         var item = command.Id.HasValue ? await db.ContractBaseDocumentProfiles.SingleOrDefaultAsync(
-            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct) : null;
+            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct) : null;
         if (command.Id.HasValue && item is null) return null;
         item ??= new ContractBaseDocumentProfile {
-            OrganizationId = tenant.OrganizationId, Name = "", DocumentId = request.DocumentId };
+            OrganizationId = tenant.OrganizationId, Name = "", DocumentId = request.DocumentId,
+            CreatedByUserId = tenant.UserId };
         item.DocumentId = request.DocumentId; item.Name = request.Name.Trim();
         item.Description = request.Description?.Trim(); item.IsActive = request.IsActive;
+        if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; }
         if (!command.Id.HasValue) db.ContractBaseDocumentProfiles.Add(item);
         var title = await db.Documents.Where(x => x.Id == request.DocumentId)
             .Select(x => x.Title).SingleAsync(ct);
@@ -92,12 +95,13 @@ public sealed class SaveContractCatalogHandler(
     {
         var request = (SaveOrganizationPartyRequest)command.Request;
         var item = command.Id.HasValue ? await db.OrganizationParties.SingleOrDefaultAsync(
-            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct) : null;
+            x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct) : null;
         if (command.Id.HasValue && item is null) return null;
-        item ??= new OrganizationParty { OrganizationId = tenant.OrganizationId, Name = "" };
+        item ??= new OrganizationParty { OrganizationId = tenant.OrganizationId, Name = "", CreatedByUserId = tenant.UserId };
         item.Name = request.Name.Trim(); item.NationalIdentifier = request.NationalIdentifier?.Trim();
         item.RepresentativeName = request.RepresentativeName?.Trim();
         item.ContactInfo = request.ContactInfo?.Trim(); item.IsActive = request.IsActive;
+        if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; }
         if (!command.Id.HasValue) db.OrganizationParties.Add(item);
         return new OrganizationPartyResponse(item.Id, item.Name, item.NationalIdentifier,
             item.RepresentativeName, item.ContactInfo, item.IsActive);
@@ -112,17 +116,27 @@ public sealed class DeleteContractCatalogHandler(
     {
         object? item = command.Kind switch {
             "statuses" => await db.ContractStatusDefinitions.SingleOrDefaultAsync(x =>
-                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
+                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
             "base-documents" => await db.ContractBaseDocumentProfiles.SingleOrDefaultAsync(x =>
-                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
+                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
             "parties" => await db.OrganizationParties.SingleOrDefaultAsync(x =>
-                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
+                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
             _ => null
         };
         if (item is null) return false;
-        db.Remove(item); audit.Add($"contract-catalog.{command.Kind}.deleted",
+        var now = DateTime.UtcNow;
+        switch (item)
+        {
+            case ContractStatusDefinition value:
+                value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
+            case ContractBaseDocumentProfile value:
+                value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
+            case OrganizationParty value:
+                value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
+        }
+        audit.Add($"contract-catalog.{command.Kind}.deleted",
             "ContractCatalog", command.Id.ToString());
-        try { await db.SaveChangesAsync(ct); return true; }
-        catch (DbUpdateException) { return false; }
+        await db.SaveChangesAsync(ct);
+        return true;
     }
 }

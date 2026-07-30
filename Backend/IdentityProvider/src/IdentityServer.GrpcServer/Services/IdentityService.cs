@@ -271,6 +271,24 @@ namespace IdentityServer.GrpcServer.Services
             // (otherwise Persian-only AccessRoles are denied for endpoints without {lang}).
             var ignorePersianFlag = request.LanguageId == 0;
 
+            // An explicit user denial has priority over role/direct grants for non-admin users.
+            var directDeny = await (
+                from deny in _applicationDbContext.AccessUserDenies
+                join menu in _applicationDbContext.AccessMenus on deny.AccessMenuId equals menu.AccessMenuId
+                join form in _applicationDbContext.AccessForms on menu.AccessFormId equals form.AccessFormId
+                where deny.UserId == userId.Value
+                    && !deny.IsDeleted
+                    && menu.IsActive
+                    && deny.AccessSystemId == form.AccessSystemId
+                    && request.AccessFormId.Contains(form.AccessFormId)
+                select deny.AccessUserDenyId
+            ).AnyAsync();
+            if (directDeny)
+            {
+                userHasAccessResonse.HasAccess = false;
+                return userHasAccessResonse;
+            }
+
             var roleAccess = await (from a in _applicationDbContext.AccessRoles
                     join r in _applicationDbContext.UserRoles on a.RoleId equals r.RoleId
                     join role in _applicationDbContext.Roles on r.RoleId equals role.Id

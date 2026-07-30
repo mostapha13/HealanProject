@@ -61,7 +61,15 @@ public sealed class ListMyAccessMenuQueryHandler
             .Select(x => x.AccessMenuId)
             .ToListAsync(cancellationToken);
 
-        var grantedLeafIds = roleMenuIds.Concat(directMenuIds).ToHashSet();
+        var deniedMenuIds = await _db.AccessUserDenies
+            .AsNoTracking()
+            .Where(x => x.UserId == userId
+                && x.AccessSystemId == request.AccessSystemId
+                && !x.IsDeleted)
+            .Select(x => x.AccessMenuId)
+            .ToListAsync(cancellationToken);
+
+        var grantedLeafIds = roleMenuIds.Concat(directMenuIds).Except(deniedMenuIds).ToHashSet();
 
         var flat = await _db.AccessMenus
             .AsNoTracking()
@@ -81,23 +89,17 @@ public sealed class ListMyAccessMenuQueryHandler
             .OrderBy(o => o.Order)
             .ToListAsync(cancellationToken);
 
-        var healanMenuIds = flat
-            .Where(m =>
-                m.FormSystemId == request.AccessSystemId
-                || (m.FormId == null && !string.IsNullOrWhiteSpace(m.Title))
-                || (m.FormId != null && string.IsNullOrEmpty(m.FormUrl) && m.FormSystemId == request.AccessSystemId))
+        var systemMenuIds = flat
+            .Where(m => m.FormSystemId == request.AccessSystemId)
             .Select(m => m.AccessMenuId)
             .ToHashSet();
-
-        // Folders without forms still need to be selectable as ancestors
-        foreach (var item in flat.Where(m => m.FormId == null || string.IsNullOrEmpty(m.FormUrl)))
-            healanMenuIds.Add(item.AccessMenuId);
+        IncludeAncestors(flat.Select(m => (m.AccessMenuId, m.ParentRef, m.IsActive)).ToList(), systemMenuIds);
 
         HashSet<int> selectedIds;
         if (isAdmin)
         {
             selectedIds = flat
-                .Where(m => m.IsActive && healanMenuIds.Contains(m.AccessMenuId))
+                .Where(m => m.IsActive && systemMenuIds.Contains(m.AccessMenuId))
                 .Select(m => m.AccessMenuId)
                 .ToHashSet();
         }

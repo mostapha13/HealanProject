@@ -36,6 +36,7 @@ namespace IdentityServer.UserManagerAPI
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddMemoryCache();
+            services.AddHealthChecks();
             services.AddHtmlSanitizer();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddDocumentService(Configuration);
@@ -82,6 +83,8 @@ namespace IdentityServer.UserManagerAPI
                      ValidateIssuer = true,
                      ValidIssuers = new[]
                      {
+                         Configuration["IdentityServer:ValidIssuer"],
+                         Configuration["IdentityServer:Url"]?.TrimEnd('/'),
                          "https://auth.drshahrooei.ir",
                          "http://auth.drshahrooei.ir",
                          "https://auth.drshahrooei.ir/",
@@ -154,7 +157,7 @@ namespace IdentityServer.UserManagerAPI
             //    MinimumSameSitePolicy = SameSiteMode.Lax
             //});
 
-            //app.UseHealthChecks("/health");
+            app.UseHealthChecks("/health");
             //app.UseHttpsRedirection();
 
             app.UseSwagger();

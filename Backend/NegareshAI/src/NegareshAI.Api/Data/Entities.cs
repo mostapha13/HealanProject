@@ -210,6 +210,13 @@ public sealed class ContractStatusDefinition
     public int Order { get; set; }
     public string Color { get; set; } = "#6658df";
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 }
 
 public sealed class ContractBaseDocumentProfile
@@ -220,6 +227,13 @@ public sealed class ContractBaseDocumentProfile
     public required string Name { get; set; }
     public string? Description { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
     public Document? Document { get; set; }
 }
 
@@ -232,6 +246,13 @@ public sealed class OrganizationParty
     public string? RepresentativeName { get; set; }
     public string? ContactInfo { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 }
 
 public sealed class ContractClause

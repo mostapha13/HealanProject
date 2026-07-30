@@ -4,6 +4,10 @@
 **/node_modules
 **/bin
 **/obj
+**/publish
+**/.cache
+**/.cursor
+**/.vscode
 **/.expo
 **/dist
 **/web-build
