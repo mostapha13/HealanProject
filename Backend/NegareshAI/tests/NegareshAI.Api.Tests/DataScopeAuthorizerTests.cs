@@ -53,6 +53,37 @@ public sealed class DataScopeAuthorizerTests
             DataScopeResourceType.DocumentGroup, groupId));
     }
 
+    [Fact]
+    public async Task Bulk_scope_returns_only_effectively_allowed_resources()
+    {
+        await using var db = CreateDbContext();
+        var organizationId = Guid.NewGuid();
+        var roleGranted = Guid.NewGuid();
+        var userDenied = Guid.NewGuid();
+        var userGranted = Guid.NewGuid();
+        db.DataScopeAssignments.AddRange(
+            Assignment(organizationId, roleGranted, DataScopeSubjectType.Role,
+                "Expert", false),
+            Assignment(organizationId, userDenied, DataScopeSubjectType.Role,
+                "Expert", false),
+            Assignment(organizationId, userDenied, DataScopeSubjectType.User,
+                "user-1", true),
+            Assignment(organizationId, userGranted, DataScopeSubjectType.Role,
+                "Expert", true),
+            Assignment(organizationId, userGranted, DataScopeSubjectType.User,
+                "user-1", false));
+        await db.SaveChangesAsync();
+        var authorizer = CreateAuthorizer(db, organizationId, "user-1", "Expert");
+
+        var allowed = await authorizer.GetAllowedResourceIdsAsync(
+            DataScopeResourceType.DocumentGroup);
+
+        Assert.NotNull(allowed);
+        Assert.Contains(roleGranted, allowed);
+        Assert.Contains(userGranted, allowed);
+        Assert.DoesNotContain(userDenied, allowed);
+    }
+
     private static DataScopeAssignment Assignment(
         Guid organizationId, Guid resourceId, DataScopeSubjectType subjectType,
         string subjectId, bool denied) => new()

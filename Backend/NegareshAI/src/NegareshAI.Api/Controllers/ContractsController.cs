@@ -64,9 +64,11 @@ public sealed class ContractsController(ISender sender) : ControllerBase
 
     [HttpGet("templates")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
-    public async Task<ActionResult<IReadOnlyList<ContractTemplateResponse>>> Templates(
-        CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new ListContractTemplatesQuery(), cancellationToken));
+    public async Task<IActionResult> Templates(
+        [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default) =>
+        Ok(await sender.Send(new ListContractTemplatesQuery(
+            pageNumber, pageSize), cancellationToken));
 
     [HttpPost("templates")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
@@ -113,8 +115,11 @@ public sealed class ContractsController(ISender sender) : ControllerBase
 
     [HttpGet("catalog/{kind}")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
-    public async Task<ActionResult> ListCatalog(string kind, CancellationToken ct) =>
-        Ok(await sender.Send(new ListContractCatalogQuery(kind), ct));
+    public async Task<ActionResult> ListCatalog(
+        string kind, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new ListContractCatalogQuery(
+            kind, pageNumber, pageSize), ct));
 
     [HttpPost("catalog/statuses")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]

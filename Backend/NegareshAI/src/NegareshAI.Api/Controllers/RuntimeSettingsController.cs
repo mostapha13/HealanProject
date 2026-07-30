@@ -15,10 +15,12 @@ namespace NegareshAI.Api.Controllers;
 public sealed class RuntimeSettingsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<RuntimeSettingResponse>>> List(
-        [FromQuery] string? category,
-        CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new ListRuntimeSettingsQuery(category), cancellationToken));
+    public async Task<IActionResult> List(
+        [FromQuery] string? category, [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default) =>
+        Ok(await sender.Send(new ListRuntimeSettingsQuery(
+            category, pageNumber, pageSize), cancellationToken));
 
     [HttpPut("{category}/{key}")]
     public async Task<ActionResult<RuntimeSettingResponse>> Upsert(

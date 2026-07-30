@@ -220,7 +220,7 @@ public sealed class TenantIsolationTests
 
         Assert.Equal(created.Id, updated.Id);
         Assert.Equal(2, updated.Version);
-        Assert.Equal("""{"model":"local-b"}""", Assert.Single(list).ValueJson);
+        Assert.Equal("""{"model":"local-b"}""", Assert.Single(list.Items).ValueJson);
         Assert.Equal(2, audit.Entries.Count);
     }
 
@@ -332,8 +332,8 @@ public sealed class TenantIsolationTests
         var listedRuleSets = await new ListRuleSetsQueryHandler(db, tenant)
             .Handle(new ListRuleSetsQuery(group.Id), default);
 
-        Assert.Equal(group.Id, Assert.Single(listedGroups).Id);
-        Assert.Equal(2, listedRuleSets.Count);
+        Assert.Equal(group.Id, Assert.Single(listedGroups.Items).Id);
+        Assert.Equal(2, listedRuleSets.TotalCount);
         Assert.Equal(3, audit.Entries.Count);
     }
 

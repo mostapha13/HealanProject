@@ -10,7 +10,10 @@ using NegareshAI.Api.Application.Settings.Queries;
 using NegareshAI.Api.Application.Contracts.Commands;
 using NegareshAI.Api.Application.Contracts.Queries;
 using NegareshAI.Api.Application.Contracts.Generation;
+using NegareshAI.Api.Application.ContractOperations;
 using NegareshAI.Api.Contracts;
+using NegareshAI.Api.Controllers;
+using NegareshAI.Api.Data;
 using Xunit;
 
 namespace NegareshAI.Api.Tests;
@@ -63,7 +66,8 @@ public sealed class ApplicationArchitectureTests
             services,
             descriptor => descriptor.ServiceType ==
                 typeof(IRequestHandler<ListRuntimeSettingsQuery,
-                    IReadOnlyList<RuntimeSettingResponse>>));
+                    NegareshAI.Api.Application.Common.Pagination.PagedResponse<
+                        RuntimeSettingResponse>>));
         Assert.Contains(
             services,
             descriptor => descriptor.ServiceType ==
@@ -90,5 +94,26 @@ public sealed class ApplicationArchitectureTests
             descriptor => descriptor.ServiceType ==
                 typeof(IRequestHandler<StartContractGenerationCommand,
                     ContractGenerationResponse?>));
+        Assert.Contains(
+            services,
+            descriptor => descriptor.ServiceType ==
+                typeof(IRequestHandler<ListWorkflowsQuery,
+                    NegareshAI.Api.Application.Common.Pagination.PagedResponse<WorkflowRow>>));
+    }
+
+    [Fact]
+    public void Api_controllers_do_not_depend_directly_on_database_context()
+    {
+        var controllerTypes = typeof(DocumentsController).Assembly.GetTypes()
+            .Where(type => !type.IsAbstract
+                && typeof(Microsoft.AspNetCore.Mvc.ControllerBase).IsAssignableFrom(type));
+
+        var violations = controllerTypes.SelectMany(type => type.GetConstructors()
+                .SelectMany(constructor => constructor.GetParameters()
+                    .Where(parameter => parameter.ParameterType == typeof(NegareshDbContext))
+                    .Select(_ => type.Name)))
+            .Distinct().ToArray();
+
+        Assert.Empty(violations);
     }
 }

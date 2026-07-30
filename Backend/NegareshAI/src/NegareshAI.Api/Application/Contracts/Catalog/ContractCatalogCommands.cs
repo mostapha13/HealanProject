@@ -2,12 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Tenancy;
+using NegareshAI.Api.Application.Common.Pagination;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 
 namespace NegareshAI.Api.Application.Contracts.Catalog;
 
-public sealed record ListContractCatalogQuery(string Kind) : IRequest<object>;
+public sealed record ListContractCatalogQuery(
+    string Kind, int PageNumber = 1, int PageSize = 20) : IRequest<object>;
 public sealed record SaveContractCatalogCommand(string Kind, Guid? Id, object Request) : IRequest<object?>;
 public sealed record DeleteContractCatalogCommand(string Kind, Guid Id) : IRequest<bool>;
 
@@ -20,18 +22,21 @@ public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTen
             "statuses" => await db.ContractStatusDefinitions.AsNoTracking()
                 .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Order).Select(x => new ContractStatusDefinitionResponse(
-                    x.Id, x.Name, x.Order, x.Color, x.IsActive)).ToListAsync(ct),
+                    x.Id, x.Name, x.Order, x.Color, x.IsActive))
+                .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
             "base-documents" => await db.ContractBaseDocumentProfiles.AsNoTracking()
                 .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Name).Select(x => new ContractBaseDocumentResponse(
                     x.Id, x.DocumentId, x.Name, x.Document!.Title, x.Description, x.IsActive))
-                .ToListAsync(ct),
+                .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
             "parties" => await db.OrganizationParties.AsNoTracking()
                 .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Name).Select(x => new OrganizationPartyResponse(
                     x.Id, x.Name, x.NationalIdentifier, x.RepresentativeName,
-                    x.ContactInfo, x.IsActive)).ToListAsync(ct),
-            _ => Array.Empty<object>()
+                    x.ContactInfo, x.IsActive))
+                .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
+            _ => new PagedResponse<object>(
+                [], 1, Math.Clamp(query.PageSize, 1, 100), 0, 0, false, false)
         };
 }
 

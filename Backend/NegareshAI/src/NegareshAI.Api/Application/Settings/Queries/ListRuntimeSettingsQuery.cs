@@ -1,20 +1,22 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NegareshAI.Api.Application.Common.Tenancy;
+using NegareshAI.Api.Application.Common.Pagination;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 
 namespace NegareshAI.Api.Application.Settings.Queries;
 
-public sealed record ListRuntimeSettingsQuery(string? Category)
-    : IRequest<IReadOnlyList<RuntimeSettingResponse>>;
+public sealed record ListRuntimeSettingsQuery(
+    string? Category, int PageNumber = 1, int PageSize = 20)
+    : IRequest<PagedResponse<RuntimeSettingResponse>>;
 
 public sealed class ListRuntimeSettingsQueryHandler(
     NegareshDbContext db,
     ICurrentTenant tenant)
-    : IRequestHandler<ListRuntimeSettingsQuery, IReadOnlyList<RuntimeSettingResponse>>
+    : IRequestHandler<ListRuntimeSettingsQuery, PagedResponse<RuntimeSettingResponse>>
 {
-    public async Task<IReadOnlyList<RuntimeSettingResponse>> Handle(
+    public async Task<PagedResponse<RuntimeSettingResponse>> Handle(
         ListRuntimeSettingsQuery request,
         CancellationToken cancellationToken)
     {
@@ -27,6 +29,7 @@ public sealed class ListRuntimeSettingsQueryHandler(
             .Select(item => new RuntimeSettingResponse(
                 item.Id, item.Category, item.Key, item.ValueJson,
                 item.Version, item.IsActive, item.UpdatedAtUtc))
-            .ToListAsync(cancellationToken);
+            .ToPagedResponseAsync(
+                new PageRequest(request.PageNumber, request.PageSize), cancellationToken);
     }
 }

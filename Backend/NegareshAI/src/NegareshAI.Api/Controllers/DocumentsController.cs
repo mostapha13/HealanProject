@@ -84,9 +84,11 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpGet("archived")]
-    public async Task<ActionResult<IReadOnlyList<DocumentListItemResponse>>> Archived(
-        CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new ListArchivedDocumentsQuery(), cancellationToken));
+    public async Task<IActionResult> Archived(
+        [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default) =>
+        Ok(await sender.Send(new ListArchivedDocumentsQuery(
+            pageNumber, pageSize), cancellationToken));
 
     [HttpGet("{documentId:guid}/versions/{versionId:guid}/download")]
     public async Task<IActionResult> DownloadVersion(

@@ -179,7 +179,7 @@ export type OrganizationParty = {
 export async function listContractCatalog<T>(kind:"statuses"|"base-documents"|"parties"):Promise<T[]> {
   const response=await authorizedFetch(`/api/contracts/catalog/${kind}`);
   if(!response.ok) throw new Error("دریافت اطلاعات پایه قرارداد انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<T>).items;
 }
 export async function saveContractCatalog<T>(kind:"statuses"|"base-documents"|"parties",input:object,id?:string):Promise<T>{
   const response=await authorizedFetch(`/api/contracts/catalog/${kind}${id?`/${id}`:""}`,{
@@ -211,7 +211,7 @@ export type ContractGeneration = {
 export async function listContractTemplates(): Promise<ContractTemplate[]> {
   const response = await authorizedFetch("/api/contracts/templates");
   if (!response.ok) throw new Error("دریافت قالب‌های قرارداد انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<ContractTemplate>).items;
 }
 
 export async function uploadContractTemplate(input: {
@@ -349,7 +349,7 @@ export async function listRuntimeSettings(category = ""): Promise<RuntimeSetting
     headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
   if (!response.ok) throw new Error("دریافت تنظیمات پویای سامانه انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<RuntimeSetting>).items;
 }
 
 async function authorizedFetch(path: string, init: RequestInit = {}) {
@@ -389,7 +389,7 @@ export async function saveDataScopes(input: {
 export async function listDocumentGroups(): Promise<DocumentGroup[]> {
   const response = await authorizedFetch("/api/knowledge/document-groups");
   if (!response.ok) throw new Error("دریافت گروه‌های اسناد انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<DocumentGroup>).items;
 }
 
 export async function createDocumentGroup(input: {
@@ -408,7 +408,7 @@ export async function listRuleSets(documentGroupId = ""): Promise<RuleSet[]> {
     ? `?documentGroupId=${encodeURIComponent(documentGroupId)}` : "";
   const response = await authorizedFetch(`/api/knowledge/rule-sets${query}`);
   if (!response.ok) throw new Error("دریافت مجموعه قواعد انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<RuleSet>).items;
 }
 
 export async function createRuleSet(input: {
@@ -427,7 +427,7 @@ export async function createRuleSet(input: {
 export async function listComparisonRuns(): Promise<ComparisonRunSummary[]> {
   const response = await authorizedFetch("/api/comparisons");
   if (!response.ok) throw new Error("دریافت تاریخچه تطابق انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<ComparisonRunSummary>).items;
 }
 
 export async function getComparisonRun(id: string): Promise<ComparisonRun> {
@@ -560,7 +560,7 @@ export async function listArchivedDocuments(): Promise<DocumentListItem[]> {
     headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
   if (!response.ok) throw new Error("دریافت بایگانی اسناد انجام نشد");
-  return response.json();
+  return ((await response.json()) as PagedResponse<DocumentListItem>).items;
 }
 
 export async function updateDocument(id: string, input: {
@@ -679,10 +679,14 @@ async function operationsRequest<T>(path:string,init?:RequestInit):Promise<T>{
   if(!response.ok)throw new Error(await response.text()||"عملیات قرارداد انجام نشد");
   return response.status===204?undefined as T:response.json();
 }
-export const listWorkflows=()=>operationsRequest<ContractWorkflow[]>("/workflows");
+export const listWorkflows=async()=>(
+  await operationsRequest<PagedResponse<ContractWorkflow>>("/workflows?pageNumber=1&pageSize=20")
+).items;
 export const startWorkflow=(input:{contractId:string;legalUserId?:string;technicalUserId?:string;financialUserId?:string;managerialUserId?:string})=>operationsRequest<ContractWorkflow>("/workflows",{method:"POST",body:JSON.stringify(input)});
 export const decideWorkflow=(id:string,decision:number,comment?:string)=>operationsRequest<ContractWorkflow>(`/workflows/${id}/decision`,{method:"POST",body:JSON.stringify({decision,comment})});
-export const listOperations=()=>operationsRequest<ContractOperation[]>("/items");
+export const listOperations=async()=>(
+  await operationsRequest<PagedResponse<ContractOperation>>("/items?pageNumber=1&pageSize=20")
+).items;
 export const createOperation=(input:{contractId:string;type:number;title:string;dueDate:string;amount?:number;currency:string;reminderDaysBefore:number;description?:string})=>operationsRequest<ContractOperation>("/items",{method:"POST",body:JSON.stringify(input)});
 export const changeOperationStatus=(id:string,status:number)=>operationsRequest<void>(`/items/${id}/status`,{method:"PUT",body:JSON.stringify({status})});
 export const deleteOperation=(id:string)=>operationsRequest<void>(`/items/${id}`,{method:"DELETE"});

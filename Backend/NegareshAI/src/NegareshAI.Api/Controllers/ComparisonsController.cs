@@ -1,12 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Application.Comparisons;
 using NegareshAI.Api.Contracts;
-using NegareshAI.Api.Data;
-using NegareshAI.Api.Services;
 using NegareshAI.Api.Security;
 
 namespace NegareshAI.Api.Controllers;
@@ -16,15 +12,14 @@ namespace NegareshAI.Api.Controllers;
 [Authorize]
 [NegareshAccess(NegareshAIAccessFormIds.Comparisons)]
 public sealed class ComparisonsController(
-    ISender sender,
-    NegareshDbContext db,
-    ICurrentTenant tenant,
-    IComparisonReportGenerator reportGenerator) : ControllerBase
+    ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ComparisonRunSummaryResponse>>> List(
-        CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new ListComparisonRunsQuery(), cancellationToken));
+    public async Task<IActionResult> List(
+        [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default) =>
+        Ok(await sender.Send(
+            new ListComparisonRunsQuery(pageNumber, pageSize), cancellationToken));
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ComparisonRunResponse>> Get(
@@ -61,17 +56,10 @@ public sealed class ComparisonsController(
         format = format.ToLowerInvariant();
         if (format is not ("docx" or "pdf"))
             return BadRequest("Report format must be docx or pdf.");
-        var run = await db.ComparisonRuns.AsNoTracking()
-            .Include(item => item.TargetDocument)
-            .Include(item => item.Findings)
-            .SingleOrDefaultAsync(item =>
-                item.Id == id && item.OrganizationId == tenant.OrganizationId,
-                cancellationToken);
-        if (run is null) return NotFound();
-        var content = await reportGenerator.GenerateAsync(
-            run, format, cancellationToken);
-        var contentType = format == "pdf" ? "application/pdf"
-            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        return File(content, contentType, $"comparison-{id:N}.{format}");
+        var result = await sender.Send(
+            new GenerateComparisonReportQuery(id, format), cancellationToken);
+        return result is null
+            ? NotFound()
+            : File(result.Content, result.ContentType, result.FileName);
     }
 }

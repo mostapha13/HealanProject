@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NegareshAI.Api.Application.Common.Tenancy;
+using NegareshAI.Api.Application.Common.Pagination;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 
@@ -35,14 +36,15 @@ public sealed class GetDocumentDetailQueryHandler(
     }
 }
 
-public sealed record ListArchivedDocumentsQuery : IRequest<IReadOnlyList<DocumentListItemResponse>>;
+public sealed record ListArchivedDocumentsQuery(int PageNumber = 1, int PageSize = 20)
+    : IRequest<PagedResponse<DocumentListItemResponse>>;
 
 public sealed class ListArchivedDocumentsQueryHandler(
     NegareshDbContext db,
     ICurrentTenant tenant)
-    : IRequestHandler<ListArchivedDocumentsQuery, IReadOnlyList<DocumentListItemResponse>>
+    : IRequestHandler<ListArchivedDocumentsQuery, PagedResponse<DocumentListItemResponse>>
 {
-    public async Task<IReadOnlyList<DocumentListItemResponse>> Handle(
+    public async Task<PagedResponse<DocumentListItemResponse>> Handle(
         ListArchivedDocumentsQuery request,
         CancellationToken cancellationToken) =>
         await db.Documents.IgnoreQueryFilters().AsNoTracking()
@@ -52,7 +54,8 @@ public sealed class ListArchivedDocumentsQueryHandler(
                 item.Id, item.Title, item.DocumentType, item.Versions.Count,
                 item.ConfidentialityLevel, item.ProcessingStatus,
                 item.CreatedAtUtc, item.UpdatedAtUtc))
-            .ToListAsync(cancellationToken);
+            .ToPagedResponseAsync(
+                new PageRequest(request.PageNumber, request.PageSize), cancellationToken);
 }
 
 public sealed record DownloadDocumentVersionQuery(

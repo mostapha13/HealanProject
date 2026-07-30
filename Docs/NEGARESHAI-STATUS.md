@@ -117,6 +117,25 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
   first-class ContractGroup domain used by contract data scopes, and split the
   four legacy access route bodies into focused list/form experiences.
 
+### M0 CQRS/pagination continuation — 2026-07-30
+
+- Removed the final direct `NegareshDbContext` dependencies from
+  `ContractOperationsController` and `ComparisonsController`.
+- Moved P5 workflow, risk, operation and management-dashboard use cases plus
+  comparison report generation to MediatR handlers.
+- Added a regression test that scans every API controller and fails if a
+  controller constructor receives `NegareshDbContext`.
+- Standardized server pagination for workflows, risks, operations, runtime
+  settings, archived documents, comparison history, contract templates,
+  RuleSets, document groups and contract catalog lists.
+- Document-group pagination applies effective group scope in the SQL query;
+  it no longer fetches every group before filtering.
+- Frontend API adapters were updated without regressing the current screen
+  contracts. Backend tests pass 25/25 and the frontend production build passes.
+- Remaining M0 work is frontend modularization/design-system extraction and
+  the additive feature-flag/data-migration strategy. Remaining M1 work is the
+  ContractGroup domain and focused permission-tree/group-scope UX.
+
 ## Authoritative current checkpoint — 2026-07-30
 
 ### P4 implementation checkpoint

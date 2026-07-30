@@ -114,6 +114,9 @@ public interface IDataScopeAuthorizer
     Task<bool> CanAccessAsync(
         DataScopeResourceType resourceType, Guid resourceId,
         CancellationToken cancellationToken = default);
+    Task<IReadOnlySet<Guid>?> GetAllowedResourceIdsAsync(
+        DataScopeResourceType resourceType,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class DataScopeAuthorizer(
@@ -145,5 +148,41 @@ public sealed class DataScopeAuthorizer(
             && x.SubjectType == DataScopeSubjectType.Role
             && roles.Contains(x.SubjectId)).ToListAsync(cancellationToken);
         return roleRows.Count > 0 && !roleRows.Any(x => x.IsDenied);
+    }
+
+    public async Task<IReadOnlySet<Guid>?> GetAllowedResourceIdsAsync(
+        DataScopeResourceType resourceType,
+        CancellationToken cancellationToken = default)
+    {
+        var principal = accessor.HttpContext?.User;
+        if (principal?.Identity?.IsAuthenticated != true) return new HashSet<Guid>();
+        var roles = principal.FindAll(ClaimTypes.Role).Select(x => x.Value)
+            .Concat(principal.FindAll("role").Select(x => x.Value))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (roles.Contains("Admin")) return null;
+        var rows = await db.DataScopeAssignments.AsNoTracking().Where(x =>
+            x.OrganizationId == tenant.OrganizationId
+            && x.ResourceType == resourceType
+            && ((x.SubjectType == DataScopeSubjectType.User
+                    && x.SubjectId == tenant.UserId)
+                || (x.SubjectType == DataScopeSubjectType.Role
+                    && roles.Contains(x.SubjectId))))
+            .ToListAsync(cancellationToken);
+        var allowed = new HashSet<Guid>();
+        foreach (var resourceRows in rows.GroupBy(x => x.ResourceId))
+        {
+            var user = resourceRows.SingleOrDefault(
+                x => x.SubjectType == DataScopeSubjectType.User);
+            if (user is not null)
+            {
+                if (!user.IsDenied) allowed.Add(resourceRows.Key);
+                continue;
+            }
+            var roleRows = resourceRows.Where(
+                x => x.SubjectType == DataScopeSubjectType.Role).ToArray();
+            if (roleRows.Length > 0 && roleRows.All(x => !x.IsDenied))
+                allowed.Add(resourceRows.Key);
+        }
+        return allowed;
     }
 }

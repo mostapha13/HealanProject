@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Dates;
 using NegareshAI.Api.Application.Common.Tenancy;
+using NegareshAI.Api.Application.Common.Pagination;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 using NegareshAI.Api.Services;
@@ -13,7 +14,8 @@ namespace NegareshAI.Api.Application.Contracts.Generation;
 public sealed record CreateContractTemplateCommand(
     CreateContractTemplateRequest Request, Stream File, string FileName, string ContentType)
     : IRequest<ContractTemplateResponse>;
-public sealed record ListContractTemplatesQuery : IRequest<IReadOnlyList<ContractTemplateResponse>>;
+public sealed record ListContractTemplatesQuery(int PageNumber = 1, int PageSize = 20)
+    : IRequest<PagedResponse<ContractTemplateResponse>>;
 public sealed record StartContractGenerationCommand(StartContractGenerationRequest Request)
     : IRequest<ContractGenerationResponse?>;
 public sealed record ReviewContractGenerationCommand(
@@ -57,16 +59,17 @@ public sealed class CreateContractTemplateHandler(
 }
 
 public sealed class ListContractTemplatesHandler(NegareshDbContext db, ICurrentTenant tenant)
-    : IRequestHandler<ListContractTemplatesQuery, IReadOnlyList<ContractTemplateResponse>>
+    : IRequestHandler<ListContractTemplatesQuery, PagedResponse<ContractTemplateResponse>>
 {
-    public async Task<IReadOnlyList<ContractTemplateResponse>> Handle(
+    public async Task<PagedResponse<ContractTemplateResponse>> Handle(
         ListContractTemplatesQuery request, CancellationToken cancellationToken) =>
         await db.ContractTemplates.AsNoTracking()
             .Where(item => item.OrganizationId == tenant.OrganizationId && item.IsActive)
             .OrderBy(item => item.Name).ThenByDescending(item => item.Version)
             .Select(item => new ContractTemplateResponse(item.Id, item.Name, item.ContractType,
                 item.Version, item.Description, item.IsActive, item.CreatedAtUtc))
-            .ToListAsync(cancellationToken);
+            .ToPagedResponseAsync(
+                new PageRequest(request.PageNumber, request.PageSize), cancellationToken);
 }
 
 public sealed class StartContractGenerationHandler(
