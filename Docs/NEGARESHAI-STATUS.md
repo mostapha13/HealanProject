@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-30
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `2e8f64b` (`Complete private RAG and document comparison`)
+Last committed baseline: `433d62c` (`feat(negareshai): complete P5 contract operations`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -23,6 +23,77 @@ When work resumes:
 
 Do not re-audit the whole repository unless this file is missing, inconsistent
 with Git, or the requested work changes scope.
+
+## Non-negotiable product memory — product owner confirmation 2026-07-30
+
+NegareshAI has exactly two primary product goals:
+
+1. Intelligent contract management.
+2. Intelligent document conformity.
+
+The authoritative narratives and acceptance scenarios are recorded under
+`تعریف قطعی مالک محصول — ۱۴۰۵/۰۵/۰۸` in
+`Docs/NEGARESHAI-PRODUCT-SPEC.md`. Every resumed session must read that section
+before planning or implementing work. Infrastructure features are supporting
+capabilities and must not displace these two end-to-end flows.
+
+### Product-alignment audit — 2026-07-30
+
+The existing P0-P5 implementation provides useful infrastructure but must not
+be treated as final completion against the newly confirmed product definition.
+The following gaps are roadmap blockers:
+
+- There is no first-class, tenant-scoped ContractGroup with many-to-many
+  contract membership, primary-group selection, effective template versions,
+  CRUD/activation/soft-delete/audit and group-level access.
+- Upload currently extracts and indexes a document immediately. Extraction/OCR
+  may run before approval, but RAG eligibility needs a separate lifecycle and
+  must remain disabled until the required final approval.
+- DocumentGroup/RuleSet is only an initial slice: it lacks complete CRUD,
+  reusable criterion catalog, numeric weights, critical criteria, per-group
+  thresholds, golden document versions, expert conflict decisions, group ACL
+  and separate permissions for comparison approval versus final/RAG approval.
+- Contract generation currently selects a contract and a template explicitly;
+  it does not resolve the base contract by company + group + contract year +
+  highest version, nor select an effective template from the primary contract
+  group.
+- Contract generation is a single request/review record rather than a
+  persistent multi-turn chat with an immutable version for every correction.
+- PDF and DOCX uploads are supported, including scanned PDF OCR, but direct
+  JPG/PNG/TIFF multi-page image ingestion is not implemented.
+- Document and contract APIs expose basic server-side pagination, but the
+  current single-page frontend loads only the first page and renders no
+  pagination control. Most management lists remain unpaged.
+- Basic data, users/access and organization settings are currently aggregated
+  panels in one SPA page. They must become permission-driven parent menus with
+  independent child routes/pages and professional list/detail/form UX.
+- Several newer P5 endpoints use direct DbContext access in controllers and
+  need to be moved to the required MediatR/AutoMapper application architecture.
+
+The next roadmap must be rebuilt around the two owner-approved end-to-end
+acceptance scenarios. Do not begin implementation until the remaining product
+questions are answered and the resulting roadmap is explicitly approved.
+
+Second product-owner clarification on 2026-07-30 is now recorded in the product
+specification. It fixes primary contract groups, effective template selection,
+contract year/version resolution, multi-image page ordering, pre-RAG approval,
+immutable chat revisions, weighted/critical conformity scoring, catalog-only
+criteria, prioritized golden documents, expert conflict decisions, separate
+approval permissions and fail-closed comparison groups. A new greenfield
+contract scenario was added and still needs its source/template fallback
+policy finalized before roadmap approval.
+
+Third and final product-owner clarification on 2026-07-30 closed the remaining
+questions: greenfield generation uses the effective group template, approved
+clause catalog and user answers; cross-group contracts require explicit user
+selection; missing templates fail closed; parties may be created inline with
+permission; expert approval always precedes manager finalization; conformity
+review and RAG finalization remain separate; and effective authorization is
+the intersection of the Healan-style action tree and group data scope.
+
+`Docs/NEGARESHAI-ROADMAP.md` has been rebuilt as the final M0-M8 roadmap. Its
+status is **waiting for explicit product-owner approval**. Do not start M0 or
+any implementation based on that roadmap until approval is received.
 
 ## Authoritative current checkpoint — 2026-07-30
 
