@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__NegareshAI: "Server=negareshai-db;Database=NegareshAI;User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__NegareshAI: "Server=${NEGARESHAI_SQL_SERVER:-negareshai-db};Database=${NEGARESHAI_SQL_DATABASE:-NegareshAI};User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
       Authentication__Authority: "${NEGARESHAI_IDENTITY_URL:-http://host.docker.internal:5005}"
       Tenancy__DevelopmentOrganizationId: "${NEGARESHAI_DEVELOPMENT_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}"
       FileManager__BaseUrl: "${NEGARESHAI_FILEMANAGER_URL:-http://host.docker.internal:6823/}"
