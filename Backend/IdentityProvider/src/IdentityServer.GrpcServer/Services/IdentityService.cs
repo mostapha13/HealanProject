@@ -1,6 +1,7 @@
 using Grpc.Core;
 using IdentityServer.Domain;
 using IdentityServer.Domain.Data;
+using IdentityServer.Domain.Security;
 using IdentityServer.Domain.Entities;
 using IdentityServer.GrpcClient;
 using IdentityServer.GrpcServer.CachedModel;
@@ -253,12 +254,8 @@ namespace IdentityServer.GrpcServer.Services
                 return userHasAccessResonse;
             }
 
-            var isAdmin = await (
-                from ur in _applicationDbContext.UserRoles
-                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                where ur.UserId == userId.Value && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted
-                select ur.RoleId
-            ).AnyAsync();
+            var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
+                _applicationDbContext, userId.Value, context.CancellationToken);
 
             if (isAdmin)
             {

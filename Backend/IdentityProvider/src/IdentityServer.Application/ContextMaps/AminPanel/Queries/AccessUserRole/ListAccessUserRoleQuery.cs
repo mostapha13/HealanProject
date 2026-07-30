@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using IdentityServer.Domain.Data;
+using IdentityServer.Domain.Security;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -59,12 +60,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                     (ur, role) => ur.RoleId)
                 .ToListAsync(cancellationToken);
 
-            var isAdmin = await (
-                from ur in _applicationDbContext.UserRoles
-                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                where ur.UserId == userId && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted
-                select ur.RoleId
-            ).AnyAsync(cancellationToken);
+            var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
+                _applicationDbContext, userId, cancellationToken);
 
             var roleGrants = await _applicationDbContext.AccessRoles
                 .AsNoTracking()
@@ -140,12 +137,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
 
         private async Task<bool> CanManageHealanAccessAsync(Guid callerId, CancellationToken cancellationToken)
         {
-            var isAdmin = await (
-                from ur in _applicationDbContext.UserRoles
-                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                where ur.UserId == callerId && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted
-                select ur.RoleId
-            ).AnyAsync(cancellationToken);
+            var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
+                _applicationDbContext, callerId, cancellationToken);
 
             if (isAdmin)
                 return true;

@@ -1,6 +1,7 @@
 #nullable enable
 
 using IdentityServer.Domain.Data;
+using IdentityServer.Domain.Security;
 using IdentityServer.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -247,8 +248,7 @@ public sealed class NegareshAIIdentityManagementController(
             throw new UnauthorizedAccessException();
         if (mutation && string.Equals(User.FindFirstValue(ImpersonationClaimNames.IsImpersonating), "true", StringComparison.OrdinalIgnoreCase))
             throw new ForbiddenAccessExceptions();
-        var admin = await (from ur in db.UserRoles join role in db.Roles on ur.RoleId equals role.Id
-            where ur.UserId == actor && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted select role.Id).AnyAsync(ct);
+        var admin = await AdminUserAccessPolicy.HasFullAccessAsync(db, actor, ct);
         if (admin) return actor;
         var denied = await (from deny in db.AccessUserDenies join menu in db.AccessMenus on deny.AccessMenuId equals menu.AccessMenuId
             where deny.UserId == actor && !deny.IsDeleted && menu.AccessFormId == formId select deny.AccessUserDenyId).AnyAsync(ct);

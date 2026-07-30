@@ -1,6 +1,7 @@
 #nullable enable
 
 using IdentityServer.Domain.Data;
+using IdentityServer.Domain.Security;
 using IdentityServer.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -385,13 +386,8 @@ public class HealanRoleManagementController : ApiControllerBase
                 StringComparison.OrdinalIgnoreCase))
             throw new ForbiddenAccessExceptions();
 
-        var isAdmin = await (
-            from userRole in _dbContext.UserRoles
-            join role in _dbContext.Roles on userRole.RoleId equals role.Id
-            where userRole.UserId == actorId
-                && role.Name == ConstUserInfo.AdminRole
-                && !role.IsDeleted
-            select role.Id).AnyAsync(cancellationToken);
+        var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
+            _dbContext, actorId, cancellationToken);
         if (isAdmin)
             return actorId;
 

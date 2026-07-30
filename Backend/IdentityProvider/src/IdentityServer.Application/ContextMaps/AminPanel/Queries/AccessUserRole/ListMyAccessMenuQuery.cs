@@ -1,6 +1,7 @@
 using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessForm;
 using IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessMenu;
 using IdentityServer.Domain.Data;
+using IdentityServer.Domain.Security;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +39,8 @@ public sealed class ListMyAccessMenuQueryHandler
             throw new UnauthorizedAccessException("Authenticated user identity is missing.");
         }
 
-        var isAdmin = await (
-            from ur in _db.UserRoles
-            join role in _db.Roles on ur.RoleId equals role.Id
-            where ur.UserId == userId && role.Name == ConstUserInfo.AdminRole && !role.IsDeleted
-            select ur.RoleId
-        ).AnyAsync(cancellationToken);
+        var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
+            _db, userId, cancellationToken);
 
         var roleMenuIds = await (
             from ur in _db.UserRoles
