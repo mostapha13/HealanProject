@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NegareshAI.Api.Application.Contracts.Commands;
 using NegareshAI.Api.Application.Contracts.Queries;
+using NegareshAI.Api.Application.Contracts.Generation;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 
@@ -50,4 +51,56 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Archive(Guid id, CancellationToken cancellationToken) =>
         await sender.Send(new ArchiveContractCommand(id), cancellationToken)
             ? NoContent() : NotFound();
+
+    [HttpGet("templates")]
+    public async Task<ActionResult<IReadOnlyList<ContractTemplateResponse>>> Templates(
+        CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new ListContractTemplatesQuery(), cancellationToken));
+
+    [HttpPost("templates")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ContractTemplateResponse>> CreateTemplate(
+        [FromForm] ContractTemplateUploadRequest request, CancellationToken cancellationToken)
+    {
+        if (!request.File.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Template must be a DOCX file.");
+        var result = await sender.Send(new CreateContractTemplateCommand(
+            new(request.Name, request.ContractType, request.Description),
+            request.File.OpenReadStream(), request.File.FileName,
+            request.File.ContentType), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("generations")]
+    public async Task<ActionResult<ContractGenerationResponse>> Generate(
+        StartContractGenerationRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new StartContractGenerationCommand(request), cancellationToken);
+        return result is null ? NotFound("Contract, base version, or template was not found.") : Ok(result);
+    }
+
+    [HttpGet("generations/{id:guid}")]
+    public async Task<ActionResult<ContractGenerationResponse>> GetGeneration(
+        Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetContractGenerationQuery(id), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPut("generations/{id:guid}/review")]
+    public async Task<ActionResult<ContractGenerationResponse>> ReviewGeneration(
+        Guid id, ReviewContractGenerationRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReviewContractGenerationCommand(id, request),
+            cancellationToken);
+        return result is null ? Conflict("Generation is not ready for review.") : Ok(result);
+    }
+}
+
+public sealed class ContractTemplateUploadRequest
+{
+    public required string Name { get; init; }
+    public required string ContractType { get; init; }
+    public string? Description { get; init; }
+    public required IFormFile File { get; init; }
 }

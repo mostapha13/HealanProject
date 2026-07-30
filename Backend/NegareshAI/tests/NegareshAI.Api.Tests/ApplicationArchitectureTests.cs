@@ -9,6 +9,7 @@ using NegareshAI.Api.Application.Settings.Commands;
 using NegareshAI.Api.Application.Settings.Queries;
 using NegareshAI.Api.Application.Contracts.Commands;
 using NegareshAI.Api.Application.Contracts.Queries;
+using NegareshAI.Api.Application.Contracts.Generation;
 using NegareshAI.Api.Contracts;
 using Xunit;
 
@@ -84,5 +85,10 @@ public sealed class ApplicationArchitectureTests
             services,
             descriptor => descriptor.ServiceType ==
                 typeof(IRequestHandler<RestoreDocumentCommand, bool>));
+        Assert.Contains(
+            services,
+            descriptor => descriptor.ServiceType ==
+                typeof(IRequestHandler<StartContractGenerationCommand,
+                    ContractGenerationResponse?>));
     }
 }

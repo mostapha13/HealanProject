@@ -26,6 +26,20 @@ with Git, or the requested work changes scope.
 
 ## Authoritative current checkpoint — 2026-07-30
 
+### P4 implementation checkpoint
+
+- P4 contract generation is implemented in the working tree.
+- Added tenant-scoped versioned DOCX templates, deterministic Persian
+  ChangeSets, Jalali date/amount/percentage validation and calculations,
+  clarification questions, source/template/model snapshots, diff preview,
+  private DOCX generation, human review and immutable approved draft versions.
+- Backend tests pass 21/21.
+- Local and Docker frontend production builds pass.
+- API and Web Docker images were built successfully.
+- Live recreation is blocked only by the absent local
+  `NEGARESHAI_SQL_PASSWORD`; no credential was extracted or persisted.
+- Acceptance details: `Docs/NEGARESHAI-ACCEPTANCE-P4-2026-07-30.md`.
+
 This section is the current source of truth. Older sections below are retained
 as historical session detail and may describe work that was uncommitted at that
 earlier checkpoint.

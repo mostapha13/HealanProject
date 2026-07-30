@@ -21,6 +21,8 @@ builder.Services.AddHttpClient<IAiDocumentProcessor, AiDocumentProcessor>((servi
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 builder.Services.AddHttpClient<IComparisonReportGenerator, ComparisonReportGenerator>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
+builder.Services.AddHttpClient<IContractDocumentGenerator, ContractDocumentGenerator>((services, client) =>
+    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 var authority = builder.Configuration["Authentication:Authority"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

@@ -17,6 +17,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ContractDate> ContractDates => Set<ContractDate>();
     public DbSet<ContractObligation> ContractObligations => Set<ContractObligation>();
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
+    public DbSet<ContractGenerationRun> ContractGenerationRuns => Set<ContractGenerationRun>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<RuntimeSetting> RuntimeSettings => Set<RuntimeSetting>();
@@ -53,6 +54,20 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<ContractValue>()
             .Property(item => item.Amount)
             .HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>()
+            .HasIndex(item => new { item.OrganizationId, item.Name, item.Version })
+            .IsUnique();
+        modelBuilder.Entity<ContractGenerationRun>()
+            .HasIndex(item => new { item.OrganizationId, item.CreatedAtUtc });
+        modelBuilder.Entity<ContractGenerationRun>()
+            .HasOne(item => item.Contract).WithMany()
+            .HasForeignKey(item => item.ContractId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractGenerationRun>()
+            .HasOne(item => item.BaseDocumentVersion).WithMany()
+            .HasForeignKey(item => item.BaseDocumentVersionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractGenerationRun>()
+            .HasOne(item => item.ContractTemplate).WithMany()
+            .HasForeignKey(item => item.ContractTemplateId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<AuditLog>()
             .HasIndex(item => new { item.OrganizationId, item.CreatedAtUtc });
         modelBuilder.Entity<RuntimeSetting>()

@@ -90,6 +90,59 @@ export type ContractDetail = ContractItem & {
   createdAtUtc: string;
 };
 
+export type ContractTemplate = {
+  id: string; name: string; contractType: string; version: number;
+  description?: string; isActive: boolean; createdAtUtc: string;
+};
+
+export type ContractGeneration = {
+  id: string; contractId: string; baseDocumentVersionId: string;
+  contractTemplateId: string; userInstruction: string; changeSetJson: string;
+  sourceSnapshotJson: string; calculationSnapshotJson: string; diffJson: string;
+  clarificationQuestionsJson?: string; status: number; modelId: string;
+  promptVersion: string; generatedDocxFileId?: string; generatedPdfFileId?: string;
+  createdByUserId: string; reviewedByUserId?: string; reviewComment?: string;
+  createdAtUtc: string; reviewedAtUtc?: string;
+};
+
+export async function listContractTemplates(): Promise<ContractTemplate[]> {
+  const response = await authorizedFetch("/api/contracts/templates");
+  if (!response.ok) throw new Error("دریافت قالب‌های قرارداد انجام نشد");
+  return response.json();
+}
+
+export async function uploadContractTemplate(input: {
+  name: string; contractType: string; description?: string; file: File;
+}): Promise<ContractTemplate> {
+  const form = new FormData();
+  form.append("name", input.name); form.append("contractType", input.contractType);
+  if (input.description) form.append("description", input.description);
+  form.append("file", input.file);
+  const response = await authorizedFetch("/api/contracts/templates", {method:"POST", body:form});
+  if (!response.ok) throw new Error(await response.text() || "ثبت قالب انجام نشد");
+  return response.json();
+}
+
+export async function generateContract(input: {
+  contractId: string; contractTemplateId: string; userInstruction: string;
+  sourceDocumentIds: string[];
+}): Promise<ContractGeneration> {
+  const response = await authorizedFetch("/api/contracts/generations", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(input)
+  });
+  if (!response.ok) throw new Error(await response.text() || "تولید قرارداد انجام نشد");
+  return response.json();
+}
+
+export async function reviewContractGeneration(id:string, approved:boolean, comment?:string) {
+  const response = await authorizedFetch(`/api/contracts/generations/${id}/review`, {
+    method:"PUT", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({approved,comment})
+  });
+  if (!response.ok) throw new Error(await response.text() || "ثبت تصمیم انجام نشد");
+  return response.json() as Promise<ContractGeneration>;
+}
+
 export type DocumentVersion = {
   id: string;
   versionNumber: number;

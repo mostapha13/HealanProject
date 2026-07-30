@@ -82,6 +82,15 @@ public enum FindingReviewDecision
     Corrected = 4
 }
 
+public enum ContractGenerationStatus
+{
+    NeedsClarification = 1,
+    ReadyForReview = 2,
+    Approved = 3,
+    Rejected = 4,
+    Failed = 5
+}
+
 public sealed class Organization
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -237,7 +246,41 @@ public sealed class ContractTemplate
     public required string Name { get; set; }
     public required string ContractType { get; set; }
     public required string FileId { get; set; }
+    public string? LetterheadFileId { get; set; }
+    public string? LogoFileId { get; set; }
+    public int Version { get; set; } = 1;
+    public string? Description { get; set; }
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+}
+
+public sealed class ContractGenerationRun
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractId { get; set; }
+    public Guid BaseDocumentVersionId { get; set; }
+    public Guid ContractTemplateId { get; set; }
+    public required string UserInstruction { get; set; }
+    public required string ChangeSetJson { get; set; }
+    public required string SourceSnapshotJson { get; set; }
+    public required string CalculationSnapshotJson { get; set; }
+    public required string DiffJson { get; set; }
+    public string? ClarificationQuestionsJson { get; set; }
+    public string? GeneratedDocxFileId { get; set; }
+    public string? GeneratedPdfFileId { get; set; }
+    public ContractGenerationStatus Status { get; set; }
+    public required string ModelId { get; set; }
+    public required string PromptVersion { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public string? ReviewedByUserId { get; set; }
+    public string? ReviewComment { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? ReviewedAtUtc { get; set; }
+    public Contract? Contract { get; set; }
+    public DocumentVersion? BaseDocumentVersion { get; set; }
+    public ContractTemplate? ContractTemplate { get; set; }
 }
 
 public sealed class Checklist
