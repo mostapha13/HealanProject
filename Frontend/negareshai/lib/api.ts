@@ -57,6 +57,7 @@ export type RuntimeSetting = {
 
 export type ContractParty = {
   id?: string;
+  directoryPartyId?: string;
   role: number;
   name: string;
   nationalIdentifier?: string;
@@ -69,6 +70,8 @@ export type ContractItem = {
   subject: string;
   contractNumber?: string;
   status: number;
+  statusDefinitionId?: string;
+  statusName?: string;
   amount?: number;
   currency: string;
   startDate?: string;
@@ -85,10 +88,40 @@ export type ContractListResponse = {
 };
 
 export type ContractDetail = ContractItem & {
+  baseDocumentProfileId?: string;
   internalOwnerUserId?: string;
   parties: ContractParty[];
   createdAtUtc: string;
 };
+
+export type ContractStatusDefinition = {
+  id:string; name:string; order:number; color:string; isActive:boolean;
+};
+export type ContractBaseDocument = {
+  id:string; documentId:string; name:string; documentTitle:string;
+  description?:string; isActive:boolean;
+};
+export type OrganizationParty = {
+  id:string; name:string; nationalIdentifier?:string; representativeName?:string;
+  contactInfo?:string; isActive:boolean;
+};
+
+export async function listContractCatalog<T>(kind:"statuses"|"base-documents"|"parties"):Promise<T[]> {
+  const response=await authorizedFetch(`/api/contracts/catalog/${kind}`);
+  if(!response.ok) throw new Error("دریافت اطلاعات پایه قرارداد انجام نشد");
+  return response.json();
+}
+export async function saveContractCatalog<T>(kind:"statuses"|"base-documents"|"parties",input:object,id?:string):Promise<T>{
+  const response=await authorizedFetch(`/api/contracts/catalog/${kind}${id?`/${id}`:""}`,{
+    method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)
+  });
+  if(!response.ok) throw new Error(await response.text()||"ثبت اطلاعات پایه انجام نشد");
+  return response.json();
+}
+export async function deleteContractCatalog(kind:"statuses"|"base-documents"|"parties",id:string){
+  const response=await authorizedFetch(`/api/contracts/catalog/${kind}/${id}`,{method:"DELETE"});
+  if(!response.ok) throw new Error("حذف ممکن نیست؛ این گزینه احتمالاً در قرارداد استفاده شده است.");
+}
 
 export type ContractTemplate = {
   id: string; name: string; contractType: string; version: number;
@@ -341,9 +374,11 @@ export async function listContracts(search = ""): Promise<ContractListResponse> 
 export async function saveContract(input: {
   id?: string;
   documentId: string;
+  baseDocumentProfileId?: string;
   contractNumber?: string;
   subject: string;
   status: number;
+  statusDefinitionId?: string;
   amount?: number;
   currency: string;
   startDate?: string;

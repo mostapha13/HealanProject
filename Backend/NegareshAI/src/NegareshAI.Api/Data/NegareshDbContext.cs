@@ -12,6 +12,9 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
     public DbSet<Contract> Contracts => Set<Contract>();
     public DbSet<ContractParty> ContractParties => Set<ContractParty>();
+    public DbSet<ContractStatusDefinition> ContractStatusDefinitions => Set<ContractStatusDefinition>();
+    public DbSet<ContractBaseDocumentProfile> ContractBaseDocumentProfiles => Set<ContractBaseDocumentProfile>();
+    public DbSet<OrganizationParty> OrganizationParties => Set<OrganizationParty>();
     public DbSet<ContractClause> ContractClauses => Set<ContractClause>();
     public DbSet<ContractValue> ContractValues => Set<ContractValue>();
     public DbSet<ContractDate> ContractDates => Set<ContractDate>();
@@ -51,6 +54,21 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<Contract>()
             .Property(item => item.Amount)
             .HasPrecision(18, 2);
+        modelBuilder.Entity<ContractStatusDefinition>()
+            .HasIndex(item => new { item.OrganizationId, item.Name }).IsUnique();
+        modelBuilder.Entity<ContractBaseDocumentProfile>()
+            .HasIndex(item => new { item.OrganizationId, item.Name }).IsUnique();
+        modelBuilder.Entity<OrganizationParty>()
+            .HasIndex(item => new { item.OrganizationId, item.Name }).IsUnique();
+        modelBuilder.Entity<Contract>()
+            .HasOne(item => item.StatusDefinition).WithMany()
+            .HasForeignKey(item => item.StatusDefinitionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Contract>()
+            .HasOne(item => item.BaseDocumentProfile).WithMany()
+            .HasForeignKey(item => item.BaseDocumentProfileId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractParty>()
+            .HasOne(item => item.DirectoryParty).WithMany()
+            .HasForeignKey(item => item.DirectoryPartyId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ContractValue>()
             .Property(item => item.Amount)
             .HasPrecision(18, 2);

@@ -26,6 +26,7 @@ export default function PersianCalendar({ value = "", onChange, placeholder = "�
   const today = toJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
   const selected = gregorianYmdToJalali(value);
   const [open, setOpen] = useState(false);
+  const [opensUp, setOpensUp] = useState(false);
   const [view, setView] = useState(selected ?? today);
 
   useEffect(() => {
@@ -51,13 +52,20 @@ export default function PersianCalendar({ value = "", onChange, placeholder = "�
     onChange(jalaliToGregorianYmd(jy, jm, jd));
     setOpen(false);
   };
+  const toggle = () => {
+    if (!open && root.current) {
+      const rect = root.current.getBoundingClientRect();
+      setOpensUp(window.innerHeight - rect.bottom < 370 && rect.top > 370);
+    }
+    setOpen(current => !current);
+  };
 
   return <div className="persian-date-picker" ref={root}>
-    <button type="button" className={`persian-date-trigger ${value ? "has-value" : ""}`} onClick={() => setOpen(current => !current)} aria-haspopup="dialog" aria-expanded={open}>
+    <button type="button" className={`persian-date-trigger ${value ? "has-value" : ""}`} onClick={toggle} aria-haspopup="dialog" aria-expanded={open}>
       <span>{value ? formatJalaliDate(value) : placeholder}</span>
       <span aria-hidden="true">▾</span>
     </button>
-    {open && <div className="persian-calendar" role="dialog" aria-label="تقویم شمسی">
+    {open && <div className={`persian-calendar ${opensUp ? "opens-up" : ""}`} role="dialog" aria-label="تقویم شمسی">
       <header>
         <button type="button" onClick={() => move(1)} aria-label="ماه بعد">‹</button>
         <strong>{JALALI_MONTH_NAMES[view.jm - 1]} {toPersianDigits(view.jy)}</strong>

@@ -20,10 +20,11 @@ public sealed class GetContractQueryHandler(
                 && item.OrganizationId == tenant.OrganizationId)
             .Select(item => new ContractDetailResponse(
                 item.Id, item.DocumentId, item.Subject, item.ContractNumber,
-                item.Status, item.Amount, item.Currency, item.StartDate, item.EndDate,
+                item.Status, item.StatusDefinitionId, item.StatusDefinition != null ? item.StatusDefinition.Name : null,
+                item.BaseDocumentProfileId, item.Amount, item.Currency, item.StartDate, item.EndDate,
                 item.InternalOwnerUserId,
                 item.Parties.OrderBy(party => party.Role).Select(party =>
-                    new ContractPartyResponse(party.Id, party.Role, party.Name,
+                    new ContractPartyResponse(party.Id, party.DirectoryPartyId, party.Role, party.Name,
                         party.NationalIdentifier, party.RepresentativeName)).ToList(),
                 item.CreatedAtUtc, item.UpdatedAtUtc))
             .SingleOrDefaultAsync(cancellationToken);

@@ -170,6 +170,8 @@ public sealed class Contract
     public string? ContractNumber { get; set; }
     public required string Subject { get; set; }
     public ContractStatus Status { get; set; } = ContractStatus.Draft;
+    public Guid? StatusDefinitionId { get; set; }
+    public Guid? BaseDocumentProfileId { get; set; }
     public decimal? Amount { get; set; }
     public string Currency { get; set; } = "IRR";
     public DateOnly? StartDate { get; set; }
@@ -178,6 +180,8 @@ public sealed class Contract
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public Document? Document { get; set; }
+    public ContractStatusDefinition? StatusDefinition { get; set; }
+    public ContractBaseDocumentProfile? BaseDocumentProfile { get; set; }
     public List<ContractParty> Parties { get; set; } = [];
     public List<ContractClause> Clauses { get; set; } = [];
     public List<ContractValue> Values { get; set; } = [];
@@ -190,10 +194,44 @@ public sealed class ContractParty
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid ContractId { get; set; }
     public ContractPartyRole Role { get; set; }
+    public Guid? DirectoryPartyId { get; set; }
     public required string Name { get; set; }
     public string? NationalIdentifier { get; set; }
     public string? RepresentativeName { get; set; }
     public Contract? Contract { get; set; }
+    public OrganizationParty? DirectoryParty { get; set; }
+}
+
+public sealed class ContractStatusDefinition
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Name { get; set; }
+    public int Order { get; set; }
+    public string Color { get; set; } = "#6658df";
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class ContractBaseDocumentProfile
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid DocumentId { get; set; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public bool IsActive { get; set; } = true;
+    public Document? Document { get; set; }
+}
+
+public sealed class OrganizationParty
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Name { get; set; }
+    public string? NationalIdentifier { get; set; }
+    public string? RepresentativeName { get; set; }
+    public string? ContactInfo { get; set; }
+    public bool IsActive { get; set; } = true;
 }
 
 public sealed class ContractClause

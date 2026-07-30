@@ -6,10 +6,12 @@ public sealed record ContractPartyRequest(
     ContractPartyRole Role,
     string Name,
     string? NationalIdentifier,
-    string? RepresentativeName);
+    string? RepresentativeName,
+    Guid? DirectoryPartyId = null);
 
 public sealed record ContractPartyResponse(
     Guid Id,
+    Guid? DirectoryPartyId,
     ContractPartyRole Role,
     string Name,
     string? NationalIdentifier,
@@ -25,7 +27,9 @@ public sealed record SaveContractRequest(
     DateOnly? StartDate,
     DateOnly? EndDate,
     string? InternalOwnerUserId,
-    IReadOnlyList<ContractPartyRequest> Parties);
+    IReadOnlyList<ContractPartyRequest> Parties,
+    Guid? BaseDocumentProfileId = null,
+    Guid? StatusDefinitionId = null);
 
 public sealed record ContractListItemResponse(
     Guid Id,
@@ -33,6 +37,8 @@ public sealed record ContractListItemResponse(
     string Subject,
     string? ContractNumber,
     ContractStatus Status,
+    Guid? StatusDefinitionId,
+    string? StatusName,
     decimal? Amount,
     string Currency,
     DateOnly? StartDate,
@@ -52,6 +58,9 @@ public sealed record ContractDetailResponse(
     string Subject,
     string? ContractNumber,
     ContractStatus Status,
+    Guid? StatusDefinitionId,
+    string? StatusName,
+    Guid? BaseDocumentProfileId,
     decimal? Amount,
     string Currency,
     DateOnly? StartDate,

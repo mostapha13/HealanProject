@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using NegareshAI.Api.Application.Contracts.Commands;
 using NegareshAI.Api.Application.Contracts.Queries;
 using NegareshAI.Api.Application.Contracts.Generation;
+using NegareshAI.Api.Application.Contracts.Catalog;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 
@@ -94,6 +95,42 @@ public sealed class ContractsController(ISender sender) : ControllerBase
         var result = await sender.Send(new ReviewContractGenerationCommand(id, request),
             cancellationToken);
         return result is null ? Conflict("Generation is not ready for review.") : Ok(result);
+    }
+
+    [HttpGet("catalog/{kind}")]
+    public async Task<ActionResult> ListCatalog(string kind, CancellationToken ct) =>
+        Ok(await sender.Send(new ListContractCatalogQuery(kind), ct));
+
+    [HttpPost("catalog/statuses")]
+    public Task<ActionResult> CreateStatus(SaveContractStatusDefinitionRequest request, CancellationToken ct) =>
+        SaveCatalog("statuses", null, request, ct);
+    [HttpPut("catalog/statuses/{id:guid}")]
+    public Task<ActionResult> UpdateStatus(Guid id, SaveContractStatusDefinitionRequest request, CancellationToken ct) =>
+        SaveCatalog("statuses", id, request, ct);
+
+    [HttpPost("catalog/base-documents")]
+    public Task<ActionResult> CreateBaseDocument(SaveContractBaseDocumentRequest request, CancellationToken ct) =>
+        SaveCatalog("base-documents", null, request, ct);
+    [HttpPut("catalog/base-documents/{id:guid}")]
+    public Task<ActionResult> UpdateBaseDocument(Guid id, SaveContractBaseDocumentRequest request, CancellationToken ct) =>
+        SaveCatalog("base-documents", id, request, ct);
+
+    [HttpPost("catalog/parties")]
+    public Task<ActionResult> CreateParty(SaveOrganizationPartyRequest request, CancellationToken ct) =>
+        SaveCatalog("parties", null, request, ct);
+    [HttpPut("catalog/parties/{id:guid}")]
+    public Task<ActionResult> UpdateParty(Guid id, SaveOrganizationPartyRequest request, CancellationToken ct) =>
+        SaveCatalog("parties", id, request, ct);
+
+    [HttpDelete("catalog/{kind}/{id:guid}")]
+    public async Task<IActionResult> DeleteCatalog(string kind, Guid id, CancellationToken ct) =>
+        await sender.Send(new DeleteContractCatalogCommand(kind, id), ct) ? NoContent() : Conflict();
+
+    private async Task<ActionResult> SaveCatalog(
+        string kind, Guid? id, object request, CancellationToken ct)
+    {
+        var result = await sender.Send(new SaveContractCatalogCommand(kind, id, request), ct);
+        return result is null ? NotFound() : Ok(result);
     }
 }
 

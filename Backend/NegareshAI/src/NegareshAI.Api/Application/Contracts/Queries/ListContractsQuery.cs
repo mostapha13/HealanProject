@@ -38,7 +38,9 @@ public sealed class ListContractsQueryHandler(
             .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(item => new ContractListItemResponse(
                 item.Id, item.DocumentId, item.Subject, item.ContractNumber,
-                item.Status, item.Amount, item.Currency, item.StartDate,
+                item.Status, item.StatusDefinitionId,
+                item.StatusDefinition != null ? item.StatusDefinition.Name : null,
+                item.Amount, item.Currency, item.StartDate,
                 item.EndDate, item.Parties.Count, item.UpdatedAtUtc))
             .ToListAsync(cancellationToken);
         return new ContractListResponse(items, page, pageSize, total);

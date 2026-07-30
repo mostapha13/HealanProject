@@ -27,6 +27,21 @@ public sealed class CreateContractCommandHandler(
         if (!documentExists || await db.Contracts.AnyAsync(item =>
             item.DocumentId == request.DocumentId, cancellationToken))
             return null;
+        if (request.StatusDefinitionId.HasValue && !await db.ContractStatusDefinitions.AnyAsync(
+                item => item.Id == request.StatusDefinitionId &&
+                    item.OrganizationId == tenant.OrganizationId && item.IsActive, cancellationToken))
+            return null;
+        if (request.BaseDocumentProfileId.HasValue && !await db.ContractBaseDocumentProfiles.AnyAsync(
+                item => item.Id == request.BaseDocumentProfileId &&
+                    item.OrganizationId == tenant.OrganizationId && item.DocumentId == request.DocumentId &&
+                    item.IsActive, cancellationToken))
+            return null;
+        var directoryIds = request.Parties.Where(x => x.DirectoryPartyId.HasValue)
+            .Select(x => x.DirectoryPartyId!.Value).Distinct().ToList();
+        if (directoryIds.Count != await db.OrganizationParties.CountAsync(x =>
+                x.OrganizationId == tenant.OrganizationId && x.IsActive &&
+                directoryIds.Contains(x.Id), cancellationToken))
+            return null;
 
         var contract = new Contract
         {
@@ -35,6 +50,8 @@ public sealed class CreateContractCommandHandler(
             Subject = request.Subject.Trim(),
             ContractNumber = Normalize(request.ContractNumber),
             Status = request.Status,
+            StatusDefinitionId = request.StatusDefinitionId,
+            BaseDocumentProfileId = request.BaseDocumentProfileId,
             Amount = request.Amount,
             Currency = request.Currency.Trim().ToUpperInvariant(),
             StartDate = request.StartDate,
@@ -53,6 +70,7 @@ public sealed class CreateContractCommandHandler(
         foreach (var party in parties.Where(item => !string.IsNullOrWhiteSpace(item.Name)))
             contract.Parties.Add(new ContractParty
             {
+                DirectoryPartyId = party.DirectoryPartyId,
                 Role = party.Role,
                 Name = party.Name.Trim(),
                 NationalIdentifier = Normalize(party.NationalIdentifier),
@@ -65,10 +83,11 @@ public sealed class CreateContractCommandHandler(
 
     internal static ContractDetailResponse Map(Contract item) =>
         new(item.Id, item.DocumentId, item.Subject, item.ContractNumber,
-            item.Status, item.Amount, item.Currency, item.StartDate, item.EndDate,
+            item.Status, item.StatusDefinitionId, item.StatusDefinition?.Name,
+            item.BaseDocumentProfileId, item.Amount, item.Currency, item.StartDate, item.EndDate,
             item.InternalOwnerUserId,
             item.Parties.OrderBy(party => party.Role).Select(party =>
-                new ContractPartyResponse(party.Id, party.Role, party.Name,
+                new ContractPartyResponse(party.Id, party.DirectoryPartyId, party.Role, party.Name,
                     party.NationalIdentifier, party.RepresentativeName)).ToList(),
             item.CreatedAtUtc, item.UpdatedAtUtc);
 }
@@ -88,9 +107,21 @@ public sealed class UpdateContractCommandHandler(
         var request = command.Request;
         if (request.DocumentId != contract.DocumentId)
             return null;
+        if (request.StatusDefinitionId.HasValue && !await db.ContractStatusDefinitions.AnyAsync(
+                item => item.Id == request.StatusDefinitionId &&
+                    item.OrganizationId == tenant.OrganizationId && item.IsActive, cancellationToken))
+            return null;
+        var directoryIds = request.Parties.Where(x => x.DirectoryPartyId.HasValue)
+            .Select(x => x.DirectoryPartyId!.Value).Distinct().ToList();
+        if (directoryIds.Count != await db.OrganizationParties.CountAsync(x =>
+                x.OrganizationId == tenant.OrganizationId && x.IsActive &&
+                directoryIds.Contains(x.Id), cancellationToken))
+            return null;
         contract.Subject = request.Subject.Trim();
         contract.ContractNumber = CreateContractCommandHandler.Normalize(request.ContractNumber);
         contract.Status = request.Status;
+        contract.StatusDefinitionId = request.StatusDefinitionId;
+        contract.BaseDocumentProfileId = request.BaseDocumentProfileId;
         contract.Amount = request.Amount;
         contract.Currency = request.Currency.Trim().ToUpperInvariant();
         contract.StartDate = request.StartDate;
