@@ -629,3 +629,24 @@ export function setAccessToken(token: string) {
 export function clearAccessToken() {
   window.localStorage.removeItem("negareshai.access_token");
 }
+
+export type WorkflowStage={id:string;type:number;order:number;assignedUserId?:string;decision:number;comment?:string};
+export type ContractWorkflow={id:string;contractId:string;subject:string;status:number;currentStageOrder:number;createdAtUtc:string;stages:WorkflowStage[]};
+export type ContractOperation={id:string;contractId:string;subject:string;type:number;title:string;dueDate:string;amount?:number;currency:string;status:number;reminderDaysBefore:number;description?:string};
+export type ManagementDashboard={activeContracts:number;pendingApprovals:number;overdueOperations:number;upcomingOperations:number;highRisks:number;upcoming:ContractOperation[]};
+
+async function operationsRequest<T>(path:string,init?:RequestInit):Promise<T>{
+  const token=accessToken();
+  const response=await fetch(`${API_BASE}/api/contract-operations${path}`,{...init,headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{ }),...(init?.headers??{})}});
+  if(!response.ok)throw new Error(await response.text()||"عملیات قرارداد انجام نشد");
+  return response.status===204?undefined as T:response.json();
+}
+export const listWorkflows=()=>operationsRequest<ContractWorkflow[]>("/workflows");
+export const startWorkflow=(input:{contractId:string;legalUserId?:string;technicalUserId?:string;financialUserId?:string;managerialUserId?:string})=>operationsRequest<ContractWorkflow>("/workflows",{method:"POST",body:JSON.stringify(input)});
+export const decideWorkflow=(id:string,decision:number,comment?:string)=>operationsRequest<ContractWorkflow>(`/workflows/${id}/decision`,{method:"POST",body:JSON.stringify({decision,comment})});
+export const listOperations=()=>operationsRequest<ContractOperation[]>("/items");
+export const createOperation=(input:{contractId:string;type:number;title:string;dueDate:string;amount?:number;currency:string;reminderDaysBefore:number;description?:string})=>operationsRequest<ContractOperation>("/items",{method:"POST",body:JSON.stringify(input)});
+export const changeOperationStatus=(id:string,status:number)=>operationsRequest<void>(`/items/${id}/status`,{method:"PUT",body:JSON.stringify({status})});
+export const deleteOperation=(id:string)=>operationsRequest<void>(`/items/${id}`,{method:"DELETE"});
+export const assessContractRisk=(input:{contractId:string;summary?:string;items:{code:string;title:string;weight:number;score:number;note?:string}[]})=>operationsRequest(`/risks`,{method:"POST",body:JSON.stringify(input)});
+export const getManagementDashboard=()=>operationsRequest<ManagementDashboard>("/dashboard");

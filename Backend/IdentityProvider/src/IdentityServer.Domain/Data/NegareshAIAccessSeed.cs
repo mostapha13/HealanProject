@@ -38,6 +38,12 @@ public static class NegareshAIAccessSeed
             new Form(NegareshAIAccessFormIds.UserPermissions, "دسترسی مستقیم کاربران", "/access/user-permissions"),
             new Form(NegareshAIAccessFormIds.RuntimeSettings, "تنظیمات سامانه", "/settings"),
             new Form(NegareshAIAccessFormIds.AuditLog, "تاریخچه تغییرات", "/audit"),
+            new Form(NegareshAIAccessFormIds.Workflows, "گردش کار قرارداد", "/workflows"),
+            new Form(NegareshAIAccessFormIds.WorkflowDecision, "تصمیم مرحله‌ای قرارداد", "/workflows/decision"),
+            new Form(NegareshAIAccessFormIds.Risk, "تحلیل ریسک قرارداد", "/risks"),
+            new Form(NegareshAIAccessFormIds.Operations, "عملیات قرارداد", "/operations"),
+            new Form(NegareshAIAccessFormIds.OperationsManage, "مدیریت عملیات قرارداد", "/operations/manage"),
+            new Form(NegareshAIAccessFormIds.ManagementDashboard, "داشبورد مدیریتی قراردادها", "/management-dashboard"),
         };
         var menus = new[]
         {
@@ -68,6 +74,12 @@ public static class NegareshAIAccessSeed
             new Menu(6125, 6007, 6104, 101, "قراردادها — افزودن"),
             new Menu(6126, 6008, 6104, 102, "قراردادها — ویرایش"),
             new Menu(6127, 6009, 6104, 103, "قراردادها — حذف"),
+            new Menu(6128, 6025, null, 8, "گردش کار قراردادها"),
+            new Menu(6129, 6026, 6128, 101, "ثبت تصمیم مرحله‌ای"),
+            new Menu(6130, 6027, null, 9, "تحلیل ریسک"),
+            new Menu(6131, 6028, null, 10, "عملیات و سررسیدها"),
+            new Menu(6132, 6029, 6131, 101, "مدیریت عملیات"),
+            new Menu(6133, 6030, null, 11, "داشبورد مدیریتی"),
         };
 
         if (!await db.AccessSystems.AnyAsync(x => x.AccessSystemId == NegareshAIAccessFormIds.SystemId))

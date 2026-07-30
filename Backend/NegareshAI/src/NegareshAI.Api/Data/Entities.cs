@@ -91,6 +91,12 @@ public enum ContractGenerationStatus
     Failed = 5
 }
 
+public enum WorkflowStageType { Legal = 1, Technical = 2, Financial = 3, Managerial = 4 }
+public enum WorkflowDecision { Pending = 1, Approved = 2, RevisionRequested = 3, Rejected = 4 }
+public enum ContractOperationType { Deadline = 1, Renewal = 2, Payment = 3, Guarantee = 4, Notice = 5 }
+public enum ContractOperationStatus { Pending = 1, Completed = 2, Cancelled = 3, Overdue = 4 }
+public enum RiskLevel { Low = 1, Medium = 2, High = 3, Critical = 4 }
+
 public sealed class Organization
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -187,6 +193,81 @@ public sealed class Contract
     public List<ContractValue> Values { get; set; } = [];
     public List<ContractDate> Dates { get; set; } = [];
     public List<ContractObligation> Obligations { get; set; } = [];
+    public List<ContractWorkflow> Workflows { get; set; } = [];
+    public List<ContractOperation> Operations { get; set; } = [];
+    public List<ContractRiskAssessment> RiskAssessments { get; set; } = [];
+}
+
+public sealed class ContractWorkflow
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractId { get; set; }
+    public WorkflowDecision Status { get; set; } = WorkflowDecision.Pending;
+    public int CurrentStageOrder { get; set; } = 1;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public Contract? Contract { get; set; }
+    public List<ContractWorkflowStage> Stages { get; set; } = [];
+}
+
+public sealed class ContractWorkflowStage
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ContractWorkflowId { get; set; }
+    public WorkflowStageType Type { get; set; }
+    public int Order { get; set; }
+    public string? AssignedUserId { get; set; }
+    public WorkflowDecision Decision { get; set; } = WorkflowDecision.Pending;
+    public string? Comment { get; set; }
+    public string? DecidedByUserId { get; set; }
+    public DateTime? DecidedAtUtc { get; set; }
+    public ContractWorkflow? Workflow { get; set; }
+}
+
+public sealed class ContractRiskAssessment
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractId { get; set; }
+    public RiskLevel Level { get; set; }
+    public int Score { get; set; }
+    public required string ChecklistJson { get; set; }
+    public string? Summary { get; set; }
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public Contract? Contract { get; set; }
+}
+
+public sealed class ContractOperation
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractId { get; set; }
+    public ContractOperationType Type { get; set; }
+    public required string Title { get; set; }
+    public DateOnly DueDate { get; set; }
+    public decimal? Amount { get; set; }
+    public string Currency { get; set; } = "IRR";
+    public ContractOperationStatus Status { get; set; } = ContractOperationStatus.Pending;
+    public int ReminderDaysBefore { get; set; } = 7;
+    public string? Description { get; set; }
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public Contract? Contract { get; set; }
 }
 
 public sealed class ContractParty

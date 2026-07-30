@@ -32,6 +32,10 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ComparisonRun> ComparisonRuns => Set<ComparisonRun>();
     public DbSet<ComparisonRunRuleSet> ComparisonRunRuleSets => Set<ComparisonRunRuleSet>();
     public DbSet<ComparisonFinding> ComparisonFindings => Set<ComparisonFinding>();
+    public DbSet<ContractWorkflow> ContractWorkflows => Set<ContractWorkflow>();
+    public DbSet<ContractWorkflowStage> ContractWorkflowStages => Set<ContractWorkflowStage>();
+    public DbSet<ContractRiskAssessment> ContractRiskAssessments => Set<ContractRiskAssessment>();
+    public DbSet<ContractOperation> ContractOperations => Set<ContractOperation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -130,6 +134,18 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
             .HasKey(item => new { item.ComparisonRunId, item.RuleSetId });
         modelBuilder.Entity<ComparisonFinding>()
             .Property(item => item.Confidence).HasPrecision(5, 4);
+        modelBuilder.Entity<ContractWorkflow>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractId, x.IsDeleted });
+        modelBuilder.Entity<ContractWorkflow>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractWorkflowStage>()
+            .HasIndex(x => new { x.ContractWorkflowId, x.Order }).IsUnique();
+        modelBuilder.Entity<ContractRiskAssessment>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractId, x.CreatedAtUtc });
+        modelBuilder.Entity<ContractRiskAssessment>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractOperation>()
+            .HasIndex(x => new { x.OrganizationId, x.DueDate, x.Status, x.IsDeleted });
+        modelBuilder.Entity<ContractOperation>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractOperation>().Property(x => x.Amount).HasPrecision(18, 2);
 
         modelBuilder.Entity<Organization>().HasData(new Organization
         {

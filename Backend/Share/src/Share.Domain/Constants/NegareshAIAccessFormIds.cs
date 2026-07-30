@@ -30,4 +30,10 @@ public static class NegareshAIAccessFormIds
     public const int UserPermissions = 6022;
     public const int RuntimeSettings = 6023;
     public const int AuditLog = 6024;
+    public const int Workflows = 6025;
+    public const int WorkflowDecision = 6026;
+    public const int Risk = 6027;
+    public const int Operations = 6028;
+    public const int OperationsManage = 6029;
+    public const int ManagementDashboard = 6030;
 }
