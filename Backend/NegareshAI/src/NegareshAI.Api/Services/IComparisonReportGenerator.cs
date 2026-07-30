@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using NegareshAI.Api.Application.Common.Dates;
 using NegareshAI.Api.Data;
 
 namespace NegareshAI.Api.Services;
@@ -26,7 +27,7 @@ public sealed class ComparisonReportGenerator(HttpClient httpClient)
                 run.ScorePercent,
                 run.ModelId,
                 run.PromptVersion,
-                run.CreatedAtUtc,
+                CreatedAtLabel = PersianDate.FormatDateTime(run.CreatedAtUtc),
                 Findings = run.Findings.Select(item => new
                 {
                     item.Title,

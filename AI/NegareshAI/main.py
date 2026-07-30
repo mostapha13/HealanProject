@@ -399,7 +399,7 @@ def _comparison_docx(payload: dict) -> bytes:
     rtl(title)
     subtitle = document.add_paragraph(
         f"{_report_text(payload.get('targetDocumentTitle'))} | "
-        f"{_report_text(payload.get('createdAtUtc'))}")
+        f"{_report_text(payload.get('createdAtLabel'))}")
     subtitle.paragraph_format.space_after = Pt(16)
     rtl(subtitle)
 
@@ -488,6 +488,7 @@ def _comparison_pdf(payload: dict) -> bytes:
     story = [
         Paragraph(fa("گزارش ممیزی تطابق اسناد"), title),
         Paragraph(fa(payload.get("targetDocumentTitle")), heading),
+        Paragraph(fa(f"تاریخ اجرا: {payload.get('createdAtLabel')}"), body),
         Paragraph(fa(f"شناسه اجرا: {payload.get('id')}"), body),
         Paragraph(fa(f"نتیجه: {payload.get('outcomeLabel')} | امتیاز: {payload.get('scorePercent')} درصد"), body),
         Paragraph(fa(f"مدل: {payload.get('modelId')} | نسخه prompt: {payload.get('promptVersion')}"), body),

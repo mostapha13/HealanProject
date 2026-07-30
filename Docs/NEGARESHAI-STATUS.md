@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-30
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `fe4fda9`
+Last committed baseline: `2e8f64b` (`Complete private RAG and document comparison`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -23,6 +23,134 @@ When work resumes:
 
 Do not re-audit the whole repository unless this file is missing, inconsistent
 with Git, or the requested work changes scope.
+
+## Authoritative current checkpoint — 2026-07-30
+
+This section is the current source of truth. Older sections below are retained
+as historical session detail and may describe work that was uncommitted at that
+earlier checkpoint.
+
+### Git state
+
+- Active branch: `codex/negareshai-foundation`
+- Latest committed and pushed checkpoint:
+  `2e8f64b Complete private RAG and document comparison`
+- That commit contains the completed P2 private Persian RAG pipeline and the
+  completed P3 knowledge-management/document-comparison implementation.
+- The Persian-calendar work described below is implemented and tested locally,
+  but is **not committed or pushed yet**.
+- Pre-existing untracked artifacts that are outside the current change and must
+  not be staged blindly:
+  - `Backend/NegareshAI/publish/`
+  - `Backend/Share/tests/`
+  - root `package-lock.json`
+
+### Stage status
+
+| Stage | Status | Summary |
+|---|---|---|
+| P0 | Complete | Tenant security, fail-closed organization context, auditing, contract domain and migrations |
+| P1 | Complete | Document/contract CRUD, immutable versions, archive/restore and secure download |
+| P2 | Complete | Private Persian RAG, OCR, BGE-M3, tenant/ACL filtering, citations and offline benchmark |
+| P3 | Complete | Document groups, versioned RuleSets, four comparison modes, findings/review and DOCX/PDF reports |
+| Persian calendar cross-cutting change | Implemented and locally tested; uncommitted | Jalali display and input throughout the current NegareshAI UI and reports |
+| P4 | Not started | Intelligent contract creation and renewal |
+| P5 | Not started | Workflow, risk and contract operations |
+| P6 | Not started | Security hardening, E2E, operations and release |
+
+### Persian-calendar implementation
+
+Product rule:
+
+- Every human-facing date in NegareshAI must be displayed in the Jalali
+  calendar with Persian digits.
+- Date selection must use the Persian-calendar logic already established in
+  the Healan project.
+- Database persistence and API transport remain Gregorian ISO/UTC. Conversion
+  happens at presentation/input boundaries so ordering, filtering, arithmetic
+  and interoperability remain correct.
+- Server-generated report times are converted from UTC to the Iran time zone
+  before Jalali formatting.
+
+Implemented files:
+
+- `Frontend/negareshai/lib/jalali.ts`
+  - dependency-free Gregorian/Jalali conversion adapted from Healan;
+  - Persian/Arabic digit normalization;
+  - short, date-time and long Jalali formatting;
+  - leap-year, month-length, weekday and month-navigation helpers;
+  - Gregorian `YYYY-MM-DD` to/from Jalali conversion.
+- `Frontend/negareshai/app/PersianCalendar.tsx`
+  - reusable accessible Persian date picker;
+  - Jalali month navigation, Saturday-first grid, today/selected states,
+    outside-click close, today and clear actions;
+  - emits Gregorian `YYYY-MM-DD` for the existing API contract.
+- `Frontend/negareshai/app/page.tsx`
+  - all current visible document, version, runtime-setting, contract,
+    comparison-run, activity and deadline dates use Jalali formatting;
+  - dashboard full date is Jalali;
+  - deadline day/month tile is calculated from the Jalali date;
+  - contract start/end native Gregorian inputs were replaced with the shared
+    Persian calendar.
+- `Frontend/negareshai/app/globals.css`
+  - Persian-calendar trigger, popover, grid, selected/today and action styles.
+- `Backend/NegareshAI/src/NegareshAI.Api/Application/Common/Dates/PersianDate.cs`
+  - server-side formatter/parser based on
+    `System.Globalization.PersianCalendar`, following the Healan approach;
+  - Persian and Arabic digit support;
+  - deterministic UTC-to-Iran conversion for reports.
+- `Backend/NegareshAI/src/NegareshAI.Api/Services/IComparisonReportGenerator.cs`
+  - sends a Jalali `CreatedAtLabel` to the report service instead of exposing a
+    raw Gregorian timestamp as report text.
+- `AI/NegareshAI/main.py`
+  - DOCX and PDF comparison reports render the supplied Jalali execution date.
+- `Backend/NegareshAI/tests/NegareshAI.Api.Tests/PersianDateTests.cs`
+  - Nowruz conversion, Persian/Arabic digit parsing, invalid Esfand date and
+    UTC-to-Iran midnight-boundary coverage.
+
+Current local validation:
+
+- `npm.cmd run build` in `Frontend/negareshai`: passed with Next.js 15.5.21.
+- `dotnet test Backend/NegareshAI/tests/NegareshAI.Api.Tests/NegareshAI.Api.Tests.csproj --no-restore`:
+  passed, **19/19**.
+- TypeScript validation and static page generation: passed.
+- `git diff --check`: passed.
+- Python AST validation could not be run on the host because Python/`py` is not
+  installed in the current shell. The edited Python change is limited to
+  reading the new `createdAtLabel` payload field and adding it to the PDF
+  report story; validate it inside the AI Docker image on the next Docker run.
+
+### Docker continuation state
+
+Last verified state before this checkpoint:
+
+- `negareshai-web`: running and available at `http://localhost:3000`.
+- `negareshai-ai`: running and healthy at `http://localhost:8000/health`.
+- `negareshai-db`: running and healthy.
+- `negareshai-api`: deliberately stopped because the real local
+  `NEGARESHAI_SQL_PASSWORD` was not available. Trying the example value failed
+  SQL authentication; no secret was persisted.
+- Do not recreate/start the API against the existing SQL volume until the
+  operator supplies the correct password through the local `.env`.
+- A fresh Docker status check was attempted while writing this handoff, but
+  this sandbox could not access the Docker named pipe. Therefore the list above
+  is the last verified runtime state, not a claim about the live engine at the
+  exact handoff time.
+
+### Exact next action
+
+1. Review the Persian-calendar diff and commit only the listed source/test/doc
+   files, excluding the three pre-existing untracked artifacts.
+2. Push `codex/negareshai-foundation`.
+3. With the operator-provided local SQL password, rebuild/recreate Web, AI and
+   API, then run:
+   - Web smoke test;
+   - AI health and Python/report test;
+   - API health/authenticated flow;
+   - manual contract create/edit using Jalali start/end dates;
+   - DOCX and PDF report download confirming Jalali execution date.
+4. Start P4 with organization-owned templates and letterheads, then structured
+   Persian ChangeSets for contract creation/renewal.
 
 ## Verified continuation checkpoint
 
