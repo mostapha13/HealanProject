@@ -1,5 +1,10 @@
-import Home from "../../page";
-
-export default function RolesPage() {
-  return <Home initialSection="access" />;
+"use client";
+import { FormEvent, useEffect, useState } from "react";
+import { createIdentityRole, deleteIdentityRole, IdentityRole, listIdentityRoles, restoreIdentityRole, updateIdentityRole } from "../../../lib/api";
+export default function RolesPage(){
+ const [items,setItems]=useState<IdentityRole[]>([]),[name,setName]=useState(""),[displayName,setDisplayName]=useState(""),[edit,setEdit]=useState<IdentityRole|null>(null),[message,setMessage]=useState("");
+ async function load(){setItems(await listIdentityRoles())}useEffect(()=>{void load().catch(()=>setMessage("دریافت نقش‌ها انجام نشد."))},[]);
+ function reset(){setEdit(null);setName("");setDisplayName("")}
+ async function submit(e:FormEvent){e.preventDefault();try{if(edit)await updateIdentityRole(edit.id,{name,displayName});else await createIdentityRole({name,displayName});reset();await load();setMessage("ذخیره شد.")}catch{setMessage("ذخیره نقش انجام نشد.")}}
+ return <main className="access-page" dir="rtl"><header className="access-header"><div><span>مدیریت کاربران و دسترسی‌ها</span><h1>نقش‌ها</h1><p>نقش‌ها را تعریف و سطح دسترسی آن‌ها را در صفحه مجوزها تنظیم کنید.</p></div></header><section className="access-card"><form className="form-grid" onSubmit={e=>void submit(e)}><input placeholder="نام سیستمی" value={name} onChange={e=>setName(e.target.value)} required/><input placeholder="عنوان فارسی" value={displayName} onChange={e=>setDisplayName(e.target.value)} required/><button className="primary-button">{edit?"ذخیره":"ثبت نقش"}</button>{edit&&<button type="button" onClick={reset}>انصراف</button>}</form><p>{message}</p>{items.map(role=><div className="catalog-row" key={role.id}><span>{role.displayName} ({role.name})</span><b>{role.isSystem?"سیستمی":role.isDeleted?"حذف‌شده":"فعال"}</b>{!role.isSystem&&<>{role.isDeleted?<button onClick={()=>void restoreIdentityRole(role.id).then(load)}>بازیابی</button>:<><button onClick={()=>{setEdit(role);setName(role.name);setDisplayName(role.displayName)}}>ویرایش</button><button onClick={()=>window.confirm("حذف نرم شود؟")&&void deleteIdentityRole(role.id).then(load)}>حذف</button></>}</>}</div>)}</section></main>
 }

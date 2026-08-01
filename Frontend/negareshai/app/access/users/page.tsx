@@ -1,5 +1,9 @@
-import Home from "../../page";
-
-export default function UsersPage() {
-  return <Home initialSection="access" />;
+"use client";
+import { FormEvent, useEffect, useState } from "react";
+import { createIdentityUser, IdentityRole, IdentityUser, listIdentityRoles, listIdentityUsers } from "../../../lib/api";
+export default function UsersPage(){
+ const [users,setUsers]=useState<IdentityUser[]>([]),[roles,setRoles]=useState<IdentityRole[]>([]),[userName,setUserName]=useState(""),[password,setPassword]=useState(""),[firstName,setFirstName]=useState(""),[lastName,setLastName]=useState(""),[roleIds,setRoleIds]=useState<string[]>([]),[message,setMessage]=useState("");
+ async function load(){const [u,r]=await Promise.all([listIdentityUsers(),listIdentityRoles()]);setUsers(u);setRoles(r.filter(x=>!x.isDeleted));}useEffect(()=>{void load().catch(()=>setMessage("دریافت کاربران انجام نشد."))},[]);
+ async function submit(e:FormEvent){e.preventDefault();try{await createIdentityUser({userName,firstName,lastName,password,isActive:true,roleIds});setUserName("");setPassword("");setFirstName("");setLastName("");setRoleIds([]);await load();setMessage("کاربر ثبت شد.")}catch{setMessage("ثبت کاربر انجام نشد.")}}
+ return <main className="access-page" dir="rtl"><header className="access-header"><div><span>مدیریت کاربران و دسترسی‌ها</span><h1>کاربران</h1><p>کاربر و نقش‌های سامانه را مدیریت کنید.</p></div></header><section className="access-card"><form className="form-grid" onSubmit={e=>void submit(e)}><input placeholder="نام کاربری" value={userName} onChange={e=>setUserName(e.target.value)} required/><input placeholder="رمز اولیه" type="password" value={password} onChange={e=>setPassword(e.target.value)} required/><input placeholder="نام" value={firstName} onChange={e=>setFirstName(e.target.value)} required/><input placeholder="نام خانوادگی" value={lastName} onChange={e=>setLastName(e.target.value)} required/><div className="choice-grid">{roles.map(r=><label key={r.id}><input type="checkbox" checked={roleIds.includes(r.id)} onChange={e=>setRoleIds(e.target.checked?[...roleIds,r.id]:roleIds.filter(id=>id!==r.id))}/>{r.displayName}</label>)}</div><button className="primary-button">ثبت کاربر</button></form><p>{message}</p>{users.map(u=><div className="catalog-row" key={u.id}><span>{u.firstName} {u.lastName} — {u.userName}</span><b>{u.isActive?"فعال":"غیرفعال"}</b></div>)}</section></main>
 }

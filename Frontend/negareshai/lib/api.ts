@@ -39,9 +39,33 @@ export async function createIdentityRole(input:{name:string;displayName:string})
   const response=await userManagerFetch(`${identityManagementPath}/roles`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
   if(!response.ok)throw new Error(await response.text()||"ثبت نقش انجام نشد.");
 }
+export async function updateIdentityRole(id:string,input:{name:string;displayName:string}) {
+  const response=await userManagerFetch(`${identityManagementPath}/roles/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if(!response.ok)throw new Error(await response.text()||"Role update failed.");
+}
+export async function deleteIdentityRole(id:string) {
+  const response=await userManagerFetch(`${identityManagementPath}/roles/${id}`,{method:"DELETE"});
+  if(!response.ok)throw new Error(await response.text()||"Role deletion failed.");
+}
+export async function restoreIdentityRole(id:string) {
+  const response=await userManagerFetch(`${identityManagementPath}/roles/${id}/restore`,{method:"POST"});
+  if(!response.ok)throw new Error(await response.text()||"Role restore failed.");
+}
 export async function createIdentityUser(input:{userName:string;firstName:string;lastName:string;email?:string;phoneNumber?:string;password:string;isActive:boolean;roleIds:string[]}) {
   const response=await userManagerFetch(`${identityManagementPath}/users`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
   if(!response.ok)throw new Error(await response.text()||"ثبت کاربر انجام نشد.");
+}
+export async function updateIdentityUser(id:string,input:{userName:string;firstName:string;lastName:string;email?:string;phoneNumber?:string;password?:string;isActive:boolean;roleIds:string[]}) {
+  const response=await userManagerFetch(`${identityManagementPath}/users/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if(!response.ok)throw new Error(await response.text()||"User update failed.");
+}
+export async function deleteIdentityUser(id:string) {
+  const response=await userManagerFetch(`${identityManagementPath}/users/${id}`,{method:"DELETE"});
+  if(!response.ok)throw new Error(await response.text()||"User deletion failed.");
+}
+export async function restoreIdentityUser(id:string) {
+  const response=await userManagerFetch(`${identityManagementPath}/users/${id}/restore`,{method:"POST"});
+  if(!response.ok)throw new Error(await response.text()||"User restore failed.");
 }
 export async function saveRolePermissions(roleId:string, accessMenuIds:number[]) {
   const response=await userManagerFetch(`${identityManagementPath}/roles/${roleId}/permissions`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({accessMenuIds})});
@@ -175,20 +199,22 @@ export type OrganizationParty = {
   id:string; name:string; nationalIdentifier?:string; representativeName?:string;
   contactInfo?:string; isActive:boolean;
 };
+export type ContractGroup = { id:string; name:string; description?:string; isActive:boolean; };
+export type ContractCatalogKind = "statuses"|"base-documents"|"parties"|"groups";
 
-export async function listContractCatalog<T>(kind:"statuses"|"base-documents"|"parties"):Promise<T[]> {
-  const response=await authorizedFetch(`/api/contracts/catalog/${kind}`);
+export async function listContractCatalog<T>(kind:ContractCatalogKind,pageNumber=1,pageSize=20):Promise<PagedResponse<T>> {
+  const response=await authorizedFetch(`/api/contracts/catalog/${kind}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   if(!response.ok) throw new Error("دریافت اطلاعات پایه قرارداد انجام نشد");
-  return ((await response.json()) as PagedResponse<T>).items;
+  return (await response.json()) as PagedResponse<T>;
 }
-export async function saveContractCatalog<T>(kind:"statuses"|"base-documents"|"parties",input:object,id?:string):Promise<T>{
+export async function saveContractCatalog<T>(kind:ContractCatalogKind,input:object,id?:string):Promise<T>{
   const response=await authorizedFetch(`/api/contracts/catalog/${kind}${id?`/${id}`:""}`,{
     method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)
   });
   if(!response.ok) throw new Error(await response.text()||"ثبت اطلاعات پایه انجام نشد");
   return response.json();
 }
-export async function deleteContractCatalog(kind:"statuses"|"base-documents"|"parties",id:string){
+export async function deleteContractCatalog(kind:ContractCatalogKind,id:string){
   const response=await authorizedFetch(`/api/contracts/catalog/${kind}/${id}`,{method:"DELETE"});
   if(!response.ok) throw new Error("حذف ممکن نیست؛ این گزینه احتمالاً در قرارداد استفاده شده است.");
 }

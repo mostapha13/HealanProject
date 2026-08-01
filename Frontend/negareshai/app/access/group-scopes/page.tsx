@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  IdentityRole, IdentityUser, listDataScopes, listDocumentGroups,
+  ContractGroup, IdentityRole, IdentityUser, listContractCatalog, listDataScopes, listDocumentGroups,
   listIdentityRoles, listIdentityUsers, saveDataScopes
 } from "../../../lib/api";
 import { requireAuthenticatedUser } from "../../../lib/auth";
@@ -12,6 +12,7 @@ type Choice = "inherit" | "grant" | "deny";
 
 export default function GroupScopesPage() {
   const [subjectType, setSubjectType] = useState(2);
+  const [resourceType, setResourceType] = useState(2);
   const [subjectId, setSubjectId] = useState("");
   const [users, setUsers] = useState<IdentityUser[]>([]);
   const [roles, setRoles] = useState<IdentityRole[]>([]);
@@ -39,21 +40,30 @@ export default function GroupScopesPage() {
   }, []);
 
   useEffect(() => {
+    void (async () => {
+      const loaded = resourceType === 1
+        ? (await listContractCatalog<ContractGroup>("groups")).items
+        : await listDocumentGroups();
+      setGroups(loaded);
+    })().catch(() => setMessage("دریافت گروه‌ها انجام نشد."));
+  }, [resourceType]);
+
+  useEffect(() => {
     setChoices({});
     if (!subjectId) return;
-    void listDataScopes({resourceType:2, subjectType, subjectId}).then(result => {
+    void listDataScopes({resourceType, subjectType, subjectId}).then(result => {
       const next: Record<string, Choice> = {};
       result.items.forEach(row => next[row.resourceId] = row.isDenied ? "deny" : "grant");
       setChoices(next);
     }).catch(error => setMessage(error instanceof Error ? error.message : "دریافت دسترسی انجام نشد."));
-  }, [subjectId, subjectType]);
+  }, [subjectId, subjectType, resourceType]);
 
   async function save() {
     if (!subjectId) return;
     setBusy(true); setMessage("");
     try {
       await saveDataScopes({
-        resourceType:2, subjectType, subjectId,
+        resourceType, subjectType, subjectId,
         grantedResourceIds:Object.keys(choices).filter(id => choices[id] === "grant"),
         deniedResourceIds:Object.keys(choices).filter(id => choices[id] === "deny")
       });
@@ -77,6 +87,9 @@ export default function GroupScopesPage() {
     </nav>
     <section className="access-card">
       <div className="scope-toolbar">
+        <label><span>نوع گروه</span><select value={resourceType} onChange={e => {setResourceType(Number(e.target.value));setChoices({});}}>
+          <option value={1}>گروه قرارداد</option><option value={2}>گروه سند</option>
+        </select></label>
         <label><span>نوع تخصیص</span><select value={subjectType} onChange={e => {setSubjectType(Number(e.target.value));setSubjectId("");}}>
           <option value={2}>نقش</option><option value={1}>کاربر</option>
         </select></label>
