@@ -4,12 +4,32 @@ using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Application.Documents.Commands;
 using NegareshAI.Api.Data;
 using NegareshAI.Api.Services;
+using System.Reflection;
+using System.Text.Json;
 using Xunit;
 
 namespace NegareshAI.Api.Tests;
 
 public sealed class DocumentIngestionLifecycleTests
 {
+    [Fact]
+    public void Suggested_fields_include_contract_year_company_amount_and_clause()
+    {
+        var support = typeof(UploadDocumentBatchCommand).Assembly.GetType(
+            "NegareshAI.Api.Application.Documents.Commands.DocumentIngestionSupport", true)!;
+        var method = support.GetMethod("SuggestFields",
+            BindingFlags.Public | BindingFlags.Static)!;
+        var value = Assert.IsType<string>(method.Invoke(null,
+            ["قرارداد شماره 1405/12 شرکت عمران ماشین مبلغ 265,000,000,000 ریال\nماده 1 موضوع قرارداد"]));
+        using var json = JsonDocument.Parse(value);
+
+        Assert.Contains("1405", json.RootElement.GetProperty("years")
+            .EnumerateArray().Select(x => x.GetString()));
+        Assert.NotEmpty(json.RootElement.GetProperty("companyAndPartyCandidates").EnumerateArray());
+        Assert.NotEmpty(json.RootElement.GetProperty("amounts").EnumerateArray());
+        Assert.NotEmpty(json.RootElement.GetProperty("clauseHeadings").EnumerateArray());
+    }
+
     [Fact]
     public async Task Extracted_version_is_not_published_before_both_approvals()
     {

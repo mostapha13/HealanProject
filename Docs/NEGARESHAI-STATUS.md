@@ -190,8 +190,9 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
 - Upload requires one or more active document groups and scope to every group
   selected during registration. Expert and manager decisions require both
   their action permission and effective Data Scope through an assigned group.
-- Extracted text, OCR metadata and suggested Persian date/amount fields are
-  stored for expert correction before approval.
+- Extracted text and OCR metadata are stored with suggested years, dates,
+  amounts, contract numbers, company/party candidates and clause headings for
+  expert correction before approval.
 - Manager finalization publishes only the approved version with organization,
   document, version, user/group ACL and `approvalState=final` metadata. A newer
   final version deletes the previous vectors and marks it `Superseded`.
@@ -203,7 +204,7 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
 - Applied `M3DocumentIngestionApproval` and `M3LifecycleBackfill` to the active
   local SQL database. Legacy versions are backfilled to Uploaded/Extracted and
   are not treated as final.
-- Validation: API build passes with zero warnings; API tests pass 35/35;
+- Validation: API build passes with zero warnings; API tests pass 36/36;
   Next.js production build passes with 22 routes; 8/8 AI security/OCR runtime
   tests pass inside the dependency-complete container image. AI/API/Web health
   endpoints and the new UI route return HTTP 200; protected documents return

@@ -253,9 +253,28 @@ internal static class DocumentIngestionSupport
     {
         var dates = Regex.Matches(text, @"(?:13|14)\d{2}[/\-.](?:0?[1-9]|1[0-2])[/\-.](?:0?[1-9]|[12]\d|3[01])")
             .Select(x => x.Value).Distinct().Take(20).ToArray();
+        var years = Regex.Matches(text, @"(?<!\d)(?:13|14)\d{2}(?!\d)")
+            .Select(x => x.Value).Distinct().Take(10).ToArray();
         var amounts = Regex.Matches(text, @"\d{1,3}(?:[,٬]\d{3}){2,}")
             .Select(x => x.Value).Distinct().Take(20).ToArray();
-        return JsonSerializer.Serialize(new { dates, amounts });
+        var contractNumbers = Regex.Matches(text,
+                @"(?:شماره\s*(?:قرارداد)?|قرارداد\s*شماره)\s*[:：-]?\s*([\p{L}\p{N}/_.-]{2,40})",
+                RegexOptions.IgnoreCase)
+            .Select(x => x.Groups[1].Value).Distinct().Take(10).ToArray();
+        var companies = Regex.Matches(text,
+                @"(?:شرکت|مؤسسه|موسسه|سازمان)\s+([\p{L}\p{N}\s‌-]{2,80})")
+            .Select(x => x.Groups[0].Value.Trim())
+            .Select(x => Regex.Split(x, @"[\r\n،؛,.]| {3,}")[0].Trim())
+            .Where(x => x.Length is >= 4 and <= 100).Distinct().Take(20).ToArray();
+        var clauseHeadings = Regex.Matches(text,
+                @"(?m)^\s*((?:ماده|بند|تبصره|فصل)\s*[\p{N}۰-۹]+[^\r\n]{0,100})")
+            .Select(x => x.Groups[1].Value.Trim()).Distinct().Take(50).ToArray();
+        return JsonSerializer.Serialize(new
+        {
+            years, dates, amounts, contractNumbers,
+            companyAndPartyCandidates = companies,
+            clauseHeadings
+        });
     }
 
     public static DocumentDetailResponse ToDetail(Document document) => new(
