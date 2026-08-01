@@ -29,6 +29,16 @@ public sealed class KnowledgeController(ISender sender) : ControllerBase
             : Created($"/api/knowledge/document-groups/{result.Id}", result);
     }
 
+    [HttpPut("document-groups/{id:guid}")]
+    public async Task<ActionResult<DocumentGroupResponse>> UpdateGroup(Guid id, UpdateDocumentGroupRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new UpdateDocumentGroupCommand(id, request), cancellationToken);
+        return result is null ? BadRequest("The document group or documents are unavailable.") : Ok(result);
+    }
+    [HttpDelete("document-groups/{id:guid}")]
+    public async Task<IActionResult> DeleteGroup(Guid id, CancellationToken cancellationToken) =>
+        await sender.Send(new DeleteDocumentGroupCommand(id), cancellationToken) ? NoContent() : NotFound();
+
     [HttpGet("rule-sets")]
     public async Task<IActionResult> ListRuleSets(
         [FromQuery] Guid? documentGroupId, [FromQuery] int pageNumber = 1,

@@ -10,6 +10,9 @@ namespace NegareshAI.Api.Application.Knowledge;
 
 public sealed record CreateDocumentGroupCommand(CreateDocumentGroupRequest Request)
     : IRequest<DocumentGroupResponse?>;
+public sealed record UpdateDocumentGroupCommand(Guid Id, UpdateDocumentGroupRequest Request)
+    : IRequest<DocumentGroupResponse?>;
+public sealed record DeleteDocumentGroupCommand(Guid Id) : IRequest<bool>;
 
 public sealed class CreateDocumentGroupCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
@@ -43,6 +46,37 @@ public sealed class CreateDocumentGroupCommandHandler(
         await db.SaveChangesAsync(cancellationToken);
         return new(group.Id, group.Name, group.Description, group.IsActive,
             documentIds, group.CreatedAtUtc);
+    }
+}
+
+public sealed class UpdateDocumentGroupCommandHandler(
+    NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
+    : IRequestHandler<UpdateDocumentGroupCommand, DocumentGroupResponse?>
+{
+    public async Task<DocumentGroupResponse?> Handle(UpdateDocumentGroupCommand command, CancellationToken ct)
+    {
+        var group = await db.DocumentGroups.Include(x => x.Members).SingleOrDefaultAsync(x =>
+            x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct);
+        if (group is null || string.IsNullOrWhiteSpace(command.Request.Name)) return null;
+        var ids = command.Request.DocumentIds.Distinct().ToArray();
+        if (ids.Length != await db.Documents.CountAsync(x => x.OrganizationId == tenant.OrganizationId && ids.Contains(x.Id), ct)) return null;
+        db.DocumentGroupMembers.RemoveRange(group.Members); group.Members.Clear();
+        group.Members.AddRange(ids.Select(id => new DocumentGroupMember { DocumentId = id }));
+        group.Name = command.Request.Name.Trim(); group.Description = command.Request.Description?.Trim(); group.IsActive = command.Request.IsActive;
+        group.UpdatedAtUtc = DateTime.UtcNow; group.UpdatedByUserId = tenant.UserId;
+        audit.Add("document-group.updated", nameof(DocumentGroup), group.Id.ToString()); await db.SaveChangesAsync(ct);
+        return new(group.Id, group.Name, group.Description, group.IsActive, ids, group.CreatedAtUtc);
+    }
+}
+public sealed class DeleteDocumentGroupCommandHandler(NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
+    : IRequestHandler<DeleteDocumentGroupCommand, bool>
+{
+    public async Task<bool> Handle(DeleteDocumentGroupCommand command, CancellationToken ct)
+    {
+        var group = await db.DocumentGroups.SingleOrDefaultAsync(x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct);
+        if (group is null) return false;
+        group.IsDeleted = true; group.IsActive = false; group.DeletedAtUtc = DateTime.UtcNow; group.DeletedByUserId = tenant.UserId;
+        audit.Add("document-group.deleted", nameof(DocumentGroup), group.Id.ToString()); await db.SaveChangesAsync(ct); return true;
     }
 }
 

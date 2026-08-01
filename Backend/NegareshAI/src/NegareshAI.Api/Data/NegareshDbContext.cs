@@ -121,6 +121,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<DocumentGroup>()
             .HasIndex(item => new { item.OrganizationId, item.Name })
             .IsUnique();
+        modelBuilder.Entity<DocumentGroup>().HasQueryFilter(item => !item.IsDeleted);
         modelBuilder.Entity<DocumentGroupMember>()
             .HasIndex(item => new { item.DocumentGroupId, item.DocumentId })
             .IsUnique();

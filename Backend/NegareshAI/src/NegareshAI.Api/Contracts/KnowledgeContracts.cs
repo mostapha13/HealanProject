@@ -6,6 +6,8 @@ public sealed record CreateDocumentGroupRequest(
     string Name,
     string? Description,
     IReadOnlyCollection<Guid> DocumentIds);
+public sealed record UpdateDocumentGroupRequest(
+    string Name, string? Description, bool IsActive, IReadOnlyCollection<Guid> DocumentIds);
 
 public sealed record DocumentGroupResponse(
     Guid Id,
