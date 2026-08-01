@@ -436,6 +436,10 @@ public sealed class ContractTemplate
     public Guid OrganizationId { get; set; }
     public required string Name { get; set; }
     public required string ContractType { get; set; }
+    public Guid? ContractGroupId { get; set; }
+    public int? ContractYear { get; set; }
+    public DateOnly? EffectiveFrom { get; set; }
+    public DateOnly? EffectiveTo { get; set; }
     public required string FileId { get; set; }
     public string? LetterheadFileId { get; set; }
     public string? LogoFileId { get; set; }
@@ -444,6 +448,27 @@ public sealed class ContractTemplate
     public string? CreatedByUserId { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public ContractGroup? ContractGroup { get; set; }
+}
+
+public sealed class ContractYearDefinition
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public int Year { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 }
 
 public sealed class ContractGenerationRun
@@ -533,6 +558,52 @@ public sealed class DocumentGroupMember
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid DocumentGroupId { get; set; }
     public Guid DocumentId { get; set; }
+    public DocumentGroup? DocumentGroup { get; set; }
+    public Document? Document { get; set; }
+}
+
+public sealed class ComplianceCriterion
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Code { get; set; }
+    public required string Title { get; set; }
+    public string? Description { get; set; }
+    public decimal DefaultWeight { get; set; } = 1;
+    public bool IsCriticalByDefault { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+}
+public sealed class DocumentGroupCriterion
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid DocumentGroupId { get; set; }
+    public Guid ComplianceCriterionId { get; set; }
+    public decimal Weight { get; set; }
+    public bool IsCritical { get; set; }
+    public int Order { get; set; }
+    public DocumentGroup? DocumentGroup { get; set; }
+    public ComplianceCriterion? ComplianceCriterion { get; set; }
+}
+public sealed class GoldenDocument
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid DocumentGroupId { get; set; }
+    public Guid DocumentId { get; set; }
+    public int Priority { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
     public DocumentGroup? DocumentGroup { get; set; }
     public Document? Document { get; set; }
 }

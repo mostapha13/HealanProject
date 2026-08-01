@@ -23,12 +23,16 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ContractDate> ContractDates => Set<ContractDate>();
     public DbSet<ContractObligation> ContractObligations => Set<ContractObligation>();
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
+    public DbSet<ContractYearDefinition> ContractYears => Set<ContractYearDefinition>();
     public DbSet<ContractGenerationRun> ContractGenerationRuns => Set<ContractGenerationRun>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<RuntimeSetting> RuntimeSettings => Set<RuntimeSetting>();
     public DbSet<DocumentGroup> DocumentGroups => Set<DocumentGroup>();
     public DbSet<DocumentGroupMember> DocumentGroupMembers => Set<DocumentGroupMember>();
+    public DbSet<ComplianceCriterion> ComplianceCriteria => Set<ComplianceCriterion>();
+    public DbSet<DocumentGroupCriterion> DocumentGroupCriteria => Set<DocumentGroupCriterion>();
+    public DbSet<GoldenDocument> GoldenDocuments => Set<GoldenDocument>();
     public DbSet<RuleSet> RuleSets => Set<RuleSet>();
     public DbSet<Rule> Rules => Set<Rule>();
     public DbSet<RuleParameter> RuleParameters => Set<RuleParameter>();
@@ -121,10 +125,26 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<DocumentGroup>()
             .HasIndex(item => new { item.OrganizationId, item.Name })
             .IsUnique();
+        modelBuilder.Entity<ContractTemplate>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractTemplate>().HasOne(x => x.ContractGroup).WithMany()
+            .HasForeignKey(x => x.ContractGroupId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractYearDefinition>().HasIndex(x => new { x.OrganizationId, x.Year }).IsUnique();
+        modelBuilder.Entity<ContractYearDefinition>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<DocumentGroup>().HasQueryFilter(item => !item.IsDeleted);
         modelBuilder.Entity<DocumentGroupMember>()
             .HasIndex(item => new { item.DocumentGroupId, item.DocumentId })
             .IsUnique();
+        modelBuilder.Entity<ComplianceCriterion>().HasIndex(x => new { x.OrganizationId, x.Code }).IsUnique();
+        modelBuilder.Entity<ComplianceCriterion>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ComplianceCriterion>().Property(x => x.DefaultWeight).HasPrecision(9, 2);
+        modelBuilder.Entity<DocumentGroupCriterion>().HasIndex(x => new { x.DocumentGroupId, x.ComplianceCriterionId }).IsUnique();
+        modelBuilder.Entity<DocumentGroupCriterion>().Property(x => x.Weight).HasPrecision(9, 2);
+        modelBuilder.Entity<DocumentGroupCriterion>().HasOne(x => x.DocumentGroup).WithMany().HasForeignKey(x => x.DocumentGroupId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DocumentGroupCriterion>().HasOne(x => x.ComplianceCriterion).WithMany().HasForeignKey(x => x.ComplianceCriterionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<GoldenDocument>().HasIndex(x => new { x.DocumentGroupId, x.DocumentId }).IsUnique();
+        modelBuilder.Entity<GoldenDocument>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<GoldenDocument>().HasOne(x => x.DocumentGroup).WithMany().HasForeignKey(x => x.DocumentGroupId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<GoldenDocument>().HasOne(x => x.Document).WithMany().HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<RuleSet>()
             .HasIndex(item => new { item.OrganizationId, item.Name, item.Version })
             .IsUnique();

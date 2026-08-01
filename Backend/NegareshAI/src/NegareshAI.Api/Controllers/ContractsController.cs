@@ -158,6 +158,13 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     public Task<ActionResult> UpdateGroup(Guid id, SaveContractGroupRequest request, CancellationToken ct) =>
         SaveCatalog("groups", id, request, ct);
 
+    [HttpPost("catalog/years")]
+    [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
+    public Task<ActionResult> CreateYear(SaveContractYearRequest request, CancellationToken ct) => SaveCatalog("years", null, request, ct);
+    [HttpPut("catalog/years/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
+    public Task<ActionResult> UpdateYear(Guid id, SaveContractYearRequest request, CancellationToken ct) => SaveCatalog("years", id, request, ct);
+
     [HttpDelete("catalog/{kind}/{id:guid}")]
     [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
     public async Task<IActionResult> DeleteCatalog(string kind, Guid id, CancellationToken ct) =>

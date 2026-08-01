@@ -2,6 +2,8 @@ namespace NegareshAI.Api.Contracts;
 
 public sealed record ContractGroupResponse(Guid Id, string Name, string? Description, bool IsActive);
 public sealed record SaveContractGroupRequest(string Name, string? Description, bool IsActive = true);
+public sealed record ContractYearResponse(Guid Id, int Year, bool IsActive);
+public sealed record SaveContractYearRequest(int Year, bool IsActive = true);
 
 public sealed record ContractStatusDefinitionResponse(
     Guid Id, string Name, int Order, string Color, bool IsActive);

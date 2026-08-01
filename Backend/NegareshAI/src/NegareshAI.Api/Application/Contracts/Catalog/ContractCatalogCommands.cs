@@ -40,6 +40,9 @@ public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTen
                 .OrderBy(x => x.Name).Select(x => new ContractGroupResponse(
                     x.Id, x.Name, x.Description, x.IsActive))
                 .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
+            "years" => await db.ContractYears.AsNoTracking().Where(x => x.OrganizationId == tenant.OrganizationId)
+                .OrderByDescending(x => x.Year).Select(x => new ContractYearResponse(x.Id, x.Year, x.IsActive))
+                .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
             _ => new PagedResponse<object>(
                 [], 1, Math.Clamp(query.PageSize, 1, 100), 0, 0, false, false)
         };
@@ -57,6 +60,7 @@ public sealed class SaveContractCatalogHandler(
             "base-documents" => await SaveBaseDocument(command, ct),
             "parties" => await SaveParty(command, ct),
             "groups" => await SaveGroup(command, ct),
+            "years" => await SaveYear(command, ct),
             _ => null
         };
         if (result is null) return null;
@@ -131,6 +135,18 @@ public sealed class SaveContractCatalogHandler(
         if (!command.Id.HasValue) db.ContractGroups.Add(item);
         return new ContractGroupResponse(item.Id, item.Name, item.Description, item.IsActive);
     }
+
+    private async Task<object?> SaveYear(SaveContractCatalogCommand command, CancellationToken ct)
+    {
+        var request = (SaveContractYearRequest)command.Request;
+        if (request.Year is < 1300 or > 1600) return null;
+        var item = command.Id.HasValue ? await db.ContractYears.SingleOrDefaultAsync(x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct) : null;
+        if (command.Id.HasValue && item is null) return null;
+        item ??= new ContractYearDefinition { OrganizationId = tenant.OrganizationId, Year = request.Year, CreatedByUserId = tenant.UserId };
+        item.Year = request.Year; item.IsActive = request.IsActive;
+        if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; } else db.ContractYears.Add(item);
+        return new ContractYearResponse(item.Id, item.Year, item.IsActive);
+    }
 }
 
 public sealed class DeleteContractCatalogHandler(
@@ -148,6 +164,7 @@ public sealed class DeleteContractCatalogHandler(
                 x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
             "groups" => await db.ContractGroups.SingleOrDefaultAsync(x =>
                 x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
+            "years" => await db.ContractYears.SingleOrDefaultAsync(x => x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
             _ => null
         };
         if (item is null) return false;
@@ -161,6 +178,8 @@ public sealed class DeleteContractCatalogHandler(
             case OrganizationParty value:
                 value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
             case ContractGroup value:
+                value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
+            case ContractYearDefinition value:
                 value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
         }
         audit.Add($"contract-catalog.{command.Kind}.deleted",
