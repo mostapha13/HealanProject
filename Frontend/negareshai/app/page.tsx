@@ -123,6 +123,7 @@ export default function Home(){
   const [contractDraft,setContractDraft]=useState<ContractDetail|null>(null);
   const [contractOpen,setContractOpen]=useState(false);
   const [activeSection,setActiveSection]=useState("overview");
+  const [currentDateLabel,setCurrentDateLabel]=useState("");
   const [loadError,setLoadError]=useState("");
   const [search,setSearch]=useState(""); const [loading,setLoading]=useState(true);
   const [sidebarOpen,setSidebarOpen]=useState(false); const [uploadOpen,setUploadOpen]=useState(false);
@@ -131,6 +132,7 @@ export default function Home(){
   const [progress,setProgress]=useState(0); const [notice,setNotice]=useState("");
   const refresh=useCallback(async()=>{setLoading(true);setLoadError("");try{const [result,documentResult,runtimeSettings,contractResult,archived,groups,rules,runs,templates,statuses,baseDocs,parties,menus]=await Promise.all([getDashboard(),listDocuments(),listRuntimeSettings(),listContracts(),listArchivedDocuments(),listDocumentGroups(),listRuleSets(),listComparisonRuns(),listContractTemplates(),listContractCatalog<ContractStatusDefinition>("statuses"),listContractCatalog<ContractBaseDocument>("base-documents"),listContractCatalog<OrganizationParty>("parties"),listMyMenus()]);setDashboard(result);setDocuments(documentResult.items);setSettings(runtimeSettings);setContracts(contractResult.items);setArchivedDocuments(archived);setDocumentGroups(groups);setRuleSets(rules);setComparisonRuns(runs);setContractTemplates(templates);setContractStatuses(statuses.items);setContractBaseDocuments(baseDocs.items);setOrganizationParties(parties.items);setAccessMenus(menus)}catch{setDashboard(null);setDocuments([]);setArchivedDocuments([]);setSettings([]);setContracts([]);setDocumentGroups([]);setRuleSets([]);setComparisonRuns([]);setContractTemplates([]);setContractStatuses([]);setContractBaseDocuments([]);setOrganizationParties([]);setAccessMenus([]);setLoadError("دریافت اطلاعات یا سطح دسترسی کاربر انجام نشد؛ سرویس‌ها را بررسی کنید.")}finally{setLoading(false)}},[]);
   useEffect(()=>{void listContractCatalog<ContractGroup>("groups",1,100).then(x=>setContractGroups(x.items)).catch(()=>setContractGroups([]))},[]);
+  useEffect(()=>{setCurrentDateLabel(fullCurrentDate())},[]);
   useEffect(()=>{const groupId=contractDraft?.primaryContractGroupId,start=contractDraft?.startDate;if(!groupId||!start){setEffectiveTemplate(null);return}void getEffectiveContractTemplate(groupId,start).then(x=>setEffectiveTemplate(x.template??null)).catch(()=>setEffectiveTemplate(null))},[contractDraft?.primaryContractGroupId,contractDraft?.startDate]);
   const allowedUrls=useMemo(()=>{const values=new Set<string>();const walk=(items:AccessMenu[])=>items.forEach(item=>{if(item.accessForm?.url)values.add(item.accessForm.url);walk(item.children??[])});walk(accessMenus);return values},[accessMenus]);
   const visibleNavItems=useMemo(()=>navItems.filter(item=>item.urls.some(url=>allowedUrls.has(url))),[allowedUrls]);
@@ -611,7 +613,7 @@ export default function Home(){
         {activeSection==="overview"?<>
         <section className="welcome">
 <div>
-<p className="eyebrow">{fullCurrentDate()}</p>
+<p className="eyebrow">{currentDateLabel}</p>
 <h1>فضای هوشمند مدیریت اسناد سازمان</h1>
 <p>اسناد و قراردادهای سازمان را در یک فضای امن مدیریت و تحلیل کنید.</p>
 </div>
