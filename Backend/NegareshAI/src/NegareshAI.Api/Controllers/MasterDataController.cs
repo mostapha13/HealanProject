@@ -22,4 +22,5 @@ public sealed class MasterDataController(ISender sender):ControllerBase
  [HttpPost("golden-documents")] public async Task<IActionResult> CreateGolden(SaveGoldenDocumentRequest r,CancellationToken ct){var x=await sender.Send(new SaveGoldenDocumentCommand(null,r),ct);return x is null?BadRequest():Ok(x);}
  [HttpPut("golden-documents/{id:guid}")] public async Task<IActionResult> UpdateGolden(Guid id,SaveGoldenDocumentRequest r,CancellationToken ct){var x=await sender.Send(new SaveGoldenDocumentCommand(id,r),ct);return x is null?NotFound():Ok(x);}
  [HttpDelete("golden-documents/{id:guid}")] public async Task<IActionResult> DeleteGolden(Guid id,CancellationToken ct)=>await sender.Send(new DeleteGoldenDocumentCommand(id),ct)?NoContent():NotFound();
+ [HttpPost("golden-documents/{id:guid}/restore")] public async Task<IActionResult> RestoreGolden(Guid id,CancellationToken ct)=>await sender.Send(new RestoreGoldenDocumentCommand(id),ct)?NoContent():NotFound();
 }

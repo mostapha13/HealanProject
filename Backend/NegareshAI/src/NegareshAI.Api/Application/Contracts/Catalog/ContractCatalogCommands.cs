@@ -12,6 +12,7 @@ public sealed record ListContractCatalogQuery(
     string Kind, int PageNumber = 1, int PageSize = 20) : IRequest<object>;
 public sealed record SaveContractCatalogCommand(string Kind, Guid? Id, object Request) : IRequest<object?>;
 public sealed record DeleteContractCatalogCommand(string Kind, Guid Id) : IRequest<bool>;
+public sealed record RestoreContractCatalogCommand(string Kind, Guid Id) : IRequest<bool>;
 
 public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTenant tenant)
     : IRequestHandler<ListContractCatalogQuery, object>
@@ -187,4 +188,8 @@ public sealed class DeleteContractCatalogHandler(
         await db.SaveChangesAsync(ct);
         return true;
     }
+}
+public sealed class RestoreContractCatalogHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<RestoreContractCatalogCommand,bool>
+{
+ public async Task<bool> Handle(RestoreContractCatalogCommand c,CancellationToken ct){object? item=c.Kind switch{"statuses"=>await db.ContractStatusDefinitions.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct),"base-documents"=>await db.ContractBaseDocumentProfiles.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct),"parties"=>await db.OrganizationParties.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct),"groups"=>await db.ContractGroups.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct),"years"=>await db.ContractYears.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct),_=>null};if(item is null)return false;switch(item){case ContractStatusDefinition x:x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;break;case ContractBaseDocumentProfile x:x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;break;case OrganizationParty x:x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;break;case ContractGroup x:x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;break;case ContractYearDefinition x:x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;break;}audit.Add($"contract-catalog.{c.Kind}.restored","ContractCatalog",c.Id.ToString());await db.SaveChangesAsync(ct);return true;}
 }

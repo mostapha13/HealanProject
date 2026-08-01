@@ -4,10 +4,15 @@ namespace NegareshAI.Api.Contracts;
 
 public sealed record ContractTemplateResponse(
     Guid Id, string Name, string ContractType, int Version, string? Description,
-    bool IsActive, DateTime CreatedAtUtc);
+    bool IsActive, DateTime CreatedAtUtc, Guid? ContractGroupId = null,
+    int? ContractYear = null, DateOnly? EffectiveFrom = null, DateOnly? EffectiveTo = null);
 
 public sealed record CreateContractTemplateRequest(
-    string Name, string ContractType, string? Description);
+    string Name, string ContractType, string? Description, Guid? ContractGroupId = null,
+    int? ContractYear = null, DateOnly? EffectiveFrom = null, DateOnly? EffectiveTo = null);
+public sealed record EffectiveContractTemplateResponse(ContractTemplateResponse? Template, string? Reason);
+public sealed record UpdateContractTemplateRequest(string Name, string ContractType, string? Description,
+    Guid? ContractGroupId, int? ContractYear, DateOnly? EffectiveFrom, DateOnly? EffectiveTo, bool IsActive);
 
 public sealed record StartContractGenerationRequest(
     Guid ContractId, Guid ContractTemplateId, string UserInstruction,

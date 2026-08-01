@@ -13,6 +13,7 @@ public sealed record CreateDocumentGroupCommand(CreateDocumentGroupRequest Reque
 public sealed record UpdateDocumentGroupCommand(Guid Id, UpdateDocumentGroupRequest Request)
     : IRequest<DocumentGroupResponse?>;
 public sealed record DeleteDocumentGroupCommand(Guid Id) : IRequest<bool>;
+public sealed record RestoreDocumentGroupCommand(Guid Id):IRequest<bool>;
 
 public sealed class CreateDocumentGroupCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
@@ -79,9 +80,13 @@ public sealed class DeleteDocumentGroupCommandHandler(NegareshDbContext db, ICur
         audit.Add("document-group.deleted", nameof(DocumentGroup), group.Id.ToString()); await db.SaveChangesAsync(ct); return true;
     }
 }
+public sealed class RestoreDocumentGroupCommandHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<RestoreDocumentGroupCommand,bool>{public async Task<bool> Handle(RestoreDocumentGroupCommand c,CancellationToken ct){var x=await db.DocumentGroups.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct);if(x is null)return false;x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;x.UpdatedAtUtc=DateTime.UtcNow;x.UpdatedByUserId=tenant.UserId;audit.Add("document-group.restored",nameof(DocumentGroup),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
 
 public sealed record CreateRuleSetCommand(CreateRuleSetRequest Request)
     : IRequest<RuleSetResponse?>;
+public sealed record SetRuleSetActiveCommand(Guid Id,bool IsActive):IRequest<bool>;
+public sealed record DeleteRuleSetCommand(Guid Id):IRequest<bool>;
+public sealed record RestoreRuleSetCommand(Guid Id):IRequest<bool>;
 
 public sealed class CreateRuleSetCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
@@ -138,6 +143,9 @@ public sealed class CreateRuleSetCommandHandler(
         return KnowledgeMapping.ToResponse(ruleSet);
     }
 }
+public sealed class SetRuleSetActiveHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<SetRuleSetActiveCommand,bool>{public async Task<bool> Handle(SetRuleSetActiveCommand c,CancellationToken ct){var x=await db.RuleSets.SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId,ct);if(x is null)return false;x.IsActive=c.IsActive;x.UpdatedAtUtc=DateTime.UtcNow;x.UpdatedByUserId=tenant.UserId;audit.Add("rule-set.active.changed",nameof(RuleSet),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
+public sealed class DeleteRuleSetHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<DeleteRuleSetCommand,bool>{public async Task<bool> Handle(DeleteRuleSetCommand c,CancellationToken ct){var x=await db.RuleSets.SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId,ct);if(x is null)return false;x.IsDeleted=true;x.IsActive=false;x.DeletedAtUtc=DateTime.UtcNow;x.DeletedByUserId=tenant.UserId;audit.Add("rule-set.deleted",nameof(RuleSet),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
+public sealed class RestoreRuleSetHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<RestoreRuleSetCommand,bool>{public async Task<bool> Handle(RestoreRuleSetCommand c,CancellationToken ct){var x=await db.RuleSets.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct);if(x is null)return false;x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;x.UpdatedAtUtc=DateTime.UtcNow;x.UpdatedByUserId=tenant.UserId;audit.Add("rule-set.restored",nameof(RuleSet),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
 
 internal static class KnowledgeMapping
 {

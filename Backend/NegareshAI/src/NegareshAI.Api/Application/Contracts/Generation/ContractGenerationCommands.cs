@@ -16,6 +16,11 @@ public sealed record CreateContractTemplateCommand(
     : IRequest<ContractTemplateResponse>;
 public sealed record ListContractTemplatesQuery(int PageNumber = 1, int PageSize = 20)
     : IRequest<PagedResponse<ContractTemplateResponse>>;
+public sealed record GetEffectiveContractTemplateQuery(Guid ContractGroupId, DateOnly StartDate)
+    : IRequest<EffectiveContractTemplateResponse>;
+public sealed record UpdateContractTemplateCommand(Guid Id, UpdateContractTemplateRequest Request):IRequest<ContractTemplateResponse?>;
+public sealed record DeleteContractTemplateCommand(Guid Id):IRequest<bool>;
+public sealed record RestoreContractTemplateCommand(Guid Id):IRequest<bool>;
 public sealed record StartContractGenerationCommand(StartContractGenerationRequest Request)
     : IRequest<ContractGenerationResponse?>;
 public sealed record ReviewContractGenerationCommand(
@@ -30,6 +35,12 @@ public sealed class CreateContractTemplateHandler(
     public async Task<ContractTemplateResponse> Handle(
         CreateContractTemplateCommand command, CancellationToken cancellationToken)
     {
+        if (command.Request.EffectiveFrom > command.Request.EffectiveTo)
+            throw new InvalidOperationException("Template effective range is invalid.");
+        if (command.Request.ContractGroupId.HasValue && !await db.ContractGroups.AnyAsync(x =>
+                x.Id == command.Request.ContractGroupId && x.OrganizationId == tenant.OrganizationId
+                && x.IsActive, cancellationToken))
+            throw new InvalidOperationException("Contract group is unavailable.");
         var version = await db.ContractTemplates.Where(item =>
                 item.OrganizationId == tenant.OrganizationId &&
                 item.Name == command.Request.Name.Trim())
@@ -42,6 +53,10 @@ public sealed class CreateContractTemplateHandler(
             Name = command.Request.Name.Trim(),
             ContractType = command.Request.ContractType.Trim(),
             Description = command.Request.Description?.Trim(),
+            ContractGroupId = command.Request.ContractGroupId,
+            ContractYear = command.Request.ContractYear,
+            EffectiveFrom = command.Request.EffectiveFrom,
+            EffectiveTo = command.Request.EffectiveTo,
             FileId = fileId, Version = version + 1, CreatedByUserId = tenant.UserId
         };
         db.ContractTemplates.Add(template);
@@ -55,8 +70,20 @@ public sealed class CreateContractTemplateHandler(
             .Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
     internal static ContractTemplateResponse Map(ContractTemplate item) =>
         new(item.Id, item.Name, item.ContractType, item.Version, item.Description,
-            item.IsActive, item.CreatedAtUtc);
+            item.IsActive, item.CreatedAtUtc, item.ContractGroupId, item.ContractYear,
+            item.EffectiveFrom, item.EffectiveTo);
 }
+public sealed class GetEffectiveContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant)
+    : IRequestHandler<GetEffectiveContractTemplateQuery,EffectiveContractTemplateResponse>
+{
+ public async Task<EffectiveContractTemplateResponse> Handle(GetEffectiveContractTemplateQuery q,CancellationToken ct){var x=await db.ContractTemplates.AsNoTracking().Where(x=>x.OrganizationId==tenant.OrganizationId&&x.ContractGroupId==q.ContractGroupId&&x.IsActive&&(x.EffectiveFrom==null||x.EffectiveFrom<=q.StartDate)&&(x.EffectiveTo==null||x.EffectiveTo>=q.StartDate)).OrderByDescending(x=>x.Version).FirstOrDefaultAsync(ct);return x is null?new(null,"گروه فاقد قالب معتبر است."):new(CreateContractTemplateHandler.Map(x),null);}
+}
+public sealed class UpdateContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<UpdateContractTemplateCommand,ContractTemplateResponse?>
+{
+ public async Task<ContractTemplateResponse?> Handle(UpdateContractTemplateCommand c,CancellationToken ct){var r=c.Request;var x=await db.ContractTemplates.SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId,ct);if(x is null||r.EffectiveFrom>r.EffectiveTo)return null;if(r.ContractGroupId.HasValue&&!await db.ContractGroups.AnyAsync(g=>g.Id==r.ContractGroupId&&g.OrganizationId==tenant.OrganizationId&&g.IsActive,ct))return null;x.Name=r.Name.Trim();x.ContractType=r.ContractType.Trim();x.Description=r.Description?.Trim();x.ContractGroupId=r.ContractGroupId;x.ContractYear=r.ContractYear;x.EffectiveFrom=r.EffectiveFrom;x.EffectiveTo=r.EffectiveTo;x.IsActive=r.IsActive;x.UpdatedAtUtc=DateTime.UtcNow;x.UpdatedByUserId=tenant.UserId;audit.Add("contract-template.updated",nameof(ContractTemplate),x.Id.ToString());await db.SaveChangesAsync(ct);return CreateContractTemplateHandler.Map(x);}
+}
+public sealed class DeleteContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<DeleteContractTemplateCommand,bool>{public async Task<bool> Handle(DeleteContractTemplateCommand c,CancellationToken ct){var x=await db.ContractTemplates.SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId,ct);if(x is null)return false;x.IsDeleted=true;x.IsActive=false;x.DeletedAtUtc=DateTime.UtcNow;x.DeletedByUserId=tenant.UserId;audit.Add("contract-template.deleted",nameof(ContractTemplate),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
+public sealed class RestoreContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<RestoreContractTemplateCommand,bool>{public async Task<bool> Handle(RestoreContractTemplateCommand c,CancellationToken ct){var x=await db.ContractTemplates.IgnoreQueryFilters().SingleOrDefaultAsync(x=>x.Id==c.Id&&x.OrganizationId==tenant.OrganizationId&&x.IsDeleted,ct);if(x is null)return false;x.IsDeleted=false;x.IsActive=true;x.DeletedAtUtc=null;x.DeletedByUserId=null;x.UpdatedAtUtc=DateTime.UtcNow;x.UpdatedByUserId=tenant.UserId;audit.Add("contract-template.restored",nameof(ContractTemplate),x.Id.ToString());await db.SaveChangesAsync(ct);return true;}}
 
 public sealed class ListContractTemplatesHandler(NegareshDbContext db, ICurrentTenant tenant)
     : IRequestHandler<ListContractTemplatesQuery, PagedResponse<ContractTemplateResponse>>
@@ -67,7 +94,8 @@ public sealed class ListContractTemplatesHandler(NegareshDbContext db, ICurrentT
             .Where(item => item.OrganizationId == tenant.OrganizationId && item.IsActive)
             .OrderBy(item => item.Name).ThenByDescending(item => item.Version)
             .Select(item => new ContractTemplateResponse(item.Id, item.Name, item.ContractType,
-                item.Version, item.Description, item.IsActive, item.CreatedAtUtc))
+                item.Version, item.Description, item.IsActive, item.CreatedAtUtc,
+                item.ContractGroupId, item.ContractYear, item.EffectiveFrom, item.EffectiveTo))
             .ToPagedResponseAsync(
                 new PageRequest(request.PageNumber, request.PageSize), cancellationToken);
 }

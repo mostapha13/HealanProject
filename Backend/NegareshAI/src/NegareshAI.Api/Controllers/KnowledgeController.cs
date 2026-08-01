@@ -38,6 +38,7 @@ public sealed class KnowledgeController(ISender sender) : ControllerBase
     [HttpDelete("document-groups/{id:guid}")]
     public async Task<IActionResult> DeleteGroup(Guid id, CancellationToken cancellationToken) =>
         await sender.Send(new DeleteDocumentGroupCommand(id), cancellationToken) ? NoContent() : NotFound();
+    [HttpPost("document-groups/{id:guid}/restore")] public async Task<IActionResult> RestoreGroup(Guid id,CancellationToken ct)=>await sender.Send(new RestoreDocumentGroupCommand(id),ct)?NoContent():NotFound();
 
     [HttpGet("rule-sets")]
     public async Task<IActionResult> ListRuleSets(
@@ -55,4 +56,7 @@ public sealed class KnowledgeController(ISender sender) : ControllerBase
         return result is null ? BadRequest("The document group is unavailable.")
             : Created($"/api/knowledge/rule-sets/{result.Id}", result);
     }
+    [HttpPut("rule-sets/{id:guid}/active")] public async Task<IActionResult> SetRuleSetActive(Guid id,[FromQuery]bool isActive,CancellationToken ct)=>await sender.Send(new SetRuleSetActiveCommand(id,isActive),ct)?NoContent():NotFound();
+    [HttpDelete("rule-sets/{id:guid}")] public async Task<IActionResult> DeleteRuleSet(Guid id,CancellationToken ct)=>await sender.Send(new DeleteRuleSetCommand(id),ct)?NoContent():NotFound();
+    [HttpPost("rule-sets/{id:guid}/restore")] public async Task<IActionResult> RestoreRuleSet(Guid id,CancellationToken ct)=>await sender.Send(new RestoreRuleSetCommand(id),ct)?NoContent():NotFound();
 }

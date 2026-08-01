@@ -79,11 +79,25 @@ public sealed class ContractsController(ISender sender) : ControllerBase
         if (!request.File.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
             return BadRequest("Template must be a DOCX file.");
         var result = await sender.Send(new CreateContractTemplateCommand(
-            new(request.Name, request.ContractType, request.Description),
+            new(request.Name, request.ContractType, request.Description, request.ContractGroupId,
+                request.ContractYear, request.EffectiveFrom, request.EffectiveTo),
             request.File.OpenReadStream(), request.File.FileName,
             request.File.ContentType), cancellationToken);
         return Ok(result);
     }
+
+    [HttpGet("templates/effective")]
+    public async Task<ActionResult<EffectiveContractTemplateResponse>> EffectiveTemplate([FromQuery] Guid contractGroupId,[FromQuery] DateOnly startDate,CancellationToken ct) => Ok(await sender.Send(new GetEffectiveContractTemplateQuery(contractGroupId,startDate),ct));
+
+    [HttpPut("templates/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<ContractTemplateResponse>> UpdateTemplate(Guid id,UpdateContractTemplateRequest request,CancellationToken ct){var result=await sender.Send(new UpdateContractTemplateCommand(id,request),ct);return result is null?BadRequest():Ok(result);}
+    [HttpDelete("templates/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<IActionResult> DeleteTemplate(Guid id,CancellationToken ct)=>await sender.Send(new DeleteContractTemplateCommand(id),ct)?NoContent():NotFound();
+    [HttpPost("templates/{id:guid}/restore")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<IActionResult> RestoreTemplate(Guid id,CancellationToken ct)=>await sender.Send(new RestoreContractTemplateCommand(id),ct)?NoContent():NotFound();
 
     [HttpPost("generations")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
@@ -169,6 +183,9 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
     public async Task<IActionResult> DeleteCatalog(string kind, Guid id, CancellationToken ct) =>
         await sender.Send(new DeleteContractCatalogCommand(kind, id), ct) ? NoContent() : Conflict();
+    [HttpPost("catalog/{kind}/{id:guid}/restore")]
+    [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
+    public async Task<IActionResult> RestoreCatalog(string kind,Guid id,CancellationToken ct)=>await sender.Send(new RestoreContractCatalogCommand(kind,id),ct)?NoContent():NotFound();
 
     private async Task<ActionResult> SaveCatalog(
         string kind, Guid? id, object request, CancellationToken ct)
@@ -183,5 +200,9 @@ public sealed class ContractTemplateUploadRequest
     public required string Name { get; init; }
     public required string ContractType { get; init; }
     public string? Description { get; init; }
+    public Guid? ContractGroupId { get; init; }
+    public int? ContractYear { get; init; }
+    public DateOnly? EffectiveFrom { get; init; }
+    public DateOnly? EffectiveTo { get; init; }
     public required IFormFile File { get; init; }
 }

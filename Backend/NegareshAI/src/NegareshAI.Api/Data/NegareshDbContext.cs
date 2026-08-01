@@ -148,6 +148,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<RuleSet>()
             .HasIndex(item => new { item.OrganizationId, item.Name, item.Version })
             .IsUnique();
+        modelBuilder.Entity<RuleSet>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Rule>()
             .HasIndex(item => new { item.RuleSetId, item.Code })
             .IsUnique();

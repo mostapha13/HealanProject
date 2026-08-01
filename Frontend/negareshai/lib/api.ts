@@ -183,6 +183,8 @@ export type ContractListResponse = {
 
 export type ContractDetail = ContractItem & {
   baseDocumentProfileId?: string;
+  primaryContractGroupId?: string;
+  contractGroupIds: string[];
   internalOwnerUserId?: string;
   parties: ContractParty[];
   createdAtUtc: string;
@@ -200,7 +202,19 @@ export type OrganizationParty = {
   contactInfo?:string; isActive:boolean;
 };
 export type ContractGroup = { id:string; name:string; description?:string; isActive:boolean; };
-export type ContractCatalogKind = "statuses"|"base-documents"|"parties"|"groups";
+export type ContractYear={id:string;year:number;isActive:boolean};
+export type ContractCatalogKind = "statuses"|"base-documents"|"parties"|"groups"|"years";
+export type ComplianceCriterion={id:string;code:string;title:string;description?:string;defaultWeight:number;isCriticalByDefault:boolean;isActive:boolean};
+export async function listCriteria(pageNumber=1,pageSize=20):Promise<PagedResponse<ComplianceCriterion>>{const r=await authorizedFetch(`/api/master-data/criteria?pageNumber=${pageNumber}&pageSize=${pageSize}`);if(!r.ok)throw new Error("دریافت معیارها انجام نشد.");return r.json();}
+export async function saveCriterion(input:Omit<ComplianceCriterion,"id">,id?:string){const r=await authorizedFetch(`/api/master-data/criteria${id?`/${id}`:""}`,{method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error(await r.text()||"ذخیره معیار انجام نشد.");return r.json() as Promise<ComplianceCriterion>;}
+export async function deleteCriterion(id:string){const r=await authorizedFetch(`/api/master-data/criteria/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف معیار انجام نشد.");}
+export type GoldenDocument={id:string;documentGroupId:string;documentId:string;documentTitle:string;priority:number;isActive:boolean};
+export async function listGoldenDocuments(groupId?:string){const r=await authorizedFetch(`/api/master-data/golden-documents?${groupId?`documentGroupId=${groupId}&`:""}pageNumber=1&pageSize=100`);if(!r.ok)throw new Error("دریافت اسناد طلایی انجام نشد.");return r.json() as Promise<PagedResponse<GoldenDocument>>;}
+export async function saveGoldenDocument(input:{documentGroupId:string;documentId:string;priority:number;isActive:boolean},id?:string){const r=await authorizedFetch(`/api/master-data/golden-documents${id?`/${id}`:""}`,{method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ذخیره سند طلایی انجام نشد.");return r.json() as Promise<GoldenDocument>;}
+export async function deleteGoldenDocument(id:string){const r=await authorizedFetch(`/api/master-data/golden-documents/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف سند طلایی انجام نشد.");}
+export type DocumentGroupCriterion={id:string;complianceCriterionId:string;code:string;title:string;weight:number;isCritical:boolean;order:number};
+export async function getDocumentGroupCriteria(id:string){const r=await authorizedFetch(`/api/master-data/document-groups/${id}/criteria`);if(!r.ok)throw new Error("دریافت معیارهای گروه انجام نشد.");return r.json() as Promise<DocumentGroupCriterion[]>;}
+export async function saveDocumentGroupCriteria(id:string,items:Array<{complianceCriterionId:string;weight:number;isCritical:boolean;order:number}>){const r=await authorizedFetch(`/api/master-data/document-groups/${id}/criteria`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({items})});if(!r.ok)throw new Error("ذخیره معیارهای گروه انجام نشد.");}
 
 export async function listContractCatalog<T>(kind:ContractCatalogKind,pageNumber=1,pageSize=20):Promise<PagedResponse<T>> {
   const response=await authorizedFetch(`/api/contracts/catalog/${kind}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
@@ -222,6 +236,7 @@ export async function deleteContractCatalog(kind:ContractCatalogKind,id:string){
 export type ContractTemplate = {
   id: string; name: string; contractType: string; version: number;
   description?: string; isActive: boolean; createdAtUtc: string;
+  contractGroupId?:string; contractYear?:number; effectiveFrom?:string; effectiveTo?:string;
 };
 
 export type ContractGeneration = {
@@ -242,15 +257,23 @@ export async function listContractTemplates(): Promise<ContractTemplate[]> {
 
 export async function uploadContractTemplate(input: {
   name: string; contractType: string; description?: string; file: File;
+  contractGroupId?:string;contractYear?:number;effectiveFrom?:string;effectiveTo?:string;
 }): Promise<ContractTemplate> {
   const form = new FormData();
   form.append("name", input.name); form.append("contractType", input.contractType);
   if (input.description) form.append("description", input.description);
+  if(input.contractGroupId)form.append("contractGroupId",input.contractGroupId);
+  if(input.contractYear)form.append("contractYear",String(input.contractYear));
+  if(input.effectiveFrom)form.append("effectiveFrom",input.effectiveFrom);
+  if(input.effectiveTo)form.append("effectiveTo",input.effectiveTo);
   form.append("file", input.file);
   const response = await authorizedFetch("/api/contracts/templates", {method:"POST", body:form});
   if (!response.ok) throw new Error(await response.text() || "ثبت قالب انجام نشد");
   return response.json();
 }
+export async function getEffectiveContractTemplate(contractGroupId:string,startDate:string){const r=await authorizedFetch(`/api/contracts/templates/effective?contractGroupId=${contractGroupId}&startDate=${startDate}`);if(!r.ok)throw new Error("دریافت قالب مؤثر انجام نشد.");return r.json() as Promise<{template?:ContractTemplate;reason?:string}>;}
+export async function updateContractTemplate(id:string,input:{name:string;contractType:string;description?:string;contractGroupId?:string;contractYear?:number;effectiveFrom?:string;effectiveTo?:string;isActive:boolean}){const r=await authorizedFetch(`/api/contracts/templates/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش قالب انجام نشد.");return r.json() as Promise<ContractTemplate>;}
+export async function deleteContractTemplate(id:string){const r=await authorizedFetch(`/api/contracts/templates/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف قالب انجام نشد.");}
 
 export async function generateContract(input: {
   contractId: string; contractTemplateId: string; userInstruction: string;
@@ -449,6 +472,10 @@ export async function createRuleSet(input: {
   if (!response.ok) throw new Error(await response.text() || "ثبت مجموعه قواعد انجام نشد");
   return response.json();
 }
+export async function updateDocumentGroup(id:string,input:{name:string;description?:string;isActive:boolean;documentIds:string[]}){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش گروه سند انجام نشد.");return r.json() as Promise<DocumentGroup>;}
+export async function deleteDocumentGroup(id:string){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف گروه سند انجام نشد.");}
+export async function setRuleSetActive(id:string,isActive:boolean){const r=await authorizedFetch(`/api/knowledge/rule-sets/${id}/active?isActive=${isActive}`,{method:"PUT"});if(!r.ok)throw new Error("تغییر وضعیت RuleSet انجام نشد.");}
+export async function deleteRuleSet(id:string){const r=await authorizedFetch(`/api/knowledge/rule-sets/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف RuleSet انجام نشد.");}
 
 export async function listComparisonRuns(): Promise<ComparisonRunSummary[]> {
   const response = await authorizedFetch("/api/comparisons");
@@ -518,6 +545,8 @@ export async function saveContract(input: {
   startDate?: string;
   endDate?: string;
   internalOwnerUserId?: string;
+  contractGroupIds?:string[];
+  primaryContractGroupId?:string;
   parties: ContractParty[];
 }) {
   const token = accessToken();

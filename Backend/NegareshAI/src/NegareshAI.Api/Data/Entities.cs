@@ -618,8 +618,13 @@ public sealed class RuleSet
     public DateTime EffectiveFromUtc { get; set; } = DateTime.UtcNow;
     public DateTime? EffectiveToUtc { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
     public string? CreatedByUserId { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
     public DocumentGroup? DocumentGroup { get; set; }
     public List<Rule> Rules { get; set; } = [];
 }

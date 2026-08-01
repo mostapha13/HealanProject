@@ -138,6 +138,17 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
 
 ## Authoritative current checkpoint — 2026-07-30
 
+### M2 master-data completion checkpoint — 2026-08-01
+
+- Contract groups are first-class tenant entities; contracts support multiple groups and one required primary group.
+- Independent RTL pages exist for contract groups/statuses/parties/base documents/years/templates, document groups, criteria, group criteria, golden documents and versioned RuleSets.
+- Criteria are organization catalogs with default weight/criticality; each document group can override weight, criticality and order.
+- Golden documents support multiple prioritized references per document group.
+- Contract templates are group-owned and versioned with contract year and effective date range; effective selection is fail-closed and chooses the highest active version for primary group and start date.
+- Master-data entities use tenant isolation, server pagination where applicable, active/inactive state, soft delete/restore endpoints and audit events.
+- Contract create/edit accepts multiple groups and a primary group; the UI requires a primary group and previews the effective template.
+- Validation: API tests pass 28/28; Next.js production build passes and generates 21 routes; migrations include `M2MasterDataReferenceModel` and `M2RuleSetLifecycle`.
+
 ### P4 implementation checkpoint
 
 - P4 contract generation is implemented in the working tree.
