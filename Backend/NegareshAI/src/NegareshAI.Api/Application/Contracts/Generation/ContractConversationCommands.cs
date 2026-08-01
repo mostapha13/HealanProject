@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.Json;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,10 @@ public sealed record SendContractConversationMessageCommand(Guid Id, string Mess
     : IRequest<ContractConversationResponse?>;
 public sealed record GetContractConversationQuery(Guid Id) : IRequest<ContractConversationResponse?>;
 public sealed record ListContractConversationsQuery : IRequest<IReadOnlyList<ContractConversationListItemResponse>>;
+public sealed record ListContractSourceOptionsQuery : IRequest<IReadOnlyList<ContractSourceOptionResponse>>;
+public sealed record DownloadContractDraftQuery(Guid ConversationId, Guid DraftId, string Format)
+    : IRequest<ContractDraftDownload?>;
+public sealed record ContractDraftDownload(byte[] Content, string FileName, string ContentType);
 public sealed record ReviewContractDraftCommand(Guid ConversationId, Guid DraftId,
     ContractDraftApprovalStatus ExpectedStatus, ReviewContractDraftRequest Request)
     : IRequest<ContractConversationResponse?>;
@@ -25,6 +30,7 @@ public sealed record ReviewContractDraftCommand(Guid ConversationId, Guid DraftI
 public sealed class StartContractConversationHandler(
     NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
     IContractDocumentGenerator generator, IHttpContextAccessor context, IAuditWriter audit,
+    IAiDocumentProcessor? ai = null,
     IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<StartContractConversationCommand, ContractConversationResponse?>,
       IRequestHandler<SendContractConversationMessageCommand, ContractConversationResponse?>
@@ -41,6 +47,9 @@ public sealed class StartContractConversationHandler(
             x.Id == request.PrimaryContractGroupId && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct);
         if (party is null || group is null || authorizer is not null &&
             !await authorizer.CanAccessAsync(DataScopeResourceType.ContractGroup, group.Id, ct)) return null;
+        var additionalSources = await FreezeAdditionalSourcesAsync(
+            request.AdditionalSourceContractIds ?? [], ct);
+        if (additionalSources is null) return null;
 
         var conversation = new ContractConversation
         {
@@ -50,7 +59,8 @@ public sealed class StartContractConversationHandler(
             RequestedContractYear = request.ContractYear,
             Subject = request.Subject.Trim(),
             Title = $"{request.Subject.Trim()} - {party.Name} - {request.ContractYear}",
-            CreatedByUserId = tenant.UserId
+            CreatedByUserId = tenant.UserId,
+            AdditionalSourceSnapshotJson = JsonSerializer.Serialize(additionalSources)
         };
         db.ContractConversations.Add(conversation);
         await AddUserMessageAsync(conversation, request.Message, ct);
@@ -114,7 +124,14 @@ public sealed class StartContractConversationHandler(
             AddClarification(conversation, "base-contract", "چند قرارداد مرجع هم‌اولویت یافت شد؛ شماره قرارداد مورد نظر را مشخص کنید.");
             return;
         }
+        if (conversation.BaseContractId.HasValue && baseResult.Contract is null)
+        {
+            AddClarification(conversation, "frozen-base-invalid",
+                "نسخه مرجع Freeze‌شده دیگر Final و فعال نیست؛ یک گفت‌وگوی جدید با مرجع معتبر شروع کنید.");
+            return;
+        }
         conversation.BaseContractId = baseResult.Contract?.Id;
+        conversation.BaseDocumentVersionId = baseResult.Version?.Id;
         var targetDate = FirstDayOfPersianYear(conversation.RequestedContractYear);
         var template = await db.ContractTemplates.AsNoTracking().Where(x =>
                 x.OrganizationId == tenant.OrganizationId && x.ContractGroupId == conversation.PrimaryContractGroupId
@@ -149,6 +166,44 @@ public sealed class StartContractConversationHandler(
                 .OrderBy(x => x.Order).Select(x => new { x.Id, x.Code, x.Title, x.Text, x.IsRequired })
                 .ToListAsync(ct)
             : [];
+        var additionalSources = string.IsNullOrWhiteSpace(conversation.AdditionalSourceSnapshotJson)
+            ? [] : JsonSerializer.Deserialize<List<FrozenContractSource>>(
+                conversation.AdditionalSourceSnapshotJson) ?? [];
+        var embeddingModel = await GetEmbeddingModelAsync(ct);
+        IReadOnlyList<AiRagSearchResult> ragSources = [];
+        if (baseResult.Version is not null && ai is not null)
+        {
+            if (!baseResult.Version.IsRagPublished)
+            {
+                AddClarification(conversation, "base-rag",
+                    "نسخه نهایی مرجع هنوز در RAG منتشر نشده است؛ ابتدا نسخه مرجع را نهایی و منتشر کنید.");
+                return;
+            }
+            var groupIds = additionalSources.Select(x => x.ContractGroupId)
+                .Append(conversation.PrimaryContractGroupId).Distinct().Select(x => x.ToString()).ToArray();
+            var documentIds = additionalSources.Select(x => x.DocumentId)
+                .Append(baseResult.Contract!.DocumentId).Distinct().ToArray();
+            ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
+                groupIds, instruction, documentIds, embeddingModel, 8, ct);
+        }
+        else if (additionalSources.Count > 0 && ai is not null)
+        {
+            ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
+                additionalSources.Select(x => x.ContractGroupId.ToString()).Distinct().ToArray(),
+                instruction, additionalSources.Select(x => x.DocumentId).Distinct().ToArray(),
+                embeddingModel, 8, ct);
+        }
+        var baseEvidence = string.Join("\n\n", ragSources.Select(x => x.Text));
+        if (string.IsNullOrWhiteSpace(baseEvidence)) baseEvidence = baseResult.Version?.ExtractedText ?? "";
+        var conflicts = ContractConflictAnalyzer.Analyze(instruction, sourceContract, changes,
+            baseEvidence, approvedClauses.Select(x => x.Text).ToArray());
+        foreach (var conflict in conflicts.Where(x => x.IsBlocking))
+            AddClarification(conversation, $"conflict-{conflict.Code}",
+                $"{conflict.Message} {conflict.Suggestion}");
+        if (conflicts.Any(x => x.IsBlocking)) return;
+        var sourceTitles = additionalSources.ToDictionary(x => x.DocumentId, x => x.DocumentTitle);
+        if (baseResult.Contract is not null) sourceTitles[baseResult.Contract.DocumentId] =
+            baseResult.Contract.Document?.Title ?? "";
         var sourceSnapshot = JsonSerializer.Serialize(new
         {
             Mode = baseResult.Contract is null ? "greenfield" : "renewal",
@@ -159,6 +214,13 @@ public sealed class StartContractConversationHandler(
             TemplateContractYear = template.ContractYear,
             PrimaryContractGroupId = conversation.PrimaryContractGroupId,
             ApprovedClauseCatalog = approvedClauses,
+            ExplicitAdditionalSources = additionalSources,
+            RagCitations = ragSources.Select(x => new
+            {
+                x.Citation.DocumentId, x.Citation.VersionId, x.Citation.Page,
+                x.Citation.Section, x.Score, Evidence = x.Text,
+                DocumentTitle = sourceTitles.GetValueOrDefault(x.Citation.DocumentId, "")
+            }),
             DirectUserClause = changes.NewClause,
             Rule = "highest-final-persian-year-and-version"
         });
@@ -173,8 +235,10 @@ public sealed class StartContractConversationHandler(
             StartDate = new { Before = sourceContract.StartDate, After = changes.StartDate },
             EndDate = new { Before = sourceContract.EndDate, After = changes.EndDate },
             Amount = new { Before = sourceContract.Amount, After = changes.CalculatedAmount },
-            AddedClause = changes.NewClause
+            AddedClause = changes.NewClause,
+            Conflicts = conflicts
         });
+        var conflictJson = JsonSerializer.Serialize(conflicts);
         var templateFile = await files.DownloadAsync(template.FileId,
             CreateContractTemplateHandler.Bearer(context), ct);
         var partyName = await db.OrganizationParties.Where(x => x.Id == conversation.OrganizationPartyId)
@@ -193,9 +257,21 @@ public sealed class StartContractConversationHandler(
         };
         var generated = await generator.GenerateAsync(templateFile.Content, values, ct);
         var version = conversation.Drafts.Count == 0 ? 1 : conversation.Drafts.Max(x => x.VersionNumber) + 1;
+        var pdf = await generator.GeneratePdfAsync(new ContractPdfRequest(
+            conversation.Id, version, conversation.Subject, partyName,
+            values["startDate"], values["endDate"], values["amount"], values["currency"],
+            changes.NewClause, values["approvedClauses"], diff,
+            ragSources.Select(x => new ContractPdfCitation(
+                sourceTitles.GetValueOrDefault(x.Citation.DocumentId, ""),
+                x.Citation.DocumentId, x.Citation.VersionId, x.Citation.Page,
+                x.Citation.Section, x.Text)).ToList(), DateTime.UtcNow), ct);
         await using var stream = new MemoryStream(generated);
         var fileId = await files.UploadAsync(stream, $"contract-draft-{conversation.Id:N}-v{version}.docx",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            CreateContractTemplateHandler.Bearer(context), ct);
+        await using var pdfStream = new MemoryStream(pdf);
+        var pdfFileId = await files.UploadAsync(pdfStream,
+            $"contract-draft-{conversation.Id:N}-v{version}.pdf", "application/pdf",
             CreateContractTemplateHandler.Bearer(context), ct);
         var draft = new ContractDraftVersion
         {
@@ -204,7 +280,9 @@ public sealed class StartContractConversationHandler(
             BaseDocumentVersionId = baseResult.Version?.Id, ContractTemplateId = template.Id,
             InstructionSnapshot = instruction, ChangeSetJson = JsonSerializer.Serialize(changes),
             SourceSnapshotJson = sourceSnapshot, CalculationSnapshotJson = calculations,
-            DiffJson = diff, GeneratedDocxFileId = fileId, CreatedByUserId = tenant.UserId
+            DiffJson = diff, ConflictAnalysisJson = conflictJson,
+            GeneratedDocxFileId = fileId, GeneratedPdfFileId = pdfFileId,
+            CreatedByUserId = tenant.UserId
         };
         conversation.Drafts.Add(draft);
         db.ContractDraftVersions.Add(draft);
@@ -242,6 +320,18 @@ public sealed class StartContractConversationHandler(
     private async Task<BaseResolution> ResolveBaseAsync(
         ContractConversation conversation, string instruction, CancellationToken ct)
     {
+        if (conversation.BaseContractId.HasValue && conversation.BaseDocumentVersionId.HasValue)
+        {
+            var frozen = await db.Contracts.AsNoTracking().Include(x => x.Document)
+                .ThenInclude(x => x!.Versions).Include(x => x.Parties)
+                .Include(x => x.GroupMemberships).SingleOrDefaultAsync(x =>
+                    x.Id == conversation.BaseContractId && x.OrganizationId == tenant.OrganizationId, ct);
+            var version = frozen?.Document?.Versions.SingleOrDefault(x =>
+                x.Id == conversation.BaseDocumentVersionId
+                && x.LifecycleStatus == DocumentVersionLifecycleStatus.Final && x.IsRagPublished);
+            return frozen is null || version is null ? new(null, null, false)
+                : new(frozen, version, false);
+        }
         var candidates = await db.Contracts.AsNoTracking()
             .Include(x => x.Document).ThenInclude(x => x!.Versions)
             .Include(x => x.Parties).Include(x => x.GroupMemberships)
@@ -279,7 +369,49 @@ public sealed class StartContractConversationHandler(
         return DateOnly.FromDateTime(value);
     }
 
+    private async Task<string> GetEmbeddingModelAsync(CancellationToken ct)
+    {
+        var json = await db.RuntimeSettings.AsNoTracking().Where(x =>
+                x.OrganizationId == tenant.OrganizationId && x.Category == "ai"
+                && x.Key == "embedding.model" && x.IsActive)
+            .Select(x => x.ValueJson).SingleOrDefaultAsync(ct);
+        if (string.IsNullOrWhiteSpace(json)) return "BAAI/bge-m3";
+        using var parsed = JsonDocument.Parse(json);
+        return parsed.RootElement.TryGetProperty("modelId", out var value)
+            ? value.GetString() ?? "BAAI/bge-m3" : "BAAI/bge-m3";
+    }
+
+    private async Task<List<FrozenContractSource>?> FreezeAdditionalSourcesAsync(
+        IReadOnlyCollection<Guid> ids, CancellationToken ct)
+    {
+        var distinct = ids.Where(x => x != Guid.Empty).Distinct().Take(10).ToArray();
+        if (distinct.Length == 0) return [];
+        var contracts = await db.Contracts.AsNoTracking().Include(x => x.Document)
+            .ThenInclude(x => x!.Versions).Include(x => x.Parties)
+            .Include(x => x.GroupMemberships).ThenInclude(x => x.ContractGroup)
+            .Where(x => x.OrganizationId == tenant.OrganizationId && distinct.Contains(x.Id))
+            .ToListAsync(ct);
+        if (contracts.Count != distinct.Length) return null;
+        var result = new List<FrozenContractSource>();
+        foreach (var contract in contracts)
+        {
+            var primary = contract.GroupMemberships.SingleOrDefault(x => x.IsPrimary);
+            var version = contract.Document!.Versions.Where(x =>
+                    x.LifecycleStatus == DocumentVersionLifecycleStatus.Final && x.IsRagPublished)
+                .OrderByDescending(x => x.VersionNumber).FirstOrDefault();
+            if (primary is null || version is null || authorizer is not null &&
+                !await authorizer.CanAccessAsync(DataScopeResourceType.ContractGroup,
+                    primary.ContractGroupId, ct)) return null;
+            result.Add(new(contract.Id, contract.DocumentId, version.Id,
+                primary.ContractGroupId, primary.ContractGroup?.Name ?? "",
+                contract.Document.Title, contract.Subject));
+        }
+        return result;
+    }
+
     private sealed record BaseResolution(Contract? Contract, DocumentVersion? Version, bool Ambiguous);
+    private sealed record FrozenContractSource(Guid ContractId, Guid DocumentId,
+        Guid VersionId, Guid ContractGroupId, string GroupName, string DocumentTitle, string Subject);
 }
 
 public sealed class GetContractConversationHandler(NegareshDbContext db, ICurrentTenant tenant)
@@ -297,6 +429,62 @@ public sealed class GetContractConversationHandler(NegareshDbContext db, ICurren
             .Select(x => new ContractConversationListItemResponse(x.Id, x.Title,
                 x.OrganizationParty!.Name, x.PrimaryContractGroup!.Name,
                 x.RequestedContractYear, x.Status, x.Drafts.Count, x.UpdatedAtUtc)).ToListAsync(ct);
+}
+
+public sealed class DownloadContractDraftHandler(
+    NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
+    IHttpContextAccessor context) : IRequestHandler<DownloadContractDraftQuery, ContractDraftDownload?>
+{
+    public async Task<ContractDraftDownload?> Handle(DownloadContractDraftQuery request, CancellationToken ct)
+    {
+        var format = request.Format.Trim().ToLowerInvariant();
+        if (format is not ("docx" or "pdf")) return null;
+        var row = await db.ContractDraftVersions.AsNoTracking().Where(x =>
+                x.Id == request.DraftId && x.ConversationId == request.ConversationId
+                && x.Conversation!.OrganizationId == tenant.OrganizationId)
+            .Select(x => new { x.GeneratedDocxFileId, x.GeneratedPdfFileId, x.VersionNumber })
+            .SingleOrDefaultAsync(ct);
+        var fileId = format == "pdf" ? row?.GeneratedPdfFileId : row?.GeneratedDocxFileId;
+        if (string.IsNullOrWhiteSpace(fileId)) return null;
+        var downloaded = await files.DownloadAsync(fileId,
+            CreateContractTemplateHandler.Bearer(context), ct);
+        var contentType = format == "pdf" ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        return new(downloaded.Content, $"contract-draft-v{row!.VersionNumber}.{format}", contentType);
+    }
+}
+
+public sealed class ListContractSourceOptionsHandler(
+    NegareshDbContext db, ICurrentTenant tenant, IDataScopeAuthorizer? authorizer = null)
+    : IRequestHandler<ListContractSourceOptionsQuery, IReadOnlyList<ContractSourceOptionResponse>>
+{
+    public async Task<IReadOnlyList<ContractSourceOptionResponse>> Handle(
+        ListContractSourceOptionsQuery request, CancellationToken ct)
+    {
+        var allowed = authorizer is null ? null : await authorizer.GetAllowedResourceIdsAsync(
+            DataScopeResourceType.ContractGroup, ct);
+        var query = db.Contracts.AsNoTracking().Where(x => x.OrganizationId == tenant.OrganizationId
+            && x.PrimaryContractGroupId.HasValue
+            && x.Document!.Versions.Any(v => v.LifecycleStatus == DocumentVersionLifecycleStatus.Final
+                && v.IsRagPublished));
+        if (allowed is not null) query = query.Where(x =>
+            x.PrimaryContractGroupId.HasValue && allowed.Contains(x.PrimaryContractGroupId.Value));
+        var rows = await query.OrderByDescending(x => x.UpdatedAtUtc).Take(100).Select(x => new
+        {
+            x.Id, x.DocumentId, x.Subject, x.ContractNumber, x.StartDate,
+            PartyName = x.Parties.OrderBy(p => p.Role).Select(p => p.Name).FirstOrDefault() ?? "",
+            GroupId = x.PrimaryContractGroupId!.Value,
+            GroupName = x.PrimaryContractGroup!.Name,
+            FinalVersionId = x.Document!.Versions.Where(v =>
+                    v.LifecycleStatus == DocumentVersionLifecycleStatus.Final && v.IsRagPublished)
+                .OrderByDescending(v => v.VersionNumber).Select(v => v.Id).First()
+        }).ToListAsync(ct);
+        var calendar = new PersianCalendar();
+        return rows.Select(x => new ContractSourceOptionResponse(x.Id, x.DocumentId, x.Subject,
+            x.ContractNumber, x.PartyName, x.GroupId, x.GroupName,
+            x.StartDate.HasValue ? calendar.GetYear(x.StartDate.Value.ToDateTime(TimeOnly.MinValue)) : null,
+            x.FinalVersionId)).ToList();
+    }
 }
 
 public sealed class ReviewContractDraftHandler(
@@ -402,16 +590,29 @@ public sealed class ReviewContractDraftHandler(
             ManagerReviewNote = draft.ManagerReviewNote,
             ChangeSummary = $"نسخه نهایی تولید هوشمند - گفت‌وگو {conversation.Id}"
         };
+        var bearer = CreateContractTemplateHandler.Bearer(context);
+        var docxFile = await files.DownloadAsync(draft.GeneratedDocxFileId, bearer, ct);
+        version.Files.Add(ToVersionFile(version.Id, draft.GeneratedDocxFileId, docxFile, 1));
+        if (!string.IsNullOrWhiteSpace(draft.GeneratedPdfFileId))
+        {
+            var pdfFile = await files.DownloadAsync(draft.GeneratedPdfFileId, bearer, ct);
+            version.Files.Add(ToVersionFile(version.Id, draft.GeneratedPdfFileId, pdfFile, 2));
+        }
         db.DocumentVersions.Add(version);
         await db.SaveChangesAsync(ct);
         draft.FinalDocumentVersionId = version.Id;
         if (ai is not null)
         {
-            var file = await files.DownloadAsync(draft.GeneratedDocxFileId,
-                CreateContractTemplateHandler.Bearer(context), ct);
             var model = await GetEmbeddingModelAsync(ct);
+            foreach (var previous in previousFinals.Where(x => x.IsRagPublished))
+            {
+                await ai.DeleteVersionAsync(tenant.OrganizationId, contract.DocumentId,
+                    previous.Id, model, ct);
+                previous.IsRagPublished = false;
+                previous.RagPublishedAtUtc = null;
+            }
             var processed = await ai.ProcessAsync(tenant.OrganizationId, contract.DocumentId, version.Id,
-                file.FileName, file.Content, model, "group", [],
+                docxFile.FileName, docxFile.Content, model, "group", [],
                 [conversation.PrimaryContractGroupId.ToString()], false, ct);
             version.ExtractedText = processed.ExtractedText;
             if (!string.IsNullOrWhiteSpace(processed.ExtractedText))
@@ -424,6 +625,14 @@ public sealed class ReviewContractDraftHandler(
             }
         }
     }
+
+    private static DocumentVersionFile ToVersionFile(Guid versionId, string fileId,
+        FileManagerDownload file, int order) => new()
+    {
+        DocumentVersionId = versionId, FileId = fileId, FileName = file.FileName,
+        ContentType = file.ContentType, SortOrder = order,
+        Sha256 = Convert.ToHexString(SHA256.HashData(file.Content)), Size = file.Content.LongLength
+    };
 
     private async Task<string> GetEmbeddingModelAsync(CancellationToken ct)
     {
@@ -480,7 +689,8 @@ internal static class ContractConversationMapper
             x.Drafts.OrderByDescending(d => d.VersionNumber).Select(d => new ContractDraftVersionResponse(
                 d.Id, d.VersionNumber, d.BaseContractId, d.BaseDocumentVersionId, d.ContractTemplateId,
                 d.InstructionSnapshot, d.ChangeSetJson, d.SourceSnapshotJson, d.CalculationSnapshotJson,
-                d.DiffJson, d.GeneratedDocxFileId, d.GeneratedPdfFileId, d.ApprovalStatus,
+                d.DiffJson, string.IsNullOrWhiteSpace(d.ConflictAnalysisJson) ? "[]" : d.ConflictAnalysisJson,
+                d.GeneratedDocxFileId, d.GeneratedPdfFileId, d.ApprovalStatus,
                 d.FinalDocumentVersionId, d.CreatedAtUtc)).ToList(), x.UpdatedAtUtc);
     }
 }

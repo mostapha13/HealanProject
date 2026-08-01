@@ -19,28 +19,39 @@ public static partial class ContractChangeSetParser
             try { return PersianDate.ParseDateOnly(match.Value); }
             catch (FormatException) { return (DateOnly?)null; }
         }).Where(value => value.HasValue).Select(value => value!.Value).ToList();
-        var percentMatch = PercentRegex().Match(normalized);
-        var amountMatch = AmountRegex().Match(normalized);
-        decimal? percent = percentMatch.Success
+        var percentMatch = PercentRegex().Matches(normalized).LastOrDefault();
+        var amountMatch = AmountRegex().Matches(normalized).LastOrDefault();
+        decimal? percent = percentMatch is { Success: true }
             ? decimal.Parse(percentMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
-        decimal? explicitAmount = amountMatch.Success
+        decimal? explicitAmount = amountMatch is { Success: true }
             ? decimal.Parse(amountMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         decimal? percentAmount = percent.HasValue && contract.Amount.HasValue
             ? decimal.Round(contract.Amount.Value * (1 + percent.Value / 100m), 2) : null;
         decimal? calculated = explicitAmount ?? percentAmount;
-        var clause = ClauseRegex().Match(instruction);
+        var clause = ClauseRegex().Matches(instruction).LastOrDefault();
+        var broadClause = BroadClauseRegex().Matches(instruction).LastOrDefault();
         var questions = new List<string>();
         if (dates.Count < 2 && (!contract.StartDate.HasValue || !contract.EndDate.HasValue))
             questions.Add("تاریخ شروع و پایان قرارداد را مشخص کنید.");
         if (!calculated.HasValue)
             questions.Add("مبلغ نهایی یا درصد تغییر مبلغ را مشخص کنید.");
-        if (explicitAmount.HasValue && percentAmount.HasValue &&
+        var explicitWins = normalized.Contains("مبلغ قطعی", StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains("مبلغ صریح", StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains("مبلغ اعلام", StringComparison.OrdinalIgnoreCase);
+        var percentWins = normalized.Contains("درصد مبنا", StringComparison.OrdinalIgnoreCase)
+            || normalized.Contains("درصد اعمال", StringComparison.OrdinalIgnoreCase);
+        if (percentWins) calculated = percentAmount;
+        else if (explicitWins) calculated = explicitAmount;
+        if (explicitAmount.HasValue && percentAmount.HasValue && !explicitWins && !percentWins &&
             Math.Abs(explicitAmount.Value - percentAmount.Value) > 1m)
             questions.Add($"مبلغ صریح ({explicitAmount:N0}) با مبلغ حاصل از درصد ({percentAmount:N0}) متفاوت است؛ کدام مبنا اعمال شود؟");
-        if (string.IsNullOrWhiteSpace(clause.Groups[1].Value) && instruction.Contains("بند"))
+        var clauseText = clause is { Success: true } ? clause.Groups[1].Value.Trim()
+            : broadClause is { Success: true } ? broadClause.Groups[1].Value.Trim() : null;
+        if (string.IsNullOrWhiteSpace(clauseText) && instruction.Contains("بند"))
             questions.Add("متن یا موضوع دقیق بند جدید را مشخص کنید.");
-        return new(dates.ElementAtOrDefault(0), dates.ElementAtOrDefault(1), explicitAmount,
-            percent, calculated, clause.Success ? clause.Groups[1].Value.Trim() : null, questions);
+        var selectedDates = dates.Count >= 2 ? dates.TakeLast(2).ToArray() : dates.ToArray();
+        return new(selectedDates.ElementAtOrDefault(0), selectedDates.ElementAtOrDefault(1), explicitAmount,
+            percent, calculated, clauseText, questions);
     }
 
     private static string ToLatinDigits(string value) => value
@@ -58,4 +69,6 @@ public static partial class ContractChangeSetParser
     private static partial Regex AmountRegex();
     [GeneratedRegex(@"بند\s+(.+?)(?:\s+را\s+)?(?:اضافه|الحاق)(?:\s+کن|\s+شود|$)")]
     private static partial Regex ClauseRegex();
+    [GeneratedRegex(@"بند\s+(.{8,}?)(?=(?:\n|$))")]
+    private static partial Regex BroadClauseRegex();
 }

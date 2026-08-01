@@ -157,5 +157,10 @@ public sealed class DocumentIngestionLifecycleTests
         public Task DeleteVersionAsync(Guid organizationId, Guid documentId, Guid versionId,
             string embeddingModel, CancellationToken cancellationToken)
         { DeleteCount++; return Task.CompletedTask; }
+        public Task<IReadOnlyList<AiRagSearchResult>> SearchAsync(Guid organizationId,
+            string userId, IReadOnlyCollection<string> groupIds, string query,
+            IReadOnlyCollection<Guid> documentIds, string embeddingModel, int limit,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<AiRagSearchResult>>([]);
     }
 }

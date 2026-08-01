@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NegareshAI.Api.Data;
 
@@ -11,9 +12,11 @@ using NegareshAI.Api.Data;
 namespace NegareshAI.Api.Data.Migrations
 {
     [DbContext(typeof(NegareshDbContext))]
-    partial class NegareshDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801200948_M4ConflictAnalysisAndPdf")]
+    partial class M4ConflictAnalysisAndPdf
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -590,14 +593,7 @@ namespace NegareshAI.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AdditionalSourceSnapshotJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("BaseContractId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("BaseDocumentVersionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAtUtc")
@@ -645,8 +641,6 @@ namespace NegareshAI.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BaseContractId");
-
-                    b.HasIndex("BaseDocumentVersionId");
 
                     b.HasIndex("OrganizationPartyId");
 
@@ -2316,11 +2310,6 @@ namespace NegareshAI.Api.Data.Migrations
                         .HasForeignKey("BaseContractId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("NegareshAI.Api.Data.DocumentVersion", "BaseDocumentVersion")
-                        .WithMany()
-                        .HasForeignKey("BaseDocumentVersionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("NegareshAI.Api.Data.OrganizationParty", "OrganizationParty")
                         .WithMany()
                         .HasForeignKey("OrganizationPartyId")
@@ -2334,8 +2323,6 @@ namespace NegareshAI.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("BaseContract");
-
-                    b.Navigation("BaseDocumentVersion");
 
                     b.Navigation("OrganizationParty");
 

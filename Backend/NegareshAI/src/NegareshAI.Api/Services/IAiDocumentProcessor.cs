@@ -27,6 +27,11 @@ public interface IAiDocumentProcessor
     Task DeleteVersionAsync(
         Guid organizationId, Guid documentId, Guid versionId,
         string embeddingModel, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AiRagSearchResult>> SearchAsync(
+        Guid organizationId, string userId, IReadOnlyCollection<string> groupIds,
+        string query, IReadOnlyCollection<Guid> documentIds, string embeddingModel,
+        int limit, CancellationToken cancellationToken);
 }
 
 public sealed record AiProcessingResult(
@@ -36,6 +41,8 @@ public sealed record AiProcessingResult(
     int ChunkCount,
     int OcrPageCount,
     string? ExtractedText);
+public sealed record AiRagCitation(Guid DocumentId, Guid VersionId, int Page, string? Section);
+public sealed record AiRagSearchResult(string Text, double Score, AiRagCitation Citation);
 
 public sealed class AiDocumentProcessor(HttpClient httpClient) : IAiDocumentProcessor
 {
@@ -100,5 +107,21 @@ public sealed class AiDocumentProcessor(HttpClient httpClient) : IAiDocumentProc
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<IReadOnlyList<AiRagSearchResult>> SearchAsync(
+        Guid organizationId, string userId, IReadOnlyCollection<string> groupIds,
+        string query, IReadOnlyCollection<Guid> documentIds, string embeddingModel,
+        int limit, CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.PostAsJsonAsync("rag/search", new
+        {
+            organizationId, userId, groupIds, query, documentIds, embeddingModel, limit
+        }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<SearchResponse>(
+            cancellationToken: cancellationToken);
+        return result?.Results ?? [];
+    }
+
     private sealed record IndexResult(int Indexed);
+    private sealed record SearchResponse(IReadOnlyList<AiRagSearchResult> Results, string EmbeddingModel);
 }

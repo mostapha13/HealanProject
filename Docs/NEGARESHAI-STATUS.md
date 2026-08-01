@@ -214,7 +214,7 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
   were assembled into the existing project images through disposable staging
   containers; all three recreated services are healthy and volumes were kept.
 
-### M4 versioned contract conversation checkpoint — 2026-08-01
+### M4 versioned contract conversation completion — 2026-08-01
 
 - Added tenant-owned persistent conversations, ordered user/assistant/system
   messages, clarification records and immutable draft versions. Corrections
@@ -247,9 +247,26 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
 - Validation: API build has zero warnings; tests pass 41/41; Next.js production
   build passes with 24 routes; IdentityServer build passes with only existing
   shared-project warnings.
-- Remaining before M4 acceptance is closed: source-backed PDF generation and
-  preview, richer clause/date/termination/obligation conflict analysis, and a
-  seeded end-to-end authenticated Fasa/Omran-Machine browser acceptance run.
+- Renewal generation now searches only frozen, published `Final` sources and
+  persists document/version/page/section/evidence citations. Cross-group RAG
+  sources are impossible unless explicitly selected, published and allowed by
+  ContractGroup Data Scope; their exact versions are frozen for the conversation.
+- Conflict analysis covers date order/duration, amount/percentage choice,
+  dispute resolution, termination, obligation and approved-catalog differences.
+  Blocking conflicts require an explicit user answer before draft generation.
+- Both DOCX and source-backed Persian PDF are generated, stored privately in
+  FileManager, downloadable through an authorized API and attached to the final
+  document version. The PDF contains contract values, approved/direct clauses,
+  structured changes and source citations.
+- Finalization deletes vectors for the superseded final version before indexing
+  the new manager-approved version. No requester/expert-stage draft is indexed.
+- Migrations `M4ConflictAnalysisAndPdf` and `M4FrozenConversationSources` are
+  applied to local SQL. Runtime DOCX and PDF endpoints return HTTP 200 and a
+  valid `%PDF` payload; API/Web/AI are healthy.
+- Final validation: API tests pass 44/44, AI contract/RAG tests pass 8/8,
+  Next.js production build passes with 24 routes, and the Fasa renewal,
+  Omran Machine greenfield, legal-conflict and explicit cross-group scenarios pass.
+- **M4 acceptance is complete.**
 
 ### P4 implementation checkpoint
 
@@ -663,13 +680,11 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Close M4 with source-backed PDF generation/preview and structured legal
-   conflict analysis for clause, date, amount, obligation, termination and
-   dispute-resolution conflicts.
-2. Seed and execute the authenticated Fasa renewal and Omran Machine
-   greenfield acceptance scenarios through FileManager, AI, Identity and RAG.
-3. Start M5 intelligent document conformity: frozen reference snapshots,
+1. Start M5 intelligent document conformity: frozen reference snapshots,
    weighted/critical scoring, prioritized golden documents and citations.
+2. Implement expert conflict decisions and the separate comparison approval
+   versus manager final/RAG publication permissions.
+3. Execute the approved steel prospectus conformity acceptance scenario.
 
 ## Session log
 

@@ -148,6 +148,9 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<ContractConversation>()
             .HasOne(x => x.BaseContract).WithMany()
             .HasForeignKey(x => x.BaseContractId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractConversation>()
+            .HasOne(x => x.BaseDocumentVersion).WithMany()
+            .HasForeignKey(x => x.BaseDocumentVersionId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ContractConversationMessage>()
             .HasIndex(x => new { x.ConversationId, x.Sequence }).IsUnique();
         modelBuilder.Entity<ContractConversationMessage>()

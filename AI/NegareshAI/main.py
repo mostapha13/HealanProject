@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.responses import Response
 from io import BytesIO
 from pypdf import PdfReader
@@ -314,7 +314,7 @@ async def process_document(payload: PipelineRequest):
         raise HTTPException(422, f"Document processing failed: {exc}") from exc
 
 @app.post("/contract/generate")
-async def generate_contract(file: UploadFile = File(...), values: str = "{}"):
+async def generate_contract(file: UploadFile = File(...), values: str = Form("{}")):
     import json
     try:
         replacements = json.loads(values)
@@ -341,6 +341,94 @@ async def generate_contract(file: UploadFile = File(...), values: str = "{}"):
         return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": "attachment; filename=generated-contract.docx"})
     except Exception as exc:
         raise HTTPException(422, f"Contract generation failed: {exc}") from exc
+
+def _contract_pdf(payload: dict) -> bytes:
+    from arabic_reshaper import reshape
+    from bidi.algorithm import get_display
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_RIGHT
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from xml.sax.saxutils import escape
+
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    pdfmetrics.registerFont(TTFont("ContractDejaVu", font_path))
+    def fa(value):
+        return escape(get_display(reshape(_report_text(value))))
+    output = BytesIO()
+    document = SimpleDocTemplate(output, pagesize=A4, rightMargin=18*mm,
+        leftMargin=18*mm, topMargin=17*mm, bottomMargin=18*mm,
+        title="NegareshAI Contract Draft")
+    base = getSampleStyleSheet()
+    body = ParagraphStyle("ContractBody", parent=base["BodyText"],
+        fontName="ContractDejaVu", fontSize=9, leading=16,
+        alignment=TA_RIGHT, spaceAfter=6)
+    title = ParagraphStyle("ContractTitle", parent=body, fontSize=17,
+        leading=25, textColor=colors.HexColor("#0B2545"), spaceAfter=10)
+    heading = ParagraphStyle("ContractHeading", parent=body, fontSize=12,
+        leading=19, textColor=colors.HexColor("#2E5AAC"), spaceBefore=9,
+        spaceAfter=6)
+    story = [Paragraph(fa("پیش‌نویس هوشمند قرارداد"), title),
+        Paragraph(fa(payload.get("subject")), heading)]
+    metadata = [
+        ("طرف قرارداد", payload.get("partyName")),
+        ("تاریخ شروع", payload.get("startDate")),
+        ("تاریخ پایان", payload.get("endDate")),
+        ("مبلغ", f"{_report_text(payload.get('amount'))} {_report_text(payload.get('currency'))}"),
+        ("نسخه پیش‌نویس", payload.get("draftVersion")),
+        ("شناسه گفت‌وگو", payload.get("conversationId")),
+    ]
+    rows = [[Paragraph(fa(label), body), Paragraph(fa(value), body)] for label, value in metadata]
+    table = Table(rows, colWidths=[42*mm, 126*mm])
+    table.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), .35, colors.HexColor("#D9DEE7")),
+        ("BACKGROUND", (0,0), (0,-1), colors.HexColor("#F2F4F7")),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("RIGHTPADDING", (0,0), (-1,-1), 7),
+        ("TOPPADDING", (0,0), (-1,-1), 5),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+    ]))
+    story.extend([table, Spacer(1, 8)])
+    approved = _report_text(payload.get("approvedClauses"))
+    direct = _report_text(payload.get("newClause"))
+    if approved:
+        story.extend([Paragraph(fa("بندهای مصوب گروه قرارداد"), heading),
+            Paragraph(fa(approved).replace("\n", "<br/>"), body)])
+    if direct:
+        story.extend([Paragraph(fa("بند ناشی از دستور مستقیم کاربر"), heading),
+            Paragraph(fa(direct).replace("\n", "<br/>"), body)])
+    story.append(Paragraph(fa("منابع و استنادها"), heading))
+    citations = payload.get("citations") or []
+    if not citations:
+        story.append(Paragraph(fa("این پیش‌نویس منبع بازیابی‌شده‌ای ندارد و بر مبنای قالب و پاسخ‌های کاربر تولید شده است."), body))
+    for index, citation in enumerate(citations, start=1):
+        label = (f"{index}. {_report_text(citation.get('documentTitle'))}، "
+                 f"صفحه {_report_text(citation.get('page'))}، "
+                 f"بخش {_report_text(citation.get('section'))}")
+        story.append(Paragraph(fa(label), body))
+        story.append(Paragraph(fa(citation.get("evidence")).replace("\n", "<br/>"), body))
+    story.extend([Paragraph(fa("خلاصه تغییرات ساختاریافته"), heading),
+        Paragraph(fa(payload.get("diffJson")), body)])
+    def footer(canvas, doc):
+        canvas.saveState(); canvas.setFont("ContractDejaVu", 7)
+        canvas.setFillColor(colors.HexColor("#6B7280"))
+        canvas.drawCentredString(A4[0]/2, 9*mm,
+            get_display(reshape(f"نسخه {payload.get('draftVersion')} | صفحه {doc.page}")))
+        canvas.restoreState()
+    document.build(story, onFirstPage=footer, onLaterPages=footer)
+    return output.getvalue()
+
+@app.post("/contract/pdf")
+async def generate_contract_pdf(payload: dict):
+    try:
+        return Response(_contract_pdf(payload), media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=contract-draft.pdf"})
+    except Exception as exc:
+        raise HTTPException(422, f"Contract PDF generation failed: {exc}") from exc
 
 @app.post("/contract/compare")
 async def compare_contracts(original: UploadFile = File(...), revised: UploadFile = File(...)):

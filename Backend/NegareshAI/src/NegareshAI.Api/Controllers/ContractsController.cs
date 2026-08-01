@@ -132,6 +132,11 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<ContractConversationListItemResponse>>> Conversations(
         CancellationToken ct) => Ok(await sender.Send(new ListContractConversationsQuery(), ct));
 
+    [HttpGet("conversations/source-options")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<IReadOnlyList<ContractSourceOptionResponse>>> SourceOptions(
+        CancellationToken ct) => Ok(await sender.Send(new ListContractSourceOptionsQuery(), ct));
+
     [HttpPost("conversations")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
     public async Task<ActionResult<ContractConversationResponse>> StartConversation(
@@ -147,6 +152,16 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetContractConversationQuery(id), ct);
         return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("conversations/{conversationId:guid}/drafts/{draftId:guid}/download/{format}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<IActionResult> DownloadDraft(
+        Guid conversationId, Guid draftId, string format, CancellationToken ct)
+    {
+        var result = await sender.Send(new DownloadContractDraftQuery(
+            conversationId, draftId, format), ct);
+        return result is null ? NotFound() : File(result.Content, result.ContentType, result.FileName);
     }
 
     [HttpPost("conversations/{id:guid}/messages")]

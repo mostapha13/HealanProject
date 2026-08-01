@@ -505,7 +505,7 @@ export type ContractClarification = {id:string;key:string;question:string;answer
 export type ContractDraftVersion = {
   id:string;versionNumber:number;baseContractId?:string;baseDocumentVersionId?:string;
   contractTemplateId:string;instructionSnapshot:string;changeSetJson:string;sourceSnapshotJson:string;
-  calculationSnapshotJson:string;diffJson:string;generatedDocxFileId:string;generatedPdfFileId?:string;
+  calculationSnapshotJson:string;diffJson:string;conflictAnalysisJson:string;generatedDocxFileId:string;generatedPdfFileId?:string;
   approvalStatus:number;finalDocumentVersionId?:string;createdAtUtc:string;
 };
 export type ContractConversation = {
@@ -517,12 +517,15 @@ export type ContractConversation = {
 export async function listContractConversations():Promise<ContractConversationListItem[]> {
   const r=await authorizedFetch("/api/contracts/conversations");if(!r.ok)throw new Error("دریافت گفت‌وگوهای قرارداد انجام نشد.");return r.json();
 }
-export async function startContractConversation(input:{organizationPartyId:string;primaryContractGroupId:string;contractYear:number;subject:string;message:string}):Promise<ContractConversation>{
+export async function startContractConversation(input:{organizationPartyId:string;primaryContractGroupId:string;contractYear:number;subject:string;message:string;additionalSourceContractIds?:string[]}):Promise<ContractConversation>{
   const r=await authorizedFetch("/api/contracts/conversations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error(await r.text()||"شروع گفت‌وگو انجام نشد.");return r.json();
 }
 export async function getContractConversation(id:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${id}`);if(!r.ok)throw new Error("گفت‌وگو یافت نشد.");return r.json();}
+export type ContractSourceOption={contractId:string;documentId:string;subject:string;contractNumber?:string;partyName:string;primaryContractGroupId:string;groupName:string;contractYear?:number;finalVersionId:string};
+export async function listContractSourceOptions():Promise<ContractSourceOption[]>{const r=await authorizedFetch("/api/contracts/conversations/source-options");if(!r.ok)throw new Error("دریافت منابع قابل انتخاب انجام نشد.");return r.json();}
 export async function sendContractConversationMessage(id:string,message:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${id}/messages`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});if(!r.ok)throw new Error(await r.text()||"ارسال پیام انجام نشد.");return r.json();}
 export async function reviewContractDraft(conversationId:string,draftId:string,stage:"requester"|"expert"|"manager",approved:boolean,note?:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/${stage}-review`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved,note})});if(!r.ok)throw new Error(await r.text()||"ثبت تصمیم انجام نشد.");return r.json();}
+export async function downloadContractDraftFile(conversationId:string,draftId:string,format:"docx"|"pdf"):Promise<Blob>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/download/${format}`);if(!r.ok)throw new Error("دریافت خروجی پیش‌نویس انجام نشد.");return r.blob();}
 export async function updateDocumentGroup(id:string,input:{name:string;description?:string;isActive:boolean;documentIds:string[]}){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش گروه سند انجام نشد.");return r.json() as Promise<DocumentGroup>;}
 export async function deleteDocumentGroup(id:string){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف گروه سند انجام نشد.");}
 export async function setRuleSetActive(id:string,isActive:boolean){const r=await authorizedFetch(`/api/knowledge/rule-sets/${id}/active?isActive=${isActive}`,{method:"PUT"});if(!r.ok)throw new Error("تغییر وضعیت RuleSet انجام نشد.");}

@@ -31,7 +31,7 @@ public sealed record ReviewContractGenerationRequest(bool Approved, string? Comm
 
 public sealed record StartContractConversationRequest(
     Guid OrganizationPartyId, Guid PrimaryContractGroupId, int ContractYear,
-    string Subject, string Message);
+    string Subject, string Message, IReadOnlyList<Guid>? AdditionalSourceContractIds = null);
 public sealed record SendContractConversationMessageRequest(string Message);
 public sealed record ReviewContractDraftRequest(bool Approved, string? Note);
 public sealed record ContractConversationListItemResponse(
@@ -46,6 +46,7 @@ public sealed record ContractDraftVersionResponse(
     Guid Id, int VersionNumber, Guid? BaseContractId, Guid? BaseDocumentVersionId,
     Guid ContractTemplateId, string InstructionSnapshot, string ChangeSetJson,
     string SourceSnapshotJson, string CalculationSnapshotJson, string DiffJson,
+    string ConflictAnalysisJson,
     string GeneratedDocxFileId, string? GeneratedPdfFileId,
     ContractDraftApprovalStatus ApprovalStatus, Guid? FinalDocumentVersionId,
     DateTime CreatedAtUtc);
@@ -56,3 +57,6 @@ public sealed record ContractConversationResponse(
     IReadOnlyList<ContractConversationMessageResponse> Messages,
     IReadOnlyList<ContractClarificationResponse> Clarifications,
     IReadOnlyList<ContractDraftVersionResponse> Drafts, DateTime UpdatedAtUtc);
+public sealed record ContractSourceOptionResponse(Guid ContractId, Guid DocumentId,
+    string Subject, string? ContractNumber, string PartyName, Guid PrimaryContractGroupId,
+    string GroupName, int? ContractYear, Guid FinalVersionId);

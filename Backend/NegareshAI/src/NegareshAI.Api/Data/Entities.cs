@@ -649,6 +649,8 @@ public sealed class ContractConversation
     public int RequestedContractYear { get; set; }
     public required string Subject { get; set; }
     public Guid? BaseContractId { get; set; }
+    public Guid? BaseDocumentVersionId { get; set; }
+    public required string AdditionalSourceSnapshotJson { get; set; } = "[]";
     public ContractConversationStatus Status { get; set; } = ContractConversationStatus.Active;
     public required string CreatedByUserId { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
@@ -659,6 +661,7 @@ public sealed class ContractConversation
     public OrganizationParty? OrganizationParty { get; set; }
     public ContractGroup? PrimaryContractGroup { get; set; }
     public Contract? BaseContract { get; set; }
+    public DocumentVersion? BaseDocumentVersion { get; set; }
     public List<ContractConversationMessage> Messages { get; set; } = [];
     public List<ContractClarification> Clarifications { get; set; } = [];
     public List<ContractDraftVersion> Drafts { get; set; } = [];
@@ -704,6 +707,7 @@ public sealed class ContractDraftVersion
     public required string SourceSnapshotJson { get; set; }
     public required string CalculationSnapshotJson { get; set; }
     public required string DiffJson { get; set; }
+    public required string ConflictAnalysisJson { get; set; }
     public required string GeneratedDocxFileId { get; set; }
     public string? GeneratedPdfFileId { get; set; }
     public ContractDraftApprovalStatus ApprovalStatus { get; set; } = ContractDraftApprovalStatus.RequesterReview;
