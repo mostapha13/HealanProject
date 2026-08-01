@@ -1,8 +1,9 @@
 # NegareshAI Development Status
 
-Last updated: 2026-08-01
+Last updated: 2026-08-02
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `afb2110` (`feat(negareshai): complete user access management`)
+Last implementation baseline: `375791b6d3b2bd2d4885198245fca46410dd804a`
+(`feat(negareshai): complete M4 contract intelligence`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -23,6 +24,81 @@ When work resumes:
 
 Do not re-audit the whole repository unless this file is missing, inconsistent
 with Git, or the requested work changes scope.
+
+## Authoritative resume checkpoint — 2026-08-02
+
+This section is the first source of truth for the next development session.
+Detailed checkpoints and older session logs below are retained as supporting
+history and must not override this section.
+
+### Completed roadmap stages
+
+- M0/M1 are complete: Identity-based action permissions, users/roles, direct
+  user grant/deny, role permissions, contract/document group Data Scope and
+  the `AdminUser` full-access bootstrap rule are implemented.
+- M2 is complete: independent paginated RTL master-data pages, contract and
+  document groups, criteria catalogs, per-group weighted/critical criteria,
+  prioritized golden documents, versioned/effective contract templates,
+  contract years, multiple contract groups and one primary group are
+  implemented with activation, audit, soft delete and restore.
+- M3 is complete: PDF/DOCX/image ingestion, ordered multi-image pages,
+  extraction/OCR, expert review, manager finalization, immutable version
+  files, SHA-256 metadata and final-only RAG publication are implemented.
+- M4 is complete: persistent multi-turn contract conversations, renewal and
+  greenfield generation, deterministic Persian changes, frozen permitted RAG
+  sources with page/section citations, explicit cross-group selection,
+  structured legal conflict handling, immutable draft versions, PDF/DOCX
+  output and requester -> expert -> manager finalization are implemented.
+
+### M4 acceptance evidence
+
+- Backend regression tests: 44/44 passed.
+- AI contract-generation and RAG security tests: 8/8 passed.
+- Next.js production build passed and generated 24 routes.
+- EF reports no pending model changes. Migrations
+  `M4ConflictAnalysisAndPdf` and `M4FrozenConversationSources` are applied to
+  the active local SQL database.
+- Fasa renewal, Omran Machine greenfield, blocking legal-conflict resolution
+  and explicitly authorized cross-group source scenarios passed.
+- Runtime DOCX and Persian source-backed PDF generation passed; PDF output has
+  a valid `%PDF` signature.
+- Local `negareshai-api`, `negareshai-ai` and `negareshai-web` containers were
+  recreated from the final M4 code and are healthy.
+- Complete M4 implementation is pushed to `origin/codex/negareshai-foundation`
+  at commit `375791b6d3b2bd2d4885198245fca46410dd804a`.
+
+### Exact continuation point
+
+The next implementation stage is **M5 — intelligent document conformity**.
+Continue in this order:
+
+1. Freeze the exact comparison reference set and rule/model/prompt snapshots
+   for every run, including multiple prioritized golden document versions.
+2. Calculate weighted scores from the organization criterion catalog and the
+   group-specific weight/order/critical overrides; a failed critical criterion
+   must be reported independently from the numeric score.
+3. Produce evidence-backed findings with document/version/page/section
+   citations and the approved steel-prospectus acceptance scenario.
+4. Implement expert conflict decisions and keep comparison approval separate
+   from manager finalization/RAG publication permissions.
+5. Complete independent professional RTL history/review/report pages, then run
+   migration, Backend/AI/Frontend tests and authenticated Docker acceptance.
+
+Before starting M5, read `Docs/NEGARESHAI-PRODUCT-SPEC.md` and the M5 section
+of `Docs/NEGARESHAI-ROADMAP.md`. Do not redesign or repeat M0-M4 unless a
+regression is proven.
+
+### Working-tree hygiene
+
+At this checkpoint the tracked working tree is clean. These pre-existing local
+untracked paths are unrelated to M4 and were intentionally not committed:
+
+- `Backend/NegareshAI/publish/`
+- `Backend/Share/tests/`
+- root `package-lock.json`
+
+Inspect them separately before any future broad `git add`; never stage them
+implicitly.
 
 ## Non-negotiable product memory — product owner confirmation 2026-07-30
 
