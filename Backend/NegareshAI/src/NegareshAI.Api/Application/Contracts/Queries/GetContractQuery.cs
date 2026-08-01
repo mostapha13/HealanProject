@@ -21,7 +21,9 @@ public sealed class GetContractQueryHandler(
             .Select(item => new ContractDetailResponse(
                 item.Id, item.DocumentId, item.Subject, item.ContractNumber,
                 item.Status, item.StatusDefinitionId, item.StatusDefinition != null ? item.StatusDefinition.Name : null,
-                item.BaseDocumentProfileId, item.Amount, item.Currency, item.StartDate, item.EndDate,
+                item.BaseDocumentProfileId, item.PrimaryContractGroupId,
+                item.GroupMemberships.Select(group => group.ContractGroupId).ToList(),
+                item.Amount, item.Currency, item.StartDate, item.EndDate,
                 item.InternalOwnerUserId,
                 item.Parties.OrderBy(party => party.Role).Select(party =>
                     new ContractPartyResponse(party.Id, party.DirectoryPartyId, party.Role, party.Name,

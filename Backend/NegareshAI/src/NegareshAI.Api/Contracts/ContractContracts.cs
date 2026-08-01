@@ -29,7 +29,9 @@ public sealed record SaveContractRequest(
     string? InternalOwnerUserId,
     IReadOnlyList<ContractPartyRequest> Parties,
     Guid? BaseDocumentProfileId = null,
-    Guid? StatusDefinitionId = null);
+    Guid? StatusDefinitionId = null,
+    IReadOnlyList<Guid>? ContractGroupIds = null,
+    Guid? PrimaryContractGroupId = null);
 
 public sealed record ContractListItemResponse(
     Guid Id,
@@ -61,6 +63,8 @@ public sealed record ContractDetailResponse(
     Guid? StatusDefinitionId,
     string? StatusName,
     Guid? BaseDocumentProfileId,
+    Guid? PrimaryContractGroupId,
+    IReadOnlyList<Guid> ContractGroupIds,
     decimal? Amount,
     string Currency,
     DateOnly? StartDate,

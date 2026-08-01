@@ -12,6 +12,8 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
     public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
     public DbSet<Contract> Contracts => Set<Contract>();
+    public DbSet<ContractGroup> ContractGroups => Set<ContractGroup>();
+    public DbSet<ContractGroupMembership> ContractGroupMemberships => Set<ContractGroupMembership>();
     public DbSet<ContractParty> ContractParties => Set<ContractParty>();
     public DbSet<ContractStatusDefinition> ContractStatusDefinitions => Set<ContractStatusDefinition>();
     public DbSet<ContractBaseDocumentProfile> ContractBaseDocumentProfiles => Set<ContractBaseDocumentProfile>();
@@ -77,6 +79,20 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<Contract>()
             .HasOne(item => item.BaseDocumentProfile).WithMany()
             .HasForeignKey(item => item.BaseDocumentProfileId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Contract>()
+            .HasOne(item => item.PrimaryContractGroup).WithMany()
+            .HasForeignKey(item => item.PrimaryContractGroupId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractGroup>()
+            .HasIndex(item => new { item.OrganizationId, item.Name }).IsUnique();
+        modelBuilder.Entity<ContractGroup>().HasQueryFilter(item => !item.IsDeleted);
+        modelBuilder.Entity<ContractGroupMembership>()
+            .HasIndex(item => new { item.ContractId, item.ContractGroupId }).IsUnique();
+        modelBuilder.Entity<ContractGroupMembership>()
+            .HasOne(item => item.Contract).WithMany(item => item.GroupMemberships)
+            .HasForeignKey(item => item.ContractId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ContractGroupMembership>()
+            .HasOne(item => item.ContractGroup).WithMany(item => item.Memberships)
+            .HasForeignKey(item => item.ContractGroupId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ContractParty>()
             .HasOne(item => item.DirectoryParty).WithMany()
             .HasForeignKey(item => item.DirectoryPartyId).OnDelete(DeleteBehavior.Restrict);

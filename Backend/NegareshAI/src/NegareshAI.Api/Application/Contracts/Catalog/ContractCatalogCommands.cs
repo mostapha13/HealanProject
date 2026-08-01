@@ -35,6 +35,11 @@ public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTen
                     x.Id, x.Name, x.NationalIdentifier, x.RepresentativeName,
                     x.ContactInfo, x.IsActive))
                 .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
+            "groups" => await db.ContractGroups.AsNoTracking()
+                .Where(x => x.OrganizationId == tenant.OrganizationId)
+                .OrderBy(x => x.Name).Select(x => new ContractGroupResponse(
+                    x.Id, x.Name, x.Description, x.IsActive))
+                .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
             _ => new PagedResponse<object>(
                 [], 1, Math.Clamp(query.PageSize, 1, 100), 0, 0, false, false)
         };
@@ -51,6 +56,7 @@ public sealed class SaveContractCatalogHandler(
             "statuses" => await SaveStatus(command, ct),
             "base-documents" => await SaveBaseDocument(command, ct),
             "parties" => await SaveParty(command, ct),
+            "groups" => await SaveGroup(command, ct),
             _ => null
         };
         if (result is null) return null;
@@ -111,6 +117,20 @@ public sealed class SaveContractCatalogHandler(
         return new OrganizationPartyResponse(item.Id, item.Name, item.NationalIdentifier,
             item.RepresentativeName, item.ContactInfo, item.IsActive);
     }
+
+    private async Task<object?> SaveGroup(SaveContractCatalogCommand command, CancellationToken ct)
+    {
+        var request = (SaveContractGroupRequest)command.Request;
+        if (string.IsNullOrWhiteSpace(request.Name)) return null;
+        var item = command.Id.HasValue ? await db.ContractGroups.SingleOrDefaultAsync(x =>
+            x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct) : null;
+        if (command.Id.HasValue && item is null) return null;
+        item ??= new ContractGroup { OrganizationId = tenant.OrganizationId, Name = "", CreatedByUserId = tenant.UserId };
+        item.Name = request.Name.Trim(); item.Description = request.Description?.Trim(); item.IsActive = request.IsActive;
+        if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; }
+        if (!command.Id.HasValue) db.ContractGroups.Add(item);
+        return new ContractGroupResponse(item.Id, item.Name, item.Description, item.IsActive);
+    }
 }
 
 public sealed class DeleteContractCatalogHandler(
@@ -126,6 +146,8 @@ public sealed class DeleteContractCatalogHandler(
                 x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
             "parties" => await db.OrganizationParties.SingleOrDefaultAsync(x =>
                 x.Id == command.Id && x.OrganizationId == tenant.OrganizationId && !x.IsDeleted, ct),
+            "groups" => await db.ContractGroups.SingleOrDefaultAsync(x =>
+                x.Id == command.Id && x.OrganizationId == tenant.OrganizationId, ct),
             _ => null
         };
         if (item is null) return false;
@@ -137,6 +159,8 @@ public sealed class DeleteContractCatalogHandler(
             case ContractBaseDocumentProfile value:
                 value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
             case OrganizationParty value:
+                value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
+            case ContractGroup value:
                 value.IsDeleted = true; value.IsActive = false; value.DeletedAtUtc = now; value.DeletedByUserId = tenant.UserId; break;
         }
         audit.Add($"contract-catalog.{command.Kind}.deleted",

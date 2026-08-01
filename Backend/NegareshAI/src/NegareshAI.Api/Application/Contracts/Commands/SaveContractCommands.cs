@@ -36,6 +36,12 @@ public sealed class CreateContractCommandHandler(
                     item.OrganizationId == tenant.OrganizationId && item.DocumentId == request.DocumentId &&
                     item.IsActive, cancellationToken))
             return null;
+        var groupIds = request.ContractGroupIds?.Distinct().ToList() ?? [];
+        if (groupIds.Count > 0 && groupIds.Count != await db.ContractGroups.CountAsync(item =>
+                item.OrganizationId == tenant.OrganizationId && item.IsActive && groupIds.Contains(item.Id), cancellationToken))
+            return null;
+        if (request.PrimaryContractGroupId.HasValue && !groupIds.Contains(request.PrimaryContractGroupId.Value))
+            return null;
         var directoryIds = request.Parties.Where(x => x.DirectoryPartyId.HasValue)
             .Select(x => x.DirectoryPartyId!.Value).Distinct().ToList();
         if (directoryIds.Count != await db.OrganizationParties.CountAsync(x =>
@@ -52,6 +58,7 @@ public sealed class CreateContractCommandHandler(
             Status = request.Status,
             StatusDefinitionId = request.StatusDefinitionId,
             BaseDocumentProfileId = request.BaseDocumentProfileId,
+            PrimaryContractGroupId = request.PrimaryContractGroupId,
             Amount = request.Amount,
             Currency = request.Currency.Trim().ToUpperInvariant(),
             StartDate = request.StartDate,
@@ -59,6 +66,7 @@ public sealed class CreateContractCommandHandler(
             InternalOwnerUserId = Normalize(request.InternalOwnerUserId)
         };
         AddParties(contract, request.Parties);
+        AddGroups(contract, groupIds, request.PrimaryContractGroupId);
         db.Contracts.Add(contract);
         audit.Add("contract.created", nameof(Contract), contract.Id.ToString());
         await db.SaveChangesAsync(cancellationToken);
@@ -78,13 +86,24 @@ public sealed class CreateContractCommandHandler(
             });
     }
 
+    internal static void AddGroups(Contract contract, IEnumerable<Guid> groupIds, Guid? primaryGroupId)
+    {
+        foreach (var groupId in groupIds)
+            contract.GroupMemberships.Add(new ContractGroupMembership
+            {
+                ContractGroupId = groupId,
+                IsPrimary = groupId == primaryGroupId
+            });
+    }
+
     internal static string? Normalize(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     internal static ContractDetailResponse Map(Contract item) =>
         new(item.Id, item.DocumentId, item.Subject, item.ContractNumber,
             item.Status, item.StatusDefinitionId, item.StatusDefinition?.Name,
-            item.BaseDocumentProfileId, item.Amount, item.Currency, item.StartDate, item.EndDate,
+            item.BaseDocumentProfileId, item.PrimaryContractGroupId,
+            item.GroupMemberships.Select(x => x.ContractGroupId).ToList(), item.Amount, item.Currency, item.StartDate, item.EndDate,
             item.InternalOwnerUserId,
             item.Parties.OrderBy(party => party.Role).Select(party =>
                 new ContractPartyResponse(party.Id, party.DirectoryPartyId, party.Role, party.Name,
@@ -99,7 +118,7 @@ public sealed class UpdateContractCommandHandler(
     public async Task<ContractDetailResponse?> Handle(
         UpdateContractCommand command, CancellationToken cancellationToken)
     {
-        var contract = await db.Contracts.Include(item => item.Parties)
+        var contract = await db.Contracts.Include(item => item.Parties).Include(item => item.GroupMemberships)
             .SingleOrDefaultAsync(item => item.Id == command.Id
                 && item.OrganizationId == tenant.OrganizationId, cancellationToken);
         if (contract is null)
@@ -122,6 +141,13 @@ public sealed class UpdateContractCommandHandler(
         contract.Status = request.Status;
         contract.StatusDefinitionId = request.StatusDefinitionId;
         contract.BaseDocumentProfileId = request.BaseDocumentProfileId;
+        var groupIds = request.ContractGroupIds?.Distinct().ToList() ?? [];
+        if (groupIds.Count > 0 && groupIds.Count != await db.ContractGroups.CountAsync(item =>
+                item.OrganizationId == tenant.OrganizationId && item.IsActive && groupIds.Contains(item.Id), cancellationToken))
+            return null;
+        if (request.PrimaryContractGroupId.HasValue && !groupIds.Contains(request.PrimaryContractGroupId.Value))
+            return null;
+        contract.PrimaryContractGroupId = request.PrimaryContractGroupId;
         contract.Amount = request.Amount;
         contract.Currency = request.Currency.Trim().ToUpperInvariant();
         contract.StartDate = request.StartDate;
@@ -133,6 +159,10 @@ public sealed class UpdateContractCommandHandler(
         contract.Parties.Clear();
         CreateContractCommandHandler.AddParties(contract, request.Parties);
         db.ContractParties.AddRange(contract.Parties);
+        db.ContractGroupMemberships.RemoveRange(contract.GroupMemberships);
+        contract.GroupMemberships.Clear();
+        CreateContractCommandHandler.AddGroups(contract, groupIds, request.PrimaryContractGroupId);
+        db.ContractGroupMemberships.AddRange(contract.GroupMemberships);
         audit.Add("contract.updated", nameof(Contract), contract.Id.ToString());
         await db.SaveChangesAsync(cancellationToken);
         return CreateContractCommandHandler.Map(contract);
