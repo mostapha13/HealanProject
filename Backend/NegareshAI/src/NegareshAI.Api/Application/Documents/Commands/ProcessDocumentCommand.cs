@@ -79,11 +79,19 @@ public sealed class ProcessDocumentCommandHandler(
                     ? []
                     : [document.OwnerUserId],
                 [],
+                false,
                 cancellationToken);
-            document.ProcessingStatus = result.Status == "ready"
+            document.ProcessingStatus = result.Status is "ready" or "extracted"
                 ? DocumentProcessingStatus.Ready
                 : DocumentProcessingStatus.Failed;
             version.ExtractedText = result.ExtractedText;
+            version.ExtractionMetadataJson = JsonSerializer.Serialize(new
+            {
+                result.PageCount, result.Characters, result.ChunkCount,
+                result.OcrPageCount, EmbeddingModel = embeddingModel
+            });
+            if (document.ProcessingStatus == DocumentProcessingStatus.Ready)
+                version.LifecycleStatus = DocumentVersionLifecycleStatus.Extracted;
             auditWriter.Add("document.processed", nameof(Document), document.Id.ToString(), new
             {
                 version.Id,

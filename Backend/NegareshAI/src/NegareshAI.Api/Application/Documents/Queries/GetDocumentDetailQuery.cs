@@ -31,7 +31,18 @@ public sealed class GetDocumentDetailQueryHandler(
                     .Select(version => new DocumentVersionResponse(
                         version.Id, version.VersionNumber, version.FileId,
                         version.ChangeSummary, version.CreatedByUserId,
-                        version.CreatedAtUtc)).ToList()))
+                        version.CreatedAtUtc, version.LifecycleStatus,
+                        version.ExtractedText, version.ExtractedFieldsJson,
+                        version.ExtractionMetadataJson,
+                        version.ExpertReviewedByUserId, version.ExpertReviewedAtUtc,
+                        version.ExpertReviewNote, version.ManagerReviewedByUserId,
+                        version.ManagerReviewedAtUtc, version.ManagerReviewNote,
+                        version.IsRagPublished, version.RagPublishedAtUtc,
+                        version.Files.OrderBy(file => file.SortOrder)
+                            .Select(file => new DocumentVersionFileResponse(
+                                file.Id, file.FileId, file.FileName, file.ContentType,
+                                file.SortOrder, file.PageNumber, file.Sha256, file.Size))
+                            .ToList())).ToList()))
             .SingleOrDefaultAsync(cancellationToken);
     }
 }

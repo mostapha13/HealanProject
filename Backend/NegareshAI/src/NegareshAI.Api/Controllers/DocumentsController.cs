@@ -18,7 +18,8 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     private static readonly string[] AllowedContentTypes =
     [
         "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/jpeg", "image/png", "image/tiff"
     ];
 
     [HttpGet]
@@ -49,6 +50,44 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
             Request.Headers.Authorization.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase));
         var response = await sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = response.Id }, response);
+    }
+
+    [HttpPost("upload-batch")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsCreate)]
+    [RequestSizeLimit(104_857_600)]
+    public async Task<ActionResult<DocumentDetailResponse>> UploadBatch(
+        [FromForm] UploadDocumentBatchRequest upload, CancellationToken cancellationToken = default)
+    {
+        var error = ValidateBatch(upload.Files, upload.PageNumbers);
+        if (error is not null) return BadRequest(error);
+        if (upload.DocumentGroupIds.Count == 0)
+            return BadRequest("At least one document group is required.");
+        var images = upload.Files.All(IsImage);
+        var pageNumbers = images
+            ? (upload.PageNumbers.Count == 0
+                ? Enumerable.Range(1, upload.Files.Count).ToArray()
+                : upload.PageNumbers.ToArray())
+            : Array.Empty<int>();
+        var inputs = upload.Files.Select((file, index) => new IngestionFile(
+            file, index + 1, images ? pageNumbers[index] : null)).ToArray();
+        try
+        {
+            var response = await sender.Send(new UploadDocumentBatchCommand(
+                inputs,
+                string.IsNullOrWhiteSpace(upload.Title) ? upload.Files[0].FileName : upload.Title,
+                upload.DocumentType, upload.ConfidentialityLevel, upload.DocumentGroupIds,
+                Request.Headers.Authorization.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)),
+                cancellationToken);
+            return CreatedAtAction(nameof(Details), new { id = response.Id }, response);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
     }
 
     [HttpPost]
@@ -169,6 +208,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
             ? NoContent() : NotFound();
 
     [HttpPost("{id:guid}/process")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
     public async Task<IActionResult> Process(Guid id, CancellationToken cancellationToken) =>
         await sender.Send(new ProcessDocumentCommand(
                 id,
@@ -177,4 +217,60 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
                     .Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase)),
             cancellationToken)
             ? Accepted() : NotFound();
+
+    [HttpPut("{documentId:guid}/versions/{versionId:guid}/extracted-fields")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
+    public async Task<ActionResult<DocumentDetailResponse>> SaveExtractedFields(
+        Guid documentId, Guid versionId, ReviewExtractedFieldsRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await sender.Send(new SaveExtractedFieldsCommand(
+                documentId, versionId, request.ExtractedFieldsJson), ct);
+            return result is null ? NotFound() : Ok(result);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return BadRequest("ExtractedFieldsJson must be valid JSON.");
+        }
+    }
+
+    [HttpPost("{documentId:guid}/versions/{versionId:guid}/expert-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentsEdit)]
+    public async Task<ActionResult<DocumentDetailResponse>> ExpertReview(
+        Guid documentId, Guid versionId, DocumentReviewDecisionRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new ExpertReviewDocumentVersionCommand(
+            documentId, versionId, request.Approved, request.Note), ct);
+        return result is null ? Conflict("Version is not available for expert review.") : Ok(result);
+    }
+
+    [HttpPost("{documentId:guid}/versions/{versionId:guid}/manager-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.DocumentFinalizeRag)]
+    public async Task<ActionResult<DocumentDetailResponse>> ManagerReview(
+        Guid documentId, Guid versionId, DocumentReviewDecisionRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new ManagerReviewDocumentVersionCommand(
+            documentId, versionId, request.Approved, request.Note), ct);
+        return result is null ? Conflict("Version is not awaiting manager review.") : Ok(result);
+    }
+
+    private static string? ValidateBatch(IReadOnlyList<IFormFile> files, IReadOnlyList<int> pageNumbers)
+    {
+        if (files.Count == 0 || files.Any(x => x.Length == 0)) return "At least one non-empty file is required.";
+        if (files.Any(x => !AllowedContentTypes.Contains(x.ContentType, StringComparer.OrdinalIgnoreCase)))
+            return "Only PDF, DOCX, JPG, PNG and TIFF files are supported.";
+        if (files.Sum(x => x.Length) > 104_857_600) return "Total upload size cannot exceed 100 MB.";
+        var allImages = files.All(IsImage);
+        if (!allImages && files.Count != 1) return "PDF and DOCX must be uploaded as a single file version.";
+        if (!allImages && pageNumbers.Count > 0) return "Page numbers are only valid for image uploads.";
+        if (allImages && pageNumbers.Count != 0 && pageNumbers.Count != files.Count)
+            return "Every image must have exactly one page number.";
+        if (pageNumbers.Any(x => x < 1) || pageNumbers.Distinct().Count() != pageNumbers.Count)
+            return "Image page numbers must be positive and unique.";
+        return null;
+    }
+
+    private static bool IsImage(IFormFile file) =>
+        file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
 }

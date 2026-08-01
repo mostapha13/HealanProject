@@ -20,6 +20,17 @@ public enum DocumentProcessingStatus
     Failed = 4
 }
 
+public enum DocumentVersionLifecycleStatus
+{
+    Uploaded = 1,
+    Extracted = 2,
+    ExpertReview = 3,
+    ManagerReview = 4,
+    Final = 5,
+    Rejected = 6,
+    Superseded = 7
+}
+
 public enum ContractStatus
 {
     Draft = 1,
@@ -173,8 +184,34 @@ public sealed class DocumentVersion
     public string? ExtractedText { get; set; }
     public string? ChangeSummary { get; set; }
     public string? CreatedByUserId { get; set; }
+    public DocumentVersionLifecycleStatus LifecycleStatus { get; set; } = DocumentVersionLifecycleStatus.Uploaded;
+    public string? ExtractedFieldsJson { get; set; }
+    public string? ExtractionMetadataJson { get; set; }
+    public string? ExpertReviewedByUserId { get; set; }
+    public DateTime? ExpertReviewedAtUtc { get; set; }
+    public string? ExpertReviewNote { get; set; }
+    public string? ManagerReviewedByUserId { get; set; }
+    public DateTime? ManagerReviewedAtUtc { get; set; }
+    public string? ManagerReviewNote { get; set; }
+    public bool IsRagPublished { get; set; }
+    public DateTime? RagPublishedAtUtc { get; set; }
     public Document? Document { get; set; }
+    public List<DocumentVersionFile> Files { get; set; } = [];
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public sealed class DocumentVersionFile
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid DocumentVersionId { get; set; }
+    public required string FileId { get; set; }
+    public required string FileName { get; set; }
+    public required string ContentType { get; set; }
+    public int SortOrder { get; set; }
+    public int? PageNumber { get; set; }
+    public required string Sha256 { get; set; }
+    public long Size { get; set; }
+    public DocumentVersion? DocumentVersion { get; set; }
 }
 
 public sealed class DocumentAttachment

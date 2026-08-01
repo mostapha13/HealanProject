@@ -56,14 +56,22 @@ class RagContext(BaseModel):
     accessScope: str = Field(default="restricted", pattern="^(organization|restricted)$")
     allowedUserIds: list[str] = Field(default_factory=list)
     allowedGroupIds: list[str] = Field(default_factory=list)
+    approvalState: str = Field(default="final", pattern="^final$")
 
 class PipelineRequest(RagContext):
     fileName: str
     contentBase64: str
     maxChars: int = Field(default=1800, ge=200, le=10000)
+    publishToRag: bool = False
 
 class IndexRequest(RagContext):
     chunks: list[dict[str, Any]] = Field(min_length=1)
+
+class DeleteVersionRequest(BaseModel):
+    organizationId: str = Field(min_length=36, max_length=36)
+    documentId: str = Field(min_length=36, max_length=36)
+    versionId: str = Field(min_length=36, max_length=36)
+    embeddingModel: str = Field(default=DEFAULT_EMBEDDING_MODEL, min_length=3)
 
 class SearchRequest(BaseModel):
     organizationId: str = Field(min_length=36, max_length=36)
@@ -126,7 +134,17 @@ def extract_pages(data: bytes, name: str, enable_ocr: bool = True) -> list[dict]
     if name.lower().endswith(".docx"):
         document = Document(BytesIO(data))
         return [{"page": 1, "text": "\n".join(p.text for p in document.paragraphs)}]
-    raise HTTPException(415, "Only PDF and DOCX are supported")
+    if name.lower().endswith((".jpg", ".jpeg", ".png", ".tif", ".tiff")):
+        try:
+            import pytesseract
+            from PIL import Image
+            image = Image.open(BytesIO(data))
+            text = pytesseract.image_to_string(
+                image, lang=os.getenv("OCR_LANGUAGES", "fas+eng")).strip()
+            return [{"page": 1, "text": text, "ocr": True}]
+        except Exception as exc:
+            raise HTTPException(422, f"Image OCR failed: {exc}") from exc
+    raise HTTPException(415, "Only PDF, DOCX, JPG, PNG and TIFF are supported")
 
 def structural_chunks(text: str, max_chars: int = 1800, page: int = 1) -> list[dict]:
     sections = re.split(r"(?m)(?=^\s*(?:ماده|بند|فصل|تبصره|[0-9۰-۹]+[.)-])\s*)", text)
@@ -192,6 +210,7 @@ def index_document_chunks(context: RagContext, chunks: list[dict]) -> int:
         "allowedUserIds": "|".join(sorted(set(context.allowedUserIds)))[:4000],
         "allowedGroupIds": "|".join(sorted(set(context.allowedGroupIds)))[:4000],
         "embeddingModel": context.embeddingModel
+        , "approvalState": context.approvalState
     } for index, chunk in enumerate(chunks)]
     collection.upsert(ids=ids, documents=documents, metadatas=metadata)
     return len(chunks)
@@ -212,10 +231,24 @@ async def index_chunks(payload: IndexRequest):
     return {"collection": collection_for(payload.embeddingModel).name,
             "indexed": index_document_chunks(payload, payload.chunks)}
 
+@app.post("/rag/delete-version")
+async def delete_version(payload: DeleteVersionRequest):
+    collection = collection_for(payload.embeddingModel)
+    existing = collection.get(where={"$and": [
+        {"organizationId": payload.organizationId},
+        {"documentId": payload.documentId},
+        {"versionId": payload.versionId}
+    ]})
+    ids = existing.get("ids") or []
+    if ids:
+        collection.delete(ids=ids)
+    return {"deleted": len(ids)}
+
 @app.post("/rag/search")
 async def search_chunks(payload: SearchRequest):
     collection = collection_for(payload.embeddingModel)
-    filters: list[dict[str, Any]] = [{"organizationId": payload.organizationId}]
+    filters: list[dict[str, Any]] = [
+        {"organizationId": payload.organizationId}, {"approvalState": "final"}]
     if payload.documentIds:
         filters.append({"documentId": {"$in": payload.documentIds}})
     where = filters[0] if len(filters) == 1 else {"$and": filters}
@@ -269,8 +302,8 @@ async def process_document(payload: PipelineRequest):
         if not chunks:
             return {"status": "ocr_required", "pageCount": len(pages),
                     "characters": 0, "chunkCount": 0}
-        indexed = index_document_chunks(payload, chunks)
-        return {"status": "ready", "pageCount": len(pages),
+        indexed = index_document_chunks(payload, chunks) if payload.publishToRag else 0
+        return {"status": "ready" if payload.publishToRag else "extracted", "pageCount": len(pages),
                 "characters": sum(len(page["text"]) for page in pages),
                 "chunkCount": indexed,
                 "ocrPageCount": sum(1 for page in pages if page.get("ocr")),

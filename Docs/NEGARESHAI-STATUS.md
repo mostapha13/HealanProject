@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-01
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `9f807c4` (`feat(negareshai): complete M2 master data foundation`)
+Last committed baseline: `afb2110` (`feat(negareshai): complete user access management`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -173,6 +173,45 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
   30/30, including Admin bypass, direct precedence, default deny and independent
   contract/document group scopes; Next.js production build passes and generates
   all 21 routes.
+
+### M3 document-ingestion and approval completion checkpoint — 2026-08-01
+
+- Extraction and RAG publication are now separate operations. Upload and OCR
+  can only produce an `Extracted` version; they never index it automatically.
+- The persisted version lifecycle is `Uploaded -> Extracted -> ExpertReview ->
+  ManagerReview -> Final`, with explicit `Rejected` and `Superseded` states.
+  Every expert/manager identity, timestamp and note is audited and retained.
+- PDF, DOCX, JPG, PNG and TIFF are supported. Multi-image versions require a
+  positive unique page number per image, default to sequential numbering and
+  reject mixed/multi-file PDF or DOCX input.
+- Every physical version file persists FileManager ID, original name, MIME,
+  order, optional page number, byte size and SHA-256. FileManager remains the
+  authoritative MIME/malware validation boundary.
+- Upload requires one or more active document groups and scope to every group
+  selected during registration. Expert and manager decisions require both
+  their action permission and effective Data Scope through an assigned group.
+- Extracted text, OCR metadata and suggested Persian date/amount fields are
+  stored for expert correction before approval.
+- Manager finalization publishes only the approved version with organization,
+  document, version, user/group ACL and `approvalState=final` metadata. A newer
+  final version deletes the previous vectors and marks it `Superseded`.
+- RAG search now requires `approvalState=final`; pre-M3 chunks without this
+  marker fail closed and are no longer retrievable.
+- Added the independent responsive RTL `/documents/ingestion` workspace for
+  upload, page ordering, group selection, extracted-field correction and both
+  approval decisions. The document dashboard links to this workspace.
+- Applied `M3DocumentIngestionApproval` and `M3LifecycleBackfill` to the active
+  local SQL database. Legacy versions are backfilled to Uploaded/Extracted and
+  are not treated as final.
+- Validation: API build passes with zero warnings; API tests pass 35/35;
+  Next.js production build passes with 22 routes; 8/8 AI security/OCR runtime
+  tests pass inside the dependency-complete container image. AI/API/Web health
+  endpoints and the new UI route return HTTP 200; protected documents return
+  HTTP 401 without a token.
+- Docker BuildKit produced no log and hit its ten-minute timeout for both AI
+  and API/Web builds. For local acceptance, verified Release/standalone outputs
+  were assembled into the existing project images through disposable staging
+  containers; all three recreated services are healthy and volumes were kept.
 
 ### P4 implementation checkpoint
 
@@ -586,13 +625,15 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start M3 document ingestion and approval lifecycle.
-2. Add ordered multi-image JPG/PNG/TIFF upload with unique page numbers.
-3. Add extracted-field review and the ExpertReview/ManagerReview workflow.
-4. Keep extracted content outside RAG until manager finalization, then publish
-   only the final version with tenant, group and ACL metadata.
-5. Add end-to-end acceptance tests proving pre-final content is not retrievable
-   and cross-tenant/cross-group chunks remain inaccessible.
+1. Start M4 versioned contract conversation and intelligent generation.
+2. Resolve the base contract by company, primary group, contract year and the
+   highest final version, asking the user when candidates are tied or unclear.
+3. Add persistent conversation/messages, immutable draft revisions and source
+   snapshots for every correction.
+4. Implement greenfield contract generation from the effective group template,
+   approved clause catalog and required user answers.
+5. Complete the requester -> expert -> manager approval chain and generate
+   source-backed DOCX/PDF outputs from final versions only.
 
 ## Session log
 

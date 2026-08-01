@@ -302,6 +302,22 @@ export type DocumentVersion = {
   changeSummary?: string;
   createdByUserId?: string;
   createdAtUtc: string;
+  lifecycleStatus: number;
+  extractedText?: string;
+  extractedFieldsJson?: string;
+  extractionMetadataJson?: string;
+  expertReviewedByUserId?: string;
+  expertReviewedAtUtc?: string;
+  expertReviewNote?: string;
+  managerReviewedByUserId?: string;
+  managerReviewedAtUtc?: string;
+  managerReviewNote?: string;
+  isRagPublished: boolean;
+  ragPublishedAtUtc?: string;
+  files: Array<{
+    id:string; fileId:string; fileName:string; contentType:string;
+    sortOrder:number; pageNumber?:number; sha256:string; size:number;
+  }>;
 };
 
 export type DocumentDetail = {
@@ -714,6 +730,40 @@ export function uploadDocument(
     xhr.send(form);
   });
 }
+
+export async function uploadDocumentBatch(input:{
+  files:File[]; pageNumbers?:number[]; title?:string;
+  documentType?:string; confidentialityLevel?:number; documentGroupIds:string[];
+}):Promise<DocumentDetail>{
+  const form=new FormData();
+  input.files.forEach(file=>form.append("files",file));
+  input.pageNumbers?.forEach(page=>form.append("pageNumbers",String(page)));
+  input.documentGroupIds.forEach(id=>form.append("documentGroupIds",id));
+  if(input.title)form.append("title",input.title);
+  form.append("documentType",input.documentType??"contract");
+  form.append("confidentialityLevel",String(input.confidentialityLevel??2));
+  const response=await authorizedFetch("/api/documents/upload-batch",{method:"POST",body:form});
+  if(!response.ok)throw new Error(await response.text()||"بارگذاری و استخراج سند انجام نشد.");
+  return response.json();
+}
+
+export async function saveExtractedDocumentFields(documentId:string,versionId:string,value:string){
+  const response=await authorizedFetch(`/api/documents/${documentId}/versions/${versionId}/extracted-fields`,{
+    method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({extractedFieldsJson:value})});
+  if(!response.ok)throw new Error(await response.text()||"ذخیره اطلاعات استخراج‌شده انجام نشد.");
+  return response.json() as Promise<DocumentDetail>;
+}
+
+async function reviewDocumentVersion(documentId:string,versionId:string,stage:"expert"|"manager",approved:boolean,note?:string){
+  const response=await authorizedFetch(`/api/documents/${documentId}/versions/${versionId}/${stage}-review`,{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved,note})});
+  if(!response.ok)throw new Error(await response.text()||"ثبت تصمیم بازبینی انجام نشد.");
+  return response.json() as Promise<DocumentDetail>;
+}
+export const expertReviewDocumentVersion=(documentId:string,versionId:string,approved:boolean,note?:string)=>
+  reviewDocumentVersion(documentId,versionId,"expert",approved,note);
+export const managerReviewDocumentVersion=(documentId:string,versionId:string,approved:boolean,note?:string)=>
+  reviewDocumentVersion(documentId,versionId,"manager",approved,note);
 
 export function setAccessToken(token: string) {
   window.localStorage.setItem("negareshai.access_token", token);

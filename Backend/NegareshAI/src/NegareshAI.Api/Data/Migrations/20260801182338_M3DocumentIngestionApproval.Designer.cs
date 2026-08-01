@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NegareshAI.Api.Data;
 
@@ -11,9 +12,11 @@ using NegareshAI.Api.Data;
 namespace NegareshAI.Api.Data.Migrations
 {
     [DbContext(typeof(NegareshDbContext))]
-    partial class NegareshDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801182338_M3DocumentIngestionApproval")]
+    partial class M3DocumentIngestionApproval
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1445,9 +1448,7 @@ namespace NegareshAI.Api.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int>("LifecycleStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
 
                     b.Property<string>("ManagerReviewNote")
                         .HasColumnType("nvarchar(max)");

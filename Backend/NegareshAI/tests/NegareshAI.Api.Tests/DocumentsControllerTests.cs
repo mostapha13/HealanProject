@@ -37,6 +37,43 @@ public sealed class DocumentsControllerTests
         Assert.Equal(0, sender.SendCount);
     }
 
+    [Fact]
+    public async Task Batch_upload_rejects_duplicate_image_page_numbers()
+    {
+        var sender = new RecordingSender();
+        var controller = new DocumentsController(sender);
+        var request = new UploadDocumentBatchRequest
+        {
+            Files = [CreateFile("1.jpg", "image/jpeg"), CreateFile("2.png", "image/png")],
+            PageNumbers = [1, 1]
+        };
+
+        var result = await controller.UploadBatch(request);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal(0, sender.SendCount);
+    }
+
+    [Fact]
+    public async Task Batch_upload_rejects_page_number_for_pdf()
+    {
+        var sender = new RecordingSender();
+        var controller = new DocumentsController(sender);
+        var request = new UploadDocumentBatchRequest
+        {
+            Files = [CreateFile("document.pdf", "application/pdf")], PageNumbers = [1]
+        };
+
+        var result = await controller.UploadBatch(request);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal(0, sender.SendCount);
+    }
+
+    private static IFormFile CreateFile(string name, string contentType) =>
+        new FormFile(new MemoryStream([1]), 0, 1, "files", name)
+        { Headers = new HeaderDictionary(), ContentType = contentType };
+
     private static UploadDocumentRequest CreateUpload(Stream content, long length, string contentType)
     {
         return new UploadDocumentRequest

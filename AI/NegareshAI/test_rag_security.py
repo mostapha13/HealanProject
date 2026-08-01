@@ -161,9 +161,14 @@ class RagSecurityTests(unittest.TestCase):
             response = self.client.post("/pipeline/process", json=payload)
         self.assertEqual(200, response.status_code, response.text)
         result = response.json()
-        self.assertEqual("ready", result["status"])
+        self.assertEqual("extracted", result["status"])
         self.assertEqual(1, result["ocrPageCount"])
-        self.assertEqual(1, result["chunkCount"])
+        self.assertEqual(0, result["chunkCount"])
+        search = self.client.post("/rag/search", json={
+            "organizationId": payload["organizationId"],
+            "userId": "owner", "query": "مبلغ قرارداد"
+        })
+        self.assertEqual([], search.json()["results"])
 
     def test_search_requires_user_context(self):
         response = self.client.post("/rag/search", json={

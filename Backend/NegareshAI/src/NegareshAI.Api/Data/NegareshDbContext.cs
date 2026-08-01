@@ -10,6 +10,7 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<DataScopeAssignment> DataScopeAssignments => Set<DataScopeAssignment>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
+    public DbSet<DocumentVersionFile> DocumentVersionFiles => Set<DocumentVersionFile>();
     public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
     public DbSet<Contract> Contracts => Set<Contract>();
     public DbSet<ContractGroup> ContractGroups => Set<ContractGroup>();
@@ -62,6 +63,19 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<DocumentVersion>()
             .HasIndex(item => new { item.DocumentId, item.VersionNumber })
             .IsUnique();
+        modelBuilder.Entity<DocumentVersion>()
+            .Property(item => item.LifecycleStatus)
+            .HasDefaultValue(DocumentVersionLifecycleStatus.Uploaded);
+        modelBuilder.Entity<DocumentVersion>()
+            .HasIndex(item => new { item.DocumentId, item.LifecycleStatus });
+        modelBuilder.Entity<DocumentVersionFile>()
+            .HasIndex(item => new { item.DocumentVersionId, item.SortOrder }).IsUnique();
+        modelBuilder.Entity<DocumentVersionFile>()
+            .HasIndex(item => new { item.DocumentVersionId, item.PageNumber })
+            .IsUnique().HasFilter("[PageNumber] IS NOT NULL");
+        modelBuilder.Entity<DocumentVersionFile>()
+            .HasOne(item => item.DocumentVersion).WithMany(item => item.Files)
+            .HasForeignKey(item => item.DocumentVersionId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Contract>()
             .HasIndex(item => new { item.OrganizationId, item.ContractNumber })
             .IsUnique()

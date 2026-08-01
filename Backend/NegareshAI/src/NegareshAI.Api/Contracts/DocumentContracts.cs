@@ -53,13 +53,43 @@ public sealed class UploadDocumentVersionRequest
     public string? ChangeSummary { get; init; }
 }
 
+public sealed class UploadDocumentBatchRequest
+{
+    public List<IFormFile> Files { get; init; } = [];
+    public List<int> PageNumbers { get; init; } = [];
+    public List<Guid> DocumentGroupIds { get; init; } = [];
+    public string? Title { get; init; }
+    public string DocumentType { get; init; } = "contract";
+    public ConfidentialityLevel ConfidentialityLevel { get; init; } = ConfidentialityLevel.Confidential;
+}
+
+public sealed record ReviewExtractedFieldsRequest(string ExtractedFieldsJson);
+public sealed record DocumentReviewDecisionRequest(bool Approved, string? Note);
+
+public sealed record DocumentVersionFileResponse(
+    Guid Id, string FileId, string FileName, string ContentType,
+    int SortOrder, int? PageNumber, string Sha256, long Size);
+
 public sealed record DocumentVersionResponse(
     Guid Id,
     int VersionNumber,
     string FileId,
     string? ChangeSummary,
     string? CreatedByUserId,
-    DateTime CreatedAtUtc);
+    DateTime CreatedAtUtc,
+    DocumentVersionLifecycleStatus LifecycleStatus,
+    string? ExtractedText,
+    string? ExtractedFieldsJson,
+    string? ExtractionMetadataJson,
+    string? ExpertReviewedByUserId,
+    DateTime? ExpertReviewedAtUtc,
+    string? ExpertReviewNote,
+    string? ManagerReviewedByUserId,
+    DateTime? ManagerReviewedAtUtc,
+    string? ManagerReviewNote,
+    bool IsRagPublished,
+    DateTime? RagPublishedAtUtc,
+    IReadOnlyList<DocumentVersionFileResponse> Files);
 
 public sealed record DocumentDetailResponse(
     Guid Id,

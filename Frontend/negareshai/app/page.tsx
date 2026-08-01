@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { AccessMenu, ComparisonRun, ComparisonRunSummary, ContractBaseDocument, ContractDetail, ContractGeneration, ContractGroup, ContractItem, ContractOperation, ContractStatusDefinition, ContractTemplate, ContractWorkflow, DashboardResponse, DocumentDetail, DocumentGroup, DocumentListItem, IdentityRole, IdentityUser, ManagementDashboard, OrganizationParty, RuleSet, RuntimeSetting, archiveContract, archiveDocument, assessContractRisk, changeOperationStatus, createDocumentGroup, createIdentityRole, createIdentityUser, createOperation, createRuleSet, decideWorkflow, deleteContractCatalog, deleteOperation, downloadComparisonReport, downloadDocumentVersion, generateContract, getComparisonRun, getContract, getDashboard, getDirectUserAccess, getDocumentDetail, getEffectiveContractTemplate, getManagementDashboard, getRolePermissions, listArchivedDocuments, listComparisonRuns, listContractCatalog, listContracts, listContractTemplates, listDocumentGroups, listDocuments, listIdentityRoles, listIdentityUsers, listMyMenus, listOperations, listRuleSets, listRuntimeSettings, listWorkflows, restoreDocument, reviewContractGeneration, reviewFinding, saveContract, saveContractCatalog, saveDirectUserAccess, saveRolePermissions, startComparison, startWorkflow, updateDocument, uploadContractTemplate, uploadDocument, uploadDocumentVersion } from "../lib/api";
 import { requireAuthenticatedUser, signOut } from "../lib/auth";
 import { formatJalaliDate, formatJalaliLongDate, gregorianYmdToJalali, JALALI_MONTH_NAMES, toPersianDigits } from "../lib/jalali";
@@ -443,8 +444,8 @@ export default function Home(){
 <p className="eyebrow">فضای کاری سازمان</p>
 <h1>{info.title}</h1>
 <p>{info.description}</p>
-</div>{activeSection==="documents"&&<button className="primary-button" onClick={()=>setUploadOpen(true)}>
-<Icon name="plus" size={18}/>افزودن سند</button>}</div>
+</div>{activeSection==="documents"&&<div className="module-actions"><Link className="ghost-button" href="/documents/ingestion">ورود و تأیید اسناد</Link><button className="primary-button" onClick={()=>setUploadOpen(true)}>
+<Icon name="plus" size={18}/>افزودن سند</button></div>}</div>
       {activeSection==="documents"?<article className="panel module-panel">
 <div className="panel-heading">
 <div>
