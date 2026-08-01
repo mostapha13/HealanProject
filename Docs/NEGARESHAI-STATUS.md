@@ -1,8 +1,8 @@
 # NegareshAI Development Status
 
-Last updated: 2026-07-30
+Last updated: 2026-08-01
 Active branch: `codex/negareshai-foundation`
-Last committed baseline: `a96937a` (`docs(negareshai): define approved product roadmap`)
+Last committed baseline: `9f807c4` (`feat(negareshai): complete M2 master data foundation`)
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -148,6 +148,31 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
 - Master-data entities use tenant isolation, server pagination where applicable, active/inactive state, soft delete/restore endpoints and audit events.
 - Contract create/edit accepts multiple groups and a primary group; the UI requires a primary group and previews the effective template.
 - Validation: API tests pass 28/28; Next.js production build passes and generates 21 routes; migrations include `M2MasterDataReferenceModel` and `M2RuleSetLifecycle`.
+
+### Users and access-management completion checkpoint — 2026-08-01
+
+- The Identity UserManager API provides persisted CRUD for users and roles,
+  user active/inactive state, soft delete/restore and protected system identities.
+  `AdminUser` cannot be disabled or deleted and retains full access to every
+  active menu in every registered subsystem.
+- User create/edit supports profile data, password rotation and assignment of
+  multiple roles. Role create/edit and soft delete/restore are available on an
+  independent RTL page.
+- Role permissions use the Identity `AccessMenu`/`AccessForm` hierarchy. A
+  parent selection applies to its complete subtree and the stored menu IDs are
+  validated against the current subsystem.
+- Direct user permissions support `inherit`, `grant` and `deny`. Direct deny
+  takes precedence over role grants; direct grant can override role evaluation.
+- Contract-group and document-group Data Scope can be assigned independently
+  to a user or role with grant/deny/inherit. Effective authorization requires
+  both the action permission and the resource scope and defaults to deny.
+- Independent RTL routes now exist for users, roles, role permissions, direct
+  user permissions and group scopes. The permission hierarchy has responsive
+  tree styling and explicit grant/deny choices.
+- Validation: Identity UserManager build passes; NegareshAI API tests pass
+  30/30, including Admin bypass, direct precedence, default deny and independent
+  contract/document group scopes; Next.js production build passes and generates
+  all 21 routes.
 
 ### P4 implementation checkpoint
 
@@ -561,12 +586,13 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start P4 with organization-owned templates and letterheads.
-2. Add Persian natural-language ChangeSets for contract creation and renewal.
-3. Add deterministic date, amount and percentage calculations.
-4. Add source-backed clause generation, diff preview and human approval.
-5. Resolve or explicitly risk-accept the remaining transitive npm audit
-   findings after compatibility testing.
+1. Start M3 document ingestion and approval lifecycle.
+2. Add ordered multi-image JPG/PNG/TIFF upload with unique page numbers.
+3. Add extracted-field review and the ExpertReview/ManagerReview workflow.
+4. Keep extracted content outside RAG until manager finalization, then publish
+   only the final version with tenant, group and ACL metadata.
+5. Add end-to-end acceptance tests proving pre-final content is not retrievable
+   and cross-tenant/cross-group chunks remain inaccessible.
 
 ## Session log
 

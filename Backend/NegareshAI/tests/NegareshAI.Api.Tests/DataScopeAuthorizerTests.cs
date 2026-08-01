@@ -54,6 +54,35 @@ public sealed class DataScopeAuthorizerTests
     }
 
     [Fact]
+    public async Task User_without_assignment_is_denied_by_default()
+    {
+        await using var db = CreateDbContext();
+        var organizationId = Guid.NewGuid();
+        var authorizer = CreateAuthorizer(db, organizationId, "user-1", "Expert");
+
+        Assert.False(await authorizer.CanAccessAsync(
+            DataScopeResourceType.ContractGroup, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task Contract_group_assignment_is_evaluated_independently()
+    {
+        await using var db = CreateDbContext();
+        var organizationId = Guid.NewGuid();
+        var groupId = Guid.NewGuid();
+        db.DataScopeAssignments.Add(Assignment(
+            organizationId, groupId, DataScopeSubjectType.User, "user-1", false,
+            DataScopeResourceType.ContractGroup));
+        await db.SaveChangesAsync();
+        var authorizer = CreateAuthorizer(db, organizationId, "user-1", "Expert");
+
+        Assert.True(await authorizer.CanAccessAsync(
+            DataScopeResourceType.ContractGroup, groupId));
+        Assert.False(await authorizer.CanAccessAsync(
+            DataScopeResourceType.DocumentGroup, groupId));
+    }
+
+    [Fact]
     public async Task Bulk_scope_returns_only_effectively_allowed_resources()
     {
         await using var db = CreateDbContext();
@@ -86,10 +115,11 @@ public sealed class DataScopeAuthorizerTests
 
     private static DataScopeAssignment Assignment(
         Guid organizationId, Guid resourceId, DataScopeSubjectType subjectType,
-        string subjectId, bool denied) => new()
+        string subjectId, bool denied,
+        DataScopeResourceType resourceType = DataScopeResourceType.DocumentGroup) => new()
         {
             OrganizationId = organizationId,
-            ResourceType = DataScopeResourceType.DocumentGroup,
+            ResourceType = resourceType,
             ResourceId = resourceId,
             SubjectType = subjectType,
             SubjectId = subjectId,

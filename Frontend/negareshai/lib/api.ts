@@ -27,8 +27,8 @@ async function userManagerFetch(path:string, init:RequestInit={}) {
   if(token)headers.set("Authorization",`Bearer ${token}`);
   return fetch(`${USER_MANAGER_BASE}${path}`,{...init,headers});
 }
-export async function listIdentityUsers():Promise<IdentityUser[]> {
-  const response=await userManagerFetch(`${identityManagementPath}/users`);
+export async function listIdentityUsers(includeDeleted=false):Promise<IdentityUser[]> {
+  const response=await userManagerFetch(`${identityManagementPath}/users?includeDeleted=${includeDeleted}`);
   if(!response.ok)throw new Error("دریافت کاربران انجام نشد."); return response.json();
 }
 export async function listIdentityRoles():Promise<IdentityRole[]> {
