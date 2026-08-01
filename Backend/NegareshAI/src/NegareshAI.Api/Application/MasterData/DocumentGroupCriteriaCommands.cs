@@ -1,0 +1,11 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using NegareshAI.Api.Application.Common.Auditing;
+using NegareshAI.Api.Application.Common.Tenancy;
+using NegareshAI.Api.Contracts;
+using NegareshAI.Api.Data;
+namespace NegareshAI.Api.Application.MasterData;
+public sealed record GetDocumentGroupCriteriaQuery(Guid GroupId):IRequest<IReadOnlyList<DocumentGroupCriterionResponse>>;
+public sealed record SaveDocumentGroupCriteriaCommand(Guid GroupId,SaveDocumentGroupCriteriaRequest Request):IRequest<bool>;
+public sealed class GetDocumentGroupCriteriaHandler(NegareshDbContext db,ICurrentTenant tenant):IRequestHandler<GetDocumentGroupCriteriaQuery,IReadOnlyList<DocumentGroupCriterionResponse>>{public async Task<IReadOnlyList<DocumentGroupCriterionResponse>> Handle(GetDocumentGroupCriteriaQuery q,CancellationToken ct)=>await db.DocumentGroupCriteria.AsNoTracking().Where(x=>x.DocumentGroupId==q.GroupId&&x.DocumentGroup!.OrganizationId==tenant.OrganizationId).OrderBy(x=>x.Order).Select(x=>new DocumentGroupCriterionResponse(x.Id,x.ComplianceCriterionId,x.ComplianceCriterion!.Code,x.ComplianceCriterion.Title,x.Weight,x.IsCritical,x.Order)).ToListAsync(ct);}
+public sealed class SaveDocumentGroupCriteriaHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<SaveDocumentGroupCriteriaCommand,bool>{public async Task<bool> Handle(SaveDocumentGroupCriteriaCommand c,CancellationToken ct){if(!await db.DocumentGroups.AnyAsync(x=>x.Id==c.GroupId&&x.OrganizationId==tenant.OrganizationId,ct))return false;var ids=c.Request.Items.Select(x=>x.ComplianceCriterionId).Distinct().ToArray();if(ids.Length!=c.Request.Items.Count||ids.Length!=await db.ComplianceCriteria.CountAsync(x=>x.OrganizationId==tenant.OrganizationId&&x.IsActive&&ids.Contains(x.Id),ct))return false;var rows=await db.DocumentGroupCriteria.Where(x=>x.DocumentGroupId==c.GroupId).ToListAsync(ct);db.DocumentGroupCriteria.RemoveRange(rows);db.DocumentGroupCriteria.AddRange(c.Request.Items.Select(x=>new DocumentGroupCriterion{DocumentGroupId=c.GroupId,ComplianceCriterionId=x.ComplianceCriterionId,Weight=x.Weight,IsCritical=x.IsCritical,Order=x.Order}));audit.Add("document-group.criteria.updated",nameof(DocumentGroup),c.GroupId.ToString());await db.SaveChangesAsync(ct);return true;}}
