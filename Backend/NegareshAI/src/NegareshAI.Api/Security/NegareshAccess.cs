@@ -17,7 +17,8 @@ public static class NegareshAIAccessFormIds
         Operations = 6028, OperationsManage = 6029, ManagementDashboard = 6030,
         ContractExpertReview = 6031, ContractFinalize = 6032,
         ComparisonReview = 6033, DocumentFinalizeRag = 6034,
-        ContractGroupAccess = 6035, DocumentGroupAccess = 6036;
+        ContractGroupAccess = 6035, DocumentGroupAccess = 6036,
+        ContractClauseCatalog = 6037;
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]

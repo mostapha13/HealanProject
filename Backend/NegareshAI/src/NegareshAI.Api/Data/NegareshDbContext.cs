@@ -25,7 +25,12 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ContractObligation> ContractObligations => Set<ContractObligation>();
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
     public DbSet<ContractYearDefinition> ContractYears => Set<ContractYearDefinition>();
+    public DbSet<ApprovedContractClause> ApprovedContractClauses => Set<ApprovedContractClause>();
     public DbSet<ContractGenerationRun> ContractGenerationRuns => Set<ContractGenerationRun>();
+    public DbSet<ContractConversation> ContractConversations => Set<ContractConversation>();
+    public DbSet<ContractConversationMessage> ContractConversationMessages => Set<ContractConversationMessage>();
+    public DbSet<ContractClarification> ContractClarifications => Set<ContractClarification>();
+    public DbSet<ContractDraftVersion> ContractDraftVersions => Set<ContractDraftVersion>();
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<RuntimeSetting> RuntimeSettings => Set<RuntimeSetting>();
@@ -131,6 +136,45 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<ContractGenerationRun>()
             .HasOne(item => item.ContractTemplate).WithMany()
             .HasForeignKey(item => item.ContractTemplateId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractConversation>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractConversation>()
+            .HasIndex(x => new { x.OrganizationId, x.CreatedByUserId, x.UpdatedAtUtc });
+        modelBuilder.Entity<ContractConversation>()
+            .HasOne(x => x.OrganizationParty).WithMany()
+            .HasForeignKey(x => x.OrganizationPartyId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractConversation>()
+            .HasOne(x => x.PrimaryContractGroup).WithMany()
+            .HasForeignKey(x => x.PrimaryContractGroupId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractConversation>()
+            .HasOne(x => x.BaseContract).WithMany()
+            .HasForeignKey(x => x.BaseContractId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractConversationMessage>()
+            .HasIndex(x => new { x.ConversationId, x.Sequence }).IsUnique();
+        modelBuilder.Entity<ContractConversationMessage>()
+            .HasOne(x => x.Conversation).WithMany(x => x.Messages)
+            .HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ContractClarification>()
+            .HasIndex(x => new { x.ConversationId, x.Key, x.IsAnswered });
+        modelBuilder.Entity<ContractClarification>()
+            .HasOne(x => x.Conversation).WithMany(x => x.Clarifications)
+            .HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasIndex(x => new { x.ConversationId, x.VersionNumber }).IsUnique();
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasOne(x => x.Conversation).WithMany(x => x.Drafts)
+            .HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasOne(x => x.BaseContract).WithMany()
+            .HasForeignKey(x => x.BaseContractId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasOne(x => x.BaseDocumentVersion).WithMany()
+            .HasForeignKey(x => x.BaseDocumentVersionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasOne(x => x.ContractTemplate).WithMany()
+            .HasForeignKey(x => x.ContractTemplateId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractDraftVersion>()
+            .HasOne(x => x.FinalDocumentVersion).WithMany()
+            .HasForeignKey(x => x.FinalDocumentVersionId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<AuditLog>()
             .HasIndex(item => new { item.OrganizationId, item.CreatedAtUtc });
         modelBuilder.Entity<RuntimeSetting>()
@@ -144,6 +188,11 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
             .HasForeignKey(x => x.ContractGroupId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ContractYearDefinition>().HasIndex(x => new { x.OrganizationId, x.Year }).IsUnique();
         modelBuilder.Entity<ContractYearDefinition>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ApprovedContractClause>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ApprovedContractClause>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractGroupId, x.Code }).IsUnique();
+        modelBuilder.Entity<ApprovedContractClause>().HasOne(x => x.ContractGroup).WithMany()
+            .HasForeignKey(x => x.ContractGroupId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<DocumentGroup>().HasQueryFilter(item => !item.IsDeleted);
         modelBuilder.Entity<DocumentGroupMember>()
             .HasIndex(item => new { item.DocumentGroupId, item.DocumentId })

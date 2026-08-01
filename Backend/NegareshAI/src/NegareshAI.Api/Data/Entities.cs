@@ -200,6 +200,25 @@ public sealed class DocumentVersion
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
+public enum ContractConversationStatus
+{
+    Active = 1,
+    NeedsClarification = 2,
+    InReview = 3,
+    Completed = 4,
+    Cancelled = 5
+}
+
+public enum ContractMessageRole { User = 1, Assistant = 2, System = 3 }
+public enum ContractDraftApprovalStatus
+{
+    RequesterReview = 1,
+    ExpertReview = 2,
+    ManagerReview = 3,
+    Final = 4,
+    Rejected = 5
+}
+
 public sealed class DocumentVersionFile
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -508,6 +527,27 @@ public sealed class ContractYearDefinition
     public DateTime? DeletedAtUtc { get; set; }
 }
 
+public sealed class ApprovedContractClause
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractGroupId { get; set; }
+    public required string Code { get; set; }
+    public required string Title { get; set; }
+    public required string Text { get; set; }
+    public int Order { get; set; }
+    public bool IsRequired { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public ContractGroup? ContractGroup { get; set; }
+}
+
 public sealed class ContractGenerationRun
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -597,6 +637,93 @@ public sealed class DocumentGroupMember
     public Guid DocumentId { get; set; }
     public DocumentGroup? DocumentGroup { get; set; }
     public Document? Document { get; set; }
+}
+
+public sealed class ContractConversation
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Title { get; set; }
+    public Guid OrganizationPartyId { get; set; }
+    public Guid PrimaryContractGroupId { get; set; }
+    public int RequestedContractYear { get; set; }
+    public required string Subject { get; set; }
+    public Guid? BaseContractId { get; set; }
+    public ContractConversationStatus Status { get; set; } = ContractConversationStatus.Active;
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public OrganizationParty? OrganizationParty { get; set; }
+    public ContractGroup? PrimaryContractGroup { get; set; }
+    public Contract? BaseContract { get; set; }
+    public List<ContractConversationMessage> Messages { get; set; } = [];
+    public List<ContractClarification> Clarifications { get; set; } = [];
+    public List<ContractDraftVersion> Drafts { get; set; } = [];
+}
+
+public sealed class ContractConversationMessage
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ConversationId { get; set; }
+    public int Sequence { get; set; }
+    public ContractMessageRole Role { get; set; }
+    public required string Content { get; set; }
+    public string? SourceSnapshotJson { get; set; }
+    public string? CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public ContractConversation? Conversation { get; set; }
+}
+
+public sealed class ContractClarification
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ConversationId { get; set; }
+    public required string Key { get; set; }
+    public required string Question { get; set; }
+    public string? Answer { get; set; }
+    public bool IsAnswered { get; set; }
+    public DateTime AskedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? AnsweredAtUtc { get; set; }
+    public string? AnsweredByUserId { get; set; }
+    public ContractConversation? Conversation { get; set; }
+}
+
+public sealed class ContractDraftVersion
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ConversationId { get; set; }
+    public int VersionNumber { get; set; }
+    public Guid? BaseContractId { get; set; }
+    public Guid? BaseDocumentVersionId { get; set; }
+    public Guid ContractTemplateId { get; set; }
+    public required string InstructionSnapshot { get; set; }
+    public required string ChangeSetJson { get; set; }
+    public required string SourceSnapshotJson { get; set; }
+    public required string CalculationSnapshotJson { get; set; }
+    public required string DiffJson { get; set; }
+    public required string GeneratedDocxFileId { get; set; }
+    public string? GeneratedPdfFileId { get; set; }
+    public ContractDraftApprovalStatus ApprovalStatus { get; set; } = ContractDraftApprovalStatus.RequesterReview;
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? RequesterReviewedByUserId { get; set; }
+    public DateTime? RequesterReviewedAtUtc { get; set; }
+    public string? RequesterReviewNote { get; set; }
+    public string? ExpertReviewedByUserId { get; set; }
+    public DateTime? ExpertReviewedAtUtc { get; set; }
+    public string? ExpertReviewNote { get; set; }
+    public string? ManagerReviewedByUserId { get; set; }
+    public DateTime? ManagerReviewedAtUtc { get; set; }
+    public string? ManagerReviewNote { get; set; }
+    public Guid? FinalDocumentVersionId { get; set; }
+    public ContractConversation? Conversation { get; set; }
+    public Contract? BaseContract { get; set; }
+    public DocumentVersion? BaseDocumentVersion { get; set; }
+    public ContractTemplate? ContractTemplate { get; set; }
+    public DocumentVersion? FinalDocumentVersion { get; set; }
 }
 
 public sealed class ComplianceCriterion

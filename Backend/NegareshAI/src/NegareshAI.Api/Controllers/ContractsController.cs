@@ -127,6 +127,55 @@ public sealed class ContractsController(ISender sender) : ControllerBase
         return result is null ? Conflict("Generation is not ready for review.") : Ok(result);
     }
 
+    [HttpGet("conversations")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<IReadOnlyList<ContractConversationListItemResponse>>> Conversations(
+        CancellationToken ct) => Ok(await sender.Send(new ListContractConversationsQuery(), ct));
+
+    [HttpPost("conversations")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<ContractConversationResponse>> StartConversation(
+        StartContractConversationRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new StartContractConversationCommand(request), ct);
+        return result is null ? BadRequest("اطلاعات طرف قرارداد، گروه یا پیام معتبر نیست.") : Ok(result);
+    }
+
+    [HttpGet("conversations/{id:guid}")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<ContractConversationResponse>> Conversation(Guid id, CancellationToken ct)
+    {
+        var result = await sender.Send(new GetContractConversationQuery(id), ct);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("conversations/{id:guid}/messages")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public async Task<ActionResult<ContractConversationResponse>> SendMessage(
+        Guid id, SendContractConversationMessageRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new SendContractConversationMessageCommand(id, request.Message), ct);
+        return result is null ? Conflict("گفت‌وگو قابل ادامه نیست.") : Ok(result);
+    }
+
+    [HttpPost("conversations/{conversationId:guid}/drafts/{draftId:guid}/requester-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractGeneration)]
+    public Task<ActionResult<ContractConversationResponse>> RequesterReview(
+        Guid conversationId, Guid draftId, ReviewContractDraftRequest request, CancellationToken ct) =>
+        ReviewDraft(conversationId, draftId, ContractDraftApprovalStatus.RequesterReview, request, ct);
+
+    [HttpPost("conversations/{conversationId:guid}/drafts/{draftId:guid}/expert-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractExpertReview)]
+    public Task<ActionResult<ContractConversationResponse>> ExpertReview(
+        Guid conversationId, Guid draftId, ReviewContractDraftRequest request, CancellationToken ct) =>
+        ReviewDraft(conversationId, draftId, ContractDraftApprovalStatus.ExpertReview, request, ct);
+
+    [HttpPost("conversations/{conversationId:guid}/drafts/{draftId:guid}/manager-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ContractFinalize)]
+    public Task<ActionResult<ContractConversationResponse>> ManagerReview(
+        Guid conversationId, Guid draftId, ReviewContractDraftRequest request, CancellationToken ct) =>
+        ReviewDraft(conversationId, draftId, ContractDraftApprovalStatus.ManagerReview, request, ct);
+
     [HttpGet("catalog/{kind}")]
     [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
     public async Task<ActionResult> ListCatalog(
@@ -192,6 +241,15 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new SaveContractCatalogCommand(kind, id, request), ct);
         return result is null ? NotFound() : Ok(result);
+    }
+
+    private async Task<ActionResult<ContractConversationResponse>> ReviewDraft(
+        Guid conversationId, Guid draftId, ContractDraftApprovalStatus expected,
+        ReviewContractDraftRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new ReviewContractDraftCommand(
+            conversationId, draftId, expected, request), ct);
+        return result is null ? Conflict("مرحله بازبینی پیش‌نویس معتبر نیست.") : Ok(result);
     }
 }
 

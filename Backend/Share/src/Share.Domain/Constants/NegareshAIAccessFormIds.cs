@@ -42,4 +42,5 @@ public static class NegareshAIAccessFormIds
     public const int DocumentFinalizeRag = 6034;
     public const int ContractGroupAccess = 6035;
     public const int DocumentGroupAccess = 6036;
+    public const int ContractClauseCatalog = 6037;
 }

@@ -52,6 +52,7 @@ public static class NegareshAIAccessSeed
             new Form(NegareshAIAccessFormIds.DocumentFinalizeRag, "نهایی‌سازی سند و انتشار RAG", "/documents/finalize"),
             new Form(NegareshAIAccessFormIds.ContractGroupAccess, "دسترسی گروه‌های قرارداد", "/access/contract-groups"),
             new Form(NegareshAIAccessFormIds.DocumentGroupAccess, "دسترسی گروه‌های سند", "/access/document-groups"),
+            new Form(NegareshAIAccessFormIds.ContractClauseCatalog, "کاتالوگ بندهای قرارداد", "/basic-data/contract-clauses"),
         };
         var menus = new[]
         {
@@ -94,6 +95,7 @@ public static class NegareshAIAccessSeed
             new Menu(6137, 6034, 6103, 104, "اسناد — نهایی‌سازی و انتشار RAG"),
             new Menu(6138, 6035, 6114, 6, "دسترسی گروه‌های قرارداد"),
             new Menu(6139, 6036, 6114, 7, "دسترسی گروه‌های سند"),
+            new Menu(6140, 6037, 6109, 5, "بندهای تأییدشده قرارداد"),
         };
 
         if (!await db.AccessSystems.AnyAsync(x => x.AccessSystemId == NegareshAIAccessFormIds.SystemId))

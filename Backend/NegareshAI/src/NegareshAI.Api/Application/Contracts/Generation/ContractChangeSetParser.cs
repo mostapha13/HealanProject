@@ -25,16 +25,18 @@ public static partial class ContractChangeSetParser
             ? decimal.Parse(percentMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         decimal? explicitAmount = amountMatch.Success
             ? decimal.Parse(amountMatch.Groups[1].Value, CultureInfo.InvariantCulture) : null;
-        decimal? calculated = explicitAmount ??
-            (percent.HasValue && contract.Amount.HasValue
-                ? decimal.Round(contract.Amount.Value * (1 + percent.Value / 100m), 2)
-                : null);
+        decimal? percentAmount = percent.HasValue && contract.Amount.HasValue
+            ? decimal.Round(contract.Amount.Value * (1 + percent.Value / 100m), 2) : null;
+        decimal? calculated = explicitAmount ?? percentAmount;
         var clause = ClauseRegex().Match(instruction);
         var questions = new List<string>();
         if (dates.Count < 2 && (!contract.StartDate.HasValue || !contract.EndDate.HasValue))
             questions.Add("تاریخ شروع و پایان قرارداد را مشخص کنید.");
         if (!calculated.HasValue)
             questions.Add("مبلغ نهایی یا درصد تغییر مبلغ را مشخص کنید.");
+        if (explicitAmount.HasValue && percentAmount.HasValue &&
+            Math.Abs(explicitAmount.Value - percentAmount.Value) > 1m)
+            questions.Add($"مبلغ صریح ({explicitAmount:N0}) با مبلغ حاصل از درصد ({percentAmount:N0}) متفاوت است؛ کدام مبنا اعمال شود؟");
         if (string.IsNullOrWhiteSpace(clause.Groups[1].Value) && instruction.Contains("بند"))
             questions.Add("متن یا موضوع دقیق بند جدید را مشخص کنید.");
         return new(dates.ElementAtOrDefault(0), dates.ElementAtOrDefault(1), explicitAmount,

@@ -214,6 +214,43 @@ approved it and authorized implementation with «شروع کن» on 2026-07-30.
   were assembled into the existing project images through disposable staging
   containers; all three recreated services are healthy and volumes were kept.
 
+### M4 versioned contract conversation checkpoint — 2026-08-01
+
+- Added tenant-owned persistent conversations, ordered user/assistant/system
+  messages, clarification records and immutable draft versions. Corrections
+  always create a new draft and retain rejected versions for audit.
+- Renewal resolution uses organization + directory party + primary contract
+  group + requested Persian year, then the highest `Final` document version.
+  Tied candidates stop for an explicit contract-number answer; non-final
+  versions are excluded from both the new and legacy generation paths.
+- Effective templates prefer an exact contract year and then the highest
+  active version inside the effective date range. Missing templates fail closed
+  with `گروه فاقد قالب معتبر است`.
+- Persian date, amount, percentage and direct clause parsing is deterministic.
+  A conflicting explicit amount and percentage produces a mandatory question
+  showing both calculated values.
+- Added the group-owned approved clause catalog with independent RTL CRUD,
+  activation, soft delete/restore, audit, pagination and Identity permission
+  6037. Greenfield drafts snapshot and inject active approved group clauses.
+- Parties can be created inline from the conversation screen; the existing
+  `ContractParties` action permission remains the authorization boundary.
+- Drafts persist change, calculation, source and template snapshots. The RTL
+  `/contract-generation` workspace shows conversation history, clarifications,
+  structured diff, calculations and source evidence.
+- Enforced requester -> expert -> manager transitions with distinct action
+  permissions. Manager finalization creates a `Final` document version,
+  supersedes earlier final versions and only then extracts/publishes to RAG.
+- Applied `M4ContractConversationLifecycle` and
+  `M4ApprovedContractClauseCatalog` to local SQL. NegareshAI API/Web/AI and
+  IdentityServer are running locally; both new routes return HTTP 200 and API
+  authorization returns HTTP 401 for anonymous requests.
+- Validation: API build has zero warnings; tests pass 41/41; Next.js production
+  build passes with 24 routes; IdentityServer build passes with only existing
+  shared-project warnings.
+- Remaining before M4 acceptance is closed: source-backed PDF generation and
+  preview, richer clause/date/termination/obligation conflict analysis, and a
+  seeded end-to-end authenticated Fasa/Omran-Machine browser acceptance run.
+
 ### P4 implementation checkpoint
 
 - P4 contract generation is implemented in the working tree.
@@ -626,15 +663,13 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start M4 versioned contract conversation and intelligent generation.
-2. Resolve the base contract by company, primary group, contract year and the
-   highest final version, asking the user when candidates are tied or unclear.
-3. Add persistent conversation/messages, immutable draft revisions and source
-   snapshots for every correction.
-4. Implement greenfield contract generation from the effective group template,
-   approved clause catalog and required user answers.
-5. Complete the requester -> expert -> manager approval chain and generate
-   source-backed DOCX/PDF outputs from final versions only.
+1. Close M4 with source-backed PDF generation/preview and structured legal
+   conflict analysis for clause, date, amount, obligation, termination and
+   dispute-resolution conflicts.
+2. Seed and execute the authenticated Fasa renewal and Omran Machine
+   greenfield acceptance scenarios through FileManager, AI, Identity and RAG.
+3. Start M5 intelligent document conformity: frozen reference snapshots,
+   weighted/critical scoring, prioritized golden documents and citations.
 
 ## Session log
 

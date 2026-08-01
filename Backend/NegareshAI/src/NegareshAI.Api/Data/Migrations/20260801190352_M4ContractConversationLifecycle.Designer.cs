@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NegareshAI.Api.Data;
 
@@ -11,9 +12,11 @@ using NegareshAI.Api.Data;
 namespace NegareshAI.Api.Data.Migrations
 {
     [DbContext(typeof(NegareshDbContext))]
-    partial class NegareshDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801190352_M4ContractConversationLifecycle")]
+    partial class M4ContractConversationLifecycle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,71 +24,6 @@ namespace NegareshAI.Api.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ApprovedContractClause", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("ContractGroupId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedByUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedByUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractGroupId");
-
-                    b.HasIndex("OrganizationId", "ContractGroupId", "Code")
-                        .IsUnique();
-
-                    b.ToTable("ApprovedContractClauses");
-                });
 
             modelBuilder.Entity("NegareshAI.Api.Data.AuditLog", b =>
                 {
@@ -2143,17 +2081,6 @@ namespace NegareshAI.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("RuntimeSettings");
-                });
-
-            modelBuilder.Entity("NegareshAI.Api.Data.ApprovedContractClause", b =>
-                {
-                    b.HasOne("NegareshAI.Api.Data.ContractGroup", "ContractGroup")
-                        .WithMany()
-                        .HasForeignKey("ContractGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ContractGroup");
                 });
 
             modelBuilder.Entity("NegareshAI.Api.Data.ComparisonFinding", b =>

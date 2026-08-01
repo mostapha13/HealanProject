@@ -76,7 +76,15 @@ public sealed class CreateContractTemplateHandler(
 public sealed class GetEffectiveContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant)
     : IRequestHandler<GetEffectiveContractTemplateQuery,EffectiveContractTemplateResponse>
 {
- public async Task<EffectiveContractTemplateResponse> Handle(GetEffectiveContractTemplateQuery q,CancellationToken ct){var x=await db.ContractTemplates.AsNoTracking().Where(x=>x.OrganizationId==tenant.OrganizationId&&x.ContractGroupId==q.ContractGroupId&&x.IsActive&&(x.EffectiveFrom==null||x.EffectiveFrom<=q.StartDate)&&(x.EffectiveTo==null||x.EffectiveTo>=q.StartDate)).OrderByDescending(x=>x.Version).FirstOrDefaultAsync(ct);return x is null?new(null,"گروه فاقد قالب معتبر است."):new(CreateContractTemplateHandler.Map(x),null);}
+ public async Task<EffectiveContractTemplateResponse> Handle(GetEffectiveContractTemplateQuery q,CancellationToken ct)
+ {
+     var year = new System.Globalization.PersianCalendar().GetYear(q.StartDate.ToDateTime(TimeOnly.MinValue));
+     var x=await db.ContractTemplates.AsNoTracking().Where(x=>x.OrganizationId==tenant.OrganizationId
+         &&x.ContractGroupId==q.ContractGroupId&&x.IsActive&&(x.ContractYear==null||x.ContractYear==year)
+         &&(x.EffectiveFrom==null||x.EffectiveFrom<=q.StartDate)&&(x.EffectiveTo==null||x.EffectiveTo>=q.StartDate))
+         .OrderByDescending(x=>x.ContractYear==year).ThenByDescending(x=>x.Version).FirstOrDefaultAsync(ct);
+     return x is null?new(null,"گروه فاقد قالب معتبر است."):new(CreateContractTemplateHandler.Map(x),null);
+ }
 }
 public sealed class UpdateContractTemplateHandler(NegareshDbContext db,ICurrentTenant tenant,IAuditWriter audit):IRequestHandler<UpdateContractTemplateCommand,ContractTemplateResponse?>
 {
@@ -116,14 +124,18 @@ public sealed class StartContractGenerationHandler(
         var template = await db.ContractTemplates.SingleOrDefaultAsync(item =>
             item.Id == request.ContractTemplateId &&
             item.OrganizationId == tenant.OrganizationId && item.IsActive, cancellationToken);
-        var baseVersion = contract?.Document?.Versions.OrderByDescending(item => item.VersionNumber).FirstOrDefault();
+        var baseVersion = contract?.Document?.Versions
+            .Where(item => item.LifecycleStatus == DocumentVersionLifecycleStatus.Final)
+            .OrderByDescending(item => item.VersionNumber).FirstOrDefault();
         if (contract is null || template is null || baseVersion is null) return null;
 
         var allowedSources = await db.Documents.AsNoTracking().Where(item =>
                 item.OrganizationId == tenant.OrganizationId &&
                 (request.SourceDocumentIds ?? Array.Empty<Guid>()).Contains(item.Id))
             .Select(item => new { item.Id, item.Title,
-                VersionId = item.Versions.OrderByDescending(v => v.VersionNumber).Select(v => v.Id).FirstOrDefault() })
+                VersionId = item.Versions.Where(v => v.LifecycleStatus == DocumentVersionLifecycleStatus.Final)
+                    .OrderByDescending(v => v.VersionNumber).Select(v => v.Id).FirstOrDefault() })
+            .Where(item => item.VersionId != Guid.Empty)
             .ToListAsync(cancellationToken);
         var changes = ContractChangeSetParser.Parse(request.UserInstruction, contract);
         var changeSetJson = JsonSerializer.Serialize(changes);
