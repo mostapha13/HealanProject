@@ -198,6 +198,7 @@ public sealed class Contract
     public ContractStatus Status { get; set; } = ContractStatus.Draft;
     public Guid? StatusDefinitionId { get; set; }
     public Guid? BaseDocumentProfileId { get; set; }
+    public Guid? PrimaryContractGroupId { get; set; }
     public decimal? Amount { get; set; }
     public string Currency { get; set; } = "IRR";
     public DateOnly? StartDate { get; set; }
@@ -208,6 +209,8 @@ public sealed class Contract
     public Document? Document { get; set; }
     public ContractStatusDefinition? StatusDefinition { get; set; }
     public ContractBaseDocumentProfile? BaseDocumentProfile { get; set; }
+    public ContractGroup? PrimaryContractGroup { get; set; }
+    public List<ContractGroupMembership> GroupMemberships { get; set; } = [];
     public List<ContractParty> Parties { get; set; } = [];
     public List<ContractClause> Clauses { get; set; } = [];
     public List<ContractValue> Values { get; set; } = [];
@@ -216,6 +219,34 @@ public sealed class Contract
     public List<ContractWorkflow> Workflows { get; set; } = [];
     public List<ContractOperation> Operations { get; set; } = [];
     public List<ContractRiskAssessment> RiskAssessments { get; set; } = [];
+}
+
+/// <summary>A tenant-owned classification used for contracts, templates and data scope.</summary>
+public sealed class ContractGroup
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? UpdatedByUserId { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+    public List<ContractGroupMembership> Memberships { get; set; } = [];
+}
+
+public sealed class ContractGroupMembership
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid ContractId { get; set; }
+    public Guid ContractGroupId { get; set; }
+    public bool IsPrimary { get; set; }
+    public Contract? Contract { get; set; }
+    public ContractGroup? ContractGroup { get; set; }
 }
 
 public sealed class ContractWorkflow
