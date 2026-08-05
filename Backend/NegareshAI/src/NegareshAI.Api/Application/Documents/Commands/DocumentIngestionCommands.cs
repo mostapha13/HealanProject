@@ -211,8 +211,16 @@ public sealed class ManagerReviewDocumentVersionCommandHandler(
         version.IsRagPublished = true;
         version.RagPublishedAtUtc = DateTime.UtcNow;
         document.UpdatedAtUtc = DateTime.UtcNow;
+        var comparisonRuns = await db.ComparisonRuns.Where(x =>
+            x.OrganizationId == tenant.OrganizationId
+            && x.TargetVersionId == version.Id
+            && x.ApprovalStatus == ComparisonApprovalStatus.ExpertApproved)
+            .ToListAsync(ct);
+        foreach (var comparisonRun in comparisonRuns)
+            comparisonRun.ApprovalStatus = ComparisonApprovalStatus.ManagerFinalized;
         audit.Add("document.manager-finalized-rag", nameof(DocumentVersion), version.Id.ToString(),
-            new { request.Note, GroupIds = groupIds, Superseded = previousFinals.Select(x => x.Id) });
+            new { request.Note, GroupIds = groupIds, Superseded = previousFinals.Select(x => x.Id),
+                ComparisonRuns = comparisonRuns.Select(x => x.Id) });
         await db.SaveChangesAsync(ct);
         return DocumentIngestionSupport.ToDetail(document);
     }

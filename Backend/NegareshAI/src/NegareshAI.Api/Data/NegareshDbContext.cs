@@ -45,6 +45,8 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ComparisonRun> ComparisonRuns => Set<ComparisonRun>();
     public DbSet<ComparisonRunRuleSet> ComparisonRunRuleSets => Set<ComparisonRunRuleSet>();
     public DbSet<ComparisonFinding> ComparisonFindings => Set<ComparisonFinding>();
+    public DbSet<ComparisonConflictDecision> ComparisonConflictDecisions => Set<ComparisonConflictDecision>();
+    public DbSet<ComparisonReportArtifact> ComparisonReportArtifacts => Set<ComparisonReportArtifact>();
     public DbSet<ContractWorkflow> ContractWorkflows => Set<ContractWorkflow>();
     public DbSet<ContractWorkflowStage> ContractWorkflowStages => Set<ContractWorkflowStage>();
     public DbSet<ContractRiskAssessment> ContractRiskAssessments => Set<ContractRiskAssessment>();
@@ -186,6 +188,8 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<DocumentGroup>()
             .HasIndex(item => new { item.OrganizationId, item.Name })
             .IsUnique();
+        modelBuilder.Entity<DocumentGroup>().Property(x => x.PassingThreshold)
+            .HasPrecision(5, 2).HasDefaultValue(80m);
         modelBuilder.Entity<ContractTemplate>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ContractTemplate>().HasOne(x => x.ContractGroup).WithMany()
             .HasForeignKey(x => x.ContractGroupId).OnDelete(DeleteBehavior.Restrict);
@@ -226,6 +230,17 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
         modelBuilder.Entity<ComparisonRun>()
             .Property(item => item.ScorePercent).HasPrecision(5, 2);
         modelBuilder.Entity<ComparisonRun>()
+            .Property(item => item.PassingThreshold).HasPrecision(5, 2);
+        modelBuilder.Entity<ComparisonRun>()
+            .Property(item => item.PassingThreshold).HasDefaultValue(80m);
+        modelBuilder.Entity<ComparisonRun>()
+            .Property(item => item.ApprovalStatus)
+            .HasDefaultValue(ComparisonApprovalStatus.PendingExpertReview);
+        modelBuilder.Entity<ComparisonRun>()
+            .Property(item => item.CriterionSnapshotJson).HasDefaultValue("[]");
+        modelBuilder.Entity<ComparisonRun>()
+            .Property(item => item.ToolTraceJson).HasDefaultValue("{}");
+        modelBuilder.Entity<ComparisonRun>()
             .HasOne(item => item.TargetDocument).WithMany()
             .HasForeignKey(item => item.TargetDocumentId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -245,6 +260,29 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
             .HasKey(item => new { item.ComparisonRunId, item.RuleSetId });
         modelBuilder.Entity<ComparisonFinding>()
             .Property(item => item.Confidence).HasPrecision(5, 4);
+        modelBuilder.Entity<ComparisonFinding>()
+            .Property(item => item.Weight).HasPrecision(9, 2);
+        modelBuilder.Entity<ComparisonFinding>()
+            .Property(item => item.IsApplicable).HasDefaultValue(true);
+        modelBuilder.Entity<ComparisonFinding>()
+            .HasOne(item => item.ComplianceCriterion).WithMany()
+            .HasForeignKey(item => item.ComplianceCriterionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ComparisonConflictDecision>()
+            .HasIndex(x => new { x.OrganizationId, x.DocumentGroupId, x.DecisionKey, x.Scope });
+        modelBuilder.Entity<ComparisonConflictDecision>()
+            .HasOne(x => x.ComparisonRun).WithMany()
+            .HasForeignKey(x => x.ComparisonRunId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ComparisonConflictDecision>()
+            .HasOne(x => x.ComparisonFinding).WithMany()
+            .HasForeignKey(x => x.ComparisonFindingId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ComparisonConflictDecision>()
+            .HasOne(x => x.DocumentGroup).WithMany()
+            .HasForeignKey(x => x.DocumentGroupId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ComparisonReportArtifact>()
+            .HasIndex(x => new { x.ComparisonRunId, x.Format, x.Version }).IsUnique();
+        modelBuilder.Entity<ComparisonReportArtifact>()
+            .HasOne(x => x.ComparisonRun).WithMany(x => x.Reports)
+            .HasForeignKey(x => x.ComparisonRunId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ContractWorkflow>()
             .HasIndex(x => new { x.OrganizationId, x.ContractId, x.IsDeleted });
         modelBuilder.Entity<ContractWorkflow>().HasQueryFilter(x => !x.IsDeleted);

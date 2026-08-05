@@ -1,5 +1,6 @@
 import os
 import unittest
+import asyncio
 from io import BytesIO
 from pathlib import Path
 
@@ -70,6 +71,21 @@ class ComparisonReportTests(unittest.TestCase):
         self.assertTrue(content.startswith(b"%PDF-"))
         self.assertGreater(len(content), 5_000)
         self._write_artifact("p3-comparison-report.pdf", content)
+
+    def test_weighted_critical_check_uses_reflection_and_page_citations(self):
+        result = asyncio.run(main.compliance_check({
+            "text": "نام شرکت فولاد دهدشت\fسرمایه ثبت‌شده شرکت",
+            "passingThreshold": 80,
+            "checklist": [
+                {"code": "NAME", "requirement": "نام شرکت", "weight": 90},
+                {"code": "SECRET", "requirement": "بند محرمانگی", "weight": 10, "critical": True},
+            ],
+        }))
+        self.assertEqual(90, result["weightedScore"])
+        self.assertTrue(result["criticalFailure"])
+        self.assertEqual("non_compliant", result["decision"])
+        self.assertEqual(1, result["findings"][0]["page"])
+        self.assertEqual(2, result["toolTrace"]["reflection"]["passes"])
 
     @staticmethod
     def _write_artifact(name: str, content: bytes):

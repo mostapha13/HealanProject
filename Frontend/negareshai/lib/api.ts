@@ -340,7 +340,7 @@ export type DocumentDetail = {
 
 export type DocumentGroup = {
   id: string; name: string; description?: string; isActive: boolean;
-  documentIds: string[]; createdAtUtc: string;
+  passingThreshold: number; documentIds: string[]; createdAtUtc: string;
 };
 
 export type DataScopeRow = {
@@ -365,9 +365,12 @@ export type RuleSet = {
 };
 
 export type ComparisonFinding = {
-  id: string; type: number; severity: number; title: string; reason: string;
+  id: string; ruleId?: string; complianceCriterionId?: string;
+  type: number; severity: number; weight: number; isCritical: boolean;
+  isApplicable: boolean; isPassed: boolean; title: string; reason: string;
   targetEvidence?: string; targetPage?: number; targetSection?: string;
-  referenceEvidence?: string; referencePage?: number; suggestion?: string;
+  referenceEvidence?: string; referencePage?: number; referenceSection?: string;
+  referenceDocumentId?: string; referenceVersionId?: string; suggestion?: string;
   confidence: number; reviewDecision: number; reviewerComment?: string;
   correctedReason?: string;
 };
@@ -375,13 +378,17 @@ export type ComparisonFinding = {
 export type ComparisonRunSummary = {
   id: string; targetDocumentId: string; targetDocumentTitle: string;
   basisMode: number; status: number; outcome?: number; scorePercent?: number;
+  hasCriticalFailure: boolean; approvalStatus: number;
   findingCount: number; pendingReviewCount: number; createdAtUtc: string;
 };
 
 export type ComparisonRun = ComparisonRunSummary & {
   targetVersionId: string; documentGroupId?: string; referenceDocumentId?: string;
   referenceVersionId?: string; userInstruction?: string; ruleSetSnapshotJson: string;
-  sourceSnapshotJson: string; modelId: string; promptVersion: string;
+  criterionSnapshotJson: string; sourceSnapshotJson: string; toolTraceJson: string;
+  modelId: string; promptVersion: string; passingThreshold: number;
+  outcomeExplanation?: string; expertReviewedByUserId?: string;
+  expertReviewedAtUtc?: string; expertReviewNote?: string;
   failureReason?: string; createdByUserId: string; completedAtUtc?: string;
   findings: ComparisonFinding[];
 };
@@ -463,7 +470,7 @@ export async function listDocumentGroups(): Promise<DocumentGroup[]> {
 }
 
 export async function createDocumentGroup(input: {
-  name: string; description?: string; documentIds: string[];
+  name: string; description?: string; documentIds: string[]; passingThreshold?: number;
 }): Promise<DocumentGroup> {
   const response = await authorizedFetch("/api/knowledge/document-groups", {
     method: "POST", headers: {"Content-Type": "application/json"},
@@ -526,7 +533,7 @@ export async function listContractSourceOptions():Promise<ContractSourceOption[]
 export async function sendContractConversationMessage(id:string,message:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${id}/messages`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});if(!r.ok)throw new Error(await r.text()||"ارسال پیام انجام نشد.");return r.json();}
 export async function reviewContractDraft(conversationId:string,draftId:string,stage:"requester"|"expert"|"manager",approved:boolean,note?:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/${stage}-review`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved,note})});if(!r.ok)throw new Error(await r.text()||"ثبت تصمیم انجام نشد.");return r.json();}
 export async function downloadContractDraftFile(conversationId:string,draftId:string,format:"docx"|"pdf"):Promise<Blob>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/download/${format}`);if(!r.ok)throw new Error("دریافت خروجی پیش‌نویس انجام نشد.");return r.blob();}
-export async function updateDocumentGroup(id:string,input:{name:string;description?:string;isActive:boolean;documentIds:string[]}){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش گروه سند انجام نشد.");return r.json() as Promise<DocumentGroup>;}
+export async function updateDocumentGroup(id:string,input:{name:string;description?:string;isActive:boolean;documentIds:string[];passingThreshold?:number}){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش گروه سند انجام نشد.");return r.json() as Promise<DocumentGroup>;}
 export async function deleteDocumentGroup(id:string){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف گروه سند انجام نشد.");}
 export async function setRuleSetActive(id:string,isActive:boolean){const r=await authorizedFetch(`/api/knowledge/rule-sets/${id}/active?isActive=${isActive}`,{method:"PUT"});if(!r.ok)throw new Error("تغییر وضعیت RuleSet انجام نشد.");}
 export async function deleteRuleSet(id:string){const r=await authorizedFetch(`/api/knowledge/rule-sets/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف RuleSet انجام نشد.");}
@@ -557,6 +564,7 @@ export async function startComparison(input: {
 
 export async function reviewFinding(id: string, input: {
   decision: number; comment?: string; correctedReason?: string;
+  persistForDocumentGroup?: boolean;
 }): Promise<ComparisonFinding> {
   const response = await authorizedFetch(`/api/comparisons/findings/${id}/review`, {
     method: "PUT", headers: {"Content-Type": "application/json"},
@@ -767,6 +775,13 @@ export function uploadDocument(
     xhr.onerror = () => reject(new Error("ارتباط با سرور برای بارگذاری سند برقرار نشد"));
     xhr.send(form);
   });
+}
+
+export async function reviewComparison(id:string,input:{approved:boolean;note?:string}):Promise<ComparisonRun>{
+  const response=await authorizedFetch(`/api/comparisons/${id}/expert-review`,{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});
+  if(!response.ok)throw new Error(await response.text()||"ثبت تأیید نتیجه انطباق انجام نشد");
+  return response.json();
 }
 
 export async function uploadDocumentBatch(input:{

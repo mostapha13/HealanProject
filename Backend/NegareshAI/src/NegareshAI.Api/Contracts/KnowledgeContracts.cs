@@ -5,14 +5,17 @@ namespace NegareshAI.Api.Contracts;
 public sealed record CreateDocumentGroupRequest(
     string Name,
     string? Description,
-    IReadOnlyCollection<Guid> DocumentIds);
+    IReadOnlyCollection<Guid> DocumentIds,
+    decimal PassingThreshold = 80m);
 public sealed record UpdateDocumentGroupRequest(
-    string Name, string? Description, bool IsActive, IReadOnlyCollection<Guid> DocumentIds);
+    string Name, string? Description, bool IsActive,
+    IReadOnlyCollection<Guid> DocumentIds, decimal PassingThreshold = 80m);
 
 public sealed record DocumentGroupResponse(
     Guid Id,
     string Name,
     string? Description,
+    decimal PassingThreshold,
     bool IsActive,
     IReadOnlyCollection<Guid> DocumentIds,
     DateTime CreatedAtUtc);
@@ -69,13 +72,21 @@ public sealed record StartComparisonRequest(
 public sealed record ReviewFindingRequest(
     FindingReviewDecision Decision,
     string? Comment,
-    string? CorrectedReason);
+    string? CorrectedReason,
+    bool PersistForDocumentGroup = false);
+
+public sealed record ReviewComparisonRequest(bool Approved, string? Note);
 
 public sealed record ComparisonFindingResponse(
     Guid Id,
     Guid? RuleId,
+    Guid? ComplianceCriterionId,
     FindingType Type,
     int Severity,
+    decimal Weight,
+    bool IsCritical,
+    bool IsApplicable,
+    bool IsPassed,
     string Title,
     string Reason,
     string? TargetEvidence,
@@ -83,6 +94,9 @@ public sealed record ComparisonFindingResponse(
     string? TargetSection,
     string? ReferenceEvidence,
     int? ReferencePage,
+    string? ReferenceSection,
+    Guid? ReferenceDocumentId,
+    Guid? ReferenceVersionId,
     string? Suggestion,
     decimal Confidence,
     FindingReviewDecision ReviewDecision,
@@ -99,6 +113,8 @@ public sealed record ComparisonRunSummaryResponse(
     ComparisonRunStatus Status,
     ComparisonOutcome? Outcome,
     decimal? ScorePercent,
+    bool HasCriticalFailure,
+    ComparisonApprovalStatus ApprovalStatus,
     int FindingCount,
     int PendingReviewCount,
     DateTime CreatedAtUtc);
@@ -114,12 +130,21 @@ public sealed record ComparisonRunResponse(
     Guid? ReferenceVersionId,
     string? UserInstruction,
     string RuleSetSnapshotJson,
+    string CriterionSnapshotJson,
     string SourceSnapshotJson,
+    string ToolTraceJson,
     string ModelId,
     string PromptVersion,
     ComparisonRunStatus Status,
     ComparisonOutcome? Outcome,
     decimal? ScorePercent,
+    decimal PassingThreshold,
+    bool HasCriticalFailure,
+    string? OutcomeExplanation,
+    ComparisonApprovalStatus ApprovalStatus,
+    string? ExpertReviewedByUserId,
+    DateTime? ExpertReviewedAtUtc,
+    string? ExpertReviewNote,
     string? FailureReason,
     string CreatedByUserId,
     DateTime CreatedAtUtc,

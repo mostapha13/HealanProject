@@ -452,21 +452,58 @@ async def compliance_check(payload: dict):
     if not text.strip() or not isinstance(checklist, list) or not checklist:
         raise HTTPException(400, "text and checklist are required")
     findings = []
+    pages = text.split("\f")
+    def locate(value: str):
+        offset = 0
+        position = text.find(value)
+        if position < 0:
+            return None, None
+        for page_number, page_text in enumerate(pages, start=1):
+            if position <= offset + len(page_text):
+                local = max(0, position - offset)
+                start = max(0, local - 120)
+                return page_text[start:local + len(value) + 120], page_number
+            offset += len(page_text) + 1
+        return value, 1
     for item in checklist:
         requirement = str(item.get("requirement", item) if isinstance(item, dict) else item).strip()
         if not requirement:
             continue
-        position = text.find(requirement)
-        matched = position >= 0
-        evidence = text[max(0, position - 120):position + len(requirement) + 120] if matched else None
-        findings.append({"requirement": requirement, "status": "met" if matched else "missing", "evidence": evidence, "confidence": 1.0 if matched else 0.0})
-    missing = [x for x in findings if x["status"] == "missing"]
-    decision = "rejected" if missing else "approved"
-    if missing and len(missing) < len(findings):
-        decision = "approved_with_improvements"
+        forbidden = bool(item.get("forbidden", False)) if isinstance(item, dict) else False
+        weight = max(0.0, float(item.get("weight", 1))) if isinstance(item, dict) else 1.0
+        critical = bool(item.get("critical", False)) if isinstance(item, dict) else False
+        evidence, page = locate(requirement)
+        present = evidence is not None
+        passed = not present if forbidden else present
+        findings.append({"code": item.get("code") if isinstance(item, dict) else None,
+            "requirement": requirement, "status": "met" if passed else ("forbidden" if forbidden else "missing"),
+            "passed": passed, "weight": weight, "critical": critical,
+            "evidence": evidence, "page": page, "section": item.get("section") if isinstance(item, dict) else None,
+            "confidence": 1.0 if present else 0.92,
+            "suggestion": None if passed else (f"عبارت ممنوع «{requirement}» حذف شود." if forbidden else f"الزام «{requirement}» افزوده شود.")})
+    applicable_weight = sum(x["weight"] for x in findings)
+    passed_weight = sum(x["weight"] for x in findings if x["passed"])
+    weighted_score = round((passed_weight * 100 / applicable_weight), 2) if applicable_weight else 0
+    critical_failure = any(x["critical"] and not x["passed"] for x in findings)
+    threshold = min(100.0, max(0.0, float(payload.get("passingThreshold", 80))))
+    decision = "non_compliant" if critical_failure or weighted_score < threshold else "compliant"
+    # Reflection pass: every emitted citation must be recoverable from the target text.
+    citation_failures = [x for x in findings if x["evidence"] and x["evidence"] not in text]
+    if citation_failures:
+        decision = "needs_human_review"
+        for finding in citation_failures:
+            finding["confidence"] = min(finding["confidence"], 0.49)
+    missing = [x for x in findings if not x["passed"]]
     focus = [str(x) for x in payload.get("focus", []) if str(x).strip()]
     focus_findings = [{"topic": topic, "present": topic in text, "evidence": text[max(0, text.find(topic)-120):text.find(topic)+len(topic)+120] if topic in text else None} for topic in focus]
-    return {"decision": decision, "findings": findings, "focusFindings": focus_findings, "missingCount": len(missing), "totalCount": len(findings)}
+    return {"decision": decision, "weightedScore": weighted_score,
+        "passingThreshold": threshold, "criticalFailure": critical_failure,
+        "findings": findings, "focusFindings": focus_findings,
+        "missingCount": len(missing), "totalCount": len(findings),
+        "toolTrace": {"strategy": "two-pass-evidence-grounded",
+            "tools": ["criterion-evaluator", "page-citation-locator", "weighted-score-calculator", "citation-reflection-verifier"],
+            "reflection": {"passes": 2, "citationFailures": len(citation_failures)},
+            "mcp": {"used": False, "reason": "private supplied text and deterministic tools were sufficient"}}}
 
 def _report_text(value) -> str:
     return "" if value is None else str(value)
@@ -527,6 +564,9 @@ def _comparison_docx(payload: dict) -> bytes:
     metadata = [
         ("نتیجه کلی", payload.get("outcomeLabel")),
         ("امتیاز تطابق", f"{_report_text(payload.get('scorePercent'))}%"),
+        ("آستانه قبولی", f"{_report_text(payload.get('passingThreshold'))}%"),
+        ("نقض معیار حیاتی", "بله" if payload.get("hasCriticalFailure") else "خیر"),
+        ("توضیح نتیجه", payload.get("outcomeExplanation")),
         ("مبنای تطابق", payload.get("basisLabel")),
         ("مدل محلی", payload.get("modelId")),
         ("نسخه prompt", payload.get("promptVersion")),
@@ -554,11 +594,14 @@ def _comparison_docx(payload: dict) -> bytes:
         rows = [
             ("وضعیت", finding.get("typeLabel")),
             ("شدت", finding.get("severity")),
+            ("وزن", finding.get("weight")),
+            ("معیار حیاتی", "بله" if finding.get("isCritical") else "خیر"),
             ("دلیل", finding.get("reason")),
             ("شاهد هدف", finding.get("targetEvidence")),
             ("صفحه هدف", finding.get("targetPage")),
             ("شاهد مرجع", finding.get("referenceEvidence")),
             ("صفحه مرجع", finding.get("referencePage")),
+            ("بخش مرجع", finding.get("referenceSection")),
             ("پیشنهاد اصلاح", finding.get("suggestion")),
             ("اطمینان", finding.get("confidence")),
             ("تصمیم کارشناس", finding.get("reviewLabel")),
@@ -611,7 +654,8 @@ def _comparison_pdf(payload: dict) -> bytes:
         Paragraph(fa(payload.get("targetDocumentTitle")), heading),
         Paragraph(fa(f"تاریخ اجرا: {payload.get('createdAtLabel')}"), body),
         Paragraph(fa(f"شناسه اجرا: {payload.get('id')}"), body),
-        Paragraph(fa(f"نتیجه: {payload.get('outcomeLabel')} | امتیاز: {payload.get('scorePercent')} درصد"), body),
+        Paragraph(fa(f"نتیجه: {payload.get('outcomeLabel')} | امتیاز: {payload.get('scorePercent')} درصد | آستانه: {payload.get('passingThreshold')} درصد"), body),
+        Paragraph(fa(f"نقض معیار حیاتی: {'بله' if payload.get('hasCriticalFailure') else 'خیر'} | {payload.get('outcomeExplanation')}"), body),
         Paragraph(fa(f"مدل: {payload.get('modelId')} | نسخه prompt: {payload.get('promptVersion')}"), body),
         Spacer(1, 8),
     ]
@@ -619,6 +663,8 @@ def _comparison_pdf(payload: dict) -> bytes:
         story.append(Paragraph(fa(f"{index}. {finding.get('title')}"), heading))
         data = [[Paragraph(fa(label), body), Paragraph(fa(value), body)] for label, value in [
             ("وضعیت", finding.get("typeLabel")), ("شدت", finding.get("severity")),
+            ("وزن", finding.get("weight")),
+            ("معیار حیاتی", "بله" if finding.get("isCritical") else "خیر"),
             ("دلیل", finding.get("reason")),
             ("شاهد هدف", finding.get("targetEvidence")),
             ("صفحه هدف", finding.get("targetPage")),

@@ -350,6 +350,8 @@ public sealed class TenantIsolationTests
         reference.Title = "امیدنامه شرکت B";
         reference.Versions[0].ExtractedText =
             "معرفی شرکت و موضوع فعالیت\fسرمایه ثبت شده 15000000000 ریال است. محرمانگی";
+        reference.Versions[0].LifecycleStatus = DocumentVersionLifecycleStatus.Final;
+        reference.Versions[0].IsRagPublished = true;
         var group = new DocumentGroup
         {
             OrganizationId = organizationId,

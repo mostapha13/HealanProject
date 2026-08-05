@@ -28,7 +28,7 @@ public sealed class ListDocumentGroupsQueryHandler(
         }
         return await query.OrderBy(item => item.Name)
             .Select(item => new DocumentGroupResponse(
-                item.Id, item.Name, item.Description, item.IsActive,
+                item.Id, item.Name, item.Description, item.PassingThreshold, item.IsActive,
                 item.Members.Select(member => member.DocumentId).ToArray(),
                 item.CreatedAtUtc))
             .ToPagedResponseAsync(

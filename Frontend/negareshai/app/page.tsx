@@ -446,7 +446,7 @@ export default function Home(){
 <p className="eyebrow">فضای کاری سازمان</p>
 <h1>{info.title}</h1>
 <p>{info.description}</p>
-</div>{activeSection==="documents"&&<div className="module-actions"><Link className="ghost-button" href="/documents/ingestion">ورود و تأیید اسناد</Link><button className="primary-button" onClick={()=>setUploadOpen(true)}>
+</div>{activeSection==="comparison"&&<div className="module-actions"><Link className="primary-button" href="/comparisons">ورود به فضای حرفه‌ای انطباق</Link></div>}{activeSection==="documents"&&<div className="module-actions"><Link className="ghost-button" href="/documents/ingestion">ورود و تأیید اسناد</Link><button className="primary-button" onClick={()=>setUploadOpen(true)}>
 <Icon name="plus" size={18}/>افزودن سند</button></div>}</div>
       {activeSection==="documents"?<article className="panel module-panel">
 <div className="panel-heading">

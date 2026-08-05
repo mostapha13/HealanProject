@@ -1,9 +1,8 @@
 # NegareshAI Development Status
 
-Last updated: 2026-08-02
+Last updated: 2026-08-05
 Active branch: `codex/negareshai-foundation`
-Last implementation baseline: `375791b6d3b2bd2d4885198245fca46410dd804a`
-(`feat(negareshai): complete M4 contract intelligence`)
+Last implementation baseline: `feat(negareshai): complete M5 intelligent document conformity`
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -25,7 +24,7 @@ When work resumes:
 Do not re-audit the whole repository unless this file is missing, inconsistent
 with Git, or the requested work changes scope.
 
-## Authoritative resume checkpoint — 2026-08-02
+## Authoritative resume checkpoint — 2026-08-05
 
 This section is the first source of truth for the next development session.
 Detailed checkpoints and older session logs below are retained as supporting
@@ -49,43 +48,50 @@ history and must not override this section.
   sources with page/section citations, explicit cross-group selection,
   structured legal conflict handling, immutable draft versions, PDF/DOCX
   output and requester -> expert -> manager finalization are implemented.
+- M5 is complete: final-only prioritized golden/reference snapshots,
+  weighted and critical criteria, evidence/citations, two-pass tool/reflection
+  trace, expert finding and result decisions, immutable versioned reports,
+  corrected-document reruns and separate manager final/RAG publication are
+  implemented. Independent RTL comparison, history, review and report routes
+  are available.
 
-### M4 acceptance evidence
+### M5 acceptance evidence
 
-- Backend regression tests: 44/44 passed.
-- AI contract-generation and RAG security tests: 8/8 passed.
-- Next.js production build passed and generated 24 routes.
-- EF reports no pending model changes. Migrations
-  `M4ConflictAnalysisAndPdf` and `M4FrozenConversationSources` are applied to
-  the active local SQL database.
-- Fasa renewal, Omran Machine greenfield, blocking legal-conflict resolution
-  and explicitly authorized cross-group source scenarios passed.
-- Runtime DOCX and Persian source-backed PDF generation passed; PDF output has
-  a valid `%PDF` signature.
-- Local `negareshai-api`, `negareshai-ai` and `negareshai-web` containers were
-  recreated from the final M4 code and are healthy.
-- Complete M4 implementation is pushed to `origin/codex/negareshai-foundation`
-  at commit `375791b6d3b2bd2d4885198245fca46410dd804a`.
+- Backend regression tests: 50/50 passed, including request-scoped score
+  recalculation and immutable report-artifact regression coverage.
+- AI report, contract-generation and RAG security tests: 11/11 passed in the
+  dependency-complete AI container.
+- Next.js production build passed and generated 28 routes.
+- EF reports no pending model changes. Migration
+  `20260805150445_M5IntelligentDocumentConformity` is applied to the active SQL
+  database and its new artifact/decision tables exist.
+- Authenticated Docker acceptance passed: incomplete input scored 90 with a
+  critical-failure override; the corrected version scored 100; expert approval
+  did not publish to RAG; manager finalization did; the final version was then
+  retrieved as an allowed source for a later comparison.
+- Runtime versioned DOCX/PDF reports passed with valid `PK`/`%PDF` signatures.
+- Tool trace records two evidence-verification/reflection passes. MCP remains
+  disabled for private internal sources and records that privacy decision; it
+  is reserved for an explicitly required external source/tool boundary.
+- Full evidence is recorded in `Docs/NEGARESHAI-ACCEPTANCE-2026-08-05.md`.
 
 ### Exact continuation point
 
-The next implementation stage is **M5 — intelligent document conformity**.
+The next implementation stage is **M6 — contract workflow, risk and operations**.
 Continue in this order:
 
-1. Freeze the exact comparison reference set and rule/model/prompt snapshots
-   for every run, including multiple prioritized golden document versions.
-2. Calculate weighted scores from the organization criterion catalog and the
-   group-specific weight/order/critical overrides; a failed critical criterion
-   must be reported independently from the numeric score.
-3. Produce evidence-backed findings with document/version/page/section
-   citations and the approved steel-prospectus acceptance scenario.
-4. Implement expert conflict decisions and keep comparison approval separate
-   from manager finalization/RAG publication permissions.
-5. Complete independent professional RTL history/review/report pages, then run
-   migration, Backend/AI/Frontend tests and authenticated Docker acceptance.
+1. Move the remaining workflow/risk/operation behavior from controllers into
+   the Application layer and finalize tenant/group-scoped data models.
+2. Implement configurable legal, technical, financial, expert and managerial
+   workflow stages with audited decisions and delegation.
+3. Complete versioned risk checklists, deadlines, renewals, payments,
+   guarantees and idempotent overdue/reminder jobs.
+4. Add independent paginated worklist, risk, operation and reporting pages.
+5. Finish M6 with migrations, access seeds, regression tests and authenticated
+   Docker acceptance using real SQL state.
 
-Before starting M5, read `Docs/NEGARESHAI-PRODUCT-SPEC.md` and the M5 section
-of `Docs/NEGARESHAI-ROADMAP.md`. Do not redesign or repeat M0-M4 unless a
+Before starting M6, read `Docs/NEGARESHAI-PRODUCT-SPEC.md` and the M6 section
+of `Docs/NEGARESHAI-ROADMAP.md`. Do not redesign or repeat M0-M5 unless a
 regression is proven.
 
 ### Working-tree hygiene
@@ -756,13 +762,29 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start M5 intelligent document conformity: frozen reference snapshots,
-   weighted/critical scoring, prioritized golden documents and citations.
-2. Implement expert conflict decisions and the separate comparison approval
-   versus manager final/RAG publication permissions.
-3. Execute the approved steel prospectus conformity acceptance scenario.
+1. Start M6 contract workflow, risk and operations from the audited roadmap.
+2. Preserve the completed M4/M5 requester/expert/manager lifecycle boundaries
+   while adding configurable workflow stages and delegation.
+3. Execute M6 acceptance against real SQL deadlines, reminders and scoped
+   user worklists.
 
 ## Session log
+
+### 2026-08-05
+
+- Completed M5 intelligent document conformity across Backend, AI and the RTL
+  frontend workspace.
+- Added immutable source/rule/criterion/model/prompt/tool snapshots,
+  weighted/critical scoring, citation verification, reusable group conflict
+  decisions, result approval and manager-only final/RAG publication.
+- Added immutable versioned DOCX/PDF report artifacts and fixed two runtime
+  issues found by authenticated acceptance: explicit EF insertion of
+  client-keyed report artifacts and full-finding loading before score
+  recalculation in request-scoped review handlers.
+- Added migration `20260805150445_M5IntelligentDocumentConformity`, 6 M5-focused
+  regression tests, AI report/reflection coverage and four comparison routes.
+- Authenticated acceptance completed with scores 90/100, critical override,
+  expert/manager separation, report signatures and later final-source reuse.
 
 ### 2026-07-28
 

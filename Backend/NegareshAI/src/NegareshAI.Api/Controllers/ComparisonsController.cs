@@ -40,6 +40,7 @@ public sealed class ComparisonsController(
     }
 
     [HttpPut("findings/{findingId:guid}/review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ComparisonReview)]
     public async Task<ActionResult<ComparisonFindingResponse>> Review(
         Guid findingId, ReviewFindingRequest request,
         CancellationToken cancellationToken)
@@ -47,6 +48,23 @@ public sealed class ComparisonsController(
         var result = await sender.Send(
             new ReviewFindingCommand(findingId, request), cancellationToken);
         return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("{id:guid}/expert-review")]
+    [NegareshAccess(NegareshAIAccessFormIds.ComparisonReview)]
+    public async Task<ActionResult<ComparisonRunResponse>> ExpertReview(
+        Guid id, ReviewComparisonRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await sender.Send(
+                new ReviewComparisonCommand(id, request), cancellationToken);
+            return result is null ? Conflict("Comparison is not awaiting expert review.") : Ok(result);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Conflict(exception.Message);
+        }
     }
 
     [HttpGet("{id:guid}/report.{format}")]

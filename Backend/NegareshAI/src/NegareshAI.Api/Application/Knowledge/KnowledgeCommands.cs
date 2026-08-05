@@ -35,6 +35,7 @@ public sealed class CreateDocumentGroupCommandHandler(
             OrganizationId = tenant.OrganizationId,
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
+            PassingThreshold = UpdateDocumentGroupCommandHandler.ValidThreshold(request.PassingThreshold),
             CreatedByUserId = tenant.UserId,
             Members = documentIds.Select(documentId => new DocumentGroupMember
             {
@@ -45,7 +46,7 @@ public sealed class CreateDocumentGroupCommandHandler(
         audit.Add("document-group.created", nameof(DocumentGroup), group.Id.ToString(),
             new { documentCount = documentIds.Length });
         await db.SaveChangesAsync(cancellationToken);
-        return new(group.Id, group.Name, group.Description, group.IsActive,
+        return new(group.Id, group.Name, group.Description, group.PassingThreshold, group.IsActive,
             documentIds, group.CreatedAtUtc);
     }
 }
@@ -54,6 +55,13 @@ public sealed class UpdateDocumentGroupCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
     : IRequestHandler<UpdateDocumentGroupCommand, DocumentGroupResponse?>
 {
+    public static decimal ValidThreshold(decimal value)
+    {
+        if (value is <= 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(value), "Passing threshold must be between 0 and 100.");
+        return decimal.Round(value, 2);
+    }
+
     public async Task<DocumentGroupResponse?> Handle(UpdateDocumentGroupCommand command, CancellationToken ct)
     {
         var group = await db.DocumentGroups.Include(x => x.Members).SingleOrDefaultAsync(x =>
@@ -64,9 +72,10 @@ public sealed class UpdateDocumentGroupCommandHandler(
         db.DocumentGroupMembers.RemoveRange(group.Members); group.Members.Clear();
         group.Members.AddRange(ids.Select(id => new DocumentGroupMember { DocumentId = id }));
         group.Name = command.Request.Name.Trim(); group.Description = command.Request.Description?.Trim(); group.IsActive = command.Request.IsActive;
+        group.PassingThreshold = ValidThreshold(command.Request.PassingThreshold);
         group.UpdatedAtUtc = DateTime.UtcNow; group.UpdatedByUserId = tenant.UserId;
         audit.Add("document-group.updated", nameof(DocumentGroup), group.Id.ToString()); await db.SaveChangesAsync(ct);
-        return new(group.Id, group.Name, group.Description, group.IsActive, ids, group.CreatedAtUtc);
+        return new(group.Id, group.Name, group.Description, group.PassingThreshold, group.IsActive, ids, group.CreatedAtUtc);
     }
 }
 public sealed class DeleteDocumentGroupCommandHandler(NegareshDbContext db, ICurrentTenant tenant, IAuditWriter audit)
