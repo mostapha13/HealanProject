@@ -68,8 +68,8 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-const navItems:{id:string;label:string;icon:IconName;urls:string[]}[]=[
-  {id:"overview",label:"نمای کلی",icon:"grid",urls:["/"]},{id:"documents",label:"اسناد",icon:"file",urls:["/documents"]},{id:"contracts",label:"قراردادها",icon:"contract",urls:["/contracts"]},{id:"workflow",label:"گردش کار",icon:"check",urls:["/workflows"]},{id:"operations",label:"عملیات و ریسک",icon:"clock",urls:["/operations","/risks"]},{id:"management",label:"داشبورد مدیریتی",icon:"chart",urls:["/management-dashboard"]},{id:"comparison",label:"تطبیق اسناد",icon:"compare",urls:["/comparisons"]},{id:"assistant",label:"دستیار هوشمند",icon:"sparkles",urls:["/contract-generation"]},{id:"reports",label:"گزارش‌ها",icon:"chart",urls:["/reports"]}
+const navItems:{id:string;label:string;icon:IconName;urls:string[];href?:string}[]=[
+  {id:"overview",label:"نمای کلی",icon:"grid",urls:["/"]},{id:"documents",label:"اسناد",icon:"file",urls:["/documents"]},{id:"contracts",label:"قراردادها",icon:"contract",urls:["/contracts"]},{id:"workflow",label:"گردش کار",icon:"check",urls:["/workflows"]},{id:"operations",label:"عملیات و ریسک",icon:"clock",urls:["/operations","/risks"]},{id:"management",label:"داشبورد مدیریتی",icon:"chart",urls:["/management-dashboard"]},{id:"comparison",label:"تطبیق اسناد",icon:"compare",urls:["/comparisons"]},{id:"assistant",label:"دستیار هوشمند",icon:"sparkles",urls:["/contract-generation"]},{id:"historical-contract-import",label:"ورود قرارداد تاریخی",icon:"upload",urls:["/contract-generation"],href:"/historical-contract-import"},{id:"reports",label:"گزارش‌ها",icon:"chart",urls:["/reports"]}
 ];
 function formatDate(value:string){return formatJalaliDate(value)||value}
 function fullCurrentDate(){return formatJalaliLongDate()}
@@ -552,7 +552,9 @@ export default function Home(){
 </div>
       <nav className="navigation" aria-label="منوی اصلی">
 <span className="nav-caption">فضای کاری</span>
-        {visibleNavItems.map(item=>
+        {visibleNavItems.map(item=>item.href?
+<Link href={item.href} className="nav-item" key={item.id} onClick={()=>setSidebarOpen(false)}>
+<Icon name={item.icon}/><span>{item.label}</span></Link>:
 <button onClick={()=>{setActiveSection(item.id);setSidebarOpen(false);if(["workflow","operations","management"].includes(item.id))void loadP5()}} className={`nav-item ${activeSection===item.id?"active":""}`} key={item.id}>
 <Icon name={item.icon}/>
 <span>{item.label}</span>{item.id==="contracts"&&dashboard?.activeContractCount?<b>{new Intl.NumberFormat("fa-IR").format(dashboard.activeContractCount)}</b>:null}</button>)}

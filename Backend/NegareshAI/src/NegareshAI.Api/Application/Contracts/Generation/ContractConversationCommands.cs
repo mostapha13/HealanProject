@@ -250,10 +250,11 @@ public sealed class StartContractConversationHandler(
             ["startDate"] = PersianDate.Format(changes.StartDate!.Value),
             ["endDate"] = PersianDate.Format(changes.EndDate!.Value),
             ["amount"] = changes.CalculatedAmount!.Value.ToString("N0"),
-            ["currency"] = sourceContract.Currency,
+            ["currency"] = CurrencyDisplayName(sourceContract.Currency),
             ["newClause"] = changes.NewClause ?? "",
             ["approvedClauses"] = string.Join("\n\n", approvedClauses.Select(x => $"{x.Code} - {x.Title}\n{x.Text}")),
-            ["partyName"] = partyName
+            ["partyName"] = partyName,
+            ["signingDate"] = PersianDate.Format(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3.5)))
         };
         var generated = await generator.GenerateAsync(templateFile.Content, values, ct);
         var version = conversation.Drafts.Count == 0 ? 1 : conversation.Drafts.Max(x => x.VersionNumber) + 1;
@@ -290,6 +291,15 @@ public sealed class StartContractConversationHandler(
             $"پیش‌نویس نسخه {version} تولید شد. منابع، محاسبات و تغییرات برای بازبینی ثبت شده‌اند.", sourceSnapshot);
         conversation.Status = ContractConversationStatus.InReview;
     }
+
+    private static string CurrencyDisplayName(string? currency) => currency?.Trim().ToUpperInvariant() switch
+    {
+        "IRR" => "ریال",
+        "IRT" => "تومان",
+        "USD" => "دلار آمریکا",
+        "EUR" => "یورو",
+        _ => string.IsNullOrWhiteSpace(currency) ? "ریال" : currency
+    };
 
     private void AddClarification(ContractConversation conversation, string key, string question)
     {
@@ -612,13 +622,13 @@ public sealed class ReviewContractDraftHandler(
                 previous.RagPublishedAtUtc = null;
             }
             var processed = await ai.ProcessAsync(tenant.OrganizationId, contract.DocumentId, version.Id,
-                docxFile.FileName, docxFile.Content, model, "group", [],
+                docxFile.FileName, docxFile.Content, model, "restricted", [],
                 [conversation.PrimaryContractGroupId.ToString()], false, ct);
             version.ExtractedText = processed.ExtractedText;
             if (!string.IsNullOrWhiteSpace(processed.ExtractedText))
             {
                 await ai.PublishTextAsync(tenant.OrganizationId, contract.DocumentId, version.Id,
-                    processed.ExtractedText, model, "group", [],
+                    processed.ExtractedText, model, "restricted", [],
                     [conversation.PrimaryContractGroupId.ToString()], ct);
                 version.IsRagPublished = true;
                 version.RagPublishedAtUtc = DateTime.UtcNow;

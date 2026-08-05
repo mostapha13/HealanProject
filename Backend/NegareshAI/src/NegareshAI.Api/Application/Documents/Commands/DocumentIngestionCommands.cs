@@ -263,7 +263,7 @@ internal static class DocumentIngestionSupport
             .Select(x => x.Value).Distinct().Take(20).ToArray();
         var years = Regex.Matches(text, @"(?<!\d)(?:13|14)\d{2}(?!\d)")
             .Select(x => x.Value).Distinct().Take(10).ToArray();
-        var amounts = Regex.Matches(text, @"\d{1,3}(?:[,٬]\d{3}){2,}")
+        var amounts = Regex.Matches(text, @"[\p{Nd}]{1,3}(?:[.,٬،][\p{Nd}]{3}){1,}(?:\s*(?:ریال|تومان))?")
             .Select(x => x.Value).Distinct().Take(20).ToArray();
         var contractNumbers = Regex.Matches(text,
                 @"(?:شماره\s*(?:قرارداد)?|قرارداد\s*شماره)\s*[:：-]?\s*([\p{L}\p{N}/_.-]{2,40})",

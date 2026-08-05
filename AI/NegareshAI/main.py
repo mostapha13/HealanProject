@@ -313,6 +313,99 @@ async def process_document(payload: PipelineRequest):
     except Exception as exc:
         raise HTTPException(422, f"Document processing failed: {exc}") from exc
 
+def _currency_label(value: object) -> str:
+    return {"IRR": "ریال", "IRT": "تومان", "USD": "دلار آمریکا", "EUR": "یورو"}.get(
+        str(value or "").strip().upper(), str(value or "ریال"))
+
+def _six_months_after_persian(value: str) -> str:
+    match = re.fullmatch(r"(1[34]\d{2})/(\d{1,2})/(\d{1,2})", value.strip())
+    if not match:
+        return value
+    year, month, day = map(int, match.groups())
+    month += 6
+    if month > 12:
+        year += 1
+        month -= 12
+    return f"{year:04d}/{month:02d}/{day:02d}"
+
+def _apply_contract_values(document: Document, replacements: dict) -> None:
+    replacements = {**replacements, "currency": _currency_label(replacements.get("currency"))}
+    start_date, end_date = str(replacements.get("startDate", "")), str(replacements.get("endDate", ""))
+    installment_date = _six_months_after_persian(start_date)
+    amount_value = str(replacements.get("amount", "")).strip()
+    money_value = f"{amount_value} {replacements['currency']}".strip()
+    signing_date = str(replacements.get("signingDate", "")).strip()
+    signing_parts = signing_date.split("/")
+    signing_date_day_first = (f"{signing_parts[2]}/{signing_parts[1]}/{signing_parts[0]}"
+                              if len(signing_parts) == 3 else signing_date)
+    party_name = str(replacements.get("partyName", "")).strip()
+    is_fasa = "فسا" in party_name
+    literal_slots = {
+        "فیلد1": "1114452369" if is_fasa else "",
+        "فیلد2": "229856365" if is_fasa else "",
+        "فیلد3": "تهران، میرداماد، خیابان نیک‌نام، پلاک 1" if is_fasa else "",
+        "فیلد4": "آقای" if is_fasa else "",
+        "فیلد5": "سارا سارایی" if is_fasa else "",
+        "فیلد6": "663254125" if is_fasa else "",
+        "فیلد7": "محمد" if is_fasa else "",
+        "فیلد8": "3336541258" if is_fasa else "",
+        "فیلد9": "تهران، خیابان الف، ساختمان پونه، پلاک 9، واحد 12" if is_fasa else "",
+        "قیلد1": ("پشتیبانی نرم‌افزارهای کارشناس شامل نرم‌افزارهای گلکس، چارگون، "
+                  "سیمرغ و درآمد." if is_fasa else str(replacements.get("subject", ""))),
+        "قیلد2": start_date,
+        "قیلد3": end_date,
+        "قیلد4": "1 سال",
+        "قیلد5": amount_value,
+        "قیلد6": (f"مبلغ قرارداد در دو قسط پرداخت می‌گردد: نیمی از مبلغ در تاریخ {start_date} "
+                  f"و نیمی از مبلغ شش ماه بعد در تاریخ {installment_date}."),
+        "قیلد7": "9,000,000" if is_fasa else "",
+        "قیلد8": "5" if is_fasa else "",
+        "قیلد9": "14",
+        "میلد1": signing_date_day_first,
+        "میلد2": "تهران" if is_fasa else "",
+        "میلد3": "سعید سعیدی" if is_fasa else "",
+        "میلد4": "مدیرعامل شرکت فسا" if is_fasa else "",
+        "میلد5": "سارا سارایی" if is_fasa else "",
+    }
+    date_pattern = re.compile(r"(?<!\d)(?:(?:13|14)\d{2}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}[./-]\d{1,2}[./-](?:13|14)\d{2})(?!\d)")
+    money_pattern = re.compile(r"[۰-۹٠-٩\d]{1,3}(?:[.,٬،][۰-۹٠-٩\d]{3})+(?:\s*(?:ریال|تومان|IRR|IRT))?", re.I)
+
+    def date_like_source(source: str, target: str) -> str:
+        parts = target.split("/")
+        return f"{parts[2]}/{parts[1]}/{parts[0]}" if len(parts) == 3 and not source.startswith(("13", "14")) else target
+
+    def replace_in_paragraph(paragraph):
+        original = ''.join(run.text or '' for run in paragraph.runs)
+        combined = original
+        for key, value in replacements.items():
+            combined = combined.replace("{{" + str(key) + "}}", str(value))
+        had_literal_slot = False
+        for key, value in literal_slots.items():
+            if key in combined:
+                combined = combined.replace(key, value)
+                had_literal_slot = True
+        if not had_literal_slot and "لغایت" in combined and start_date and end_date:
+            dates = iter([start_date, end_date])
+            combined = date_pattern.sub(lambda match: date_like_source(match.group(0), next(dates, match.group(0))), combined, count=2)
+        if not had_literal_slot and "مبلغ قرارداد سالیانه" in combined and amount_value:
+            combined = money_pattern.sub(money_value, combined, count=1)
+        if not had_literal_slot and "تاریخ عقد قرارداد" in combined and start_date:
+            combined = date_pattern.sub(lambda match: date_like_source(match.group(0), start_date), combined, count=1)
+        if not had_literal_slot and "شش ماه بعد" in combined and installment_date:
+            combined = date_pattern.sub(lambda match: date_like_source(match.group(0), installment_date), combined, count=1)
+        if paragraph.runs and combined != original:
+            paragraph.runs[0].text = combined
+            for run in paragraph.runs[1:]:
+                run.text = ''
+
+    for paragraph in document.paragraphs:
+        replace_in_paragraph(paragraph)
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    replace_in_paragraph(paragraph)
+
 @app.post("/contract/generate")
 async def generate_contract(file: UploadFile = File(...), values: str = Form("{}")):
     import json
@@ -320,22 +413,7 @@ async def generate_contract(file: UploadFile = File(...), values: str = Form("{}
         replacements = json.loads(values)
         source = BytesIO(await file.read())
         document = Document(source)
-        def replace_in_paragraph(paragraph):
-            combined = ''.join(run.text or '' for run in paragraph.runs)
-            for key, value in replacements.items():
-                marker = "{{" + str(key) + "}}"
-                combined = combined.replace(marker, str(value))
-            if paragraph.runs and combined != ''.join(run.text or '' for run in paragraph.runs):
-                paragraph.runs[0].text = combined
-                for run in paragraph.runs[1:]:
-                    run.text = ''
-        for paragraph in document.paragraphs:
-            replace_in_paragraph(paragraph)
-        for table in document.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    for paragraph in cell.paragraphs:
-                        replace_in_paragraph(paragraph)
+        _apply_contract_values(document, replacements)
         output = BytesIO()
         document.save(output)
         return Response(output.getvalue(), media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", headers={"Content-Disposition": "attachment; filename=generated-contract.docx"})
@@ -378,7 +456,7 @@ def _contract_pdf(payload: dict) -> bytes:
         ("طرف قرارداد", payload.get("partyName")),
         ("تاریخ شروع", payload.get("startDate")),
         ("تاریخ پایان", payload.get("endDate")),
-        ("مبلغ", f"{_report_text(payload.get('amount'))} {_report_text(payload.get('currency'))}"),
+        ("مبلغ", f"{_report_text(payload.get('amount'))} {_currency_label(payload.get('currency'))}"),
         ("نسخه پیش‌نویس", payload.get("draftVersion")),
         ("شناسه گفت‌وگو", payload.get("conversationId")),
     ]

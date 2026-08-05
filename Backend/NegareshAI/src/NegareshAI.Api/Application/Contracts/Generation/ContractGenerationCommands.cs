@@ -178,7 +178,8 @@ public sealed class StartContractGenerationHandler(
                 ["amount"] = (changes.CalculatedAmount ?? contract.Amount!.Value).ToString("N0"),
                 ["currency"] = contract.Currency,
                 ["newClause"] = changes.NewClause ?? "",
-                ["partyName"] = contract.Parties.FirstOrDefault()?.Name ?? ""
+                ["partyName"] = contract.Parties.FirstOrDefault()?.Name ?? "",
+                ["signingDate"] = PersianDate.Format(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3.5)))
             };
             var generated = await generator.GenerateAsync(templateFile.Content, values, cancellationToken);
             await using var stream = new MemoryStream(generated);

@@ -10,6 +10,21 @@ namespace NegareshAI.Api.Tests;
 public sealed class ContractGenerationTests
 {
     [Fact]
+    public void Parses_slash_grouped_amount_without_confusing_persian_dates()
+    {
+        var contract = new Contract { Subject = "پشتیبانی", Currency = "IRR" };
+
+        var result = ContractChangeSetParser.Parse(
+            "قرارداد پشتیبانی شرکت فسا از تاریخ 1402/01/01 تا 1402/12/29 و با مبلغ 6/000/000/000 ریال",
+            contract);
+
+        Assert.Equal(6_000_000_000m, result.CalculatedAmount);
+        Assert.Equal(new DateOnly(2023, 3, 21), result.StartDate);
+        Assert.Equal(new DateOnly(2024, 3, 19), result.EndDate);
+        Assert.Empty(result.Questions);
+    }
+
+    [Fact]
     public void Persian_instruction_produces_deterministic_dates_percentage_and_amount()
     {
         var contract = new Contract

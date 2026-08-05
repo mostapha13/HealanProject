@@ -31,6 +31,21 @@ public sealed class DocumentIngestionLifecycleTests
     }
 
     [Fact]
+    public void Suggested_fields_recognize_dot_separated_persian_contract_amount()
+    {
+        var support = typeof(UploadDocumentBatchCommand).Assembly.GetType(
+            "NegareshAI.Api.Application.Documents.Commands.DocumentIngestionSupport", true)!;
+        var method = support.GetMethod("SuggestFields",
+            BindingFlags.Public | BindingFlags.Static)!;
+        var value = Assert.IsType<string>(method.Invoke(null,
+            ["ماده ۳- مبلغ قرارداد سالیانه ۱۵.۰۰۰.۰۰۰.۰۰۰ ریال می‌باشد."]));
+        using var json = JsonDocument.Parse(value);
+
+        Assert.Contains("۱۵.۰۰۰.۰۰۰.۰۰۰ ریال", json.RootElement.GetProperty("amounts")
+            .EnumerateArray().Select(x => x.GetString()));
+    }
+
+    [Fact]
     public async Task Extracted_version_is_not_published_before_both_approvals()
     {
         await using var db = CreateDb();

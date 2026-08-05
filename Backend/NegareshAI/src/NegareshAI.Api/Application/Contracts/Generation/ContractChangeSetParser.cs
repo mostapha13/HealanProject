@@ -13,7 +13,7 @@ public static partial class ContractChangeSetParser
 {
     public static ContractChangeSet Parse(string instruction, Contract contract)
     {
-        var normalized = ToLatinDigits(instruction).Replace("٬", "").Replace(",", "");
+        var normalized = NormalizeGroupedNumbers(ToLatinDigits(instruction));
         var dates = DateRegex().Matches(normalized).Select(match =>
         {
             try { return PersianDate.ParseDateOnly(match.Value); }
@@ -61,8 +61,14 @@ public static partial class ContractChangeSetParser
         .Replace('٢', '2').Replace('٣', '3').Replace('٤', '4').Replace('٥', '5')
         .Replace('٦', '6').Replace('٧', '7').Replace('٨', '8').Replace('٩', '9');
 
+    private static string NormalizeGroupedNumbers(string value) =>
+        GroupedNumberRegex().Replace(value, match => Regex.Replace(match.Value, @"[/.,٬،]", ""))
+            .Replace("٬", "").Replace(",", "");
+
     [GeneratedRegex(@"\b1[34]\d{2}[\/\-]\d{1,2}[\/\-]\d{1,2}\b")]
     private static partial Regex DateRegex();
+    [GeneratedRegex(@"(?<!\d)\d{1,3}(?:[/.,٬،]\d{3}){2,}(?![/\d])")]
+    private static partial Regex GroupedNumberRegex();
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s*درصد")]
     private static partial Regex PercentRegex();
     [GeneratedRegex(@"(\d{6,})\s*(?:ریال|تومان)")]
