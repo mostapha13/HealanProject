@@ -102,11 +102,14 @@ public enum ContractGenerationStatus
     Failed = 5
 }
 
-public enum WorkflowStageType { Legal = 1, Technical = 2, Financial = 3, Managerial = 4 }
+public enum WorkflowStageType { Legal = 1, Technical = 2, Financial = 3, Managerial = 4, Expert = 5 }
 public enum WorkflowDecision { Pending = 1, Approved = 2, RevisionRequested = 3, Rejected = 4 }
-public enum ContractOperationType { Deadline = 1, Renewal = 2, Payment = 3, Guarantee = 4, Notice = 5 }
+public enum ContractOperationType { Deadline = 1, Renewal = 2, Payment = 3, Guarantee = 4, Notice = 5, Obligation = 6 }
 public enum ContractOperationStatus { Pending = 1, Completed = 2, Cancelled = 3, Overdue = 4 }
 public enum RiskLevel { Low = 1, Medium = 2, High = 3, Critical = 4 }
+public enum WorkflowActionType { Comment = 1, Approved = 2, RevisionRequested = 3, Rejected = 4, Delegated = 5 }
+public enum OperationReminderKind { Upcoming = 1, Overdue = 2 }
+public enum OperationReminderStatus { PendingDelivery = 1, Delivered = 2, Failed = 3 }
 public enum DataScopeResourceType { ContractGroup = 1, DocumentGroup = 2 }
 public enum DataScopeSubjectType { User = 1, Role = 2 }
 
@@ -324,6 +327,10 @@ public sealed class ContractWorkflow
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid ContractId { get; set; }
+    public Guid? ContractGroupId { get; set; }
+    public Guid? WorkflowDefinitionId { get; set; }
+    public int? WorkflowDefinitionVersion { get; set; }
+    public string DefinitionSnapshotJson { get; set; } = "[]";
     public WorkflowDecision Status { get; set; } = WorkflowDecision.Pending;
     public int CurrentStageOrder { get; set; } = 1;
     public bool IsDeleted { get; set; }
@@ -335,6 +342,7 @@ public sealed class ContractWorkflow
     public DateTime? DeletedAtUtc { get; set; }
     public Contract? Contract { get; set; }
     public List<ContractWorkflowStage> Stages { get; set; } = [];
+    public List<ContractWorkflowAction> Actions { get; set; } = [];
 }
 
 public sealed class ContractWorkflowStage
@@ -342,8 +350,12 @@ public sealed class ContractWorkflowStage
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid ContractWorkflowId { get; set; }
     public WorkflowStageType Type { get; set; }
+    public string Title { get; set; } = string.Empty;
     public int Order { get; set; }
     public string? AssignedUserId { get; set; }
+    public string? DelegatedFromUserId { get; set; }
+    public string? DelegatedByUserId { get; set; }
+    public DateTime? DelegatedAtUtc { get; set; }
     public WorkflowDecision Decision { get; set; } = WorkflowDecision.Pending;
     public string? Comment { get; set; }
     public string? DecidedByUserId { get; set; }
@@ -351,14 +363,68 @@ public sealed class ContractWorkflowStage
     public ContractWorkflow? Workflow { get; set; }
 }
 
+public sealed class ContractWorkflowDefinition
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid DefinitionKey { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid? ContractGroupId { get; set; }
+    public required string Name { get; set; }
+    public int Version { get; set; } = 1;
+    public required string StagesJson { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+}
+
+public sealed class ContractWorkflowAction
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractWorkflowId { get; set; }
+    public Guid ContractWorkflowStageId { get; set; }
+    public WorkflowActionType Type { get; set; }
+    public string? Comment { get; set; }
+    public string? FromUserId { get; set; }
+    public string? ToUserId { get; set; }
+    public required string PerformedByUserId { get; set; }
+    public DateTime PerformedAtUtc { get; set; } = DateTime.UtcNow;
+    public ContractWorkflow? Workflow { get; set; }
+    public ContractWorkflowStage? Stage { get; set; }
+}
+
+public sealed class ContractRiskChecklistDefinition
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid DefinitionKey { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid? ContractGroupId { get; set; }
+    public required string Name { get; set; }
+    public int Version { get; set; } = 1;
+    public required string ItemsJson { get; set; }
+    public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public required string CreatedByUserId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public string? DeletedByUserId { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+}
+
 public sealed class ContractRiskAssessment
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid OrganizationId { get; set; }
     public Guid ContractId { get; set; }
+    public Guid? ChecklistDefinitionId { get; set; }
+    public int? ChecklistDefinitionVersion { get; set; }
+    public int Version { get; set; } = 1;
     public RiskLevel Level { get; set; }
     public int Score { get; set; }
     public required string ChecklistJson { get; set; }
+    public string DefinitionSnapshotJson { get; set; } = "[]";
     public string? Summary { get; set; }
     public bool IsDeleted { get; set; }
     public required string CreatedByUserId { get; set; }
@@ -380,6 +446,9 @@ public sealed class ContractOperation
     public string Currency { get; set; } = "IRR";
     public ContractOperationStatus Status { get; set; } = ContractOperationStatus.Pending;
     public int ReminderDaysBefore { get; set; } = 7;
+    public string? AssignedUserId { get; set; }
+    public string? CompletedByUserId { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
     public string? Description { get; set; }
     public bool IsDeleted { get; set; }
     public required string CreatedByUserId { get; set; }
@@ -389,6 +458,20 @@ public sealed class ContractOperation
     public string? DeletedByUserId { get; set; }
     public DateTime? DeletedAtUtc { get; set; }
     public Contract? Contract { get; set; }
+    public List<ContractOperationReminder> Reminders { get; set; } = [];
+}
+
+public sealed class ContractOperationReminder
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OrganizationId { get; set; }
+    public Guid ContractOperationId { get; set; }
+    public required string DedupeKey { get; set; }
+    public OperationReminderKind Kind { get; set; }
+    public OperationReminderStatus Status { get; set; } = OperationReminderStatus.PendingDelivery;
+    public DateOnly ScheduledFor { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public ContractOperation? Operation { get; set; }
 }
 
 public sealed class ContractParty

@@ -4,6 +4,7 @@ using NegareshAI.Api.Application.Common.Tenancy;
 using System.Reflection;
 using NegareshAI.Api.Services;
 using NegareshAI.Api.Application.Access;
+using NegareshAI.Api.Application.ContractOperations;
 
 namespace NegareshAI.Api.Application;
 
@@ -19,6 +20,9 @@ public static class DependencyInjection
         services.AddScoped<IAuditWriter, AuditWriter>();
         services.AddScoped<IComparisonEngine, ComparisonEngine>();
         services.AddScoped<IDataScopeAuthorizer, DataScopeAuthorizer>();
+        services.AddScoped<ContractOperationScope>();
+        services.AddScoped<IContractOperationReminderProcessor,
+            ContractOperationReminderProcessor>();
         return services;
     }
 }

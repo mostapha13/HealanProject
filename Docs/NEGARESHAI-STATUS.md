@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-05
 Active branch: `codex/negareshai-foundation`
-Last implementation baseline: `feat(negareshai): complete M5 intelligent document conformity`
+Last implementation baseline: `feat(negareshai): complete M6 workflow risk and operations`
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
@@ -54,44 +54,54 @@ history and must not override this section.
   corrected-document reruns and separate manager final/RAG publication are
   implemented. Independent RTL comparison, history, review and report routes
   are available.
+- M6 is complete: organization/contract-group workflow definitions and risk
+  checklists are immutable and versioned; legal, technical, financial, expert
+  and manager stages support audited comment, revision, rejection, approval
+  and delegation. Deadline, renewal, payment, guarantee, obligation and notice
+  operations have completion audit, soft delete/restore, idempotent reminders,
+  SQL-backed dashboards and CSV reporting. Six independent paginated RTL
+  routes are available.
 
-### M5 acceptance evidence
+### M6 acceptance evidence
 
-- Backend regression tests: 50/50 passed, including request-scoped score
-  recalculation and immutable report-artifact regression coverage.
-- AI report, contract-generation and RAG security tests: 11/11 passed in the
-  dependency-complete AI container.
-- Next.js production build passed and generated 28 routes.
+- Backend regression tests: 56/56 passed, including assignee-only worklists,
+  delegation, versioned/critical risk, idempotent reminders and complete
+  operation lifecycle coverage.
+- Next.js production build passed and generated 34 routes. Authenticated
+  browser validation passed for all six M6 routes with RTL layout and no
+  console or rendered application errors.
 - EF reports no pending model changes. Migration
-  `20260805150445_M5IntelligentDocumentConformity` is applied to the active SQL
-  database and its new artifact/decision tables exist.
-- Authenticated Docker acceptance passed: incomplete input scored 90 with a
-  critical-failure override; the corrected version scored 100; expert approval
-  did not publish to RAG; manager finalization did; the final version was then
-  retrieved as an allowed source for a later comparison.
-- Runtime versioned DOCX/PDF reports passed with valid `PK`/`%PDF` signatures.
-- Tool trace records two evidence-verification/reflection passes. MCP remains
-  disabled for private internal sources and records that privacy decision; it
-  is reserved for an explicitly required external source/tool boundary.
-- Full evidence is recorded in `Docs/NEGARESHAI-ACCEPTANCE-2026-08-05.md`.
+  `20260805160513_M6WorkflowRiskOperations` is applied to the active SQL Server
+  database.
+- Authenticated Docker/Identity/SQL acceptance passed: workflow definition
+  versions 1/2, five decisions and eight audited actions; weighted risk scores
+  59/37 with critical override; reminder run 1 queued two records and run 2
+  skipped the same two dedupe keys; real overdue/upcoming/high-risk dashboard
+  values, completion audit, update, archive, restore and UTF-8 BOM CSV passed.
+- API, AI and Web containers are healthy. No secret, token or connection
+  string is recorded in the repository.
+- M6 is deterministic operational logic and does not require an AI model call.
+  Browser/API tools were used for acceptance; no private contract data was
+  sent across an external MCP boundary. Existing M4/M5 AI reflection/tool
+  traces remain the correct boundary for evidence-grounded AI work.
+- Full evidence is recorded in
+  `Docs/NEGARESHAI-ACCEPTANCE-2026-08-05-M6.md`.
 
 ### Exact continuation point
 
-The next implementation stage is **M6 — contract workflow, risk and operations**.
+The next implementation stage is **M7 — professional UX, performance and accessibility**.
 Continue in this order:
 
-1. Move the remaining workflow/risk/operation behavior from controllers into
-   the Application layer and finalize tenant/group-scoped data models.
-2. Implement configurable legal, technical, financial, expert and managerial
-   workflow stages with audited decisions and delegation.
-3. Complete versioned risk checklists, deadlines, renewals, payments,
-   guarantees and idempotent overdue/reminder jobs.
-4. Add independent paginated worklist, risk, operation and reporting pages.
-5. Finish M6 with migrations, access seeds, regression tests and authenticated
-   Docker acceptance using real SQL state.
+1. Build the historical contract/image import wizard and complete Persian
+   calendar usage in new M6 forms.
+2. Consolidate the chat workspace around sources, questions, calculations,
+   diffs and versions without changing the completed M4/M5 lifecycle rules.
+3. Complete responsive, keyboard, accessibility and performance budgets for
+   the two primary product journeys.
+4. Run M7 regression and authenticated browser acceptance before beginning M8.
 
-Before starting M6, read `Docs/NEGARESHAI-PRODUCT-SPEC.md` and the M6 section
-of `Docs/NEGARESHAI-ROADMAP.md`. Do not redesign or repeat M0-M5 unless a
+Before starting M7, read `Docs/NEGARESHAI-PRODUCT-SPEC.md` and the M7 section
+of `Docs/NEGARESHAI-ROADMAP.md`. Do not redesign or repeat M0-M6 unless a
 regression is proven.
 
 ### Working-tree hygiene
@@ -762,16 +772,28 @@ Performed on 2026-07-28:
 
 ## Next action
 
-1. Start M6 contract workflow, risk and operations from the audited roadmap.
-2. Preserve the completed M4/M5 requester/expert/manager lifecycle boundaries
-   while adding configurable workflow stages and delegation.
-3. Execute M6 acceptance against real SQL deadlines, reminders and scoped
-   user worklists.
+1. Start M7 professional UX, performance and accessibility from the audited
+   roadmap without changing the accepted M4-M6 domain rules.
+2. Implement the historical contract/image import wizard and finish Persian
+   calendar consistency across the primary journeys.
+3. Run responsive, keyboard, accessibility and performance acceptance before
+   moving to M8 hardening and release.
 
 ## Session log
 
 ### 2026-08-05
 
+- Completed M6 workflow, risk and contract operations across the Application
+  layer, SQL model, thin HTTP controllers and six paginated RTL routes.
+- Added immutable workflow/risk definition versions, five-stage audited
+  decisions, comments/delegation, weighted critical assessments, completion
+  audit, all six operation types, idempotent reminder worker, scoped dashboard
+  and UTF-8 BOM CSV reporting.
+- Added migration `20260805160513_M6WorkflowRiskOperations` and six focused
+  regression tests; the complete Backend suite passes 56/56 and EF reports no
+  pending model changes.
+- Authenticated Docker/SQL acceptance and signed-in browser validation passed;
+  API, AI and Web containers are healthy and M7 is the exact continuation.
 - Completed M5 intelligent document conformity across Backend, AI and the RTL
   frontend workspace.
 - Added immutable source/rule/criterion/model/prompt/tool snapshots,

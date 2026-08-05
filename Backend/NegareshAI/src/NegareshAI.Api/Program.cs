@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NegareshAI.Api.Application;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Services;
+using NegareshAI.Api.Application.ContractOperations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<NegareshAI.Api.Data.NegareshDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NegareshAI")));
 builder.Services.AddApplication();
+builder.Services.AddHostedService<ContractOperationReminderWorker>();
 
 builder.Services.AddControllers();
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()

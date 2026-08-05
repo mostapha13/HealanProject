@@ -49,8 +49,12 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
     public DbSet<ComparisonReportArtifact> ComparisonReportArtifacts => Set<ComparisonReportArtifact>();
     public DbSet<ContractWorkflow> ContractWorkflows => Set<ContractWorkflow>();
     public DbSet<ContractWorkflowStage> ContractWorkflowStages => Set<ContractWorkflowStage>();
+    public DbSet<ContractWorkflowDefinition> ContractWorkflowDefinitions => Set<ContractWorkflowDefinition>();
+    public DbSet<ContractWorkflowAction> ContractWorkflowActions => Set<ContractWorkflowAction>();
+    public DbSet<ContractRiskChecklistDefinition> ContractRiskChecklistDefinitions => Set<ContractRiskChecklistDefinition>();
     public DbSet<ContractRiskAssessment> ContractRiskAssessments => Set<ContractRiskAssessment>();
     public DbSet<ContractOperation> ContractOperations => Set<ContractOperation>();
+    public DbSet<ContractOperationReminder> ContractOperationReminders => Set<ContractOperationReminder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -285,16 +289,47 @@ public sealed class NegareshDbContext(DbContextOptions<NegareshDbContext> option
             .HasForeignKey(x => x.ComparisonRunId).OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ContractWorkflow>()
             .HasIndex(x => new { x.OrganizationId, x.ContractId, x.IsDeleted });
+        modelBuilder.Entity<ContractWorkflow>().Property(x => x.DefinitionSnapshotJson)
+            .HasDefaultValue("[]");
         modelBuilder.Entity<ContractWorkflow>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ContractWorkflowStage>()
             .HasIndex(x => new { x.ContractWorkflowId, x.Order }).IsUnique();
+        modelBuilder.Entity<ContractWorkflowStage>().Property(x => x.Title)
+            .HasDefaultValue(string.Empty);
+        modelBuilder.Entity<ContractWorkflowDefinition>()
+            .HasIndex(x => new { x.OrganizationId, x.DefinitionKey, x.Version }).IsUnique();
+        modelBuilder.Entity<ContractWorkflowDefinition>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractGroupId, x.IsActive, x.IsDeleted });
+        modelBuilder.Entity<ContractWorkflowDefinition>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<ContractWorkflowAction>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractWorkflowId, x.PerformedAtUtc });
+        modelBuilder.Entity<ContractWorkflowAction>()
+            .HasOne(x => x.Workflow).WithMany(x => x.Actions)
+            .HasForeignKey(x => x.ContractWorkflowId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ContractWorkflowAction>()
+            .HasOne(x => x.Stage).WithMany()
+            .HasForeignKey(x => x.ContractWorkflowStageId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ContractRiskChecklistDefinition>()
+            .HasIndex(x => new { x.OrganizationId, x.DefinitionKey, x.Version }).IsUnique();
+        modelBuilder.Entity<ContractRiskChecklistDefinition>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractGroupId, x.IsActive, x.IsDeleted });
+        modelBuilder.Entity<ContractRiskChecklistDefinition>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ContractRiskAssessment>()
             .HasIndex(x => new { x.OrganizationId, x.ContractId, x.CreatedAtUtc });
+        modelBuilder.Entity<ContractRiskAssessment>()
+            .HasIndex(x => new { x.OrganizationId, x.ContractId, x.Version });
+        modelBuilder.Entity<ContractRiskAssessment>().Property(x => x.DefinitionSnapshotJson)
+            .HasDefaultValue("[]");
         modelBuilder.Entity<ContractRiskAssessment>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ContractOperation>()
             .HasIndex(x => new { x.OrganizationId, x.DueDate, x.Status, x.IsDeleted });
         modelBuilder.Entity<ContractOperation>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<ContractOperation>().Property(x => x.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractOperationReminder>()
+            .HasIndex(x => new { x.OrganizationId, x.DedupeKey }).IsUnique();
+        modelBuilder.Entity<ContractOperationReminder>()
+            .HasOne(x => x.Operation).WithMany(x => x.Reminders)
+            .HasForeignKey(x => x.ContractOperationId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Organization>().HasData(new Organization
         {

@@ -826,10 +826,18 @@ export function clearAccessToken() {
   window.localStorage.removeItem("negareshai.access_token");
 }
 
-export type WorkflowStage={id:string;type:number;order:number;assignedUserId?:string;decision:number;comment?:string};
-export type ContractWorkflow={id:string;contractId:string;subject:string;status:number;currentStageOrder:number;createdAtUtc:string;stages:WorkflowStage[]};
-export type ContractOperation={id:string;contractId:string;subject:string;type:number;title:string;dueDate:string;amount?:number;currency:string;status:number;reminderDaysBefore:number;description?:string};
-export type ManagementDashboard={activeContracts:number;pendingApprovals:number;overdueOperations:number;upcomingOperations:number;highRisks:number;upcoming:ContractOperation[]};
+export type WorkflowStageDefinition={type:number;title:string;order:number;defaultAssignedUserId?:string};
+export type WorkflowDefinition={id:string;definitionKey:string;name:string;contractGroupId?:string;version:number;isActive:boolean;stages:WorkflowStageDefinition[];createdAtUtc:string};
+export type WorkflowStage={id:string;type:number;title:string;order:number;assignedUserId?:string;decision:number;comment?:string;decidedByUserId?:string;decidedAtUtc?:string;delegatedFromUserId?:string};
+export type WorkflowAction={id:string;type:number;comment?:string;fromUserId?:string;toUserId?:string;performedByUserId:string;performedAtUtc:string};
+export type ContractWorkflow={id:string;contractId:string;subject:string;contractGroupId?:string;status:number;currentStageOrder:number;createdAtUtc:string;stages:WorkflowStage[];actions:WorkflowAction[]};
+export type RiskChecklistDefinitionItem={code:string;title:string;weight:number;isCritical:boolean};
+export type RiskChecklistDefinition={id:string;definitionKey:string;name:string;contractGroupId?:string;version:number;isActive:boolean;items:RiskChecklistDefinitionItem[];createdAtUtc:string};
+export type RiskChecklistItem=RiskChecklistDefinitionItem&{score:number;note?:string};
+export type RiskAssessment={id:string;contractId:string;subject:string;checklistDefinitionId?:string;checklistDefinitionVersion?:number;version:number;score:number;level:number;summary?:string;items:RiskChecklistItem[];createdByUserId:string;createdAtUtc:string};
+export type ContractOperation={id:string;contractId:string;subject:string;type:number;title:string;dueDate:string;amount?:number;currency:string;status:number;reminderDaysBefore:number;description?:string;assignedUserId?:string;completedByUserId?:string;completedAtUtc?:string};
+export type ManagementDashboard={activeContracts:number;pendingApprovals:number;myPendingTasks:number;overdueOperations:number;upcomingOperations:number;highRisks:number;upcoming:ContractOperation[]};
+export type ReminderRunResult={asOf:string;markedOverdue:number;upcomingQueued:number;overdueQueued:number;existingSkipped:number};
 
 async function operationsRequest<T>(path:string,init?:RequestInit):Promise<T>{
   const token=accessToken();
@@ -837,16 +845,47 @@ async function operationsRequest<T>(path:string,init?:RequestInit):Promise<T>{
   if(!response.ok)throw new Error(await response.text()||"عملیات قرارداد انجام نشد");
   return response.status===204?undefined as T:response.json();
 }
-export const listWorkflows=async()=>(
-  await operationsRequest<PagedResponse<ContractWorkflow>>("/workflows?pageNumber=1&pageSize=20")
-).items;
-export const startWorkflow=(input:{contractId:string;legalUserId?:string;technicalUserId?:string;financialUserId?:string;managerialUserId?:string})=>operationsRequest<ContractWorkflow>("/workflows",{method:"POST",body:JSON.stringify(input)});
+export const listWorkflowDefinitions=(pageNumber=1,pageSize=20,archived=false)=>operationsRequest<PagedResponse<WorkflowDefinition>>(`/workflow-definitions?pageNumber=${pageNumber}&pageSize=${pageSize}&archived=${archived}`);
+export const saveWorkflowDefinition=(input:{name:string;contractGroupId?:string;stages:WorkflowStageDefinition[];isActive?:boolean},id?:string)=>operationsRequest<WorkflowDefinition>(id?`/workflow-definitions/${id}`:"/workflow-definitions",{method:id?"PUT":"POST",body:JSON.stringify(input)});
+export const deleteWorkflowDefinition=(id:string)=>operationsRequest<void>(`/workflow-definitions/${id}`,{method:"DELETE"});
+export const restoreWorkflowDefinition=(id:string)=>operationsRequest<void>(`/workflow-definitions/${id}/restore`,{method:"POST"});
+export function listWorkflows():Promise<ContractWorkflow[]>;
+export function listWorkflows(pageNumber:number,pageSize?:number,myWorklistOnly?:boolean,archived?:boolean):Promise<PagedResponse<ContractWorkflow>>;
+export async function listWorkflows(pageNumber?:number,pageSize=20,myWorklistOnly=false,archived=false){
+  const result=await operationsRequest<PagedResponse<ContractWorkflow>>(`/workflows?pageNumber=${pageNumber??1}&pageSize=${pageSize}&myWorklistOnly=${myWorklistOnly}&archived=${archived}`);
+  return pageNumber===undefined?result.items:result;
+}
+export const startWorkflow=(input:{contractId:string;workflowDefinitionId?:string;legalUserId?:string;technicalUserId?:string;financialUserId?:string;expertUserId?:string;managerialUserId?:string;stageAssignments?:{type:number;assignedUserId?:string}[]})=>operationsRequest<ContractWorkflow>("/workflows",{method:"POST",body:JSON.stringify(input)});
 export const decideWorkflow=(id:string,decision:number,comment?:string)=>operationsRequest<ContractWorkflow>(`/workflows/${id}/decision`,{method:"POST",body:JSON.stringify({decision,comment})});
-export const listOperations=async()=>(
-  await operationsRequest<PagedResponse<ContractOperation>>("/items?pageNumber=1&pageSize=20")
-).items;
-export const createOperation=(input:{contractId:string;type:number;title:string;dueDate:string;amount?:number;currency:string;reminderDaysBefore:number;description?:string})=>operationsRequest<ContractOperation>("/items",{method:"POST",body:JSON.stringify(input)});
+export const commentWorkflow=(id:string,comment:string)=>operationsRequest<ContractWorkflow>(`/workflows/${id}/comments`,{method:"POST",body:JSON.stringify({comment})});
+export const delegateWorkflow=(id:string,assignedUserId:string,comment?:string)=>operationsRequest<ContractWorkflow>(`/workflows/${id}/delegate`,{method:"POST",body:JSON.stringify({assignedUserId,comment})});
+export const deleteWorkflow=(id:string)=>operationsRequest<void>(`/workflows/${id}`,{method:"DELETE"});
+export const restoreWorkflow=(id:string)=>operationsRequest<void>(`/workflows/${id}/restore`,{method:"POST"});
+export const listRiskChecklists=(pageNumber=1,pageSize=20,archived=false)=>operationsRequest<PagedResponse<RiskChecklistDefinition>>(`/risk-checklists?pageNumber=${pageNumber}&pageSize=${pageSize}&archived=${archived}`);
+export const saveRiskChecklist=(input:{name:string;contractGroupId?:string;items:RiskChecklistDefinitionItem[];isActive?:boolean},id?:string)=>operationsRequest<RiskChecklistDefinition>(id?`/risk-checklists/${id}`:"/risk-checklists",{method:id?"PUT":"POST",body:JSON.stringify(input)});
+export const deleteRiskChecklist=(id:string)=>operationsRequest<void>(`/risk-checklists/${id}`,{method:"DELETE"});
+export const restoreRiskChecklist=(id:string)=>operationsRequest<void>(`/risk-checklists/${id}/restore`,{method:"POST"});
+export const listRisks=(pageNumber=1,pageSize=20,archived=false,contractId?:string)=>operationsRequest<PagedResponse<RiskAssessment>>(`/risks?pageNumber=${pageNumber}&pageSize=${pageSize}&archived=${archived}${contractId?`&contractId=${contractId}`:""}`);
+export function listOperations():Promise<ContractOperation[]>;
+export function listOperations(pageNumber:number,pageSize?:number,archived?:boolean,mineOnly?:boolean,contractId?:string):Promise<PagedResponse<ContractOperation>>;
+export async function listOperations(pageNumber?:number,pageSize=20,archived=false,mineOnly=false,contractId?:string){
+  const result=await operationsRequest<PagedResponse<ContractOperation>>(`/items?pageNumber=${pageNumber??1}&pageSize=${pageSize}&archived=${archived}&mineOnly=${mineOnly}${contractId?`&contractId=${contractId}`:""}`);
+  return pageNumber===undefined?result.items:result;
+}
+export type SaveOperationInput={contractId:string;type:number;title:string;dueDate:string;amount?:number;currency:string;reminderDaysBefore:number;description?:string;assignedUserId?:string};
+export const createOperation=(input:SaveOperationInput)=>operationsRequest<ContractOperation>("/items",{method:"POST",body:JSON.stringify(input)});
+export const updateOperation=(id:string,input:SaveOperationInput)=>operationsRequest<ContractOperation>(`/items/${id}`,{method:"PUT",body:JSON.stringify(input)});
 export const changeOperationStatus=(id:string,status:number)=>operationsRequest<void>(`/items/${id}/status`,{method:"PUT",body:JSON.stringify({status})});
 export const deleteOperation=(id:string)=>operationsRequest<void>(`/items/${id}`,{method:"DELETE"});
-export const assessContractRisk=(input:{contractId:string;summary?:string;items:{code:string;title:string;weight:number;score:number;note?:string}[]})=>operationsRequest(`/risks`,{method:"POST",body:JSON.stringify(input)});
+export const restoreOperation=(id:string)=>operationsRequest<void>(`/items/${id}/restore`,{method:"POST"});
+export const assessContractRisk=(input:{contractId:string;summary?:string;checklistDefinitionId?:string;items:{code:string;title:string;weight:number;score:number;note?:string;isCritical?:boolean}[]})=>operationsRequest<RiskAssessment>(`/risks`,{method:"POST",body:JSON.stringify(input)});
+export const deleteRisk=(id:string)=>operationsRequest<void>(`/risks/${id}`,{method:"DELETE"});
+export const restoreRisk=(id:string)=>operationsRequest<void>(`/risks/${id}/restore`,{method:"POST"});
+export const processOperationReminders=(asOf?:string)=>operationsRequest<ReminderRunResult>(`/reminders/process${asOf?`?asOf=${asOf}`:""}`,{method:"POST"});
 export const getManagementDashboard=()=>operationsRequest<ManagementDashboard>("/dashboard");
+export async function downloadContractOperationsReport(from?:string,to?:string){
+  const token=accessToken();const query=new URLSearchParams();if(from)query.set("from",from);if(to)query.set("to",to);
+  const response=await fetch(`${API_BASE}/api/contract-operations/reports.csv${query.size?`?${query}`:""}`,{headers:token?{Authorization:`Bearer ${token}`}:{}});
+  if(!response.ok)throw new Error(await response.text()||"دریافت گزارش انجام نشد");
+  const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="contract-operations.csv";link.click();URL.revokeObjectURL(url);
+}
