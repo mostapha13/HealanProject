@@ -265,7 +265,9 @@ public sealed class StartComparisonCommandHandler(
             item.OrganizationId == tenant.OrganizationId && item.Category == category
             && item.Key == key && item.IsActive, cancellationToken)
         ?? throw new InvalidOperationException(
-            $"Active runtime setting {category}/{key} is required.");
+            key == "comparison.prompt"
+                ? "تنظیم فعال تحلیل تطبیق اسناد در سازمان ثبت نشده است. مدیر سامانه باید تنظیم ai/comparison.prompt را فعال کند."
+                : $"تنظیم فعال موردنیاز {category}/{key} در سازمان ثبت نشده است.");
 
     private static string JsonValue(string json, string property)
     {

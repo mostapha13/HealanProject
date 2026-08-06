@@ -8,8 +8,29 @@ using NegareshAI.Api.Services;
 using NegareshAI.Api.Application.Common.Auditing;
 using System.Security.Cryptography;
 using System.Text.Json;
+using NegareshAI.Api.Application.Access;
 
 namespace NegareshAI.Api.Application.Comparisons;
+
+public sealed record ListApprovedReferenceDocumentIdsQuery(Guid DocumentGroupId)
+    : IRequest<IReadOnlyList<Guid>>;
+
+public sealed class ListApprovedReferenceDocumentIdsQueryHandler(
+    NegareshDbContext db, ICurrentTenant tenant, IDataScopeAuthorizer? authorizer = null)
+    : IRequestHandler<ListApprovedReferenceDocumentIdsQuery, IReadOnlyList<Guid>>
+{
+    public async Task<IReadOnlyList<Guid>> Handle(
+        ListApprovedReferenceDocumentIdsQuery request, CancellationToken cancellationToken)
+    {
+        if (authorizer is not null && !await authorizer.CanAccessAsync(
+                DataScopeResourceType.DocumentGroup, request.DocumentGroupId,
+                cancellationToken)) return [];
+        return await db.GoldenDocuments.AsNoTracking().Where(item =>
+                item.OrganizationId == tenant.OrganizationId
+                && item.DocumentGroupId == request.DocumentGroupId && item.IsActive)
+            .Select(item => item.DocumentId).Distinct().ToListAsync(cancellationToken);
+    }
+}
 
 public sealed record ListComparisonRunsQuery(int PageNumber = 1, int PageSize = 20)
     : IRequest<PagedResponse<ComparisonRunSummaryResponse>>;

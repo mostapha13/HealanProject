@@ -610,6 +610,12 @@ export async function getComparisonRun(id: string): Promise<ComparisonRun> {
   return response.json();
 }
 
+export async function listComparisonApprovedReferenceDocumentIds(documentGroupId:string):Promise<string[]>{
+  const response=await authorizedFetch(`/api/comparisons/approved-reference-document-ids?documentGroupId=${encodeURIComponent(documentGroupId)}`);
+  if(!response.ok)throw new Error("دریافت اسناد مرجع گروه انجام نشد");
+  return response.json();
+}
+
 export async function startComparison(input: {
   targetDocumentId: string; basisMode: number; documentGroupId?: string;
   ruleSetIds: string[]; referenceDocumentId?: string; userInstruction?: string;

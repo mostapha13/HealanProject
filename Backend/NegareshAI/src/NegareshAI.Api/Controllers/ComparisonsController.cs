@@ -29,14 +29,31 @@ public sealed class ComparisonsController(
         return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpGet("approved-reference-document-ids")]
+    public async Task<IActionResult> ApprovedReferenceDocumentIds(
+        [FromQuery] Guid documentGroupId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(
+            new ListApprovedReferenceDocumentIdsQuery(documentGroupId), cancellationToken));
+
     [HttpPost]
     public async Task<ActionResult<ComparisonRunResponse>> Start(
         StartComparisonRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new StartComparisonCommand(request), cancellationToken);
-        return result is null
-            ? BadRequest("One or more selected sources are unavailable.")
-            : CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+        try
+        {
+            var result = await sender.Send(new StartComparisonCommand(request), cancellationToken);
+            return result is null
+                ? BadRequest("یکی از منابع انتخاب‌شده موجود یا قابل دسترسی نیست.")
+                : CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(exception.Message);
+        }
     }
 
     [HttpPut("findings/{findingId:guid}/review")]

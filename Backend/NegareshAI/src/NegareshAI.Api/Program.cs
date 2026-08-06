@@ -124,6 +124,20 @@ static async Task EnsureRequiredInfrastructureDataAsync(WebApplication app)
             UpdatedByUserId = "system-bootstrap"
         });
     }
+    var comparisonPromptExists = await db.RuntimeSettings.AnyAsync(item =>
+        item.OrganizationId == organizationId && item.Category == "ai"
+        && item.Key == "comparison.prompt" && item.IsActive);
+    if (!comparisonPromptExists)
+    {
+        db.RuntimeSettings.Add(new NegareshAI.Api.Data.RuntimeSetting
+        {
+            OrganizationId = organizationId,
+            Category = "ai",
+            Key = "comparison.prompt",
+            ValueJson = """{"template":"Evaluate the target only against approved references, configured group criteria and the user's per-run important items. Return evidence-backed findings, exact rejection reasons and actionable improvement suggestions.","language":"fa-IR","requirePageCitation":true,"humanReviewRequired":true}""",
+            UpdatedByUserId = "system-bootstrap"
+        });
+    }
     await db.SaveChangesAsync();
     app.Logger.LogInformation("Required infrastructure data is available for organization {OrganizationId}.", organizationId);
 }

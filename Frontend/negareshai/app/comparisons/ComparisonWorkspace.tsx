@@ -10,6 +10,7 @@ import {
   downloadComparisonReport,
   getComparisonRun,
   listComparisonRuns,
+  listComparisonApprovedReferenceDocumentIds,
   listDocumentGroups,
   listDocuments,
   reviewComparison,
@@ -42,6 +43,7 @@ const findingLabel: Record<number, string> = {
 export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
   const [documents, setDocuments] = useState<DocumentListItem[]>([]),
     [groups, setGroups] = useState<DocumentGroup[]>([]),
+    [approvedReferenceDocumentIds, setApprovedReferenceDocumentIds] = useState<string[]>([]),
     [runs, setRuns] = useState<ComparisonRunSummary[]>([]),
     [selected, setSelected] = useState<ComparisonRun | null>(null);
   const [targetDocumentId, setTargetDocumentId] = useState(""),
@@ -78,6 +80,10 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           ? runs.filter((x) => x.approvalStatus >= 2)
           : runs,
     [mode, runs],
+  );
+  const selectableDocuments = useMemo(
+    () => documents.filter((document) => !approvedReferenceDocumentIds.includes(document.id)),
+    [approvedReferenceDocumentIds, documents],
   );
   async function open(id: string) {
     setBusy(true);
@@ -228,7 +234,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                 onChange={(e) => { setTargetDocumentId(e.target.value); setTargetFile(null); }}
               >
                 <option value="">انتخاب سند قبلی (اختیاری)</option>
-                {documents.map((x) => (
+                {selectableDocuments.map((x) => (
                   <option key={x.id} value={x.id}>
                     {x.title}
                   </option>
@@ -239,7 +245,17 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
               <span>۲. گروه کاری سند</span>
               <select
                 value={documentGroupId}
-                onChange={(e) => setDocumentGroupId(e.target.value)}
+                onChange={(e) => { void (async () => {
+                  const nextGroupId = e.target.value;
+                  setDocumentGroupId(nextGroupId);
+                  const referenceIds = nextGroupId
+                    ? await listComparisonApprovedReferenceDocumentIds(nextGroupId) : [];
+                  setApprovedReferenceDocumentIds(referenceIds);
+                  if (referenceIds.includes(targetDocumentId)) {
+                    setTargetDocumentId("");
+                    setMessage("سند مورد تأیید همان گروه نمی‌تواند به‌عنوان سند جدید با خودش مقایسه شود.");
+                  }
+                })().catch(() => setMessage("دریافت منابع معتبر گروه انجام نشد.")); }}
               >
                 <option value="">انتخاب گروه کاری</option>
                 {groups
