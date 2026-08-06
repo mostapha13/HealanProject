@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,8 @@ public sealed class StartContractConversationHandler(
     NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
     IContractDocumentGenerator generator, IHttpContextAccessor context, IAuditWriter audit,
     IAiDocumentProcessor? ai = null,
-    IDataScopeAuthorizer? authorizer = null)
+    IDataScopeAuthorizer? authorizer = null,
+    ILogger<StartContractConversationHandler>? logger = null)
     : IRequestHandler<StartContractConversationCommand, ContractConversationResponse?>,
       IRequestHandler<SendContractConversationMessageCommand, ContractConversationResponse?>
 {
@@ -39,26 +41,51 @@ public sealed class StartContractConversationHandler(
         StartContractConversationCommand command, CancellationToken ct)
     {
         var request = command.Request;
-        if (request.ContractYear is < 1300 or > 1600 || string.IsNullOrWhiteSpace(request.Message))
+        if (string.IsNullOrWhiteSpace(request.Message))
             return null;
-        var party = await db.OrganizationParties.AsNoTracking().SingleOrDefaultAsync(x =>
-            x.Id == request.OrganizationPartyId && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct);
-        var group = await db.ContractGroups.AsNoTracking().SingleOrDefaultAsync(x =>
-            x.Id == request.PrimaryContractGroupId && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct);
-        if (party is null || group is null || authorizer is not null &&
+        var party = request.OrganizationPartyId.HasValue
+            ? await db.OrganizationParties.AsNoTracking().SingleOrDefaultAsync(x =>
+                x.Id == request.OrganizationPartyId && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct)
+            : await ResolvePartyFromInstructionAsync(request.Message, ct);
+        if (party is null)
+            throw new InvalidOperationException("نام طرف قرارداد در درخواست پیدا نشد؛ نام ثبت‌شده شرکت را در متن بنویسید یا ابتدا آن را در داده‌های پایه ثبت کنید.");
+
+        var inferredContract = await db.Contracts.AsNoTracking().Where(x =>
+                x.OrganizationId == tenant.OrganizationId
+                && x.Parties.Any(p => p.DirectoryPartyId == party.Id)
+                && x.Document!.Versions.Any(v => v.LifecycleStatus == DocumentVersionLifecycleStatus.Final))
+            .OrderByDescending(x => x.StartDate).ThenByDescending(x => x.UpdatedAtUtc)
+            .FirstOrDefaultAsync(ct);
+        var groupId = request.PrimaryContractGroupId ?? inferredContract?.PrimaryContractGroupId
+            ?? await ResolveGroupFromInstructionAsync(request.Message, ct);
+        var group = groupId.HasValue
+            ? await db.ContractGroups.AsNoTracking().SingleOrDefaultAsync(x =>
+                x.Id == groupId && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct)
+            : null;
+        if (group is null)
+            throw new InvalidOperationException("نوع قرارداد از سوابق این شرکت قابل تشخیص نیست؛ برای قرارداد نخست، نوع قرارداد و Template آن را در داده‌های پایه تعریف کنید.");
+        var contractYear = request.ContractYear ?? ExtractPersianYear(request.Message);
+        if (!contractYear.HasValue || contractYear.Value is < 1300 or > 1600)
+            throw new InvalidOperationException("سال قرارداد از تاریخ‌های نوشته‌شده قابل تشخیص نیست.");
+        if (authorizer is not null &&
             !await authorizer.CanAccessAsync(DataScopeResourceType.ContractGroup, group.Id, ct)) return null;
         var additionalSources = await FreezeAdditionalSourcesAsync(
             request.AdditionalSourceContractIds ?? [], ct);
         if (additionalSources is null) return null;
+        var subject = !string.IsNullOrWhiteSpace(request.Subject)
+            ? request.Subject.Trim()
+            : InferSubjectFromInstruction(request.Message)
+                ?? CleanInheritedSubject(inferredContract?.Subject, contractYear.Value)
+                ?? $"قرارداد {party.Name}";
 
         var conversation = new ContractConversation
         {
             OrganizationId = tenant.OrganizationId,
             OrganizationPartyId = party.Id,
             PrimaryContractGroupId = group.Id,
-            RequestedContractYear = request.ContractYear,
-            Subject = request.Subject.Trim(),
-            Title = $"{request.Subject.Trim()} - {party.Name} - {request.ContractYear}",
+            RequestedContractYear = contractYear.Value,
+            Subject = subject,
+            Title = $"{subject} - {party.Name} - {contractYear}",
             CreatedByUserId = tenant.UserId,
             AdditionalSourceSnapshotJson = JsonSerializer.Serialize(additionalSources)
         };
@@ -70,14 +97,125 @@ public sealed class StartContractConversationHandler(
         return await ContractConversationMapper.LoadAsync(db, tenant.OrganizationId, conversation.Id, ct);
     }
 
+    private async Task<OrganizationParty?> ResolvePartyFromInstructionAsync(string instruction, CancellationToken ct)
+    {
+        var normalized = NormalizePersianText(instruction);
+        var existing = (await db.OrganizationParties.AsNoTracking().Where(x =>
+                x.OrganizationId == tenant.OrganizationId && x.IsActive).ToListAsync(ct))
+            .Where(x => normalized.Contains(NormalizePersianText(x.Name), StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.Name.Length).FirstOrDefault();
+        if (existing is not null) return existing;
+
+        var nameMatch = Regex.Match(instruction,
+            @"(?:با\s+)?شرکت\s+(?<name>.+?)\s+از\s+تاریخ", RegexOptions.IgnoreCase);
+        if (!nameMatch.Success) return null;
+        var name = nameMatch.Groups["name"].Value.Trim(' ', '،', ',', '.', '؛');
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        var representative = Regex.Match(instruction,
+            @"نماینده\s+(?:شرکت\s+)?(?:آقای|خانم)?\s*(?<name>.+?)(?=\s+(?:باشه|باشد|با\s+شماره|و\s+شماره|شماره))",
+            RegexOptions.IgnoreCase).Groups["name"].Value.Trim();
+        var nationalId = Regex.Match(ToLatinDigits(instruction),
+            @"شماره\s+ملی\s*(?<value>\d+)", RegexOptions.IgnoreCase).Groups["value"].Value;
+        var address = Regex.Match(instruction,
+            @"آدرس\s+(?<value>.+?)(?=$|[\r\n]|\s+(?:شماره\s+تماس|تلفن)\b)",
+            RegexOptions.IgnoreCase).Groups["value"].Value.Trim(' ', '،', ',', '.', '؛');
+        var party = new OrganizationParty
+        {
+            OrganizationId = tenant.OrganizationId,
+            Name = name,
+            RepresentativeName = string.IsNullOrWhiteSpace(representative) ? null : representative,
+            NationalIdentifier = string.IsNullOrWhiteSpace(nationalId) ? null : nationalId,
+            Address = string.IsNullOrWhiteSpace(address) ? null : address,
+            CreatedByUserId = tenant.UserId
+        };
+        db.OrganizationParties.Add(party);
+        await db.SaveChangesAsync(ct);
+        audit.Add("contract-party.created-from-instruction", nameof(OrganizationParty), party.Id.ToString());
+        return party;
+    }
+
+    private async Task<Guid?> ResolveGroupFromInstructionAsync(string instruction, CancellationToken ct)
+    {
+        var normalized = NormalizePersianText(instruction);
+        return (await db.ContractGroups.AsNoTracking().Where(x =>
+                x.OrganizationId == tenant.OrganizationId && x.IsActive).ToListAsync(ct))
+            .Where(x => normalized.Contains(NormalizePersianText(x.Name), StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(x => x.Name.Length).Select(x => (Guid?)x.Id).FirstOrDefault();
+    }
+
+    private static int? ExtractPersianYear(string instruction)
+    {
+        var normalized = instruction.Replace('۰', '0').Replace('۱', '1').Replace('۲', '2')
+            .Replace('۳', '3').Replace('۴', '4').Replace('۵', '5').Replace('۶', '6')
+            .Replace('۷', '7').Replace('۸', '8').Replace('۹', '9');
+        var match = Regex.Match(normalized,
+            @"(?<!\d)(1[3-5]\d{2})[/.\-](?:0?[1-9]|1[0-2])[/.\-](?:0?[1-9]|[12]\d|3[01])(?!\d)");
+        if (!match.Success)
+        {
+            var yearAtEnd = Regex.Match(normalized,
+                @"(?<!\d)(?:0?[1-9]|[12]\d|3[01])[/.\-](?:0?[1-9]|1[0-2])[/.\-](1[3-5]\d{2})(?!\d)");
+            if (yearAtEnd.Success) match = yearAtEnd;
+        }
+        if (!match.Success)
+            match = Regex.Match(normalized, @"(?:سال\s*)(1[3-5]\d{2})(?!\d)");
+        if (!match.Success)
+            match = Regex.Match(normalized, @"(?<!\d)(1[3-5]\d{2})(?=[/\-\s]|$)");
+        return match.Success && int.TryParse(match.Groups[1].Value, out var year) ? year : null;
+    }
+
+    private static string NormalizePersianText(string value) => value.Trim()
+        .Replace('ي', 'ی').Replace('ك', 'ک').Replace("‌", " ")
+        .Replace("شرکت", "", StringComparison.OrdinalIgnoreCase).Trim();
+
+    private static string ToLatinDigits(string value) => value
+        .Replace('۰', '0').Replace('۱', '1').Replace('۲', '2').Replace('۳', '3')
+        .Replace('۴', '4').Replace('۵', '5').Replace('۶', '6').Replace('۷', '7')
+        .Replace('۸', '8').Replace('۹', '9').Replace('٠', '0').Replace('١', '1')
+        .Replace('٢', '2').Replace('٣', '3').Replace('٤', '4').Replace('٥', '5')
+        .Replace('٦', '6').Replace('٧', '7').Replace('٨', '8').Replace('٩', '9');
+
+    private static string? InferSubjectFromInstruction(string instruction)
+    {
+        var patterns = new[]
+        {
+            @"موضوع\s+قرارداد(?:\s+را|\s*:)?\s*[«\""']?(?<subject>.+?)[»\""']?\s+(?:باشد|است|شود)",
+            @"قرارداد(?:\s+جدید)?\s+برای\s+(?<subject>.+?)\s+را\s+بر\s+اساس",
+            @"قرارداد\s+(?<subject>.+?)\s+با\s+شرکت"
+        };
+        foreach (var pattern in patterns)
+        {
+            var matches = Regex.Matches(instruction, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (matches.Count == 0) continue;
+            var subject = matches[^1].Groups["subject"].Value.Trim()
+                .Trim('«', '»', '"', '\'', ' ', '.', '،', '؛');
+            if (!string.IsNullOrWhiteSpace(subject)) return subject;
+        }
+        return null;
+    }
+
+    private static string? CleanInheritedSubject(string? subject, int contractYear)
+    {
+        if (string.IsNullOrWhiteSpace(subject)) return null;
+        var cleaned = Regex.Replace(subject.Trim(), @"\s+(?:سال\s*)?1[3-5]\d{2}\s*$", "").Trim();
+        return string.IsNullOrWhiteSpace(cleaned) ? $"قرارداد {contractYear}" : cleaned;
+    }
+
     public async Task<ContractConversationResponse?> Handle(
         SendContractConversationMessageCommand command, CancellationToken ct)
     {
         var conversation = await LoadConversationAsync(command.Id, ct);
-        if (conversation is null || conversation.Status is ContractConversationStatus.Completed
-            or ContractConversationStatus.Cancelled || string.IsNullOrWhiteSpace(command.Message)) return null;
+        if (conversation is null || conversation.Status == ContractConversationStatus.Cancelled
+            || string.IsNullOrWhiteSpace(command.Message)) return null;
         if (authorizer is not null && !await authorizer.CanAccessAsync(
             DataScopeResourceType.ContractGroup, conversation.PrimaryContractGroupId, ct)) return null;
+        if (conversation.Status == ContractConversationStatus.Completed && conversation.BaseContractId.HasValue)
+        {
+            conversation.BaseDocumentVersionId = await db.Contracts.AsNoTracking()
+                .Where(x => x.Id == conversation.BaseContractId && x.OrganizationId == tenant.OrganizationId)
+                .SelectMany(x => x.Document!.Versions)
+                .Where(x => x.LifecycleStatus == DocumentVersionLifecycleStatus.Final)
+                .OrderByDescending(x => x.VersionNumber).Select(x => (Guid?)x.Id).FirstOrDefaultAsync(ct);
+        }
 
         foreach (var clarification in conversation.Clarifications.Where(x => !x.IsAnswered))
         {
@@ -89,6 +227,19 @@ public sealed class StartContractConversationHandler(
         await AddUserMessageAsync(conversation, command.Message, ct);
         var completeInstruction = string.Join("\n", conversation.Messages
             .Where(x => x.Role == ContractMessageRole.User).OrderBy(x => x.Sequence).Select(x => x.Content));
+        var correctedYear = ExtractPersianYear(completeInstruction);
+        if (correctedYear is >= 1300 and <= 1600)
+            conversation.RequestedContractYear = correctedYear.Value;
+        var correctedSubject = InferSubjectFromInstruction(command.Message)
+            ?? InferSubjectFromInstruction(completeInstruction);
+        if (!string.IsNullOrWhiteSpace(correctedSubject))
+        {
+            conversation.Subject = correctedSubject;
+            var partyName = await db.OrganizationParties.AsNoTracking()
+                .Where(x => x.Id == conversation.OrganizationPartyId).Select(x => x.Name).SingleAsync(ct);
+            conversation.Title = $"{correctedSubject} - {partyName} - {conversation.RequestedContractYear}";
+        }
+        conversation.Status = ContractConversationStatus.Active;
         await GenerateOrClarifyAsync(conversation, completeInstruction, ct);
         conversation.UpdatedAtUtc = DateTime.UtcNow;
         audit.Add("contract-conversation.message-added", nameof(ContractConversation), conversation.Id.ToString());
@@ -132,7 +283,28 @@ public sealed class StartContractConversationHandler(
         }
         conversation.BaseContractId = baseResult.Contract?.Id;
         conversation.BaseDocumentVersionId = baseResult.Version?.Id;
-        var targetDate = FirstDayOfPersianYear(conversation.RequestedContractYear);
+        var sourceContract = baseResult.Contract ?? new Contract
+        {
+            OrganizationId = tenant.OrganizationId, DocumentId = Guid.Empty,
+            Subject = conversation.Subject, Currency = "IRR"
+        };
+        var changes = ContractChangeSetParser.Parse(instruction, sourceContract);
+        var newClauses = changes.NewClauses is { Count: > 0 }
+            ? changes.NewClauses
+            : string.IsNullOrWhiteSpace(changes.NewClause) ? [] : [changes.NewClause];
+        if (changes.Questions.Count > 0)
+        {
+            foreach (var question in changes.Questions)
+                AddClarification(conversation, $"input-{question.GetHashCode():X}", question);
+            return;
+        }
+        var organization = await db.Organizations.AsNoTracking().SingleAsync(
+            x => x.Id == tenant.OrganizationId, ct);
+        if (!OrganizationProfileIsComplete(organization))
+            throw new InvalidOperationException(
+                "اطلاعات شرکت ما کامل نیست. ابتدا از داده‌های پایه ← اطلاعات شرکت ما، مشخصات طرف اول قرارداد را تکمیل کنید.");
+        var baseClauseCount = CountContractClauses(sourceContract, baseResult.Version?.ExtractedText);
+        var targetDate = changes.StartDate ?? FirstDayOfPersianYear(conversation.RequestedContractYear);
         var template = await db.ContractTemplates.AsNoTracking().Where(x =>
                 x.OrganizationId == tenant.OrganizationId && x.ContractGroupId == conversation.PrimaryContractGroupId
                 && x.IsActive && (x.ContractYear == null || x.ContractYear == conversation.RequestedContractYear)
@@ -142,20 +314,11 @@ public sealed class StartContractConversationHandler(
             .ThenByDescending(x => x.Version).FirstOrDefaultAsync(ct);
         if (template is null)
         {
-            AddClarification(conversation, "effective-template", "گروه فاقد قالب معتبر است.");
-            return;
-        }
-
-        var sourceContract = baseResult.Contract ?? new Contract
-        {
-            OrganizationId = tenant.OrganizationId, DocumentId = Guid.Empty,
-            Subject = conversation.Subject, Currency = "IRR"
-        };
-        var changes = ContractChangeSetParser.Parse(instruction, sourceContract);
-        if (changes.Questions.Count > 0)
-        {
-            foreach (var question in changes.Questions)
-                AddClarification(conversation, $"input-{question.GetHashCode():X}", question);
+            var groupName = await db.ContractGroups.AsNoTracking()
+                .Where(x => x.Id == conversation.PrimaryContractGroupId)
+                .Select(x => x.Name).SingleOrDefaultAsync(ct) ?? "انتخاب‌شده";
+            AddClarification(conversation, "effective-template",
+                $"برای نوع قرارداد «{groupName}» در سال {conversation.RequestedContractYear} و تاریخ درخواستی، Template فعالی وجود ندارد. از داده‌های پایه ← Templateهای قرارداد، یک قالب معتبر برای همین نوع و سال ثبت کنید.");
             return;
         }
 
@@ -171,27 +334,38 @@ public sealed class StartContractConversationHandler(
                 conversation.AdditionalSourceSnapshotJson) ?? [];
         var embeddingModel = await GetEmbeddingModelAsync(ct);
         IReadOnlyList<AiRagSearchResult> ragSources = [];
-        if (baseResult.Version is not null && ai is not null)
+        try
         {
-            if (!baseResult.Version.IsRagPublished)
+            if (baseResult.Version is not null && ai is not null)
             {
-                AddClarification(conversation, "base-rag",
-                    "نسخه نهایی مرجع هنوز در RAG منتشر نشده است؛ ابتدا نسخه مرجع را نهایی و منتشر کنید.");
-                return;
+                if (!baseResult.Version.IsRagPublished)
+                {
+                    AddClarification(conversation, "base-rag",
+                        "نسخه نهایی مرجع هنوز در RAG منتشر نشده است؛ ابتدا نسخه مرجع را نهایی و منتشر کنید.");
+                    return;
+                }
+                var groupIds = additionalSources.Select(x => x.ContractGroupId)
+                    .Append(conversation.PrimaryContractGroupId).Distinct().Select(x => x.ToString()).ToArray();
+                var documentIds = additionalSources.Select(x => x.DocumentId)
+                    .Append(baseResult.Contract!.DocumentId).Distinct().ToArray();
+                ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
+                    groupIds, instruction, documentIds, embeddingModel, 8, ct);
             }
-            var groupIds = additionalSources.Select(x => x.ContractGroupId)
-                .Append(conversation.PrimaryContractGroupId).Distinct().Select(x => x.ToString()).ToArray();
-            var documentIds = additionalSources.Select(x => x.DocumentId)
-                .Append(baseResult.Contract!.DocumentId).Distinct().ToArray();
-            ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
-                groupIds, instruction, documentIds, embeddingModel, 8, ct);
+            else if (additionalSources.Count > 0 && ai is not null)
+            {
+                ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
+                    additionalSources.Select(x => x.ContractGroupId.ToString()).Distinct().ToArray(),
+                    instruction, additionalSources.Select(x => x.DocumentId).Distinct().ToArray(),
+                    embeddingModel, 8, ct);
+            }
         }
-        else if (additionalSources.Count > 0 && ai is not null)
+        catch (HttpRequestException exception)
         {
-            ragSources = await ai.SearchAsync(tenant.OrganizationId, tenant.UserId,
-                additionalSources.Select(x => x.ContractGroupId.ToString()).Distinct().ToArray(),
-                instruction, additionalSources.Select(x => x.DocumentId).Distinct().ToArray(),
-                embeddingModel, 8, ct);
+            logger?.LogWarning(exception,
+                "RAG search failed for contract conversation {ConversationId}; using frozen extracted text.",
+                conversation.Id);
+            audit.Add("contract-rag.search-fallback", nameof(ContractConversation),
+                conversation.Id.ToString(), new { exception.Message, EmbeddingModel = embeddingModel });
         }
         var baseEvidence = string.Join("\n\n", ragSources.Select(x => x.Text));
         if (string.IsNullOrWhiteSpace(baseEvidence)) baseEvidence = baseResult.Version?.ExtractedText ?? "";
@@ -222,6 +396,23 @@ public sealed class StartContractConversationHandler(
                 DocumentTitle = sourceTitles.GetValueOrDefault(x.Citation.DocumentId, "")
             }),
             DirectUserClause = changes.NewClause,
+            DirectUserClauses = newClauses,
+            OrganizationProfile = new
+            {
+                organization.Name,
+                organization.ChiefExecutiveName,
+                organization.ChiefExecutiveFatherName,
+                organization.ChiefExecutiveNationalId,
+                organization.NationalIdentifier,
+                organization.EconomicCode,
+                organization.RegistrationNumber,
+                organization.Address,
+                organization.PostalCode,
+                organization.Phone,
+                organization.Fax,
+                organization.Email,
+                organization.Website
+            },
             Rule = "highest-final-persian-year-and-version"
         });
         var calculations = JsonSerializer.Serialize(new
@@ -236,13 +427,25 @@ public sealed class StartContractConversationHandler(
             EndDate = new { Before = sourceContract.EndDate, After = changes.EndDate },
             Amount = new { Before = sourceContract.Amount, After = changes.CalculatedAmount },
             AddedClause = changes.NewClause,
+            AddedClauses = newClauses,
+            PaymentDates = new
+            {
+                First = changes.FirstPaymentDate,
+                Second = changes.SecondPaymentDate
+            },
+            ClauseCount = new
+            {
+                Before = baseClauseCount,
+                After = baseClauseCount + newClauses.Count
+            },
             Conflicts = conflicts
         });
         var conflictJson = JsonSerializer.Serialize(conflicts);
         var templateFile = await files.DownloadAsync(template.FileId,
             CreateContractTemplateHandler.Bearer(context), ct);
-        var partyName = await db.OrganizationParties.Where(x => x.Id == conversation.OrganizationPartyId)
-            .Select(x => x.Name).SingleAsync(ct);
+        var party = await db.OrganizationParties.AsNoTracking()
+            .SingleAsync(x => x.Id == conversation.OrganizationPartyId, ct);
+        var partyName = party.Name;
         var values = new Dictionary<string, string>
         {
             ["subject"] = conversation.Subject,
@@ -252,8 +455,49 @@ public sealed class StartContractConversationHandler(
             ["amount"] = changes.CalculatedAmount!.Value.ToString("N0"),
             ["currency"] = CurrencyDisplayName(sourceContract.Currency),
             ["newClause"] = changes.NewClause ?? "",
+            ["newClausesJson"] = JsonSerializer.Serialize(newClauses),
+            ["newClauseNumber"] = (baseClauseCount + 1).ToString(CultureInfo.InvariantCulture),
+            ["firstPaymentDate"] = changes.FirstPaymentDate.HasValue
+                ? PersianDate.Format(changes.FirstPaymentDate.Value) : PersianDate.Format(changes.StartDate!.Value),
+            ["secondPaymentDate"] = changes.SecondPaymentDate.HasValue
+                ? PersianDate.Format(changes.SecondPaymentDate.Value) : "",
             ["approvedClauses"] = string.Join("\n\n", approvedClauses.Select(x => $"{x.Code} - {x.Title}\n{x.Text}")),
             ["partyName"] = partyName,
+            ["organizationName"] = organization.Name,
+            ["organizationRepresentative"] = organization.ChiefExecutiveName ?? "",
+            ["organizationChiefExecutiveName"] = organization.ChiefExecutiveName ?? "",
+            ["organizationFatherName"] = organization.ChiefExecutiveFatherName ?? "",
+            ["organizationChiefExecutiveFatherName"] = organization.ChiefExecutiveFatherName ?? "",
+            ["organizationRepresentativeNationalIdentifier"] = organization.ChiefExecutiveNationalId ?? "",
+            ["organizationChiefExecutiveNationalId"] = organization.ChiefExecutiveNationalId ?? "",
+            ["organizationNationalIdentifier"] = organization.NationalIdentifier ?? "",
+            ["organizationEconomicCode"] = organization.EconomicCode ?? "",
+            ["organizationRegistrationNumber"] = organization.RegistrationNumber ?? "",
+            ["organizationPhone"] = organization.Phone ?? "",
+            ["organizationAddress"] = organization.Address ?? "",
+            ["organizationPostalCode"] = organization.PostalCode ?? "",
+            ["organizationFax"] = organization.Fax ?? "",
+            ["organizationEmail"] = organization.Email ?? "",
+            ["organizationWebsite"] = organization.Website ?? "",
+            ["نام شرکت"] = organization.Name,
+            ["نام مدیرعامل"] = organization.ChiefExecutiveName ?? "",
+            ["نام پدر مدیرعامل"] = organization.ChiefExecutiveFatherName ?? "",
+            ["شماره ملی مدیرعامل"] = organization.ChiefExecutiveNationalId ?? "",
+            ["شناسه ملی شرکت"] = organization.NationalIdentifier ?? "",
+            ["شماره اقتصادی شرکت"] = organization.EconomicCode ?? "",
+            ["شماره ثبت شرکت"] = organization.RegistrationNumber ?? "",
+            ["آدرس شرکت"] = organization.Address ?? "",
+            ["کد پستی شرکت"] = organization.PostalCode ?? "",
+            ["تلفن شرکت"] = organization.Phone ?? "",
+            ["فکس شرکت"] = organization.Fax ?? "",
+            ["ایمیل شرکت"] = organization.Email ?? "",
+            ["وب سایت شرکت"] = organization.Website ?? "",
+            ["counterpartyName"] = party.Name,
+            ["counterpartyNationalIdentifier"] = party.NationalIdentifier ?? "",
+            ["counterpartyRepresentative"] = party.RepresentativeName ?? "",
+            ["counterpartyFatherName"] = "",
+            ["counterpartyPhone"] = party.ContactInfo ?? "",
+            ["counterpartyAddress"] = party.Address ?? "",
             ["signingDate"] = PersianDate.Format(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3.5)))
         };
         var generated = await generator.GenerateAsync(templateFile.Content, values, ct);
@@ -261,7 +505,7 @@ public sealed class StartContractConversationHandler(
         var pdf = await generator.GeneratePdfAsync(new ContractPdfRequest(
             conversation.Id, version, conversation.Subject, partyName,
             values["startDate"], values["endDate"], values["amount"], values["currency"],
-            changes.NewClause, values["approvedClauses"], diff,
+            string.Join("\n", newClauses), values["approvedClauses"], diff,
             ragSources.Select(x => new ContractPdfCitation(
                 sourceTitles.GetValueOrDefault(x.Citation.DocumentId, ""),
                 x.Citation.DocumentId, x.Citation.VersionId, x.Citation.Page,
@@ -301,6 +545,23 @@ public sealed class StartContractConversationHandler(
         _ => string.IsNullOrWhiteSpace(currency) ? "ریال" : currency
     };
 
+    private static bool OrganizationProfileIsComplete(Organization organization) =>
+        !string.IsNullOrWhiteSpace(organization.Name)
+        && !string.IsNullOrWhiteSpace(organization.ChiefExecutiveName)
+        && !string.IsNullOrWhiteSpace(organization.ChiefExecutiveFatherName)
+        && !string.IsNullOrWhiteSpace(organization.ChiefExecutiveNationalId)
+        && !string.IsNullOrWhiteSpace(organization.NationalIdentifier)
+        && !string.IsNullOrWhiteSpace(organization.EconomicCode)
+        && !string.IsNullOrWhiteSpace(organization.Address)
+        && !string.IsNullOrWhiteSpace(organization.Phone);
+
+    private static int CountContractClauses(Contract contract, string? extractedText)
+    {
+        var extractedCount = string.IsNullOrWhiteSpace(extractedText) ? 0 : Regex.Matches(
+            extractedText, @"(?m)^\s*(?:ماده|بند)\s*[\p{N}۰-۹]+(?:\s|[.\-:])").Count;
+        return Math.Max(contract.Clauses.Count, extractedCount);
+    }
+
     private void AddClarification(ContractConversation conversation, string key, string question)
     {
         if (!conversation.Clarifications.Any(x => !x.IsAnswered && x.Key == key))
@@ -334,7 +595,7 @@ public sealed class StartContractConversationHandler(
         {
             var frozen = await db.Contracts.AsNoTracking().Include(x => x.Document)
                 .ThenInclude(x => x!.Versions).Include(x => x.Parties)
-                .Include(x => x.GroupMemberships).SingleOrDefaultAsync(x =>
+                .Include(x => x.GroupMemberships).Include(x => x.Clauses).SingleOrDefaultAsync(x =>
                     x.Id == conversation.BaseContractId && x.OrganizationId == tenant.OrganizationId, ct);
             var version = frozen?.Document?.Versions.SingleOrDefault(x =>
                 x.Id == conversation.BaseDocumentVersionId
@@ -344,7 +605,7 @@ public sealed class StartContractConversationHandler(
         }
         var candidates = await db.Contracts.AsNoTracking()
             .Include(x => x.Document).ThenInclude(x => x!.Versions)
-            .Include(x => x.Parties).Include(x => x.GroupMemberships)
+            .Include(x => x.Parties).Include(x => x.GroupMemberships).Include(x => x.Clauses)
             .Where(x => x.OrganizationId == tenant.OrganizationId
                 && x.Parties.Any(p => p.DirectoryPartyId == conversation.OrganizationPartyId)
                 && x.GroupMemberships.Any(g => g.ContractGroupId == conversation.PrimaryContractGroupId && g.IsPrimary)
@@ -504,43 +765,59 @@ public sealed class ReviewContractDraftHandler(
 {
     public async Task<ContractConversationResponse?> Handle(ReviewContractDraftCommand command, CancellationToken ct)
     {
-        var conversation = await db.ContractConversations.Include(x => x.Drafts).Include(x => x.Messages)
-            .SingleOrDefaultAsync(x => x.Id == command.ConversationId
-                && x.OrganizationId == tenant.OrganizationId, ct);
-        var draft = conversation?.Drafts.SingleOrDefault(x => x.Id == command.DraftId);
-        if (conversation is null || draft is null || draft.ApprovalStatus != command.ExpectedStatus) return null;
-        if (!command.Request.Approved)
+        var transaction = command.ExpectedStatus == ContractDraftApprovalStatus.ManagerReview
+            && command.Request.Approved && db.Database.IsRelational()
+            ? await db.Database.BeginTransactionAsync(ct) : null;
+        try
         {
-            draft.ApprovalStatus = ContractDraftApprovalStatus.Rejected;
-            conversation.Status = ContractConversationStatus.Active;
-            SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, false);
-            AddReviewMessage(conversation, "پیش‌نویس رد شد؛ اصلاحات را در پیام بعدی اعلام کنید.");
+            var conversation = await db.ContractConversations.Include(x => x.Drafts).Include(x => x.Messages)
+                .SingleOrDefaultAsync(x => x.Id == command.ConversationId
+                    && x.OrganizationId == tenant.OrganizationId, ct);
+            var draft = conversation?.Drafts.SingleOrDefault(x => x.Id == command.DraftId);
+            if (conversation is null || draft is null || draft.ApprovalStatus != command.ExpectedStatus) return null;
+            if (!command.Request.Approved)
+            {
+                draft.ApprovalStatus = ContractDraftApprovalStatus.Rejected;
+                conversation.Status = ContractConversationStatus.Active;
+                SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, false);
+                AddReviewMessage(conversation, "پیش‌نویس رد شد؛ اصلاحات را در پیام بعدی اعلام کنید.");
+            }
+            else if (command.ExpectedStatus == ContractDraftApprovalStatus.RequesterReview)
+            {
+                SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
+                draft.ApprovalStatus = ContractDraftApprovalStatus.ExpertReview;
+                AddReviewMessage(conversation, "تأیید درخواست‌کننده ثبت شد و پیش‌نویس در انتظار نظر کارشناس است.");
+            }
+            else if (command.ExpectedStatus == ContractDraftApprovalStatus.ExpertReview)
+            {
+                SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
+                draft.ApprovalStatus = ContractDraftApprovalStatus.ManagerReview;
+                AddReviewMessage(conversation, "تأیید کارشناس ثبت شد و پیش‌نویس در انتظار تأیید مدیر امور قراردادها است.");
+            }
+            else
+            {
+                SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
+                await FinalizeAsync(conversation, draft, ct);
+                draft.ApprovalStatus = ContractDraftApprovalStatus.Final;
+                conversation.Status = ContractConversationStatus.Completed;
+                AddReviewMessage(conversation, "قرارداد توسط مدیر نهایی شد و نسخه نهایی در مخزن اسناد ثبت گردید.");
+            }
+            conversation.UpdatedAtUtc = DateTime.UtcNow;
+            audit.Add("contract-draft.reviewed", nameof(ContractDraftVersion), draft.Id.ToString(),
+                new { command.ExpectedStatus, command.Request.Approved });
+            await db.SaveChangesAsync(ct);
+            if (transaction is not null) await transaction.CommitAsync(ct);
+            return await ContractConversationMapper.LoadAsync(db, tenant.OrganizationId, conversation.Id, ct);
         }
-        else if (command.ExpectedStatus == ContractDraftApprovalStatus.RequesterReview)
+        catch
         {
-            SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
-            draft.ApprovalStatus = ContractDraftApprovalStatus.ExpertReview;
-            AddReviewMessage(conversation, "تأیید درخواست‌کننده ثبت شد و پیش‌نویس در انتظار نظر کارشناس است.");
+            if (transaction is not null) await transaction.RollbackAsync(ct);
+            throw;
         }
-        else if (command.ExpectedStatus == ContractDraftApprovalStatus.ExpertReview)
+        finally
         {
-            SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
-            draft.ApprovalStatus = ContractDraftApprovalStatus.ManagerReview;
-            AddReviewMessage(conversation, "تأیید کارشناس ثبت شد و پیش‌نویس در انتظار تأیید مدیر امور قراردادها است.");
+            if (transaction is not null) await transaction.DisposeAsync();
         }
-        else
-        {
-            SetReview(draft, command.ExpectedStatus, command.Request.Note, tenant.UserId, true);
-            await FinalizeAsync(conversation, draft, ct);
-            draft.ApprovalStatus = ContractDraftApprovalStatus.Final;
-            conversation.Status = ContractConversationStatus.Completed;
-            AddReviewMessage(conversation, "قرارداد توسط مدیر نهایی شد و نسخه نهایی در مخزن اسناد ثبت گردید.");
-        }
-        conversation.UpdatedAtUtc = DateTime.UtcNow;
-        audit.Add("contract-draft.reviewed", nameof(ContractDraftVersion), draft.Id.ToString(),
-            new { command.ExpectedStatus, command.Request.Approved });
-        await db.SaveChangesAsync(ct);
-        return await ContractConversationMapper.LoadAsync(db, tenant.OrganizationId, conversation.Id, ct);
     }
 
     private async Task FinalizeAsync(ContractConversation conversation, ContractDraftVersion draft, CancellationToken ct)
@@ -551,6 +828,8 @@ public sealed class ReviewContractDraftHandler(
         if (draft.BaseContractId.HasValue)
         {
             contract = await db.Contracts.Include(x => x.Document).ThenInclude(x => x!.Versions)
+                .Include(x => x.Parties)
+                .Include(x => x.Clauses)
                 .SingleAsync(x => x.Id == draft.BaseContractId && x.OrganizationId == tenant.OrganizationId, ct);
         }
         else
@@ -577,17 +856,60 @@ public sealed class ReviewContractDraftHandler(
             });
             db.Contracts.Add(contract);
         }
+        var organization = await db.Organizations.SingleAsync(
+            x => x.Id == tenant.OrganizationId, ct);
+        var firstParty = contract.Parties.FirstOrDefault(x => x.Role == ContractPartyRole.FirstParty);
+        if (firstParty is null)
+        {
+            firstParty = new ContractParty
+            {
+                ContractId = contract.Id,
+                Role = ContractPartyRole.FirstParty,
+                Name = organization.Name,
+                NationalIdentifier = organization.NationalIdentifier,
+                RepresentativeName = organization.ChiefExecutiveName
+            };
+            contract.Parties.Add(firstParty);
+            db.ContractParties.Add(firstParty);
+        }
+        else
+        {
+            firstParty.Name = organization.Name;
+            firstParty.NationalIdentifier = organization.NationalIdentifier;
+            firstParty.RepresentativeName = organization.ChiefExecutiveName;
+        }
         contract.Amount = changeSet.CalculatedAmount ?? contract.Amount;
+        contract.Subject = conversation.Subject;
+        contract.Document!.Title = conversation.Title;
         contract.StartDate = changeSet.StartDate ?? contract.StartDate;
         contract.EndDate = changeSet.EndDate ?? contract.EndDate;
         contract.Status = ContractStatus.Approved;
         contract.UpdatedAtUtc = DateTime.UtcNow;
-        if (!string.IsNullOrWhiteSpace(changeSet.NewClause))
-            contract.Clauses.Add(new ContractClause
+        var newClauses = changeSet.NewClauses is { Count: > 0 }
+            ? changeSet.NewClauses
+            : string.IsNullOrWhiteSpace(changeSet.NewClause) ? [] : [changeSet.NewClause];
+        if (newClauses.Count > 0)
+        {
+            using var diff = JsonDocument.Parse(draft.DiffJson);
+            var finalClauseNumber = diff.RootElement.TryGetProperty("ClauseCount", out var clauseCount)
+                && clauseCount.TryGetProperty("After", out var after) && after.TryGetInt32(out var parsed)
+                ? parsed : contract.Clauses.Count + 1;
+            var firstClauseNumber = finalClauseNumber - newClauses.Count + 1;
+            for (var index = 0; index < newClauses.Count; index++)
             {
-                ClauseNumber = $"AI-{contract.Clauses.Count + 1}", Title = "بند پیشنهادی کاربر",
-                Text = changeSet.NewClause, Order = contract.Clauses.Count + 1
-            });
+                var clauseText = newClauses[index].Trim();
+                if (contract.Clauses.Any(x => x.Text.Trim() == clauseText)) continue;
+                var clauseNumber = firstClauseNumber + index;
+                var clause = new ContractClause
+                {
+                    ContractId = contract.Id,
+                    ClauseNumber = clauseNumber.ToString(CultureInfo.InvariantCulture),
+                    Title = "ماده پیشنهادی کاربر", Text = clauseText, Order = clauseNumber
+                };
+                contract.Clauses.Add(clause);
+                db.ContractClauses.Add(clause);
+            }
+        }
         await db.SaveChangesAsync(ct);
         var previousFinals = contract.Document!.Versions.Where(x => x.LifecycleStatus == DocumentVersionLifecycleStatus.Final).ToList();
         foreach (var previous in previousFinals) previous.LifecycleStatus = DocumentVersionLifecycleStatus.Superseded;
@@ -611,6 +933,7 @@ public sealed class ReviewContractDraftHandler(
         db.DocumentVersions.Add(version);
         await db.SaveChangesAsync(ct);
         draft.FinalDocumentVersionId = version.Id;
+        conversation.BaseDocumentVersionId = version.Id;
         if (ai is not null)
         {
             var model = await GetEmbeddingModelAsync(ct);

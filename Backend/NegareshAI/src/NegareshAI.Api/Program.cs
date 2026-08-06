@@ -45,6 +45,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 await ApplyMigrationsAsync(app);
+await EnsureRequiredInfrastructureDataAsync(app);
 app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
@@ -90,4 +91,39 @@ static async Task ApplyMigrationsAsync(WebApplication app)
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
+}
+
+static async Task EnsureRequiredInfrastructureDataAsync(WebApplication app)
+{
+    var organizationValue = app.Configuration["Tenancy:DevelopmentOrganizationId"]
+        ?? "11111111-1111-1111-1111-111111111111";
+    if (!Guid.TryParse(organizationValue, out var organizationId)) return;
+
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<NegareshAI.Api.Data.NegareshDbContext>();
+    if (!await db.Organizations.AnyAsync(item => item.Id == organizationId))
+    {
+        db.Organizations.Add(new NegareshAI.Api.Data.Organization
+        {
+            Id = organizationId,
+            Name = "NegareshAI Development Organization",
+            CreatedAtUtc = DateTime.UnixEpoch
+        });
+    }
+    var exists = await db.RuntimeSettings.AnyAsync(item =>
+        item.OrganizationId == organizationId && item.Category == "ai"
+        && item.Key == "embedding.model" && item.IsActive);
+    if (!exists)
+    {
+        db.RuntimeSettings.Add(new NegareshAI.Api.Data.RuntimeSetting
+        {
+            OrganizationId = organizationId,
+            Category = "ai",
+            Key = "embedding.model",
+            ValueJson = """{"modelId":"BAAI/bge-m3","retrievalMode":"hybrid","normalizePersianDigits":true,"numericExactBoost":0.5}""",
+            UpdatedByUserId = "system-bootstrap"
+        });
+    }
+    await db.SaveChangesAsync();
+    app.Logger.LogInformation("Required infrastructure data is available for organization {OrganizationId}.", organizationId);
 }

@@ -1,98 +1,1411 @@
 "use client";
 
 import Link from "next/link";
-import {FormEvent, useCallback, useEffect, useMemo, useState} from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ContractGroup, ContractItem, ContractOperation, ContractWorkflow, IdentityUser,
-  ManagementDashboard, RiskAssessment, RiskChecklistDefinition, WorkflowDefinition,
-  assessContractRisk, changeOperationStatus, commentWorkflow, createOperation,
-  decideWorkflow, delegateWorkflow, deleteOperation, deleteRisk, deleteRiskChecklist,
-  deleteWorkflow, deleteWorkflowDefinition, downloadContractOperationsReport,
-  getManagementDashboard, listContractCatalog, listContracts, listIdentityUsers,
-  listOperations, listRiskChecklists, listRisks, listWorkflowDefinitions, listWorkflows,
-  processOperationReminders, restoreOperation, restoreRisk, restoreRiskChecklist,
-  restoreWorkflow, restoreWorkflowDefinition, saveRiskChecklist, saveWorkflowDefinition,
-  startWorkflow, updateOperation
+  ContractGroup,
+  ContractItem,
+  ContractOperation,
+  ContractWorkflow,
+  IdentityUser,
+  ManagementDashboard,
+  RiskAssessment,
+  RiskChecklistDefinition,
+  WorkflowDefinition,
+  assessContractRisk,
+  changeOperationStatus,
+  commentWorkflow,
+  createOperation,
+  decideWorkflow,
+  delegateWorkflow,
+  deleteOperation,
+  deleteRisk,
+  deleteRiskChecklist,
+  deleteWorkflow,
+  deleteWorkflowDefinition,
+  downloadContractOperationsReport,
+  getManagementDashboard,
+  listContractCatalog,
+  listContracts,
+  listIdentityUsers,
+  listOperations,
+  listRiskChecklists,
+  listRisks,
+  listWorkflowDefinitions,
+  listWorkflows,
+  processOperationReminders,
+  restoreOperation,
+  restoreRisk,
+  restoreRiskChecklist,
+  restoreWorkflow,
+  restoreWorkflowDefinition,
+  saveRiskChecklist,
+  saveWorkflowDefinition,
+  startWorkflow,
+  updateOperation,
 } from "../../lib/api";
+import { formatJalaliDate, formatJalaliDateTime } from "../../lib/jalali";
+import PersianCalendar from "../PersianCalendar";
 
-export type M6View="workflows"|"workflow-definitions"|"risks"|"risk-checklists"|"operations"|"dashboard";
-const size=10;
-const stageTypes=[{type:1,title:"حقوقی"},{type:2,title:"فنی"},{type:3,title:"مالی"},{type:5,title:"کارشناسی"},{type:4,title:"مدیریتی"}];
-const operationTypes=["—","سررسید","تمدید","پرداخت","تضمین","اعلان","تعهد"];
-const statusText=["—","در انتظار","تأیید","نیازمند اصلاح","ردشده"];
-const riskText=["—","کم","متوسط","زیاد","بحرانی"];
+export type M6View =
+  | "workflows"
+  | "workflow-definitions"
+  | "risks"
+  | "risk-checklists"
+  | "operations"
+  | "dashboard";
+const size = 10;
+const stageTypes = [
+  { type: 1, title: "حقوقی" },
+  { type: 2, title: "فنی" },
+  { type: 3, title: "مالی" },
+  { type: 5, title: "کارشناسی" },
+  { type: 4, title: "مدیریتی" },
+];
+const operationTypes = [
+  "—",
+  "سررسید",
+  "تمدید",
+  "پرداخت",
+  "تضمین",
+  "اعلان",
+  "تعهد",
+];
+const statusText = ["—", "در انتظار", "تأیید", "نیازمند اصلاح", "ردشده"];
+const riskText = ["—", "کم", "متوسط", "زیاد", "بحرانی"];
 
-function ErrorMessage({value}:{value:string}){return value?<p className="m6-message error-text">{value}</p>:null}
-function Pager({page,pages,onChange}:{page:number;pages:number;onChange:(p:number)=>void}){return <nav className="pagination"><button disabled={page<=1} onClick={()=>onChange(page-1)}>قبلی</button><span>صفحه {page} از {pages}</span><button disabled={page>=pages} onClick={()=>onChange(page+1)}>بعدی</button></nav>}
-function UserSelect({users,value,onChange,required=false}:{users:IdentityUser[];value:string;onChange:(v:string)=>void;required?:boolean}){return <select value={value} onChange={e=>onChange(e.target.value)} required={required}><option value="">بدون تخصیص</option>{users.filter(x=>x.isActive&&!x.isDeleted).map(x=><option key={x.id} value={x.id}>{x.firstName} {x.lastName} ({x.userName})</option>)}</select>}
+function ErrorMessage({ value }: { value: string }) {
+  return value ? <p className="m6-message error-text">{value}</p> : null;
+}
+function Pager({
+  page,
+  pages,
+  onChange,
+}: {
+  page: number;
+  pages: number;
+  onChange: (p: number) => void;
+}) {
+  return (
+    <nav className="pagination">
+      <button disabled={page <= 1} onClick={() => onChange(page - 1)}>
+        قبلی
+      </button>
+      <span>
+        صفحه {page} از {pages}
+      </span>
+      <button disabled={page >= pages} onClick={() => onChange(page + 1)}>
+        بعدی
+      </button>
+    </nav>
+  );
+}
+function UserSelect({
+  users,
+  value,
+  onChange,
+  required = false,
+}: {
+  users: IdentityUser[];
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      required={required}
+    >
+      <option value="">بدون تخصیص</option>
+      {users
+        .filter((x) => x.isActive && !x.isDeleted)
+        .map((x) => (
+          <option key={x.id} value={x.id}>
+            {x.firstName} {x.lastName} ({x.userName})
+          </option>
+        ))}
+    </select>
+  );
+}
 
-const tabs:[M6View,string,string][]=[
-  ["workflows","کارتابل من","/workflows"],["workflow-definitions","تعریف گردش‌کار","/workflows/definitions"],
-  ["risks","ارزیابی ریسک","/risks"],["risk-checklists","چک‌لیست ریسک","/risks/checklists"],
-  ["operations","عملیات و سررسیدها","/operations"],["dashboard","داشبورد مدیریت","/management-dashboard"]
+const tabs: [M6View, string, string][] = [
+  ["workflows", "کارتابل من", "/workflows"],
+  ["workflow-definitions", "تعریف گردش‌کار", "/workflows/definitions"],
+  ["risks", "ارزیابی ریسک", "/risks"],
+  ["risk-checklists", "چک‌لیست ریسک", "/risks/checklists"],
+  ["operations", "عملیات و سررسیدها", "/operations"],
+  ["dashboard", "داشبورد مدیریت", "/management-dashboard"],
 ];
 
-export default function M6Workspace({view}:{view:M6View}){
-  return <main className="m6-page" dir="rtl"><header className="m6-header"><div><span>مدیریت چرخه قرارداد · M6</span><h1>{tabs.find(x=>x[0]===view)?.[1]}</h1><p>گردش‌کار قابل ممیزی، ریسک نسخه‌دار و کنترل تعهدات بر مبنای دامنه دسترسی سازمانی</p></div><Link href="/">بازگشت به داشبورد</Link></header>
-    <nav className="m6-tabs">{tabs.map(([id,label,url])=><Link className={id===view?"active":""} href={url} key={id}>{label}</Link>)}</nav>
-    {view==="workflows"&&<WorkflowWorklist/>}{view==="workflow-definitions"&&<WorkflowDefinitions/>}
-    {view==="risks"&&<RiskAssessments/>}{view==="risk-checklists"&&<RiskChecklists/>}
-    {view==="operations"&&<Operations/>}{view==="dashboard"&&<Management/>}
-  </main>;
+export default function M6Workspace({ view }: { view: M6View }) {
+  return (
+    <main className="m6-page" dir="rtl">
+      <header className="m6-header">
+        <div>
+          <span>مدیریت چرخه قرارداد · M6</span>
+          <h1>{tabs.find((x) => x[0] === view)?.[1]}</h1>
+          <p>
+            گردش‌کار قابل ممیزی، ریسک نسخه‌دار و کنترل تعهدات بر مبنای دامنه
+            دسترسی سازمانی
+          </p>
+        </div>
+        <Link href="/">بازگشت به داشبورد</Link>
+      </header>
+      <nav className="m6-tabs">
+        {tabs.map(([id, label, url]) => (
+          <Link className={id === view ? "active" : ""} href={url} key={id}>
+            {label}
+          </Link>
+        ))}
+      </nav>
+      {view === "workflows" && <WorkflowWorklist />}
+      {view === "workflow-definitions" && <WorkflowDefinitions />}
+      {view === "risks" && <RiskAssessments />}
+      {view === "risk-checklists" && <RiskChecklists />}
+      {view === "operations" && <Operations />}
+      {view === "dashboard" && <Management />}
+    </main>
+  );
 }
 
-function useReferenceData(){
-  const [contracts,setContracts]=useState<ContractItem[]>([]),[groups,setGroups]=useState<ContractGroup[]>([]),[users,setUsers]=useState<IdentityUser[]>([]);
-  useEffect(()=>{void Promise.all([listContracts(),listContractCatalog<ContractGroup>("groups",1,100),listIdentityUsers()]).then(([c,g,u])=>{setContracts(c.items);setGroups(g.items);setUsers(u)}).catch(()=>{})},[]);
-  return {contracts,groups,users};
+function useReferenceData() {
+  const [contracts, setContracts] = useState<ContractItem[]>([]),
+    [groups, setGroups] = useState<ContractGroup[]>([]),
+    [users, setUsers] = useState<IdentityUser[]>([]);
+  useEffect(() => {
+    void Promise.all([
+      listContracts(),
+      listContractCatalog<ContractGroup>("groups", 1, 100),
+      listIdentityUsers(),
+    ])
+      .then(([c, g, u]) => {
+        setContracts(c.items);
+        setGroups(g.items);
+        setUsers(u);
+      })
+      .catch(() => {});
+  }, []);
+  return { contracts, groups, users };
 }
 
-function WorkflowDefinitions(){
-  const {groups,users}=useReferenceData(),[items,setItems]=useState<WorkflowDefinition[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(1),[archived,setArchived]=useState(false),[error,setError]=useState(""),[editing,setEditing]=useState<WorkflowDefinition>(),[name,setName]=useState(""),[groupId,setGroupId]=useState(""),[assignees,setAssignees]=useState<Record<number,string>>({});
-  const load=useCallback(async(p=1,a=archived)=>{try{const r=await listWorkflowDefinitions(p,size,a);setItems(r.items);setPage(r.pageNumber);setPages(Math.max(1,r.totalPages));setError("")}catch{setError("دریافت تعریف‌های گردش‌کار انجام نشد.")}},[archived]);
-  useEffect(()=>{void load(1)},[archived]);
-  async function submit(e:FormEvent){e.preventDefault();try{await saveWorkflowDefinition({name,contractGroupId:groupId||undefined,stages:stageTypes.map((s,i)=>({...s,order:i+1,defaultAssignedUserId:assignees[s.type]||undefined}))},editing?.id);setEditing(undefined);setName("");setGroupId("");setAssignees({});await load(1);setError("")}catch{setError("ذخیره تعریف انجام نشد؛ ترتیب مراحل و دامنه گروه را بررسی کنید.")}}
-  function edit(x:WorkflowDefinition){setEditing(x);setName(x.name);setGroupId(x.contractGroupId||"");setAssignees(Object.fromEntries(x.stages.map(s=>[s.type,s.defaultAssignedUserId||""])))}
-  return <section className="m6-grid"><article className="panel"><h2>{editing?`ایجاد نسخه جدید از ${editing.name}`:"تعریف گردش‌کار جدید"}</h2><p className="m6-hint">ویرایش یک تعریف، نسخه قبلی را حفظ و یک نسخه غیرقابل‌تغییر جدید ایجاد می‌کند.</p><form className="m6-form" onSubmit={submit}><label><span>عنوان *</span><input value={name} onChange={e=>setName(e.target.value)} required/></label><label><span>گروه قرارداد</span><select value={groupId} onChange={e=>setGroupId(e.target.value)}><option value="">سراسری سازمان</option>{groups.map(g=><option value={g.id} key={g.id}>{g.name}</option>)}</select></label><fieldset><legend>مراحل و مسئول پیش‌فرض</legend>{stageTypes.map(s=><label key={s.type}><span>{s.title}</span><UserSelect users={users} value={assignees[s.type]||""} onChange={v=>setAssignees({...assignees,[s.type]:v})}/></label>)}</fieldset><div className="m6-actions"><button className="primary-button">{editing?"ثبت نسخه جدید":"ثبت تعریف"}</button>{editing&&<button type="button" onClick={()=>{setEditing(undefined);setName("");setGroupId("")}}>انصراف</button>}</div></form></article>
-    <article className="panel"><header className="m6-panel-title"><h2>تعریف‌های نسخه‌دار</h2><label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> آرشیو</label></header><ErrorMessage value={error}/><div className="m6-list">{items.map(x=><article key={x.id}><header><div><strong>{x.name}</strong><small>نسخه {x.version} · {groups.find(g=>g.id===x.contractGroupId)?.name||"سراسری"}</small></div><b>{x.isActive?"فعال":"جایگزین‌شده"}</b></header><p>{x.stages.sort((a,b)=>a.order-b.order).map(s=>s.title).join(" ← ")}</p><footer>{archived?<button onClick={()=>void restoreWorkflowDefinition(x.id).then(()=>load(page))}>بازیابی</button>:<><button onClick={()=>edit(x)}>نسخه جدید</button><button className="danger" onClick={()=>window.confirm("تعریف آرشیو شود؟")&&void deleteWorkflowDefinition(x.id).then(()=>load(page))}>آرشیو</button></>}</footer></article>)}</div><Pager page={page} pages={pages} onChange={p=>void load(p)}/></article></section>;
+function WorkflowDefinitions() {
+  const { groups, users } = useReferenceData(),
+    [items, setItems] = useState<WorkflowDefinition[]>([]),
+    [page, setPage] = useState(1),
+    [pages, setPages] = useState(1),
+    [archived, setArchived] = useState(false),
+    [error, setError] = useState(""),
+    [editing, setEditing] = useState<WorkflowDefinition>(),
+    [name, setName] = useState(""),
+    [groupId, setGroupId] = useState(""),
+    [assignees, setAssignees] = useState<Record<number, string>>({});
+  const load = useCallback(
+    async (p = 1, a = archived) => {
+      try {
+        const r = await listWorkflowDefinitions(p, size, a);
+        setItems(r.items);
+        setPage(r.pageNumber);
+        setPages(Math.max(1, r.totalPages));
+        setError("");
+      } catch {
+        setError("دریافت تعریف‌های گردش‌کار انجام نشد.");
+      }
+    },
+    [archived],
+  );
+  useEffect(() => {
+    void load(1);
+  }, [archived]);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    try {
+      await saveWorkflowDefinition(
+        {
+          name,
+          contractGroupId: groupId || undefined,
+          stages: stageTypes.map((s, i) => ({
+            ...s,
+            order: i + 1,
+            defaultAssignedUserId: assignees[s.type] || undefined,
+          })),
+        },
+        editing?.id,
+      );
+      setEditing(undefined);
+      setName("");
+      setGroupId("");
+      setAssignees({});
+      await load(1);
+      setError("");
+    } catch {
+      setError(
+        "ذخیره تعریف انجام نشد؛ ترتیب مراحل و دامنه گروه را بررسی کنید.",
+      );
+    }
+  }
+  function edit(x: WorkflowDefinition) {
+    setEditing(x);
+    setName(x.name);
+    setGroupId(x.contractGroupId || "");
+    setAssignees(
+      Object.fromEntries(
+        x.stages.map((s) => [s.type, s.defaultAssignedUserId || ""]),
+      ),
+    );
+  }
+  return (
+    <section className="m6-grid">
+      <article className="panel">
+        <h2>
+          {editing
+            ? `ایجاد نسخه جدید از ${editing.name}`
+            : "تعریف گردش‌کار جدید"}
+        </h2>
+        <p className="m6-hint">
+          ویرایش یک تعریف، نسخه قبلی را حفظ و یک نسخه غیرقابل‌تغییر جدید ایجاد
+          می‌کند.
+        </p>
+        <form className="m6-form" onSubmit={submit}>
+          <label>
+            <span>عنوان *</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            <span>گروه قرارداد</span>
+            <select
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+            >
+              <option value="">سراسری سازمان</option>
+              {groups.map((g) => (
+                <option value={g.id} key={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset>
+            <legend>مراحل و مسئول پیش‌فرض</legend>
+            {stageTypes.map((s) => (
+              <label key={s.type}>
+                <span>{s.title}</span>
+                <UserSelect
+                  users={users}
+                  value={assignees[s.type] || ""}
+                  onChange={(v) => setAssignees({ ...assignees, [s.type]: v })}
+                />
+              </label>
+            ))}
+          </fieldset>
+          <div className="m6-actions">
+            <button className="primary-button">
+              {editing ? "ثبت نسخه جدید" : "ثبت تعریف"}
+            </button>
+            {editing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(undefined);
+                  setName("");
+                  setGroupId("");
+                }}
+              >
+                انصراف
+              </button>
+            )}
+          </div>
+        </form>
+      </article>
+      <article className="panel">
+        <header className="m6-panel-title">
+          <h2>تعریف‌های نسخه‌دار</h2>
+          <label>
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(e) => setArchived(e.target.checked)}
+            />{" "}
+            آرشیو
+          </label>
+        </header>
+        <ErrorMessage value={error} />
+        <div className="m6-list">
+          {items.map((x) => (
+            <article key={x.id}>
+              <header>
+                <div>
+                  <strong>{x.name}</strong>
+                  <small>
+                    نسخه {x.version} ·{" "}
+                    {groups.find((g) => g.id === x.contractGroupId)?.name ||
+                      "سراسری"}
+                  </small>
+                </div>
+                <b>{x.isActive ? "فعال" : "جایگزین‌شده"}</b>
+              </header>
+              <p>
+                {x.stages
+                  .sort((a, b) => a.order - b.order)
+                  .map((s) => s.title)
+                  .join(" ← ")}
+              </p>
+              <footer>
+                {archived ? (
+                  <button
+                    onClick={() =>
+                      void restoreWorkflowDefinition(x.id).then(() =>
+                        load(page),
+                      )
+                    }
+                  >
+                    بازیابی
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => edit(x)}>نسخه جدید</button>
+                    <button
+                      className="danger"
+                      onClick={() =>
+                        window.confirm("تعریف آرشیو شود؟") &&
+                        void deleteWorkflowDefinition(x.id).then(() =>
+                          load(page),
+                        )
+                      }
+                    >
+                      آرشیو
+                    </button>
+                  </>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
+        <Pager page={page} pages={pages} onChange={(p) => void load(p)} />
+      </article>
+    </section>
+  );
 }
 
-function WorkflowWorklist(){
-  const {contracts,users}=useReferenceData(),[definitions,setDefinitions]=useState<WorkflowDefinition[]>([]),[items,setItems]=useState<ContractWorkflow[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(1),[archived,setArchived]=useState(false),[mine,setMine]=useState(true),[contractId,setContractId]=useState(""),[definitionId,setDefinitionId]=useState(""),[selected,setSelected]=useState<string>(),[comment,setComment]=useState(""),[delegateId,setDelegateId]=useState(""),[error,setError]=useState("");
-  const load=useCallback(async(p=1)=>{try{const [r,d]=await Promise.all([listWorkflows(p,size,mine,archived),listWorkflowDefinitions(1,100)]);setItems(r.items);setDefinitions(d.items.filter(x=>x.isActive));setPage(r.pageNumber);setPages(Math.max(1,r.totalPages));if(!selected&&r.items[0])setSelected(r.items[0].id);setError("")}catch{setError("دریافت کارتابل گردش‌کار انجام نشد.")}},[mine,archived,selected]);
-  useEffect(()=>{void load(1)},[mine,archived]);const current=items.find(x=>x.id===selected);
-  async function begin(e:FormEvent){e.preventDefault();try{await startWorkflow({contractId,workflowDefinitionId:definitionId||undefined});setContractId("");await load(1)}catch{setError("شروع گردش‌کار انجام نشد؛ ممکن است قرارداد گردش فعال داشته باشد.")}}
-  async function act(kind:"decision"|"comment"|"delegate",decision=0){if(!current)return;try{if(kind==="decision")await decideWorkflow(current.id,decision,comment);if(kind==="comment")await commentWorkflow(current.id,comment);if(kind==="delegate")await delegateWorkflow(current.id,delegateId,comment);setComment("");await load(page)}catch{setError("ثبت اقدام انجام نشد؛ فقط مسئول مرحله یا مدیر مجاز است.")}}
-  return <><article className="panel m6-toolbar"><form onSubmit={begin}><select value={contractId} onChange={e=>setContractId(e.target.value)} required><option value="">انتخاب قرارداد برای شروع گردش</option>{contracts.map(c=><option key={c.id} value={c.id}>{c.subject}</option>)}</select><select value={definitionId} onChange={e=>setDefinitionId(e.target.value)}><option value="">گردش پیش‌فرض پنج‌مرحله‌ای</option>{definitions.map(d=><option key={d.id} value={d.id}>{d.name} ـ نسخه {d.version}</option>)}</select><button className="primary-button">شروع گردش</button></form><div><label><input type="checkbox" checked={mine} onChange={e=>setMine(e.target.checked)}/> فقط کارتابل من</label><label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> آرشیو</label></div></article><ErrorMessage value={error}/>
-    <section className="m6-master-detail"><article className="panel m6-list">{items.map(x=>{const stage=x.stages.find(s=>s.order===x.currentStageOrder);return <button className={selected===x.id?"active":""} key={x.id} onClick={()=>setSelected(x.id)}><strong>{x.subject}</strong><span>{stage?.title||"پایان گردش"} · {statusText[x.status]||x.status}</span><small>{new Date(x.createdAtUtc).toLocaleString("fa-IR")}</small></button>})}<Pager page={page} pages={pages} onChange={p=>void load(p)}/></article>
-      <article className="panel m6-detail">{current?<><header><div><h2>{current.subject}</h2><span>مرحله {current.currentStageOrder} · {statusText[current.status]}</span></div>{archived?<button onClick={()=>void restoreWorkflow(current.id).then(()=>load(page))}>بازیابی</button>:<button className="danger" onClick={()=>window.confirm("گردش‌کار آرشیو شود؟")&&void deleteWorkflow(current.id).then(()=>load(page))}>آرشیو</button>}</header><ol className="m6-stage-list">{current.stages.sort((a,b)=>a.order-b.order).map(s=><li className={s.order===current.currentStageOrder?"current":""} key={s.id}><b>{s.order}</b><div><strong>{s.title}</strong><small>{statusText[s.decision]}{s.decidedByUserId?` · ${s.decidedByUserId}`:""}</small>{s.comment&&<p>{s.comment}</p>}</div></li>)}</ol>{!archived&&current.status===1&&<div className="m6-decision"><textarea placeholder="توضیح تصمیم، نظر یا علت ارجاع…" value={comment} onChange={e=>setComment(e.target.value)}/><div><button className="approve" onClick={()=>void act("decision",2)}>تأیید</button><button onClick={()=>void act("decision",3)}>اصلاح</button><button className="danger" onClick={()=>void act("decision",4)}>رد</button><button onClick={()=>void act("comment")}>ثبت نظر</button></div><label><span>ارجاع مرحله به کاربر دیگر</span><UserSelect users={users} value={delegateId} onChange={setDelegateId}/><button disabled={!delegateId} onClick={()=>void act("delegate")}>واگذاری</button></label></div>}<details><summary>ردپای ممیزی ({current.actions.length})</summary>{current.actions.map(a=><p key={a.id}>{new Date(a.performedAtUtc).toLocaleString("fa-IR")} · {a.performedByUserId} · {a.comment||"بدون توضیح"}</p>)}</details></>:<p className="m6-empty">موردی برای نمایش وجود ندارد.</p>}</article></section></>;
+function WorkflowWorklist() {
+  const { contracts, users } = useReferenceData(),
+    [definitions, setDefinitions] = useState<WorkflowDefinition[]>([]),
+    [items, setItems] = useState<ContractWorkflow[]>([]),
+    [page, setPage] = useState(1),
+    [pages, setPages] = useState(1),
+    [archived, setArchived] = useState(false),
+    [mine, setMine] = useState(true),
+    [contractId, setContractId] = useState(""),
+    [definitionId, setDefinitionId] = useState(""),
+    [selected, setSelected] = useState<string>(),
+    [comment, setComment] = useState(""),
+    [delegateId, setDelegateId] = useState(""),
+    [error, setError] = useState("");
+  const load = useCallback(
+    async (p = 1) => {
+      try {
+        const [r, d] = await Promise.all([
+          listWorkflows(p, size, mine, archived),
+          listWorkflowDefinitions(1, 100),
+        ]);
+        setItems(r.items);
+        setDefinitions(d.items.filter((x) => x.isActive));
+        setPage(r.pageNumber);
+        setPages(Math.max(1, r.totalPages));
+        if (!selected && r.items[0]) setSelected(r.items[0].id);
+        setError("");
+      } catch {
+        setError("دریافت کارتابل گردش‌کار انجام نشد.");
+      }
+    },
+    [mine, archived, selected],
+  );
+  useEffect(() => {
+    void load(1);
+  }, [mine, archived]);
+  const current = items.find((x) => x.id === selected);
+  async function begin(e: FormEvent) {
+    e.preventDefault();
+    try {
+      await startWorkflow({
+        contractId,
+        workflowDefinitionId: definitionId || undefined,
+      });
+      setContractId("");
+      await load(1);
+    } catch {
+      setError(
+        "شروع گردش‌کار انجام نشد؛ ممکن است قرارداد گردش فعال داشته باشد.",
+      );
+    }
+  }
+  async function act(kind: "decision" | "comment" | "delegate", decision = 0) {
+    if (!current) return;
+    try {
+      if (kind === "decision")
+        await decideWorkflow(current.id, decision, comment);
+      if (kind === "comment") await commentWorkflow(current.id, comment);
+      if (kind === "delegate")
+        await delegateWorkflow(current.id, delegateId, comment);
+      setComment("");
+      await load(page);
+    } catch {
+      setError("ثبت اقدام انجام نشد؛ فقط مسئول مرحله یا مدیر مجاز است.");
+    }
+  }
+  return (
+    <>
+      <article className="panel m6-toolbar">
+        <form onSubmit={begin}>
+          <select
+            value={contractId}
+            onChange={(e) => setContractId(e.target.value)}
+            required
+          >
+            <option value="">انتخاب قرارداد برای شروع گردش</option>
+            {contracts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.subject}
+              </option>
+            ))}
+          </select>
+          <select
+            value={definitionId}
+            onChange={(e) => setDefinitionId(e.target.value)}
+          >
+            <option value="">گردش پیش‌فرض پنج‌مرحله‌ای</option>
+            {definitions.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name} ـ نسخه {d.version}
+              </option>
+            ))}
+          </select>
+          <button className="primary-button">شروع گردش</button>
+        </form>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={mine}
+              onChange={(e) => setMine(e.target.checked)}
+            />{" "}
+            فقط کارتابل من
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(e) => setArchived(e.target.checked)}
+            />{" "}
+            آرشیو
+          </label>
+        </div>
+      </article>
+      <ErrorMessage value={error} />
+      <section className="m6-master-detail">
+        <article className="panel m6-list">
+          {items.map((x) => {
+            const stage = x.stages.find((s) => s.order === x.currentStageOrder);
+            return (
+              <button
+                className={selected === x.id ? "active" : ""}
+                key={x.id}
+                onClick={() => setSelected(x.id)}
+              >
+                <strong>{x.subject}</strong>
+                <span>
+                  {stage?.title || "پایان گردش"} ·{" "}
+                  {statusText[x.status] || x.status}
+                </span>
+              <small>{formatJalaliDateTime(x.createdAtUtc)}</small>
+              </button>
+            );
+          })}
+          <Pager page={page} pages={pages} onChange={(p) => void load(p)} />
+        </article>
+        <article className="panel m6-detail">
+          {current ? (
+            <>
+              <header>
+                <div>
+                  <h2>{current.subject}</h2>
+                  <span>
+                    مرحله {current.currentStageOrder} ·{" "}
+                    {statusText[current.status]}
+                  </span>
+                </div>
+                {archived ? (
+                  <button
+                    onClick={() =>
+                      void restoreWorkflow(current.id).then(() => load(page))
+                    }
+                  >
+                    بازیابی
+                  </button>
+                ) : (
+                  <button
+                    className="danger"
+                    onClick={() =>
+                      window.confirm("گردش‌کار آرشیو شود؟") &&
+                      void deleteWorkflow(current.id).then(() => load(page))
+                    }
+                  >
+                    آرشیو
+                  </button>
+                )}
+              </header>
+              <ol className="m6-stage-list">
+                {current.stages
+                  .sort((a, b) => a.order - b.order)
+                  .map((s) => (
+                    <li
+                      className={
+                        s.order === current.currentStageOrder ? "current" : ""
+                      }
+                      key={s.id}
+                    >
+                      <b>{s.order}</b>
+                      <div>
+                        <strong>{s.title}</strong>
+                        <small>
+                          {statusText[s.decision]}
+                          {s.decidedByUserId ? ` · ${s.decidedByUserId}` : ""}
+                        </small>
+                        {s.comment && <p>{s.comment}</p>}
+                      </div>
+                    </li>
+                  ))}
+              </ol>
+              {!archived && current.status === 1 && (
+                <div className="m6-decision">
+                  <textarea
+                    placeholder="توضیح تصمیم، نظر یا علت ارجاع…"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                  <div>
+                    <button
+                      className="approve"
+                      onClick={() => void act("decision", 2)}
+                    >
+                      تأیید
+                    </button>
+                    <button onClick={() => void act("decision", 3)}>
+                      اصلاح
+                    </button>
+                    <button
+                      className="danger"
+                      onClick={() => void act("decision", 4)}
+                    >
+                      رد
+                    </button>
+                    <button onClick={() => void act("comment")}>ثبت نظر</button>
+                  </div>
+                  <label>
+                    <span>ارجاع مرحله به کاربر دیگر</span>
+                    <UserSelect
+                      users={users}
+                      value={delegateId}
+                      onChange={setDelegateId}
+                    />
+                    <button
+                      disabled={!delegateId}
+                      onClick={() => void act("delegate")}
+                    >
+                      واگذاری
+                    </button>
+                  </label>
+                </div>
+              )}
+              <details>
+                <summary>ردپای ممیزی ({current.actions.length})</summary>
+                {current.actions.map((a) => (
+                  <p key={a.id}>
+                    {formatJalaliDateTime(a.performedAtUtc)} ·{" "}
+                    {a.performedByUserId} · {a.comment || "بدون توضیح"}
+                  </p>
+                ))}
+              </details>
+            </>
+          ) : (
+            <p className="m6-empty">موردی برای نمایش وجود ندارد.</p>
+          )}
+        </article>
+      </section>
+    </>
+  );
 }
 
-function RiskChecklists(){
-  const {groups}=useReferenceData(),[items,setItems]=useState<RiskChecklistDefinition[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(1),[archived,setArchived]=useState(false),[editing,setEditing]=useState<RiskChecklistDefinition>(),[name,setName]=useState(""),[groupId,setGroupId]=useState(""),[rows,setRows]=useState([{code:"LEGAL",title:"ریسک حقوقی",weight:40,isCritical:true},{code:"FIN",title:"ریسک مالی",weight:35,isCritical:false},{code:"TECH",title:"ریسک فنی",weight:25,isCritical:false}]),[error,setError]=useState("");
-  const load=useCallback(async(p=1)=>{try{const r=await listRiskChecklists(p,size,archived);setItems(r.items);setPage(r.pageNumber);setPages(Math.max(1,r.totalPages));setError("")}catch{setError("دریافت چک‌لیست‌ها انجام نشد.")}},[archived]);useEffect(()=>{void load(1)},[archived]);
-  async function submit(e:FormEvent){e.preventDefault();try{await saveRiskChecklist({name,contractGroupId:groupId||undefined,items:rows},editing?.id);setEditing(undefined);setName("");await load(1)}catch{setError("ذخیره چک‌لیست انجام نشد؛ کدها، وزن‌ها و مجموع وزن را بررسی کنید.")}}
-  return <section className="m6-grid"><article className="panel"><h2>{editing?"ثبت نسخه جدید چک‌لیست":"چک‌لیست ریسک جدید"}</h2><form className="m6-form" onSubmit={submit}><label><span>عنوان *</span><input required value={name} onChange={e=>setName(e.target.value)}/></label><label><span>گروه قرارداد</span><select value={groupId} onChange={e=>setGroupId(e.target.value)}><option value="">سراسری سازمان</option>{groups.map(g=><option key={g.id} value={g.id}>{g.name}</option>)}</select></label><fieldset><legend>معیارها · مجموع وزن: {rows.reduce((n,x)=>n+x.weight,0)}</legend>{rows.map((r,i)=><div className="m6-risk-row" key={i}><input value={r.code} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,code:e.target.value}:x))}/><input value={r.title} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,title:e.target.value}:x))}/><input type="number" min="1" max="100" value={r.weight} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,weight:Number(e.target.value)}:x))}/><label><input type="checkbox" checked={r.isCritical} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,isCritical:e.target.checked}:x))}/> بحرانی</label><button type="button" onClick={()=>setRows(rows.filter((_,j)=>j!==i))}>×</button></div>)}<button type="button" onClick={()=>setRows([...rows,{code:"",title:"",weight:10,isCritical:false}])}>+ افزودن معیار</button></fieldset><button className="primary-button">{editing?"ثبت نسخه جدید":"ثبت چک‌لیست"}</button></form></article><article className="panel"><header className="m6-panel-title"><h2>نسخه‌های چک‌لیست</h2><label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> آرشیو</label></header><ErrorMessage value={error}/><div className="m6-list">{items.map(x=><article key={x.id}><header><div><strong>{x.name}</strong><small>نسخه {x.version} · {x.items.length} معیار</small></div><b>{x.isActive?"فعال":"جایگزین‌شده"}</b></header><p>{x.items.map(i=>`${i.title} (${i.weight})`).join("، ")}</p><footer>{archived?<button onClick={()=>void restoreRiskChecklist(x.id).then(()=>load(page))}>بازیابی</button>:<><button onClick={()=>{setEditing(x);setName(x.name);setGroupId(x.contractGroupId||"");setRows(x.items)}}>نسخه جدید</button><button className="danger" onClick={()=>void deleteRiskChecklist(x.id).then(()=>load(page))}>آرشیو</button></>}</footer></article>)}</div><Pager page={page} pages={pages} onChange={p=>void load(p)}/></article></section>;
+function RiskChecklists() {
+  const { groups } = useReferenceData(),
+    [items, setItems] = useState<RiskChecklistDefinition[]>([]),
+    [page, setPage] = useState(1),
+    [pages, setPages] = useState(1),
+    [archived, setArchived] = useState(false),
+    [editing, setEditing] = useState<RiskChecklistDefinition>(),
+    [name, setName] = useState(""),
+    [groupId, setGroupId] = useState(""),
+    [rows, setRows] = useState([
+      { code: "LEGAL", title: "ریسک حقوقی", weight: 40, isCritical: true },
+      { code: "FIN", title: "ریسک مالی", weight: 35, isCritical: false },
+      { code: "TECH", title: "ریسک فنی", weight: 25, isCritical: false },
+    ]),
+    [error, setError] = useState("");
+  const load = useCallback(
+    async (p = 1) => {
+      try {
+        const r = await listRiskChecklists(p, size, archived);
+        setItems(r.items);
+        setPage(r.pageNumber);
+        setPages(Math.max(1, r.totalPages));
+        setError("");
+      } catch {
+        setError("دریافت چک‌لیست‌ها انجام نشد.");
+      }
+    },
+    [archived],
+  );
+  useEffect(() => {
+    void load(1);
+  }, [archived]);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    try {
+      await saveRiskChecklist(
+        { name, contractGroupId: groupId || undefined, items: rows },
+        editing?.id,
+      );
+      setEditing(undefined);
+      setName("");
+      await load(1);
+    } catch {
+      setError(
+        "ذخیره چک‌لیست انجام نشد؛ کدها، وزن‌ها و مجموع وزن را بررسی کنید.",
+      );
+    }
+  }
+  return (
+    <section className="m6-grid">
+      <article className="panel">
+        <h2>{editing ? "ثبت نسخه جدید چک‌لیست" : "چک‌لیست ریسک جدید"}</h2>
+        <form className="m6-form" onSubmit={submit}>
+          <label>
+            <span>عنوان *</span>
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <label>
+            <span>گروه قرارداد</span>
+            <select
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+            >
+              <option value="">سراسری سازمان</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset>
+            <legend>
+              معیارها · مجموع وزن: {rows.reduce((n, x) => n + x.weight, 0)}
+            </legend>
+            {rows.map((r, i) => (
+              <div className="m6-risk-row" key={i}>
+                <input
+                  value={r.code}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, code: e.target.value } : x,
+                      ),
+                    )
+                  }
+                />
+                <input
+                  value={r.title}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, title: e.target.value } : x,
+                      ),
+                    )
+                  }
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={r.weight}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, weight: Number(e.target.value) } : x,
+                      ),
+                    )
+                  }
+                />
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={r.isCritical}
+                    onChange={(e) =>
+                      setRows(
+                        rows.map((x, j) =>
+                          j === i ? { ...x, isCritical: e.target.checked } : x,
+                        ),
+                      )
+                    }
+                  />{" "}
+                  بحرانی
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setRows([
+                  ...rows,
+                  { code: "", title: "", weight: 10, isCritical: false },
+                ])
+              }
+            >
+              + افزودن معیار
+            </button>
+          </fieldset>
+          <button className="primary-button">
+            {editing ? "ثبت نسخه جدید" : "ثبت چک‌لیست"}
+          </button>
+        </form>
+      </article>
+      <article className="panel">
+        <header className="m6-panel-title">
+          <h2>نسخه‌های چک‌لیست</h2>
+          <label>
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(e) => setArchived(e.target.checked)}
+            />{" "}
+            آرشیو
+          </label>
+        </header>
+        <ErrorMessage value={error} />
+        <div className="m6-list">
+          {items.map((x) => (
+            <article key={x.id}>
+              <header>
+                <div>
+                  <strong>{x.name}</strong>
+                  <small>
+                    نسخه {x.version} · {x.items.length} معیار
+                  </small>
+                </div>
+                <b>{x.isActive ? "فعال" : "جایگزین‌شده"}</b>
+              </header>
+              <p>{x.items.map((i) => `${i.title} (${i.weight})`).join("، ")}</p>
+              <footer>
+                {archived ? (
+                  <button
+                    onClick={() =>
+                      void restoreRiskChecklist(x.id).then(() => load(page))
+                    }
+                  >
+                    بازیابی
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setEditing(x);
+                        setName(x.name);
+                        setGroupId(x.contractGroupId || "");
+                        setRows(x.items);
+                      }}
+                    >
+                      نسخه جدید
+                    </button>
+                    <button
+                      className="danger"
+                      onClick={() =>
+                        void deleteRiskChecklist(x.id).then(() => load(page))
+                      }
+                    >
+                      آرشیو
+                    </button>
+                  </>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
+        <Pager page={page} pages={pages} onChange={(p) => void load(p)} />
+      </article>
+    </section>
+  );
 }
 
-function RiskAssessments(){
-  const {contracts}=useReferenceData(),[definitions,setDefinitions]=useState<RiskChecklistDefinition[]>([]),[items,setItems]=useState<RiskAssessment[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(1),[archived,setArchived]=useState(false),[contractId,setContractId]=useState(""),[definitionId,setDefinitionId]=useState(""),[scores,setScores]=useState<Record<string,number>>({}),[summary,setSummary]=useState(""),[error,setError]=useState("");
-  const selected=definitions.find(x=>x.id===definitionId);const load=useCallback(async(p=1)=>{try{const [r,d]=await Promise.all([listRisks(p,size,archived),listRiskChecklists(1,100)]);setItems(r.items);setDefinitions(d.items.filter(x=>x.isActive));setPage(r.pageNumber);setPages(Math.max(1,r.totalPages));setError("")}catch{setError("دریافت ارزیابی‌های ریسک انجام نشد.")}},[archived]);useEffect(()=>{void load(1)},[archived]);
-  async function submit(e:FormEvent){e.preventDefault();if(!selected)return;try{await assessContractRisk({contractId,checklistDefinitionId:selected.id,summary,items:selected.items.map(x=>({...x,score:scores[x.code]||0}))});setSummary("");await load(1)}catch{setError("ثبت ارزیابی انجام نشد؛ دامنه قرارداد و امتیازها را بررسی کنید.")}}
-  return <section className="m6-grid"><article className="panel"><h2>ارزیابی نسخه‌دار قرارداد</h2><form className="m6-form" onSubmit={submit}><label><span>قرارداد *</span><select required value={contractId} onChange={e=>setContractId(e.target.value)}><option value="">انتخاب کنید</option>{contracts.map(c=><option key={c.id} value={c.id}>{c.subject}</option>)}</select></label><label><span>چک‌لیست *</span><select required value={definitionId} onChange={e=>{setDefinitionId(e.target.value);setScores({})}}><option value="">انتخاب کنید</option>{definitions.map(d=><option key={d.id} value={d.id}>{d.name} · نسخه {d.version}</option>)}</select></label>{selected&&<fieldset><legend>امتیاز هر معیار از ۰ تا ۱۰۰</legend>{selected.items.map(x=><label key={x.code}><span>{x.title} · وزن {x.weight}{x.isCritical?" · بحرانی":""}</span><input type="number" min="0" max="100" value={scores[x.code]||0} onChange={e=>setScores({...scores,[x.code]:Number(e.target.value)})}/></label>)}</fieldset>}<label><span>جمع‌بندی</span><textarea value={summary} onChange={e=>setSummary(e.target.value)}/></label><button className="primary-button" disabled={!selected}>ثبت ارزیابی</button></form></article><article className="panel"><header className="m6-panel-title"><h2>سوابق ریسک</h2><label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> آرشیو</label></header><ErrorMessage value={error}/><div className="m6-list">{items.map(x=><article key={x.id}><header><div><strong>{x.subject}</strong><small>ارزیابی نسخه {x.version} · چک‌لیست نسخه {x.checklistDefinitionVersion||"—"}</small></div><b className={`risk-${x.level}`}>{x.score} · {riskText[x.level]}</b></header><p>{x.summary||x.items.map(i=>`${i.title}: ${i.score}`).join("، ")}</p><footer>{archived?<button onClick={()=>void restoreRisk(x.id).then(()=>load(page))}>بازیابی</button>:<button className="danger" onClick={()=>void deleteRisk(x.id).then(()=>load(page))}>آرشیو</button>}</footer></article>)}</div><Pager page={page} pages={pages} onChange={p=>void load(p)}/></article></section>;
+function RiskAssessments() {
+  const { contracts } = useReferenceData(),
+    [definitions, setDefinitions] = useState<RiskChecklistDefinition[]>([]),
+    [items, setItems] = useState<RiskAssessment[]>([]),
+    [page, setPage] = useState(1),
+    [pages, setPages] = useState(1),
+    [archived, setArchived] = useState(false),
+    [contractId, setContractId] = useState(""),
+    [definitionId, setDefinitionId] = useState(""),
+    [scores, setScores] = useState<Record<string, number>>({}),
+    [summary, setSummary] = useState(""),
+    [error, setError] = useState("");
+  const selected = definitions.find((x) => x.id === definitionId);
+  const load = useCallback(
+    async (p = 1) => {
+      try {
+        const [r, d] = await Promise.all([
+          listRisks(p, size, archived),
+          listRiskChecklists(1, 100),
+        ]);
+        setItems(r.items);
+        setDefinitions(d.items.filter((x) => x.isActive));
+        setPage(r.pageNumber);
+        setPages(Math.max(1, r.totalPages));
+        setError("");
+      } catch {
+        setError("دریافت ارزیابی‌های ریسک انجام نشد.");
+      }
+    },
+    [archived],
+  );
+  useEffect(() => {
+    void load(1);
+  }, [archived]);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!selected) return;
+    try {
+      await assessContractRisk({
+        contractId,
+        checklistDefinitionId: selected.id,
+        summary,
+        items: selected.items.map((x) => ({
+          ...x,
+          score: scores[x.code] || 0,
+        })),
+      });
+      setSummary("");
+      await load(1);
+    } catch {
+      setError(
+        "ثبت ارزیابی انجام نشد؛ دامنه قرارداد و امتیازها را بررسی کنید.",
+      );
+    }
+  }
+  return (
+    <section className="m6-grid">
+      <article className="panel">
+        <h2>ارزیابی نسخه‌دار قرارداد</h2>
+        <form className="m6-form" onSubmit={submit}>
+          <label>
+            <span>قرارداد *</span>
+            <select
+              required
+              value={contractId}
+              onChange={(e) => setContractId(e.target.value)}
+            >
+              <option value="">انتخاب کنید</option>
+              {contracts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.subject}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>چک‌لیست *</span>
+            <select
+              required
+              value={definitionId}
+              onChange={(e) => {
+                setDefinitionId(e.target.value);
+                setScores({});
+              }}
+            >
+              <option value="">انتخاب کنید</option>
+              {definitions.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} · نسخه {d.version}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selected && (
+            <fieldset>
+              <legend>امتیاز هر معیار از ۰ تا ۱۰۰</legend>
+              {selected.items.map((x) => (
+                <label key={x.code}>
+                  <span>
+                    {x.title} · وزن {x.weight}
+                    {x.isCritical ? " · بحرانی" : ""}
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={scores[x.code] || 0}
+                    onChange={(e) =>
+                      setScores({ ...scores, [x.code]: Number(e.target.value) })
+                    }
+                  />
+                </label>
+              ))}
+            </fieldset>
+          )}
+          <label>
+            <span>جمع‌بندی</span>
+            <textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+            />
+          </label>
+          <button className="primary-button" disabled={!selected}>
+            ثبت ارزیابی
+          </button>
+        </form>
+      </article>
+      <article className="panel">
+        <header className="m6-panel-title">
+          <h2>سوابق ریسک</h2>
+          <label>
+            <input
+              type="checkbox"
+              checked={archived}
+              onChange={(e) => setArchived(e.target.checked)}
+            />{" "}
+            آرشیو
+          </label>
+        </header>
+        <ErrorMessage value={error} />
+        <div className="m6-list">
+          {items.map((x) => (
+            <article key={x.id}>
+              <header>
+                <div>
+                  <strong>{x.subject}</strong>
+                  <small>
+                    ارزیابی نسخه {x.version} · چک‌لیست نسخه{" "}
+                    {x.checklistDefinitionVersion || "—"}
+                  </small>
+                </div>
+                <b className={`risk-${x.level}`}>
+                  {x.score} · {riskText[x.level]}
+                </b>
+              </header>
+              <p>
+                {x.summary ||
+                  x.items.map((i) => `${i.title}: ${i.score}`).join("، ")}
+              </p>
+              <footer>
+                {archived ? (
+                  <button
+                    onClick={() =>
+                      void restoreRisk(x.id).then(() => load(page))
+                    }
+                  >
+                    بازیابی
+                  </button>
+                ) : (
+                  <button
+                    className="danger"
+                    onClick={() => void deleteRisk(x.id).then(() => load(page))}
+                  >
+                    آرشیو
+                  </button>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
+        <Pager page={page} pages={pages} onChange={(p) => void load(p)} />
+      </article>
+    </section>
+  );
 }
 
-function Operations(){
-  const {contracts,users}=useReferenceData(),[items,setItems]=useState<ContractOperation[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(1),[archived,setArchived]=useState(false),[mine,setMine]=useState(false),[editing,setEditing]=useState<ContractOperation>(),[form,setForm]=useState({contractId:"",type:1,title:"",dueDate:"",amount:"",currency:"IRR",reminderDaysBefore:7,description:"",assignedUserId:""}),[error,setError]=useState("");
-  const load=useCallback(async(p=1)=>{try{const r=await listOperations(p,size,archived,mine);setItems(r.items);setPage(r.pageNumber);setPages(Math.max(1,r.totalPages));setError("")}catch{setError("دریافت عملیات قرارداد انجام نشد.")}},[archived,mine]);useEffect(()=>{void load(1)},[archived,mine]);
-  async function submit(e:FormEvent){e.preventDefault();try{const input={...form,amount:form.amount?Number(form.amount):undefined,assignedUserId:form.assignedUserId||undefined};if(editing)await updateOperation(editing.id,input);else await createOperation(input);setEditing(undefined);setForm({...form,title:"",dueDate:"",amount:"",description:""});await load(1)}catch{setError("ذخیره عملیات انجام نشد؛ تاریخ و قرارداد را بررسی کنید.")}}
-  function edit(x:ContractOperation){setEditing(x);setForm({contractId:x.contractId,type:x.type,title:x.title,dueDate:x.dueDate,amount:x.amount?.toString()||"",currency:x.currency,reminderDaysBefore:x.reminderDaysBefore,description:x.description||"",assignedUserId:x.assignedUserId||""})}
-  return <section className="m6-grid"><article className="panel"><h2>{editing?"ویرایش عملیات":"ثبت سررسید یا تعهد"}</h2><form className="m6-form" onSubmit={submit}><label><span>قرارداد *</span><select required value={form.contractId} onChange={e=>setForm({...form,contractId:e.target.value})}><option value="">انتخاب کنید</option>{contracts.map(c=><option key={c.id} value={c.id}>{c.subject}</option>)}</select></label><label><span>نوع *</span><select value={form.type} onChange={e=>setForm({...form,type:Number(e.target.value)})}>{operationTypes.slice(1).map((x,i)=><option key={i+1} value={i+1}>{x}</option>)}</select></label><label><span>عنوان *</span><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><label><span>تاریخ سررسید *</span><input required type="date" value={form.dueDate} onChange={e=>setForm({...form,dueDate:e.target.value})}/></label><label><span>مبلغ</span><input type="number" min="0" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})}/></label><label><span>ارز</span><input value={form.currency} onChange={e=>setForm({...form,currency:e.target.value})}/></label><label><span>یادآوری (روز قبل)</span><input type="number" min="0" max="365" value={form.reminderDaysBefore} onChange={e=>setForm({...form,reminderDaysBefore:Number(e.target.value)})}/></label><label><span>مسئول</span><UserSelect users={users} value={form.assignedUserId} onChange={v=>setForm({...form,assignedUserId:v})}/></label><label className="full"><span>توضیحات</span><textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label><div className="m6-actions"><button className="primary-button">{editing?"ذخیره تغییرات":"ثبت عملیات"}</button>{editing&&<button type="button" onClick={()=>setEditing(undefined)}>انصراف</button>}</div></form></article><article className="panel"><header className="m6-panel-title"><h2>تقویم عملیات</h2><div><label><input type="checkbox" checked={mine} onChange={e=>setMine(e.target.checked)}/> مسئولیت من</label><label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> آرشیو</label></div></header><ErrorMessage value={error}/><div className="m6-list">{items.map(x=><article key={x.id}><header><div><strong>{x.title}</strong><small>{x.subject} · {operationTypes[x.type]}</small></div><b className={x.status===4?"danger-text":""}>{x.dueDate} · وضعیت {x.status}</b></header><p>{x.description||"بدون توضیح"}{x.completedAtUtc?` · تکمیل در ${new Date(x.completedAtUtc).toLocaleString("fa-IR")}`:""}</p><footer>{archived?<button onClick={()=>void restoreOperation(x.id).then(()=>load(page))}>بازیابی</button>:<><button onClick={()=>edit(x)}>ویرایش</button>{x.status!==2&&<button className="approve" onClick={()=>void changeOperationStatus(x.id,2).then(()=>load(page))}>تکمیل</button>}<button className="danger" onClick={()=>void deleteOperation(x.id).then(()=>load(page))}>آرشیو</button></>}</footer></article>)}</div><Pager page={page} pages={pages} onChange={p=>void load(p)}/></article></section>;
+function Operations() {
+  const { contracts, users } = useReferenceData(),
+    [items, setItems] = useState<ContractOperation[]>([]),
+    [page, setPage] = useState(1),
+    [pages, setPages] = useState(1),
+    [archived, setArchived] = useState(false),
+    [mine, setMine] = useState(false),
+    [editing, setEditing] = useState<ContractOperation>(),
+    [form, setForm] = useState({
+      contractId: "",
+      type: 1,
+      title: "",
+      dueDate: "",
+      amount: "",
+      currency: "IRR",
+      reminderDaysBefore: 7,
+      description: "",
+      assignedUserId: "",
+    }),
+    [error, setError] = useState("");
+  const load = useCallback(
+    async (p = 1) => {
+      try {
+        const r = await listOperations(p, size, archived, mine);
+        setItems(r.items);
+        setPage(r.pageNumber);
+        setPages(Math.max(1, r.totalPages));
+        setError("");
+      } catch {
+        setError("دریافت عملیات قرارداد انجام نشد.");
+      }
+    },
+    [archived, mine],
+  );
+  useEffect(() => {
+    void load(1);
+  }, [archived, mine]);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    try {
+      const input = {
+        ...form,
+        amount: form.amount ? Number(form.amount) : undefined,
+        assignedUserId: form.assignedUserId || undefined,
+      };
+      if (editing) await updateOperation(editing.id, input);
+      else await createOperation(input);
+      setEditing(undefined);
+      setForm({ ...form, title: "", dueDate: "", amount: "", description: "" });
+      await load(1);
+    } catch {
+      setError("ذخیره عملیات انجام نشد؛ تاریخ و قرارداد را بررسی کنید.");
+    }
+  }
+  function edit(x: ContractOperation) {
+    setEditing(x);
+    setForm({
+      contractId: x.contractId,
+      type: x.type,
+      title: x.title,
+      dueDate: x.dueDate,
+      amount: x.amount?.toString() || "",
+      currency: x.currency,
+      reminderDaysBefore: x.reminderDaysBefore,
+      description: x.description || "",
+      assignedUserId: x.assignedUserId || "",
+    });
+  }
+  return (
+    <section className="m6-grid">
+      <article className="panel">
+        <h2>{editing ? "ویرایش عملیات" : "ثبت سررسید یا تعهد"}</h2>
+        <form className="m6-form" onSubmit={submit}>
+          <label>
+            <span>قرارداد *</span>
+            <select
+              required
+              value={form.contractId}
+              onChange={(e) => setForm({ ...form, contractId: e.target.value })}
+            >
+              <option value="">انتخاب کنید</option>
+              {contracts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.subject}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>نوع *</span>
+            <select
+              value={form.type}
+              onChange={(e) =>
+                setForm({ ...form, type: Number(e.target.value) })
+              }
+            >
+              {operationTypes.slice(1).map((x, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {x}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>عنوان *</span>
+            <input
+              required
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </label>
+          <label>
+          <span>تاریخ سررسید (شمسی) *</span>
+          <PersianCalendar
+            value={form.dueDate}
+            onChange={(value) => setForm({ ...form, dueDate: value })}
+          />
+          </label>
+          <label>
+            <span>مبلغ</span>
+            <input
+              type="number"
+              min="0"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+          </label>
+          <label>
+            <span>ارز</span>
+            <input
+              value={form.currency}
+              onChange={(e) => setForm({ ...form, currency: e.target.value })}
+            />
+          </label>
+          <label>
+            <span>یادآوری (روز قبل)</span>
+            <input
+              type="number"
+              min="0"
+              max="365"
+              value={form.reminderDaysBefore}
+              onChange={(e) =>
+                setForm({ ...form, reminderDaysBefore: Number(e.target.value) })
+              }
+            />
+          </label>
+          <label>
+            <span>مسئول</span>
+            <UserSelect
+              users={users}
+              value={form.assignedUserId}
+              onChange={(v) => setForm({ ...form, assignedUserId: v })}
+            />
+          </label>
+          <label className="full">
+            <span>توضیحات</span>
+            <textarea
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+          </label>
+          <div className="m6-actions">
+            <button className="primary-button">
+              {editing ? "ذخیره تغییرات" : "ثبت عملیات"}
+            </button>
+            {editing && (
+              <button type="button" onClick={() => setEditing(undefined)}>
+                انصراف
+              </button>
+            )}
+          </div>
+        </form>
+      </article>
+      <article className="panel">
+        <header className="m6-panel-title">
+          <h2>تقویم عملیات</h2>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={mine}
+                onChange={(e) => setMine(e.target.checked)}
+              />{" "}
+              مسئولیت من
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={archived}
+                onChange={(e) => setArchived(e.target.checked)}
+              />{" "}
+              آرشیو
+            </label>
+          </div>
+        </header>
+        <ErrorMessage value={error} />
+        <div className="m6-list">
+          {items.map((x) => (
+            <article key={x.id}>
+              <header>
+                <div>
+                  <strong>{x.title}</strong>
+                  <small>
+                    {x.subject} · {operationTypes[x.type]}
+                  </small>
+                </div>
+                <b className={x.status === 4 ? "danger-text" : ""}>
+                  {formatJalaliDate(x.dueDate)} · وضعیت {x.status}
+                </b>
+              </header>
+              <p>
+                {x.description || "بدون توضیح"}
+                {x.completedAtUtc
+                  ? ` · تکمیل در ${formatJalaliDateTime(x.completedAtUtc)}`
+                  : ""}
+              </p>
+              <footer>
+                {archived ? (
+                  <button
+                    onClick={() =>
+                      void restoreOperation(x.id).then(() => load(page))
+                    }
+                  >
+                    بازیابی
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => edit(x)}>ویرایش</button>
+                    {x.status !== 2 && (
+                      <button
+                        className="approve"
+                        onClick={() =>
+                          void changeOperationStatus(x.id, 2).then(() =>
+                            load(page),
+                          )
+                        }
+                      >
+                        تکمیل
+                      </button>
+                    )}
+                    <button
+                      className="danger"
+                      onClick={() =>
+                        void deleteOperation(x.id).then(() => load(page))
+                      }
+                    >
+                      آرشیو
+                    </button>
+                  </>
+                )}
+              </footer>
+            </article>
+          ))}
+        </div>
+        <Pager page={page} pages={pages} onChange={(p) => void load(p)} />
+      </article>
+    </section>
+  );
 }
 
-function Management(){
-  const [data,setData]=useState<ManagementDashboard>(),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);const load=useCallback(async()=>{try{setData(await getManagementDashboard())}catch{setMessage("دریافت داشبورد مدیریت انجام نشد.")}},[]);useEffect(()=>{void load()},[]);
-  const cards=useMemo(()=>data?[{t:"قرارداد فعال",v:data.activeContracts},{t:"در انتظار تأیید",v:data.pendingApprovals},{t:"کارتابل من",v:data.myPendingTasks},{t:"سررسید گذشته",v:data.overdueOperations},{t:"۳۰ روز آینده",v:data.upcomingOperations},{t:"ریسک بالا",v:data.highRisks}]:[],[data]);
-  async function reminders(){setBusy(true);try{const r=await processOperationReminders();setMessage(`پردازش شد: ${r.markedOverdue} معوق، ${r.upcomingQueued+r.overdueQueued} یادآوری جدید، ${r.existingSkipped} تکراری نادیده گرفته شد.`);await load()}catch{setMessage("پردازش یادآورها انجام نشد.")}finally{setBusy(false)}}
-  return <><section className="m6-metrics">{cards.map(x=><article className="panel" key={x.t}><span>{x.t}</span><strong>{x.v.toLocaleString("fa-IR")}</strong></article>)}</section><section className="m6-grid"><article className="panel"><header className="m6-panel-title"><h2>سررسیدهای نزدیک</h2><Link href="/operations">مدیریت عملیات</Link></header><div className="m6-list">{data?.upcoming.map(x=><article key={x.id}><header><div><strong>{x.title}</strong><small>{x.subject} · {operationTypes[x.type]}</small></div><b>{x.dueDate}</b></header></article>)}{!data?.upcoming.length&&<p className="m6-empty">سررسیدی در بازه ۳۰ روزه وجود ندارد.</p>}</div></article><article className="panel"><h2>عملیات مدیریتی</h2><p className="m6-hint">پردازش یادآورها idempotent است؛ اجرای دوباره برای یک موعد، رکورد تکراری تولید نمی‌کند.</p><div className="m6-report-actions"><button className="primary-button" disabled={busy} onClick={()=>void reminders()}>پردازش یادآورها</button><button onClick={()=>void downloadContractOperationsReport()}>دانلود گزارش CSV</button></div>{message&&<p className="m6-message">{message}</p>}</article></section></>;
+function Management() {
+  const [data, setData] = useState<ManagementDashboard>(),
+    [message, setMessage] = useState(""),
+    [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    try {
+      setData(await getManagementDashboard());
+    } catch {
+      setMessage("دریافت داشبورد مدیریت انجام نشد.");
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, []);
+  const cards = useMemo(
+    () =>
+      data
+        ? [
+            { t: "قرارداد فعال", v: data.activeContracts },
+            { t: "در انتظار تأیید", v: data.pendingApprovals },
+            { t: "کارتابل من", v: data.myPendingTasks },
+            { t: "سررسید گذشته", v: data.overdueOperations },
+            { t: "۳۰ روز آینده", v: data.upcomingOperations },
+            { t: "ریسک بالا", v: data.highRisks },
+          ]
+        : [],
+    [data],
+  );
+  async function reminders() {
+    setBusy(true);
+    try {
+      const r = await processOperationReminders();
+      setMessage(
+        `پردازش شد: ${r.markedOverdue} معوق، ${r.upcomingQueued + r.overdueQueued} یادآوری جدید، ${r.existingSkipped} تکراری نادیده گرفته شد.`,
+      );
+      await load();
+    } catch {
+      setMessage("پردازش یادآورها انجام نشد.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <section className="m6-metrics">
+        {cards.map((x) => (
+          <article className="panel" key={x.t}>
+            <span>{x.t}</span>
+            <strong>{x.v.toLocaleString("fa-IR")}</strong>
+          </article>
+        ))}
+      </section>
+      <section className="m6-grid">
+        <article className="panel">
+          <header className="m6-panel-title">
+            <h2>سررسیدهای نزدیک</h2>
+            <Link href="/operations">مدیریت عملیات</Link>
+          </header>
+          <div className="m6-list">
+            {data?.upcoming.map((x) => (
+              <article key={x.id}>
+                <header>
+                  <div>
+                    <strong>{x.title}</strong>
+                    <small>
+                      {x.subject} · {operationTypes[x.type]}
+                    </small>
+                  </div>
+                  <b>{formatJalaliDate(x.dueDate)}</b>
+                </header>
+              </article>
+            ))}
+            {!data?.upcoming.length && (
+              <p className="m6-empty">سررسیدی در بازه ۳۰ روزه وجود ندارد.</p>
+            )}
+          </div>
+        </article>
+        <article className="panel">
+          <h2>عملیات مدیریتی</h2>
+          <p className="m6-hint">
+            پردازش یادآورها idempotent است؛ اجرای دوباره برای یک موعد، رکورد
+            تکراری تولید نمی‌کند.
+          </p>
+          <div className="m6-report-actions">
+            <button
+              className="primary-button"
+              disabled={busy}
+              onClick={() => void reminders()}
+            >
+              پردازش یادآورها
+            </button>
+            <button onClick={() => void downloadContractOperationsReport()}>
+              دانلود گزارش CSV
+            </button>
+          </div>
+          {message && <p className="m6-message">{message}</p>}
+        </article>
+      </section>
+    </>
+  );
 }

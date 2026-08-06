@@ -36,8 +36,10 @@ public static class ContractConflictAnalyzer
             result.Add(new("INVALID_AMOUNT", "amount", 4, true,
                 "مبلغ قرارداد باید بزرگ‌تر از صفر باشد.", contract.Amount?.ToString(),
                 changes.CalculatedAmount?.ToString(), "مبلغ معتبر اعلام کنید.", "user-instruction"));
-        var clause = changes.NewClause;
-        if (!string.IsNullOrWhiteSpace(clause))
+        var clauses = changes.NewClauses is { Count: > 0 }
+            ? changes.NewClauses
+            : string.IsNullOrWhiteSpace(changes.NewClause) ? [] : [changes.NewClause];
+        foreach (var clause in clauses)
         {
             AddLegalConflict(result, instruction, baseText, clause, "حل اختلاف", "DISPUTE_CONFLICT",
                 "بند حل اختلاف جدید با متن مرجع هم‌موضوع است.", resolvedAsReplacement);

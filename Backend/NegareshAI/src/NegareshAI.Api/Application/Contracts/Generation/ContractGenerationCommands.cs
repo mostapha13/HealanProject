@@ -152,7 +152,9 @@ public sealed class StartContractGenerationHandler(
             StartDate = new { Before = contract.StartDate, After = changes.StartDate ?? contract.StartDate },
             EndDate = new { Before = contract.EndDate, After = changes.EndDate ?? contract.EndDate },
             Amount = new { Before = contract.Amount, After = changes.CalculatedAmount ?? contract.Amount },
-            AddedClause = changes.NewClause
+            AddedClause = changes.NewClause,
+            AddedClauses = changes.NewClauses,
+            PaymentDates = new { First = changes.FirstPaymentDate, Second = changes.SecondPaymentDate }
         });
         var run = new ContractGenerationRun {
             OrganizationId = tenant.OrganizationId, ContractId = contract.Id,
@@ -178,6 +180,12 @@ public sealed class StartContractGenerationHandler(
                 ["amount"] = (changes.CalculatedAmount ?? contract.Amount!.Value).ToString("N0"),
                 ["currency"] = contract.Currency,
                 ["newClause"] = changes.NewClause ?? "",
+                ["newClausesJson"] = JsonSerializer.Serialize(changes.NewClauses ?? []),
+                ["firstPaymentDate"] = changes.FirstPaymentDate.HasValue
+                    ? PersianDate.Format(changes.FirstPaymentDate.Value)
+                    : PersianDate.Format(changes.StartDate ?? contract.StartDate!.Value),
+                ["secondPaymentDate"] = changes.SecondPaymentDate.HasValue
+                    ? PersianDate.Format(changes.SecondPaymentDate.Value) : "",
                 ["partyName"] = contract.Parties.FirstOrDefault()?.Name ?? "",
                 ["signingDate"] = PersianDate.Format(DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3.5)))
             };

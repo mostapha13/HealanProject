@@ -4,6 +4,47 @@ Last updated: 2026-08-05
 Active branch: `codex/negareshai-foundation`
 Last implementation baseline: `feat(negareshai): complete M6 workflow risk and operations`
 
+## Intent-first UX correction — 2026-08-06
+
+- The product owner rejected the form-first contract experience. The primary
+  journey is now explicitly intent-first: the user writes one Persian request
+  containing company, dates, amount and requested clauses.
+- Conversation start accepts those structured selectors only as optional API
+  hints. It resolves the registered party from the text, infers the contract
+  type/internal group from the latest contract, derives the Persian year from
+  written dates and selects the effective versioned Template internally.
+- Contract group and primary group are implementation concepts for Template
+  resolution, approved clauses, access scope and historical matching. They
+  must not be exposed as routine fields to the end user.
+- The contract-generation start screen no longer asks for party, group, year
+  or subject. It presents a single Persian request box and explains the
+  automatic resolution steps. The contracts empty state and primary action
+  route to this intent-first journey instead of the legacy manual modal.
+- Added `/basic-data` as the central hub for parties, contract types,
+  Templates, approved clauses, statuses, base documents, years and document
+  conformity catalogs.
+- At the owner's explicit request, all rows in the standalone `NegareshAI`
+  product database were deleted on 2026-08-06 while preserving schema and
+  `__EFMigrationsHistory`. Identity, FileManager and other service databases
+  were not changed. The reusable reset script is
+  `Backend/NegareshAI/scripts/reset-product-data.sql`.
+- Validation: NegareshAI API build passes with zero warnings; Next.js
+  production build passes and generates 36 routes.
+- Follow-up regression on 2026-08-06 added direct coverage for the exact Fasa
+  intent-only sentence, including inferred party/group/year, explicit amount,
+  requested clause and `10 -> 11` clause count. Template resolution now uses
+  the requested start date, only final historical contracts may drive type
+  inference, natural Persian `باید باشد/باشه` clause requests are parsed, and
+  input-resolution failures return HTTP 400 instead of HTTP 500.
+- DOCX generation appends a numbered clause when a Template has no
+  `{{newClause}}` placeholder. Clause count falls back to headings extracted
+  from the final base document when historical clause rows are unavailable.
+- RAG collections are separated by embedding backend as well as model ID to
+  prevent vector dimension collisions after backend changes.
+- Final regression: backend 61/61 passed; all AI tests 15/15 passed in one
+  discovery run; Next.js production build passed with 36 routes; product DB
+  row verification remained zero after the requested reset.
+
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,
 or other secrets here.

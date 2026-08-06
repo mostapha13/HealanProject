@@ -30,8 +30,8 @@ public sealed record ContractGenerationResponse(
 public sealed record ReviewContractGenerationRequest(bool Approved, string? Comment);
 
 public sealed record StartContractConversationRequest(
-    Guid OrganizationPartyId, Guid PrimaryContractGroupId, int ContractYear,
-    string Subject, string Message, IReadOnlyList<Guid>? AdditionalSourceContractIds = null);
+    Guid? OrganizationPartyId, Guid? PrimaryContractGroupId, int? ContractYear,
+    string? Subject, string Message, IReadOnlyList<Guid>? AdditionalSourceContractIds = null);
 public sealed record SendContractConversationMessageRequest(string Message);
 public sealed record ReviewContractDraftRequest(bool Approved, string? Note);
 public sealed record ContractConversationListItemResponse(

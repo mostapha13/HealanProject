@@ -33,6 +33,8 @@ services:
       SENTENCE_TRANSFORMERS_HOME: "/models"
       HF_HOME: "/models"
       MODEL_OFFLINE: "${NEGARESHAI_MODEL_OFFLINE:-true}"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
       OCR_LANGUAGES: "${NEGARESHAI_OCR_LANGUAGES:-fas+eng}"
     ports:
       - "127.0.0.1:8000:8000"

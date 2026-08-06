@@ -34,7 +34,7 @@ public sealed class ListContractCatalogHandler(NegareshDbContext db, ICurrentTen
                 .Where(x => x.OrganizationId == tenant.OrganizationId && !x.IsDeleted)
                 .OrderBy(x => x.Name).Select(x => new OrganizationPartyResponse(
                     x.Id, x.Name, x.NationalIdentifier, x.RepresentativeName,
-                    x.ContactInfo, x.IsActive))
+                    x.ContactInfo, x.Address, x.IsActive))
                 .ToPagedResponseAsync(new PageRequest(query.PageNumber, query.PageSize), ct),
             "groups" => await db.ContractGroups.AsNoTracking()
                 .Where(x => x.OrganizationId == tenant.OrganizationId)
@@ -116,11 +116,12 @@ public sealed class SaveContractCatalogHandler(
         item ??= new OrganizationParty { OrganizationId = tenant.OrganizationId, Name = "", CreatedByUserId = tenant.UserId };
         item.Name = request.Name.Trim(); item.NationalIdentifier = request.NationalIdentifier?.Trim();
         item.RepresentativeName = request.RepresentativeName?.Trim();
-        item.ContactInfo = request.ContactInfo?.Trim(); item.IsActive = request.IsActive;
+        item.ContactInfo = request.ContactInfo?.Trim(); item.Address = request.Address?.Trim();
+        item.IsActive = request.IsActive;
         if (command.Id.HasValue) { item.UpdatedAtUtc = DateTime.UtcNow; item.UpdatedByUserId = tenant.UserId; }
         if (!command.Id.HasValue) db.OrganizationParties.Add(item);
         return new OrganizationPartyResponse(item.Id, item.Name, item.NationalIdentifier,
-            item.RepresentativeName, item.ContactInfo, item.IsActive);
+            item.RepresentativeName, item.ContactInfo, item.Address, item.IsActive);
     }
 
     private async Task<object?> SaveGroup(SaveContractCatalogCommand command, CancellationToken ct)
