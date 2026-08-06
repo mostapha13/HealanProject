@@ -218,9 +218,45 @@ public sealed class ManagerReviewDocumentVersionCommandHandler(
             .ToListAsync(ct);
         foreach (var comparisonRun in comparisonRuns)
             comparisonRun.ApprovalStatus = ComparisonApprovalStatus.ManagerFinalized;
+        var approvedGroupIds = comparisonRuns.Where(x => x.DocumentGroupId.HasValue)
+            .Select(x => x.DocumentGroupId!.Value).Distinct().ToArray();
+        foreach (var groupId in approvedGroupIds)
+        {
+            if (!await db.DocumentGroupMembers.AnyAsync(x =>
+                    x.DocumentGroupId == groupId && x.DocumentId == document.Id, ct))
+                db.DocumentGroupMembers.Add(new DocumentGroupMember
+                {
+                    DocumentGroupId = groupId,
+                    DocumentId = document.Id
+                });
+            var existingReference = await db.GoldenDocuments.IgnoreQueryFilters().SingleOrDefaultAsync(x =>
+                x.OrganizationId == tenant.OrganizationId && x.DocumentGroupId == groupId
+                && x.DocumentId == document.Id, ct);
+            if (existingReference is not null)
+            {
+                existingReference.IsDeleted = false;
+                existingReference.IsActive = true;
+                existingReference.DeletedAtUtc = null;
+                existingReference.DeletedByUserId = null;
+                continue;
+            }
+            var nextPriority = (await db.GoldenDocuments.IgnoreQueryFilters().Where(x =>
+                    x.OrganizationId == tenant.OrganizationId && x.DocumentGroupId == groupId
+                    && !x.IsDeleted)
+                .MaxAsync(x => (int?)x.Priority, ct) ?? 0) + 1;
+            db.GoldenDocuments.Add(new GoldenDocument
+            {
+                OrganizationId = tenant.OrganizationId,
+                DocumentGroupId = groupId,
+                DocumentId = document.Id,
+                Priority = nextPriority,
+                IsActive = true,
+                CreatedByUserId = tenant.UserId
+            });
+        }
         audit.Add("document.manager-finalized-rag", nameof(DocumentVersion), version.Id.ToString(),
             new { request.Note, GroupIds = groupIds, Superseded = previousFinals.Select(x => x.Id),
-                ComparisonRuns = comparisonRuns.Select(x => x.Id) });
+                ComparisonRuns = comparisonRuns.Select(x => x.Id), ApprovedReferenceGroups = approvedGroupIds });
         await db.SaveChangesAsync(ct);
         return DocumentIngestionSupport.ToDetail(document);
     }

@@ -59,8 +59,8 @@ export default function ComplianceCriteriaPage() {
       <header className="basic-detail-header">
         <div>
           <span><Link href="/basic-data">داده‌های پایه</Link> / تطبیق اسناد</span>
-          <h1>معیارهای انطباق</h1>
-          <p>معیارهایی را تعریف کنید که هنگام مقایسه اسناد سنجیده می‌شوند. وزن، سهم معیار در امتیاز نهایی را مشخص می‌کند.</p>
+          <h1>فیلدها و موارد مهم اسناد</h1>
+          <p>موارد قابل بررسی را مستقل از قراردادها تعریف کنید؛ اتصال هر مورد به گروه سند اختیاری است.</p>
         </div>
         <Link href="/basic-data" className="basic-outline-button">همه داده‌های پایه</Link>
       </header>

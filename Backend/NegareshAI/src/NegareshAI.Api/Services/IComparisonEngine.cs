@@ -71,8 +71,9 @@ public sealed class ComparisonEngine : IComparisonEngine
                 continue;
             findings.Add(EvaluateRule(targetText, rule));
         }
+        var hasConfiguredChecks = criteria.Count > 0 || rules.Any(item => item.IsActive);
         foreach (var reference in references)
-            findings.Add(EvaluateReference(targetText, reference));
+            findings.Add(EvaluateReference(targetText, reference, !hasConfiguredChecks));
         if (!string.IsNullOrWhiteSpace(userInstruction))
             findings.Add(EvaluateInstruction(targetText, userInstruction));
         return VerifyEvidence(targetText, references, findings);
@@ -163,7 +164,7 @@ public sealed class ComparisonEngine : IComparisonEngine
     }
 
     private static ComparisonFindingDraft EvaluateReference(
-        string targetText, ComparisonSource reference)
+        string targetText, ComparisonSource reference, bool isPrimaryCheck)
     {
         var targetTokens = Tokens(targetText);
         var referenceTokens = Tokens(reference.Text);
@@ -175,7 +176,7 @@ public sealed class ComparisonEngine : IComparisonEngine
         var targetEvidence = FirstEvidence(targetText);
         var referenceEvidence = FirstEvidence(reference.Text);
         return new(null, null, type, coverage < 45 ? 4 : coverage < 75 ? 3 : 1,
-            0m, false, false, type == FindingType.Matched,
+            isPrimaryCheck ? 1m : 0m, false, isPrimaryCheck, type == FindingType.Matched,
             $"پوشش سند مرجع «{reference.Title}»",
             $"پوشش واژگانی قابل بازتولید نسبت به نسخه مرجع {coverage.ToString(CultureInfo.InvariantCulture)} درصد است.",
             targetEvidence?.Text, targetEvidence?.Page, "مقایسه با سند مرجع",
@@ -190,7 +191,7 @@ public sealed class ComparisonEngine : IComparisonEngine
     {
         var evidence = Find(text, instruction);
         return new(null, null, evidence is null ? FindingType.Missing : FindingType.Matched,
-            evidence is null ? 3 : 1, 0m, false, false, evidence is not null,
+            evidence is null ? 3 : 1, 1m, false, true, evidence is not null,
             "دستور تکمیلی کاربر",
             evidence is null ? "عبارت یا معیار دستور تکمیلی عیناً در سند یافت نشد و نیازمند بررسی انسانی است."
                 : "دستور تکمیلی کاربر در سند شاهد مستقیم دارد.",

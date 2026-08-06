@@ -62,8 +62,8 @@ public sealed class StartComparisonCommandHandler(
                     item.ComplianceCriterion.Title, item.ComplianceCriterion.Description,
                     item.Weight, item.IsCritical, item.Order))
                 .ToListAsync(cancellationToken);
-            if (criteria.Count == 0 && request.BasisMode == ComparisonBasisMode.DocumentGroup)
-                throw new InvalidOperationException("گروه فاقد مرجع معتبر است: معیار فعالی تعریف نشده است.");
+            // Group criteria are intentionally optional. A group can be evaluated only
+            // against its approved reference documents and per-run user instructions.
         }
 
         var ruleSetIds = request.RuleSetIds.Distinct().ToHashSet();
@@ -111,22 +111,9 @@ public sealed class StartComparisonCommandHandler(
                     golden.Priority, cancellationToken);
                 if (source is not null) references.Add(source);
             }
-            var goldenIds = goldenRows.Select(x => x.DocumentId).ToHashSet();
-            var memberIds = await db.DocumentGroupMembers.AsNoTracking()
-                .Where(item => item.DocumentGroupId == group.Id
-                    && item.DocumentId != target.Id
-                    && !goldenIds.Contains(item.DocumentId))
-                .OrderBy(item => item.DocumentId)
-                .Select(item => item.DocumentId).ToListAsync(cancellationToken);
-            for (var index = 0; index < memberIds.Count; index++)
-            {
-                var source = await LoadFinalReference(memberIds[index], null,
-                    10_000 + index, cancellationToken);
-                if (source is not null) references.Add(source);
-            }
             if (references.Count == 0)
                 throw new InvalidOperationException(
-                    "گروه فاقد مرجع معتبر است: سند طلایی Final و منتشرشده وجود ندارد.");
+                    "گروه فاقد مرجع معتبر است: سند مورد تأیید Final و منتشرشده وجود ندارد.");
         }
         references = references.GroupBy(item => item.VersionId)
             .Select(item => item.OrderBy(x => x.Priority).First())

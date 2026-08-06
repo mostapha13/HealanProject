@@ -4,6 +4,7 @@ using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Application.Comparisons;
 using NegareshAI.Api.Application.Documents.Commands;
+using NegareshAI.Api.Application.MasterData;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 using NegareshAI.Api.Services;
@@ -13,6 +14,56 @@ namespace NegareshAI.Api.Tests;
 
 public sealed class M5DocumentConformityTests
 {
+    [Fact]
+    public void Approved_references_are_scorable_when_group_has_no_optional_criteria()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع",
+            "نام شرکت مبلغ تاریخ امضا محرمانگی تعهدات");
+
+        var findings = new ComparisonEngine().Evaluate(
+            "نام شرکت مبلغ تاریخ امضا محرمانگی تعهدات", [], [], [reference], null);
+
+        var finding = Assert.Single(findings);
+        Assert.True(finding.IsApplicable);
+        Assert.Equal(1m, finding.Weight);
+        Assert.True(finding.IsPassed);
+    }
+
+    [Fact]
+    public void Per_run_important_item_participates_in_the_score()
+    {
+        var findings = new ComparisonEngine().Evaluate(
+            "این سند دارای مبلغ و تاریخ است", [], [], [], "بند محرمانگی");
+
+        var finding = Assert.Single(findings);
+        Assert.True(finding.IsApplicable);
+        Assert.Equal(1m, finding.Weight);
+        Assert.False(finding.IsPassed);
+    }
+
+    [Fact]
+    public async Task Readding_a_deleted_approved_reference_restores_it_and_group_membership()
+    {
+        await using var db = CreateDb();
+        var organizationId = Guid.NewGuid();
+        var group = new DocumentGroup { OrganizationId = organizationId, Name = "گروه", CreatedByUserId = "u" };
+        var document = new Document { OrganizationId = organizationId, Title = "مرجع", DocumentType = "reference" };
+        var deleted = new GoldenDocument { OrganizationId = organizationId,
+            DocumentGroupId = group.Id, DocumentId = document.Id, Priority = 1,
+            CreatedByUserId = "u", IsDeleted = true, IsActive = false };
+        db.AddRange(group, document, deleted); await db.SaveChangesAsync();
+
+        var result = await new SaveGoldenDocumentHandler(db,
+            new Tenant(organizationId, "u"), new NullAudit()).Handle(
+            new(null, new SaveGoldenDocumentRequest(group.Id, document.Id, 2, true)), default);
+
+        Assert.NotNull(result);
+        Assert.False(deleted.IsDeleted);
+        Assert.True(deleted.IsActive);
+        Assert.True(await db.DocumentGroupMembers.AnyAsync(x =>
+            x.DocumentGroupId == group.Id && x.DocumentId == document.Id));
+    }
+
     [Fact]
     public async Task Freezes_final_golden_sources_and_critical_failure_overrides_high_score()
     {
@@ -69,6 +120,9 @@ public sealed class M5DocumentConformityTests
         Assert.Equal(1, ai.PublishCount);
         Assert.True(target.IsRagPublished);
         Assert.Equal(ComparisonApprovalStatus.ManagerFinalized, finalized.ApprovalStatus);
+        var promoted = await db.GoldenDocuments.SingleAsync(x =>
+            x.DocumentGroupId == seeded.GroupId && x.DocumentId == seeded.TargetDocumentId);
+        Assert.True(promoted.IsActive);
     }
 
     [Fact]
