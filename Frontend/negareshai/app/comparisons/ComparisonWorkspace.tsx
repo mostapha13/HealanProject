@@ -9,6 +9,7 @@ import {
   DocumentListItem,
   downloadComparisonReport,
   getDocumentDetail,
+  getDocumentProgress,
   getComparisonRun,
   listComparisonRuns,
   listComparisonApprovedReferenceDocumentIds,
@@ -45,6 +46,7 @@ const findingLabel: Record<number, string> = {
   4: "متفاوت",
   5: "اضافی",
 };
+function readable(value?:string|null){return (value||"").replace(/\*\*/g,"").replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,"").replace(/[ \t]+/g," ").replace(/\s+([،؛:,.])/g,"$1").trim()}
 
 export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
   const mounted = useRef(true);
@@ -96,6 +98,12 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     const job = readComparisonJob();
     if (!job) return;
     resumed.current = true;
+    setTargetDocumentId(job.targetDocumentId);
+    setReferenceDocumentId(job.referenceDocumentId || "");
+    setDocumentGroupId(job.documentGroupId || "");
+    setSourceMode(job.sourceMode);
+    setInstruction(job.instruction || "");
+    setProgress(1);
     void resumeJob(job);
   }, [mode]);
   const visible = useMemo(
@@ -136,19 +144,25 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     }
     setBusy(true);
     setProgress(1);
-    setProgressStage("آماده‌سازی فایل‌ها");
+    setProgressStage("آماده‌سازی و بارگذاری فایل‌ها");
     try {
+      const uploadProgress=[targetFile?0:100,needsFile&&referenceFile?0:100];
+      const updateUploadProgress=(index:number,value:number)=>{uploadProgress[index]=value;const active=needsFile?2:1;setProgress(Math.max(1,Math.min(20,Math.round(uploadProgress.slice(0,active).reduce((a,b)=>a+b,0)/active*.2))));setProgressStage(`بارگذاری فایل‌ها · ${Math.round(uploadProgress.slice(0,active).reduce((a,b)=>a+b,0)/active)}٪`)};
       const [uploadedTarget, uploadedReference] = await Promise.all([
         targetFile ? uploadDocumentBatch({ files: [targetFile], title: targetFile.name,
-          documentType: "general", documentGroupIds: [] }) : null,
+          documentType: "general", documentGroupIds: [] },value=>updateUploadProgress(0,value)) : null,
         needsFile && referenceFile ? uploadDocumentBatch({ files: [referenceFile], title: referenceFile.name,
-          documentType: "general", documentGroupIds: [] }) : null,
+          documentType: "general", documentGroupIds: [] },value=>updateUploadProgress(1,value)) : null,
       ]);
       const job: ActiveComparisonJob = {
         targetDocumentId: uploadedTarget?.id ?? targetDocumentId,
         referenceDocumentId: needsFile ? uploadedReference?.id ?? referenceDocumentId : undefined,
         documentGroupId: needsGroup ? documentGroupId : undefined,
         sourceMode, instruction: instruction || undefined,
+        targetTitle: uploadedTarget?.title ?? documents.find(x => x.id === targetDocumentId)?.title ?? targetFile?.name,
+        referenceTitle: uploadedReference?.title ?? documents.find(x => x.id === referenceDocumentId)?.title ?? referenceFile?.name,
+        documentGroupTitle: groups.find(x => x.id === documentGroupId)?.name,
+        returnUrl: "/comparisons?resume=1",
         createdAt: new Date().toISOString(), stage: "processing",
       };
       writeComparisonJob(job);
@@ -193,7 +207,8 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       setProgressStage("مقایسه تکمیل شد");
       await load();
     } catch (e) {
-      if (mounted.current) setMessage(e instanceof Error ? e.message : "اجرای انطباق انجام نشد.");
+      if(e instanceof Error&&e.message==="DOCUMENT_NOT_FOUND")writeComparisonJob(null);
+      if (mounted.current) setMessage(e instanceof Error&&e.message==="DOCUMENT_NOT_FOUND" ? "سند پردازش حذف شده است؛ درخواست جدیدی ثبت کنید." : e instanceof Error ? e.message : "اجرای انطباق انجام نشد.");
       throw e;
     } finally {
       if (mounted.current) setBusy(false);
@@ -202,16 +217,13 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
   async function waitForDocument(id: string, offset: number, span: number, label: string) {
     for (;;) {
       if (!mounted.current) return;
-      const document = await getDocumentDetail(id);
-      const version = document.versions[0];
-      let metadata: { progressPercent?: number; processingStage?: string; failureReason?: string } = {};
-      try { metadata = JSON.parse(version?.extractionMetadataJson || "{}"); } catch { /* polling continues */ }
-      const documentProgress = Math.max(0, Math.min(100, metadata.progressPercent ?? 2));
+      const state = await getDocumentProgress(id);
+      const documentProgress = Math.max(0, Math.min(100, state.percent));
       setProgress(Math.min(90, offset + Math.round(documentProgress * span / 100)));
-      setProgressStage(`${label}: ${metadata.processingStage ?? "در صف پردازش"}`);
-      if (document.processingStatus === 3) return;
-      if (document.processingStatus === 4)
-        throw new Error(metadata.failureReason || `پردازش ${label} ناموفق بود.`);
+      setProgressStage(`${label}: ${state.stage}`);
+      if (state.status === "ready") return;
+      if (state.status === "failed")
+        throw new Error(state.failureReason || `پردازش ${label} ناموفق بود.`);
       await new Promise(resolve => window.setTimeout(resolve, 2000));
     }
   }
@@ -393,11 +405,11 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           >
             {busy ? "در حال خواندن و مقایسه..." : "مقایسه سند"}
           </button>
-          {busy && <div className="comparison-progress" role="progressbar"
+          {progress > 0 && <div className={`comparison-progress ${progress >= 100 ? "complete" : ""}`} role="progressbar"
             aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
-            <div><span>{progressStage}</span><strong>{progress}٪</strong></div>
-            <i style={{ width: `${progress}%` }} />
-            <small>پردازش در پس‌زمینه انجام می‌شود؛ می‌توانید در بخش‌های دیگر سامانه کار کنید.</small>
+            <div><span>{progressStage}</span><strong className="comparison-progress-number">{progress}٪</strong></div>
+            <i><em style={{ width: `${progress}%` }} /></i>
+            <small>{progress >= 100 ? "پردازش کامل شد؛ نتیجه در همین صفحه آماده ادامه بررسی است." : "پردازش در پس‌زمینه انجام می‌شود؛ برای بازگشت، کارت پیشرفت پایین صفحه را انتخاب کنید."}</small>
           </div>}
           <small>
             سامانه تمام صفحات را می‌خواند، عنوان‌های هم‌معنا را به سرفصل‌های استاندارد نگاشت می‌کند
@@ -513,7 +525,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                   >
                     <header>
                       <div>
-                        <h3>{f.title}</h3>
+                        <h3>{readable(f.title)}</h3>
                         {f.isCritical && <b>حیاتی</b>}
                         {f.isApplicable && <b>وزن {f.weight}</b>}
                       </div>
@@ -522,13 +534,13 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                         {Math.round(f.confidence * 100)}٪
                       </span>
                     </header>
-                    <p>{f.correctedReason || f.reason}</p>
+                    <p>{readable(f.correctedReason || f.reason)}</p>
                     {f.targetEvidence && (
                       <blockquote>
                         هدف — صفحه {f.targetPage ?? "؟"}، بخش{" "}
                         {f.targetSection || "نامشخص"}
                         <br />
-                        {f.targetEvidence}
+                        <span className="evidence-text">{readable(f.targetEvidence)}</span>
                       </blockquote>
                     )}
                     {f.referenceEvidence && (
@@ -536,12 +548,12 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                         مرجع — صفحه {f.referencePage ?? "؟"}، بخش{" "}
                         {f.referenceSection || "نامشخص"}
                         <br />
-                        {f.referenceEvidence}
+                        <span className="evidence-text">{readable(f.referenceEvidence)}</span>
                       </blockquote>
                     )}
                     {f.suggestion && (
                       <div className="suggestion">
-                        پیشنهاد اصلاح: {f.suggestion}
+                        پیشنهاد اصلاح: {readable(f.suggestion)}
                       </div>
                     )}
                     <footer>

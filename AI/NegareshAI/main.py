@@ -145,6 +145,27 @@ def ocr_pdf_page(data: bytes, page_index: int) -> str:
     except Exception as exc:
         raise RuntimeError(f"OCR failed for page {page_index + 1}: {exc}") from exc
 
+def text_quality_score(text: str) -> float:
+    """Score extracted Persian text; broken PDF font maps otherwise look non-empty."""
+    value = (text or "").strip()
+    if not value:
+        return 0.0
+    visible = [char for char in value if not char.isspace()]
+    if not visible:
+        return 0.0
+    persian = sum("\u0600" <= char <= "\u06ff" for char in visible)
+    letters = sum(char.isalpha() for char in visible)
+    controls = sum(ord(char) < 32 and char not in "\n\r\t" for char in value)
+    replacement = value.count("�") + value.count("\ufffd")
+    latin_fragments = re.findall(r"\b[A-Za-z]{1,3}\b", value)
+    readable_ratio = persian / max(1, letters)
+    noise_penalty = min(0.7, (controls + replacement * 4 + len(latin_fragments) * 0.4) / max(20, len(visible)))
+    return max(0.0, min(1.0, readable_ratio - noise_penalty + (0.15 if len(value) > 80 else 0.0)))
+
+def needs_ocr(text: str) -> bool:
+    value = (text or "").strip()
+    return len(value) < 30 or text_quality_score(value) < 0.70
+
 def extract_pages(data: bytes, name: str, enable_ocr: bool = True) -> list[dict]:
     if name.lower().endswith(".pdf"):
         reader = PdfReader(BytesIO(data))
@@ -152,9 +173,11 @@ def extract_pages(data: bytes, name: str, enable_ocr: bool = True) -> list[dict]
         for index, page in enumerate(reader.pages):
             text = (page.extract_text() or "").strip()
             used_ocr = False
-            if enable_ocr and not text:
-                text = ocr_pdf_page(data, index)
-                used_ocr = bool(text)
+            if enable_ocr and needs_ocr(text):
+                ocr_text = ocr_pdf_page(data, index)
+                if ocr_text and (not text or text_quality_score(ocr_text) >= text_quality_score(text)):
+                    text = ocr_text
+                    used_ocr = True
             pages.append({"page": index + 1, "text": text, "ocr": used_ocr})
         return pages
     if name.lower().endswith(".docx"):

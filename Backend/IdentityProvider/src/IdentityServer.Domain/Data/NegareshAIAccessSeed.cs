@@ -18,7 +18,7 @@ public static class NegareshAIAccessSeed
         {
             new Form(NegareshAIAccessFormIds.Dashboard, "داشبورد", "/"),
             new Form(NegareshAIAccessFormIds.Documents, "مدیریت اسناد", "/documents"),
-            new Form(NegareshAIAccessFormIds.DocumentsCreate, "افزودن سند", "/documents/add"),
+            new Form(NegareshAIAccessFormIds.DocumentsCreate, "بارگذاری سند سازمانی", "/documents/add"),
             new Form(NegareshAIAccessFormIds.DocumentsEdit, "ویرایش سند", "/documents/edit"),
             new Form(NegareshAIAccessFormIds.DocumentsDelete, "حذف سند", "/documents/delete"),
             new Form(NegareshAIAccessFormIds.Contracts, "مدیریت قراردادها", "/contracts"),
@@ -140,10 +140,10 @@ public static class NegareshAIAccessSeed
         }
         await db.SaveChangesAsync();
 
-        var expert = await EnsureSystemRole(roleManager, ExpertRole, "کارشناس");
+        var expert = await EnsureSystemRole(roleManager, ExpertRole, "کارشناس اسناد و تطبیق");
         var manager = await EnsureSystemRole(roleManager, ContractManagerRole, "مدیر امور قراردادها");
-        await GrantRole(db, expert, new[] { 6101, 6102, 6103, 6104, 6105, 6106, 6107, 6122, 6123, 6125, 6126, 6134, 6136 });
-        await GrantRole(db, manager, new[] { 6101, 6102, 6103, 6104, 6105, 6106, 6107, 6108, 6122, 6123, 6125, 6126, 6128, 6129, 6130, 6131, 6132, 6133, 6134, 6135, 6136, 6137 });
+        await GrantRole(db, expert, new[] { 6102, 6103, 6105, 6107, 6122, 6123, 6136, 6137 });
+        await GrantRole(db, manager, new[] { 6102, 6104, 6106, 6125, 6126, 6128, 6129, 6130, 6131, 6132, 6133, 6134, 6135 });
 
         var admin = await roleManager.FindByNameAsync(ConstUserInfo.AdminRole);
         if (admin == null) return;
@@ -189,8 +189,12 @@ public static class NegareshAIAccessSeed
     {
         if (!await db.AccessSystemRoles.AnyAsync(x => x.RoleId == role.Id && x.AccessSystemId == NegareshAIAccessFormIds.SystemId))
             db.AccessSystemRoles.Add(new AccessSystemRole { RoleId = role.Id, AccessSystemId = NegareshAIAccessFormIds.SystemId });
-        var existing = await db.AccessRoles.Where(x => x.RoleId == role.Id).Select(x => x.AccessMenuId).ToListAsync();
-        foreach (var menuId in menuIds.Except(existing))
+        var expected = menuIds.ToHashSet();
+        var existing = await db.AccessRoles
+            .Where(x => x.RoleId == role.Id && x.AccessMenuId >= 6101 && x.AccessMenuId < 6200)
+            .ToListAsync();
+        db.AccessRoles.RemoveRange(existing.Where(x => !expected.Contains(x.AccessMenuId)));
+        foreach (var menuId in expected.Except(existing.Select(x => x.AccessMenuId)))
             db.AccessRoles.Add(new AccessRole { RoleId = role.Id, AccessMenuId = menuId, HasPersianAccess = true });
         await db.SaveChangesAsync();
     }

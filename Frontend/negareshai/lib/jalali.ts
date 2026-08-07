@@ -1,5 +1,5 @@
 /**
- * Dependency-free Jalali helpers, adapted from Healan's Persian calendar.
+ * Dependency-free Jalali helpers for the NegareshAI client.
  * API/storage values remain Gregorian ISO; these helpers own presentation and input conversion.
  */
 const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";

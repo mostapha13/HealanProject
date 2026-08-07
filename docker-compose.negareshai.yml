@@ -1,4 +1,18 @@
 services:
+  negareshai-redis:
+    image: redis:7-alpine
+    container_name: negareshai-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - negareshai-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [negareshai]
+
   negareshai-api:
     build:
       context: .
@@ -8,6 +22,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__NegareshAI: "Server=${NEGARESHAI_SQL_SERVER:-host.docker.internal,1433};Database=${NEGARESHAI_SQL_DATABASE:-NegareshAI};User Id=sa;Password=${NEGARESHAI_SQL_PASSWORD:?Set NEGARESHAI_SQL_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__Redis: "negareshai-redis:6379"
       Authentication__Authority: "${NEGARESHAI_IDENTITY_URL:-http://host.docker.internal:5005}"
       Identity__UserManagerBaseUrl: "${NEGARESHAI_USERMANAGER_URL:-http://host.docker.internal:5074/}"
       Tenancy__DevelopmentOrganizationId: "${NEGARESHAI_DEVELOPMENT_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}"
@@ -19,6 +34,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks: [negareshai]
+    depends_on:
+      negareshai-redis:
+        condition: service_healthy
 
   negareshai-ai:
     build:
@@ -69,3 +87,4 @@ networks:
 volumes:
   negareshai-chroma:
   negareshai-models:
+  negareshai-redis-data:

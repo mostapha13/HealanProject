@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Share.Domain.Constants;
 using Share.Domain.Exceptions;
 using System.Security.Claims;
 
@@ -41,7 +40,8 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
             }
 
             var userId = request.IdentityId == Guid.Empty ? callerId : request.IdentityId;
-            if (userId != callerId && !await CanManageHealanAccessAsync(callerId, cancellationToken))
+            if (userId != callerId && !await AdminUserAccessPolicy.HasFullAccessAsync(
+                    _applicationDbContext, callerId, cancellationToken))
             {
                 _logger.LogWarning(
                     "User {CallerId} attempted to read access for {TargetUserId}.",
@@ -75,6 +75,13 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                     && !x.IsDeleted)
                 .Select(x => x.AccessMenuId)
                 .ToListAsync(cancellationToken);
+            var deniedMenuIds = await _applicationDbContext.AccessUserDenies
+                .AsNoTracking()
+                .Where(x => x.UserId == userId
+                    && x.AccessSystemId == request.AccessSystemId
+                    && !x.IsDeleted)
+                .Select(x => x.AccessMenuId)
+                .ToListAsync(cancellationToken);
 
             var roleGrantByMenu = roleGrants
                 .GroupBy(x => x.AccessMenuId)
@@ -86,6 +93,7 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                             ? false
                             : (bool?)null);
             var directGrantSet = directMenuIds.ToHashSet();
+            var deniedSet = deniedMenuIds.ToHashSet();
             var forms = await (
                 from form in _applicationDbContext.AccessForms.AsNoTracking()
                 join menu in _applicationDbContext.AccessMenus.AsNoTracking()
@@ -105,14 +113,19 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
                         .Select(x => roleGrantByMenu[x.AccessMenuId])
                         .ToList();
                     var hasDirectGrant = group.Any(x => directGrantSet.Contains(x.AccessMenuId));
+                    var hasDirectDeny = group.Any(x => deniedSet.Contains(x.AccessMenuId));
                     return new AccessUserRoleResponse
                     {
                         AccessSystemId = group.Key.AccessSystemId,
                         FormTitle = group.Key.FormTitle,
                         URL = group.Key.URL,
-                        HasAccess = isAdmin || hasDirectGrant || roleValues.Count > 0,
-                        HasPersianAccess = isAdmin || hasDirectGrant
+                        HasAccess = isAdmin || (!hasDirectDeny && (hasDirectGrant || roleValues.Count > 0)),
+                        HasPersianAccess = isAdmin
                             ? true
+                            : hasDirectDeny
+                                ? false
+                                : hasDirectGrant
+                                    ? true
                             : roleValues.Any(x => x == true)
                                 ? true
                                 : roleValues.Any(x => x == false)
@@ -133,41 +146,6 @@ namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRol
             }
 
             return result;
-        }
-
-        private async Task<bool> CanManageHealanAccessAsync(Guid callerId, CancellationToken cancellationToken)
-        {
-            var isAdmin = await AdminUserAccessPolicy.HasFullAccessAsync(
-                _applicationDbContext, callerId, cancellationToken);
-
-            if (isAdmin)
-                return true;
-
-            var hasRoleGrant = await (
-                from ur in _applicationDbContext.UserRoles
-                join role in _applicationDbContext.Roles on ur.RoleId equals role.Id
-                join accessRole in _applicationDbContext.AccessRoles on ur.RoleId equals accessRole.RoleId
-                join menu in _applicationDbContext.AccessMenus on accessRole.AccessMenuId equals menu.AccessMenuId
-                join form in _applicationDbContext.AccessForms on menu.AccessFormId equals form.AccessFormId
-                where ur.UserId == callerId
-                    && !role.IsDeleted
-                    && form.AccessSystemId == HealanAccessFormIds.SystemId
-                    && form.AccessFormId == HealanAccessFormIds.AccessAdmin
-                select accessRole.AccessRoleId
-            ).AnyAsync(cancellationToken);
-
-            if (hasRoleGrant)
-                return true;
-
-            return await (
-                from grant in _applicationDbContext.AccessUserGrants
-                join menu in _applicationDbContext.AccessMenus on grant.AccessMenuId equals menu.AccessMenuId
-                where grant.UserId == callerId
-                    && grant.AccessSystemId == HealanAccessFormIds.SystemId
-                    && !grant.IsDeleted
-                    && menu.AccessFormId == HealanAccessFormIds.AccessAdmin
-                select grant.AccessUserGrantId
-            ).AnyAsync(cancellationToken);
         }
 
     }

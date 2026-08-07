@@ -23,6 +23,7 @@ public sealed record UploadDocumentBatchCommand(
 public sealed class UploadDocumentBatchCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
     IDocumentIngestionQueue ingestionQueue, IAuditWriter audit,
+    IDocumentProgressStore progressStore,
     IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<UploadDocumentBatchCommand, DocumentDetailResponse>
 {
@@ -85,6 +86,7 @@ public sealed class UploadDocumentBatchCommandHandler(
         audit.Add("document.ingestion-queued", nameof(Document), document.Id.ToString(),
             new { version.Id, Files = request.Files.Count });
         await db.SaveChangesAsync(ct);
+        await progressStore.SetAsync(tenant.OrganizationId, document.Id, 2, "در صف پردازش", ct: ct);
         await ingestionQueue.EnqueueAsync(new DocumentIngestionJob(
             tenant.OrganizationId, tenant.UserId, document.Id, version.Id,
             model, request.BearerToken), ct);

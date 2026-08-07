@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NegareshAI.Api.Data.NegareshDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NegareshAI")));
 builder.Services.AddApplication();
+builder.Services.AddStackExchangeRedisCache(options =>
+    options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
+builder.Services.AddSingleton<IDocumentProgressStore, RedisDocumentProgressStore>();
 builder.Services.AddHostedService<ContractOperationReminderWorker>();
 builder.Services.AddSingleton<IDocumentIngestionQueue, DocumentIngestionQueue>();
 builder.Services.AddHostedService<DocumentIngestionWorker>();

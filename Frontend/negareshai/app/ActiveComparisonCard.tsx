@@ -2,13 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { getDocumentDetail } from "../lib/api";
+import { getDocumentProgress } from "../lib/api";
 import { ActiveComparisonJob, readComparisonJob, writeComparisonJob } from "../lib/comparison-job";
-
-function metadata(json?: string) {
-  try { return JSON.parse(json || "{}") as { progressPercent?: number; processingStage?: string }; }
-  catch { return {}; }
-}
 
 export default function ActiveComparisonCard() {
   const failedPolls = useRef(0);
@@ -28,15 +23,14 @@ export default function ActiveComparisonCard() {
       }
       try {
         const ids = [current.targetDocumentId, current.referenceDocumentId].filter(Boolean) as string[];
-        const documents = await Promise.all(ids.map(id => getDocumentDetail(id)));
+        const values = await Promise.all(ids.map(id => getDocumentProgress(id)));
         failedPolls.current = 0;
-        const values = documents.map(document => metadata(document.versions[0]?.extractionMetadataJson));
-        setPercent(Math.round(values.reduce((sum, item) => sum + (item.progressPercent ?? 2), 0) / values.length * .9));
-        setStage(values.find(item => (item.progressPercent ?? 0) < 100)?.processingStage ?? "آماده برای مقایسه");
-      } catch {
+        setPercent(Math.round(values.reduce((sum, item) => sum + item.percent, 0) / values.length * .9));
+        setStage(values.find(item => item.percent < 100)?.stage ?? "آماده برای مقایسه");
+      } catch (error) {
+        if(error instanceof Error&&error.message==="DOCUMENT_NOT_FOUND"){writeComparisonJob(null);setJob(null);return}
         failedPolls.current += 1;
-        if (failedPolls.current >= 3) writeComparisonJob(null);
-        else setStage("در انتظار دریافت وضعیت");
+        setStage(failedPolls.current >= 3 ? "ارتباط موقتاً برقرار نیست؛ برای ادامه کلیک کنید" : "در انتظار دریافت وضعیت");
       }
     }
     void refresh();
@@ -46,10 +40,10 @@ export default function ActiveComparisonCard() {
   }, []);
 
   if (!job) return null;
-  return <Link className="active-comparison-card" href="/comparisons?resume=1">
-    <div><strong>مقایسهٔ در حال اجرا</strong><b>{percent}٪</b></div>
+  return <Link className="active-comparison-card" href={job.returnUrl || "/comparisons?resume=1"}>
+    <div><strong>مقایسهٔ در حال اجرا</strong><b className="active-progress-percent">{percent}٪</b></div>
     <span>{stage}</span>
     <i><em style={{ width: `${percent}%` }} /></i>
-    <small>برای مشاهدهٔ جزئیات کلیک کنید</small>
+    <small>مشاهده درخواست و ادامه کار ←</small>
   </Link>;
 }
