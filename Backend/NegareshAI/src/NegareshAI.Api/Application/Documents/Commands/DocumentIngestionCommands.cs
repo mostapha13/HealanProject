@@ -29,7 +29,6 @@ public sealed class UploadDocumentBatchCommandHandler(
         UploadDocumentBatchCommand request, CancellationToken ct)
     {
         var groupIds = request.DocumentGroupIds.Distinct().ToArray();
-        if (groupIds.Length == 0) throw new InvalidOperationException("At least one document group is required.");
         var validGroupCount = await db.DocumentGroups.CountAsync(x => groupIds.Contains(x.Id)
             && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct);
         if (validGroupCount != groupIds.Length) throw new InvalidOperationException("An invalid document group was selected.");

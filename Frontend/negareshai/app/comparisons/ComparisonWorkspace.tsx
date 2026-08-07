@@ -21,6 +21,10 @@ import {
 import { formatJalaliDateTime } from "../../lib/jalali";
 
 type Mode = "execute" | "history" | "review" | "reports";
+type ComparisonSourceMode = "file" | "group" | "both";
+type ReviewDialog =
+  | { kind: "finding"; findingId: string; decision: number }
+  | { kind: "result"; approved: boolean };
 const outcomeLabel: Record<number, string> = {
   1: "منطبق",
   2: "نامنطبق",
@@ -47,11 +51,18 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     [runs, setRuns] = useState<ComparisonRunSummary[]>([]),
     [selected, setSelected] = useState<ComparisonRun | null>(null);
   const [targetDocumentId, setTargetDocumentId] = useState(""),
+    [referenceDocumentId, setReferenceDocumentId] = useState(""),
     [documentGroupId, setDocumentGroupId] = useState(""),
+    [sourceMode, setSourceMode] = useState<ComparisonSourceMode>("file"),
     [targetFile, setTargetFile] = useState<File | null>(null),
+    [referenceFile, setReferenceFile] = useState<File | null>(null),
     [instruction, setInstruction] = useState(""),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const [reviewDialog, setReviewDialog] = useState<ReviewDialog | null>(null),
+    [reviewNote, setReviewNote] = useState(""),
+    [correctedReason, setCorrectedReason] = useState(""),
+    [persistDecision, setPersistDecision] = useState(false);
   async function load() {
     const [d, g, r] = await Promise.all([
       listDocuments(),
@@ -81,10 +92,6 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           : runs,
     [mode, runs],
   );
-  const selectableDocuments = useMemo(
-    () => documents.filter((document) => !approvedReferenceDocumentIds.includes(document.id)),
-    [approvedReferenceDocumentIds, documents],
-  );
   async function open(id: string) {
     setBusy(true);
     try {
@@ -94,30 +101,58 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     }
   }
   async function execute() {
-    if ((!targetDocumentId && !targetFile) || !documentGroupId) {
-      setMessage("فایل مورد بررسی و گروه کاری آن را مشخص کنید.");
+    const needsFile = sourceMode === "file" || sourceMode === "both";
+    const needsGroup = sourceMode === "group" || sourceMode === "both";
+    if (!targetDocumentId && !targetFile) {
+      setMessage("سند مورد بررسی را انتخاب یا بارگذاری کنید.");
+      return;
+    }
+    if (needsFile && !referenceDocumentId && !referenceFile) {
+      setMessage("سند مرجع را انتخاب یا بارگذاری کنید.");
+      return;
+    }
+    if (needsGroup && !documentGroupId) {
+      setMessage("گروه مرجع را انتخاب کنید.");
+      return;
+    }
+    if (needsFile && targetDocumentId && targetDocumentId === referenceDocumentId) {
+      setMessage("برای مقایسه باید دو سند متفاوت انتخاب شوند.");
       return;
     }
     setBusy(true);
     try {
       let selectedDocumentId = targetDocumentId;
+      let selectedReferenceId = referenceDocumentId;
       if (targetFile) {
         const uploaded = await uploadDocumentBatch({
           files: [targetFile], title: targetFile.name,
-          documentType: "general", documentGroupIds: [documentGroupId],
+          documentType: "general", documentGroupIds: [],
         });
         selectedDocumentId = uploaded.id;
       }
+      if (needsFile && referenceFile) {
+        const uploaded = await uploadDocumentBatch({
+          files: [referenceFile], title: referenceFile.name,
+          documentType: "general", documentGroupIds: [],
+        });
+        selectedReferenceId = uploaded.id;
+      }
       const run = await startComparison({
         targetDocumentId: selectedDocumentId,
-        documentGroupId,
-        basisMode: 1,
+        referenceDocumentId: needsFile ? selectedReferenceId : undefined,
+        documentGroupId: needsGroup ? documentGroupId : undefined,
+        basisMode: sourceMode === "file" ? 3 : sourceMode === "group" ? 1 : 4,
         ruleSetIds: [],
         userInstruction: instruction || undefined,
       });
       setSelected(run);
       setTargetFile(null);
-      setMessage("مقایسه انجام شد؛ نتیجه و موارد اختلاف در ادامه نمایش داده شده است.");
+      setReferenceFile(null);
+      setMessage(sourceMode === "file"
+        ? "دو سند خوانده و مقایسه شدند؛ شباهت‌ها و تفاوت‌های مستند در ادامه آمده است."
+        : sourceMode === "group"
+          ? "سند با منابع تأییدشده گروه مقایسه شد."
+          : "سند هم‌زمان با سند مرجع و منابع تأییدشده گروه مقایسه شد.");
       await load();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "اجرای انطباق انجام نشد.");
@@ -125,24 +160,23 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       setBusy(false);
     }
   }
+  function openReviewDialog(next: ReviewDialog) {
+    setReviewDialog(next);
+    setReviewNote("");
+    setCorrectedReason("");
+    setPersistDecision(false);
+  }
   async function decide(findingId: string, decision: number) {
-    const comment = window.prompt("نظر کارشناس") || undefined;
-    const persist = window.confirm(
-      "این تصمیم به‌عنوان مرجع پایدار گروه در اجراهای بعدی نیز اعمال شود؟",
-    );
-    let correctedReason: string | undefined;
-    if (decision === 4) {
-      correctedReason = window.prompt("دلیل اصلاح‌شده") || undefined;
-      if (!correctedReason) return;
-    }
+    if (decision === 4 && !correctedReason.trim()) return;
     setBusy(true);
     try {
       await reviewFinding(findingId, {
         decision,
-        comment,
-        correctedReason,
-        persistForDocumentGroup: persist,
+        comment: reviewNote.trim() || undefined,
+        correctedReason: correctedReason.trim() || undefined,
+        persistForDocumentGroup: persistDecision,
       });
+      setReviewDialog(null);
       if (selected) setSelected(await getComparisonRun(selected.id));
       await load();
     } catch (e) {
@@ -153,12 +187,13 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
   }
   async function approveResult(approved: boolean) {
     if (!selected) return;
-    const note =
-      window.prompt(approved ? "یادداشت تأیید نتیجه" : "علت رد نتیجه") ||
-      undefined;
     setBusy(true);
     try {
-      setSelected(await reviewComparison(selected.id, { approved, note }));
+      setSelected(await reviewComparison(selected.id, {
+        approved,
+        note: reviewNote.trim() || undefined,
+      }));
+      setReviewDialog(null);
       setMessage(
         approved
           ? "نتیجه تأیید شد؛ نسخه اکنون منتظر نهایی‌سازی مدیر است."
@@ -186,7 +221,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                   : "گزارش‌های ممیزی"}
           </h1>
           <p>
-            یک سند بدهید؛ سامانه آن را با اسناد مرجع تأییدشده همان گروه کاری مقایسه می‌کند.
+            مثل یک گفت‌وگو، دو سند را بدهید و با زبان ساده بگویید چه تفاوت‌هایی برایتان مهم است.
           </p>
         </div>
         <Link href="/">بازگشت به داشبورد</Link>
@@ -219,60 +254,80 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       </nav>
       {mode === "execute" && (
         <article className="panel conformity-builder">
-          <h2>سند را برای مقایسه انتخاب کنید</h2>
+          <h2>دو سند را بدهید و بگویید چه چیزی مقایسه شود</h2>
           <div className="conformity-form">
+            <fieldset className="full comparison-source-mode">
+              <legend>مبنای مقایسه</legend>
+              <label><input type="radio" name="comparison-source" checked={sourceMode === "file"}
+                onChange={() => setSourceMode("file")} /><span>با یک سند</span></label>
+              <label><input type="radio" name="comparison-source" checked={sourceMode === "group"}
+                onChange={() => setSourceMode("group")} /><span>با یک گروه</span></label>
+              <label><input type="radio" name="comparison-source" checked={sourceMode === "both"}
+                onChange={() => setSourceMode("both")} /><span>با سند و گروه</span></label>
+            </fieldset>
             <label className="full comparison-file-picker">
-              <span>۱. فایل مورد بررسی</span>
+              <span>۱. سند اول</span>
               <input type="file" accept=".pdf,.docx,.jpg,.jpeg,.png,.tif,.tiff"
                 onChange={e => { setTargetFile(e.target.files?.[0] ?? null); setTargetDocumentId(""); }} />
-              <small>{targetFile ? targetFile.name : "PDF، Word یا تصویر سند را انتخاب کنید."}</small>
+              <small>{targetFile ? targetFile.name : "PDF، Word یا تصویر سند اول را انتخاب کنید."}</small>
             </label>
             <label className="full comparison-existing">
-              <span>یا انتخاب از اسناد قبلی سامانه</span>
+              <span>یا سند اول از اسناد قبلی</span>
               <select
                 value={targetDocumentId}
                 onChange={(e) => { setTargetDocumentId(e.target.value); setTargetFile(null); }}
               >
                 <option value="">انتخاب سند قبلی (اختیاری)</option>
-                {selectableDocuments.map((x) => (
+                {documents.filter(x => x.id !== referenceDocumentId
+                  && (!(sourceMode === "group" || sourceMode === "both")
+                    || !approvedReferenceDocumentIds.includes(x.id))).map((x) => (
                   <option key={x.id} value={x.id}>
                     {x.title}
                   </option>
                 ))}
               </select>
             </label>
-            <label>
-              <span>۲. گروه کاری سند</span>
+            {(sourceMode === "file" || sourceMode === "both") && <label className="full comparison-file-picker">
+              <span>۲. سند دوم</span>
+              <input type="file" accept=".pdf,.docx,.jpg,.jpeg,.png,.tif,.tiff"
+                onChange={e => { setReferenceFile(e.target.files?.[0] ?? null); setReferenceDocumentId(""); }} />
+              <small>{referenceFile ? referenceFile.name : "PDF، Word یا تصویر سند دوم را انتخاب کنید."}</small>
+            </label>}
+            {(sourceMode === "file" || sourceMode === "both") && <label className="full comparison-existing">
+              <span>یا سند دوم از اسناد قبلی</span>
               <select
-                value={documentGroupId}
-                onChange={(e) => { void (async () => {
-                  const nextGroupId = e.target.value;
-                  setDocumentGroupId(nextGroupId);
-                  const referenceIds = nextGroupId
-                    ? await listComparisonApprovedReferenceDocumentIds(nextGroupId) : [];
-                  setApprovedReferenceDocumentIds(referenceIds);
-                  if (referenceIds.includes(targetDocumentId)) {
-                    setTargetDocumentId("");
-                    setMessage("سند مورد تأیید همان گروه نمی‌تواند به‌عنوان سند جدید با خودش مقایسه شود.");
-                  }
-                })().catch(() => setMessage("دریافت منابع معتبر گروه انجام نشد.")); }}
+                value={referenceDocumentId}
+                onChange={(e) => { setReferenceDocumentId(e.target.value); setReferenceFile(null); }}
               >
-                <option value="">انتخاب گروه کاری</option>
-                {groups
-                  .filter((x) => x.isActive)
-                  .map((x) => (
-                    <option key={x.id} value={x.id}>
-                      {x.name}
-                    </option>
-                  ))}
+                <option value="">انتخاب سند دوم (اختیاری)</option>
+                {documents.filter(x => x.id !== targetDocumentId).map((x) => (
+                  <option key={x.id} value={x.id}>{x.title}</option>
+                ))}
               </select>
-            </label>
+            </label>}
+            {(sourceMode === "group" || sourceMode === "both") && <label className="full comparison-existing">
+              <span>{sourceMode === "group" ? "۲. گروه مرجع" : "۳. گروه مرجع"}</span>
+              <select value={documentGroupId} onChange={(e) => { void (async () => {
+                const next = e.target.value;
+                setDocumentGroupId(next);
+                const ids = next ? await listComparisonApprovedReferenceDocumentIds(next) : [];
+                setApprovedReferenceDocumentIds(ids);
+                if (ids.includes(targetDocumentId)) {
+                  setTargetDocumentId("");
+                  setMessage("یکی از منابع تأییدشده گروه نمی‌تواند سند هدف همان مقایسه باشد.");
+                }
+              })().catch(() => setMessage("دریافت منابع گروه انجام نشد.")); }}>
+                <option value="">انتخاب گروه</option>
+                {groups.filter(x => x.isActive).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+              </select>
+              <small>همه منابع تأییدشده فعال این گروه مانند فایل‌های مرجع مقایسه می‌شوند.</small>
+            </label>}
             <label className="full">
-              <span>۳. نکته‌ای که باید بیشتر بررسی شود (اختیاری)</span>
+              <span>{sourceMode === "both" ? "۴" : "۳"}. درخواست شما (اختیاری)</span>
               <textarea
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
-                placeholder="مثلاً تاریخ‌ها، مبالغ یا بند محرمانگی با دقت بیشتری بررسی شود."
+                placeholder="مثلاً تفاوت مبلغ‌ها، تاریخ‌ها، تعهدات و بندهای اضافه یا حذف‌شده را بگو."
               />
             </label>
           </div>
@@ -283,7 +338,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           >
             {busy ? "در حال خواندن و مقایسه..." : "مقایسه سند"}
           </button>
-          <small>مبنای مقایسه فقط اسناد مرجع تأییدشده‌ای است که قبلاً برای همین گروه کاری ثبت شده‌اند.</small>
+          <small>سامانه هر دو سند را مستقیم می‌خواند و تفاوت‌ها را با شاهد از هر دو طرف گزارش می‌کند.</small>
         </article>
       )}
       <section className="conformity-layout">
@@ -430,19 +485,19 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                         <>
                           <button
                             disabled={busy}
-                            onClick={() => void decide(f.id, 2)}
+                            onClick={() => openReviewDialog({ kind: "finding", findingId: f.id, decision: 2 })}
                           >
                             تأیید یافته
                           </button>
                           <button
                             disabled={busy}
-                            onClick={() => void decide(f.id, 3)}
+                            onClick={() => openReviewDialog({ kind: "finding", findingId: f.id, decision: 3 })}
                           >
                             رد یافته
                           </button>
                           <button
                             disabled={busy}
-                            onClick={() => void decide(f.id, 4)}
+                            onClick={() => openReviewDialog({ kind: "finding", findingId: f.id, decision: 4 })}
                           >
                             اصلاح دلیل
                           </button>
@@ -462,7 +517,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                       selected.findings.some((x) => x.reviewDecision === 1)
                     }
                     className="approve"
-                    onClick={() => void approveResult(true)}
+                    onClick={() => openReviewDialog({ kind: "result", approved: true })}
                   >
                     تأیید نتیجه انطباق
                   </button>
@@ -472,7 +527,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
                       selected.findings.some((x) => x.reviewDecision === 1)
                     }
                     className="reject"
-                    onClick={() => void approveResult(false)}
+                    onClick={() => openReviewDialog({ kind: "result", approved: false })}
                   >
                     رد نتیجه
                   </button>
@@ -493,6 +548,47 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           )}
         </article>
       </section>
+      {reviewDialog && (
+        <div className="conformity-modal-backdrop" role="presentation">
+          <section className="conformity-modal" role="dialog" aria-modal="true" aria-labelledby="review-dialog-title">
+            <header>
+              <h2 id="review-dialog-title">
+                {reviewDialog.kind === "result"
+                  ? reviewDialog.approved ? "تأیید نتیجه انطباق" : "رد نتیجه انطباق"
+                  : reviewDialog.decision === 2 ? "تأیید یافته" : reviewDialog.decision === 3 ? "رد یافته" : "اصلاح دلیل یافته"}
+              </h2>
+              <button type="button" aria-label="بستن پنجره بازبینی" onClick={() => setReviewDialog(null)}>×</button>
+            </header>
+            <label>
+              <span>{reviewDialog.kind === "result" && !reviewDialog.approved ? "علت رد" : "یادداشت کارشناس (اختیاری)"}</span>
+              <textarea autoFocus value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
+            </label>
+            {reviewDialog.kind === "finding" && reviewDialog.decision === 4 && (
+              <label>
+                <span>دلیل اصلاح‌شده</span>
+                <textarea required value={correctedReason} onChange={(e) => setCorrectedReason(e.target.value)} />
+              </label>
+            )}
+            {reviewDialog.kind === "finding" && (
+              <label className="conformity-modal-check">
+                <input type="checkbox" checked={persistDecision} onChange={(e) => setPersistDecision(e.target.checked)} />
+                <span>این تصمیم در اجراهای بعدی همین گروه نیز به‌عنوان مرجع اعمال شود.</span>
+              </label>
+            )}
+            <footer>
+              <button type="button" onClick={() => setReviewDialog(null)}>انصراف</button>
+              <button
+                type="button"
+                className="primary-button"
+                disabled={busy || (reviewDialog.kind === "finding" && reviewDialog.decision === 4 && !correctedReason.trim())}
+                onClick={() => reviewDialog.kind === "result"
+                  ? void approveResult(reviewDialog.approved)
+                  : void decide(reviewDialog.findingId, reviewDialog.decision)}
+              >{busy ? "در حال ثبت..." : "ثبت تصمیم"}</button>
+            </footer>
+          </section>
+        </div>
+      )}
       {message && <div className="ingestion-message">{message}</div>}
     </main>
   );

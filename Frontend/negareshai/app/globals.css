@@ -204,3 +204,81 @@
 
 /* Keep long role-based menus reachable at every viewport height. */
 .sidebar .brand{flex:0 0 auto}.sidebar .navigation{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-left:5px;scrollbar-width:thin;scrollbar-color:#48546b transparent}.sidebar .navigation::-webkit-scrollbar{width:5px}.sidebar .navigation::-webkit-scrollbar-track{background:transparent}.sidebar .navigation::-webkit-scrollbar-thumb{background:#48546b;border-radius:10px}.sidebar .navigation::-webkit-scrollbar-thumb:hover{background:#68748c}.sidebar .storage-card,.sidebar .sidebar-user{flex:0 0 auto}.sidebar .nav-caption.second{margin-top:12px}
+.conformity-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 55%);
+}
+.conformity-modal {
+  width: min(34rem, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  background: #fff;
+  box-shadow: 0 24px 70px rgb(15 23 42 / 30%);
+}
+.conformity-modal > header,
+.conformity-modal > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.conformity-modal > header button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: .75rem;
+  font-size: 1.5rem;
+}
+.conformity-modal label:not(.conformity-modal-check) {
+  display: grid;
+  gap: .5rem;
+  margin: 1rem 0;
+}
+.conformity-modal textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+.conformity-modal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  margin: 1rem 0;
+}
+.conformity-modal > footer {
+  justify-content: flex-end;
+}
+.comparison-source-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  border: 0;
+  padding: 0;
+  margin: 0 0 .5rem;
+}
+.comparison-source-mode legend {
+  width: 100%;
+  margin-bottom: .35rem;
+  font-weight: 700;
+}
+.comparison-source-mode label {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  min-width: 8.5rem;
+  padding: .75rem 1rem;
+  border: 1px solid #dbe4ee;
+  border-radius: .9rem;
+  background: #fff;
+  cursor: pointer;
+}
+.comparison-source-mode label:has(input:checked) {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  color: #115e59;
+}

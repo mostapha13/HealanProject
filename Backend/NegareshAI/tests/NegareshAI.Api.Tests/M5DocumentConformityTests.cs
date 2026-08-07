@@ -15,6 +15,40 @@ namespace NegareshAI.Api.Tests;
 public sealed class M5DocumentConformityTests
 {
     [Fact]
+    public void Direct_pair_comparison_reports_changed_and_added_content_with_two_sided_evidence()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "سند دوم",
+            "مبلغ قرارداد ۱۰۰ میلیون ریال است.\nمدت قرارداد یک سال است.");
+
+        var findings = new ComparisonEngine().Evaluate(
+            "مبلغ قرارداد ۱۵۰ میلیون ریال است.\nمدت قرارداد یک سال است.\nبند محرمانگی اضافه شد.",
+            [], [], [reference], "مبلغ و محرمانگی را مقایسه کن");
+
+        Assert.Contains(findings, x => x.Type == FindingType.Different
+            && x.TargetEvidence is not null && x.ReferenceEvidence is not null);
+        Assert.Contains(findings, x => x.Type == FindingType.Extra
+            && x.TargetEvidence!.Contains("محرمانگی"));
+        Assert.Contains(findings, x => x.Title == "تمرکز درخواستی کاربر");
+    }
+
+    [Fact]
+    public void Group_sources_are_compared_like_multiple_reference_files()
+    {
+        var first = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع اول",
+            "مبلغ قرارداد ۱۰۰ میلیون ریال است.", 1);
+        var second = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع دوم",
+            "مدت قرارداد دو سال است.", 2);
+
+        var findings = new ComparisonEngine().Evaluate(
+            "مبلغ قرارداد ۱۵۰ میلیون ریال است. مدت قرارداد یک سال است.",
+            [], [], [first, second], null);
+
+        Assert.Contains(findings, x => x.ReferenceDocumentId == first.DocumentId);
+        Assert.Contains(findings, x => x.ReferenceDocumentId == second.DocumentId);
+        Assert.All(findings, x => Assert.True(x.IsApplicable));
+    }
+
+    [Fact]
     public void Approved_references_are_scorable_when_group_has_no_optional_criteria()
     {
         var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع",

@@ -243,6 +243,7 @@ const navItems: {
     label: "تطبیق اسناد",
     icon: "compare",
     urls: ["/comparisons"],
+    href: "/comparisons",
   },
   {
     id: "assistant",

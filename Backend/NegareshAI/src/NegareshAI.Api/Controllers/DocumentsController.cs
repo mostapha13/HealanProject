@@ -60,8 +60,6 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     {
         var error = ValidateBatch(upload.Files, upload.PageNumbers);
         if (error is not null) return BadRequest(error);
-        if (upload.DocumentGroupIds.Count == 0)
-            return BadRequest("At least one document group is required.");
         var images = upload.Files.All(IsImage);
         var pageNumbers = images
             ? (upload.PageNumbers.Count == 0

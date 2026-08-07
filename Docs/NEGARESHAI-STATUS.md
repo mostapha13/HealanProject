@@ -4,6 +4,98 @@ Last updated: 2026-08-07
 Active branch: `codex/negareshai-contract-ux`
 Last implementation baseline: `977a741 Separate document conformity workflow`
 
+## ChatGPT-style direct document comparison — 2026-08-07
+
+### Product decision and implementation
+
+- The user can explicitly choose one of three source modes: compare with one
+  file, compare with an approved-reference group, or compare with both a file
+  and a group. The API maps these to ReferenceDocument, DocumentGroup and
+  Combined basis modes without exposing those technical enum names.
+- A group behaves as an ordered collection of reference files: every active,
+  Final and RAG-published approved reference receives the same evidence-backed
+  pairwise analysis. When group criteria also exist, they continue to affect
+  conformity scoring while detailed file-like diffs are retained as supporting
+  findings. In combined mode the explicitly selected file and group references
+  are de-duplicated and analyzed together.
+- Group selection removes its approved references from the target selector and
+  the API continues to reject invalid/self comparison. Added regression coverage
+  for multi-reference group comparison; Backend tests now pass 84/84.
+
+- Official OpenAI file-upload guidance identifies direct "compare and contrast
+  two documents" as a synthesis task. Text documents are extracted and relevant
+  content may be placed in context or retrieved; PDFs may also use visual
+  retrieval depending on the product plan. OpenAI does not publish ChatGPT's
+  private comparison prompt or exact internal algorithm, so this implementation
+  reproduces the documented user experience rather than claiming model parity.
+- The primary comparison journey is now intent-first: document one, document
+  two, and one optional natural-language request. A document group, golden
+  reference, RuleSet or technical basis selector is no longer required for this
+  journey.
+- Both sides support a new PDF/DOCX/image upload or reuse of an existing
+  organization document. Direct user-supplied pair comparison can use extracted
+  non-rejected versions immediately without first publishing either document to
+  RAG. Group-approved-reference comparison remains final-only and unchanged.
+- Pairwise analysis now produces an auditable overall similarity plus
+  paragraph-level changed, missing and added findings, two-sided evidence,
+  page attribution, suggestions and a focused finding derived from the user's
+  natural-language request. The previous literal full-instruction lookup and
+  single vocabulary-coverage finding are no longer used for direct pairs.
+- The dashboard's comparison navigation now opens the dedicated two-document
+  journey directly. Organization conformity governance, expert review, manager
+  finalization, versioned reports and group-based reference workflows remain
+  available after analysis.
+- Added regression coverage for changed values, added clauses, two-sided
+  evidence and natural-language focus. Backend tests pass 83/83; Next.js
+  production build, TypeScript validation and all 37 static routes pass.
+
+### Remaining acceptance
+
+1. Sign in after the rebuilt local Web/API containers and run one end-to-end
+   comparison using two newly uploaded files (not pre-existing documents).
+2. Validate visual/scanned PDF behavior separately from text-based DOCX/PDF;
+   exact scanned-table values must remain explicitly confidence-qualified.
+3. Continue responsive, keyboard, accessibility and performance acceptance.
+
+## Authenticated conformity acceptance and review UX — 2026-08-07
+
+### Completed
+
+- Completed an authenticated browser acceptance run for document conformity
+  using `Folad-Tabriz.docx` as the target and the approved references of the
+  `فولاد` group (`TataboghTest.docx` priority 1 and `Folad-Behbahan.docx`
+  priority 2).
+- Verified that approved reference documents are removed from the next target
+  selector after the group is selected.
+- The new run produced a reproducible 37.5% non-conforming result. The critical
+  criteria override was active, both approved references supplied page-level
+  evidence, and the per-run instruction was stored as a separately scored
+  finding.
+- Registered expert approval, completed manager finalization, and verified the
+  target version became Final and RAG-published.
+- Verified automatic promotion of `Folad-Tabriz.docx` as the active priority-3
+  approved reference of the same group. The next target snapshot excludes all
+  three active approved references.
+- Authenticated testing exposed an M7 blocker: finding/result review actions
+  used `window.prompt`/`window.confirm`, which are unsupported in the in-app
+  browser and violate the explicit-modal UX requirement. Replaced them with an
+  accessible in-product review dialog with explicit close, cancel and submit
+  actions, editable notes, corrected-reason validation and persistent-decision
+  control.
+- Rebuilt the Web image and verified the new dialog in the authenticated UI;
+  expert approval now completes successfully without console errors.
+- Validation: Next.js production build, TypeScript validation and all 37 static
+  routes pass. The rebuilt local Web/API/AI services are healthy.
+
+### Remaining verification and next action
+
+1. Confirm the versioned DOCX/PDF report downloads with a browser surface that
+   exposes downloads reliably; the in-app browser did not emit a download event.
+2. Continue M7 responsive, keyboard, focus, accessibility and performance
+   acceptance for the contract-generation and comparison journeys.
+3. Run the full regression suite after the remaining M7 changes, then proceed
+   to M8 hardening and release readiness.
+
 ## Independent document conformity correction — 2026-08-07
 
 ### Completed

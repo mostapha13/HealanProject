@@ -53,6 +53,15 @@ public sealed class ComparisonEngine : IComparisonEngine
         IReadOnlyCollection<ComparisonSource> references,
         string? userInstruction)
     {
+        if (criteria.Count == 0 && !rules.Any(item => item.IsActive)
+            && references.Count > 0)
+        {
+            var pairwise = references.SelectMany((reference, index) =>
+                EvaluatePairwise(targetText, reference, index == 0 ? userInstruction : null))
+                .ToArray();
+            return VerifyEvidence(targetText, references, pairwise);
+        }
+
         var findings = new List<ComparisonFindingDraft>();
         var rulesByCode = rules.Where(item => item.IsActive)
             .GroupBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
@@ -73,11 +82,130 @@ public sealed class ComparisonEngine : IComparisonEngine
         }
         var hasConfiguredChecks = criteria.Count > 0 || rules.Any(item => item.IsActive);
         foreach (var reference in references)
+        {
             findings.Add(EvaluateReference(targetText, reference, !hasConfiguredChecks));
+            if (hasConfiguredChecks)
+                findings.AddRange(EvaluatePairwise(targetText, reference, null)
+                    .Skip(1).Select(item => item with { IsApplicable = false, Weight = 0m }));
+        }
         if (!string.IsNullOrWhiteSpace(userInstruction))
             findings.Add(EvaluateInstruction(targetText, userInstruction));
         return VerifyEvidence(targetText, references, findings);
     }
+
+    private static IReadOnlyList<ComparisonFindingDraft> EvaluatePairwise(
+        string targetText, ComparisonSource reference, string? instruction)
+    {
+        var targetParts = Parts(targetText);
+        var referenceParts = Parts(reference.Text);
+        var findings = new List<ComparisonFindingDraft>();
+        var targetTokens = Tokens(targetText);
+        var referenceTokens = Tokens(reference.Text);
+        var union = targetTokens.Union(referenceTokens).Count();
+        var common = targetTokens.Intersect(referenceTokens).Count();
+        var similarity = union == 0 ? 0m : decimal.Round(common * 100m / union, 1);
+        findings.Add(new(null, null,
+            similarity >= 80 ? FindingType.Matched : FindingType.Different,
+            similarity >= 80 ? 1 : 3, 1m, false, true, similarity >= 80,
+            "جمع‌بندی شباهت دو سند",
+            $"شباهت واژگانی و محتوایی قابل بازتولید دو سند {similarity.ToString(CultureInfo.InvariantCulture)} درصد است.",
+            targetParts.FirstOrDefault()?.Text, targetParts.FirstOrDefault()?.Page,
+            "سند اول", referenceParts.FirstOrDefault()?.Text,
+            referenceParts.FirstOrDefault()?.Page, "سند دوم",
+            reference.DocumentId, reference.VersionId,
+            "تفاوت‌های بندبه‌بند زیر را بررسی کنید.",
+            decimal.Clamp(0.65m + similarity / 300m, 0.65m, 0.98m)));
+
+        var matchedTargets = new HashSet<int>();
+        foreach (var source in referenceParts.Take(40))
+        {
+            var best = targetParts.Select((part, index) => new
+                { Part = part, Index = index, Score = Similarity(source.Text, part.Text) })
+                .OrderByDescending(item => item.Score).FirstOrDefault();
+            if (best is not null && best.Score >= 0.72m)
+            {
+                matchedTargets.Add(best.Index);
+                continue;
+            }
+            var changed = best is not null && best.Score >= 0.28m;
+            if (changed) matchedTargets.Add(best!.Index);
+            findings.Add(new(null, null,
+                changed ? FindingType.Different : FindingType.Missing,
+                changed ? 3 : 4, 1m, false, true, false,
+                changed ? "بند تغییرکرده" : "مطلب حذف‌شده از سند اول",
+                changed
+                    ? "این بخش در هر دو سند وجود دارد اما متن یا مقادیر آن یکسان نیست."
+                    : "این بخش از سند دوم در سند اول پیدا نشد.",
+                best?.Part.Text, best?.Part.Page, "سند اول",
+                source.Text, source.Page, "سند دوم",
+                reference.DocumentId, reference.VersionId,
+                changed ? "مقادیر و تعهدات دو متن را بررسی و نسخه صحیح را تعیین کنید."
+                    : "در صورت لزوم این مطلب را به سند اول اضافه کنید.",
+                changed ? 0.84m : 0.88m));
+            if (findings.Count >= 10) break;
+        }
+
+        foreach (var item in targetParts.Select((part, index) => new { part, index })
+                     .Where(item => !matchedTargets.Contains(item.index)).Take(6))
+            findings.Add(new(null, null, FindingType.Extra, 3, 1m, false, true, false,
+                "مطلب افزوده‌شده در سند اول",
+                "این بخش در سند اول وجود دارد اما متن متناظری در سند دوم پیدا نشد.",
+                item.part.Text, item.part.Page, "سند اول",
+                null, null, "سند دوم", reference.DocumentId, reference.VersionId,
+                "بررسی کنید این مطلب جدید عمدی و مجاز است.", 0.86m));
+
+        if (!string.IsNullOrWhiteSpace(instruction))
+        {
+            var focusTerms = Tokens(instruction).Where(x => x.Length > 2
+                && !PersianStopWords.Contains(x)).Take(12).ToArray();
+            var targetHits = focusTerms.Where(targetTokens.Contains).ToArray();
+            var referenceHits = focusTerms.Where(referenceTokens.Contains).ToArray();
+            findings.Add(new(null, null,
+                targetHits.Length + referenceHits.Length > 0 ? FindingType.Different : FindingType.Missing,
+                2, 1m, false, true, targetHits.Length > 0 && referenceHits.Length > 0,
+                "تمرکز درخواستی کاربر",
+                $"درخواست «{instruction.Trim()}» روی مفاهیم مرتبط در هر دو سند اعمال شد؛ "
+                + $"سند اول: {string.Join("، ", targetHits.DefaultIfEmpty("بدون شاهد مستقیم"))}؛ "
+                + $"سند دوم: {string.Join("، ", referenceHits.DefaultIfEmpty("بدون شاهد مستقیم"))}.",
+                FindAny(targetText, targetHits)?.Text, FindAny(targetText, targetHits)?.Page,
+                "درخواست کاربر", FindAny(reference.Text, referenceHits)?.Text,
+                FindAny(reference.Text, referenceHits)?.Page, "درخواست کاربر",
+                reference.DocumentId, reference.VersionId,
+                "کارشناس نتیجه متمرکز را همراه با تفاوت‌های بندبه‌بند بررسی کند.", 0.78m));
+        }
+        return findings;
+    }
+
+    private static readonly HashSet<string> PersianStopWords = new(StringComparer.Ordinal)
+        { "این", "آن", "را", "با", "برای", "در", "از", "به", "که", "شود", "کن", "کنید", "بگو", "مقایسه" };
+
+    private static decimal Similarity(string left, string right)
+    {
+        var a = Tokens(left); var b = Tokens(right);
+        var union = a.Union(b).Count();
+        return union == 0 ? 0 : (decimal)a.Intersect(b).Count() / union;
+    }
+
+    private static List<TextPart> Parts(string text)
+    {
+        var result = new List<TextPart>();
+        var pages = text.Split('\f');
+        for (var page = 0; page < pages.Length; page++)
+            foreach (var value in Regex.Split(pages[page], @"(?:\r?\n){1,}|(?<=[.!?؟؛])\s+"))
+            {
+                var cleaned = Regex.Replace(value, @"\s+", " ").Trim();
+                if (cleaned.Length >= 12)
+                    result.Add(new(cleaned[..Math.Min(cleaned.Length, 600)], page + 1));
+            }
+        if (result.Count == 0 && !string.IsNullOrWhiteSpace(text))
+            result.Add(new(text.Trim()[..Math.Min(text.Trim().Length, 600)], 1));
+        return result;
+    }
+
+    private static Evidence? FindAny(string text, IReadOnlyCollection<string> terms) =>
+        terms.Select(term => Find(text, term)).FirstOrDefault(item => item is not null);
+
+    private sealed record TextPart(string Text, int Page);
 
     private static ComparisonFindingDraft EvaluateCriterion(
         string text, ComparisonCriterionInput criterion)

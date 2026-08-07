@@ -28,6 +28,8 @@ public sealed class StartComparisonCommandHandler(
     {
         var request = command.Request;
         ValidateBasis(request);
+        if (request.ReferenceDocumentId == request.TargetDocumentId)
+            throw new ArgumentException("برای مقایسه باید دو سند متفاوت انتخاب شوند.");
         var target = await db.Documents.Include(item => item.Versions)
             .SingleOrDefaultAsync(item => item.Id == request.TargetDocumentId
                 && item.OrganizationId == tenant.OrganizationId, cancellationToken);
@@ -90,7 +92,7 @@ public sealed class StartComparisonCommandHandler(
         Guid? referenceVersionId = null;
         if (request.ReferenceDocumentId is not null)
         {
-            var source = await LoadFinalReference(request.ReferenceDocumentId.Value,
+            var source = await LoadReference(request.ReferenceDocumentId.Value,
                 request.ReferenceVersionId, 0, cancellationToken);
             if (source is null) return null;
             referenceVersionId = source.VersionId;
@@ -141,7 +143,8 @@ public sealed class StartComparisonCommandHandler(
         var sourceSnapshot = references.Select(item => new
         {
             item.DocumentId, item.VersionId, item.Title, item.Priority,
-            TextSha256 = Sha256(item.Text), ApprovalState = "final"
+            TextSha256 = Sha256(item.Text),
+            ApprovalState = group is null ? "explicit-user-input" : "final"
         }).ToArray();
 
         var drafts = engine.Evaluate(targetVersion.ExtractedText, criteria,
@@ -252,6 +255,24 @@ public sealed class StartComparisonCommandHandler(
         var versions = document.Versions.Where(item =>
             item.LifecycleStatus == DocumentVersionLifecycleStatus.Final
             && item.IsRagPublished && !string.IsNullOrWhiteSpace(item.ExtractedText));
+        var version = versionId is null
+            ? versions.OrderByDescending(item => item.VersionNumber).FirstOrDefault()
+            : versions.SingleOrDefault(item => item.Id == versionId);
+        return version is null ? null : new(document.Id, version.Id, document.Title,
+            version.ExtractedText!, priority);
+    }
+
+    private async Task<ComparisonSource?> LoadReference(Guid documentId,
+        Guid? versionId, int priority, CancellationToken cancellationToken)
+    {
+        var document = await db.Documents.AsNoTracking().Include(item => item.Versions)
+            .SingleOrDefaultAsync(item => item.Id == documentId
+                && item.OrganizationId == tenant.OrganizationId, cancellationToken);
+        if (document is null) return null;
+        var versions = document.Versions.Where(item =>
+            item.LifecycleStatus is not (DocumentVersionLifecycleStatus.Rejected
+                or DocumentVersionLifecycleStatus.Superseded)
+            && !string.IsNullOrWhiteSpace(item.ExtractedText));
         var version = versionId is null
             ? versions.OrderByDescending(item => item.VersionNumber).FirstOrDefault()
             : versions.SingleOrDefault(item => item.Id == versionId);
