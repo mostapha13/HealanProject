@@ -4,6 +4,7 @@ using NegareshAI.Api.Application.Common.Auditing;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Application.Comparisons;
 using NegareshAI.Api.Application.Documents.Commands;
+using NegareshAI.Api.Application.MasterData;
 using NegareshAI.Api.Contracts;
 using NegareshAI.Api.Data;
 using NegareshAI.Api.Services;
@@ -13,6 +14,146 @@ namespace NegareshAI.Api.Tests;
 
 public sealed class M5DocumentConformityTests
 {
+    [Fact]
+    public void Direct_pair_comparison_reports_changed_and_added_content_with_two_sided_evidence()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "سند دوم",
+            "مبلغ قرارداد ۱۰۰ میلیون ریال است.\nمدت قرارداد یک سال است.");
+
+        var findings = new ComparisonEngine().Evaluate(
+            "مبلغ قرارداد ۱۵۰ میلیون ریال است.\nمدت قرارداد یک سال است.\nبند محرمانگی اضافه شد.",
+            [], [], [reference], "مبلغ و محرمانگی را مقایسه کن");
+
+        Assert.Contains(findings, x => x.Type == FindingType.Different
+            && x.TargetEvidence is not null && x.ReferenceEvidence is not null);
+        Assert.Contains(findings, x => x.Type == FindingType.Extra
+            && x.TargetEvidence!.Contains("محرمانگی"));
+        Assert.Contains(findings, x => x.Title == "تمرکز درخواستی کاربر");
+    }
+
+    [Fact]
+    public void Large_documents_are_compared_by_semantic_main_sections_across_all_pages()
+    {
+        var targetPages = Enumerable.Range(1, 80)
+            .Select(page => page switch
+            {
+                4 => "فهرست مطالب\nمعرفی شرکت\nترکیب سهامداران",
+                12 => "معرفی شرکت\nتاریخچه و مشخصات ناشر",
+                48 => "ترکیب صاحبان سهام\nجدول درصد مالکیت سهامداران",
+                67 => "صورت های مالی\nصورت وضعیت مالی و صورت سود و زیان",
+                _ => $"متن عمومی صفحه {page}"
+            });
+        var referencePages = Enumerable.Range(1, 75)
+            .Select(page => page switch
+            {
+                3 => "فهرست مندرجات\nمشخصات شرکت\nسهامداران عمده",
+                10 => "مشخصات شرکت\nمعرفی و تاریخچه ناشر",
+                52 => "سهامداران عمده\nساختار مالکیت شرکت",
+                70 => "گزارش حسابرس مستقل\nاظهارنظر حسابرس",
+                _ => $"محتوای عمومی صفحه {page}"
+            });
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(),
+            "امیدنامه دوم", string.Join('\f', referencePages));
+
+        var findings = new ComparisonEngine().Evaluate(
+            string.Join('\f', targetPages), [], [], [reference], null);
+
+        Assert.Contains(findings, item => item.Title == "معرفی و تاریخچه شرکت"
+            && item.Type == FindingType.Matched
+            && item.TargetPage == 12 && item.ReferencePage == 10);
+        Assert.Contains(findings, item => item.Title == "سهامداران و ساختار مالکیت"
+            && item.Type == FindingType.Matched
+            && item.TargetPage == 48 && item.ReferencePage == 52);
+        Assert.Contains(findings, item => item.Title == "صورت‌های مالی"
+            && item.Type == FindingType.Extra && item.TargetPage == 67);
+        Assert.Contains(findings, item => item.Title == "گزارش حسابرس"
+            && item.Type == FindingType.Missing && item.ReferencePage == 70);
+        Assert.Contains(findings, item => item.Title == "جمع‌بندی پوشش ساختاری کل اسناد"
+            && item.Reason.Contains("تمام صفحات هر دو سند بررسی شد"));
+    }
+
+    [Fact]
+    public void Ocr_noise_is_not_exposed_as_a_section_title()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع",
+            "فهرست مطالب\f۲-۲- دعاوی حقوقی له یا علیه شرکت");
+        var findings = new ComparisonEngine().Evaluate(
+            "فهرست مطالب\f۳-۲-۴- دعاوی حقوقی له با pS ade کت", [], [], [reference], null);
+
+        var litigation = Assert.Single(findings, x =>
+            x.Title == "دعاوی، تعهدات و بدهی‌های احتمالی");
+        Assert.DoesNotContain("pS", litigation.Reason);
+        Assert.DoesNotContain("ade", litigation.Reason);
+        Assert.Equal("دعاوی، تعهدات و بدهی‌های احتمالی", litigation.TargetSection);
+    }
+
+    [Fact]
+    public void Group_sources_are_compared_like_multiple_reference_files()
+    {
+        var first = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع اول",
+            "مبلغ قرارداد ۱۰۰ میلیون ریال است.", 1);
+        var second = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع دوم",
+            "مدت قرارداد دو سال است.", 2);
+
+        var findings = new ComparisonEngine().Evaluate(
+            "مبلغ قرارداد ۱۵۰ میلیون ریال است. مدت قرارداد یک سال است.",
+            [], [], [first, second], null);
+
+        Assert.Contains(findings, x => x.ReferenceDocumentId == first.DocumentId);
+        Assert.Contains(findings, x => x.ReferenceDocumentId == second.DocumentId);
+        Assert.All(findings, x => Assert.True(x.IsApplicable));
+    }
+
+    [Fact]
+    public void Approved_references_are_scorable_when_group_has_no_optional_criteria()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع",
+            "نام شرکت مبلغ تاریخ امضا محرمانگی تعهدات");
+
+        var findings = new ComparisonEngine().Evaluate(
+            "نام شرکت مبلغ تاریخ امضا محرمانگی تعهدات", [], [], [reference], null);
+
+        var finding = Assert.Single(findings);
+        Assert.True(finding.IsApplicable);
+        Assert.Equal(1m, finding.Weight);
+        Assert.True(finding.IsPassed);
+    }
+
+    [Fact]
+    public void Per_run_important_item_participates_in_the_score()
+    {
+        var findings = new ComparisonEngine().Evaluate(
+            "این سند دارای مبلغ و تاریخ است", [], [], [], "بند محرمانگی");
+
+        var finding = Assert.Single(findings);
+        Assert.True(finding.IsApplicable);
+        Assert.Equal(1m, finding.Weight);
+        Assert.False(finding.IsPassed);
+    }
+
+    [Fact]
+    public async Task Readding_a_deleted_approved_reference_restores_it_and_group_membership()
+    {
+        await using var db = CreateDb();
+        var organizationId = Guid.NewGuid();
+        var group = new DocumentGroup { OrganizationId = organizationId, Name = "گروه", CreatedByUserId = "u" };
+        var document = new Document { OrganizationId = organizationId, Title = "مرجع", DocumentType = "reference" };
+        var deleted = new GoldenDocument { OrganizationId = organizationId,
+            DocumentGroupId = group.Id, DocumentId = document.Id, Priority = 1,
+            CreatedByUserId = "u", IsDeleted = true, IsActive = false };
+        db.AddRange(group, document, deleted); await db.SaveChangesAsync();
+
+        var result = await new SaveGoldenDocumentHandler(db,
+            new Tenant(organizationId, "u"), new NullAudit()).Handle(
+            new(null, new SaveGoldenDocumentRequest(group.Id, document.Id, 2, true)), default);
+
+        Assert.NotNull(result);
+        Assert.False(deleted.IsDeleted);
+        Assert.True(deleted.IsActive);
+        Assert.True(await db.DocumentGroupMembers.AnyAsync(x =>
+            x.DocumentGroupId == group.Id && x.DocumentId == document.Id));
+    }
+
     [Fact]
     public async Task Freezes_final_golden_sources_and_critical_failure_overrides_high_score()
     {
@@ -69,6 +210,9 @@ public sealed class M5DocumentConformityTests
         Assert.Equal(1, ai.PublishCount);
         Assert.True(target.IsRagPublished);
         Assert.Equal(ComparisonApprovalStatus.ManagerFinalized, finalized.ApprovalStatus);
+        var promoted = await db.GoldenDocuments.SingleAsync(x =>
+            x.DocumentGroupId == seeded.GroupId && x.DocumentId == seeded.TargetDocumentId);
+        Assert.True(promoted.IsActive);
     }
 
     [Fact]

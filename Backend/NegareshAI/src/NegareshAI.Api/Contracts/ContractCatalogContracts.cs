@@ -18,7 +18,7 @@ public sealed record SaveContractBaseDocumentRequest(
 
 public sealed record OrganizationPartyResponse(
     Guid Id, string Name, string? NationalIdentifier, string? RepresentativeName,
-    string? ContactInfo, bool IsActive);
+    string? ContactInfo, string? Address, bool IsActive);
 public sealed record SaveOrganizationPartyRequest(
     string Name, string? NationalIdentifier, string? RepresentativeName,
-    string? ContactInfo, bool IsActive = true);
+    string? ContactInfo, string? Address = null, bool IsActive = true);

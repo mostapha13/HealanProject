@@ -3,6 +3,8 @@ from fastapi.responses import Response
 from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from copy import deepcopy
 from pydantic import BaseModel, Field
 from typing import Any
 import re
@@ -11,6 +13,7 @@ import hashlib
 import os
 import difflib
 import logging
+import json
 
 app = FastAPI(title="NegareshAI", version="0.1.0")
 class HashEmbedding:
@@ -25,14 +28,37 @@ class SemanticEmbedding:
     def __init__(self, model_id: str):
         from sentence_transformers import SentenceTransformer
         self.model_id = model_id
+        model_source = local_model_snapshot(model_id)
         self.model = SentenceTransformer(
-            model_id,
+            model_source,
             cache_folder=os.getenv("SENTENCE_TRANSFORMERS_HOME", "/models"),
             local_files_only=os.getenv("MODEL_OFFLINE", "true").lower() == "true")
     def __call__(self, input):
         values = [str(value) for value in input]
         return self.model.encode(
             values, normalize_embeddings=True, show_progress_bar=False).tolist()
+
+def local_model_snapshot(model_id: str) -> str:
+    """Resolve a cached Hugging Face model to a concrete local snapshot.
+
+    Passing the repository id to recent transformers versions can still trigger
+    a metadata request even with local_files_only enabled. A concrete snapshot
+    path keeps the contract workflow fully offline once the model is cached.
+    """
+    if os.path.isdir(model_id):
+        return model_id
+    cache_root = os.getenv("SENTENCE_TRANSFORMERS_HOME", "/models")
+    repository = os.path.join(cache_root, f"models--{model_id.replace('/', '--')}")
+    main_ref = os.path.join(repository, "refs", "main")
+    try:
+        with open(main_ref, encoding="utf-8") as ref:
+            revision = ref.read().strip()
+        snapshot = os.path.join(repository, "snapshots", revision)
+        if revision and os.path.isdir(snapshot):
+            return snapshot
+    except OSError:
+        pass
+    return model_id
 
 _embeddings: dict[str, Any] = {}
 def embedding_for(model_id: str):
@@ -160,11 +186,13 @@ def structural_chunks(text: str, max_chars: int = 1800, page: int = 1) -> list[d
     return chunks
 
 def collection_for(model_id: str):
-    suffix = hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:12]
+    backend = os.getenv("EMBEDDING_BACKEND", "semantic")
+    collection_key = f"{backend}:{model_id}"
+    suffix = hashlib.sha256(collection_key.encode("utf-8")).hexdigest()[:12]
     return vector_client.get_or_create_collection(
         f"{RAG_COLLECTION}_{suffix}",
         embedding_function=embedding_for(model_id),
-        metadata={"embeddingModel": model_id})
+        metadata={"embeddingModel": model_id, "embeddingBackend": backend})
 
 def normalize_persian(value: str) -> str:
     table = str.maketrans({
@@ -331,7 +359,8 @@ def _six_months_after_persian(value: str) -> str:
 def _apply_contract_values(document: Document, replacements: dict) -> None:
     replacements = {**replacements, "currency": _currency_label(replacements.get("currency"))}
     start_date, end_date = str(replacements.get("startDate", "")), str(replacements.get("endDate", ""))
-    installment_date = _six_months_after_persian(start_date)
+    first_payment_date = str(replacements.get("firstPaymentDate") or start_date).strip()
+    second_payment_date = str(replacements.get("secondPaymentDate") or _six_months_after_persian(start_date)).strip()
     amount_value = str(replacements.get("amount", "")).strip()
     money_value = f"{amount_value} {replacements['currency']}".strip()
     signing_date = str(replacements.get("signingDate", "")).strip()
@@ -339,44 +368,77 @@ def _apply_contract_values(document: Document, replacements: dict) -> None:
     signing_date_day_first = (f"{signing_parts[2]}/{signing_parts[1]}/{signing_parts[0]}"
                               if len(signing_parts) == 3 else signing_date)
     party_name = str(replacements.get("partyName", "")).strip()
-    is_fasa = "فسا" in party_name
+    raw_new_clauses = replacements.get("newClausesJson", "")
+    try:
+        new_clauses = json.loads(raw_new_clauses) if isinstance(raw_new_clauses, str) and raw_new_clauses else raw_new_clauses
+    except (TypeError, ValueError):
+        new_clauses = []
+    if not isinstance(new_clauses, list):
+        new_clauses = []
+    new_clauses = [str(value).strip() for value in new_clauses if str(value).strip()]
+    fallback_clause = str(replacements.get("newClause", "")).strip()
+    if not new_clauses and fallback_clause:
+        new_clauses = [fallback_clause]
+    new_clause = "\n".join(new_clauses)
+    # A single placeholder can safely hold one article. When the user asks for
+    # several articles, clear it and append each article separately below.
+    replacements["newClause"] = new_clause if len(new_clauses) == 1 else ""
+    new_clause_number = str(replacements.get("newClauseNumber", "")).strip()
+    new_clause_inserted = False
+    original_contract_text = "\n".join(
+        [paragraph.text for paragraph in document.paragraphs]
+        + [cell.text for table in document.tables for row in table.rows for cell in row.cells])
+    clause_label = ("ماده" if len(re.findall(r"ماده\s*[۰-۹0-9]+", original_contract_text))
+                    >= len(re.findall(r"بند\s*[۰-۹0-9]+", original_contract_text)) else "بند")
+    organization_name = str(replacements.get("organizationName", "")).strip()
+    organization_representative = str(replacements.get("organizationRepresentative", "")).strip()
+    counterparty_name = str(replacements.get("counterpartyName", party_name)).strip()
+    counterparty_representative = str(replacements.get("counterpartyRepresentative", "")).strip()
     literal_slots = {
-        "فیلد1": "1114452369" if is_fasa else "",
-        "فیلد2": "229856365" if is_fasa else "",
-        "فیلد3": "تهران، میرداماد، خیابان نیک‌نام، پلاک 1" if is_fasa else "",
-        "فیلد4": "آقای" if is_fasa else "",
-        "فیلد5": "سارا سارایی" if is_fasa else "",
-        "فیلد6": "663254125" if is_fasa else "",
-        "فیلد7": "محمد" if is_fasa else "",
-        "فیلد8": "3336541258" if is_fasa else "",
-        "فیلد9": "تهران، خیابان الف، ساختمان پونه، پلاک 9، واحد 12" if is_fasa else "",
-        "قیلد1": ("پشتیبانی نرم‌افزارهای کارشناس شامل نرم‌افزارهای گلکس، چارگون، "
-                  "سیمرغ و درآمد." if is_fasa else str(replacements.get("subject", ""))),
+        "فیلد1": str(replacements.get("organizationRepresentativeNationalIdentifier")
+                     or replacements.get("organizationNationalIdentifier", "")),
+        "فیلد2": str(replacements.get("organizationPhone", "")),
+        "فیلد3": str(replacements.get("organizationAddress", "")),
+        "فیلد4": "آقای" if counterparty_representative else "",
+        "فیلد5": counterparty_representative,
+        "فیلد6": str(replacements.get("counterpartyNationalIdentifier", "")),
+        "فیلد7": str(replacements.get("counterpartyFatherName", "")),
+        "فیلد8": str(replacements.get("counterpartyPhone", "")),
+        "فیلد9": str(replacements.get("counterpartyAddress", "")),
+        "توسعه ارتباطات": counterparty_name,
+        "قیلد1": str(replacements.get("subject", "")),
         "قیلد2": start_date,
         "قیلد3": end_date,
         "قیلد4": "1 سال",
         "قیلد5": amount_value,
-        "قیلد6": (f"مبلغ قرارداد در دو قسط پرداخت می‌گردد: نیمی از مبلغ در تاریخ {start_date} "
-                  f"و نیمی از مبلغ شش ماه بعد در تاریخ {installment_date}."),
-        "قیلد7": "9,000,000" if is_fasa else "",
-        "قیلد8": "5" if is_fasa else "",
+        "قیلد6": (f"مبلغ قرارداد در دو قسط پرداخت می‌گردد: نیمی از مبلغ در تاریخ {first_payment_date} "
+                  f"و نیمی از مبلغ در تاریخ {second_payment_date}."),
+        "قیلد7": str(replacements.get("visitFee", "")),
+        "قیلد8": str(replacements.get("taxPercent", "")),
         "قیلد9": "14",
         "میلد1": signing_date_day_first,
-        "میلد2": "تهران" if is_fasa else "",
-        "میلد3": "سعید سعیدی" if is_fasa else "",
-        "میلد4": "مدیرعامل شرکت فسا" if is_fasa else "",
-        "میلد5": "سارا سارایی" if is_fasa else "",
+        "میلد2": "",
+        "میلد3": organization_representative,
+        "میلد4": f"مدیرعامل شرکت {organization_name}" if organization_name else "",
+        "میلد5": counterparty_representative,
+        "میلد6": organization_name,
+        "میلد7": organization_representative,
+        "میلد8": str(replacements.get("organizationFatherName", "")),
     }
     date_pattern = re.compile(r"(?<!\d)(?:(?:13|14)\d{2}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}[./-]\d{1,2}[./-](?:13|14)\d{2})(?!\d)")
     money_pattern = re.compile(r"[۰-۹٠-٩\d]{1,3}(?:[.,٬،][۰-۹٠-٩\d]{3})+(?:\s*(?:ریال|تومان|IRR|IRT))?", re.I)
 
-    def date_like_source(source: str, target: str) -> str:
-        parts = target.split("/")
-        return f"{parts[2]}/{parts[1]}/{parts[0]}" if len(parts) == 3 and not source.startswith(("13", "14")) else target
+    def date_like_source(_source: str, target: str) -> str:
+        # Dates across the system and generated documents use one canonical
+        # Jalali representation: yyyy/MM/dd, regardless of the template sample.
+        return target
 
     def replace_in_paragraph(paragraph):
+        nonlocal new_clause_inserted
         original = ''.join(run.text or '' for run in paragraph.runs)
         combined = original
+        if "{{newClause}}" in combined and new_clause:
+            new_clause_inserted = True
         for key, value in replacements.items():
             combined = combined.replace("{{" + str(key) + "}}", str(value))
         had_literal_slot = False
@@ -391,8 +453,8 @@ def _apply_contract_values(document: Document, replacements: dict) -> None:
             combined = money_pattern.sub(money_value, combined, count=1)
         if not had_literal_slot and "تاریخ عقد قرارداد" in combined and start_date:
             combined = date_pattern.sub(lambda match: date_like_source(match.group(0), start_date), combined, count=1)
-        if not had_literal_slot and "شش ماه بعد" in combined and installment_date:
-            combined = date_pattern.sub(lambda match: date_like_source(match.group(0), installment_date), combined, count=1)
+        if not had_literal_slot and "شش ماه بعد" in combined and second_payment_date:
+            combined = date_pattern.sub(lambda match: date_like_source(match.group(0), second_payment_date), combined, count=1)
         if paragraph.runs and combined != original:
             paragraph.runs[0].text = combined
             for run in paragraph.runs[1:]:
@@ -405,6 +467,120 @@ def _apply_contract_values(document: Document, replacements: dict) -> None:
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     replace_in_paragraph(paragraph)
+
+    def set_paragraph_text(paragraph, value: str) -> None:
+        if paragraph.runs:
+            paragraph.runs[0].text = value
+            for run in paragraph.runs[1:]:
+                run.text = ""
+        else:
+            paragraph.add_run(value)
+
+    # Some legacy templates contain a literal subject instead of {{subject}}.
+    # Treat the content immediately after "ماده 1- موضوع قرارداد" as a semantic
+    # slot so a copied contract can never retain its old subject/year.
+    subject = str(replacements.get("subject", "")).strip()
+    subject_heading = re.compile(r"ماده\s*[۱١1]\s*[-–—:]?\s*موضوع\s+قرارداد", re.I)
+    body_paragraphs = list(document.paragraphs)
+    if subject:
+        for index, paragraph in enumerate(body_paragraphs):
+            text = paragraph.text.strip()
+            heading_match = subject_heading.search(text)
+            if not heading_match:
+                continue
+            suffix = text[heading_match.end():].strip(" \t\r\n-–—:")
+            if suffix:
+                set_paragraph_text(paragraph, text[:heading_match.end()] + "\n" + subject)
+            else:
+                next_paragraph = next((candidate for candidate in body_paragraphs[index + 1:]
+                                       if candidate.text.strip()), None)
+                if next_paragraph is not None:
+                    set_paragraph_text(next_paragraph, subject)
+            break
+
+    # Keep the two party introductions in one continuous paragraph. Word
+    # templates often store them as two paragraphs and leave a visible blank
+    # line before the second party ("و فسا به نمایندگی ...").
+    body_paragraphs = list(document.paragraphs)
+    non_empty = [(index, paragraph) for index, paragraph in enumerate(body_paragraphs)
+                 if paragraph.text.strip()]
+    for pair_index in range(len(non_empty) - 1):
+        first_index, first = non_empty[pair_index]
+        second_index, second = non_empty[pair_index + 1]
+        first_text, second_text = first.text.strip(), second.text.strip()
+        if ("«کارفرما»" in first_text and first_text.endswith("و")
+                and "«کارشناس»" in second_text):
+            set_paragraph_text(first, first_text + " " + second_text)
+            for paragraph in body_paragraphs[first_index + 1:second_index + 1]:
+                paragraph._element.getparent().remove(paragraph._element)
+            break
+    if new_clauses and not new_clause_inserted:
+        article_pattern = re.compile(r"^\s*" + re.escape(clause_label) + r"\s*[۰-۹0-9]+")
+        article_paragraphs = [p for p in document.paragraphs if article_pattern.search(p.text)]
+        for table in document.tables:
+            article_paragraphs.extend(
+                p for row in table.rows for cell in row.cells for p in cell.paragraphs
+                if article_pattern.search(p.text))
+        terminal_markers = ("تعداد نسخ", "امضای طرفین", "امضاء طرفین", "تاریخ")
+        terminal_article = next((p for p in reversed(article_paragraphs)
+            if sum(marker in p.text for marker in terminal_markers) >= 2), None)
+
+        effective_number = int(new_clause_number) if new_clause_number.isdigit() else None
+        if terminal_article is not None:
+            number_match = re.search(r"[۰-۹0-9]+", terminal_article.text)
+            if number_match:
+                latin_number = number_match.group(0).translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789"))
+                terminal_number = int(latin_number)
+                effective_number = terminal_number
+                shifted_number = str(terminal_number + len(new_clauses))
+
+                def replace_paragraph_text(target, pattern, replacement):
+                    original = "".join(run.text or "" for run in target.runs)
+                    updated = re.sub(pattern, replacement, original, count=1)
+                    if target.runs and updated != original:
+                        target.runs[0].text = updated
+                        for extra_run in target.runs[1:]:
+                            extra_run.text = ""
+
+                replace_paragraph_text(terminal_article, r"[۰-۹0-9]+", shifted_number)
+                count_pattern = rf"(در\s*){terminal_number}(\s*{re.escape(clause_label)})"
+                for target in document.paragraphs:
+                    replace_paragraph_text(target, count_pattern, rf"\g<1>{shifted_number}\g<2>")
+                for table in document.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            for target in cell.paragraphs:
+                                replace_paragraph_text(target, count_pattern,
+                                                       rf"\g<1>{shifted_number}\g<2>")
+
+        substantive_articles = [p for p in article_paragraphs if p is not terminal_article]
+        style_source = (substantive_articles[-1] if substantive_articles
+                        else article_paragraphs[-1] if article_paragraphs else None)
+        signature_markers = ("امضا", "امضاء", "مدیرعامل", "نماینده طرف", "طرف اول", "طرف دوم")
+        body_elements = list(document.element.body.iterchildren())
+        insertion_target = None
+        for element in body_elements:
+            block_text = "".join(element.itertext())
+            if any(marker in block_text for marker in signature_markers):
+                insertion_target = element
+        for index, clause_text in enumerate(new_clauses):
+            clause_number = effective_number + index if effective_number is not None else None
+            label = (f"{clause_label} {clause_number} - " if clause_number is not None
+                     else f"{clause_label} جدید - ")
+            paragraph = document.add_paragraph()
+            if style_source is not None:
+                if style_source._p.pPr is not None:
+                    paragraph._p.insert(0, deepcopy(style_source._p.pPr))
+                run = paragraph.add_run(f"{label}{clause_text}")
+                if style_source.runs and style_source.runs[0]._r.rPr is not None:
+                    run._r.insert(0, deepcopy(style_source.runs[0]._r.rPr))
+            else:
+                paragraph.add_run(f"{label}{clause_text}")
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            if terminal_article is not None:
+                terminal_article._p.addprevious(paragraph._p)
+            elif insertion_target is not None:
+                insertion_target.addprevious(paragraph._p)
 
 @app.post("/contract/generate")
 async def generate_contract(file: UploadFile = File(...), values: str = Form("{}")):

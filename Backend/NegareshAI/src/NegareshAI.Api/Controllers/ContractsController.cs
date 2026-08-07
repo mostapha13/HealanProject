@@ -142,8 +142,15 @@ public sealed class ContractsController(ISender sender) : ControllerBase
     public async Task<ActionResult<ContractConversationResponse>> StartConversation(
         StartContractConversationRequest request, CancellationToken ct)
     {
-        var result = await sender.Send(new StartContractConversationCommand(request), ct);
-        return result is null ? BadRequest("اطلاعات طرف قرارداد، گروه یا پیام معتبر نیست.") : Ok(result);
+        try
+        {
+            var result = await sender.Send(new StartContractConversationCommand(request), ct);
+            return result is null ? BadRequest("درخواست قابل پردازش نیست یا دسترسی لازم وجود ندارد.") : Ok(result);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
     }
 
     [HttpGet("conversations/{id:guid}")]

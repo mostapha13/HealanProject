@@ -117,7 +117,21 @@ public sealed class Organization
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public required string Name { get; set; }
+    public string? ChiefExecutiveName { get; set; }
+    public string? ChiefExecutiveFatherName { get; set; }
+    public string? ChiefExecutiveNationalId { get; set; }
+    public string? NationalIdentifier { get; set; }
+    public string? EconomicCode { get; set; }
+    public string? RegistrationNumber { get; set; }
+    public string? Address { get; set; }
+    public string? PostalCode { get; set; }
+    public string? Phone { get; set; }
+    public string? Fax { get; set; }
+    public string? Email { get; set; }
+    public string? Website { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAtUtc { get; set; }
+    public string? UpdatedByUserId { get; set; }
     public List<Department> Departments { get; set; } = [];
     public List<OrganizationMembership> Memberships { get; set; } = [];
 }
@@ -530,6 +544,7 @@ public sealed class OrganizationParty
     public string? NationalIdentifier { get; set; }
     public string? RepresentativeName { get; set; }
     public string? ContactInfo { get; set; }
+    public string? Address { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
     public string? CreatedByUserId { get; set; }

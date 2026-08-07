@@ -10,6 +10,8 @@ namespace NegareshAI.Api.Controllers;
 [NegareshAccess(NegareshAIAccessFormIds.OtherCatalogs)]
 public sealed class MasterDataController(ISender sender):ControllerBase
 {
+ [HttpGet("organization-profile")] public async Task<ActionResult> GetOrganizationProfile(CancellationToken ct){var x=await sender.Send(new GetOrganizationProfileQuery(),ct);return x is null?NotFound():Ok(x);}
+ [HttpPut("organization-profile")] public async Task<ActionResult> SaveOrganizationProfile(SaveOrganizationProfileRequest r,CancellationToken ct){var x=await sender.Send(new SaveOrganizationProfileCommand(r),ct);return x is null?BadRequest("فیلدهای ستاره‌دار را کامل کنید. شماره‌های ملی، شناسه ملی و شماره اقتصادی باید شامل عدد باشند."):Ok(x);}
  [HttpGet("criteria")] public Task<ActionResult> List([FromQuery]int pageNumber=1,[FromQuery]int pageSize=20,CancellationToken ct=default)=>ListCore(pageNumber,pageSize,ct);
  private async Task<ActionResult> ListCore(int page,int size,CancellationToken ct)=>Ok(await sender.Send(new ListComplianceCriteriaQuery(page,size),ct));
  [HttpPost("criteria")] public async Task<ActionResult> Create(SaveComplianceCriterionRequest r,CancellationToken ct){var x=await sender.Send(new SaveComplianceCriterionCommand(null,r),ct);return x is null?BadRequest():Ok(x);}

@@ -1,49 +1,476 @@
 "use client";
 
-import {FormEvent,useEffect,useMemo,useState} from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import PersianCalendar from "../PersianCalendar";
-import {gregorianYmdToJalali} from "../../lib/jalali";
-import {ContractGroup,DocumentDetail,DocumentGroup,OrganizationParty,expertReviewDocumentVersion,listContractCatalog,listDocumentGroups,managerReviewDocumentVersion,saveContract,saveExtractedDocumentFields,uploadDocumentBatch} from "../../lib/api";
+import { gregorianYmdToJalali } from "../../lib/jalali";
+import {
+  ContractGroup,
+  DocumentDetail,
+  DocumentGroup,
+  OrganizationParty,
+  expertReviewDocumentVersion,
+  listContractCatalog,
+  listDocumentGroups,
+  managerReviewDocumentVersion,
+  saveContract,
+  saveExtractedDocumentFields,
+  uploadDocumentBatch,
+} from "../../lib/api";
 
-type Step="upload"|"review"|"expert"|"manager"|"done";
-function parseExtractedAmount(value?:string){if(!value)return undefined;try{const fields=JSON.parse(value) as {amounts?:string[]};const raw=fields.amounts?.[0];if(!raw)return undefined;const latin=raw.replace(/[۰-۹]/g,x=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(x))).replace(/[٠-٩]/g,x=>String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));const parsed=Number(latin.replace(/[^0-9]/g,""));return Number.isFinite(parsed)&&parsed>0?parsed:undefined;}catch{return undefined;}}
+type Step = "upload" | "review" | "expert" | "manager" | "done";
+function parseExtractedAmount(value?: string) {
+  if (!value) return undefined;
+  try {
+    const fields = JSON.parse(value) as { amounts?: string[] };
+    const raw = fields.amounts?.[0];
+    if (!raw) return undefined;
+    const latin = raw
+      .replace(/[۰-۹]/g, (x) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(x)))
+      .replace(/[٠-٩]/g, (x) => String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));
+    const parsed = Number(latin.replace(/[^0-9]/g, ""));
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
-export default function HistoricalContractImportPage(){
- const [documentGroups,setDocumentGroups]=useState<DocumentGroup[]>([]),[contractGroups,setContractGroups]=useState<ContractGroup[]>([]),[parties,setParties]=useState<OrganizationParty[]>([]);
- const [files,setFiles]=useState<File[]>([]),[pageNumbers,setPageNumbers]=useState<number[]>([]);
- const [title,setTitle]=useState(""),[subject,setSubject]=useState(""),[documentGroupId,setDocumentGroupId]=useState(""),[contractGroupId,setContractGroupId]=useState(""),[partyId,setPartyId]=useState("");
- const [contractNumber,setContractNumber]=useState(""),[amount,setAmount]=useState(""),[currency,setCurrency]=useState("IRR"),[startDate,setStartDate]=useState(""),[endDate,setEndDate]=useState(""),[status,setStatus]=useState(6);
- const [detail,setDetail]=useState<DocumentDetail>(),[fields,setFields]=useState("{}"),[step,setStep]=useState<Step>("upload"),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
- const version=detail?.versions[0];
- const isImages=useMemo(()=>files.length>0&&files.every(x=>x.type.startsWith("image/")),[files]);
+export default function HistoricalContractImportPage() {
+  const [documentGroups, setDocumentGroups] = useState<DocumentGroup[]>([]),
+    [contractGroups, setContractGroups] = useState<ContractGroup[]>([]),
+    [parties, setParties] = useState<OrganizationParty[]>([]);
+  const [files, setFiles] = useState<File[]>([]),
+    [pageNumbers, setPageNumbers] = useState<number[]>([]);
+  const [title, setTitle] = useState(""),
+    [subject, setSubject] = useState(""),
+    [documentGroupId, setDocumentGroupId] = useState(""),
+    [contractGroupId, setContractGroupId] = useState(""),
+    [partyId, setPartyId] = useState("");
+  const [contractNumber, setContractNumber] = useState(""),
+    [amount, setAmount] = useState(""),
+    [currency, setCurrency] = useState("IRR"),
+    [startDate, setStartDate] = useState(""),
+    [endDate, setEndDate] = useState(""),
+    [status, setStatus] = useState(6);
+  const [detail, setDetail] = useState<DocumentDetail>(),
+    [fields, setFields] = useState("{}"),
+    [step, setStep] = useState<Step>("upload"),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState("");
+  const version = detail?.versions[0];
+  const isImages = useMemo(
+    () => files.length > 0 && files.every((x) => x.type.startsWith("image/")),
+    [files],
+  );
 
- useEffect(()=>{Promise.all([listDocumentGroups(),listContractCatalog<ContractGroup>("groups",1,100),listContractCatalog<OrganizationParty>("parties",1,100)])
-  .then(([dg,cg,p])=>{setDocumentGroups(dg.filter(x=>x.isActive));setContractGroups(cg.items.filter(x=>x.isActive));setParties(p.items.filter(x=>x.isActive));})
-  .catch(e=>setMessage(e instanceof Error?e.message:"دریافت اطلاعات پایه انجام نشد."));},[]);
+  useEffect(() => {
+    Promise.all([
+      listDocumentGroups(),
+      listContractCatalog<ContractGroup>("groups", 1, 100),
+      listContractCatalog<OrganizationParty>("parties", 1, 100),
+    ])
+      .then(([dg, cg, p]) => {
+        setDocumentGroups(dg.filter((x) => x.isActive));
+        setContractGroups(cg.items.filter((x) => x.isActive));
+        setParties(p.items.filter((x) => x.isActive));
+      })
+      .catch((e) =>
+        setMessage(
+          e instanceof Error ? e.message : "دریافت اطلاعات پایه انجام نشد.",
+        ),
+      );
+  }, []);
 
- function chooseFiles(value:FileList|null){const selected=Array.from(value??[]);setFiles(selected);setPageNumbers(selected.map((_,i)=>i+1));if(selected[0]&&!title)setTitle(selected[0].name.replace(/\.[^.]+$/,""));}
- async function upload(e:FormEvent){e.preventDefault();if(!files.length)return;setBusy(true);setMessage("");try{
-  const uploaded=await uploadDocumentBatch({files,pageNumbers:isImages?pageNumbers:undefined,title,documentType:"contract",confidentialityLevel:2,documentGroupIds:[documentGroupId]});
-  const party=parties.find(x=>x.id===partyId);if(!party)throw new Error("طرف قرارداد معتبر نیست.");
-  const extractedAmount=parseExtractedAmount(uploaded.versions[0]?.extractedFieldsJson);const resolvedAmount=amount?Number(amount):extractedAmount;const resolvedCurrency=uploaded.versions[0]?.extractedText?.includes("تومان")?"IRT":currency;
-  await saveContract({documentId:uploaded.id,contractNumber:contractNumber||undefined,subject,status,amount:resolvedAmount,currency:resolvedCurrency,startDate:startDate||undefined,endDate:endDate||undefined,contractGroupIds:[contractGroupId],primaryContractGroupId:contractGroupId,parties:[{role:2,name:party.name,directoryPartyId:party.id,nationalIdentifier:party.nationalIdentifier,representativeName:party.representativeName}]});
-  if(!amount&&extractedAmount)setAmount(String(extractedAmount));setCurrency(resolvedCurrency);
-  setDetail(uploaded);setFields(uploaded.versions[0]?.extractedFieldsJson??"{}");setStep("review");setMessage("فایل استخراج شد و قرارداد تاریخی به آن متصل شد. اطلاعات پیشنهادی را بازبینی کنید.");
- }catch(e){setMessage(e instanceof Error?e.message:"ورود قرارداد انجام نشد.");}finally{setBusy(false);}}
- async function saveReview(){if(!detail||!version)return;setBusy(true);try{setDetail(await saveExtractedDocumentFields(detail.id,version.id,fields));setStep("expert");setMessage("بازبینی استخراج ثبت شد؛ اکنون تأیید کارشناس لازم است.");}catch(e){setMessage(e instanceof Error?e.message:"ثبت بازبینی انجام نشد.");}finally{setBusy(false);}}
- async function expertApprove(){if(!detail||!version)return;setBusy(true);try{setDetail(await expertReviewDocumentVersion(detail.id,version.id,true,"قرارداد تاریخی بازبینی شد."));setStep("manager");setMessage("تأیید کارشناس ثبت شد؛ نهایی‌سازی مدیر لازم است.");}catch(e){setMessage(e instanceof Error?e.message:"تأیید کارشناس انجام نشد.");}finally{setBusy(false);}}
- async function managerApprove(){if(!detail||!version)return;setBusy(true);try{setDetail(await managerReviewDocumentVersion(detail.id,version.id,true,"قرارداد تاریخی نهایی و برای RAG منتشر شد."));setStep("done");setMessage("قرارداد تاریخی نهایی شد و اکنون مبنای تمدید است.");}catch(e){setMessage(e instanceof Error?e.message:"نهایی‌سازی مدیر انجام نشد.");}finally{setBusy(false);}}
- const requestedYear=gregorianYmdToJalali(startDate)?.jy??1405;
- const renewUrl=`/contract-generation?partyId=${encodeURIComponent(partyId)}&groupId=${encodeURIComponent(contractGroupId)}&year=${encodeURIComponent(requestedYear)}&subject=${encodeURIComponent(subject)}&message=${encodeURIComponent(`قرارداد جدید را بر اساس قرارداد ${contractNumber||subject} با تاریخ و مبلغ جدید تنظیم کن.`)}`;
+  function chooseFiles(value: FileList | null) {
+    const selected = Array.from(value ?? []);
+    setFiles(selected);
+    setPageNumbers(selected.map((_, i) => i + 1));
+    if (selected[0] && !title)
+      setTitle(selected[0].name.replace(/\.[^.]+$/, ""));
+  }
+  async function upload(e: FormEvent) {
+    e.preventDefault();
+    if (!files.length) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const uploaded = await uploadDocumentBatch({
+        files,
+        pageNumbers: isImages ? pageNumbers : undefined,
+        title,
+        documentType: "contract",
+        confidentialityLevel: 2,
+        documentGroupIds: [documentGroupId],
+      });
+      const party = parties.find((x) => x.id === partyId);
+      if (!party) throw new Error("طرف قرارداد معتبر نیست.");
+      const extractedAmount = parseExtractedAmount(
+        uploaded.versions[0]?.extractedFieldsJson,
+      );
+      const resolvedAmount = amount ? Number(amount) : extractedAmount;
+      const resolvedCurrency = uploaded.versions[0]?.extractedText?.includes(
+        "تومان",
+      )
+        ? "IRT"
+        : currency;
+      await saveContract({
+        documentId: uploaded.id,
+        contractNumber: contractNumber || undefined,
+        subject,
+        status,
+        amount: resolvedAmount,
+        currency: resolvedCurrency,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        contractGroupIds: [contractGroupId],
+        primaryContractGroupId: contractGroupId,
+        parties: [
+          {
+            role: 2,
+            name: party.name,
+            directoryPartyId: party.id,
+            nationalIdentifier: party.nationalIdentifier,
+            representativeName: party.representativeName,
+          },
+        ],
+      });
+      if (!amount && extractedAmount) setAmount(String(extractedAmount));
+      setCurrency(resolvedCurrency);
+      setDetail(uploaded);
+      setFields(uploaded.versions[0]?.extractedFieldsJson ?? "{}");
+      setStep("review");
+      setMessage(
+        "فایل استخراج شد و قرارداد سابق به آن متصل شد. اطلاعات پیشنهادی را بازبینی کنید.",
+      );
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "ورود قرارداد انجام نشد.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function saveReview() {
+    if (!detail || !version) return;
+    setBusy(true);
+    try {
+      setDetail(
+        await saveExtractedDocumentFields(detail.id, version.id, fields),
+      );
+      setStep("expert");
+      setMessage("بازبینی استخراج ثبت شد؛ اکنون تأیید کارشناس لازم است.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "ثبت بازبینی انجام نشد.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function expertApprove() {
+    if (!detail || !version) return;
+    setBusy(true);
+    try {
+      setDetail(
+        await expertReviewDocumentVersion(
+          detail.id,
+          version.id,
+          true,
+          "قرارداد سابق بازبینی شد.",
+        ),
+      );
+      setStep("manager");
+      setMessage("تأیید کارشناس ثبت شد؛ نهایی‌سازی مدیر لازم است.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "تأیید کارشناس انجام نشد.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function managerApprove() {
+    if (!detail || !version) return;
+    setBusy(true);
+    try {
+      setDetail(
+        await managerReviewDocumentVersion(
+          detail.id,
+          version.id,
+          true,
+          "قرارداد سابق نهایی و برای RAG منتشر شد.",
+        ),
+      );
+      setStep("done");
+      setMessage("قرارداد سابق نهایی شد و اکنون مبنای تمدید است.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "نهایی‌سازی مدیر انجام نشد.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  const requestedYear = gregorianYmdToJalali(startDate)?.jy ?? 1405;
+  const renewUrl = `/contract-generation?partyId=${encodeURIComponent(partyId)}&groupId=${encodeURIComponent(contractGroupId)}&year=${encodeURIComponent(requestedYear)}&subject=${encodeURIComponent(subject)}&message=${encodeURIComponent(`قرارداد جدید را بر اساس قرارداد ${contractNumber || subject} با تاریخ و مبلغ جدید تنظیم کن.`)}`;
 
- return <main className="ingestion-page historical-import" dir="rtl"><header className="conversation-header"><div><span>M7 · ورود قرارداد تاریخی</span><h1>آماده‌سازی قرارداد برای تمدید هوشمند</h1><p>فایل، مشخصات قراردادی و چرخهٔ تأیید را در یک مسیر کامل ثبت کنید.</p></div><nav><a href="/contract-generation">دستیار تمدید</a><a href="/">داشبورد</a></nav></header>
- <ol className="wizard-steps"><li className={step!=="upload"?"done":"active"}>۱. فایل و مشخصات</li><li className={step==="review"?"active":(["expert","manager","done"].includes(step)?"done":"")}>۲. بازبینی استخراج</li><li className={step==="expert"?"active":(["manager","done"].includes(step)?"done":"")}>۳. تأیید کارشناس</li><li className={step==="manager"?"active":(step==="done"?"done":"")}>۴. نهایی‌سازی مدیر</li></ol>
- {step==="upload"&&<form className="panel historical-form" onSubmit={upload}><label className="full"><span>فایل قرارداد (PDF/DOCX یا تصاویر مرتب‌شده)</span><input type="file" accept=".pdf,.docx,image/jpeg,image/png,image/tiff" multiple onChange={e=>chooseFiles(e.target.files)} required/></label>
- {isImages&&<fieldset className="full"><legend>ترتیب صفحات تصویری</legend>{files.map((file,i)=><label key={`${file.name}-${i}`}><span>{file.name}</span><input type="number" min={1} value={pageNumbers[i]} onChange={e=>setPageNumbers(v=>v.map((x,j)=>j===i?Number(e.target.value):x))}/></label>)}</fieldset>}
- <label><span>عنوان سند</span><input value={title} onChange={e=>setTitle(e.target.value)} required/></label><label><span>موضوع قرارداد</span><input value={subject} onChange={e=>setSubject(e.target.value)} required/></label><label><span>شماره قرارداد</span><input value={contractNumber} onChange={e=>setContractNumber(e.target.value)}/></label>
- <label><span>طرف قرارداد</span><select value={partyId} onChange={e=>setPartyId(e.target.value)} required><option value="">انتخاب کنید</option>{parties.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label><span>گروه اصلی قرارداد</span><select value={contractGroupId} onChange={e=>setContractGroupId(e.target.value)} required><option value="">انتخاب کنید</option>{contractGroups.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label><span>گروه سند</span><select value={documentGroupId} onChange={e=>setDocumentGroupId(e.target.value)} required><option value="">انتخاب کنید</option>{documentGroups.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
- <label><span>مبلغ</span><input type="number" min="0" value={amount} onChange={e=>setAmount(e.target.value)}/></label><label><span>واحد پول</span><select value={currency} onChange={e=>setCurrency(e.target.value)}><option value="IRR">ریال</option><option value="USD">دلار</option><option value="EUR">یورو</option></select></label><label><span>تاریخ شروع</span><PersianCalendar value={startDate} onChange={setStartDate}/></label><label><span>تاریخ پایان</span><PersianCalendar value={endDate} onChange={setEndDate}/></label><label><span>وضعیت قرارداد</span><select value={status} onChange={e=>setStatus(Number(e.target.value))}><option value={5}>امضاشده</option><option value={6}>فعال</option><option value={7}>منقضی</option></select></label>
- <div className="full"><button className="primary-button" disabled={busy}>{busy?"در حال OCR و استخراج...":"بارگذاری و استخراج قرارداد"}</button></div></form>}
- {step!=="upload"&&<section className="panel historical-review"><header><div><h2>{detail?.title}</h2><span>نسخه {version?.versionNumber} · وضعیت {version?.lifecycleStatus}</span></div></header>{step==="review"&&<><label className="review-field"><span>اطلاعات پیشنهادی استخراج‌شده (قابل اصلاح)</span><textarea rows={16} value={fields} onChange={e=>setFields(e.target.value)}/></label><details><summary>متن استخراج‌شده</summary><pre>{version?.extractedText}</pre></details><button className="primary-button" disabled={busy} onClick={saveReview}>ثبت بازبینی و ارسال برای کارشناس</button></>}{step==="expert"&&<div className="approval-gate"><h3>تأیید کارشناس</h3><p>متن و اطلاعات استخراج‌شده باید توسط کارشناس مجاز کنترل شود.</p><button className="primary-button" disabled={busy} onClick={expertApprove}>تأیید کارشناس</button></div>}{step==="manager"&&<div className="approval-gate"><h3>نهایی‌سازی مدیر</h3><p>با این تأیید، نسخه Final و قابل بازیابی در RAG می‌شود.</p><button className="primary-button" disabled={busy} onClick={managerApprove}>نهایی‌سازی و انتشار</button></div>}{step==="done"&&<div className="approval-gate success"><h3>قرارداد آمادهٔ تمدید است</h3><p>دستیار این نسخهٔ نهایی را به‌عنوان مبنا پیدا می‌کند.</p><a className="primary-button" href={renewUrl}>ادامه در دستیار تمدید</a></div>}</section>}
- {message&&<div className="ingestion-message">{message}</div>}</main>;
+  return (
+    <main className="ingestion-page historical-import" dir="rtl">
+      <header className="conversation-header">
+        <div>
+          <span>M7 · قراردادهای سابق</span>
+          <h1>وارد کردن قراردادهای سابق</h1>
+          <p>
+            فایل، مشخصات قراردادی و چرخهٔ تأیید را در یک مسیر کامل ثبت کنید.
+          </p>
+        </div>
+        <nav>
+          <a href="/contract-generation">دستیار تمدید</a>
+          <a href="/">داشبورد</a>
+        </nav>
+      </header>
+      <ol className="wizard-steps">
+        <li className={step !== "upload" ? "done" : "active"}>
+          ۱. فایل و مشخصات
+        </li>
+        <li
+          className={
+            step === "review"
+              ? "active"
+              : ["expert", "manager", "done"].includes(step)
+                ? "done"
+                : ""
+          }
+        >
+          ۲. بازبینی استخراج
+        </li>
+        <li
+          className={
+            step === "expert"
+              ? "active"
+              : ["manager", "done"].includes(step)
+                ? "done"
+                : ""
+          }
+        >
+          ۳. تأیید کارشناس
+        </li>
+        <li
+          className={
+            step === "manager" ? "active" : step === "done" ? "done" : ""
+          }
+        >
+          ۴. نهایی‌سازی مدیر
+        </li>
+      </ol>
+      {step === "upload" && (
+        <form className="panel historical-form" onSubmit={upload}>
+          <label className="full">
+            <span>فایل قرارداد (PDF/DOCX یا تصاویر مرتب‌شده)</span>
+            <input
+              type="file"
+              accept=".pdf,.docx,image/jpeg,image/png,image/tiff"
+              multiple
+              onChange={(e) => chooseFiles(e.target.files)}
+              required
+            />
+          </label>
+          {isImages && (
+            <fieldset className="full">
+              <legend>ترتیب صفحات تصویری</legend>
+              {files.map((file, i) => (
+                <label key={`${file.name}-${i}`}>
+                  <span>{file.name}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={pageNumbers[i]}
+                    onChange={(e) =>
+                      setPageNumbers((v) =>
+                        v.map((x, j) => (j === i ? Number(e.target.value) : x)),
+                      )
+                    }
+                  />
+                </label>
+              ))}
+            </fieldset>
+          )}
+          <label>
+            <span>عنوان سند</span>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            <span>موضوع قرارداد</span>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            <span>شماره قرارداد</span>
+            <input
+              value={contractNumber}
+              onChange={(e) => setContractNumber(e.target.value)}
+            />
+          </label>
+          <label>
+            <span>طرف قرارداد</span>
+            <select
+              value={partyId}
+              onChange={(e) => setPartyId(e.target.value)}
+              required
+            >
+              <option value="">انتخاب کنید</option>
+              {parties.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>گروه اصلی قرارداد</span>
+            <select
+              value={contractGroupId}
+              onChange={(e) => setContractGroupId(e.target.value)}
+              required
+            >
+              <option value="">انتخاب کنید</option>
+              {contractGroups.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>گروه سند</span>
+            <select
+              value={documentGroupId}
+              onChange={(e) => setDocumentGroupId(e.target.value)}
+              required
+            >
+              <option value="">انتخاب کنید</option>
+              {documentGroups.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>مبلغ</span>
+            <input
+              type="number"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </label>
+          <label>
+            <span>واحد پول</span>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
+              <option value="IRR">ریال</option>
+              <option value="USD">دلار</option>
+              <option value="EUR">یورو</option>
+            </select>
+          </label>
+          <label>
+            <span>تاریخ شروع</span>
+            <PersianCalendar value={startDate} onChange={setStartDate} />
+          </label>
+          <label>
+            <span>تاریخ پایان</span>
+            <PersianCalendar value={endDate} onChange={setEndDate} />
+          </label>
+          <label>
+            <span>وضعیت قرارداد</span>
+            <select
+              value={status}
+              onChange={(e) => setStatus(Number(e.target.value))}
+            >
+              <option value={5}>امضاشده</option>
+              <option value={6}>فعال</option>
+              <option value={7}>منقضی</option>
+            </select>
+          </label>
+          <div className="full">
+            <button className="primary-button" disabled={busy}>
+              {busy ? "در حال OCR و استخراج..." : "بارگذاری و استخراج قرارداد"}
+            </button>
+          </div>
+        </form>
+      )}
+      {step !== "upload" && (
+        <section className="panel historical-review">
+          <header>
+            <div>
+              <h2>{detail?.title}</h2>
+              <span>
+                نسخه {version?.versionNumber} · وضعیت {version?.lifecycleStatus}
+              </span>
+            </div>
+          </header>
+          {step === "review" && (
+            <>
+              <label className="review-field">
+                <span>اطلاعات پیشنهادی استخراج‌شده (قابل اصلاح)</span>
+                <textarea
+                  rows={16}
+                  value={fields}
+                  onChange={(e) => setFields(e.target.value)}
+                />
+              </label>
+              <details>
+                <summary>متن استخراج‌شده</summary>
+                <pre>{version?.extractedText}</pre>
+              </details>
+              <button
+                className="primary-button"
+                disabled={busy}
+                onClick={saveReview}
+              >
+                ثبت بازبینی و ارسال برای کارشناس
+              </button>
+            </>
+          )}
+          {step === "expert" && (
+            <div className="approval-gate">
+              <h3>تأیید کارشناس</h3>
+              <p>متن و اطلاعات استخراج‌شده باید توسط کارشناس مجاز کنترل شود.</p>
+              <button
+                className="primary-button"
+                disabled={busy}
+                onClick={expertApprove}
+              >
+                تأیید کارشناس
+              </button>
+            </div>
+          )}
+          {step === "manager" && (
+            <div className="approval-gate">
+              <h3>نهایی‌سازی مدیر</h3>
+              <p>با این تأیید، نسخه Final و قابل بازیابی در RAG می‌شود.</p>
+              <button
+                className="primary-button"
+                disabled={busy}
+                onClick={managerApprove}
+              >
+                نهایی‌سازی و انتشار
+              </button>
+            </div>
+          )}
+          {step === "done" && (
+            <div className="approval-gate success">
+              <h3>قرارداد آمادهٔ تمدید است</h3>
+              <p>دستیار این نسخهٔ نهایی را به‌عنوان مبنا پیدا می‌کند.</p>
+              <a className="primary-button" href={renewUrl}>
+                ادامه در دستیار تمدید
+              </a>
+            </div>
+          )}
+        </section>
+      )}
+      {message && <div className="ingestion-message">{message}</div>}
+    </main>
+  );
 }

@@ -46,6 +46,11 @@ export default function PersianCalendar({ value = "", onChange, placeholder = "�
     const days = Array.from({ length: jalaliMonthLength(view.jy, view.jm) }, (_, index) => index + 1);
     return [...blanks, ...days];
   }, [view.jy, view.jm]);
+  const years = useMemo(() => {
+    const first = Math.min(1350, today.jy - 75);
+    const last = Math.max(1500, today.jy + 25);
+    return Array.from({ length: last - first + 1 }, (_, index) => first + index);
+  }, [today.jy]);
 
   const move = (delta: number) => setView(current => ({ ...current, ...shiftJalaliMonth(current.jy, current.jm, delta) }));
   const choose = (jy: number, jm: number, jd: number) => {
@@ -68,7 +73,14 @@ export default function PersianCalendar({ value = "", onChange, placeholder = "�
     {open && <div className={`persian-calendar ${opensUp ? "opens-up" : ""}`} role="dialog" aria-label="تقویم شمسی">
       <header>
         <button type="button" onClick={() => move(1)} aria-label="ماه بعد">‹</button>
-        <strong>{JALALI_MONTH_NAMES[view.jm - 1]} {toPersianDigits(view.jy)}</strong>
+        <div className="persian-calendar-period">
+          <select aria-label="انتخاب ماه" value={view.jm} onChange={event => setView(current => ({ ...current, jm: Number(event.target.value) }))}>
+            {JALALI_MONTH_NAMES.map((month, index) => <option value={index + 1} key={month}>{month}</option>)}
+          </select>
+          <select aria-label="انتخاب سال" value={view.jy} onChange={event => setView(current => ({ ...current, jy: Number(event.target.value) }))}>
+            {years.map(year => <option value={year} key={year}>{toPersianDigits(year)}</option>)}
+          </select>
+        </div>
         <button type="button" onClick={() => move(-1)} aria-label="ماه قبل">›</button>
       </header>
       <div className="persian-calendar-grid weekdays">

@@ -4,6 +4,7 @@ using NegareshAI.Api.Application;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Services;
 using NegareshAI.Api.Application.ContractOperations;
+using NegareshAI.Api.Application.Documents.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<NegareshAI.Api.Data.NegareshDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NegareshAI")));
 builder.Services.AddApplication();
 builder.Services.AddHostedService<ContractOperationReminderWorker>();
+builder.Services.AddSingleton<IDocumentIngestionQueue, DocumentIngestionQueue>();
+builder.Services.AddHostedService<DocumentIngestionWorker>();
 
 builder.Services.AddControllers();
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -20,7 +23,10 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 builder.Services.AddHttpClient<IFileManagerClient, FileManagerClient>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["FileManager:BaseUrl"] ?? "http://localhost:5000/"));
 builder.Services.AddHttpClient<IAiDocumentProcessor, AiDocumentProcessor>((services, client) =>
-    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
+{
+    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/");
+    client.Timeout = TimeSpan.FromMinutes(60);
+});
 builder.Services.AddHttpClient<IComparisonReportGenerator, ComparisonReportGenerator>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 builder.Services.AddHttpClient<IContractDocumentGenerator, ContractDocumentGenerator>((services, client) =>
@@ -45,6 +51,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 await ApplyMigrationsAsync(app);
+await EnsureRequiredInfrastructureDataAsync(app);
 app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
@@ -90,4 +97,53 @@ static async Task ApplyMigrationsAsync(WebApplication app)
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
+}
+
+static async Task EnsureRequiredInfrastructureDataAsync(WebApplication app)
+{
+    var organizationValue = app.Configuration["Tenancy:DevelopmentOrganizationId"]
+        ?? "11111111-1111-1111-1111-111111111111";
+    if (!Guid.TryParse(organizationValue, out var organizationId)) return;
+
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<NegareshAI.Api.Data.NegareshDbContext>();
+    if (!await db.Organizations.AnyAsync(item => item.Id == organizationId))
+    {
+        db.Organizations.Add(new NegareshAI.Api.Data.Organization
+        {
+            Id = organizationId,
+            Name = "NegareshAI Development Organization",
+            CreatedAtUtc = DateTime.UnixEpoch
+        });
+    }
+    var exists = await db.RuntimeSettings.AnyAsync(item =>
+        item.OrganizationId == organizationId && item.Category == "ai"
+        && item.Key == "embedding.model" && item.IsActive);
+    if (!exists)
+    {
+        db.RuntimeSettings.Add(new NegareshAI.Api.Data.RuntimeSetting
+        {
+            OrganizationId = organizationId,
+            Category = "ai",
+            Key = "embedding.model",
+            ValueJson = """{"modelId":"BAAI/bge-m3","retrievalMode":"hybrid","normalizePersianDigits":true,"numericExactBoost":0.5}""",
+            UpdatedByUserId = "system-bootstrap"
+        });
+    }
+    var comparisonPromptExists = await db.RuntimeSettings.AnyAsync(item =>
+        item.OrganizationId == organizationId && item.Category == "ai"
+        && item.Key == "comparison.prompt" && item.IsActive);
+    if (!comparisonPromptExists)
+    {
+        db.RuntimeSettings.Add(new NegareshAI.Api.Data.RuntimeSetting
+        {
+            OrganizationId = organizationId,
+            Category = "ai",
+            Key = "comparison.prompt",
+            ValueJson = """{"template":"Evaluate the target only against approved references, configured group criteria and the user's per-run important items. Return evidence-backed findings, exact rejection reasons and actionable improvement suggestions.","language":"fa-IR","requirePageCitation":true,"humanReviewRequired":true}""",
+            UpdatedByUserId = "system-bootstrap"
+        });
+    }
+    await db.SaveChangesAsync();
+    app.Logger.LogInformation("Required infrastructure data is available for organization {OrganizationId}.", organizationId);
 }

@@ -28,6 +28,8 @@ public sealed class StartComparisonCommandHandler(
     {
         var request = command.Request;
         ValidateBasis(request);
+        if (request.ReferenceDocumentId == request.TargetDocumentId)
+            throw new ArgumentException("برای مقایسه باید دو سند متفاوت انتخاب شوند.");
         var target = await db.Documents.Include(item => item.Versions)
             .SingleOrDefaultAsync(item => item.Id == request.TargetDocumentId
                 && item.OrganizationId == tenant.OrganizationId, cancellationToken);
@@ -62,8 +64,8 @@ public sealed class StartComparisonCommandHandler(
                     item.ComplianceCriterion.Title, item.ComplianceCriterion.Description,
                     item.Weight, item.IsCritical, item.Order))
                 .ToListAsync(cancellationToken);
-            if (criteria.Count == 0 && request.BasisMode == ComparisonBasisMode.DocumentGroup)
-                throw new InvalidOperationException("گروه فاقد مرجع معتبر است: معیار فعالی تعریف نشده است.");
+            // Group criteria are intentionally optional. A group can be evaluated only
+            // against its approved reference documents and per-run user instructions.
         }
 
         var ruleSetIds = request.RuleSetIds.Distinct().ToHashSet();
@@ -90,7 +92,7 @@ public sealed class StartComparisonCommandHandler(
         Guid? referenceVersionId = null;
         if (request.ReferenceDocumentId is not null)
         {
-            var source = await LoadFinalReference(request.ReferenceDocumentId.Value,
+            var source = await LoadReference(request.ReferenceDocumentId.Value,
                 request.ReferenceVersionId, 0, cancellationToken);
             if (source is null) return null;
             referenceVersionId = source.VersionId;
@@ -111,22 +113,9 @@ public sealed class StartComparisonCommandHandler(
                     golden.Priority, cancellationToken);
                 if (source is not null) references.Add(source);
             }
-            var goldenIds = goldenRows.Select(x => x.DocumentId).ToHashSet();
-            var memberIds = await db.DocumentGroupMembers.AsNoTracking()
-                .Where(item => item.DocumentGroupId == group.Id
-                    && item.DocumentId != target.Id
-                    && !goldenIds.Contains(item.DocumentId))
-                .OrderBy(item => item.DocumentId)
-                .Select(item => item.DocumentId).ToListAsync(cancellationToken);
-            for (var index = 0; index < memberIds.Count; index++)
-            {
-                var source = await LoadFinalReference(memberIds[index], null,
-                    10_000 + index, cancellationToken);
-                if (source is not null) references.Add(source);
-            }
             if (references.Count == 0)
                 throw new InvalidOperationException(
-                    "گروه فاقد مرجع معتبر است: سند طلایی Final و منتشرشده وجود ندارد.");
+                    "گروه فاقد مرجع معتبر است: سند مورد تأیید Final و منتشرشده وجود ندارد.");
         }
         references = references.GroupBy(item => item.VersionId)
             .Select(item => item.OrderBy(x => x.Priority).First())
@@ -154,7 +143,8 @@ public sealed class StartComparisonCommandHandler(
         var sourceSnapshot = references.Select(item => new
         {
             item.DocumentId, item.VersionId, item.Title, item.Priority,
-            TextSha256 = Sha256(item.Text), ApprovalState = "final"
+            TextSha256 = Sha256(item.Text),
+            ApprovalState = group is null ? "explicit-user-input" : "final"
         }).ToArray();
 
         var drafts = engine.Evaluate(targetVersion.ExtractedText, criteria,
@@ -272,13 +262,33 @@ public sealed class StartComparisonCommandHandler(
             version.ExtractedText!, priority);
     }
 
+    private async Task<ComparisonSource?> LoadReference(Guid documentId,
+        Guid? versionId, int priority, CancellationToken cancellationToken)
+    {
+        var document = await db.Documents.AsNoTracking().Include(item => item.Versions)
+            .SingleOrDefaultAsync(item => item.Id == documentId
+                && item.OrganizationId == tenant.OrganizationId, cancellationToken);
+        if (document is null) return null;
+        var versions = document.Versions.Where(item =>
+            item.LifecycleStatus is not (DocumentVersionLifecycleStatus.Rejected
+                or DocumentVersionLifecycleStatus.Superseded)
+            && !string.IsNullOrWhiteSpace(item.ExtractedText));
+        var version = versionId is null
+            ? versions.OrderByDescending(item => item.VersionNumber).FirstOrDefault()
+            : versions.SingleOrDefault(item => item.Id == versionId);
+        return version is null ? null : new(document.Id, version.Id, document.Title,
+            version.ExtractedText!, priority);
+    }
+
     private async Task<RuntimeSetting> RequiredSetting(string category, string key,
         CancellationToken cancellationToken) =>
         await db.RuntimeSettings.AsNoTracking().SingleOrDefaultAsync(item =>
             item.OrganizationId == tenant.OrganizationId && item.Category == category
             && item.Key == key && item.IsActive, cancellationToken)
         ?? throw new InvalidOperationException(
-            $"Active runtime setting {category}/{key} is required.");
+            key == "comparison.prompt"
+                ? "تنظیم فعال تحلیل تطبیق اسناد در سازمان ثبت نشده است. مدیر سامانه باید تنظیم ai/comparison.prompt را فعال کند."
+                : $"تنظیم فعال موردنیاز {category}/{key} در سازمان ثبت نشده است.");
 
     private static string JsonValue(string json, string property)
     {

@@ -1,8 +1,196 @@
 # NegareshAI Development Status
 
-Last updated: 2026-08-05
-Active branch: `codex/negareshai-foundation`
-Last implementation baseline: `feat(negareshai): complete M6 workflow risk and operations`
+Last updated: 2026-08-07
+Active branch: `codex/negareshai-contract-ux`
+Last implementation baseline: `977a741 Separate document conformity workflow`
+
+## ChatGPT-style direct document comparison — 2026-08-07
+
+### Product decision and implementation
+
+- The user can explicitly choose one of three source modes: compare with one
+  file, compare with an approved-reference group, or compare with both a file
+  and a group. The API maps these to ReferenceDocument, DocumentGroup and
+  Combined basis modes without exposing those technical enum names.
+- A group behaves as an ordered collection of reference files: every active,
+  Final and RAG-published approved reference receives the same evidence-backed
+  pairwise analysis. When group criteria also exist, they continue to affect
+  conformity scoring while detailed file-like diffs are retained as supporting
+  findings. In combined mode the explicitly selected file and group references
+  are de-duplicated and analyzed together.
+- Group selection removes its approved references from the target selector and
+  the API continues to reject invalid/self comparison. Added regression coverage
+  for multi-reference group comparison; Backend tests now pass 84/84.
+
+- Official OpenAI file-upload guidance identifies direct "compare and contrast
+  two documents" as a synthesis task. Text documents are extracted and relevant
+  content may be placed in context or retrieved; PDFs may also use visual
+  retrieval depending on the product plan. OpenAI does not publish ChatGPT's
+  private comparison prompt or exact internal algorithm, so this implementation
+  reproduces the documented user experience rather than claiming model parity.
+- The primary comparison journey is now intent-first: document one, document
+  two, and one optional natural-language request. A document group, golden
+  reference, RuleSet or technical basis selector is no longer required for this
+  journey.
+- Both sides support a new PDF/DOCX/image upload or reuse of an existing
+  organization document. Direct user-supplied pair comparison can use extracted
+  non-rejected versions immediately without first publishing either document to
+  RAG. Group-approved-reference comparison remains final-only and unchanged.
+- Pairwise analysis now produces an auditable overall similarity plus
+  paragraph-level changed, missing and added findings, two-sided evidence,
+  page attribution, suggestions and a focused finding derived from the user's
+  natural-language request. The previous literal full-instruction lookup and
+  single vocabulary-coverage finding are no longer used for direct pairs.
+- The dashboard's comparison navigation now opens the dedicated two-document
+  journey directly. Organization conformity governance, expert review, manager
+  finalization, versioned reports and group-based reference workflows remain
+  available after analysis.
+- Added regression coverage for changed values, added clauses, two-sided
+  evidence and natural-language focus. Backend tests pass 83/83; Next.js
+  production build, TypeScript validation and all 37 static routes pass.
+
+### Remaining acceptance
+
+1. Sign in after the rebuilt local Web/API containers and run one end-to-end
+   comparison using two newly uploaded files (not pre-existing documents).
+2. Validate visual/scanned PDF behavior separately from text-based DOCX/PDF;
+   exact scanned-table values must remain explicitly confidence-qualified.
+3. Continue responsive, keyboard, accessibility and performance acceptance.
+
+## Authenticated conformity acceptance and review UX — 2026-08-07
+
+### Completed
+
+- Completed an authenticated browser acceptance run for document conformity
+  using `Folad-Tabriz.docx` as the target and the approved references of the
+  `فولاد` group (`TataboghTest.docx` priority 1 and `Folad-Behbahan.docx`
+  priority 2).
+- Verified that approved reference documents are removed from the next target
+  selector after the group is selected.
+- The new run produced a reproducible 37.5% non-conforming result. The critical
+  criteria override was active, both approved references supplied page-level
+  evidence, and the per-run instruction was stored as a separately scored
+  finding.
+- Registered expert approval, completed manager finalization, and verified the
+  target version became Final and RAG-published.
+- Verified automatic promotion of `Folad-Tabriz.docx` as the active priority-3
+  approved reference of the same group. The next target snapshot excludes all
+  three active approved references.
+- Authenticated testing exposed an M7 blocker: finding/result review actions
+  used `window.prompt`/`window.confirm`, which are unsupported in the in-app
+  browser and violate the explicit-modal UX requirement. Replaced them with an
+  accessible in-product review dialog with explicit close, cancel and submit
+  actions, editable notes, corrected-reason validation and persistent-decision
+  control.
+- Rebuilt the Web image and verified the new dialog in the authenticated UI;
+  expert approval now completes successfully without console errors.
+- Validation: Next.js production build, TypeScript validation and all 37 static
+  routes pass. The rebuilt local Web/API/AI services are healthy.
+
+### Remaining verification and next action
+
+1. Confirm the versioned DOCX/PDF report downloads with a browser surface that
+   exposes downloads reliably; the in-app browser did not emit a download event.
+2. Continue M7 responsive, keyboard, focus, accessibility and performance
+   acceptance for the contract-generation and comparison journeys.
+3. Run the full regression suite after the remaining M7 changes, then proceed
+   to M8 hardening and release readiness.
+
+## Independent document conformity correction — 2026-08-07
+
+### Completed
+
+- Document conformity master data is presented as a domain independent from
+  contract management: document groups, optional important fields/criteria,
+  approved group references and versioned rule sets remain isolated from
+  contract groups, templates, clauses and contract base documents.
+- The document-group editor now saves the group's passing threshold together
+  with optional weighted/critical important fields. A group with no optional
+  criteria is valid and is scored against its approved references.
+- The approved-reference page supports direct PDF/DOCX/image upload or reuse
+  of an existing document. An uploaded reference remains unusable until its
+  version is extracted, expert-approved, manager-finalized and RAG-published.
+- Group comparison now retrieves only active approved references with a Final,
+  RAG-published, non-empty extracted version. Ordinary group members are not
+  silently treated as authoritative references.
+- Per-run user-important instructions are applicable scored findings. Missing,
+  different, forbidden and extra findings retain evidence, confidence, exact
+  reasons and improvement suggestions.
+- A comparison target that is itself an approved reference of the selected
+  group is removed from the target selector. The API also returns controlled
+  HTTP 400 Persian errors instead of exposing developer stack traces.
+- After expert approval and manager finalization, the accepted target is
+  automatically added/restored as an active approved reference of the same
+  group with the next priority. Rejected or expert-only versions are not
+  promoted.
+- Approved-reference restoration is idempotent, group membership is ensured,
+  and invalid criterion weights or duplicate orders are rejected.
+- Development bootstrap now self-heals both required AI settings:
+  `ai/embedding.model` and `ai/comparison.prompt`. Missing runtime settings
+  produce controlled Persian guidance.
+- Runtime testing found and resolved two configuration/usage issues: the local
+  Web/API images were stale, and the only approved reference was selected as
+  its own target. The local Web/API images were rebuilt and are healthy.
+- Validation: Backend regression suite passes 82/82; Next.js production build,
+  TypeScript validation, 37-route static generation and `git diff --check`
+  pass. The active local database contains an enabled version-1
+  `ai/comparison.prompt` row.
+
+### Remaining verification and roadmap work
+
+1. Product owner should complete the authenticated manual scenario with two
+   distinct documents: keep `TataboghTest.docx` as the approved reference and
+   upload a second document as the target.
+2. Verify positive conformity, critical-field rejection, per-run important
+   instruction, finding-by-finding expert review, manager finalization and
+   automatic promotion of the accepted target.
+3. Verify that the next target snapshot includes the newly promoted reference
+   and excludes rejected, non-final and non-published versions.
+4. Verify versioned DOCX/PDF audit reports in the signed-in UI.
+5. After this M5 regression is accepted, continue the existing M7 sequence:
+   responsive/accessibility/performance work and authenticated browser
+   acceptance; then proceed to M8 hardening and release readiness.
+
+## Intent-first UX correction — 2026-08-06
+
+- The product owner rejected the form-first contract experience. The primary
+  journey is now explicitly intent-first: the user writes one Persian request
+  containing company, dates, amount and requested clauses.
+- Conversation start accepts those structured selectors only as optional API
+  hints. It resolves the registered party from the text, infers the contract
+  type/internal group from the latest contract, derives the Persian year from
+  written dates and selects the effective versioned Template internally.
+- Contract group and primary group are implementation concepts for Template
+  resolution, approved clauses, access scope and historical matching. They
+  must not be exposed as routine fields to the end user.
+- The contract-generation start screen no longer asks for party, group, year
+  or subject. It presents a single Persian request box and explains the
+  automatic resolution steps. The contracts empty state and primary action
+  route to this intent-first journey instead of the legacy manual modal.
+- Added `/basic-data` as the central hub for parties, contract types,
+  Templates, approved clauses, statuses, base documents, years and document
+  conformity catalogs.
+- At the owner's explicit request, all rows in the standalone `NegareshAI`
+  product database were deleted on 2026-08-06 while preserving schema and
+  `__EFMigrationsHistory`. Identity, FileManager and other service databases
+  were not changed. The reusable reset script is
+  `Backend/NegareshAI/scripts/reset-product-data.sql`.
+- Validation: NegareshAI API build passes with zero warnings; Next.js
+  production build passes and generates 36 routes.
+- Follow-up regression on 2026-08-06 added direct coverage for the exact Fasa
+  intent-only sentence, including inferred party/group/year, explicit amount,
+  requested clause and `10 -> 11` clause count. Template resolution now uses
+  the requested start date, only final historical contracts may drive type
+  inference, natural Persian `باید باشد/باشه` clause requests are parsed, and
+  input-resolution failures return HTTP 400 instead of HTTP 500.
+- DOCX generation appends a numbered clause when a Template has no
+  `{{newClause}}` placeholder. Clause count falls back to headings extracted
+  from the final base document when historical clause rows are unavailable.
+- RAG collections are separated by embedding backend as well as model ID to
+  prevent vector dimension collisions after backend changes.
+- Final regression: backend 61/61 passed; all AI tests 15/15 passed in one
+  discovery run; Next.js production build passed with 36 routes; product DB
+  row verification remained zero after the requested reset.
 
 This is the persistent handoff document for NegareshAI. Update it at the end of
 every development session. Do not store passwords, tokens, connection strings,

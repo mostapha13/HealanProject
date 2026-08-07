@@ -22,14 +22,14 @@ public sealed record UploadDocumentBatchCommand(
 
 public sealed class UploadDocumentBatchCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
-    IAiDocumentProcessor ai, IAuditWriter audit, IDataScopeAuthorizer? authorizer = null)
+    IDocumentIngestionQueue ingestionQueue, IAuditWriter audit,
+    IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<UploadDocumentBatchCommand, DocumentDetailResponse>
 {
     public async Task<DocumentDetailResponse> Handle(
         UploadDocumentBatchCommand request, CancellationToken ct)
     {
         var groupIds = request.DocumentGroupIds.Distinct().ToArray();
-        if (groupIds.Length == 0) throw new InvalidOperationException("At least one document group is required.");
         var validGroupCount = await db.DocumentGroups.CountAsync(x => groupIds.Contains(x.Id)
             && x.OrganizationId == tenant.OrganizationId && x.IsActive, ct);
         if (validGroupCount != groupIds.Length) throw new InvalidOperationException("An invalid document group was selected.");
@@ -51,9 +51,6 @@ public sealed class UploadDocumentBatchCommandHandler(
             CreatedByUserId = tenant.UserId
         };
         document.Versions.Add(version);
-        var extractedPages = new SortedDictionary<int, string>();
-        var extractionRows = new List<object>();
-
         foreach (var input in request.Files.OrderBy(x => x.SortOrder))
         {
             await using var source = input.File.OpenReadStream();
@@ -72,27 +69,11 @@ public sealed class UploadDocumentBatchCommandHandler(
                 SortOrder = input.SortOrder, PageNumber = input.PageNumber,
                 Sha256 = sha, Size = input.File.Length
             });
-            var result = await ai.ProcessAsync(
-                tenant.OrganizationId, document.Id, version.Id, input.File.FileName,
-                content, model, "restricted", [tenant.UserId], [], false, ct);
-            var texts = (result.ExtractedText ?? string.Empty).Split('\f');
-            for (var index = 0; index < texts.Length; index++)
-            {
-                var page = input.PageNumber ?? (extractedPages.Count + 1);
-                extractedPages[page + index] = texts[index];
-            }
-            extractionRows.Add(new
-            {
-                input.File.FileName, input.PageNumber, result.PageCount,
-                result.Characters, result.OcrPageCount, sha
-            });
         }
 
-        version.ExtractedText = string.Join("\f", extractedPages.OrderBy(x => x.Key).Select(x => x.Value));
-        version.ExtractedFieldsJson = DocumentIngestionSupport.SuggestFields(version.ExtractedText);
-        version.ExtractionMetadataJson = JsonSerializer.Serialize(new { files = extractionRows, embeddingModel = model });
-        version.LifecycleStatus = DocumentVersionLifecycleStatus.Extracted;
-        document.ProcessingStatus = DocumentProcessingStatus.Ready;
+        version.ExtractionMetadataJson = JsonSerializer.Serialize(new
+            { progressPercent = 2, processingStage = "در صف پردازش" });
+        document.ProcessingStatus = DocumentProcessingStatus.Processing;
         document.UpdatedAtUtc = DateTime.UtcNow;
         if (!await db.OrganizationMemberships.AnyAsync(x =>
                 x.OrganizationId == tenant.OrganizationId && x.UserId == tenant.UserId, ct))
@@ -101,9 +82,12 @@ public sealed class UploadDocumentBatchCommandHandler(
         db.Documents.Add(document);
         db.DocumentGroupMembers.AddRange(groupIds.Select(groupId => new DocumentGroupMember
         { DocumentGroupId = groupId, DocumentId = document.Id }));
-        audit.Add("document.ingestion-extracted", nameof(Document), document.Id.ToString(),
-            new { version.Id, Files = request.Files.Count, RagPublished = false });
+        audit.Add("document.ingestion-queued", nameof(Document), document.Id.ToString(),
+            new { version.Id, Files = request.Files.Count });
         await db.SaveChangesAsync(ct);
+        await ingestionQueue.EnqueueAsync(new DocumentIngestionJob(
+            tenant.OrganizationId, tenant.UserId, document.Id, version.Id,
+            model, request.BearerToken), ct);
         return DocumentIngestionSupport.ToDetail(document);
     }
 }
@@ -218,9 +202,45 @@ public sealed class ManagerReviewDocumentVersionCommandHandler(
             .ToListAsync(ct);
         foreach (var comparisonRun in comparisonRuns)
             comparisonRun.ApprovalStatus = ComparisonApprovalStatus.ManagerFinalized;
+        var approvedGroupIds = comparisonRuns.Where(x => x.DocumentGroupId.HasValue)
+            .Select(x => x.DocumentGroupId!.Value).Distinct().ToArray();
+        foreach (var groupId in approvedGroupIds)
+        {
+            if (!await db.DocumentGroupMembers.AnyAsync(x =>
+                    x.DocumentGroupId == groupId && x.DocumentId == document.Id, ct))
+                db.DocumentGroupMembers.Add(new DocumentGroupMember
+                {
+                    DocumentGroupId = groupId,
+                    DocumentId = document.Id
+                });
+            var existingReference = await db.GoldenDocuments.IgnoreQueryFilters().SingleOrDefaultAsync(x =>
+                x.OrganizationId == tenant.OrganizationId && x.DocumentGroupId == groupId
+                && x.DocumentId == document.Id, ct);
+            if (existingReference is not null)
+            {
+                existingReference.IsDeleted = false;
+                existingReference.IsActive = true;
+                existingReference.DeletedAtUtc = null;
+                existingReference.DeletedByUserId = null;
+                continue;
+            }
+            var nextPriority = (await db.GoldenDocuments.IgnoreQueryFilters().Where(x =>
+                    x.OrganizationId == tenant.OrganizationId && x.DocumentGroupId == groupId
+                    && !x.IsDeleted)
+                .MaxAsync(x => (int?)x.Priority, ct) ?? 0) + 1;
+            db.GoldenDocuments.Add(new GoldenDocument
+            {
+                OrganizationId = tenant.OrganizationId,
+                DocumentGroupId = groupId,
+                DocumentId = document.Id,
+                Priority = nextPriority,
+                IsActive = true,
+                CreatedByUserId = tenant.UserId
+            });
+        }
         audit.Add("document.manager-finalized-rag", nameof(DocumentVersion), version.Id.ToString(),
             new { request.Note, GroupIds = groupIds, Superseded = previousFinals.Select(x => x.Id),
-                ComparisonRuns = comparisonRuns.Select(x => x.Id) });
+                ComparisonRuns = comparisonRuns.Select(x => x.Id), ApprovedReferenceGroups = approvedGroupIds });
         await db.SaveChangesAsync(ct);
         return DocumentIngestionSupport.ToDetail(document);
     }

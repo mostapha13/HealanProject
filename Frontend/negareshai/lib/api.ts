@@ -1,3 +1,5 @@
+import { getFreshAccessToken, redirectToSignin } from "./auth";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:6129";
 const USER_MANAGER_BASE = process.env.NEXT_PUBLIC_USER_MANAGER_BASE_URL ?? "http://localhost:5074";
 
@@ -21,6 +23,7 @@ export async function listMyMenus(accessSystemId = 12): Promise<AccessMenu[]> {
 
 export type IdentityRole = { id:string; name:string; displayName:string; isSystem:boolean; isDeleted:boolean };
 export type IdentityUser = { id:string; userName:string; firstName:string; lastName:string; email?:string; phoneNumber?:string; isActive:boolean; isDeleted:boolean; roleIds:string[] };
+export type CurrentIdentityProfile = { id:string; userName:string; firstName:string; lastName:string; roles:string[] };
 const identityManagementPath = "/UserManager/api/v1/NegareshAIIdentityManagement";
 async function userManagerFetch(path:string, init:RequestInit={}) {
   const headers=new Headers(init.headers); const token=accessToken();
@@ -199,8 +202,57 @@ export type ContractBaseDocument = {
 };
 export type OrganizationParty = {
   id:string; name:string; nationalIdentifier?:string; representativeName?:string;
-  contactInfo?:string; isActive:boolean;
+  contactInfo?:string; address?:string; isActive:boolean;
 };
+export type OrganizationProfile = {
+  id:string;
+  name:string;
+  chiefExecutiveName?:string;
+  chiefExecutiveFatherName?:string;
+  chiefExecutiveNationalId?:string;
+  nationalIdentifier?:string;
+  economicCode?:string;
+  registrationNumber?:string;
+  address?:string;
+  postalCode?:string;
+  phone?:string;
+  fax?:string;
+  email?:string;
+  website?:string;
+  updatedAtUtc?:string;
+};
+export type SaveOrganizationProfile = {
+  name:string;
+  chiefExecutiveName:string;
+  chiefExecutiveFatherName:string;
+  chiefExecutiveNationalId:string;
+  nationalIdentifier:string;
+  economicCode:string;
+  registrationNumber:string;
+  address:string;
+  postalCode:string;
+  phone:string;
+  fax:string;
+  email:string;
+  website:string;
+};
+export async function getOrganizationProfile():Promise<OrganizationProfile>{
+  const response=await authorizedFetch("/api/master-data/organization-profile");
+  if(!response.ok) throw new Error("دریافت اطلاعات شرکت انجام نشد.");
+  return response.json();
+}
+export async function getCurrentIdentityProfile():Promise<CurrentIdentityProfile> {
+  const response=await userManagerFetch("/UserManager/api/v1/Account/Profile");
+  if(!response.ok)throw new Error("دریافت مشخصات کاربر انجام نشد.");
+  return response.json();
+}
+export async function saveOrganizationProfile(input:SaveOrganizationProfile):Promise<OrganizationProfile>{
+  const response=await authorizedFetch("/api/master-data/organization-profile",{
+    method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)
+  });
+  if(!response.ok) throw new Error(await response.text()||"ذخیره اطلاعات شرکت انجام نشد.");
+  return response.json();
+}
 export type ContractGroup = { id:string; name:string; description?:string; isActive:boolean; };
 export type ContractYear={id:string;year:number;isActive:boolean};
 export type ContractCatalogKind = "statuses"|"base-documents"|"parties"|"groups"|"years";
@@ -430,10 +482,24 @@ export async function listRuntimeSettings(category = ""): Promise<RuntimeSetting
 }
 
 async function authorizedFetch(path: string, init: RequestInit = {}) {
-  const token = accessToken();
-  const headers = new Headers(init.headers);
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  return fetch(`${API_BASE}${path}`, {...init, headers});
+  const send = (token: string | null) => {
+    const headers = new Headers(init.headers);
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return fetch(`${API_BASE}${path}`, {...init, headers});
+  };
+
+  const token = await getFreshAccessToken().catch(() => accessToken());
+  let response = await send(token);
+  if (response.status !== 401) return response;
+
+  const renewedToken = await getFreshAccessToken(true);
+  if (renewedToken) {
+    response = await send(renewedToken);
+    if (response.status !== 401) return response;
+  }
+
+  await redirectToSignin();
+  throw new Error("نشست ورود شما منقضی شده است؛ در حال انتقال به صفحه ورود...");
 }
 
 export async function listDataScopes(input: {
@@ -524,14 +590,14 @@ export type ContractConversation = {
 export async function listContractConversations():Promise<ContractConversationListItem[]> {
   const r=await authorizedFetch("/api/contracts/conversations");if(!r.ok)throw new Error("دریافت گفت‌وگوهای قرارداد انجام نشد.");return r.json();
 }
-export async function startContractConversation(input:{organizationPartyId:string;primaryContractGroupId:string;contractYear:number;subject:string;message:string;additionalSourceContractIds?:string[]}):Promise<ContractConversation>{
+export async function startContractConversation(input:{message:string;organizationPartyId?:string;primaryContractGroupId?:string;contractYear?:number;subject?:string;additionalSourceContractIds?:string[]}):Promise<ContractConversation>{
   const r=await authorizedFetch("/api/contracts/conversations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error(await r.text()||"شروع گفت‌وگو انجام نشد.");return r.json();
 }
 export async function getContractConversation(id:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${id}`);if(!r.ok)throw new Error("گفت‌وگو یافت نشد.");return r.json();}
 export type ContractSourceOption={contractId:string;documentId:string;subject:string;contractNumber?:string;partyName:string;primaryContractGroupId:string;groupName:string;contractYear?:number;finalVersionId:string};
 export async function listContractSourceOptions():Promise<ContractSourceOption[]>{const r=await authorizedFetch("/api/contracts/conversations/source-options");if(!r.ok)throw new Error("دریافت منابع قابل انتخاب انجام نشد.");return r.json();}
 export async function sendContractConversationMessage(id:string,message:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${id}/messages`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});if(!r.ok)throw new Error(await r.text()||"ارسال پیام انجام نشد.");return r.json();}
-export async function reviewContractDraft(conversationId:string,draftId:string,stage:"requester"|"expert"|"manager",approved:boolean,note?:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/${stage}-review`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved,note})});if(!r.ok)throw new Error(stage==="manager"?"نهایی‌سازی سند انجام نشد؛ سرویس پردازش سند را بررسی و دوباره تلاش کنید.":"ثبت تصمیم انجام نشد.");return r.json();}
+export async function reviewContractDraft(conversationId:string,draftId:string,stage:"requester"|"expert"|"manager",approved:boolean,note?:string):Promise<ContractConversation>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/${stage}-review`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved,note})});if(!r.ok){if(r.status===403)throw new Error(stage==="expert"?"شما دسترسی بررسی کارشناس قرارداد را ندارید.":stage==="manager"?"شما دسترسی نهایی‌سازی قرارداد را ندارید.":"شما دسترسی ثبت این تصمیم را ندارید.");if(r.status===409)throw new Error("این پیش‌نویس قبلاً بررسی شده است؛ صفحه را تازه‌سازی کنید.");throw new Error(stage==="manager"?"نهایی‌سازی سند انجام نشد؛ سرویس پردازش سند را بررسی و دوباره تلاش کنید.":"ثبت تصمیم انجام نشد.");}return r.json();}
 export async function downloadContractDraftFile(conversationId:string,draftId:string,format:"docx"|"pdf"):Promise<Blob>{const r=await authorizedFetch(`/api/contracts/conversations/${conversationId}/drafts/${draftId}/download/${format}`);if(!r.ok)throw new Error("دریافت خروجی پیش‌نویس انجام نشد.");return r.blob();}
 export async function updateDocumentGroup(id:string,input:{name:string;description?:string;isActive:boolean;documentIds:string[];passingThreshold?:number}){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)});if(!r.ok)throw new Error("ویرایش گروه سند انجام نشد.");return r.json() as Promise<DocumentGroup>;}
 export async function deleteDocumentGroup(id:string){const r=await authorizedFetch(`/api/knowledge/document-groups/${id}`,{method:"DELETE"});if(!r.ok)throw new Error("حذف گروه سند انجام نشد.");}
@@ -547,6 +613,12 @@ export async function listComparisonRuns(): Promise<ComparisonRunSummary[]> {
 export async function getComparisonRun(id: string): Promise<ComparisonRun> {
   const response = await authorizedFetch(`/api/comparisons/${id}`);
   if (!response.ok) throw new Error("دریافت نتیجه تطابق انجام نشد");
+  return response.json();
+}
+
+export async function listComparisonApprovedReferenceDocumentIds(documentGroupId:string):Promise<string[]>{
+  const response=await authorizedFetch(`/api/comparisons/approved-reference-document-ids?documentGroupId=${encodeURIComponent(documentGroupId)}`);
+  if(!response.ok)throw new Error("دریافت اسناد مرجع گروه انجام نشد");
   return response.json();
 }
 
