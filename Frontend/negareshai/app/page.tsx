@@ -15,6 +15,7 @@ import {
   ContractStatusDefinition,
   ContractTemplate,
   ContractWorkflow,
+  CurrentIdentityProfile,
   DashboardResponse,
   DocumentDetail,
   DocumentGroup,
@@ -41,6 +42,7 @@ import {
   downloadDocumentVersion,
   generateContract,
   getComparisonRun,
+  getCurrentIdentityProfile,
   getContract,
   getDashboard,
   getDirectUserAccess,
@@ -307,6 +309,7 @@ export default function Home() {
   >([]);
   const [showArchive, setShowArchive] = useState(false);
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<CurrentIdentityProfile | null>(null);
   const [accessMenus, setAccessMenus] = useState<AccessMenu[]>([]);
   const [identityUsers, setIdentityUsers] = useState<IdentityUser[]>([]);
   const [identityRoles, setIdentityRoles] = useState<IdentityRole[]>([]);
@@ -504,6 +507,9 @@ export default function Home() {
         setAccessMenus([]);
         setLoadError("دریافت منوی دسترسی انجام نشد؛ صفحه را تازه‌سازی کنید.");
       });
+  }, []);
+  useEffect(() => {
+    void getCurrentIdentityProfile().then(setCurrentProfile).catch(() => setCurrentProfile(null));
   }, []);
   useEffect(() => {
     void listContractCatalog<ContractGroup>("groups", 1, 100)
@@ -2896,22 +2902,15 @@ export default function Home() {
             </button>
           )}
         </nav>
-        <div className="storage-card">
-          <div className="storage-icon">
-            <Icon name="shield" size={19} />
-          </div>
-          <strong>فضای امن سازمان</strong>
-          <span>
-            {dashboard?.organizationName ??
-              "اطلاعات سازمان پس از ورود دریافت می‌شود"}
-          </span>
-          <button>مدیریت فضای ذخیره‌سازی</button>
-        </div>
         <div className="sidebar-user">
-          <div className="avatar">ک</div>
+          <div className="avatar">{currentProfile?.firstName?.trim().charAt(0) || "ک"}</div>
           <div>
-            <strong>{dashboard?.currentUserId ?? "کاربر سازمان"}</strong>
-            <span>{dashboard?.organizationName ?? "ورود به سامانه"}</span>
+            <strong>{currentProfile
+              ? `${currentProfile.firstName} ${currentProfile.lastName}`.trim() || currentProfile.userName
+              : "کاربر سازمان"}</strong>
+            <span>{currentProfile?.roles?.length
+              ? currentProfile.roles.join("، ")
+              : dashboard?.organizationName ?? "کاربر احراز هویت‌شده"}</span>
           </div>
           <Icon name="more" />
         </div>
@@ -2977,7 +2976,9 @@ export default function Home() {
                 </button>
               </section>
               <section className="stats-grid">
-                <article className="stat-card">
+                <article className="stat-card clickable" role="button" tabIndex={0}
+                  onClick={() => setActiveSection("documents")}
+                  onKeyDown={event => event.key === "Enter" && setActiveSection("documents")}>
                   <div className="stat-icon blue">
                     <Icon name="file" />
                   </div>
@@ -2994,7 +2995,9 @@ export default function Home() {
                     <path d="M2 34 C18 31,20 18,34 24 S55 28,64 14 S82 19,98 4" />
                   </svg>
                 </article>
-                <article className="stat-card">
+                <article className="stat-card clickable" role="button" tabIndex={0}
+                  onClick={() => setActiveSection("contracts")}
+                  onKeyDown={event => event.key === "Enter" && setActiveSection("contracts")}>
                   <div className="stat-icon violet">
                     <Icon name="contract" />
                   </div>
@@ -3013,7 +3016,9 @@ export default function Home() {
                     </small>
                   </div>
                 </article>
-                <article className="stat-card">
+                <article className="stat-card clickable" role="button" tabIndex={0}
+                  onClick={() => setActiveSection("contracts")}
+                  onKeyDown={event => event.key === "Enter" && setActiveSection("contracts")}>
                   <div className="stat-icon amber">
                     <Icon name="clock" />
                   </div>
@@ -3027,7 +3032,9 @@ export default function Home() {
                     <small>بر اساس وضعیت قراردادها</small>
                   </div>
                 </article>
-                <article className="stat-card">
+                <article className="stat-card clickable" role="button" tabIndex={0}
+                  onClick={() => setActiveSection("documents")}
+                  onKeyDown={event => event.key === "Enter" && setActiveSection("documents")}>
                   <div className="stat-icon green">
                     <Icon name="check" />
                   </div>
@@ -3056,7 +3063,7 @@ export default function Home() {
                       <h2>اسناد اخیر</h2>
                       <p>آخرین اسناد ثبت‌شده در فضای سازمان</p>
                     </div>
-                    <button className="text-button">
+                    <button className="text-button" onClick={() => setActiveSection("documents")}>
                       مشاهده همه <Icon name="arrow" size={16} />
                     </button>
                   </div>
@@ -3077,7 +3084,8 @@ export default function Home() {
                       </div>
                     ) : (
                       visibleDocuments.slice(0, 4).map((document, index) => (
-                        <button className="document-row" key={document.id}>
+                        <button className="document-row" key={document.id}
+                          onClick={() => void openDocument(document.id)}>
                           <span
                             className={`file-type ${index % 2 ? "docx" : "pdf"}`}
                           >

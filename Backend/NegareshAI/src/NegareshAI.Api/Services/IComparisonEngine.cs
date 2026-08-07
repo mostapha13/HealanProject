@@ -180,19 +180,21 @@ public sealed class ComparisonEngine : IComparisonEngine
                 : target is not null ? FindingType.Extra
                 : FindingType.Missing;
             const bool applicable = true;
+            var targetHeading = target is null ? null : HeadingForDisplay(target);
+            var sourceHeading = source is null ? null : HeadingForDisplay(source);
             var reason = target is not null && source is not null
-                ? $"این بخش با عنوان «{target.Heading}» در صفحات {PageRange(target)} سند اول و با عنوان «{source.Heading}» در صفحات {PageRange(source)} سند دوم شناسایی شد."
+                ? $"این بخش با عنوان «{targetHeading}» در صفحات {PageRange(target)} سند اول و با عنوان «{sourceHeading}» در صفحات {PageRange(source)} سند دوم شناسایی شد."
                 : target is not null
-                    ? $"این بخش با عنوان «{target.Heading}» در صفحات {PageRange(target)} سند اول وجود دارد، اما عنوان هم‌معنایی در کل صفحات سند دوم پیدا نشد."
+                    ? $"این بخش با عنوان «{targetHeading}» در صفحات {PageRange(target)} سند اول وجود دارد، اما عنوان هم‌معنایی در کل صفحات سند دوم پیدا نشد."
                     : source is not null
-                        ? $"این بخش در کل صفحات سند اول پیدا نشد، اما با عنوان «{source.Heading}» در صفحات {PageRange(source)} سند دوم وجود دارد."
+                        ? $"این بخش در کل صفحات سند اول پیدا نشد، اما با عنوان «{sourceHeading}» در صفحات {PageRange(source)} سند دوم وجود دارد."
                         : "عنوانی هم‌معنا با این بخش در کل صفحات هیچ‌یک از دو سند شناسایی نشد.";
             findings.Add(new(null, null, type,
                 !applicable ? 1 : type == FindingType.Matched ? 1 : 4,
                 applicable ? 1m : 0m, false, applicable, type == FindingType.Matched,
                 definition.Title, reason,
-                target?.Evidence, target?.StartPage, target?.Heading,
-                source?.Evidence, source?.StartPage, source?.Heading,
+                target?.Evidence, target?.StartPage, targetHeading,
+                source?.Evidence, source?.StartPage, sourceHeading,
                 reference.DocumentId, reference.VersionId,
                 type == FindingType.Matched || !applicable ? null
                     : "وجود واقعی بخش و کیفیت محتوای آن را با مراجعه به صفحات ذکرشده کنترل کنید.",
@@ -299,6 +301,17 @@ public sealed class ComparisonEngine : IComparisonEngine
     private static string PageRange(SemanticSectionMatch section) =>
         section.StartPage == section.EndPage ? section.StartPage.ToString(CultureInfo.InvariantCulture)
             : $"{section.StartPage.ToString(CultureInfo.InvariantCulture)} تا {section.EndPage.ToString(CultureInfo.InvariantCulture)}";
+
+    private static string HeadingForDisplay(SemanticSectionMatch section)
+    {
+        var heading = Regex.Replace(section.Heading, @"\p{Cf}", string.Empty);
+        var hasLatinNoise = Regex.IsMatch(heading, @"[A-Za-z]{2,}");
+        heading = Regex.Replace(heading, @"\b[A-Za-z]+\b", " ");
+        heading = Regex.Replace(heading, @"\s+", " ").Trim(' ', '-', '=', ':', '؛', '،');
+        return hasLatinNoise || heading.Length < 4
+            ? section.Definition.Title
+            : heading;
+    }
 
     private static ComparisonFindingDraft EvaluateInstructionAcrossDocuments(
         string targetText, ComparisonSource reference, string instruction)

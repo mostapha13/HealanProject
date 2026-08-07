@@ -23,6 +23,7 @@ export async function listMyMenus(accessSystemId = 12): Promise<AccessMenu[]> {
 
 export type IdentityRole = { id:string; name:string; displayName:string; isSystem:boolean; isDeleted:boolean };
 export type IdentityUser = { id:string; userName:string; firstName:string; lastName:string; email?:string; phoneNumber?:string; isActive:boolean; isDeleted:boolean; roleIds:string[] };
+export type CurrentIdentityProfile = { id:string; userName:string; firstName:string; lastName:string; roles:string[] };
 const identityManagementPath = "/UserManager/api/v1/NegareshAIIdentityManagement";
 async function userManagerFetch(path:string, init:RequestInit={}) {
   const headers=new Headers(init.headers); const token=accessToken();
@@ -238,6 +239,11 @@ export type SaveOrganizationProfile = {
 export async function getOrganizationProfile():Promise<OrganizationProfile>{
   const response=await authorizedFetch("/api/master-data/organization-profile");
   if(!response.ok) throw new Error("دریافت اطلاعات شرکت انجام نشد.");
+  return response.json();
+}
+export async function getCurrentIdentityProfile():Promise<CurrentIdentityProfile> {
+  const response=await userManagerFetch("/UserManager/api/v1/Account/Profile");
+  if(!response.ok)throw new Error("دریافت مشخصات کاربر انجام نشد.");
   return response.json();
 }
 export async function saveOrganizationProfile(input:SaveOrganizationProfile):Promise<OrganizationProfile>{

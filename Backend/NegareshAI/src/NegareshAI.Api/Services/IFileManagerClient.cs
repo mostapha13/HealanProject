@@ -19,8 +19,11 @@ public sealed class FileManagerClient(HttpClient httpClient) : IFileManagerClien
         using var request = new HttpRequestMessage(HttpMethod.Post, "File/Upload") { Content = form };
         if (!string.IsNullOrWhiteSpace(bearerToken)) request.Headers.Authorization = new("Bearer", bearerToken);
         using var response = await httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
         var payload = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException(string.IsNullOrWhiteSpace(payload)
+                ? $"File upload failed with status {(int)response.StatusCode}."
+                : payload.Trim().Trim('"'));
         return ExtractFileId(payload);
     }
 

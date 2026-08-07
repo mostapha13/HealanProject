@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ComparisonRun,
   ComparisonRunSummary,
@@ -20,6 +20,7 @@ import {
   uploadDocumentBatch,
 } from "../../lib/api";
 import { formatJalaliDateTime } from "../../lib/jalali";
+import { ActiveComparisonJob, readComparisonJob, writeComparisonJob } from "../../lib/comparison-job";
 
 type Mode = "execute" | "history" | "review" | "reports";
 type ComparisonSourceMode = "file" | "group" | "both";
@@ -46,6 +47,8 @@ const findingLabel: Record<number, string> = {
 };
 
 export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
+  const mounted = useRef(true);
+  const resumed = useRef(false);
   const [documents, setDocuments] = useState<DocumentListItem[]>([]),
     [groups, setGroups] = useState<DocumentGroup[]>([]),
     [approvedReferenceDocumentIds, setApprovedReferenceDocumentIds] = useState<string[]>([]),
@@ -84,7 +87,16 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     if (first) setSelected(await getComparisonRun(first.id));
   }
   useEffect(() => {
+    mounted.current = true;
     void load().catch(() => setMessage("دریافت اطلاعات انطباق انجام نشد."));
+    return () => { mounted.current = false; };
+  }, [mode]);
+  useEffect(() => {
+    if (mode !== "execute" || resumed.current) return;
+    const job = readComparisonJob();
+    if (!job) return;
+    resumed.current = true;
+    void resumeJob(job);
   }, [mode]);
   const visible = useMemo(
     () =>
@@ -126,37 +138,21 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     setProgress(1);
     setProgressStage("آماده‌سازی فایل‌ها");
     try {
-      let selectedDocumentId = targetDocumentId;
-      let selectedReferenceId = referenceDocumentId;
-      if (targetFile) {
-        const uploaded = await uploadDocumentBatch({
-          files: [targetFile], title: targetFile.name,
-          documentType: "general", documentGroupIds: [],
-        });
-        selectedDocumentId = uploaded.id;
-        await waitForDocument(uploaded.id, 5, needsFile && referenceFile ? 45 : 85, "سند اول");
-      }
-      if (needsFile && referenceFile) {
-        const uploaded = await uploadDocumentBatch({
-          files: [referenceFile], title: referenceFile.name,
-          documentType: "general", documentGroupIds: [],
-        });
-        selectedReferenceId = uploaded.id;
-        await waitForDocument(uploaded.id, targetFile ? 50 : 5, targetFile ? 40 : 85, "سند مرجع");
-      }
-      setProgress(92);
-      setProgressStage("مقایسه ساختار و سرفصل‌ها");
-      const run = await startComparison({
-        targetDocumentId: selectedDocumentId,
-        referenceDocumentId: needsFile ? selectedReferenceId : undefined,
+      const [uploadedTarget, uploadedReference] = await Promise.all([
+        targetFile ? uploadDocumentBatch({ files: [targetFile], title: targetFile.name,
+          documentType: "general", documentGroupIds: [] }) : null,
+        needsFile && referenceFile ? uploadDocumentBatch({ files: [referenceFile], title: referenceFile.name,
+          documentType: "general", documentGroupIds: [] }) : null,
+      ]);
+      const job: ActiveComparisonJob = {
+        targetDocumentId: uploadedTarget?.id ?? targetDocumentId,
+        referenceDocumentId: needsFile ? uploadedReference?.id ?? referenceDocumentId : undefined,
         documentGroupId: needsGroup ? documentGroupId : undefined,
-        basisMode: sourceMode === "file" ? 3 : sourceMode === "group" ? 1 : 4,
-        ruleSetIds: [],
-        userInstruction: instruction || undefined,
-      });
-      setSelected(run);
-      setProgress(100);
-      setProgressStage("مقایسه تکمیل شد");
+        sourceMode, instruction: instruction || undefined,
+        createdAt: new Date().toISOString(), stage: "processing",
+      };
+      writeComparisonJob(job);
+      await resumeJob(job);
       setTargetFile(null);
       setReferenceFile(null);
       setMessage(sourceMode === "file"
@@ -171,8 +167,41 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       setBusy(false);
     }
   }
+  async function resumeJob(job: ActiveComparisonJob) {
+    setBusy(true);
+    setProgressStage("بازیابی وضعیت پردازش");
+    try {
+      const ids = [job.targetDocumentId, job.referenceDocumentId].filter(Boolean) as string[];
+      await Promise.all(ids.map((id, index) => waitForDocument(
+        id, 5 + index * (85 / ids.length), 85 / ids.length,
+        index === 0 ? "سند اول" : "سند مرجع")));
+      if (!mounted.current) return;
+      setProgress(92);
+      setProgressStage("مقایسه ساختار و سرفصل‌ها");
+      writeComparisonJob({ ...job, stage: "comparing" });
+      const run = await startComparison({
+        targetDocumentId: job.targetDocumentId,
+        referenceDocumentId: job.referenceDocumentId,
+        documentGroupId: job.documentGroupId,
+        basisMode: job.sourceMode === "file" ? 3 : job.sourceMode === "group" ? 1 : 4,
+        ruleSetIds: [], userInstruction: job.instruction,
+      });
+      writeComparisonJob(null);
+      if (!mounted.current) return;
+      setSelected(run);
+      setProgress(100);
+      setProgressStage("مقایسه تکمیل شد");
+      await load();
+    } catch (e) {
+      if (mounted.current) setMessage(e instanceof Error ? e.message : "اجرای انطباق انجام نشد.");
+      throw e;
+    } finally {
+      if (mounted.current) setBusy(false);
+    }
+  }
   async function waitForDocument(id: string, offset: number, span: number, label: string) {
     for (;;) {
+      if (!mounted.current) return;
       const document = await getDocumentDetail(id);
       const version = document.versions[0];
       let metadata: { progressPercent?: number; processingStage?: string; failureReason?: string } = {};

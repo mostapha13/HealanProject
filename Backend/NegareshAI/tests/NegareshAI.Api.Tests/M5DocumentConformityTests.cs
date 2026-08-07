@@ -73,6 +73,21 @@ public sealed class M5DocumentConformityTests
     }
 
     [Fact]
+    public void Ocr_noise_is_not_exposed_as_a_section_title()
+    {
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع",
+            "فهرست مطالب\f۲-۲- دعاوی حقوقی له یا علیه شرکت");
+        var findings = new ComparisonEngine().Evaluate(
+            "فهرست مطالب\f۳-۲-۴- دعاوی حقوقی له با pS ade کت", [], [], [reference], null);
+
+        var litigation = Assert.Single(findings, x =>
+            x.Title == "دعاوی، تعهدات و بدهی‌های احتمالی");
+        Assert.DoesNotContain("pS", litigation.Reason);
+        Assert.DoesNotContain("ade", litigation.Reason);
+        Assert.Equal("دعاوی، تعهدات و بدهی‌های احتمالی", litigation.TargetSection);
+    }
+
+    [Fact]
     public void Group_sources_are_compared_like_multiple_reference_files()
     {
         var first = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع اول",

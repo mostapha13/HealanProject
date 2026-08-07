@@ -40,6 +40,21 @@ public class AccountController : ApiControllerBase
         public string PhoneNumber { get; set; } = string.Empty;
     }
 
+    [HttpGet("Profile")]
+    public async Task<IActionResult> Profile()
+    {
+        var user = await GetCurrentUserAsync();
+        var roles = await _userManager.GetRolesAsync(user);
+        return Ok(new
+        {
+            id = user.Id,
+            userName = user.UserName,
+            firstName = user.FirstName,
+            lastName = user.LastName,
+            roles
+        });
+    }
+
     [HttpPost("ChangePassword")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
