@@ -8,6 +8,14 @@ import main
 
 
 class OcrRuntimeTests(unittest.TestCase):
+    def test_broken_font_mapped_persian_requests_ocr(self):
+        broken = "۳ ۲ سرمایه گذاری سهر ety Dam investment شب 5 ات پذیرش se هب"
+        self.assertTrue(main.needs_ocr(broken))
+
+    def test_readable_persian_does_not_request_ocr(self):
+        readable = "امیدنامه پذیرش و درج شرکت سرمایه‌گذاری در بازار دوم فرابورس ایران"
+        self.assertFalse(main.needs_ocr(readable))
+
     def test_scanned_pdf_is_ocrd_with_page_metadata(self):
         image = Image.new("RGB", (1800, 500), "white")
         draw = ImageDraw.Draw(image)

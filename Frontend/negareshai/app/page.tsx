@@ -2901,7 +2901,7 @@ export default function Home() {
               <span>داده‌های پایه</span>
             </Link>
           )}
-          {["/access/users", "/access/roles", "/access/definitions", "/access/role-permissions", "/access/user-permissions"].some(
+          {["/access/users", "/access/roles", "/access/definitions", "/access/role-permissions"].some(
             (url) => allowedUrls.has(url),
           ) && (
             <div className="access-nav-group">
@@ -2921,7 +2921,6 @@ export default function Home() {
                 {allowedUrls.has("/access/roles") && <Link href="/access/roles" onClick={() => setSidebarOpen(false)}>نقش‌ها</Link>}
                 {allowedUrls.has("/access/definitions") && <Link href="/access/definitions" onClick={() => setSidebarOpen(false)}>تعریف منوها و دسترسی‌ها</Link>}
                 {allowedUrls.has("/access/role-permissions") && <Link href="/access/role-permissions" onClick={() => setSidebarOpen(false)}>دسترسی نقش‌ها</Link>}
-                {allowedUrls.has("/access/user-permissions") && <Link href="/access/user-permissions" onClick={() => setSidebarOpen(false)}>دسترسی مستقیم کاربران</Link>}
               </div>
             </div>
           )}

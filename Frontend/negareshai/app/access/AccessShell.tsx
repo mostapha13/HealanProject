@@ -8,7 +8,6 @@ const tabs = [
   ["/access/users", "کاربران"],
   ["/access/roles", "نقش‌ها"],
   ["/access/role-permissions", "دسترسی نقش‌ها"],
-  ["/access/user-permissions", "دسترسی مستقیم کاربران"],
 ] as const;
 
 export default function AccessShell({ title, description, badge, children }: {

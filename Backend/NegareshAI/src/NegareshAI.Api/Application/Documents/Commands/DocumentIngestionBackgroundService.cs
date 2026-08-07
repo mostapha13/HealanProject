@@ -53,19 +53,20 @@ public sealed class DocumentIngestionWorker(
         var db = scope.ServiceProvider.GetRequiredService<NegareshDbContext>();
         var files = scope.ServiceProvider.GetRequiredService<IFileManagerClient>();
         var ai = scope.ServiceProvider.GetRequiredService<IAiDocumentProcessor>();
+        var progress = scope.ServiceProvider.GetRequiredService<IDocumentProgressStore>();
         var document = await db.Documents.Include(x => x.Versions).ThenInclude(x => x.Files)
             .SingleAsync(x => x.Id == job.DocumentId && x.OrganizationId == job.OrganizationId, ct);
         var version = document.Versions.Single(x => x.Id == job.VersionId);
         var inputs = version.Files.OrderBy(x => x.SortOrder).ToArray();
         var extractedPages = new SortedDictionary<int, string>();
         var extractionRows = new List<object>();
-        await SetProgressAsync(db, document, version, 5, "در صف پردازش", ct);
+        await SetProgressAsync(db, progress, job.OrganizationId, document, version, 5, "در صف پردازش", ct);
 
         for (var inputIndex = 0; inputIndex < inputs.Length; inputIndex++)
         {
             var input = inputs[inputIndex];
             var start = 10 + (int)Math.Floor(inputIndex * 80d / inputs.Length);
-            await SetProgressAsync(db, document, version, start,
+            await SetProgressAsync(db, progress, job.OrganizationId, document, version, start,
                 $"استخراج متن فایل {inputIndex + 1} از {inputs.Length}", ct);
             var download = await files.DownloadAsync(input.FileId, job.BearerToken, ct);
             var result = await ai.ProcessAsync(job.OrganizationId, document.Id, version.Id,
@@ -79,7 +80,7 @@ public sealed class DocumentIngestionWorker(
                 result.Characters, result.OcrPageCount, input.Sha256 });
         }
 
-        await SetProgressAsync(db, document, version, 92, "تجمیع و آماده‌سازی متن", ct);
+        await SetProgressAsync(db, progress, job.OrganizationId, document, version, 92, "تجمیع و آماده‌سازی متن", ct);
         version.ExtractedText = string.Join("\f", extractedPages.OrderBy(x => x.Key).Select(x => x.Value));
         version.ExtractedFieldsJson = DocumentIngestionSupport.SuggestFields(version.ExtractedText);
         version.ExtractionMetadataJson = JsonSerializer.Serialize(new
@@ -91,9 +92,11 @@ public sealed class DocumentIngestionWorker(
         document.ProcessingStatus = DocumentProcessingStatus.Ready;
         document.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
+        await progress.SetAsync(job.OrganizationId, document.Id, 100, "آماده برای مقایسه", "ready", ct: ct);
     }
 
-    private static async Task SetProgressAsync(NegareshDbContext db, Document document,
+    private static async Task SetProgressAsync(NegareshDbContext db, IDocumentProgressStore progress,
+        Guid organizationId, Document document,
         DocumentVersion version, int percent, string stage, CancellationToken ct)
     {
         version.ExtractionMetadataJson = JsonSerializer.Serialize(new
@@ -101,6 +104,7 @@ public sealed class DocumentIngestionWorker(
         document.ProcessingStatus = DocumentProcessingStatus.Processing;
         document.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
+        await progress.SetAsync(organizationId, document.Id, percent, stage, ct: ct);
     }
 
     private async Task MarkFailedAsync(DocumentIngestionJob job, string reason, CancellationToken ct)
@@ -116,5 +120,7 @@ public sealed class DocumentIngestionWorker(
             { progressPercent = 100, processingStage = "پردازش ناموفق", failureReason = reason });
         document.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
+        var progress = scope.ServiceProvider.GetRequiredService<IDocumentProgressStore>();
+        await progress.SetAsync(job.OrganizationId, document.Id, 100, "پردازش ناموفق", "failed", reason, ct);
     }
 }

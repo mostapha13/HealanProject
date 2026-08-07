@@ -13,7 +13,8 @@ namespace NegareshAI.Api.Controllers;
 [Route("api/documents")]
 [Authorize]
 [NegareshAccess(NegareshAIAccessFormIds.Documents)]
-public sealed class DocumentsController(ISender sender) : ControllerBase
+public sealed class DocumentsController(ISender sender, IDocumentProgressStore progressStore,
+    NegareshAI.Api.Application.Common.Tenancy.ICurrentTenant tenant) : ControllerBase
 {
     private static readonly string[] AllowedContentTypes =
     [
@@ -118,6 +119,21 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
         var response = await sender.Send(
             new GetDocumentDetailQuery(id, includeArchived), cancellationToken);
         return response is null ? NotFound() : Ok(response);
+    }
+
+    [HttpGet("{id:guid}/progress")]
+    public async Task<ActionResult<DocumentProgressResponse>> Progress(Guid id, CancellationToken ct)
+    {
+        var progress = await progressStore.GetAsync(tenant.OrganizationId, id, ct);
+        if (progress is not null) return Ok(progress);
+        var detail = await sender.Send(new GetDocumentDetailQuery(id, false), ct);
+        if (detail is null) return NotFound();
+        var percent = detail.ProcessingStatus == DocumentProcessingStatus.Ready ? 100 : 2;
+        var status = detail.ProcessingStatus == DocumentProcessingStatus.Ready ? "ready"
+            : detail.ProcessingStatus == DocumentProcessingStatus.Failed ? "failed" : "processing";
+        return Ok(new DocumentProgressResponse(id, percent,
+            status == "ready" ? "آماده برای مقایسه" : status == "failed" ? "پردازش ناموفق" : "در صف پردازش",
+            status));
     }
 
     [HttpGet("archived")]

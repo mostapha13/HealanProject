@@ -6,6 +6,10 @@ export type ActiveComparisonJob = {
   documentGroupId?: string;
   sourceMode: "file" | "group" | "both";
   instruction?: string;
+  targetTitle?: string;
+  referenceTitle?: string;
+  documentGroupTitle?: string;
+  returnUrl?: string;
   createdAt: string;
   stage: "processing" | "comparing";
 };

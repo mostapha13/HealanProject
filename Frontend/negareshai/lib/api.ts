@@ -412,6 +412,7 @@ export type DocumentDetail = {
   updatedAtUtc: string;
   versions: DocumentVersion[];
 };
+export type DocumentProgress = {documentId:string;percent:number;stage:string;status:"processing"|"ready"|"failed";failureReason?:string;updatedAtUtc?:string};
 
 export type DocumentGroup = {
   id: string; name: string; description?: string; isActive: boolean;
@@ -882,7 +883,7 @@ export async function reviewComparison(id:string,input:{approved:boolean;note?:s
 export async function uploadDocumentBatch(input:{
   files:File[]; pageNumbers?:number[]; title?:string;
   documentType?:string; confidentialityLevel?:number; documentGroupIds:string[];
-}):Promise<DocumentDetail>{
+},onProgress?:(percent:number)=>void):Promise<DocumentDetail>{
   const form=new FormData();
   input.files.forEach(file=>form.append("files",file));
   input.pageNumbers?.forEach(page=>form.append("pageNumbers",String(page)));
@@ -890,10 +891,18 @@ export async function uploadDocumentBatch(input:{
   if(input.title)form.append("title",input.title);
   form.append("documentType",input.documentType??"contract");
   form.append("confidentialityLevel",String(input.confidentialityLevel??2));
-  const response=await authorizedFetch("/api/documents/upload-batch",{method:"POST",body:form});
-  if(!response.ok)throw new Error(await response.text()||"بارگذاری و استخراج سند انجام نشد.");
-  return response.json();
+  return new Promise((resolve,reject)=>{
+    const token=accessToken();
+    const xhr=new XMLHttpRequest();
+    xhr.open("POST",`${API_BASE}/api/documents/upload-batch`);
+    if(token)xhr.setRequestHeader("Authorization",`Bearer ${token}`);
+    xhr.upload.onprogress=event=>{if(event.lengthComputable)onProgress?.(Math.round(event.loaded/event.total*100))};
+    xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300){onProgress?.(100);resolve(JSON.parse(xhr.responseText) as DocumentDetail)}else reject(new Error(xhr.responseText||"بارگذاری و استخراج سند انجام نشد."))};
+    xhr.onerror=()=>reject(new Error("ارتباط با سرور هنگام بارگذاری سند قطع شد."));
+    xhr.send(form);
+  });
 }
+export async function getDocumentProgress(id:string):Promise<DocumentProgress>{const response=await authorizedFetch(`/api/documents/${id}/progress`);if(response.status===404)throw new Error("DOCUMENT_NOT_FOUND");if(!response.ok)throw new Error("دریافت درصد پیشرفت انجام نشد.");return response.json()}
 
 export async function saveExtractedDocumentFields(documentId:string,versionId:string,value:string){
   const response=await authorizedFetch(`/api/documents/${documentId}/versions/${versionId}/extracted-fields`,{
