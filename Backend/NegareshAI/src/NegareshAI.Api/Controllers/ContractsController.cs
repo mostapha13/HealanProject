@@ -199,7 +199,7 @@ public sealed class ContractsController(ISender sender) : ControllerBase
         ReviewDraft(conversationId, draftId, ContractDraftApprovalStatus.ManagerReview, request, ct);
 
     [HttpGet("catalog/{kind}")]
-    [NegareshAccess(NegareshAIAccessFormIds.ContractStatuses)]
+    [NegareshAccess(NegareshAIAccessFormIds.Contracts)]
     public async Task<ActionResult> ListCatalog(
         string kind, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20,
         CancellationToken ct = default) =>

@@ -5,14 +5,13 @@ using IdentityServer.Domain.Security;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Share.Domain.Constants;
 using System.Security.Claims;
 
 namespace IdentityServer.Application.ContextMaps.AminPanel.Queries.AccessUserRole;
 
 public sealed class ListMyAccessMenuQuery : IRequest<List<AccessMenuFullResponse>>
 {
-    public int AccessSystemId { get; set; } = HealanAccessFormIds.SystemId;
+    public int AccessSystemId { get; set; }
 }
 
 public sealed class ListMyAccessMenuQueryHandler
@@ -31,6 +30,8 @@ public sealed class ListMyAccessMenuQueryHandler
         ListMyAccessMenuQuery request,
         CancellationToken cancellationToken)
     {
+        if (request.AccessSystemId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request.AccessSystemId), "AccessSystemId is required.");
         var principal = _httpContextAccessor.HttpContext?.User;
         if (principal?.Identity?.IsAuthenticated != true ||
             !Guid.TryParse(principal.FindFirstValue("sub"), out var userId) ||

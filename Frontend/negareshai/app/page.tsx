@@ -59,6 +59,7 @@ import {
   listDocuments,
   listIdentityRoles,
   listIdentityUsers,
+  listMyAccessForms,
   listMyMenus,
   listOperations,
   listRuleSets,
@@ -268,6 +269,16 @@ function formatDate(value: string) {
 function fullCurrentDate() {
   return formatJalaliLongDate();
 }
+function accessUrls(items: AccessMenu[]) {
+  const values = new Set<string>();
+  const walk = (nodes: AccessMenu[]) =>
+    nodes.forEach((item) => {
+      if (item.accessForm?.url) values.add(item.accessForm.url);
+      walk(item.children ?? []);
+    });
+  walk(items);
+  return values;
+}
 function activityTitle(action: string) {
   return (
     (
@@ -311,6 +322,7 @@ export default function Home() {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [currentProfile, setCurrentProfile] = useState<CurrentIdentityProfile | null>(null);
   const [accessMenus, setAccessMenus] = useState<AccessMenu[]>([]);
+  const [effectiveAccessUrls, setEffectiveAccessUrls] = useState<Set<string>>(new Set());
   const [identityUsers, setIdentityUsers] = useState<IdentityUser[]>([]);
   const [identityRoles, setIdentityRoles] = useState<IdentityRole[]>([]);
   const [userDraft, setUserDraft] = useState({
@@ -437,84 +449,45 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [notice, setNotice] = useState("");
   const [dashboardAssistantPrompt, setDashboardAssistantPrompt] = useState("");
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (permissions?: Set<string>) => {
     setLoading(true);
     setLoadError("");
-    try {
-      const [
-        result,
-        documentResult,
-        runtimeSettings,
-        contractResult,
-        archived,
-        groups,
-        rules,
-        runs,
-        templates,
-        statuses,
-        baseDocs,
-        parties,
-      ] = await Promise.all([
-        getDashboard(),
-        listDocuments(),
-        listRuntimeSettings(),
-        listContracts(),
-        listArchivedDocuments(),
-        listDocumentGroups(),
-        listRuleSets(),
-        listComparisonRuns(),
-        listContractTemplates(),
-        listContractCatalog<ContractStatusDefinition>("statuses"),
-        listContractCatalog<ContractBaseDocument>("base-documents"),
-        listContractCatalog<OrganizationParty>("parties"),
-      ]);
-      setDashboard(result);
-      setDocuments(documentResult.items);
-      setSettings(runtimeSettings);
-      setContracts(contractResult.items);
-      setArchivedDocuments(archived);
-      setDocumentGroups(groups);
-      setRuleSets(rules);
-      setComparisonRuns(runs);
-      setContractTemplates(templates);
-      setContractStatuses(statuses.items);
-      setContractBaseDocuments(baseDocs.items);
-      setOrganizationParties(parties.items);
-    } catch {
-      setDashboard(null);
-      setDocuments([]);
-      setArchivedDocuments([]);
-      setSettings([]);
-      setContracts([]);
-      setDocumentGroups([]);
-      setRuleSets([]);
-      setComparisonRuns([]);
-      setContractTemplates([]);
-      setContractStatuses([]);
-      setContractBaseDocuments([]);
-      setOrganizationParties([]);
-      setLoadError(
-        "دریافت اطلاعات یا سطح دسترسی کاربر انجام نشد؛ سرویس‌ها را بررسی کنید.",
-      );
-    } finally {
-      setLoading(false);
+    const allowed = permissions ?? effectiveAccessUrls;
+    const tasks: Promise<unknown>[] = [];
+    setDashboard(null); setDocuments([]); setArchivedDocuments([]); setSettings([]);
+    setContracts([]); setDocumentGroups([]); setRuleSets([]); setComparisonRuns([]);
+    setContractTemplates([]); setContractStatuses([]); setContractBaseDocuments([]);
+    setOrganizationParties([]); setContractGroups([]);
+    if (allowed.has("/")) tasks.push(getDashboard().then(setDashboard));
+    if (allowed.has("/documents")) {
+      tasks.push(listDocuments().then(x => setDocuments(x.items)));
+      tasks.push(listArchivedDocuments().then(setArchivedDocuments));
     }
-  }, []);
-  useEffect(() => {
-    void listMyMenus()
-      .then(setAccessMenus)
-      .catch(() => {
-        setAccessMenus([]);
-        setLoadError("دریافت منوی دسترسی انجام نشد؛ صفحه را تازه‌سازی کنید.");
-      });
-  }, []);
+    if (allowed.has("/comparisons")) {
+      tasks.push(listComparisonRuns().then(setComparisonRuns));
+    }
+    if (allowed.has("/knowledge") || allowed.has("/comparisons")) {
+      tasks.push(listDocumentGroups().then(setDocumentGroups));
+      tasks.push(listRuleSets().then(setRuleSets));
+    }
+    if (allowed.has("/contracts")) {
+      tasks.push(listContracts().then(x => setContracts(x.items)));
+      tasks.push(listContractCatalog<ContractStatusDefinition>("statuses").then(x => setContractStatuses(x.items)));
+      tasks.push(listContractCatalog<ContractBaseDocument>("base-documents").then(x => setContractBaseDocuments(x.items)));
+      tasks.push(listContractCatalog<OrganizationParty>("parties").then(x => setOrganizationParties(x.items)));
+      tasks.push(listContractCatalog<ContractGroup>("groups", 1, 100).then(x => setContractGroups(x.items)));
+    }
+    if (allowed.has("/contract-generation")) {
+      tasks.push(listContractTemplates().then(setContractTemplates));
+    }
+    if (allowed.has("/settings")) tasks.push(listRuntimeSettings().then(setSettings));
+    const results = await Promise.allSettled(tasks);
+    if (results.some(x => x.status === "rejected"))
+      setLoadError("بخشی از اطلاعات مجاز دریافت نشد؛ اتصال سرویس را بررسی کنید.");
+    setLoading(false);
+  }, [effectiveAccessUrls]);
   useEffect(() => {
     void getCurrentIdentityProfile().then(setCurrentProfile).catch(() => setCurrentProfile(null));
-  }, []);
-  useEffect(() => {
-    void listContractCatalog<ContractGroup>("groups", 1, 100)
-      .then((x) => setContractGroups(x.items))
-      .catch(() => setContractGroups([]));
   }, []);
   useEffect(() => {
     setCurrentDateLabel(fullCurrentDate());
@@ -531,15 +504,8 @@ export default function Home() {
       .catch(() => setEffectiveTemplate(null));
   }, [contractDraft?.primaryContractGroupId, contractDraft?.startDate]);
   const allowedUrls = useMemo(() => {
-    const values = new Set<string>();
-    const walk = (items: AccessMenu[]) =>
-      items.forEach((item) => {
-        if (item.accessForm?.url) values.add(item.accessForm.url);
-        walk(item.children ?? []);
-      });
-    walk(accessMenus);
-    return values;
-  }, [accessMenus]);
+    return effectiveAccessUrls;
+  }, [effectiveAccessUrls]);
   const visibleNavItems = useMemo(
     () =>
       navItems.filter((item) => item.urls.some((url) => allowedUrls.has(url))),
@@ -634,9 +600,35 @@ export default function Home() {
   }
   useEffect(() => {
     void requireAuthenticatedUser().then((user) => {
-      if (user) void refresh();
+      if (!user) return;
+      void Promise.all([listMyMenus(), listMyAccessForms()])
+        .then(([menus, forms]) => {
+          setAccessMenus(menus);
+          const urls = new Set(
+            forms
+              .filter(form => form.hasAccess && form.url.trim())
+              .map(form => form.url.trim()),
+          );
+          setEffectiveAccessUrls(urls);
+          if (!urls.has("/")) {
+            const firstSection = navItems.find(item =>
+              item.urls.some(url => urls.has(url)) && !item.href,
+            );
+            if (firstSection) setActiveSection(firstSection.id);
+          }
+          void refresh(urls);
+        })
+        .catch(() => {
+          setAccessMenus([]);
+          setEffectiveAccessUrls(new Set());
+          setLoadError("دریافت منوی دسترسی انجام نشد؛ صفحه را تازه‌سازی کنید.");
+          setLoading(false);
+        });
     });
-  }, [refresh]);
+    // دسترسی‌ها فقط یک‌بار پس از احراز هویت دریافت می‌شوند؛ refresh مجموعهٔ
+    // همان مجوزها را صریح دریافت می‌کند تا هیچ API غیرمجازی فراخوانی نشود.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const visibleDocuments = useMemo(() => {
     const q = search.trim();
     return q
@@ -775,7 +767,7 @@ export default function Home() {
       !contractDraft.subject.trim() ||
       !contractDraft.primaryContractGroupId
     ) {
-      setNotice("سند، موضوع و گروه اصلی قرارداد الزامی است.");
+      setNotice("موضوع و گروه اصلی قرارداد الزامی است.");
       return;
     }
     try {
@@ -1897,8 +1889,8 @@ export default function Home() {
       icon: "shield",
     },
     settings: {
-      title: "تنظیمات پویای سازمان",
-      description: "مدل‌ها، ویژگی گروه‌ها و رفتار هر بخش در زمان اجرا",
+      title: "تنظیمات هوشمندسازی سازمان",
+      description: "شیوه تحلیل هوشمند، زبان پاسخ و کنترل‌های نظارتی سازمان",
       icon: "settings",
     },
   };
@@ -2021,7 +2013,15 @@ export default function Home() {
                 onClick={() => setUploadOpen(true)}
               >
                 <Icon name="plus" size={18} />
-                افزودن سند
+                بارگذاری سند
+              </button>
+            </div>
+          )}
+          {activeSection === "contracts" && (
+            <div className="module-actions">
+              <button className="primary-button" onClick={newContract}>
+                <Icon name="plus" size={18} />
+                ثبت قرارداد
               </button>
             </div>
           )}
@@ -2113,11 +2113,11 @@ export default function Home() {
                 </p>
               </div>
               <Link
-                className="primary-button compact"
+                className="ghost-button compact"
                 href="/contract-generation"
               >
                 <Icon name="sparkles" size={16} />
-                درخواست با زبان ساده
+                تنظیم قرارداد با دستیار هوشمند
               </Link>
             </div>
             <div className="contract-table">
@@ -2158,16 +2158,15 @@ export default function Home() {
                   <Icon name="contract" size={26} />
                   <strong>هنوز قراردادی ثبت نشده است</strong>
                   <span>
-                    نیازتان را بنویسید؛ سامانه قرارداد، تاریخ، مبلغ، بندها و
-                    Template را مدیریت می‌کند.
+                    برای شروع، مشخصات اولین قرارداد سازمان را ثبت کنید.
                   </span>
-                  <Link
+                  <button
                     className="primary-button compact"
-                    href="/contract-generation"
+                    onClick={newContract}
                   >
-                    <Icon name="sparkles" size={16} />
-                    نوشتن درخواست قرارداد
-                  </Link>
+                    <Icon name="plus" size={16} />
+                    ثبت نخستین قرارداد
+                  </button>
                 </div>
               )}
             </div>
@@ -2747,35 +2746,71 @@ export default function Home() {
             </article>
           </div>
         ) : activeSection === "settings" ? (
-          <div className="settings-grid">
+          <div className="runtime-settings">
+            <article className="settings-intro">
+              <div className="settings-intro-icon">
+                <Icon name="sparkles" size={25} />
+              </div>
+              <div>
+                <h2>این تنظیمات چه کاری انجام می‌دهند؟</h2>
+                <p>
+                  این بخش قواعد اجرای قابلیت‌های هوشمند را برای سازمان مشخص
+                  می‌کند؛ از جمله زبان پاسخ، الزام ارائه شاهد و نیاز به تأیید
+                  انسانی. تغییر این موارد بر اجرای تحلیل‌های بعدی اثر می‌گذارد.
+                </p>
+              </div>
+              <span className="settings-readonly">نمایش تنظیمات فعال</span>
+            </article>
+            <div className="settings-grid">
             {settings.length ? (
-              settings.map((setting) => (
-                <article className="setting-card" key={setting.id}>
-                  <div>
-                    <span>{setting.category}</span>
-                    <b className={setting.isActive ? "on" : "off"}>
-                      {setting.isActive ? "فعال" : "غیرفعال"}
-                    </b>
-                  </div>
-                  <h3>{setting.key}</h3>
-                  <p>
-                    نسخه{" "}
-                    {new Intl.NumberFormat("fa-IR").format(setting.version)} ·
-                    ویرایش {formatDate(setting.updatedAtUtc)}
-                  </p>
-                  <code>{setting.valueJson}</code>
-                </article>
-              ))
+              settings.map((setting) => {
+                let values: Record<string, unknown> = {};
+                try { values = JSON.parse(setting.valueJson); } catch { values = {}; }
+                const isComparisonPrompt = setting.key === "comparison.prompt";
+                return (
+                  <article className="setting-card" key={setting.id}>
+                    <header>
+                      <div className="setting-card-icon">
+                        <Icon name={isComparisonPrompt ? "compare" : "settings"} size={20} />
+                      </div>
+                      <div>
+                        <span>{setting.category === "ai" ? "هوش مصنوعی" : setting.category}</span>
+                        <h3>{isComparisonPrompt ? "راهنمای تحلیل و تطبیق" : setting.key}</h3>
+                      </div>
+                      <b className={setting.isActive ? "on" : "off"}>
+                        {setting.isActive ? "فعال" : "غیرفعال"}
+                      </b>
+                    </header>
+                    <p className="setting-description">
+                      {isComparisonPrompt
+                        ? "تعیین می‌کند تحلیل فقط با منابع تأییدشده انجام شود و نتیجه همراه با دلیل و پیشنهاد عملی ارائه شود."
+                        : "تنظیم اجرایی اختصاصی این سازمان"}
+                    </p>
+                    {isComparisonPrompt && (
+                      <div className="setting-options">
+                        <span><i className={values.requirePageCitation ? "enabled" : ""} /> ارجاع دقیق به صفحه</span>
+                        <span><i className={values.humanReviewRequired ? "enabled" : ""} /> بازبینی انسانی الزامی</span>
+                        <span><i className="enabled" /> زبان پاسخ: {values.language === "fa-IR" ? "فارسی" : String(values.language ?? "پیش‌فرض")}</span>
+                      </div>
+                    )}
+                    <footer>
+                      <span>نسخه {new Intl.NumberFormat("fa-IR").format(setting.version)}</span>
+                      <span>آخرین ویرایش: {formatDate(setting.updatedAtUtc)}</span>
+                    </footer>
+                  </article>
+                );
+              })
             ) : (
               <article className="panel empty-module">
                 <Icon name="settings" size={30} />
-                <h2>تنظیم runtime ثبت نشده است</h2>
+                <h2>تنظیم اجرایی ثبت نشده است</h2>
                 <p>
                   {loadError ||
-                    "مدل AI، ویژگی‌های گروه، RuleSet و سایر تنظیمات از API و دیتابیس این بخش خوانده خواهند شد."}
+                    "پس از تعریف قواعد هوشمندسازی سازمان، وضعیت آن‌ها در این بخش نمایش داده می‌شود."}
                 </p>
               </article>
             )}
+            </div>
           </div>
         ) : (
           <article className="panel empty-module">
@@ -2866,7 +2901,7 @@ export default function Home() {
               <span>داده‌های پایه</span>
             </Link>
           )}
-          {["/access/users", "/access/roles", "/access/role-permissions", "/access/user-permissions"].some(
+          {["/access/users", "/access/roles", "/access/definitions", "/access/role-permissions", "/access/user-permissions"].some(
             (url) => allowedUrls.has(url),
           ) && (
             <div className="access-nav-group">
@@ -2884,6 +2919,7 @@ export default function Home() {
               <div className="access-nav-children">
                 {allowedUrls.has("/access/users") && <Link href="/access/users" onClick={() => setSidebarOpen(false)}>کاربران</Link>}
                 {allowedUrls.has("/access/roles") && <Link href="/access/roles" onClick={() => setSidebarOpen(false)}>نقش‌ها</Link>}
+                {allowedUrls.has("/access/definitions") && <Link href="/access/definitions" onClick={() => setSidebarOpen(false)}>تعریف منوها و دسترسی‌ها</Link>}
                 {allowedUrls.has("/access/role-permissions") && <Link href="/access/role-permissions" onClick={() => setSidebarOpen(false)}>دسترسی نقش‌ها</Link>}
                 {allowedUrls.has("/access/user-permissions") && <Link href="/access/user-permissions" onClick={() => setSidebarOpen(false)}>دسترسی مستقیم کاربران</Link>}
               </div>
@@ -2936,7 +2972,7 @@ export default function Home() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="جست‌وجو در اسناد، قراردادها و گزارش‌ها..."
+              placeholder="جست‌وجو در فضای کاری سازمان..."
             />
             <kbd>⌘ K</kbd>
           </div>
@@ -2961,10 +2997,9 @@ export default function Home() {
               <section className="welcome">
                 <div>
                   <p className="eyebrow">{currentDateLabel}</p>
-                  <h1>فضای هوشمند مدیریت اسناد سازمان</h1>
+                  <h1>فضای هوشمند سازمان</h1>
                   <p>
-                    اسناد و قراردادهای سازمان را در یک فضای امن مدیریت و تحلیل
-                    کنید.
+                    هر بخش را مستقل، امن و متناسب با فرایندهای سازمان مدیریت کنید.
                   </p>
                 </div>
                 <button
@@ -2972,7 +3007,7 @@ export default function Home() {
                   onClick={() => setUploadOpen(true)}
                 >
                   <Icon name="plus" size={18} />
-                  افزودن سند جدید
+                  بارگذاری سند
                 </button>
               </section>
               <section className="stats-grid">
@@ -3458,33 +3493,8 @@ export default function Home() {
               <Icon name="contract" size={25} />
             </div>
             <h2>{contractDraft.id ? "ویرایش قرارداد" : "قرارداد جدید"}</h2>
-            <p>مشخصات قرارداد و طرف اصلی را ثبت کنید.</p>
+            <p>اطلاعات این بخش مستقل از مخزن اسناد ثبت و مدیریت می‌شود.</p>
             <div className="form-grid">
-              <label className="field full">
-                <span>سند مبنا</span>
-                <select
-                  value={contractDraft.baseDocumentProfileId ?? ""}
-                  onChange={(e) => {
-                    const base = contractBaseDocuments.find(
-                      (x) => x.id === e.target.value,
-                    );
-                    setContractDraft({
-                      ...contractDraft,
-                      baseDocumentProfileId: base?.id,
-                      documentId: base?.documentId ?? "",
-                    });
-                  }}
-                >
-                  <option value="">انتخاب سند مبنای سازمان</option>
-                  {contractBaseDocuments
-                    .filter((x) => x.isActive)
-                    .map((base) => (
-                      <option key={base.id} value={base.id}>
-                        {base.name} — {base.documentTitle}
-                      </option>
-                    ))}
-                </select>
-              </label>
               <label className="field full">
                 <span>موضوع قرارداد</span>
                 <input
@@ -3903,14 +3913,14 @@ export default function Home() {
             <div className="modal-icon">
               <Icon name="upload" size={25} />
             </div>
-            <h2 id="upload-title">افزودن سند جدید</h2>
-            <p>فایل شما به‌صورت امن در فضای اختصاصی سازمان نگهداری می‌شود.</p>
+            <h2 id="upload-title">بارگذاری سند سازمانی</h2>
+            <p>این فایل فقط در مخزن اسناد سازمان نگهداری و مدیریت می‌شود.</p>
             <label className="field">
               <span>عنوان سند</span>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="مثلاً قرارداد پشتیبانی سال ۱۴۰۵"
+                placeholder="مثلاً آیین‌نامه منابع انسانی ۱۴۰۵"
               />
             </label>
             <button

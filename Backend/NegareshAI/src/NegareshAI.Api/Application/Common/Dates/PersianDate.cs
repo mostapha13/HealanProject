@@ -3,7 +3,7 @@ using System.Globalization;
 namespace NegareshAI.Api.Application.Common.Dates;
 
 /// <summary>
-/// The server-side PersianCalendar contract adapted from Healan.
+/// Server-side Persian calendar utilities owned by NegareshAI.
 /// Persistence and transport remain UTC/Gregorian; only human-facing values use this formatter.
 /// </summary>
 public static class PersianDate

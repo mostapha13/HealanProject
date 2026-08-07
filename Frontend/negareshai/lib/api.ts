@@ -11,6 +11,15 @@ export type AccessMenu = {
   children: AccessMenu[];
 };
 
+export type UserAccessForm = {
+  accessSystemId: number;
+  formTitle: string;
+  url: string;
+  pageUrl?: string;
+  hasAccess: boolean;
+  hasPersianAccess?: boolean | null;
+};
+
 export async function listMyMenus(accessSystemId = 12): Promise<AccessMenu[]> {
   const token = accessToken();
   const response = await fetch(
@@ -19,6 +28,29 @@ export async function listMyMenus(accessSystemId = 12): Promise<AccessMenu[]> {
   );
   if (!response.ok) throw new Error("دریافت منوی دسترسی کاربر انجام نشد.");
   return response.json();
+}
+export async function listManagementMenus(): Promise<AccessMenu[]> {
+  const response = await userManagerFetch(`${identityManagementPath}/menus`);
+  if (!response.ok) throw new Error("دریافت درخت کامل دسترسی‌ها انجام نشد.");
+  return response.json();
+}
+
+export async function listMyAccessForms(accessSystemId = 12): Promise<UserAccessForm[]> {
+  const token = accessToken();
+  const response = await fetch(
+    `${USER_MANAGER_BASE}/UserManager/api/v1/UserAccess/UserAccessRole?AccessSystemId=${accessSystemId}`,
+    { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+  );
+  if (!response.ok) throw new Error("دریافت دسترسی مؤثر کاربر انجام نشد.");
+  const raw = await response.json() as Record<string, unknown>[];
+  return raw.map(item => ({
+    accessSystemId: Number(item.accessSystemId ?? item.AccessSystemId ?? accessSystemId),
+    formTitle: String(item.formTitle ?? item.FormTitle ?? ""),
+    url: String(item.url ?? item.URL ?? ""),
+    pageUrl: String(item.pageUrl ?? item.PageUrl ?? ""),
+    hasAccess: Boolean(item.hasAccess ?? item.HasAccess),
+    hasPersianAccess: (item.hasPersianAccess ?? item.HasPersianAccess) as boolean | null | undefined,
+  }));
 }
 
 export type IdentityRole = { id:string; name:string; displayName:string; isSystem:boolean; isDeleted:boolean };
@@ -80,22 +112,13 @@ export async function getRolePermissions(roleId:string):Promise<number[]> {
   return ((await response.json()) as {accessMenuIds:number[]}).accessMenuIds;
 }
 export async function saveDirectUserAccess(userId:string, grants:number[], denies:number[]) {
-  const headers={"Content-Type":"application/json"};
-  const [grantResponse,denyResponse]=await Promise.all([
-    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-grants`,{method:"PUT",headers,body:JSON.stringify({accessSystemId:12,accessMenuIds:grants})}),
-    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-denies`,{method:"PUT",headers,body:JSON.stringify({accessSystemId:12,accessMenuIds:denies})})
-  ]);
-  if(!grantResponse.ok||!denyResponse.ok)throw new Error("ثبت دسترسی مستقیم کاربر انجام نشد.");
+  const response=await userManagerFetch(`${identityManagementPath}/users/${userId}/direct-access`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({grants,denies})});
+  if(!response.ok)throw new Error(await response.text()||"ثبت دسترسی مستقیم کاربر انجام نشد.");
 }
 export async function getDirectUserAccess(userId:string) {
-  const [grantResponse,denyResponse]=await Promise.all([
-    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-grants?accessSystemId=12`),
-    userManagerFetch(`/UserManager/api/v1/HealanRoleManagement/users/${userId}/direct-denies?accessSystemId=12`)
-  ]);
-  if(!grantResponse.ok||!denyResponse.ok)throw new Error("دریافت دسترسی مستقیم انجام نشد.");
-  const grants=await grantResponse.json() as {accessMenuIds:number[]};
-  const denies=await denyResponse.json() as {accessMenuIds:number[]};
-  return {grants:grants.accessMenuIds,denies:denies.accessMenuIds};
+  const response=await userManagerFetch(`${identityManagementPath}/users/${userId}/direct-access`);
+  if(!response.ok)throw new Error("دریافت دسترسی مستقیم انجام نشد.");
+  return response.json() as Promise<{grants:number[];denies:number[]}>;
 }
 
 export type DocumentListItem = {
