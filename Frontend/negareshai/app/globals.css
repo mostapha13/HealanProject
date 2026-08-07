@@ -282,3 +282,4 @@
   background: #f0fdfa;
   color: #115e59;
 }
+.comparison-progress{margin-top:14px;padding:12px 14px;border:1px solid #dedbf8;border-radius:12px;background:#faf9ff}.comparison-progress>div{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin-bottom:8px}.comparison-progress strong{color:#5e50d5}.comparison-progress>i{display:block;height:8px;border-radius:8px;background:linear-gradient(90deg,#6658df,#8175eb);transition:width .35s ease}.comparison-progress>small{display:block;margin-top:8px;color:#737d8d;font-size:9px}

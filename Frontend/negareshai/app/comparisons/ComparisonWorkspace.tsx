@@ -8,6 +8,7 @@ import {
   DocumentGroup,
   DocumentListItem,
   downloadComparisonReport,
+  getDocumentDetail,
   getComparisonRun,
   listComparisonRuns,
   listComparisonApprovedReferenceDocumentIds,
@@ -58,6 +59,8 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
     [referenceFile, setReferenceFile] = useState<File | null>(null),
     [instruction, setInstruction] = useState(""),
     [message, setMessage] = useState(""),
+    [progress, setProgress] = useState(0),
+    [progressStage, setProgressStage] = useState(""),
     [busy, setBusy] = useState(false);
   const [reviewDialog, setReviewDialog] = useState<ReviewDialog | null>(null),
     [reviewNote, setReviewNote] = useState(""),
@@ -120,6 +123,8 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       return;
     }
     setBusy(true);
+    setProgress(1);
+    setProgressStage("آماده‌سازی فایل‌ها");
     try {
       let selectedDocumentId = targetDocumentId;
       let selectedReferenceId = referenceDocumentId;
@@ -129,6 +134,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           documentType: "general", documentGroupIds: [],
         });
         selectedDocumentId = uploaded.id;
+        await waitForDocument(uploaded.id, 5, needsFile && referenceFile ? 45 : 85, "سند اول");
       }
       if (needsFile && referenceFile) {
         const uploaded = await uploadDocumentBatch({
@@ -136,7 +142,10 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           documentType: "general", documentGroupIds: [],
         });
         selectedReferenceId = uploaded.id;
+        await waitForDocument(uploaded.id, targetFile ? 50 : 5, targetFile ? 40 : 85, "سند مرجع");
       }
+      setProgress(92);
+      setProgressStage("مقایسه ساختار و سرفصل‌ها");
       const run = await startComparison({
         targetDocumentId: selectedDocumentId,
         referenceDocumentId: needsFile ? selectedReferenceId : undefined,
@@ -146,6 +155,8 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
         userInstruction: instruction || undefined,
       });
       setSelected(run);
+      setProgress(100);
+      setProgressStage("مقایسه تکمیل شد");
       setTargetFile(null);
       setReferenceFile(null);
       setMessage(sourceMode === "file"
@@ -158,6 +169,21 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       setMessage(e instanceof Error ? e.message : "اجرای انطباق انجام نشد.");
     } finally {
       setBusy(false);
+    }
+  }
+  async function waitForDocument(id: string, offset: number, span: number, label: string) {
+    for (;;) {
+      const document = await getDocumentDetail(id);
+      const version = document.versions[0];
+      let metadata: { progressPercent?: number; processingStage?: string; failureReason?: string } = {};
+      try { metadata = JSON.parse(version?.extractionMetadataJson || "{}"); } catch { /* polling continues */ }
+      const documentProgress = Math.max(0, Math.min(100, metadata.progressPercent ?? 2));
+      setProgress(Math.min(90, offset + Math.round(documentProgress * span / 100)));
+      setProgressStage(`${label}: ${metadata.processingStage ?? "در صف پردازش"}`);
+      if (document.processingStatus === 3) return;
+      if (document.processingStatus === 4)
+        throw new Error(metadata.failureReason || `پردازش ${label} ناموفق بود.`);
+      await new Promise(resolve => window.setTimeout(resolve, 2000));
     }
   }
   function openReviewDialog(next: ReviewDialog) {
@@ -254,7 +280,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
       </nav>
       {mode === "execute" && (
         <article className="panel conformity-builder">
-          <h2>دو سند را بدهید و بگویید چه چیزی مقایسه شود</h2>
+          <h2>مقایسه ساختاری و محتوایی کل سند</h2>
           <div className="conformity-form">
             <fieldset className="full comparison-source-mode">
               <legend>مبنای مقایسه</legend>
@@ -327,7 +353,7 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
               <textarea
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
-                placeholder="مثلاً تفاوت مبلغ‌ها، تاریخ‌ها، تعهدات و بندهای اضافه یا حذف‌شده را بگو."
+                placeholder="مثلاً فهرست، معرفی شرکت، سرمایه، سهامداران، هیئت‌مدیره و صورت‌های مالی را مقایسه کن."
               />
             </label>
           </div>
@@ -338,7 +364,16 @@ export default function ComparisonWorkspace({ mode }: { mode: Mode }) {
           >
             {busy ? "در حال خواندن و مقایسه..." : "مقایسه سند"}
           </button>
-          <small>سامانه هر دو سند را مستقیم می‌خواند و تفاوت‌ها را با شاهد از هر دو طرف گزارش می‌کند.</small>
+          {busy && <div className="comparison-progress" role="progressbar"
+            aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+            <div><span>{progressStage}</span><strong>{progress}٪</strong></div>
+            <i style={{ width: `${progress}%` }} />
+            <small>پردازش در پس‌زمینه انجام می‌شود؛ می‌توانید در بخش‌های دیگر سامانه کار کنید.</small>
+          </div>}
+          <small>
+            سامانه تمام صفحات را می‌خواند، عنوان‌های هم‌معنا را به سرفصل‌های استاندارد نگاشت می‌کند
+            و وجود، نبود و بازه صفحات هر بخش را با شاهد از هر دو طرف گزارش می‌دهد.
+          </small>
         </article>
       )}
       <section className="conformity-layout">

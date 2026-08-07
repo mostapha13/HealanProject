@@ -32,6 +32,47 @@ public sealed class M5DocumentConformityTests
     }
 
     [Fact]
+    public void Large_documents_are_compared_by_semantic_main_sections_across_all_pages()
+    {
+        var targetPages = Enumerable.Range(1, 80)
+            .Select(page => page switch
+            {
+                4 => "فهرست مطالب\nمعرفی شرکت\nترکیب سهامداران",
+                12 => "معرفی شرکت\nتاریخچه و مشخصات ناشر",
+                48 => "ترکیب صاحبان سهام\nجدول درصد مالکیت سهامداران",
+                67 => "صورت های مالی\nصورت وضعیت مالی و صورت سود و زیان",
+                _ => $"متن عمومی صفحه {page}"
+            });
+        var referencePages = Enumerable.Range(1, 75)
+            .Select(page => page switch
+            {
+                3 => "فهرست مندرجات\nمشخصات شرکت\nسهامداران عمده",
+                10 => "مشخصات شرکت\nمعرفی و تاریخچه ناشر",
+                52 => "سهامداران عمده\nساختار مالکیت شرکت",
+                70 => "گزارش حسابرس مستقل\nاظهارنظر حسابرس",
+                _ => $"محتوای عمومی صفحه {page}"
+            });
+        var reference = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(),
+            "امیدنامه دوم", string.Join('\f', referencePages));
+
+        var findings = new ComparisonEngine().Evaluate(
+            string.Join('\f', targetPages), [], [], [reference], null);
+
+        Assert.Contains(findings, item => item.Title == "معرفی و تاریخچه شرکت"
+            && item.Type == FindingType.Matched
+            && item.TargetPage == 12 && item.ReferencePage == 10);
+        Assert.Contains(findings, item => item.Title == "سهامداران و ساختار مالکیت"
+            && item.Type == FindingType.Matched
+            && item.TargetPage == 48 && item.ReferencePage == 52);
+        Assert.Contains(findings, item => item.Title == "صورت‌های مالی"
+            && item.Type == FindingType.Extra && item.TargetPage == 67);
+        Assert.Contains(findings, item => item.Title == "گزارش حسابرس"
+            && item.Type == FindingType.Missing && item.ReferencePage == 70);
+        Assert.Contains(findings, item => item.Title == "جمع‌بندی پوشش ساختاری کل اسناد"
+            && item.Reason.Contains("تمام صفحات هر دو سند بررسی شد"));
+    }
+
+    [Fact]
     public void Group_sources_are_compared_like_multiple_reference_files()
     {
         var first = new ComparisonSource(Guid.NewGuid(), Guid.NewGuid(), "مرجع اول",

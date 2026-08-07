@@ -22,7 +22,8 @@ public sealed record UploadDocumentBatchCommand(
 
 public sealed class UploadDocumentBatchCommandHandler(
     NegareshDbContext db, ICurrentTenant tenant, IFileManagerClient files,
-    IAiDocumentProcessor ai, IAuditWriter audit, IDataScopeAuthorizer? authorizer = null)
+    IDocumentIngestionQueue ingestionQueue, IAuditWriter audit,
+    IDataScopeAuthorizer? authorizer = null)
     : IRequestHandler<UploadDocumentBatchCommand, DocumentDetailResponse>
 {
     public async Task<DocumentDetailResponse> Handle(
@@ -50,9 +51,6 @@ public sealed class UploadDocumentBatchCommandHandler(
             CreatedByUserId = tenant.UserId
         };
         document.Versions.Add(version);
-        var extractedPages = new SortedDictionary<int, string>();
-        var extractionRows = new List<object>();
-
         foreach (var input in request.Files.OrderBy(x => x.SortOrder))
         {
             await using var source = input.File.OpenReadStream();
@@ -71,27 +69,11 @@ public sealed class UploadDocumentBatchCommandHandler(
                 SortOrder = input.SortOrder, PageNumber = input.PageNumber,
                 Sha256 = sha, Size = input.File.Length
             });
-            var result = await ai.ProcessAsync(
-                tenant.OrganizationId, document.Id, version.Id, input.File.FileName,
-                content, model, "restricted", [tenant.UserId], [], false, ct);
-            var texts = (result.ExtractedText ?? string.Empty).Split('\f');
-            for (var index = 0; index < texts.Length; index++)
-            {
-                var page = input.PageNumber ?? (extractedPages.Count + 1);
-                extractedPages[page + index] = texts[index];
-            }
-            extractionRows.Add(new
-            {
-                input.File.FileName, input.PageNumber, result.PageCount,
-                result.Characters, result.OcrPageCount, sha
-            });
         }
 
-        version.ExtractedText = string.Join("\f", extractedPages.OrderBy(x => x.Key).Select(x => x.Value));
-        version.ExtractedFieldsJson = DocumentIngestionSupport.SuggestFields(version.ExtractedText);
-        version.ExtractionMetadataJson = JsonSerializer.Serialize(new { files = extractionRows, embeddingModel = model });
-        version.LifecycleStatus = DocumentVersionLifecycleStatus.Extracted;
-        document.ProcessingStatus = DocumentProcessingStatus.Ready;
+        version.ExtractionMetadataJson = JsonSerializer.Serialize(new
+            { progressPercent = 2, processingStage = "در صف پردازش" });
+        document.ProcessingStatus = DocumentProcessingStatus.Processing;
         document.UpdatedAtUtc = DateTime.UtcNow;
         if (!await db.OrganizationMemberships.AnyAsync(x =>
                 x.OrganizationId == tenant.OrganizationId && x.UserId == tenant.UserId, ct))
@@ -100,9 +82,12 @@ public sealed class UploadDocumentBatchCommandHandler(
         db.Documents.Add(document);
         db.DocumentGroupMembers.AddRange(groupIds.Select(groupId => new DocumentGroupMember
         { DocumentGroupId = groupId, DocumentId = document.Id }));
-        audit.Add("document.ingestion-extracted", nameof(Document), document.Id.ToString(),
-            new { version.Id, Files = request.Files.Count, RagPublished = false });
+        audit.Add("document.ingestion-queued", nameof(Document), document.Id.ToString(),
+            new { version.Id, Files = request.Files.Count });
         await db.SaveChangesAsync(ct);
+        await ingestionQueue.EnqueueAsync(new DocumentIngestionJob(
+            tenant.OrganizationId, tenant.UserId, document.Id, version.Id,
+            model, request.BearerToken), ct);
         return DocumentIngestionSupport.ToDetail(document);
     }
 }

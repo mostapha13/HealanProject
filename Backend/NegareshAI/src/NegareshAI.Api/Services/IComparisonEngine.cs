@@ -57,7 +57,8 @@ public sealed class ComparisonEngine : IComparisonEngine
             && references.Count > 0)
         {
             var pairwise = references.SelectMany((reference, index) =>
-                EvaluatePairwise(targetText, reference, index == 0 ? userInstruction : null))
+                EvaluateStructuralComparison(targetText, reference,
+                    index == 0 ? userInstruction : null))
                 .ToArray();
             return VerifyEvidence(targetText, references, pairwise);
         }
@@ -91,6 +92,234 @@ public sealed class ComparisonEngine : IComparisonEngine
         if (!string.IsNullOrWhiteSpace(userInstruction))
             findings.Add(EvaluateInstruction(targetText, userInstruction));
         return VerifyEvidence(targetText, references, findings);
+    }
+
+    private sealed record SemanticSectionDefinition(
+        string Code, string Title, string[] Aliases);
+
+    private sealed record SemanticSectionMatch(
+        SemanticSectionDefinition Definition, string Heading,
+        string Evidence, int StartPage, int EndPage);
+
+    private static readonly SemanticSectionDefinition[] MainDocumentSections =
+    [
+        new("TOC", "فهرست مطالب", ["فهرست مطالب", "فهرست مندرجات", "فهرست"]),
+        new("COMPANY", "معرفی و تاریخچه شرکت",
+            ["معرفی شرکت", "تاریخچه شرکت", "مشخصات شرکت", "اطلاعات کلی شرکت", "کلیات شرکت"]),
+        new("ACTIVITY", "موضوع و حوزه فعالیت",
+            ["موضوع فعالیت", "حوزه فعالیت", "فعالیت شرکت", "موضوع شرکت"]),
+        new("PRODUCTS", "محصولات، خدمات و بازار",
+            ["محصولات شرکت", "خدمات شرکت", "بازار محصولات", "بازار فروش", "محصولات و خدمات", "رقبا"]),
+        new("CAPITAL", "سرمایه و تغییرات سرمایه",
+            ["سرمایه شرکت", "اطلاعات سرمایه شرکت", "تغییرات سرمایه", "سرمایه ثبت شده", "روند افزایش سرمایه", "افزایش سرمایه"]),
+        new("SHAREHOLDERS", "سهامداران و ساختار مالکیت",
+            ["ترکیب سهامداران", "سهامداران عمده", "ساختار مالکیت", "صاحبان سهام", "ترکیب صاحبان سهام", "اطلاعات سهامداران", "اطلاعات سرمایه شرکت و سهامداران"]),
+        new("BOARD", "اعضای هیئت‌مدیره و مدیران",
+            ["اعضای هیئت مدیره", "ترکیب هیئت مدیره", "هیئت مدیره", "مدیران شرکت", "مدیران ارشد"]),
+        new("ORGANIZATION", "ساختار سازمانی و نیروی انسانی",
+            ["ساختار سازمانی", "نمودار سازمانی", "نیروی انسانی", "کارکنان شرکت"]),
+        new("FINANCIAL_SUMMARY", "خلاصه اطلاعات مالی",
+            ["خلاصه اطلاعات مالی", "اطلاعات مالی", "گزیده اطلاعات مالی", "نسبت های مالی", "شاخص های مالی"]),
+        new("FINANCIAL_STATEMENTS", "صورت‌های مالی",
+            ["صورت های مالی", "صورت وضعیت مالی", "ترازنامه", "صورت سود و زیان", "صورت جریان وجوه نقد"]),
+        new("DEVELOPMENT", "طرح‌ها و برنامه‌های توسعه",
+            ["طرح های توسعه", "برنامه های آتی", "برنامه توسعه", "طرح توسعه", "پروژه های در دست اجرا"]),
+        new("RISKS", "عوامل ریسک",
+            ["عوامل ریسک", "ریسک های شرکت", "ریسکهای شرکت", "مدیریت ریسک", "مخاطرات"]),
+        new("LITIGATION", "دعاوی، تعهدات و بدهی‌های احتمالی",
+            ["دعاوی حقوقی", "دعاوی و تعهدات", "تعهدات احتمالی", "بدهی های احتمالی", "پرونده های حقوقی"]),
+        new("RELATED_PARTIES", "معاملات با اشخاص وابسته",
+            ["معاملات با اشخاص وابسته", "اشخاص وابسته", "معاملات اشخاص وابسته"]),
+        new("AUDITOR", "گزارش حسابرس",
+            ["گزارش حسابرس", "گزارش حسابرس مستقل", "اظهارنظر حسابرس", "بازرس قانونی"])
+    ];
+
+    private static readonly IReadOnlyDictionary<string, string[]> NormalizedSectionAliases =
+        MainDocumentSections.ToDictionary(section => section.Code,
+            section => section.Aliases.Select(NormalizeForSectionMatch).ToArray());
+
+    private static IReadOnlyList<ComparisonFindingDraft> EvaluateStructuralComparison(
+        string targetText, ComparisonSource reference, string? instruction)
+    {
+        var targetSections = DetectSemanticSections(targetText);
+        var referenceSections = DetectSemanticSections(reference.Text);
+        if (targetSections.Count == 0 && referenceSections.Count == 0)
+            return EvaluatePairwise(targetText, reference, instruction);
+        var findings = new List<ComparisonFindingDraft>();
+        var both = MainDocumentSections.Count(section =>
+            targetSections.ContainsKey(section.Code) && referenceSections.ContainsKey(section.Code));
+        var targetOnly = MainDocumentSections.Count(section =>
+            targetSections.ContainsKey(section.Code) && !referenceSections.ContainsKey(section.Code));
+        var referenceOnly = MainDocumentSections.Count(section =>
+            !targetSections.ContainsKey(section.Code) && referenceSections.ContainsKey(section.Code));
+        var neither = MainDocumentSections.Length - both - targetOnly - referenceOnly;
+        var coverage = MainDocumentSections.Length == 0 ? 0m
+            : decimal.Round(both * 100m / MainDocumentSections.Length, 1);
+
+        findings.Add(new(null, null,
+            targetOnly == 0 && referenceOnly == 0 ? FindingType.Matched : FindingType.Different,
+            targetOnly == 0 && referenceOnly == 0 ? 1 : 3, 1m, false, true,
+            targetOnly == 0 && referenceOnly == 0,
+            "جمع‌بندی پوشش ساختاری کل اسناد",
+            $"تمام صفحات هر دو سند بررسی شد. از {MainDocumentSections.Length} سرفصل استاندارد، "
+            + $"{both} سرفصل در هر دو سند، {targetOnly} سرفصل فقط در سند اول، "
+            + $"{referenceOnly} سرفصل فقط در سند دوم و {neither} سرفصل در هیچ‌کدام شناسایی شد. "
+            + $"پوشش مشترک ساختاری {coverage.ToString(CultureInfo.InvariantCulture)} درصد است.",
+            FirstEvidence(targetText)?.Text, FirstEvidence(targetText)?.Page,
+            "کل سند", FirstEvidence(reference.Text)?.Text, FirstEvidence(reference.Text)?.Page,
+            "کل سند", reference.DocumentId, reference.VersionId,
+            "سرفصل‌های مفقود یا یک‌طرفه را بررسی کنید؛ تطبیق محتوای داخلی هر بخش در مرحله بعد انجام می‌شود.",
+            0.94m));
+
+        foreach (var definition in MainDocumentSections)
+        {
+            targetSections.TryGetValue(definition.Code, out var target);
+            referenceSections.TryGetValue(definition.Code, out var source);
+            if (target is null && source is null) continue;
+            var type = target is not null && source is not null ? FindingType.Matched
+                : target is not null ? FindingType.Extra
+                : FindingType.Missing;
+            const bool applicable = true;
+            var reason = target is not null && source is not null
+                ? $"این بخش با عنوان «{target.Heading}» در صفحات {PageRange(target)} سند اول و با عنوان «{source.Heading}» در صفحات {PageRange(source)} سند دوم شناسایی شد."
+                : target is not null
+                    ? $"این بخش با عنوان «{target.Heading}» در صفحات {PageRange(target)} سند اول وجود دارد، اما عنوان هم‌معنایی در کل صفحات سند دوم پیدا نشد."
+                    : source is not null
+                        ? $"این بخش در کل صفحات سند اول پیدا نشد، اما با عنوان «{source.Heading}» در صفحات {PageRange(source)} سند دوم وجود دارد."
+                        : "عنوانی هم‌معنا با این بخش در کل صفحات هیچ‌یک از دو سند شناسایی نشد.";
+            findings.Add(new(null, null, type,
+                !applicable ? 1 : type == FindingType.Matched ? 1 : 4,
+                applicable ? 1m : 0m, false, applicable, type == FindingType.Matched,
+                definition.Title, reason,
+                target?.Evidence, target?.StartPage, target?.Heading,
+                source?.Evidence, source?.StartPage, source?.Heading,
+                reference.DocumentId, reference.VersionId,
+                type == FindingType.Matched || !applicable ? null
+                    : "وجود واقعی بخش و کیفیت محتوای آن را با مراجعه به صفحات ذکرشده کنترل کنید.",
+                target is not null || source is not null ? 0.90m : 0.72m));
+        }
+
+        if (!string.IsNullOrWhiteSpace(instruction))
+            findings.Add(EvaluateInstructionAcrossDocuments(
+                targetText, reference, instruction));
+        return findings;
+    }
+
+    private static Dictionary<string, SemanticSectionMatch> DetectSemanticSections(string text)
+    {
+        var candidates = new List<(SemanticSectionDefinition Definition, string Heading,
+            string Evidence, int Page)>();
+        var pages = text.Split('\f');
+        for (var pageIndex = 0; pageIndex < pages.Length; pageIndex++)
+        {
+            var lines = Regex.Split(pages[pageIndex], @"\r?\n")
+                .Select(value => Regex.Replace(value, @"\s+", " ").Trim())
+                .Where(value => value.Length is >= 3 and <= 180)
+                .ToArray();
+            foreach (var line in lines)
+            {
+                var normalizedLine = NormalizeForSectionMatch(line);
+                foreach (var definition in MainDocumentSections)
+                {
+                    var alias = NormalizedSectionAliases[definition.Code]
+                        .FirstOrDefault(value => IsHeadingMatch(normalizedLine, value, definition.Code));
+                    if (alias is null) continue;
+                    candidates.Add((definition, line, EvidenceAround(lines, line), pageIndex + 1));
+                }
+            }
+        }
+
+        var selected = new Dictionary<string, SemanticSectionMatch>();
+        var tableOfContentsPages = candidates
+            .Where(item => item.Definition.Code == "TOC")
+            .Select(item => item.Page).ToHashSet();
+        var denseIndexPages = candidates.GroupBy(item => item.Page)
+            .Where(group => group.Select(item => item.Definition.Code).Distinct().Count() >= 3)
+            .Select(group => group.Key).ToHashSet();
+        var indexPages = tableOfContentsPages.Concat(denseIndexPages)
+            .SelectMany(page => new[] { page - 1, page, page + 1 })
+            .Where(page => page > 0).ToHashSet();
+        foreach (var group in candidates.GroupBy(item => item.Definition.Code))
+        {
+            var groupItems = group.ToArray();
+            var hasLaterCandidate = groupItems.Any(candidate => candidate.Page > 10
+                && !indexPages.Contains(candidate.Page));
+            var item = groupItems.OrderBy(candidate => candidate.Definition.Code != "TOC"
+                    && indexPages.Contains(candidate.Page) ? 1 : 0)
+                .ThenBy(candidate => candidate.Definition.Code != "TOC"
+                    && hasLaterCandidate && candidate.Page <= 10 ? 1 : 0)
+                .ThenBy(candidate => candidate.Page)
+                .ThenBy(candidate => candidate.Heading.Length)
+                .First();
+            selected[group.Key] = new(item.Definition, item.Heading,
+                item.Evidence, item.Page, item.Page);
+        }
+
+        var ordered = selected.Values.OrderBy(item => item.StartPage).ToArray();
+        for (var index = 0; index < ordered.Length; index++)
+        {
+            var current = ordered[index];
+            var nextPage = ordered.Skip(index + 1)
+                .Select(item => item.StartPage).FirstOrDefault(page => page > current.StartPage);
+            var endPage = nextPage > 0 ? nextPage - 1 : pages.Length;
+            selected[current.Definition.Code] = current with
+                { EndPage = Math.Max(current.StartPage, endPage) };
+        }
+        return selected;
+    }
+
+    private static string NormalizeForSectionMatch(string value) =>
+        Regex.Replace(NormalizeDigits(value).Replace('ي', 'ی').Replace('ك', 'ک')
+            .Replace("‌", " ").ToLowerInvariant(), @"[^\p{L}\p{N}\s]", " ")
+            .Replace("  ", " ").Trim();
+
+    private static bool IsHeadingMatch(string line, string alias, string sectionCode)
+    {
+        if (line.StartsWith("نمایه", StringComparison.Ordinal)
+            || line.StartsWith("جدول", StringComparison.Ordinal))
+            return sectionCode == "FINANCIAL_STATEMENTS"
+                && line.Contains(alias, StringComparison.Ordinal)
+                && line.Length <= alias.Length + 100;
+        var withoutNumbering = Regex.Replace(line,
+            @"^(?:(?:فصل|بخش|پیوست)\s*)?[0-9۰-۹\s./_-]+\s*", "").Trim();
+        if (withoutNumbering == alias) return true;
+        if (withoutNumbering.StartsWith(alias + " ", StringComparison.Ordinal))
+            return withoutNumbering.Length <= alias.Length + 60;
+        var colon = withoutNumbering.IndexOf(' ');
+        if (colon is < 0 or > 14) return false;
+        var afterShortPrefix = withoutNumbering[(colon + 1)..].Trim();
+        return afterShortPrefix == alias
+            || afterShortPrefix.StartsWith(alias + " ", StringComparison.Ordinal)
+            && afterShortPrefix.Length <= alias.Length + 60;
+    }
+
+    private static string EvidenceAround(string[] lines, string heading)
+        => heading;
+
+    private static string PageRange(SemanticSectionMatch section) =>
+        section.StartPage == section.EndPage ? section.StartPage.ToString(CultureInfo.InvariantCulture)
+            : $"{section.StartPage.ToString(CultureInfo.InvariantCulture)} تا {section.EndPage.ToString(CultureInfo.InvariantCulture)}";
+
+    private static ComparisonFindingDraft EvaluateInstructionAcrossDocuments(
+        string targetText, ComparisonSource reference, string instruction)
+    {
+        var terms = Tokens(instruction).Where(term => term.Length > 2
+            && !PersianStopWords.Contains(term)).Take(16).ToArray();
+        var targetEvidence = terms.Select(term => Find(targetText, term))
+            .FirstOrDefault(item => item is not null);
+        var referenceEvidence = terms.Select(term => Find(reference.Text, term))
+            .FirstOrDefault(item => item is not null);
+        var matched = targetEvidence is not null && referenceEvidence is not null;
+        return new(null, null, matched ? FindingType.Matched : FindingType.Different,
+            matched ? 1 : 3, 1m, false, true, matched,
+            "تمرکز درخواستی کاربر",
+            $"درخواست «{instruction.Trim()}» در کل صفحات هر دو سند جستجو شد؛ "
+            + $"سند اول: {(targetEvidence is null ? "بدون شاهد" : $"صفحه {targetEvidence.Page}")}؛ "
+            + $"سند دوم: {(referenceEvidence is null ? "بدون شاهد" : $"صفحه {referenceEvidence.Page}")}.",
+            targetEvidence?.Text, targetEvidence?.Page, "درخواست کاربر",
+            referenceEvidence?.Text, referenceEvidence?.Page, "درخواست کاربر",
+            reference.DocumentId, reference.VersionId,
+            matched ? null : "درخواست کاربر و شواهد احتمالی را به‌صورت انسانی بازبینی کنید.", 0.82m);
     }
 
     private static IReadOnlyList<ComparisonFindingDraft> EvaluatePairwise(

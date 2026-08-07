@@ -4,6 +4,7 @@ using NegareshAI.Api.Application;
 using NegareshAI.Api.Application.Common.Tenancy;
 using NegareshAI.Api.Services;
 using NegareshAI.Api.Application.ContractOperations;
+using NegareshAI.Api.Application.Documents.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<NegareshAI.Api.Data.NegareshDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NegareshAI")));
 builder.Services.AddApplication();
 builder.Services.AddHostedService<ContractOperationReminderWorker>();
+builder.Services.AddSingleton<IDocumentIngestionQueue, DocumentIngestionQueue>();
+builder.Services.AddHostedService<DocumentIngestionWorker>();
 
 builder.Services.AddControllers();
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -20,7 +23,10 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 builder.Services.AddHttpClient<IFileManagerClient, FileManagerClient>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["FileManager:BaseUrl"] ?? "http://localhost:5000/"));
 builder.Services.AddHttpClient<IAiDocumentProcessor, AiDocumentProcessor>((services, client) =>
-    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
+{
+    client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/");
+    client.Timeout = TimeSpan.FromMinutes(60);
+});
 builder.Services.AddHttpClient<IComparisonReportGenerator, ComparisonReportGenerator>((services, client) =>
     client.BaseAddress = new Uri(services.GetRequiredService<IConfiguration>()["Ai:BaseUrl"] ?? "http://localhost:8000/"));
 builder.Services.AddHttpClient<IContractDocumentGenerator, ContractDocumentGenerator>((services, client) =>
