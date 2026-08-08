@@ -1,4 +1,4 @@
-﻿using IdentityServer.Domain;
+using IdentityServer.Domain;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -51,6 +51,7 @@ namespace IdentityServer
                     {
                         await HealanAccessSeed.SeedAsync(context, roleManager);
                         await NegareshAIAccessSeed.SeedAsync(context, roleManager);
+                        await OneDeskAIAccessSeed.SeedAsync(context, roleManager);
                     }
                     catch (Exception accessEx)
                     {

@@ -1,4 +1,4 @@
-﻿using IdentityServer4;
+using IdentityServer4;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Configuration;
 using Share.Domain.Constants;
@@ -248,6 +248,29 @@ namespace IdentityServer
                 },
             },
             new Client
+            {
+                ClientId = "OneDeskAIWeb",
+                ClientName = "Ø³Ø§Ù…Ø§Ù†Ù‡ Ø¯Ø³ØªÛŒØ§Ø± Ù‡ÙˆØ´Ù…Ù†Ø¯ Ø³Ø§Ø²Ù…Ø§Ù†ÛŒ OneDeskAI",
+                RequirePkce = true,
+                RequireClientSecret = false,
+                AllowedGrantTypes = GrantTypes.Code,
+                AllowOfflineAccess = true,
+                AccessTokenLifetime = 60 * 60,
+                AbsoluteRefreshTokenLifetime = 60 * 60 * 8,
+                RedirectUris = (configuration["IdentityServer:OneDeskAIRedirectUriCallback"] ?? "http://localhost:8088/auth/callback")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                PostLogoutRedirectUris = (configuration["IdentityServer:OneDeskAIPostLogoutRedirectUri"] ?? "http://localhost:8088/auth/logout-callback")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                AllowedCorsOrigins = (configuration["IdentityServer:OneDeskAIAllowedCorsOrigins"] ?? "http://localhost:8088")
+                    .Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).ToList(),
+                AllowedScopes =
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    IdentityServerConstants.StandardScopes.OfflineAccess,
+                    "Content_Producer",
+                },
+            },            new Client
             {
                 ClientId = "HealanClinicMobile",
                 ClientName = "اپ اندروید پذیرش Healan",
