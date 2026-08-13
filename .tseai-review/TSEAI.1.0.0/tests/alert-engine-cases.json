@@ -1,0 +1,17 @@
+[
+  {"case":"first-observation-false","previous":null,"current":false,"expectedTrigger":false},
+  {"case":"first-observation-true","previous":null,"current":true,"expectedTrigger":false},
+  {"case":"false-to-false","previous":false,"current":false,"expectedTrigger":false},
+  {"case":"true-to-true","previous":true,"current":true,"expectedTrigger":false},
+  {"case":"true-to-false","previous":true,"current":false,"expectedTrigger":false},
+  {"case":"false-to-true","previous":false,"current":true,"cooldownAvailable":true,"expectedTrigger":true},
+  {"case":"false-to-true-cooldown","previous":false,"current":true,"cooldownAvailable":false,"expectedTrigger":false},
+  {"case":"new-filter-version-new-baseline","previousVersion":2,"currentVersion":3,"current":true,"expectedTrigger":false},
+  {"case":"clienttype-only-requires-client-dependency","change":"ClientType","dependency":"ClientType","expectedEvaluation":true},
+  {"case":"clienttype-only-skips-price-filter","change":"ClientType","dependency":"Current","expectedEvaluation":false},
+  {"case":"orderbook-only-requires-orderbook-dependency","change":"OrderBook","dependency":"OrderBook","expectedEvaluation":true},
+  {"case":"current-change-can-affect-filter","change":"Current","dependency":"Any","expectedEvaluation":true},
+  {"case":"signalr-failure-releases-dedup-reservation","expectedRabbitAction":"nack-requeue"},
+  {"case":"successful-rabbit-publish-persists-outbox-state","expected":"PublishedAtUtc"},
+  {"case":"offline-user-event-remains-queryable","expectedPersistence":"AlertEvents"}
+]

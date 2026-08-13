@@ -1,0 +1,3693 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:1174241e-6dda-4d96-af76-26eee5171a3c",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-11T21:07:38.348577+00:00",
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:generic/tseai@1.0.0-rc.31",
+      "name": "TSEAI",
+      "version": "1.0.0-rc.31",
+      "purl": "pkg:generic/tseai@1.0.0-rc.31"
+    },
+    "properties": [
+      {
+        "name": "tseai:lock-sha256:AI/tseai-ai/requirements.lock",
+        "value": "ad942470480d941e5ae1e0fa23424bfc959d50946345a5a350a5bdd6c04a6ecc"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json",
+        "value": "d7429f929e12cdcf8218277397b0b0d3c956f448e3e6e2209b0e80e394591fd1"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Identity/src/TSEAI.Identity.Api/packages.lock.json",
+        "value": "fb1977f594ede9b73810b3104227ef24cc7c64d0d7d0d9aea06f7014a6659965"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Identity/src/TSEAI.Identity.Application/packages.lock.json",
+        "value": "e219ac485c68b23593c62bd5ed983271b707f4839b2beca0ad923847456f89fe"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Identity/src/TSEAI.Identity.Domain/packages.lock.json",
+        "value": "3af200e31fa5d30593fcb1a612bb4b9e272831739597bc77e52f0a157a3343f5"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json",
+        "value": "6a4822e1ec162fa036d89477b94e344e6e923f21eaea8942ef187a6a4f93a5da"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json",
+        "value": "a1780cf9130fd488d98756ecb8b43575441e8663dce1c155562c03b969eed71a"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/MarketRuntime/src/TSEAI.MarketRuntime.Worker/packages.lock.json",
+        "value": "70ba1c700927e4c946c59ee4a7f810b8f91450c077c989d0a47508ccec941122"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json",
+        "value": "52be4613056e4f216c9cc11d71678e098178829b283e84283af331cfac1b650b"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/src/TSEAI.Api/packages.lock.json",
+        "value": "9999ab525b583f21734f07e54aaa7e25ff94c0fa4b7640beab6f0729a7b88ffc"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/src/TSEAI.Application/packages.lock.json",
+        "value": "19a4f8bf8a6e1cf0902d1c8685bb72724ca7792e88dac690893cd78537252d17"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/src/TSEAI.Domain/packages.lock.json",
+        "value": "de8bcf744b693c863740d92cd007f4437701d6685f917b0d5e7d38bb6160c305"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/src/TSEAI.Infrastructure/packages.lock.json",
+        "value": "11b9ea9f60e8af6db43d329e4059a64c72a70278f5d2ff89af29ad93ccf027bc"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.CapabilityRouter.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.ChatFilter.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.ChatFilterAssets.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.ConversationContext.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.ConversationalFilter.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.DataQuality.SmokeTests/packages.lock.json",
+        "value": "af6072c7958e866d0818152f847dad6b63f1b57e88f16735fb8f6e3908614389"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.EntityResolution.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.EvidenceCitation.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.FilterTemporal.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.MarketAnalytics.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.MultiToolHybridPlanner.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.StructuredQuery.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.Temporal.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Platform/tests/TSEAI.TemporalConversation.SmokeTests/packages.lock.json",
+        "value": "892aea84b97567b13ff338f57e099ce910ad35d90f04b02a8f36e57ef4eae076"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Shared/TSEAI.Shared.Application/packages.lock.json",
+        "value": "20621ff4fd9a232e719c78548acaf0069b9181708c2532e634c5cab729668241"
+      },
+      {
+        "name": "tseai:lock-sha256:Backend/Shared/TSEAI.Shared.Domain/packages.lock.json",
+        "value": "21309355e77d26df68664ac0899fbbacb314b0354d4a65cf8406751d68bd5ad8"
+      },
+      {
+        "name": "tseai:lock-sha256:Frontend/package-lock.json",
+        "value": "0c02a3ecf96f0df9c0d1ad6b0b8f579f95c56150ca94e2c5993f4b6898cb76da"
+      },
+      {
+        "name": "tseai:lock-sha256:docker/healthcheck/packages.lock.json",
+        "value": "21309355e77d26df68664ac0899fbbacb314b0354d4a65cf8406751d68bd5ad8"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/aix-ppc64@0.25.12",
+      "name": "@esbuild/aix-ppc64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/aix-ppc64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/android-arm64@0.25.12",
+      "name": "@esbuild/android-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/android-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/android-arm@0.25.12",
+      "name": "@esbuild/android-arm",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/android-arm@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/android-x64@0.25.12",
+      "name": "@esbuild/android-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/android-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/darwin-arm64@0.25.12",
+      "name": "@esbuild/darwin-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/darwin-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/darwin-x64@0.25.12",
+      "name": "@esbuild/darwin-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/darwin-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/freebsd-arm64@0.25.12",
+      "name": "@esbuild/freebsd-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/freebsd-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/freebsd-x64@0.25.12",
+      "name": "@esbuild/freebsd-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/freebsd-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-arm64@0.25.12",
+      "name": "@esbuild/linux-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-arm@0.25.12",
+      "name": "@esbuild/linux-arm",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-arm@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-ia32@0.25.12",
+      "name": "@esbuild/linux-ia32",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-ia32@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-loong64@0.25.12",
+      "name": "@esbuild/linux-loong64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-loong64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-mips64el@0.25.12",
+      "name": "@esbuild/linux-mips64el",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-mips64el@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-ppc64@0.25.12",
+      "name": "@esbuild/linux-ppc64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-ppc64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-riscv64@0.25.12",
+      "name": "@esbuild/linux-riscv64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-riscv64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-s390x@0.25.12",
+      "name": "@esbuild/linux-s390x",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-s390x@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/linux-x64@0.25.12",
+      "name": "@esbuild/linux-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/linux-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/netbsd-arm64@0.25.12",
+      "name": "@esbuild/netbsd-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/netbsd-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/netbsd-x64@0.25.12",
+      "name": "@esbuild/netbsd-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/netbsd-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/openbsd-arm64@0.25.12",
+      "name": "@esbuild/openbsd-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/openbsd-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/openbsd-x64@0.25.12",
+      "name": "@esbuild/openbsd-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/openbsd-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/openharmony-arm64@0.25.12",
+      "name": "@esbuild/openharmony-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/openharmony-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/sunos-x64@0.25.12",
+      "name": "@esbuild/sunos-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/sunos-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/win32-arm64@0.25.12",
+      "name": "@esbuild/win32-arm64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/win32-arm64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/win32-ia32@0.25.12",
+      "name": "@esbuild/win32-ia32",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/win32-ia32@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40esbuild/win32-x64@0.25.12",
+      "name": "@esbuild/win32-x64",
+      "version": "0.25.12",
+      "purl": "pkg:npm/%40esbuild/win32-x64@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40microsoft/signalr@9.0.6",
+      "name": "@microsoft/signalr",
+      "version": "9.0.6",
+      "purl": "pkg:npm/%40microsoft/signalr@9.0.6",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40napi-rs/lzma-linux-x64-gnu@1.5.1",
+      "name": "@napi-rs/lzma-linux-x64-gnu",
+      "version": "1.5.1",
+      "purl": "pkg:npm/%40napi-rs/lzma-linux-x64-gnu@1.5.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-android-arm-eabi@4.62.4",
+      "name": "@rollup/rollup-android-arm-eabi",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-android-arm-eabi@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-android-arm64@4.62.4",
+      "name": "@rollup/rollup-android-arm64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-android-arm64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-darwin-arm64@4.62.4",
+      "name": "@rollup/rollup-darwin-arm64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-darwin-arm64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-darwin-x64@4.62.4",
+      "name": "@rollup/rollup-darwin-x64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-darwin-x64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-freebsd-arm64@4.62.4",
+      "name": "@rollup/rollup-freebsd-arm64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-freebsd-arm64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-freebsd-x64@4.62.4",
+      "name": "@rollup/rollup-freebsd-x64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-freebsd-x64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-arm-gnueabihf@4.62.4",
+      "name": "@rollup/rollup-linux-arm-gnueabihf",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-arm-gnueabihf@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-arm-musleabihf@4.62.4",
+      "name": "@rollup/rollup-linux-arm-musleabihf",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-arm-musleabihf@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-arm64-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-arm64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-arm64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-arm64-musl@4.62.4",
+      "name": "@rollup/rollup-linux-arm64-musl",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-arm64-musl@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-loong64-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-loong64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-loong64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-loong64-musl@4.62.4",
+      "name": "@rollup/rollup-linux-loong64-musl",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-loong64-musl@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-ppc64-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-ppc64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-ppc64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-ppc64-musl@4.62.4",
+      "name": "@rollup/rollup-linux-ppc64-musl",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-ppc64-musl@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-riscv64-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-riscv64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-riscv64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-riscv64-musl@4.62.4",
+      "name": "@rollup/rollup-linux-riscv64-musl",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-riscv64-musl@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-s390x-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-s390x-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-s390x-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-x64-gnu@4.62.4",
+      "name": "@rollup/rollup-linux-x64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-x64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-linux-x64-musl@4.62.4",
+      "name": "@rollup/rollup-linux-x64-musl",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-linux-x64-musl@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-openbsd-x64@4.62.4",
+      "name": "@rollup/rollup-openbsd-x64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-openbsd-x64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-openharmony-arm64@4.62.4",
+      "name": "@rollup/rollup-openharmony-arm64",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-openharmony-arm64@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-win32-arm64-msvc@4.62.4",
+      "name": "@rollup/rollup-win32-arm64-msvc",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-win32-arm64-msvc@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-win32-ia32-msvc@4.62.4",
+      "name": "@rollup/rollup-win32-ia32-msvc",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-win32-ia32-msvc@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-win32-x64-gnu@4.62.4",
+      "name": "@rollup/rollup-win32-x64-gnu",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-win32-x64-gnu@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40rollup/rollup-win32-x64-msvc@4.62.4",
+      "name": "@rollup/rollup-win32-x64-msvc",
+      "version": "4.62.4",
+      "purl": "pkg:npm/%40rollup/rollup-win32-x64-msvc@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/%40types/estree@1.0.9",
+      "name": "@types/estree",
+      "version": "1.0.9",
+      "purl": "pkg:npm/%40types/estree@1.0.9",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/abort-controller@3.0.0",
+      "name": "abort-controller",
+      "version": "3.0.0",
+      "purl": "pkg:npm/abort-controller@3.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/esbuild@0.25.12",
+      "name": "esbuild",
+      "version": "0.25.12",
+      "purl": "pkg:npm/esbuild@0.25.12",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/event-target-shim@5.0.1",
+      "name": "event-target-shim",
+      "version": "5.0.1",
+      "purl": "pkg:npm/event-target-shim@5.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/eventsource@2.0.2",
+      "name": "eventsource",
+      "version": "2.0.2",
+      "purl": "pkg:npm/eventsource@2.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/fdir@6.5.0",
+      "name": "fdir",
+      "version": "6.5.0",
+      "purl": "pkg:npm/fdir@6.5.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/fetch-cookie@2.2.0",
+      "name": "fetch-cookie",
+      "version": "2.2.0",
+      "purl": "pkg:npm/fetch-cookie@2.2.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/fsevents@2.3.3",
+      "name": "fsevents",
+      "version": "2.3.3",
+      "purl": "pkg:npm/fsevents@2.3.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/nanoid@3.3.18",
+      "name": "nanoid",
+      "version": "3.3.18",
+      "purl": "pkg:npm/nanoid@3.3.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/node-fetch@2.7.0",
+      "name": "node-fetch",
+      "version": "2.7.0",
+      "purl": "pkg:npm/node-fetch@2.7.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/picocolors@1.1.1",
+      "name": "picocolors",
+      "version": "1.1.1",
+      "purl": "pkg:npm/picocolors@1.1.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/picomatch@4.0.5",
+      "name": "picomatch",
+      "version": "4.0.5",
+      "purl": "pkg:npm/picomatch@4.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/postcss@8.5.26",
+      "name": "postcss",
+      "version": "8.5.26",
+      "purl": "pkg:npm/postcss@8.5.26",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/psl@1.15.0",
+      "name": "psl",
+      "version": "1.15.0",
+      "purl": "pkg:npm/psl@1.15.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/punycode@2.3.1",
+      "name": "punycode",
+      "version": "2.3.1",
+      "purl": "pkg:npm/punycode@2.3.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/querystringify@2.2.0",
+      "name": "querystringify",
+      "version": "2.2.0",
+      "purl": "pkg:npm/querystringify@2.2.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react-dom@19.0.0",
+      "name": "react-dom",
+      "version": "19.0.0",
+      "purl": "pkg:npm/react-dom@19.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react@19.0.0",
+      "name": "react",
+      "version": "19.0.0",
+      "purl": "pkg:npm/react@19.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/requires-port@1.0.0",
+      "name": "requires-port",
+      "version": "1.0.0",
+      "purl": "pkg:npm/requires-port@1.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/rollup@4.62.4",
+      "name": "rollup",
+      "version": "4.62.4",
+      "purl": "pkg:npm/rollup@4.62.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/scheduler@0.25.0",
+      "name": "scheduler",
+      "version": "0.25.0",
+      "purl": "pkg:npm/scheduler@0.25.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/set-cookie-parser@2.7.2",
+      "name": "set-cookie-parser",
+      "version": "2.7.2",
+      "purl": "pkg:npm/set-cookie-parser@2.7.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/source-map-js@1.2.1",
+      "name": "source-map-js",
+      "version": "1.2.1",
+      "purl": "pkg:npm/source-map-js@1.2.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/tinyglobby@0.2.17",
+      "name": "tinyglobby",
+      "version": "0.2.17",
+      "purl": "pkg:npm/tinyglobby@0.2.17",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/tough-cookie@4.1.4",
+      "name": "tough-cookie",
+      "version": "4.1.4",
+      "purl": "pkg:npm/tough-cookie@4.1.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/tr46@0.0.3",
+      "name": "tr46",
+      "version": "0.0.3",
+      "purl": "pkg:npm/tr46@0.0.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/universalify@0.2.0",
+      "name": "universalify",
+      "version": "0.2.0",
+      "purl": "pkg:npm/universalify@0.2.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/url-parse@1.5.10",
+      "name": "url-parse",
+      "version": "1.5.10",
+      "purl": "pkg:npm/url-parse@1.5.10",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/vite@6.4.3",
+      "name": "vite",
+      "version": "6.4.3",
+      "purl": "pkg:npm/vite@6.4.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/webidl-conversions@3.0.1",
+      "name": "webidl-conversions",
+      "version": "3.0.1",
+      "purl": "pkg:npm/webidl-conversions@3.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/whatwg-url@5.0.0",
+      "name": "whatwg-url",
+      "version": "5.0.0",
+      "purl": "pkg:npm/whatwg-url@5.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/ws@7.5.13",
+      "name": "ws",
+      "version": "7.5.13",
+      "purl": "pkg:npm/ws@7.5.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Frontend/package-lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Azure.Core@1.38.0",
+      "name": "Azure.Core",
+      "version": "1.38.0",
+      "purl": "pkg:nuget/Azure.Core@1.38.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Azure.Core@1.47.1",
+      "name": "Azure.Core",
+      "version": "1.47.1",
+      "purl": "pkg:nuget/Azure.Core@1.47.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Azure.Identity@1.11.4",
+      "name": "Azure.Identity",
+      "version": "1.11.4",
+      "purl": "pkg:nuget/Azure.Identity@1.11.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Azure.Identity@1.14.2",
+      "name": "Azure.Identity",
+      "version": "1.14.2",
+      "purl": "pkg:nuget/Azure.Identity@1.14.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Dapper@2.1.79",
+      "name": "Dapper",
+      "version": "2.1.79",
+      "purl": "pkg:nuget/Dapper@2.1.79",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Humanizer.Core@2.14.1",
+      "name": "Humanizer.Core",
+      "version": "2.14.1",
+      "purl": "pkg:nuget/Humanizer.Core@2.14.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/MessagePack.Annotations@2.5.302",
+      "name": "MessagePack.Annotations",
+      "version": "2.5.302",
+      "purl": "pkg:nuget/MessagePack.Annotations@2.5.302",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/MessagePack@2.5.302",
+      "name": "MessagePack",
+      "version": "2.5.302",
+      "purl": "pkg:nuget/MessagePack@2.5.302",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.AspNetCore.Authentication.JwtBearer@9.0.18",
+      "name": "Microsoft.AspNetCore.Authentication.JwtBearer",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.AspNetCore.Authentication.JwtBearer@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.AspNetCore.Cryptography.Internal@9.0.18",
+      "name": "Microsoft.AspNetCore.Cryptography.Internal",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.AspNetCore.Cryptography.Internal@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.AspNetCore.Cryptography.KeyDerivation@9.0.18",
+      "name": "Microsoft.AspNetCore.Cryptography.KeyDerivation",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.AspNetCore.Cryptography.KeyDerivation@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.AspNetCore.Identity.EntityFrameworkCore@9.0.18",
+      "name": "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.AspNetCore.Identity.EntityFrameworkCore@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.AspNetCore.SignalR.StackExchangeRedis@9.0.18",
+      "name": "Microsoft.AspNetCore.SignalR.StackExchangeRedis",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.AspNetCore.SignalR.StackExchangeRedis@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@1.1.1",
+      "name": "Microsoft.Bcl.AsyncInterfaces",
+      "version": "1.1.1",
+      "purl": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@1.1.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@7.0.0",
+      "name": "Microsoft.Bcl.AsyncInterfaces",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@8.0.0",
+      "name": "Microsoft.Bcl.AsyncInterfaces",
+      "version": "8.0.0",
+      "purl": "pkg:nuget/Microsoft.Bcl.AsyncInterfaces@8.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.Cryptography@10.0.2",
+      "name": "Microsoft.Bcl.Cryptography",
+      "version": "10.0.2",
+      "purl": "pkg:nuget/Microsoft.Bcl.Cryptography@10.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.Cryptography@9.0.13",
+      "name": "Microsoft.Bcl.Cryptography",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/Microsoft.Bcl.Cryptography@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Bcl.Cryptography@9.0.4",
+      "name": "Microsoft.Bcl.Cryptography",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/Microsoft.Bcl.Cryptography@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Build.Framework@17.8.43",
+      "name": "Microsoft.Build.Framework",
+      "version": "17.8.43",
+      "purl": "pkg:nuget/Microsoft.Build.Framework@17.8.43",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Build.Locator@1.7.8",
+      "name": "Microsoft.Build.Locator",
+      "version": "1.7.8",
+      "purl": "pkg:nuget/Microsoft.Build.Locator@1.7.8",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.Analyzers@3.3.4",
+      "name": "Microsoft.CodeAnalysis.Analyzers",
+      "version": "3.3.4",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.Analyzers@3.3.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.CSharp.Workspaces@4.8.0",
+      "name": "Microsoft.CodeAnalysis.CSharp.Workspaces",
+      "version": "4.8.0",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.CSharp.Workspaces@4.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.CSharp@4.8.0",
+      "name": "Microsoft.CodeAnalysis.CSharp",
+      "version": "4.8.0",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.CSharp@4.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.Common@4.8.0",
+      "name": "Microsoft.CodeAnalysis.Common",
+      "version": "4.8.0",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.Common@4.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.Workspaces.Common@4.8.0",
+      "name": "Microsoft.CodeAnalysis.Workspaces.Common",
+      "version": "4.8.0",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.Workspaces.Common@4.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CodeAnalysis.Workspaces.MSBuild@4.8.0",
+      "name": "Microsoft.CodeAnalysis.Workspaces.MSBuild",
+      "version": "4.8.0",
+      "purl": "pkg:nuget/Microsoft.CodeAnalysis.Workspaces.MSBuild@4.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient.Extensions.Abstractions@7.0.2",
+      "name": "Microsoft.Data.SqlClient.Extensions.Abstractions",
+      "version": "7.0.2",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient.Extensions.Abstractions@7.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient.Internal.Logging@7.0.2",
+      "name": "Microsoft.Data.SqlClient.Internal.Logging",
+      "version": "7.0.2",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient.Internal.Logging@7.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient.SNI.runtime@5.1.1",
+      "name": "Microsoft.Data.SqlClient.SNI.runtime",
+      "version": "5.1.1",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient.SNI.runtime@5.1.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient.SNI.runtime@6.0.2",
+      "name": "Microsoft.Data.SqlClient.SNI.runtime",
+      "version": "6.0.2",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient.SNI.runtime@6.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient@5.1.6",
+      "name": "Microsoft.Data.SqlClient",
+      "version": "5.1.6",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient@5.1.6",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient@6.1.1",
+      "name": "Microsoft.Data.SqlClient",
+      "version": "6.1.1",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient@6.1.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Data.SqlClient@7.0.2",
+      "name": "Microsoft.Data.SqlClient",
+      "version": "7.0.2",
+      "purl": "pkg:nuget/Microsoft.Data.SqlClient@7.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore.Abstractions@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore.Analyzers@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore.Analyzers",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore.Analyzers@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore.Design@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore.Design",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore.Design@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore.Relational@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore.Relational",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore.Relational@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore.SqlServer@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore.SqlServer",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore.SqlServer@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.EntityFrameworkCore@9.0.18",
+      "name": "Microsoft.EntityFrameworkCore",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.EntityFrameworkCore@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.13",
+      "name": "Microsoft.Extensions.Caching.Abstractions",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/MarketRuntime/src/TSEAI.MarketRuntime.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Caching.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.4",
+      "name": "Microsoft.Extensions.Caching.Abstractions",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Abstractions@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.13",
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/MarketRuntime/src/TSEAI.MarketRuntime.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.18",
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.4",
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.Memory@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Caching.StackExchangeRedis@9.0.18",
+      "name": "Microsoft.Extensions.Caching.StackExchangeRedis",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Caching.StackExchangeRedis@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.Binder@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.Binder",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.Binder@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.CommandLine@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.CommandLine",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.CommandLine@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.EnvironmentVariables@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.EnvironmentVariables",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.EnvironmentVariables@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.FileExtensions@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.FileExtensions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.FileExtensions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.Json@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.Json",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.Json@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration.UserSecrets@9.0.18",
+      "name": "Microsoft.Extensions.Configuration.UserSecrets",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration.UserSecrets@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Configuration@9.0.18",
+      "name": "Microsoft.Extensions.Configuration",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Configuration@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.DependencyInjection.Abstractions@10.0.5",
+      "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "version": "10.0.5",
+      "purl": "pkg:nuget/Microsoft.Extensions.DependencyInjection.Abstractions@10.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.DependencyInjection.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.DependencyInjection.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Domain/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.DependencyInjection@9.0.18",
+      "name": "Microsoft.Extensions.DependencyInjection",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.DependencyInjection@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.DependencyModel@9.0.18",
+      "name": "Microsoft.Extensions.DependencyModel",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.DependencyModel@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Diagnostics.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Diagnostics.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Diagnostics.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Diagnostics.HealthChecks@9.0.18",
+      "name": "Microsoft.Extensions.Diagnostics.HealthChecks",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Diagnostics.HealthChecks@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Diagnostics@9.0.18",
+      "name": "Microsoft.Extensions.Diagnostics",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Diagnostics@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.FileProviders.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.FileProviders.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.FileProviders.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.FileProviders.Physical@9.0.18",
+      "name": "Microsoft.Extensions.FileProviders.Physical",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.FileProviders.Physical@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.FileSystemGlobbing@9.0.18",
+      "name": "Microsoft.Extensions.FileSystemGlobbing",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.FileSystemGlobbing@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Hosting.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Hosting.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Hosting.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Hosting@9.0.18",
+      "name": "Microsoft.Extensions.Hosting",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Hosting@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Http@9.0.18",
+      "name": "Microsoft.Extensions.Http",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Http@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Http@9.0.8",
+      "name": "Microsoft.Extensions.Http",
+      "version": "9.0.8",
+      "purl": "pkg:nuget/Microsoft.Extensions.Http@9.0.8",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Identity.Core@9.0.18",
+      "name": "Microsoft.Extensions.Identity.Core",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Identity.Core@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Identity.Stores@9.0.18",
+      "name": "Microsoft.Extensions.Identity.Stores",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Identity.Stores@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.Abstractions@10.0.5",
+      "name": "Microsoft.Extensions.Logging.Abstractions",
+      "version": "10.0.5",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.Abstractions@10.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.Abstractions@9.0.18",
+      "name": "Microsoft.Extensions.Logging.Abstractions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.Abstractions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Domain/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.Configuration@9.0.18",
+      "name": "Microsoft.Extensions.Logging.Configuration",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.Configuration@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.Console@9.0.18",
+      "name": "Microsoft.Extensions.Logging.Console",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.Console@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.Debug@9.0.18",
+      "name": "Microsoft.Extensions.Logging.Debug",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.Debug@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.EventLog@9.0.18",
+      "name": "Microsoft.Extensions.Logging.EventLog",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.EventLog@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging.EventSource@9.0.18",
+      "name": "Microsoft.Extensions.Logging.EventSource",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging.EventSource@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Logging@9.0.18",
+      "name": "Microsoft.Extensions.Logging",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Logging@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Options.ConfigurationExtensions@9.0.18",
+      "name": "Microsoft.Extensions.Options.ConfigurationExtensions",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Options.ConfigurationExtensions@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Options@9.0.18",
+      "name": "Microsoft.Extensions.Options",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Options@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Extensions.Primitives@9.0.18",
+      "name": "Microsoft.Extensions.Primitives",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/Microsoft.Extensions.Primitives@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Identity.Client.Extensions.Msal@4.61.3",
+      "name": "Microsoft.Identity.Client.Extensions.Msal",
+      "version": "4.61.3",
+      "purl": "pkg:nuget/Microsoft.Identity.Client.Extensions.Msal@4.61.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Identity.Client.Extensions.Msal@4.73.1",
+      "name": "Microsoft.Identity.Client.Extensions.Msal",
+      "version": "4.73.1",
+      "purl": "pkg:nuget/Microsoft.Identity.Client.Extensions.Msal@4.73.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Identity.Client@4.61.3",
+      "name": "Microsoft.Identity.Client",
+      "version": "4.61.3",
+      "purl": "pkg:nuget/Microsoft.Identity.Client@4.61.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Identity.Client@4.73.1",
+      "name": "Microsoft.Identity.Client",
+      "version": "4.73.1",
+      "purl": "pkg:nuget/Microsoft.Identity.Client@4.73.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Abstractions@7.7.1",
+      "name": "Microsoft.IdentityModel.Abstractions",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Abstractions@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.16.0",
+      "name": "Microsoft.IdentityModel.Abstractions",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.19.2",
+      "name": "Microsoft.IdentityModel.Abstractions",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.22.0",
+      "name": "Microsoft.IdentityModel.Abstractions",
+      "version": "8.22.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Abstractions@8.22.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@7.7.1",
+      "name": "Microsoft.IdentityModel.JsonWebTokens",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.16.0",
+      "name": "Microsoft.IdentityModel.JsonWebTokens",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.19.2",
+      "name": "Microsoft.IdentityModel.JsonWebTokens",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.22.0",
+      "name": "Microsoft.IdentityModel.JsonWebTokens",
+      "version": "8.22.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.JsonWebTokens@8.22.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Logging@7.7.1",
+      "name": "Microsoft.IdentityModel.Logging",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Logging@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Logging@8.16.0",
+      "name": "Microsoft.IdentityModel.Logging",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Logging@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Logging@8.19.2",
+      "name": "Microsoft.IdentityModel.Logging",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Logging@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Logging@8.22.0",
+      "name": "Microsoft.IdentityModel.Logging",
+      "version": "8.22.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Logging@8.22.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@6.35.0",
+      "name": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+      "version": "6.35.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@6.35.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@7.7.1",
+      "name": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@8.16.0",
+      "name": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@8.19.2",
+      "name": "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols.OpenIdConnect@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols@6.35.0",
+      "name": "Microsoft.IdentityModel.Protocols",
+      "version": "6.35.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols@6.35.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols@7.7.1",
+      "name": "Microsoft.IdentityModel.Protocols",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols@8.16.0",
+      "name": "Microsoft.IdentityModel.Protocols",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Protocols@8.19.2",
+      "name": "Microsoft.IdentityModel.Protocols",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Protocols@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Tokens@7.7.1",
+      "name": "Microsoft.IdentityModel.Tokens",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Tokens@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.16.0",
+      "name": "Microsoft.IdentityModel.Tokens",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.19.2",
+      "name": "Microsoft.IdentityModel.Tokens",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.22.0",
+      "name": "Microsoft.IdentityModel.Tokens",
+      "version": "8.22.0",
+      "purl": "pkg:nuget/Microsoft.IdentityModel.Tokens@8.22.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.NET.StringTools@17.6.3",
+      "name": "Microsoft.NET.StringTools",
+      "version": "17.6.3",
+      "purl": "pkg:nuget/Microsoft.NET.StringTools@17.6.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.SqlServer.Server@1.0.0",
+      "name": "Microsoft.SqlServer.Server",
+      "version": "1.0.0",
+      "purl": "pkg:nuget/Microsoft.SqlServer.Server@1.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.Win32.SystemEvents@6.0.0",
+      "name": "Microsoft.Win32.SystemEvents",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/Microsoft.Win32.SystemEvents@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Mono.TextTemplating@3.0.0",
+      "name": "Mono.TextTemplating",
+      "version": "3.0.0",
+      "purl": "pkg:nuget/Mono.TextTemplating@3.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/RESPite@3.0.17",
+      "name": "RESPite",
+      "version": "3.0.17",
+      "purl": "pkg:nuget/RESPite@3.0.17",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/RabbitMQ.Client@7.2.1",
+      "name": "RabbitMQ.Client",
+      "version": "7.2.1",
+      "purl": "pkg:nuget/RabbitMQ.Client@7.2.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/StackExchange.Redis@3.0.17",
+      "name": "StackExchange.Redis",
+      "version": "3.0.17",
+      "purl": "pkg:nuget/StackExchange.Redis@3.0.17",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.ClientModel@1.0.0",
+      "name": "System.ClientModel",
+      "version": "1.0.0",
+      "purl": "pkg:nuget/System.ClientModel@1.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.ClientModel@1.5.1",
+      "name": "System.ClientModel",
+      "version": "1.5.1",
+      "purl": "pkg:nuget/System.ClientModel@1.5.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.CodeDom@6.0.0",
+      "name": "System.CodeDom",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.CodeDom@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Collections.Immutable@7.0.0",
+      "name": "System.Collections.Immutable",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Collections.Immutable@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition.AttributedModel@7.0.0",
+      "name": "System.Composition.AttributedModel",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition.AttributedModel@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition.Convention@7.0.0",
+      "name": "System.Composition.Convention",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition.Convention@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition.Hosting@7.0.0",
+      "name": "System.Composition.Hosting",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition.Hosting@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition.Runtime@7.0.0",
+      "name": "System.Composition.Runtime",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition.Runtime@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition.TypedParts@7.0.0",
+      "name": "System.Composition.TypedParts",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition.TypedParts@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Composition@7.0.0",
+      "name": "System.Composition",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Composition@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Configuration.ConfigurationManager@6.0.1",
+      "name": "System.Configuration.ConfigurationManager",
+      "version": "6.0.1",
+      "purl": "pkg:nuget/System.Configuration.ConfigurationManager@6.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Configuration.ConfigurationManager@9.0.13",
+      "name": "System.Configuration.ConfigurationManager",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/System.Configuration.ConfigurationManager@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Configuration.ConfigurationManager@9.0.4",
+      "name": "System.Configuration.ConfigurationManager",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/System.Configuration.ConfigurationManager@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Diagnostics.DiagnosticSource@10.0.5",
+      "name": "System.Diagnostics.DiagnosticSource",
+      "version": "10.0.5",
+      "purl": "pkg:nuget/System.Diagnostics.DiagnosticSource@10.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Diagnostics.DiagnosticSource@6.0.1",
+      "name": "System.Diagnostics.DiagnosticSource",
+      "version": "6.0.1",
+      "purl": "pkg:nuget/System.Diagnostics.DiagnosticSource@6.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Diagnostics.EventLog@9.0.13",
+      "name": "System.Diagnostics.EventLog",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/System.Diagnostics.EventLog@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Platform/src/TSEAI.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Diagnostics.EventLog@9.0.18",
+      "name": "System.Diagnostics.EventLog",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/System.Diagnostics.EventLog@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Drawing.Common@6.0.0",
+      "name": "System.Drawing.Common",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Drawing.Common@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Formats.Asn1@9.0.18",
+      "name": "System.Formats.Asn1",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/System.Formats.Asn1@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IO.Hashing@10.0.5",
+      "name": "System.IO.Hashing",
+      "version": "10.0.5",
+      "purl": "pkg:nuget/System.IO.Hashing@10.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IO.Pipelines@10.0.5",
+      "name": "System.IO.Pipelines",
+      "version": "10.0.5",
+      "purl": "pkg:nuget/System.IO.Pipelines@10.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IdentityModel.Tokens.Jwt@7.7.1",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "version": "7.7.1",
+      "purl": "pkg:nuget/System.IdentityModel.Tokens.Jwt@7.7.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.16.0",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "version": "8.16.0",
+      "purl": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.19.2",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "version": "8.19.2",
+      "purl": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.19.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Notification/src/TSEAI.Notification.Api/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.22.0",
+      "name": "System.IdentityModel.Tokens.Jwt",
+      "version": "8.22.0",
+      "purl": "pkg:nuget/System.IdentityModel.Tokens.Jwt@8.22.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Memory.Data@1.0.2",
+      "name": "System.Memory.Data",
+      "version": "1.0.2",
+      "purl": "pkg:nuget/System.Memory.Data@1.0.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Memory.Data@8.0.1",
+      "name": "System.Memory.Data",
+      "version": "8.0.1",
+      "purl": "pkg:nuget/System.Memory.Data@8.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Memory@4.5.4",
+      "name": "System.Memory",
+      "version": "4.5.4",
+      "purl": "pkg:nuget/System.Memory@4.5.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Memory@4.5.5",
+      "name": "System.Memory",
+      "version": "4.5.5",
+      "purl": "pkg:nuget/System.Memory@4.5.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Numerics.Vectors@4.5.0",
+      "name": "System.Numerics.Vectors",
+      "version": "4.5.0",
+      "purl": "pkg:nuget/System.Numerics.Vectors@4.5.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Reflection.Metadata@7.0.0",
+      "name": "System.Reflection.Metadata",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Reflection.Metadata@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Runtime.Caching@6.0.0",
+      "name": "System.Runtime.Caching",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Runtime.Caching@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Runtime.CompilerServices.Unsafe@6.0.0",
+      "name": "System.Runtime.CompilerServices.Unsafe",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Runtime.CompilerServices.Unsafe@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.AccessControl@6.0.0",
+      "name": "System.Security.AccessControl",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Security.AccessControl@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.Cng@5.0.0",
+      "name": "System.Security.Cryptography.Cng",
+      "version": "5.0.0",
+      "purl": "pkg:nuget/System.Security.Cryptography.Cng@5.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.Pkcs@9.0.13",
+      "name": "System.Security.Cryptography.Pkcs",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/System.Security.Cryptography.Pkcs@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.Pkcs@9.0.4",
+      "name": "System.Security.Cryptography.Pkcs",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/System.Security.Cryptography.Pkcs@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.ProtectedData@6.0.0",
+      "name": "System.Security.Cryptography.ProtectedData",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Security.Cryptography.ProtectedData@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.ProtectedData@9.0.13",
+      "name": "System.Security.Cryptography.ProtectedData",
+      "version": "9.0.13",
+      "purl": "pkg:nuget/System.Security.Cryptography.ProtectedData@9.0.13",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Cryptography.ProtectedData@9.0.4",
+      "name": "System.Security.Cryptography.ProtectedData",
+      "version": "9.0.4",
+      "purl": "pkg:nuget/System.Security.Cryptography.ProtectedData@9.0.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Permissions@6.0.0",
+      "name": "System.Security.Permissions",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Security.Permissions@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Security.Principal.Windows@5.0.0",
+      "name": "System.Security.Principal.Windows",
+      "version": "5.0.0",
+      "purl": "pkg:nuget/System.Security.Principal.Windows@5.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Text.Encoding.CodePages@6.0.0",
+      "name": "System.Text.Encoding.CodePages",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Text.Encoding.CodePages@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Text.Encodings.Web@6.0.0",
+      "name": "System.Text.Encodings.Web",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Text.Encodings.Web@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Text.Json@9.0.18",
+      "name": "System.Text.Json",
+      "version": "9.0.18",
+      "purl": "pkg:nuget/System.Text.Json@9.0.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Text.Json@9.0.5",
+      "name": "System.Text.Json",
+      "version": "9.0.5",
+      "purl": "pkg:nuget/System.Text.Json@9.0.5",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Knowledge/src/TSEAI.Knowledge.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Threading.Channels@7.0.0",
+      "name": "System.Threading.Channels",
+      "version": "7.0.0",
+      "purl": "pkg:nuget/System.Threading.Channels@7.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Threading.RateLimiting@8.0.0",
+      "name": "System.Threading.RateLimiting",
+      "version": "8.0.0",
+      "purl": "pkg:nuget/System.Threading.RateLimiting@8.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Alerts/src/TSEAI.Alert.Worker/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Threading.Tasks.Extensions@4.5.4",
+      "name": "System.Threading.Tasks.Extensions",
+      "version": "4.5.4",
+      "purl": "pkg:nuget/System.Threading.Tasks.Extensions@4.5.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.Windows.Extensions@6.0.0",
+      "name": "System.Windows.Extensions",
+      "version": "6.0.0",
+      "purl": "pkg:nuget/System.Windows.Extensions@6.0.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "Backend/Identity/src/TSEAI.Identity.Infrastructure/packages.lock.json"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/annotated-types@0.8.0",
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "purl": "pkg:pypi/annotated-types@0.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/anyio@4.14.2",
+      "name": "anyio",
+      "version": "4.14.2",
+      "purl": "pkg:pypi/anyio@4.14.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/certifi@2026.7.22",
+      "name": "certifi",
+      "version": "2026.7.22",
+      "purl": "pkg:pypi/certifi@2026.7.22",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/click@8.4.2",
+      "name": "click",
+      "version": "8.4.2",
+      "purl": "pkg:pypi/click@8.4.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/colorama@0.4.6",
+      "name": "colorama",
+      "version": "0.4.6",
+      "purl": "pkg:pypi/colorama@0.4.6",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/h11@0.16.0",
+      "name": "h11",
+      "version": "0.16.0",
+      "purl": "pkg:pypi/h11@0.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/httpcore@1.0.9",
+      "name": "httpcore",
+      "version": "1.0.9",
+      "purl": "pkg:pypi/httpcore@1.0.9",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/httptools@0.8.0",
+      "name": "httptools",
+      "version": "0.8.0",
+      "purl": "pkg:pypi/httptools@0.8.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/httpx@0.28.1",
+      "name": "httpx",
+      "version": "0.28.1",
+      "purl": "pkg:pypi/httpx@0.28.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/idna@3.18",
+      "name": "idna",
+      "version": "3.18",
+      "purl": "pkg:pypi/idna@3.18",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pydantic-core@2.46.4",
+      "name": "pydantic-core",
+      "version": "2.46.4",
+      "purl": "pkg:pypi/pydantic-core@2.46.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pydantic@2.13.4",
+      "name": "pydantic",
+      "version": "2.13.4",
+      "purl": "pkg:pypi/pydantic@2.13.4",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/python-dotenv@1.2.2",
+      "name": "python-dotenv",
+      "version": "1.2.2",
+      "purl": "pkg:pypi/python-dotenv@1.2.2",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pyyaml@6.0.3",
+      "name": "pyyaml",
+      "version": "6.0.3",
+      "purl": "pkg:pypi/pyyaml@6.0.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/starlette@1.3.1",
+      "name": "starlette",
+      "version": "1.3.1",
+      "purl": "pkg:pypi/starlette@1.3.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/typing-extensions@4.16.0",
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "purl": "pkg:pypi/typing-extensions@4.16.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/typing-inspection@0.4.3",
+      "name": "typing-inspection",
+      "version": "0.4.3",
+      "purl": "pkg:pypi/typing-inspection@0.4.3",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/uvicorn@0.48.0",
+      "name": "uvicorn",
+      "version": "0.48.0",
+      "purl": "pkg:pypi/uvicorn@0.48.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/watchfiles@1.2.0",
+      "name": "watchfiles",
+      "version": "1.2.0",
+      "purl": "pkg:pypi/watchfiles@1.2.0",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/websockets@17.0.1",
+      "name": "websockets",
+      "version": "17.0.1",
+      "purl": "pkg:pypi/websockets@17.0.1",
+      "properties": [
+        {
+          "name": "tseai:lock-source",
+          "value": "AI/tseai-ai/requirements.lock"
+        }
+      ]
+    }
+  ]
+}

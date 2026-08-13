@@ -1,0 +1,30 @@
+{
+  "referenceUtc": "2026-08-11T08:00:00Z",
+  "marketTimeZone": "Asia/Tehran",
+  "referenceJalali": "1405/05/20",
+  "cases": [
+    {"text":"امروز","start":"1405/05/20","rule":"relative.today"},
+    {"text":"فردا","start":"1405/05/21","rule":"relative.tomorrow"},
+    {"text":"پس فردا","start":"1405/05/22","rule":"relative.day_after_tomorrow"},
+    {"text":"دیروز","start":"1405/05/19","rule":"relative.yesterday"},
+    {"text":"پریروز","start":"1405/05/18","rule":"relative.day_before_yesterday"},
+    {"text":"4روز بعد","start":"1405/05/24","rule":"relative.offset_days"},
+    {"text":"چهار روز بعد","start":"1405/05/24","rule":"relative.offset_days"},
+    {"text":"1405/05/20","start":"1405/05/20","rule":"exact.numeric"},
+    {"text":"20/05/1405","start":"1405/05/20","rule":"exact.numeric"},
+    {"text":"20 مرداد 1405","start":"1405/05/20","rule":"exact.persian_month_name"},
+    {"text":"بیست مرداد 1405","start":"1405/05/20","rule":"exact.persian_month_name"},
+    {"text":"بیستم مرداد 1405","start":"1405/05/20","rule":"exact.persian_month_name"},
+    {"text":"از 10 مرداد تا 20 مرداد 1405","start":"1405/05/10","end":"1405/05/20","rule":"range.explicit"},
+    {"text":"از امروز تا فردا","start":"1405/05/20","end":"1405/05/21","rule":"range.explicit"},
+    {"text":"از اول ماه تا امروز","start":"1405/05/01","end":"1405/05/20","rule":"range.month_to_today"},
+    {"text":"این هفته","start":"1405/05/17","end":"1405/05/20","rule":"range.current_week"},
+    {"text":"هفته قبل","start":"1405/05/10","end":"1405/05/16","rule":"range.previous_week"},
+    {"text":"ماه جاری","start":"1405/05/01","end":"1405/05/20","rule":"range.current_month"},
+    {"text":"ماه گذشته","start":"1405/04/01","end":"1405/04/31","rule":"range.previous_month"},
+    {"text":"7 روز اخیر","start":"1405/05/14","end":"1405/05/20","rule":"range.recent_days"},
+    {"text":"سه ماه اخیر","start":"1405/02/21","end":"1405/05/20","rule":"range.recent_months"},
+    {"text":"هفته آینده","start":"1405/05/24","end":"1405/05/30","rule":"range.next_week"},
+    {"text":"ماه آینده","start":"1405/06/01","end":"1405/06/31","rule":"range.next_month"}
+  ]
+}

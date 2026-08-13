@@ -1,0 +1,60 @@
+[
+  {
+    "request": "ارزش معاملات بیشتر از 20 میلیارد ریال",
+    "operation": "create",
+    "expected": "(tval) > 20000000000"
+  },
+  {
+    "request": "صف خرید هم اضافه کن",
+    "operation": "add"
+  },
+  {
+    "request": "شرط دوم را حذف کن",
+    "operation": "remove_condition",
+    "conditionIndex": 2
+  },
+  {
+    "request": "شرط ارزش معاملات را حذف کن",
+    "operation": "remove_field",
+    "fieldCode": "tval"
+  },
+  {
+    "request": "حدش را 30 میلیارد ریال کن",
+    "operation": "replace_condition"
+  },
+  {
+    "request": "یک مرحله برگرد",
+    "operation": "undo"
+  },
+  {
+    "request": "دوباره اعمال کن",
+    "operation": "redo"
+  },
+  {
+    "request": "کل فیلتر رو پاک کن",
+    "operation": "clear"
+  },
+  {
+    "request": "فیلتر رو توضیح بده",
+    "operation": "explain"
+  },
+  {
+    "request": "همین رو اجرا کن",
+    "operation": "execute"
+  },
+  {
+    "request": "P/E رو زیر 5 کن",
+    "operation": "replace_condition",
+    "fieldCode": "pe"
+  },
+  {
+    "request": "شرط دوم را با (pl) > (pc) جایگزین کن",
+    "operation": "replace_condition",
+    "conditionIndex": 2
+  },
+  {
+    "request": "P/E رو زیر پنج کن",
+    "operation": "replace_condition",
+    "fieldCode": "pe"
+  }
+]

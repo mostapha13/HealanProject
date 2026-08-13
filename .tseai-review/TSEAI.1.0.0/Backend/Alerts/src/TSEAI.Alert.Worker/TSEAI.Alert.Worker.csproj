@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../Platform/src/TSEAI.Application/TSEAI.Application.csproj" />
+    <ProjectReference Include="../../../Platform/src/TSEAI.Domain/TSEAI.Domain.csproj" />
+    <ProjectReference Include="../../../Platform/src/TSEAI.Infrastructure/TSEAI.Infrastructure.csproj" />
+    <ProjectReference Include="../../../Shared/TSEAI.Shared.Application/TSEAI.Shared.Application.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.18" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+  </ItemGroup>
+</Project>

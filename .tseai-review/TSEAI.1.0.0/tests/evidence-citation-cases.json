@@ -1,0 +1,10 @@
+[
+  {"case":"market","expected":"M1 canonical snapshot with observed timestamp"},
+  {"case":"knowledge","expected":"K1 source_type/source_id/url/published_at"},
+  {"case":"analytics","expected":"A1 deterministic-calculation authority"},
+  {"case":"comparison","expected":"M1/M2 and A1/A2"},
+  {"case":"structured-zero-results","expected":"Q1 execution provenance remains present"},
+  {"case":"filter","expected":"F1 filter-engine provenance"},
+  {"case":"unknown-label","expected":"fail closed"},
+  {"case":"unknown-source-id","expected":"fail closed"}
+]

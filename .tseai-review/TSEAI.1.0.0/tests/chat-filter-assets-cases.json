@@ -1,0 +1,12 @@
+[
+  {"input":"همین رو با اسم کم P/E ذخیره کن","operation":"SaveCurrent"},
+  {"input":"فیلترهای ذخیره شده من رو بده","operation":"ListSaved"},
+  {"input":"فیلتر کم P/E رو بارگذاری کن","operation":"LoadSaved"},
+  {"input":"همین رو هشدار کن","operation":"CreateAlert"},
+  {"input":"برای فیلتر کم P/E یک هشدار بساز","operation":"CreateAlert"},
+  {"input":"هشدارهای من رو بده","operation":"ListAlerts"},
+  {"input":"هشدار کم P/E رو غیرفعال کن","operation":"DisableAlert"},
+  {"input":"هشدار کم P/E رو فعال کن","operation":"EnableAlert"},
+  {"input":"هشدار کم P/E رو حذف کن","operation":"DeleteAlert"},
+  {"input":"آخرین خبر بانک ملت رو بده","operation":"None"}
+]

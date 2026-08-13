@@ -1,0 +1,32 @@
+[
+  {
+    "question": "همین رو با اسم کم P/E ذخیره کن",
+    "route": "FilterAssets",
+    "planner_used": false
+  },
+  {
+    "question": "فیلتر کن (pl)>(pc)",
+    "route": "FilterConversation",
+    "planner_used": false
+  },
+  {
+    "question": "10 نماد با بیشترین حجم معاملات را بده",
+    "route": "StructuredQuery",
+    "planner_used": false
+  },
+  {
+    "question": "قیمت فولاد چنده؟",
+    "route": "MarketSymbol",
+    "planner_used": true
+  },
+  {
+    "question": "قانون اختیار معامله چیست؟",
+    "route": "Knowledge",
+    "planner_used": true
+  },
+  {
+    "question": "قیمت فولاد و آخرین خبرش رو بگو",
+    "route": "Hybrid",
+    "planner_used": true
+  }
+]

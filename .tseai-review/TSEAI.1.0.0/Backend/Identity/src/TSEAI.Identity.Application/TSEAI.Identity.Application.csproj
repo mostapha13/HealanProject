@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../TSEAI.Identity.Domain/TSEAI.Identity.Domain.csproj" />
+    <ProjectReference Include="../../../Shared/TSEAI.Shared.Application/TSEAI.Shared.Application.csproj" />
+  </ItemGroup>
+</Project>

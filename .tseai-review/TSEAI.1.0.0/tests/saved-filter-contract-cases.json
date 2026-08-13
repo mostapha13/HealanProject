@@ -1,0 +1,11 @@
+[
+  {"case":"save-current-conversation","endpoint":"POST /api/saved-filters","requiresAuth":true,"requiresPermission":"Filter.Save","source":"conversation","expectedVersion":1},
+  {"case":"save-direct-tsetmc","endpoint":"POST /api/saved-filters","requiresAuth":true,"source":"tsetmcCode","canonicalize":true},
+  {"case":"create-new-version","endpoint":"POST /api/saved-filters/{id}/versions","appendOnly":true},
+  {"case":"restore-old-version","endpoint":"POST /api/saved-filters/{id}/restore/{version}","restoreCreatesNewVersion":true},
+  {"case":"load-to-conversation","endpoint":"POST /api/saved-filters/{id}/load","createsConversationRevision":true,"preservesUndoRedo":true},
+  {"case":"soft-delete","endpoint":"DELETE /api/saved-filters/{id}","hardDelete":false},
+  {"case":"owner-isolation","allRepositoryQueriesScopedByOwner":true},
+  {"case":"daily-chat-quota","savedFilterOperationsConsumeQuestionQuota":false},
+  {"case":"configurable-capacity","setting":"Filters.MaxSavedFiltersPerUser","default":50}
+]

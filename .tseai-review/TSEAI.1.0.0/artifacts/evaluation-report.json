@@ -1,0 +1,24 @@
+{
+  "mode": "offline-preflight",
+  "total": 320,
+  "uniqueIds": 320,
+  "categories": [
+    "assets",
+    "comparison",
+    "conversation",
+    "entity",
+    "filter",
+    "filter-conversation",
+    "hybrid",
+    "knowledge",
+    "market",
+    "security",
+    "structured",
+    "temporal",
+    "temporal-conversation",
+    "temporal-range",
+    "unsupported"
+  ],
+  "issues": [],
+  "passed": true
+}

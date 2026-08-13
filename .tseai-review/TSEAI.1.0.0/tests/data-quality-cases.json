@@ -1,0 +1,26 @@
+{
+  "sprint": 16,
+  "policy": "fail-closed for stale/invalid; warning remains usable",
+  "cases": [
+    {"id":"fresh-live","expected":"Valid","canUse":true},
+    {"id":"stale-live","expected":"Stale","canUse":false},
+    {"id":"future-snapshot","expected":"Invalid","canUse":false},
+    {"id":"negative-trade-volume","expected":"Invalid","canUse":false},
+    {"id":"min-greater-than-max","expected":"Invalid","canUse":false},
+    {"id":"last-outside-range","expected":"Warning","canUse":true},
+    {"id":"duplicate-orderbook-level","expected":"Invalid","canUse":false},
+    {"id":"invalid-orderbook-level","expected":"Invalid","canUse":false},
+    {"id":"negative-orderbook-value","expected":"Invalid","canUse":false},
+    {"id":"crossed-orderbook","expected":"Warning","canUse":true},
+    {"id":"negative-client-type","expected":"Invalid","canUse":false},
+    {"id":"missing-source-table","expected":"Invalid"},
+    {"id":"empty-required-source","expected":"Invalid"},
+    {"id":"stale-current-source","expected":"Stale"},
+    {"id":"missing-reference-collection-time","expected":"Valid"},
+    {"id":"missing-current-collection-time","expected":"Warning"},
+    {"id":"source-collection-time-future","expected":"Invalid"},
+    {"id":"filter-rejects-bad-snapshot","expected":"QualityRejected++"},
+    {"id":"chat-rejects-stale-snapshot","expected":"data_quality_unavailable"},
+    {"id":"chat-warning-is-transparent","expected":"answer-with-warning"}
+  ]
+}

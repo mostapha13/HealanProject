@@ -1,0 +1,17 @@
+{
+  "cases": [
+    {"name":"buyer_power","buyVolume":2000,"buyCount":10,"sellVolume":500,"sellCount":10,"expected":4.0},
+    {"name":"buyer_power_zero_buyers","buyVolume":2000,"buyCount":0,"sellVolume":500,"sellCount":10,"expected":"unavailable"},
+    {"name":"buyer_power_zero_sellers","buyVolume":2000,"buyCount":10,"sellVolume":500,"sellCount":0,"expected":"unavailable"},
+    {"name":"individual_net_volume","buyVolume":2000,"sellVolume":500,"expected":1500},
+    {"name":"orderbook_imbalance_balanced","buyVolume":1000,"sellVolume":1000,"expected":0.0},
+    {"name":"orderbook_imbalance_buy","buyVolume":3000,"sellVolume":1000,"expected":0.5},
+    {"name":"spread","bestBid":990,"bestAsk":1000,"expected":10},
+    {"name":"spread_percent","bestBid":990,"bestAsk":1000,"lastPrice":1000,"expected":1.0},
+    {"name":"volume_vs_base","tradeVolume":2000000,"baseVolume":1000000,"expected":2.0},
+    {"name":"volume_vs_monthly_average","expected":"unavailable_without_source"},
+    {"name":"distance_from_high","lastPrice":900,"high":1000,"expected":10.0},
+    {"name":"distance_from_low","lastPrice":900,"low":800,"expected":12.5},
+    {"name":"breadth_positive","positive":70,"negative":20,"total":100,"expectedSignal":"StrongPositive"}
+  ]
+}

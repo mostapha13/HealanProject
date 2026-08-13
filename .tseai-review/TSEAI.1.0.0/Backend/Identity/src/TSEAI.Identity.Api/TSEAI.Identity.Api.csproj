@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../Shared/TSEAI.Shared.Application/TSEAI.Shared.Application.csproj" />
+    <ProjectReference Include="../TSEAI.Identity.Application/TSEAI.Identity.Application.csproj" />
+    <ProjectReference Include="../TSEAI.Identity.Infrastructure/TSEAI.Identity.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.18" />
+  </ItemGroup>
+</Project>

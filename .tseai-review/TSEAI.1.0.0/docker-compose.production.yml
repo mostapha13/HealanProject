@@ -1,0 +1,550 @@
+name: tseai
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: tseai-gateway
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    ports:
+    - 8080:80
+    volumes:
+    - ./deploy/nginx/gateway.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+    - web
+    - tseai-api
+    - identity-api
+    - notification-api
+    - ai-engine
+    networks:
+    - tseai
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    container_name: tseai-web
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    networks:
+    - tseai
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  tseai-api:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/Platform/src/TSEAI.Api/TSEAI.Api.csproj
+        DLL_NAME: TSEAI.Api.dll
+    container_name: tseai-api
+    restart: always
+    logging: *default-logging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ApplicationDb: ${APP_DB_CONNECTION_STRING}
+      ConnectionStrings__SqlAi: ${SQL_AI_CONNECTION_STRING:-}
+      SqlAi__CashMarketMoneyUnit: ${SQL_AI_CASHMARKET_MONEY_UNIT:-Irr}
+      DataQuality__MarketStartLocal: ${DATA_QUALITY_MARKET_START_LOCAL:-08:30}
+      DataQuality__MarketEndLocal: ${DATA_QUALITY_MARKET_END_LOCAL:-13:30}
+      DataQuality__MarketLiveMaxAgeSeconds: ${DATA_QUALITY_MARKET_LIVE_MAX_AGE_SECONDS:-30}
+      DataQuality__OffHoursMaxAgeHours: ${DATA_QUALITY_OFF_HOURS_MAX_AGE_HOURS:-24}
+      DataQuality__WeekendMaxAgeHours: ${DATA_QUALITY_WEEKEND_MAX_AGE_HOURS:-96}
+      DataQuality__CanonicalCurrentSnapshotMaxAgeHours: ${DATA_QUALITY_CANONICAL_CURRENT_MAX_AGE_HOURS:-24}
+      DataQuality__CanonicalVersionedMaxAgeDays: ${DATA_QUALITY_CANONICAL_VERSIONED_MAX_AGE_DAYS:-14}
+      DataQuality__CanonicalReferenceMaxAgeDays: ${DATA_QUALITY_CANONICAL_REFERENCE_MAX_AGE_DAYS:-30}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Security__JwtSigningKey: ${JWT_SIGNING_KEY}
+      Security__Issuer: tseai-identity
+      Security__Audience: tseai
+      RabbitMq__Host: rabbitmq
+      Qdrant__BaseUrl: http://qdrant:6333
+      AI__BaseUrl: http://ai-engine:8000/
+      TZ: ${TZ:-Asia/Tehran}
+      Release__RequireStrictConfiguration: 'true'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+    healthcheck:
+      test: [CMD, "dotnet", "/healthcheck/TSEAI.HealthCheck.dll", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  identity-api:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/Identity/src/TSEAI.Identity.Api/TSEAI.Identity.Api.csproj
+        DLL_NAME: TSEAI.Identity.Api.dll
+    container_name: tseai-identity
+    restart: always
+    logging: *default-logging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__IdentityDb: ${IDENTITY_DB_CONNECTION_STRING}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Security__JwtSigningKey: ${JWT_SIGNING_KEY}
+      Security__OtpHashSecret: ${OTP_HASH_SECRET}
+      Security__Issuer: tseai-identity
+      Security__Audience: tseai
+      Security__AccessTokenMinutes: ${ACCESS_TOKEN_MINUTES:-15}
+      Security__RefreshTokenDays: ${REFRESH_TOKEN_DAYS:-30}
+      Sms__Endpoint: ${SMS_ENDPOINT:-}
+      Sms__ApiKey: ${SMS_API_KEY:-}
+      Sms__AllowConsoleFallback: 'false'
+      Security__BootstrapAdminMobile: ${BOOTSTRAP_ADMIN_MOBILE:-}
+      TZ: ${TZ:-Asia/Tehran}
+      Release__RequireStrictConfiguration: 'true'
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+    healthcheck:
+      test: [CMD, "dotnet", "/healthcheck/TSEAI.HealthCheck.dll", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  market-runtime:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/MarketRuntime/src/TSEAI.MarketRuntime.Worker/TSEAI.MarketRuntime.Worker.csproj
+        DLL_NAME: TSEAI.MarketRuntime.Worker.dll
+    container_name: tseai-market-runtime
+    restart: always
+    logging: *default-logging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__MarketDb: ${MARKET_DB_CONNECTION_STRING}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Runtime__PollIntervalMilliseconds: ${MARKET_POLL_INTERVAL_MS:-1000}
+      Runtime__InstrumentRefreshMinutes: ${INSTRUMENT_REFRESH_MINUTES:-30}
+      Runtime__UseWatermark: ${MARKET_USE_WATERMARK:-true}
+      Runtime__InstrumentSql: ${MARKET_INSTRUMENT_SQL:-}
+      Runtime__CurrentStateSql: ${MARKET_CURRENT_STATE_SQL:-}
+      Runtime__ClientTypeSql: ${MARKET_CLIENT_TYPE_SQL:-}
+      Runtime__OrderBookSql: ${MARKET_ORDERBOOK_SQL:-}
+      TZ: ${TZ:-Asia/Tehran}
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+  alert-engine:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/Alerts/src/TSEAI.Alert.Worker/TSEAI.Alert.Worker.csproj
+        DLL_NAME: TSEAI.Alert.Worker.dll
+    container_name: tseai-alert-engine
+    restart: always
+    logging: *default-logging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ApplicationDb: ${APP_DB_CONNECTION_STRING}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Alerts__ConsumerGroup: tseai-alert-engine-v1
+      Alerts__StreamReadCount: ${ALERT_STREAM_READ_COUNT:-20}
+      Alerts__PendingClaimIdleMilliseconds: ${ALERT_PENDING_CLAIM_IDLE_MS:-30000}
+      Alerts__StateTtlSeconds: ${ALERT_STATE_TTL_SECONDS:-172800}
+      Alerts__RuleRefreshSeconds: ${ALERT_RULE_REFRESH_SECONDS:-5}
+      Alerts__OutboxPollMilliseconds: ${ALERT_OUTBOX_POLL_MS:-500}
+      Alerts__OutboxBatchSize: ${ALERT_OUTBOX_BATCH_SIZE:-50}
+      Alerts__OutboxLeaseSeconds: ${ALERT_OUTBOX_LEASE_SECONDS:-120}
+      RabbitMq__Host: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_DEFAULT_USER:-tseai}
+      RabbitMq__Password: ${RABBITMQ_DEFAULT_PASS}
+      RabbitMq__Exchange: tseai.alerts
+      RabbitMq__RoutingKey: alert.triggered
+      TZ: ${TZ:-Asia/Tehran}
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+  notification-api:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/Notification/src/TSEAI.Notification.Api/TSEAI.Notification.Api.csproj
+        DLL_NAME: TSEAI.Notification.Api.dll
+    container_name: tseai-notification
+    restart: always
+    logging: *default-logging
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      RabbitMq__Host: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_DEFAULT_USER:-tseai}
+      RabbitMq__Password: ${RABBITMQ_DEFAULT_PASS}
+      RabbitMq__Exchange: tseai.alerts
+      RabbitMq__Queue: tseai.notifications.alerts
+      RabbitMq__RoutingKey: alert.triggered
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Security__JwtSigningKey: ${JWT_SIGNING_KEY}
+      Security__Issuer: tseai-identity
+      Security__Audience: tseai
+      TZ: ${TZ:-Asia/Tehran}
+      Release__RequireStrictConfiguration: 'true'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+    healthcheck:
+      test: [CMD, "dotnet", "/healthcheck/TSEAI.HealthCheck.dll", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  knowledge-worker:
+    build:
+      context: .
+      dockerfile: docker/dotnet-service.Dockerfile
+      args:
+        PROJECT_PATH: Backend/Knowledge/src/TSEAI.Knowledge.Worker/TSEAI.Knowledge.Worker.csproj
+        DLL_NAME: TSEAI.Knowledge.Worker.dll
+    container_name: tseai-knowledge-worker
+    restart: always
+    logging: *default-logging
+    environment:
+      Knowledge__ConnectionString: ${KNOWLEDGE_CONNECTION_STRING:-Server=sqlserver;Database=TSEAI;User
+        Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=true}
+      Knowledge__RedisConnectionString: redis:6379,password=${REDIS_PASSWORD},abortConnect=false
+      Knowledge__CheckpointKeyPrefix: tseai:knowledge:checkpoint:v1
+      Knowledge__AiBaseUrl: http://ai-engine:8000
+      Knowledge__PollSeconds: ${KNOWLEDGE_POLL_SECONDS:-120}
+      Knowledge__BatchSize: ${KNOWLEDGE_BATCH_SIZE:-250}
+      Knowledge__EnablePhase1AutoSources: ${KNOWLEDGE_ENABLE_PHASE1_AUTO_SOURCES:-true}
+      Knowledge__MaxDocumentsPerSourceRun: ${KNOWLEDGE_MAX_DOCUMENTS_PER_SOURCE_RUN:-100000}
+      Knowledge__WatermarkOverlapMinutes: ${KNOWLEDGE_WATERMARK_OVERLAP_MINUTES:-5}
+      Knowledge__AiRequestTimeoutSeconds: ${KNOWLEDGE_AI_REQUEST_TIMEOUT_SECONDS:-300}
+      TZ: ${TZ:-Asia/Tehran}
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-engine:
+        condition: service_started
+      db-init:
+        condition: service_completed_successfully
+    networks:
+    - tseai
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+  ai-engine:
+    build:
+      context: .
+      dockerfile: docker/python-service.Dockerfile
+    container_name: tseai-ai
+    restart: always
+    logging: *default-logging
+    environment:
+      APP_ENV: ${ASPNETCORE_ENVIRONMENT:-Development}
+      QDRANT_URL: http://qdrant:6333
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      TZ: ${TZ:-Asia/Tehran}
+      LLM_FILTER_PLANNER_ENABLED: ${LLM_FILTER_PLANNER_ENABLED:-true}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://local-llm:8080/v1}
+      LLM_MODEL: ${LLM_MODEL:-qwen3.5-4b-fa}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-2}
+      LLM_QUEUE_TIMEOUT_SECONDS: ${LLM_QUEUE_TIMEOUT_SECONDS:-15}
+      LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-45}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://local-embedding:8080/v1}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding-0.6b}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1024}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      QDRANT_KNOWLEDGE_COLLECTION: ${QDRANT_KNOWLEDGE_COLLECTION:-tseai_knowledge_v1}
+      AI_ALLOWED_HOSTS: ai-engine,localhost,127.0.0.1
+    extra_hosts:
+    - host.docker.internal:host-gateway
+    depends_on:
+    - qdrant
+    - redis
+    - local-llm
+    - local-embedding
+    networks:
+    - tseai
+    - ai-inference
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    tmpfs:
+    - /tmp
+    healthcheck:
+      test: [CMD, "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+  local-llm:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda@sha256:182a26fbd68d1774860bd2a0fb5581ba3047974307eaeee64930d8bf889e0c0c
+    container_name: tseai-local-llm
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    read_only: true
+    tmpfs:
+    - /tmp
+    command: ["-m", "/models/Qwen3.5-4B-UD-Q4_K_XL.gguf", "--alias", "qwen3.5-4b-fa", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--flash-attn", "on", "-c", "8192", "-np", "2", "--cont-batching", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "8"]
+    volumes:
+    - ./models:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+    healthcheck:
+      test: [CMD, "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+    networks:
+    - ai-inference
+  local-embedding:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda@sha256:182a26fbd68d1774860bd2a0fb5581ba3047974307eaeee64930d8bf889e0c0c
+    container_name: tseai-local-embedding
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    read_only: true
+    tmpfs:
+    - /tmp
+    command: ["-m", "/models/Qwen3-Embedding-0.6B-Q8_0.gguf", "--alias", "qwen3-embedding-0.6b", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--embedding", "--pooling", "last", "-c", "8192", "-b", "512", "-np", "2", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "4"]
+    volumes:
+    - ./models:/models:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+    healthcheck:
+      test: [CMD, "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+    - ai-inference
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-CU23-ubuntu-22.04
+    container_name: tseai-sqlserver
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+    - tseai_sqlserver:/var/opt/mssql
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}"
+        -Q "SELECT 1" || exit 1
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+    networks:
+    - tseai
+  redis:
+    image: redis:7.4.10-alpine
+    container_name: tseai-redis
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    - --requirepass
+    - ${REDIS_PASSWORD}
+    volumes:
+    - tseai_redis:/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli -a "$${REDIS_PASSWORD}" ping | grep PONG
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+    - tseai
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+  rabbitmq:
+    image: rabbitmq:4.3.4-management-alpine
+    container_name: tseai-rabbitmq
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-tseai}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+    - tseai_rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test:
+      - CMD
+      - rabbitmq-diagnostics
+      - -q
+      - ping
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+    - tseai
+  qdrant:
+    image: qdrant/qdrant:v1.19.0
+    container_name: tseai-qdrant
+    restart: always
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    volumes:
+    - tseai_qdrant:/qdrant/storage
+    networks:
+    - tseai
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - bash -c '</dev/tcp/127.0.0.1/6333'
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-CU23-ubuntu-22.04
+    container_name: tseai-db-init
+    restart: 'no'
+    logging: *default-logging
+    security_opt:
+    - no-new-privileges:true
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    entrypoint:
+    - /bin/bash
+    - -c
+    command:
+    - /opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P "$$MSSQL_SA_PASSWORD"
+      -b -Q "IF DB_ID(N'TSEAI_App') IS NULL CREATE DATABASE [TSEAI_App]; IF DB_ID(N'TSEAI_Identity')
+      IS NULL CREATE DATABASE [TSEAI_Identity]; IF DB_ID(N'TSEAI') IS NULL CREATE
+      DATABASE [TSEAI];"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+    - tseai
+networks:
+  tseai:
+    name: tseai-network
+  ai-inference:
+    name: tseai-ai-inference
+    internal: true
+volumes:
+  tseai_sqlserver: null
+  tseai_redis: null
+  tseai_rabbitmq: null
+  tseai_qdrant: null

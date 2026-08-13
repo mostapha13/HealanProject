@@ -1,0 +1,30 @@
+[
+  {
+    "name": "trade-count",
+    "source": "(tno)>20"
+  },
+  {
+    "name": "volume-base",
+    "source": "(tvol)>(bvol)"
+  },
+  {
+    "name": "queue",
+    "source": "(pl)==(tmax) && (qd1)>=200_000_000"
+  },
+  {
+    "name": "client-volume",
+    "source": "(ct).Buy_I_Volume >= 2 * (ct).Sell_I_Volume"
+  },
+  {
+    "name": "symbol-prefix",
+    "source": "(l18).indexOf(\"x\")==0"
+  },
+  {
+    "name": "symbol-last-char",
+    "source": "(l18)[(l18).length-1]==\"x\""
+  },
+  {
+    "name": "math",
+    "source": "Math.abs((pl)-(pc))<100"
+  }
+]

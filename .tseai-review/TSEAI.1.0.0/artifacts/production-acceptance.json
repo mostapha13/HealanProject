@@ -1,0 +1,47 @@
+{
+  "generatedAtUtc": "2026-08-11T21:07:53.517277+00:00",
+  "version": "1.0.0-rc.31",
+  "status": "FAIL",
+  "gates": {
+    "dotnet": "PASS",
+    "frontendBuild": "PASS",
+    "docker": "FAIL",
+    "liveGoldenEvaluation": "FAIL",
+    "loadTest": "FAIL",
+    "securityDAST": "FAIL",
+    "backupRestoreDrill": "FAIL"
+  },
+  "evidence": {
+    "static": {
+      "path": "artifacts/release-static.json",
+      "sha256": "282b971825da459f10ad4a2ff6e256cefcced076b5ad48517ec532ef27dcabbf"
+    },
+    "securityStatic": {
+      "path": "artifacts/security-static.json",
+      "sha256": "4a45b0810c332299b619770f84e633fd8dd97d2d488643c44370e0722bacedcc"
+    },
+    "sbom": {
+      "path": "artifacts/sbom.cdx.json",
+      "sha256": "fca644cd35ef626f87bdb3dab7f3b37dad22b4504f50ff1bcd61f7af6fcbb55c"
+    }
+  },
+  "blockingReasons": [
+    "evidence_missing:runtime",
+    "evidence_missing:evaluation",
+    "evidence_missing:performance",
+    "evidence_missing:security",
+    "evidence_missing:backupRestore",
+    "gate_not_passed:runtime",
+    "gate_not_passed:performance",
+    "gate_not_passed:security",
+    "gate_not_passed:backupRestore",
+    "gate_not_passed:evaluation",
+    "golden_case_count_mismatch",
+    "golden_dataset_digest_mismatch",
+    "load_volume_below_minimum",
+    "load_errors_present",
+    "security_dast_coverage_insufficient",
+    "backup_restore_database_coverage_mismatch",
+    "runtime_service_coverage_insufficient"
+  ]
+}

@@ -1,0 +1,180 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Shared.Domain", "Backend\Shared\TSEAI.Shared.Domain\TSEAI.Shared.Domain.csproj", "{A0C75F1F-AE74-4DA9-B650-6C04AF275AB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Shared.Application", "Backend\Shared\TSEAI.Shared.Application\TSEAI.Shared.Application.csproj", "{A1094FD2-0724-4513-B407-2166CABE4A6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Identity.Domain", "Backend\Identity\src\TSEAI.Identity.Domain\TSEAI.Identity.Domain.csproj", "{9234F405-BACB-460D-85CA-87290B03DC98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Identity.Application", "Backend\Identity\src\TSEAI.Identity.Application\TSEAI.Identity.Application.csproj", "{1BF36B72-9BED-4654-B572-09FC41611206}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Identity.Infrastructure", "Backend\Identity\src\TSEAI.Identity.Infrastructure\TSEAI.Identity.Infrastructure.csproj", "{B585EFBD-D710-4EEE-A8C2-A535E34050D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Identity.Api", "Backend\Identity\src\TSEAI.Identity.Api\TSEAI.Identity.Api.csproj", "{544D5F19-A1BD-4DBF-A18F-D5F9749F3E56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Domain", "Backend\Platform\src\TSEAI.Domain\TSEAI.Domain.csproj", "{74B3ECA1-914A-4EB0-B4CC-7DD506EAD421}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Application", "Backend\Platform\src\TSEAI.Application\TSEAI.Application.csproj", "{69AECDEC-915B-4430-AAE2-8ADBB62EB3E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Infrastructure", "Backend\Platform\src\TSEAI.Infrastructure\TSEAI.Infrastructure.csproj", "{51511BD8-6A49-4070-80AD-FD82DBB3CD2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Api", "Backend\Platform\src\TSEAI.Api\TSEAI.Api.csproj", "{1176FF15-0EDF-49D4-9E81-D62BFCCBD859}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.MarketRuntime.Worker", "Backend\MarketRuntime\src\TSEAI.MarketRuntime.Worker\TSEAI.MarketRuntime.Worker.csproj", "{6F9ADB42-4111-4D29-8D70-84309C47FF95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Notification.Api", "Backend\Notification\src\TSEAI.Notification.Api\TSEAI.Notification.Api.csproj", "{76F6A89E-99E5-4083-B35A-45313182C3B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Alert.Worker", "Backend\Alerts\src\TSEAI.Alert.Worker\TSEAI.Alert.Worker.csproj", "{2DA7F6B9-39AC-4B54-9D6B-7F0D52AC91E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Knowledge.Worker", "Backend\Knowledge\src\TSEAI.Knowledge.Worker\TSEAI.Knowledge.Worker.csproj", "{8D68A22A-145D-4DBB-942A-7C0A58B9BAA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.Temporal.SmokeTests", "Backend\Platform\tests\TSEAI.Temporal.SmokeTests\TSEAI.Temporal.Smoke.csproj", "{B140A14A-71F2-4D19-9414-000000000014}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.EntityResolution.SmokeTests", "Backend\Platform\tests\TSEAI.EntityResolution.SmokeTests\TSEAI.EntityResolution.Smoke.csproj", "{B150A15A-71F2-4D19-9415-000000000015}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.DataQuality.SmokeTests", "Backend\Platform\tests\TSEAI.DataQuality.SmokeTests\TSEAI.DataQuality.Smoke.csproj", "{B160A16A-71F2-4D19-9416-000000000016}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.MarketAnalytics.SmokeTests", "Backend\Platform\tests\TSEAI.MarketAnalytics.SmokeTests\TSEAI.MarketAnalytics.Smoke.csproj", "{B180A18A-71F2-4D19-9418-000000000018}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.StructuredQuery.SmokeTests", "Backend\Platform\tests\TSEAI.StructuredQuery.SmokeTests\TSEAI.StructuredQuery.Smoke.csproj", "{B190A19A-71F2-4D19-9419-000000000019}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.ChatFilter.SmokeTests", "Backend\Platform\tests\TSEAI.ChatFilter.SmokeTests\TSEAI.ChatFilter.Smoke.csproj", "{B200A20A-71F2-4D19-9420-000000000020}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.ConversationalFilter.SmokeTests", "Backend\Platform\tests\TSEAI.ConversationalFilter.SmokeTests\TSEAI.ConversationalFilter.Smoke.csproj", "{B210A21A-71F2-4D19-9421-000000000021}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.FilterTemporal.SmokeTests", "Backend\Platform\tests\TSEAI.FilterTemporal.SmokeTests\TSEAI.FilterTemporal.Smoke.csproj", "{B220A22A-71F2-4D19-9422-000000000022}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.ChatFilterAssets.SmokeTests", "Backend\Platform\tests\TSEAI.ChatFilterAssets.SmokeTests\TSEAI.ChatFilterAssets.SmokeTests.csproj", "{A23B0001-4F11-4B78-9A23-000000000023}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.CapabilityRouter.SmokeTests", "Backend\Platform\tests\TSEAI.CapabilityRouter.SmokeTests\TSEAI.CapabilityRouter.Smoke.csproj", "{B260A26A-71F2-4D19-9426-000000000026}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.MultiToolHybridPlanner.SmokeTests", "Backend\Platform\tests\TSEAI.MultiToolHybridPlanner.SmokeTests\TSEAI.MultiToolHybridPlanner.SmokeTests.csproj", "{C270A27A-71F2-4D19-9427-000000000027}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.ConversationContext.SmokeTests", "Backend\Platform\tests\TSEAI.ConversationContext.SmokeTests\TSEAI.ConversationContext.SmokeTests.csproj", "{D280A28A-71F2-4D19-9428-000000000028}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TSEAI.TemporalConversation.SmokeTests", "Backend\Platform\tests\TSEAI.TemporalConversation.SmokeTests\TSEAI.TemporalConversation.SmokeTests.csproj", "{D290A29A-71F2-4D19-9429-000000000029}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04FC9429}") = "TSEAI.EvidenceCitation.SmokeTests", "Backend\Platform\tests\TSEAI.EvidenceCitation.SmokeTests\TSEAI.EvidenceCitation.SmokeTests.csproj", "{D300A30A-71F2-4D19-9430-000000000030}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D290A29A-71F2-4D19-9429-000000000029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D290A29A-71F2-4D19-9429-000000000029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D290A29A-71F2-4D19-9429-000000000029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D290A29A-71F2-4D19-9429-000000000029}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D280A28A-71F2-4D19-9428-000000000028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D280A28A-71F2-4D19-9428-000000000028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D280A28A-71F2-4D19-9428-000000000028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D280A28A-71F2-4D19-9428-000000000028}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B260A26A-71F2-4D19-9426-000000000026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B260A26A-71F2-4D19-9426-000000000026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B260A26A-71F2-4D19-9426-000000000026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B260A26A-71F2-4D19-9426-000000000026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C270A27A-71F2-4D19-9427-000000000027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C270A27A-71F2-4D19-9427-000000000027}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C270A27A-71F2-4D19-9427-000000000027}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C270A27A-71F2-4D19-9427-000000000027}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A23B0001-4F11-4B78-9A23-000000000023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A23B0001-4F11-4B78-9A23-000000000023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A23B0001-4F11-4B78-9A23-000000000023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A23B0001-4F11-4B78-9A23-000000000023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0C75F1F-AE74-4DA9-B650-6C04AF275AB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0C75F1F-AE74-4DA9-B650-6C04AF275AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0C75F1F-AE74-4DA9-B650-6C04AF275AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0C75F1F-AE74-4DA9-B650-6C04AF275AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1094FD2-0724-4513-B407-2166CABE4A6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1094FD2-0724-4513-B407-2166CABE4A6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1094FD2-0724-4513-B407-2166CABE4A6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1094FD2-0724-4513-B407-2166CABE4A6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9234F405-BACB-460D-85CA-87290B03DC98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9234F405-BACB-460D-85CA-87290B03DC98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9234F405-BACB-460D-85CA-87290B03DC98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9234F405-BACB-460D-85CA-87290B03DC98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BF36B72-9BED-4654-B572-09FC41611206}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BF36B72-9BED-4654-B572-09FC41611206}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BF36B72-9BED-4654-B572-09FC41611206}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BF36B72-9BED-4654-B572-09FC41611206}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B585EFBD-D710-4EEE-A8C2-A535E34050D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B585EFBD-D710-4EEE-A8C2-A535E34050D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B585EFBD-D710-4EEE-A8C2-A535E34050D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B585EFBD-D710-4EEE-A8C2-A535E34050D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544D5F19-A1BD-4DBF-A18F-D5F9749F3E56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544D5F19-A1BD-4DBF-A18F-D5F9749F3E56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544D5F19-A1BD-4DBF-A18F-D5F9749F3E56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544D5F19-A1BD-4DBF-A18F-D5F9749F3E56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74B3ECA1-914A-4EB0-B4CC-7DD506EAD421}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74B3ECA1-914A-4EB0-B4CC-7DD506EAD421}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74B3ECA1-914A-4EB0-B4CC-7DD506EAD421}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74B3ECA1-914A-4EB0-B4CC-7DD506EAD421}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69AECDEC-915B-4430-AAE2-8ADBB62EB3E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69AECDEC-915B-4430-AAE2-8ADBB62EB3E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69AECDEC-915B-4430-AAE2-8ADBB62EB3E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69AECDEC-915B-4430-AAE2-8ADBB62EB3E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51511BD8-6A49-4070-80AD-FD82DBB3CD2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51511BD8-6A49-4070-80AD-FD82DBB3CD2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51511BD8-6A49-4070-80AD-FD82DBB3CD2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51511BD8-6A49-4070-80AD-FD82DBB3CD2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1176FF15-0EDF-49D4-9E81-D62BFCCBD859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1176FF15-0EDF-49D4-9E81-D62BFCCBD859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1176FF15-0EDF-49D4-9E81-D62BFCCBD859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1176FF15-0EDF-49D4-9E81-D62BFCCBD859}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F9ADB42-4111-4D29-8D70-84309C47FF95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F9ADB42-4111-4D29-8D70-84309C47FF95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F9ADB42-4111-4D29-8D70-84309C47FF95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F9ADB42-4111-4D29-8D70-84309C47FF95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76F6A89E-99E5-4083-B35A-45313182C3B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76F6A89E-99E5-4083-B35A-45313182C3B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76F6A89E-99E5-4083-B35A-45313182C3B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76F6A89E-99E5-4083-B35A-45313182C3B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DA7F6B9-39AC-4B54-9D6B-7F0D52AC91E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DA7F6B9-39AC-4B54-9D6B-7F0D52AC91E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DA7F6B9-39AC-4B54-9D6B-7F0D52AC91E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DA7F6B9-39AC-4B54-9D6B-7F0D52AC91E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D68A22A-145D-4DBB-942A-7C0A58B9BAA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D68A22A-145D-4DBB-942A-7C0A58B9BAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D68A22A-145D-4DBB-942A-7C0A58B9BAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D68A22A-145D-4DBB-942A-7C0A58B9BAA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B140A14A-71F2-4D19-9414-000000000014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B140A14A-71F2-4D19-9414-000000000014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B140A14A-71F2-4D19-9414-000000000014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B140A14A-71F2-4D19-9414-000000000014}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B150A15A-71F2-4D19-9415-000000000015}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B150A15A-71F2-4D19-9415-000000000015}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B150A15A-71F2-4D19-9415-000000000015}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B150A15A-71F2-4D19-9415-000000000015}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B160A16A-71F2-4D19-9416-000000000016}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B160A16A-71F2-4D19-9416-000000000016}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B160A16A-71F2-4D19-9416-000000000016}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B160A16A-71F2-4D19-9416-000000000016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B180A18A-71F2-4D19-9418-000000000018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B180A18A-71F2-4D19-9418-000000000018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B180A18A-71F2-4D19-9418-000000000018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B180A18A-71F2-4D19-9418-000000000018}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B190A19A-71F2-4D19-9419-000000000019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B190A19A-71F2-4D19-9419-000000000019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B190A19A-71F2-4D19-9419-000000000019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B190A19A-71F2-4D19-9419-000000000019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B200A20A-71F2-4D19-9420-000000000020}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B200A20A-71F2-4D19-9420-000000000020}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B200A20A-71F2-4D19-9420-000000000020}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B200A20A-71F2-4D19-9420-000000000020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B210A21A-71F2-4D19-9421-000000000021}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B210A21A-71F2-4D19-9421-000000000021}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B210A21A-71F2-4D19-9421-000000000021}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B210A21A-71F2-4D19-9421-000000000021}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B220A22A-71F2-4D19-9422-000000000022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B220A22A-71F2-4D19-9422-000000000022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B220A22A-71F2-4D19-9422-000000000022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B220A22A-71F2-4D19-9422-000000000022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D300A30A-71F2-4D19-9430-000000000030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D300A30A-71F2-4D19-9430-000000000030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D300A30A-71F2-4D19-9430-000000000030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D300A30A-71F2-4D19-9430-000000000030}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

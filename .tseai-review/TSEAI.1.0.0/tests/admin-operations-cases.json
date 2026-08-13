@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "name": "audit-has-correlation",
+      "required": [
+        "Action",
+        "ResourceType",
+        "Outcome",
+        "CorrelationId",
+        "CreatedAtUtc"
+      ]
+    },
+    {
+      "name": "incident-is-operational",
+      "required": [
+        "Component",
+        "Severity",
+        "Code",
+        "Status",
+        "Occurrences"
+      ]
+    },
+    {
+      "name": "no-secret-return",
+      "forbidden": [
+        "Password",
+        "Jwt",
+        "RefreshToken",
+        "Otp",
+        "ConnectionString"
+      ]
+    }
+  ]
+}

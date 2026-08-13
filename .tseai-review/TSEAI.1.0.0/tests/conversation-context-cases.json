@@ -1,0 +1,8 @@
+[
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"حقیقی حقوقیش؟","expected":"MarketSymbol","entity":"خودرو"},
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"اردربوکشم بگو","expected":"MarketSymbol","entity":"خودرو"},
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"آخرین خبرش؟","expected":"Knowledge","entity":"خودرو"},
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"چرا افت کرده؟","expected":"Hybrid","entity":"خودرو"},
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"حالا با خساپا مقایسه کن","expected":"MarketComparison","primary":"خودرو","secondary":"خساپا"},
+  {"turn1":"وضعیت خودرو رو بگو","turn2":"نه منظورم خساپا بود","expected":"Correction","entity":"خساپا"}
+]

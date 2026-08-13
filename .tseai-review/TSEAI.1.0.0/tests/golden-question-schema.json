@@ -1,0 +1,16 @@
+{
+  "requiredCaseFields": [
+    "id",
+    "category",
+    "question",
+    "expected"
+  ],
+  "expectedFields": [
+    "route",
+    "capabilities",
+    "entity",
+    "temporal",
+    "mustContain",
+    "mustNotContain"
+  ]
+}

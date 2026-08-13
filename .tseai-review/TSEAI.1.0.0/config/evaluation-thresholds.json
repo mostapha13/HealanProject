@@ -1,0 +1,16 @@
+{
+  "datasetVersion": "1.0",
+  "minimum": {
+    "routeAccuracy": 0.97,
+    "capabilityAccuracy": 0.97,
+    "entityAccuracy": 0.98,
+    "temporalAccuracy": 0.99,
+    "groundedness": 0.98,
+    "citationValidity": 0.99
+  },
+  "maximum": {
+    "hallucinationRate": 0.005,
+    "unsafeToolRate": 0.0
+  },
+  "hardBlockCategories": ["security", "unsupported"]
+}

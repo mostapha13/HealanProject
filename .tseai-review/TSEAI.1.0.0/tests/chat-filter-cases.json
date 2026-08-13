@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "text": "(pl)==(tmax) && (qd1)>=200000000",
+      "filter": true,
+      "dsl": true
+    },
+    {
+      "text": "فیلتر کن (pl)>(pc) && (tvol)>(bvol)",
+      "filter": true,
+      "dsl": true
+    },
+    {
+      "text": "```js\\n(pe)<6 && (tvol)>1000000\\n```",
+      "filter": true,
+      "dsl": true
+    },
+    {
+      "text": "صف خریدها رو فیلتر کن",
+      "filter": true,
+      "dsl": false
+    },
+    {
+      "text": "فیلتر بازار بساز که ارزش معاملات بالا باشه",
+      "filter": true,
+      "dsl": false
+    },
+    {
+      "text": "([ih][0].QTotTran5J)>1000",
+      "filter": true,
+      "dsl": true,
+      "history": true
+    },
+    {
+      "text": "قیمت فولاد چنده؟",
+      "filter": false
+    },
+    {
+      "text": "۱۰ نماد با بیشترین حجم معاملات",
+      "filter": false
+    },
+    {
+      "text": "P/E خودرو چنده؟",
+      "filter": false
+    },
+    {
+      "text": "قرارداد اختیار معامله چیست؟",
+      "filter": false
+    },
+    {
+      "text": "شرط دوم رو حذف کن",
+      "filter": true,
+      "directDsl": false,
+      "reason": "conversational-edit"
+    },
+    {
+      "text": "P/E رو زیر 5 کن",
+      "filter": true,
+      "directDsl": false,
+      "reason": "field-edit"
+    },
+    {
+      "text": "فیلتر رو توضیح بده",
+      "filter": true,
+      "directDsl": false,
+      "reason": "explain"
+    },
+    {
+      "text": "همین رو اجرا کن",
+      "filter": true,
+      "directDsl": false,
+      "reason": "execute"
+    },
+    {
+      "text": "شرط دوم را با (pl) > (pc) جایگزین کن",
+      "filter": true,
+      "directDsl": true,
+      "reason": "direct-dsl-edit"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {"name":"top_volume","question":"10 نماد با بیشترین حجم معاملات را بده","expectedSort":"TradeVolume","take":10},
+    {"name":"pe_less_than","question":"نمادهایی که P/E کمتر از 6 دارند را بده","metric":"PE","operator":"LessThan","value":6},
+    {"name":"buyer_power","question":"نمادهایی که قدرت خریدار بالای 2 دارند","metric":"BuyerPower","operator":"GreaterThan","value":2},
+    {"name":"top_trade_value","question":"20 نماد با بیشترین ارزش معاملات","expectedSort":"TradeValue","take":20},
+    {"name":"lowest_market_value","question":"10 نماد با کمترین ارزش بازار","expectedSort":"MarketValue","take":10},
+    {"name":"farabourse_scope","question":"نمادهای فرابورس با P/E زیر 5","marketTypeId":30},
+    {"name":"tse_scope","question":"نمادهای بورس با P/E زیر 5","marketTypeId":20},
+    {"name":"persian_digits","question":"۱۰ نماد با بیشترین حجم معاملات","take":10},
+    {"name":"single_symbol_not_screening","question":"قیمت فولاد چنده؟","mustNotIntercept":true},
+    {"name":"single_symbol_pe_not_screening","question":"P/E فولاد چنده؟","mustNotIntercept":true},
+    {"name":"unavailable_buyer_power","rule":"unavailable analytics must not become zero or match a condition"},
+    {"name":"historical_guard","question":"دیروز 10 نماد با بیشترین حجم را بده","rule":"fail closed until trusted history exists"}
+  ]
+}

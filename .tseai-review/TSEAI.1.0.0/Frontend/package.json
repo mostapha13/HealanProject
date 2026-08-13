@@ -1,0 +1,18 @@
+{
+  "name": "tseai-web",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "vite": "6.4.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@microsoft/signalr": "9.0.6"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,3 @@
+using StackExchange.Redis;
+using TSEAI.MarketRuntime.Worker;
+var builder=Host.CreateApplicationBuilder(args); builder.Services.Configure<MarketRuntimeOptions>(builder.Configuration.GetSection("Runtime")); builder.Services.AddSingleton<IConnectionMultiplexer>(_=>ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]??"redis:6379")); builder.Services.AddSingleton<MarketDbReader>();builder.Services.AddSingleton<RedisMarketSnapshotStore>();builder.Services.AddSingleton<TradingSessionPolicy>();builder.Services.AddHostedService<MarketRuntimeWorker>(); await builder.Build().RunAsync();

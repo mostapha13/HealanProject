@@ -1,0 +1,58 @@
+name: tseai-rc31-preview
+
+services:
+  gateway:
+    container_name: tseai-rc31-gateway
+    ports: !override
+      - "8280:80"
+  web:
+    container_name: tseai-rc31-web
+  tseai-api:
+    container_name: tseai-rc31-api
+    environment:
+      DataQuality__OffHoursMaxAgeHours: 96
+  identity-api:
+    container_name: tseai-rc31-identity
+  market-runtime:
+    container_name: tseai-rc31-market-runtime
+  alert-engine:
+    container_name: tseai-rc31-alert-engine
+  notification-api:
+    container_name: tseai-rc31-notification
+  knowledge-worker:
+    container_name: tseai-rc31-knowledge-worker
+    environment:
+      Knowledge__BatchSize: 25
+      Knowledge__MaxDocumentsPerSourceRun: 500
+  ai-engine:
+    container_name: tseai-rc31-ai
+  local-llm:
+    container_name: tseai-rc31-local-llm
+    restart: "no"
+    command: !override ["-m", "/models/Qwen3.5-4B-UD-Q4_K_XL.gguf", "--alias", "qwen3.5-4b-fa", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--flash-attn", "on", "-c", "4096", "-np", "1", "--cont-batching", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "6"]
+    volumes: !override
+      - tseai_rc31_models:/models:ro
+  local-embedding:
+    container_name: tseai-rc31-local-embedding
+  sqlserver:
+    container_name: tseai-rc31-sqlserver
+  redis:
+    container_name: tseai-rc31-redis
+  rabbitmq:
+    container_name: tseai-rc31-rabbitmq
+    ports: !reset []
+  qdrant:
+    container_name: tseai-rc31-qdrant
+  db-init:
+    container_name: tseai-rc31-db-init
+
+networks:
+  tseai:
+    name: tseai-rc31-network
+  ai-inference:
+    name: tseai-rc31-ai-inference
+
+volumes:
+  tseai_rc31_models:
+    name: tseai-rc31-models
+    external: true

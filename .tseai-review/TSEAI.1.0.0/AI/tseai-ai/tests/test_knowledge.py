@@ -1,0 +1,287 @@
+import asyncio
+from app.knowledge.models import KnowledgeDocument
+from app.knowledge.normalization import normalize_persian, normalize_for_search
+from app.knowledge.html_sanitizer import html_to_text
+from app.knowledge.preprocessing import prepare_document
+from app.knowledge.content_policy import decide_route
+from app.knowledge.chunking import chunk_document
+from app.knowledge.embedding import HashingEmbeddingProvider
+from app.knowledge.service import KnowledgeService
+
+class FakeStore:
+    def __init__(self): self.rows=[]
+    async def ensure_collection(self,dimension): self.dimension=dimension
+    async def delete_document(self,document_id): self.rows=[x for x in self.rows if x["payload"]["document_id"]!=document_id]
+    async def archive_document(self,document_id,content_hash,effective_to):
+        for x in list(self.rows):
+            if x["payload"]["document_id"]!=document_id: continue
+            archived={**x,"payload":{**x["payload"]}}
+            archived["payload"]["document_id"]=f"{document_id}:history:{content_hash[:16]}"
+            archived["payload"]["metadata"]={**(x["payload"].get("metadata") or {}),"is_current":False,"effective_to":effective_to,"archived_from":document_id}
+            self.rows.append(archived)
+    async def get_document_hashes(self,document_ids):
+        wanted=set(document_ids); out={}
+        for x in self.rows:
+            p=x["payload"]
+            if p.get("document_id") in wanted:
+                h=(p.get("metadata") or {}).get("content_hash")
+                if h: out[p["document_id"]]=h
+        return out
+    async def get_document_text_hashes(self,document_ids):
+        wanted=set(document_ids); out={}
+        for x in self.rows:
+            p=x["payload"]
+            if p.get("document_id") in wanted:
+                h=(p.get("metadata") or {}).get("text_hash")
+                if h: out[p["document_id"]]=h
+        return out
+    async def upsert(self,chunks,vectors):
+        for c,v in zip(chunks,vectors):
+            self.rows.append({"id":c.chunk_id,"score":sum(a*b for a,b in zip(v,v)),"vector":v,"payload":{"document_id":c.document_id,"source_type":c.source_type,"source_id":c.source_id,"title":c.title,"text":c.text,"url":c.url,"symbol":c.symbol,"category":c.category,"published_at":c.published_at,"metadata":c.metadata}})
+    async def search(self,vector,limit,filters):
+        out=[]
+        for x in self.rows:
+            p=x["payload"]
+            if any(filters.get(k) and p.get(k)!=filters[k] for k in ("source_type","symbol","category")): continue
+            meta=p.get("metadata") or {}
+            if any(filters.get(k) is not None and meta.get(k)!=filters[k] for k in ("route","content_type_id")): continue
+            language_id=filters.get("language_id")
+            if language_id==1 and meta.get("language_id") not in (None,1): continue
+            if language_id not in (None,1) and meta.get("language_id")!=language_id: continue
+            if filters.get("topic") and filters["topic"] not in (meta.get("topics") or []): continue
+            if filters.get("company") and filters["company"] not in (meta.get("companies") or []): continue
+            if filters.get("current_only") is True and meta.get("is_current") is False: continue
+            if filters.get("current_only") is False and meta.get("is_current") is not False: continue
+            pub=p.get("published_at")
+            if filters.get("date_from") and (not pub or pub < filters["date_from"]): continue
+            if filters.get("date_to") and (not pub or pub > filters["date_to"]): continue
+            y=dict(x); y["score"]=sum(a*b for a,b in zip(vector,x["vector"])); out.append(y)
+        return sorted(out,key=lambda x:x["score"],reverse=True)[:limit*4]
+
+def test_persian_normalization():
+    assert normalize_persian("شركت  توسعه‌ي  بازار") == "شرکت توسعه ی بازار"
+
+def test_chunk_ids_are_stable():
+    d=KnowledgeDocument("d1","notice","1","عنوان","متن "*800)
+    a=chunk_document(d); b=chunk_document(d)
+    assert len(a)>1 and [x.chunk_id for x in a]==[x.chunk_id for x in b]
+
+def test_hybrid_retrieval_and_metadata_filter():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(128))
+        await svc.index([
+            KnowledgeDocument("d1","notice","n1","افزایش سرمایه فولاد","شرکت فولاد از محل سود انباشته افزایش سرمایه می دهد",symbol="فولاد",category="corporate_action"),
+            KnowledgeDocument("d2","manager","m1","مدیرعامل شرکت خودرو","مدیرعامل شرکت خودرو معرفی شد",symbol="خودرو",category="manager"),
+        ])
+        r=await svc.retrieve("افزایش سرمایه فولاد",limit=5,symbol="فولاد")
+        assert r["count"]==1
+        assert r["items"][0]["source"]["document_id"]=="d1"
+        assert r["items"][0]["keyword_score"]>0
+    asyncio.run(run())
+
+
+def test_html_sanitizer_removes_scripts_and_preserves_blocks():
+    raw="<h1>عنوان</h1><script>alert(1)</script><p>متن&nbsp;اصلی</p><ul><li>یک</li><li>دو</li></ul>"
+    text=html_to_text(raw)
+    assert "alert" not in text and "عنوان" in text and "متن اصلی" in text and "• یک" in text
+
+
+def test_content_type_routing_is_fail_closed():
+    assert decide_route("cms_content",1,"خبر معتبر").route=="rag"
+    assert decide_route("cms_content",3,"بنر").indexable is False
+    assert decide_route("cms_content",999,"ناشناخته").indexable is False
+    x=decide_route("cms_content",13,"پارامترهای بازارگردانی")
+    assert x.route=="hybrid" and x.authority=="descriptive_only"
+
+
+def test_prepare_faq_cleans_html_and_adds_hash_topics():
+    d=KnowledgeDocument("faq:1","faq","1","افزایش سرمایه چیست؟","<p>افزایش سرمایه از روش‌های مختلف انجام می‌شود.</p>",metadata={"language_id":1})
+    clean,reason=prepare_document(d)
+    assert clean is not None and reason=="faq"
+    assert "<p>" not in clean.body
+    assert clean.metadata["route"]=="rag"
+    assert len(clean.metadata["content_hash"])==64
+    assert "capital_increase" in clean.metadata["topics"]
+
+
+def test_deleted_document_removes_existing_vector():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        d=KnowledgeDocument("d1","faq","1","سؤال","پاسخ")
+        r1=await svc.index([d]); assert r1["documents"]==1 and len(store.rows)>0
+        tomb=KnowledgeDocument("d1","faq","1","سؤال","پاسخ",metadata={"is_deleted":True})
+        r2=await svc.index([tomb]); assert r2["deleted"]==1 and store.rows==[]
+    asyncio.run(run())
+
+
+def test_unchanged_content_hash_skips_reembedding():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        d=KnowledgeDocument("d1","faq","1","سؤال","پاسخ")
+        a=await svc.index([d]); b=await svc.index([d])
+        assert a["documents"]==1 and b["unchanged"]==1 and b["documents"]==0
+    asyncio.run(run())
+
+
+def test_new_only_policy_does_not_replace_existing_document():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        first=KnowledgeDocument("d1","faq","1","Question","Original answer",metadata={"vectorization_policy":"NewOnly"})
+        changed=KnowledgeDocument("d1","faq","1","Question","Changed answer",metadata={"vectorization_policy":"NewOnly"})
+        a=await svc.index([first]); original=store.rows[0]["payload"]["text"]
+        b=await svc.index([changed])
+        assert a["documents"]==1 and b["policy_skipped"]==1
+        assert store.rows[0]["payload"]["text"]==original
+    asyncio.run(run())
+
+
+def test_current_projection_removes_non_current_version():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        current=KnowledgeDocument("manager:it","manager","it","IT Manager","Ms A",metadata={"vectorization_policy":"CurrentProjection","is_current":True})
+        former=KnowledgeDocument("manager:it","manager","it","Former IT Manager","Ms A",metadata={"vectorization_policy":"CurrentProjection","is_current":False})
+        await svc.index([current]); result=await svc.index([former])
+        assert result["policy_skipped"]==1 and store.rows==[]
+    asyncio.run(run())
+
+
+def test_current_projection_archives_changed_current_version():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        old=KnowledgeDocument("manager:it","manager","it","IT Manager","Mr A",metadata={"vectorization_policy":"CurrentProjection","is_current":True})
+        new=KnowledgeDocument("manager:it","manager","it","IT Manager","Ms B",metadata={"vectorization_policy":"CurrentProjection","is_current":True})
+        await svc.index([old]); await svc.index([new])
+        current=[x for x in store.rows if x["payload"]["document_id"]=="manager:it"]
+        history=[x for x in store.rows if x["payload"]["document_id"].startswith("manager:it:history:")]
+        assert len(current)==1 and current[0]["payload"]["text"]=="Ms B"
+        assert len(history)==1 and history[0]["payload"]["metadata"]["is_current"] is False
+    asyncio.run(run())
+
+
+def test_current_projection_does_not_archive_metadata_only_change():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        old=KnowledgeDocument("manager:it","manager","it","IT Manager","Mr A",metadata={"vectorization_policy":"CurrentProjection","is_current":True})
+        tagged=KnowledgeDocument("manager:it","manager","it","IT Manager","Mr A",metadata={"vectorization_policy":"CurrentProjection","is_current":True,"language_id":1})
+        await svc.index([old]); await svc.index([tagged])
+        current=[x for x in store.rows if x["payload"]["document_id"]=="manager:it"]
+        history=[x for x in store.rows if x["payload"]["document_id"].startswith("manager:it:history:")]
+        assert len(current)==1 and history==[]
+    asyncio.run(run())
+
+
+def test_persian_filter_includes_legacy_documents_without_language_tag():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("legacy-fa","faq","1","سؤال فارسی","پاسخ فارسی"),
+            KnowledgeDocument("english","faq","2","English question","English answer",metadata={"language_id":2}),
+        ])
+        fa=await svc.retrieve("سؤال فارسی",limit=10,language_id=1)
+        en=await svc.retrieve("English question",limit=10,language_id=2)
+        assert [x["source"]["document_id"] for x in fa["items"]]==["legacy-fa"]
+        assert [x["source"]["document_id"] for x in en["items"]]==["english"]
+    asyncio.run(run())
+
+
+def test_retrieval_drops_semantically_near_but_lexically_unrelated_documents():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("manager","organization_person","1","مدیرعامل بورس تهران","نام: محمود گودرزی",metadata={"language_id":1}),
+            KnowledgeDocument("faq","faq","2","قوانین بازار سرمایه","توضیحات عمومی بازار",metadata={"language_id":1}),
+        ])
+        relevant=await svc.retrieve("مدیرعامل بورس تهران کیه؟",limit=8,language_id=1)
+        unrelated=await svc.retrieve("آشپزی فضایی چگونه است؟",limit=8,language_id=1)
+        assert [x["source"]["document_id"] for x in relevant["items"]]==["manager"]
+        assert unrelated["items"]==[]
+    asyncio.run(run())
+
+
+def test_retrieval_drops_related_but_materially_weaker_tail():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("exact","organization_person","1","مدیرعامل بورس تهران","محمود گودرزی مدیرعامل بورس تهران است",metadata={"language_id":1}),
+            KnowledgeDocument("weak","faq","2","شرح مسئولیت مدیرعامل","مدیرعامل مسئول پاسخگویی است",metadata={"language_id":1}),
+        ])
+        result=await svc.retrieve("مدیرعامل بورس تهران کیه؟",limit=8,language_id=1)
+        assert result["items"][0]["source"]["document_id"]=="exact"
+        assert all(x["source"]["document_id"]!="weak" for x in result["items"])
+    asyncio.run(run())
+
+
+def test_download_center_is_metadata_only_hybrid():
+    d=KnowledgeDocument("download_center:10","download_center","10","گزارش ماهانه","شرح گزارش",url="https://example.test/page")
+    clean,_=prepare_document(d)
+    assert clean is not None
+    assert clean.metadata["route"]=="hybrid"
+    assert clean.metadata["authority"]=="metadata_only"
+    assert clean.metadata["download_mode"]=="page_link_only"
+
+
+def test_search_normalizes_persian_and_arabic_digits():
+    assert normalize_for_search("۱۴۰۵/٠٥/20") == "1405 05 20"
+
+
+def test_retrieve_can_filter_by_route_and_content_type():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("c1","cms_content","1","خبر فولاد","متن خبر فولاد",metadata={"content_type_id":1,"language_id":1}),
+            KnowledgeDocument("c2","cms_content","2","بازارگردانی","متن پارامترهای بازارگردانی",metadata={"content_type_id":13,"language_id":1}),
+        ])
+        r=await svc.retrieve("فولاد",limit=10,route="rag",content_type_id=1,language_id=1)
+        assert r["count"]==1 and r["items"][0]["source"]["document_id"]=="c1"
+    asyncio.run(run())
+
+def test_advanced_retrieval_latest_news_prefers_fresh_document():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("old","cms_content","1","خبر فولاد","فولاد افزایش سرمایه داد",symbol="فولاد",published_at="2024-01-01T00:00:00+00:00",metadata={"content_type_id":1,"language_id":1}),
+            KnowledgeDocument("new","cms_content","2","خبر جدید فولاد","فولاد افزایش سرمایه جدید اعلام کرد",symbol="فولاد",published_at="2026-08-10T00:00:00+00:00",metadata={"content_type_id":1,"language_id":1}),
+        ])
+        r=await svc.retrieve("آخرین خبر فولاد",limit=5,symbol="فولاد")
+        assert r["latest_first"] is True
+        assert r["items"][0]["source"]["document_id"]=="new"
+        assert "bm25_score" in r["items"][0] and "freshness_score" in r["items"][0]
+    asyncio.run(run())
+
+
+def test_latest_news_prefers_newest_known_document_even_when_dataset_is_old():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("old","cms_content","1","خبر بورس تهران","گزارش بورس تهران",published_at="2013-05-13T10:00:00+00:00",metadata={"content_type_id":1,"language_id":1}),
+            KnowledgeDocument("newer","cms_content","2","خبر بورس تهران","گزارش بورس تهران",published_at="2019-11-02T10:00:00+00:00",metadata={"content_type_id":1,"language_id":1}),
+        ])
+        r=await svc.retrieve("آخرین خبر بورس تهران",limit=2,language_id=1)
+        assert r["items"][0]["source"]["document_id"]=="newer"
+        assert r["items"][0]["freshness_score"]==1.0
+    asyncio.run(run())
+
+
+def test_advanced_retrieval_content_type_is_inferred_for_news_queries():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("news","cms_content","1","خبر وتجارت","اطلاعیه وتجارت",symbol="وتجارت",metadata={"content_type_id":1,"language_id":1}),
+            KnowledgeDocument("other","cms_content","2","محتوای وتجارت","آموزش وتجارت",symbol="وتجارت",metadata={"content_type_id":2,"language_id":1}),
+        ])
+        r=await svc.retrieve("آخرین خبر وتجارت",limit=10,symbol="وتجارت")
+        assert r["filters"]["content_type_id"]==1
+        assert all(x["source"]["document_id"]=="news" for x in r["items"])
+    asyncio.run(run())
+
+
+def test_advanced_retrieval_metadata_topic_and_company_filters():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("a","cms_content","1","مجمع فولاد","اطلاعیه مجمع",metadata={"content_type_id":1,"language_id":1,"topics":["assembly"],"companies":["فولاد مبارکه"]}),
+            KnowledgeDocument("b","cms_content","2","خبر دیگر","متن دیگر",metadata={"content_type_id":1,"language_id":1,"topics":["dividend"],"companies":["شرکت دیگر"]}),
+        ])
+        r=await svc.retrieve("مجمع",limit=10,topic="assembly",company="فولاد مبارکه")
+        assert r["count"]>=1 and all(x["source"]["document_id"]=="a" for x in r["items"])
+    asyncio.run(run())

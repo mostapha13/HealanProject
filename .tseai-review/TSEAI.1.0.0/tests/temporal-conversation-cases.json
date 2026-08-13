@@ -1,0 +1,10 @@
+[
+  {"question":"یک روز قبلش","anchor":"1405/05/20","expected":"1405/05/19","context":true},
+  {"question":"سه روز بعدش","anchor":"1405/05/20","expected":"1405/05/23","context":true},
+  {"question":"همون روز","anchor":"1405/05/20","expected":"1405/05/20","context":true},
+  {"question":"هفته بعدش","anchor":"1405/05/20","expected_kind":"RelativeRange","context":true},
+  {"question":"دیروز","anchor":"1405/05/10","expected":"1405/05/19","context":false},
+  {"question":"یک روز قبلش","anchor":null,"expected_status":"Ambiguous","rule":"context.anchor_missing"},
+  {"question":"امروز رو با دیروز مقایسه کن","expected_primary":"1405/05/20","expected_comparison":"1405/05/19"},
+  {"question":"همان بازه","anchor_range":["1405/05/10","1405/05/15"],"expected_range":["1405/05/10","1405/05/15"]}
+]

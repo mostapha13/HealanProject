@@ -1,0 +1,10 @@
+[
+ {"case":"market needs structured evidence"},
+ {"case":"hybrid needs knowledge evidence"},
+ {"case":"unknown citation blocks"},
+ {"case":"numeric claim needs authority"},
+ {"case":"knowledge cannot masquerade as current market fact"},
+ {"case":"grounded answer passes"},
+ {"case":"empty answer blocks"},
+ {"case":"filter execution authority passes"}
+]

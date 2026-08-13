@@ -1,0 +1,44 @@
+{
+  "phase": "Sprint13",
+  "sources": [
+    "Instrument",
+    "Cashmarket",
+    "OrderBookCurrent",
+    "ClientType",
+    "Marketsummary",
+    "IndexLastLive",
+    "Companystate",
+    "ContentType",
+    "Content",
+    "FAQ",
+    "Talar",
+    "TalarInfo",
+    "Nahad_Mali_Type",
+    "Nahad_Mali",
+    "Company",
+    "TsePerson",
+    "EDeliveryCatery",
+    "EDeliveryObject"
+  ],
+  "criticalMappings": [
+    {"source":"Instrument.InstrumentID","canonical":"CanonicalInstrument.InstrumentId"},
+    {"source":"Instrument.InsCode","canonical":"CanonicalInstrument.InsCode"},
+    {"source":"Instrument.LVal18AFC","canonical":"CanonicalInstrument.InstrumentSymbol"},
+    {"source":"Instrument.LVal30","canonical":"CanonicalInstrument.InstrumentName"},
+    {"source":"Instrument.CSocCSAC","canonical":"CanonicalInstrument.IssuerSymbol"},
+    {"source":"Instrument.LSoc30","canonical":"CanonicalInstrument.CompanyName"},
+    {"source":"OrderBookCurrent.BuyPrice","canonical":"BidPriceIrr"},
+    {"source":"OrderBookCurrent.SellPrice","canonical":"AskPriceIrr"},
+    {"source":"ClientType.Buy_CountI","canonical":"IndividualBuyCount"},
+    {"source":"ClientType.Sell_I_Volume","canonical":"IndividualSellVolume"}
+  ],
+  "moneyUnits": ["Irr","Toman","ThousandIrr","MillionIrr"],
+  "invariants": [
+    "SQL AI is read-only",
+    "InstrumentID is canonical identity where available",
+    "InsCode is a source bridge key",
+    "SourceCollectedAt is collection time",
+    "No monetary magnitude guessing",
+    "No arbitrary user supplied SQL/table names"
+  ]
+}

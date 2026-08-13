@@ -1,0 +1,6 @@
+[
+  {"name":"persian-normalization","input":"شركت‌ توسعه ي بازار","expected":"شرکت توسعه ی بازار"},
+  {"name":"notice-symbol-filter","query":"افزایش سرمایه فولاد","filters":{"source_type":"notice","symbol":"فولاد"}},
+  {"name":"manager-filter","query":"مدیرعامل خودرو","filters":{"category":"manager","symbol":"خودرو"}},
+  {"name":"option-reference","query":"اختیار معامله خودرو","filters":{"category":"option"}}
+]

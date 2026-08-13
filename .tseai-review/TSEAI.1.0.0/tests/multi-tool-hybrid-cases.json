@@ -1,0 +1,8 @@
+[
+  {"question":"قیمت فولاد و آخرین خبرش رو بگو","steps":["entity.resolve","structured.market.symbol","knowledge.retrieve","analytics.symbol"],"parallel":["structured.market.symbol","knowledge.retrieve"]},
+  {"question":"وضعیت وتجارت امروز و آخرین خبر مهمش چیست؟","steps":["entity.resolve","structured.market.symbol","knowledge.retrieve","analytics.symbol"]},
+  {"question":"بازار نماد خودرو را بگو و درباره آخرین اطلاعیه‌اش توضیح بده","steps":["entity.resolve","structured.market.symbol","knowledge.retrieve","analytics.symbol"]},
+  {"guard":"unknown capability must fail closed"},
+  {"guard":"analytics depends on market"},
+  {"guard":"max parallelism is bounded"}
+]

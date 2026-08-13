@@ -1,0 +1,14 @@
+[
+ {"q":"آخرین خبر وتجارت","expect":{"content_type_id":1,"latest_first":true,"symbol":"وتجارت"}},
+ {"q":"جدیدترین اطلاعیه فولاد","expect":{"content_type_id":1,"latest_first":true,"symbol":"فولاد"}},
+ {"q":"اخبار خودرو در بازه زمانی","expect":{"content_type_id":1,"temporal_filter":true}},
+ {"q":"مجمع فولاد","expect":{"topic":"assembly","supported_filter":true}},
+ {"q":"افزایش سرمایه فولاد","expect":{"hybrid_scores":["vector","bm25","phrase","entity","freshness"]}},
+ {"q":"قرارداد اختیار چیست","expect":{"structured_numeric_override":false}},
+ {"q":"آخرین خبر بانک ملت","expect":{"document_diversity":true}},
+ {"q":"خبر امروز وتجارت","expect":{"date_filter":true}},
+ {"q":"اطلاعیه شرکت فولاد مبارکه","expect":{"company_filter_supported":true}},
+ {"q":"خبر","expect":{"fail_closed_entity":true}},
+ {"q":"آخرین خبر","expect":{"latest_first":true}},
+ {"q":"FAQ افزایش سرمایه","expect":{"content_type_inference_only_for_news":true}}
+]

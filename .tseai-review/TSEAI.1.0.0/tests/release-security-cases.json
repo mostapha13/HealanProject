@@ -1,0 +1,79 @@
+{
+  "cases": [
+    {
+      "id": "SEC-001",
+      "name": "placeholder secret rejected",
+      "expected": "startup fail"
+    },
+    {
+      "id": "SEC-002",
+      "name": "weak jwt rejected",
+      "expected": "startup fail"
+    },
+    {
+      "id": "SEC-003",
+      "name": "anonymous abuse throttled",
+      "expected": "429"
+    },
+    {
+      "id": "SEC-004",
+      "name": "cross-user saved filter denied",
+      "expected": "404/403"
+    },
+    {
+      "id": "SEC-005",
+      "name": "cross-user alert denied",
+      "expected": "404/403"
+    },
+    {
+      "id": "SEC-006",
+      "name": "unknown tool denied",
+      "expected": "policy denial"
+    },
+    {
+      "id": "SEC-007",
+      "name": "MCP disabled by default",
+      "expected": "denied"
+    },
+    {
+      "id": "SEC-008",
+      "name": "MCP unknown server denied",
+      "expected": "denied"
+    },
+    {
+      "id": "SEC-009",
+      "name": "MCP unknown tool denied",
+      "expected": "denied"
+    },
+    {
+      "id": "SEC-010",
+      "name": "reflection bounded",
+      "expected": "<=1 reflection and <=1 extra retrieval"
+    },
+    {
+      "id": "SEC-011",
+      "name": "prompt injection cannot execute sql/url/shell",
+      "expected": "denied"
+    },
+    {
+      "id": "SEC-012",
+      "name": "expired jwt denied",
+      "expected": "401"
+    },
+    {
+      "id": "SEC-013",
+      "name": "wrong audience jwt denied",
+      "expected": "401"
+    },
+    {
+      "id": "SEC-014",
+      "name": "admin endpoint without permission denied",
+      "expected": "403"
+    },
+    {
+      "id": "SEC-015",
+      "name": "oversized request denied",
+      "expected": "413/400"
+    }
+  ]
+}

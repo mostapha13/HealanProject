@@ -1,0 +1,137 @@
+{
+  "version": "entity-resolution-v1",
+  "cases": [
+    {
+      "text": "خودرو",
+      "expectedKind": "Instrument",
+      "expected": "exact-symbol"
+    },
+    {
+      "text": "ایران خودرو",
+      "expectedKind": "Instrument",
+      "expected": "company-alias"
+    },
+    {
+      "text": "ایران‌خودرو",
+      "expectedKind": "Instrument",
+      "expected": "zwnj-normalized"
+    },
+    {
+      "text": "ايران خودرو",
+      "expectedKind": "Instrument",
+      "expected": "arabic-yeh-normalized"
+    },
+    {
+      "text": "IRO1IKCO0001",
+      "expectedKind": "Instrument",
+      "expected": "identifier"
+    },
+    {
+      "text": "۴۶۳۴۸۵۵۹۱۹۳۲۲۴۰۹۰",
+      "expectedKind": "Instrument",
+      "expected": "inscode-persian-digits"
+    },
+    {
+      "text": "IRX6XTPI0006",
+      "expectedKind": "MarketIndex",
+      "expected": "index-id"
+    },
+    {
+      "text": "شاخص کل",
+      "expectedKind": "MarketIndex",
+      "expected": "index-name"
+    },
+    {
+      "text": "شاخص کل بورس",
+      "expectedKind": "MarketIndex",
+      "expected": "index-alias"
+    },
+    {
+      "text": "وبملت",
+      "expectedKind": "Instrument",
+      "expected": "exact-symbol"
+    },
+    {
+      "text": "بانک ملت",
+      "expectedKind": "Instrument",
+      "expected": "company-name"
+    },
+    {
+      "text": "فولاد",
+      "expectedKind": "Instrument",
+      "expected": "exact-symbol"
+    },
+    {
+      "text": "شرکت فولاد مبارکه اصفهان",
+      "expectedKind": "Instrument",
+      "expected": "company-name"
+    },
+    {
+      "text": "فملی",
+      "expectedKind": "Instrument",
+      "expected": "exact-symbol"
+    },
+    {
+      "text": "ملی صنایع مس ایران",
+      "expectedKind": "Instrument",
+      "expected": "company-alias"
+    },
+    {
+      "text": "بانک",
+      "expectedKind": "Instrument",
+      "expected": "ambiguous"
+    },
+    {
+      "text": "سرمایه",
+      "expectedKind": "Instrument",
+      "expected": "ambiguous-or-prefix"
+    },
+    {
+      "text": "علی رضایی",
+      "expectedKind": "TsePerson",
+      "expected": "person-name"
+    },
+    {
+      "text": "خوزستان",
+      "expectedKind": "RegionHall",
+      "expected": "region-alias"
+    },
+    {
+      "text": "تالار خوزستان",
+      "expectedKind": "RegionHall",
+      "expected": "hall-name"
+    },
+    {
+      "text": "کارگزاری نمونه",
+      "expectedKind": "FinancialInstitution",
+      "expected": "institution-name"
+    },
+    {
+      "text": "شرکت نمونه",
+      "expectedKind": "Company",
+      "expected": "company-reference"
+    },
+    {
+      "text": "ي ك ۱۲۳",
+      "expected": "normalization"
+    },
+    {
+      "text": "موجودیت ناشناخته",
+      "expected": "no-match"
+    },
+    {
+      "text": "؟",
+      "expected": "invalid"
+    },
+    {
+      "text": "شرکت ایران خودرو",
+      "expectedKind": "Instrument",
+      "expected": "generic-prefix-normalized"
+    },
+    {
+      "text": "دکتر علی رضایی",
+      "expectedKind": "TsePerson",
+      "expected": "honorific-prefix-normalized"
+    }
+  ]
+}

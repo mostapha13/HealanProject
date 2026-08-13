@@ -1,0 +1,21 @@
+{
+  "generatedAtUtc": "2026-08-11T21:07:38.559720+00:00",
+  "version": "1.0.0-rc.31",
+  "passed": true,
+  "gates": {
+    "pythonValidation": "PASS",
+    "pythonTests": "PASS",
+    "dotnet": "PASS",
+    "frontendBuild": "PASS",
+    "dependencyAudit": "PASS",
+    "securityStatic": "PASS",
+    "sbom": "PASS"
+  },
+  "toolchain": {
+    "os": "Windows-11-10.0.26100-SP0",
+    "python": "3.14.5",
+    "dotnetSdk": "9.0.315",
+    "node": "v24.16.0",
+    "npm": "11.13.0"
+  }
+}

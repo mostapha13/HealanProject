@@ -1,0 +1,15 @@
+{
+  "referenceUtc":"2026-08-11T08:00:00Z",
+  "cases":[
+    {"text":"امروز صف خریدها رو فیلتر کن","expected":"current_snapshot","execute":true},
+    {"text":"1405/05/20 فیلتر کن (pl)>(pc)","expected":"current_snapshot","execute":true},
+    {"text":"فیلتر کن (pl)>(pc) ۲۰ مرداد ۱۴۰۵","expected":"current_snapshot","execute":true},
+    {"text":"دیروز صف خریدها رو فیلتر کن","expected":"historical_unavailable","execute":false},
+    {"text":"سه روز قبل همین رو اجرا کن","expected":"historical_unavailable","execute":false},
+    {"text":"فردا صف خریدها رو بده","expected":"future_unavailable","execute":false},
+    {"text":"از 10 مرداد تا 20 مرداد 1405 صف خریدها رو فیلتر کن","expected":"historical_unavailable","execute":false},
+    {"text":"7 روز اخیر فیلتر کن (pe)<6","expected":"historical_unavailable","execute":false},
+    {"text":"دیروز (pl)>(pc)","expected":"historical_unavailable","execute":false},
+    {"text":"[ih][1].PClosing > [ih][2].PClosing","expected":"history_dependency_unavailable","execute":false}
+  ]
+}

@@ -1,0 +1,85 @@
+[
+  {
+    "name": "cms-news-rag",
+    "source_type": "cms_content",
+    "content_type_id": 1,
+    "expected_route": "rag"
+  },
+  {
+    "name": "cms-body-rag",
+    "source_type": "cms_content",
+    "content_type_id": 2,
+    "expected_route": "rag"
+  },
+  {
+    "name": "cms-banner-ignore",
+    "source_type": "cms_content",
+    "content_type_id": 3,
+    "expected_route": "ignore"
+  },
+  {
+    "name": "cms-market-maker-hybrid",
+    "source_type": "cms_content",
+    "content_type_id": 13,
+    "expected_route": "hybrid",
+    "authority": "descriptive_only"
+  },
+  {
+    "name": "cms-image-without-text-ignore",
+    "source_type": "cms_content",
+    "content_type_id": 22,
+    "text": "تصویر",
+    "expected_route": "ignore"
+  },
+  {
+    "name": "cms-bulletin-rag",
+    "source_type": "cms_content",
+    "content_type_id": 23,
+    "expected_route": "rag"
+  },
+  {
+    "name": "faq-html-clean",
+    "source_type": "faq",
+    "body": "<p>پاسخ <b>تست</b></p>",
+    "expected_no_html": true
+  },
+  {
+    "name": "deleted-tombstone",
+    "source_type": "cms_content",
+    "metadata": {
+      "is_deleted": true
+    },
+    "expected": "delete-from-qdrant"
+  },
+  {
+    "name": "download-page-only",
+    "source_type": "download_center",
+    "expected_route": "hybrid",
+    "download_mode": "page_link_only"
+  },
+  {
+    "name": "unknown-content-type",
+    "source_type": "cms_content",
+    "content_type_id": 999,
+    "expected_route": "ignore"
+  },
+  {
+    "name": "script-content-removed",
+    "body": "<script>bad()</script><p>safe</p>",
+    "expected": "safe"
+  },
+  {
+    "name": "incremental-watermark",
+    "expected": "@Since-with-overlap"
+  },
+  {
+    "name": "stream-all-batches",
+    "rows": 61859,
+    "batch_size": 250,
+    "expected": "all-rows-not-first-batch-only"
+  },
+  {
+    "name": "exact-symbol-enrichment",
+    "expected": "Instrument.LVal18AFC exact token only"
+  }
+]

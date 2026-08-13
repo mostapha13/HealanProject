@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {"tool":"entity.resolve","entity":"فولاد","expected":"allowed"},
+    {"tool":"market.get_symbol_snapshot","entity":"فولاد","expected":"quality_gated"},
+    {"tool":"market.get_order_book","entity":"خودرو","expected":"allowed"},
+    {"tool":"market.get_client_type","entity":"وبملت","expected":"allowed"},
+    {"tool":"market.get_summary","expected":"allowed"},
+    {"tool":"market.get_indexes","expected":"allowed"},
+    {"tool":"market.get_instrument","entity":"ایران خودرو","expected":"allowed"},
+    {"tool":"sql.execute","expected":"rejected"},
+    {"tool":"mcp.call","expected":"rejected"},
+    {"tool":"market.anything","expected":"rejected"}
+  ]
+}
