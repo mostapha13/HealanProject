@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TSEAI.Application.Chat;
+using TSEAI.Application.Temporal;
 
 namespace TSEAI.Infrastructure.Chat;
 
@@ -15,18 +16,23 @@ public sealed class SqlAiCanonicalReferenceAnswerService(
 {
     private string? ConnectionString => configuration.GetConnectionString("SqlAi");
 
-    public async Task<string?> TryAnswerAsync(string question, CancellationToken ct)
+    public async Task<string?> TryAnswerAsync(string question, TemporalResolution temporal, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(ConnectionString)) return null;
         var q = Normalize(question);
+        var currentScope = !temporal.HasTemporalReference || temporal.IsReferenceDayOnly;
         var symbol = SymbolAfter(q, "نماد");
         var aboutSymbol = SymbolAfter(q, "در مورد");
-        var isNews = q.Contains("آخرین خبر", StringComparison.Ordinal) || q.Contains("جدیدترین خبر", StringComparison.Ordinal);
-        var isLatestInstrument = q.Contains("آخرین نماد", StringComparison.Ordinal) || q.Contains("جدیدترین نماد", StringComparison.Ordinal);
+        var isNews = currentScope && (q.Contains("آخرین خبر", StringComparison.Ordinal) || q.Contains("جدیدترین خبر", StringComparison.Ordinal));
+        var isLatestInstrument = currentScope && (q.Contains("آخرین نماد", StringComparison.Ordinal) || q.Contains("جدیدترین نماد", StringComparison.Ordinal));
         var isHall = q.Contains("تالار", StringComparison.Ordinal) &&
             (q.Contains("خوزستان", StringComparison.Ordinal) || q.Contains("اهواز", StringComparison.Ordinal));
-        var isVolume = !string.IsNullOrWhiteSpace(symbol) && q.Contains("حجم", StringComparison.Ordinal);
-        if (!isNews && !isLatestInstrument && !isHall && !isVolume && string.IsNullOrWhiteSpace(aboutSymbol)) return null;
+        var isVolume = currentScope && !string.IsNullOrWhiteSpace(symbol) && q.Contains("حجم", StringComparison.Ordinal);
+        var isPersonRole = currentScope
+            && q.Contains("بورس تهران",StringComparison.Ordinal)
+            && CanonicalPersonRoleMatcher.IsPersonRoleQuestion(q);
+        if (!currentScope) aboutSymbol=null;
+        if (!isNews && !isLatestInstrument && !isHall && !isVolume && !isPersonRole && string.IsNullOrWhiteSpace(aboutSymbol)) return null;
 
         try
         {
@@ -34,6 +40,7 @@ public sealed class SqlAiCanonicalReferenceAnswerService(
             {
                 ApplicationIntent = ApplicationIntent.ReadOnly
             }.ConnectionString);
+            if (isPersonRole) return await CurrentPersonRole(connection, q, ct);
             if (isNews) return await LatestNews(connection, ct);
             if (isLatestInstrument) return await LatestInstrument(connection, ct);
             if (isHall) return await RegionHall(connection, q, ct);
@@ -45,6 +52,34 @@ public sealed class SqlAiCanonicalReferenceAnswerService(
             logger.LogWarning(exception, "Canonical reference lookup failed; normal chat routing will continue.");
             return null;
         }
+    }
+
+    private static async Task<string> CurrentPersonRole(SqlConnection connection, string question, CancellationToken ct)
+    {
+        const string sql = """
+            WITH current_roles AS
+            (
+                SELECT ContentId, TsePersonCateryId, Role, Fullname, SourceCollectedAt,
+                       ROW_NUMBER() OVER
+                       (
+                           PARTITION BY COALESCE(TsePersonCateryId,-1), LTRIM(RTRIM(Role))
+                           ORDER BY ContentId DESC
+                       ) AS rn
+                FROM dbo.TsePerson
+                WHERE NULLIF(LTRIM(RTRIM(Role)),N'') IS NOT NULL
+            )
+            SELECT ContentId, TsePersonCateryId, Role, Fullname, SourceCollectedAt
+            FROM current_roles
+            WHERE rn=1 AND NULLIF(LTRIM(RTRIM(Fullname)),N'') IS NOT NULL
+            """;
+        var rows=(await connection.QueryAsync<CanonicalPersonRoleCandidate>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:20))).AsList();
+        var match=CanonicalPersonRoleMatcher.Match(question,rows);
+        if(match is null)
+            return "در اطلاعات فعلی بورس تهران، شخص مشخص و قابل اتکایی برای این عنوان سمت پیدا نشد؛ لطفاً عنوان سمت را دقیق‌تر بنویسید.";
+        var name=PersianDisplayText.Normalize(match.FullName);
+        var role=PersianDisplayText.Normalize(match.Role);
+        var organization=role.Contains("بورس تهران",StringComparison.Ordinal)?"":" بورس تهران";
+        return $"{name}، {role}{organization} است.";
     }
 
     private static async Task<string?> LatestNews(SqlConnection connection, CancellationToken ct)

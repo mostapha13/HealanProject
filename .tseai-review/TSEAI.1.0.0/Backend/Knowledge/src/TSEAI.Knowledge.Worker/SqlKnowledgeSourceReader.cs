@@ -32,6 +32,15 @@ public sealed class SqlKnowledgeSourceReader
             var parameter=command.Parameters.Add("@Since", System.Data.SqlDbType.DateTime2);
             parameter.Value=since is null ? DBNull.Value : since.Value.UtcDateTime;
         }
+        if (source.Query.Contains("@Take", StringComparison.OrdinalIgnoreCase))
+            command.Parameters.Add("@Take", System.Data.SqlDbType.Int).Value=maxDocuments;
+        if (source.Query.Contains("@AfterWatermark", StringComparison.OrdinalIgnoreCase))
+        {
+            var parameter=command.Parameters.Add("@AfterWatermark", System.Data.SqlDbType.DateTime2);
+            parameter.Value=checkpoint is null ? DBNull.Value : checkpoint.Watermark.UtcDateTime;
+        }
+        if (source.Query.Contains("@AfterSourceId", StringComparison.OrdinalIgnoreCase))
+            command.Parameters.Add("@AfterSourceId", System.Data.SqlDbType.NVarChar,200).Value=checkpoint is null ? DBNull.Value : checkpoint.LastSourceId;
 
         await using var reader = await command.ExecuteReaderAsync(ct);
         var ordinals = Enumerable.Range(0, reader.FieldCount).ToDictionary(i => reader.GetName(i), StringComparer.OrdinalIgnoreCase);
@@ -79,6 +88,8 @@ public sealed class SqlKnowledgeSourceReader
             total++;
 
             var body=Get("Body").Trim();
+            if(source.Name.Equals("phase1-tse-faq",StringComparison.OrdinalIgnoreCase))
+                body=OverlappingFragmentMerger.Merge(body.Split('\u001e'));
             var isDeleted=metadata.TryGetValue("is_deleted",out var deletedValue) && IsTrue(deletedValue);
             if(string.IsNullOrWhiteSpace(body) && !isDeleted) continue;
             if(body.Length>200000)
@@ -88,6 +99,8 @@ public sealed class SqlKnowledgeSourceReader
                 body=body[..200000];
             }
             var title=Get("Title").Trim();
+            if(source.Name.Equals("phase1-tse-faq",StringComparison.OrdinalIgnoreCase))
+                title=OverlappingFragmentMerger.Merge(title.Split('\u001e'));
             if(string.IsNullOrWhiteSpace(title)) title=$"{source.SourceType} {sourceId}";
             if(title.Length>1000) title=title[..1000];
             var documentId = BuildDocumentId(source,sourceId,metadata);

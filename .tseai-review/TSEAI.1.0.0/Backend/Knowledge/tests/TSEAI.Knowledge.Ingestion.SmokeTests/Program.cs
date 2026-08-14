@@ -30,4 +30,16 @@ var invalid = new KnowledgeSourceOptions
 try { registry.Build([invalid]); throw new InvalidOperationException("Invalid policy combination was accepted."); }
 catch(InvalidOperationException ex) when(ex.Message.Contains("AllVersions",StringComparison.Ordinal)) { }
 
+var reconstructed=OverlappingFragmentMerger.Merge([
+    "برنامه‌های توسعه‌ای بورس تهران در چند محور کلیدی طر",
+    "در چند محور کلیدی طراحی شده اند که همراستا هستند.",
+    "مهمترین حوزه‌ها عبارت‌اند از افق دیجیتال."
+]);
+Ensure(reconstructed=="برنامه‌های توسعه‌ای بورس تهران در چند محور کلیدی طراحی شده اند که همراستا هستند. مهمترین حوزه‌ها عبارت‌اند از افق دیجیتال.","Overlapping FAQ fragments must be reconstructed without repeated text.");
+
+var builder=typeof(Phase1KnowledgeSourceDiscovery).GetMethod("BuildTseFaq",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic)!;
+var faqSource=(KnowledgeSourceOptions)builder.Invoke(null,[new HashSet<string>(["Id","FaqId","Title","Keywords","ResourceCode","CreatedDate"],StringComparer.OrdinalIgnoreCase)])!;
+Ensure(faqSource.Query.Contains("GROUP BY [FaqId]",StringComparison.Ordinal),"TseFaq parent documents must be grouped by the authoritative FaqId.");
+Ensure(!faqSource.Query.Contains("GROUP BY FragmentGroup",StringComparison.Ordinal),"TseFaq with FaqId must not collapse unrelated rows by nullable keywords.");
+
 Console.WriteLine("TSEAI Knowledge ingestion policy smoke tests PASS");

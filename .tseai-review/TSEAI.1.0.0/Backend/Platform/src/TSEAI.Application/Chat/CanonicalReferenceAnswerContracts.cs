@@ -1,3 +1,5 @@
+using TSEAI.Application.Temporal;
+
 namespace TSEAI.Application.Chat;
 
 /// <summary>
@@ -6,5 +8,5 @@ namespace TSEAI.Application.Chat;
 /// </summary>
 public interface ICanonicalReferenceAnswerService
 {
-    Task<string?> TryAnswerAsync(string question, CancellationToken ct);
+    Task<string?> TryAnswerAsync(string question, TemporalResolution temporal, CancellationToken ct);
 }

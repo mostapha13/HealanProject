@@ -7,6 +7,14 @@ class EmbeddingProvider:
     dimension: int
     async def embed(self, texts: list[str]) -> list[list[float]]: raise NotImplementedError
 
+    async def embed_batched(self,texts:list[str],batch_size:int=8)->list[list[float]]:
+        """Bound local-model requests while preserving input order."""
+        if batch_size<1: raise ValueError("batch_size must be positive")
+        vectors=[]
+        for start in range(0,len(texts),batch_size):
+            vectors.extend(await self.embed(texts[start:start+batch_size]))
+        return vectors
+
 class HashingEmbeddingProvider(EmbeddingProvider):
     """Offline deterministic fallback. Production can point EMBEDDING_BASE_URL at a local semantic embedding service."""
     def __init__(self, dimension: int = 384): self.dimension=dimension

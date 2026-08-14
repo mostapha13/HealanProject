@@ -58,7 +58,7 @@ public sealed class ChatOrchestrator(
         var effectiveQuestion=turnContext.EffectiveQuestion;
 
         toolPolicy.Demand("structured.reference");
-        var canonicalAnswer=await Timed("structured.reference",()=>canonicalReferenceAnswers.TryAnswerAsync(effectiveQuestion,ct),trace);
+        var canonicalAnswer=await Timed("structured.reference",()=>canonicalReferenceAnswers.TryAnswerAsync(effectiveQuestion,temporalContext,ct),trace);
         if(!string.IsNullOrWhiteSpace(canonicalAnswer))
             return new("structured_reference",canonicalAnswer,request.ConversationId,ChatIntent.Knowledge,1,null,null,[],[],trace,null,temporalContext);
 
@@ -339,11 +339,7 @@ public sealed class ChatOrchestrator(
         {
             from=temporal.Start?.GregorianIso; to=(temporal.End??temporal.Start)?.GregorianIso;
         }
-        var personQuestion=question.Contains("مدیرعامل",StringComparison.Ordinal)
-            || question.Contains("مدیر عامل",StringComparison.Ordinal)
-            || question.Contains("معاون",StringComparison.Ordinal)
-            || question.Contains("رئیس",StringComparison.Ordinal)
-            || question.Contains("رییس",StringComparison.Ordinal);
+        var personQuestion=CanonicalPersonRoleMatcher.IsPersonRoleQuestion(question);
         return new(symbol,from,to,latest?true:null,contentType,null,1,personQuestion?"organization_person":null);
     }
 
@@ -371,7 +367,7 @@ public sealed class ChatOrchestrator(
         if (temporal.Start.MarketDayKind == MarketDayKind.WeekendClosed)
             return $"تاریخ {temporal.Start.JalaliDate} ({temporal.Start.GregorianIso}) در تعطیلی هفتگی بازار قرار دارد و داده معاملاتی روزانه برای آن نباید از Snapshot امروز جایگزین شود.";
 
-        return $"تاریخ تاریخی {temporal.Start.JalaliDate} ({temporal.Start.GregorianIso}) شناسایی شد، اما MarketDailyHistory هنوز به فاز جاری متصل نیست؛ برای جلوگیری از پاسخ نادرست از Snapshot امروز استفاده نمی‌کنم.";
+        return $"تاریخ {temporal.Start.JalaliDate} ({temporal.Start.GregorianIso}) شناسایی شد، اما MarketDailyHistory هنوز به فاز جاری متصل نیست؛ برای جلوگیری از پاسخ نادرست از Snapshot امروز استفاده نمی‌کنم.";
     }
 
     private static bool ShouldReflect(ChatPlan plan,IReadOnlyList<KnowledgeHit> hits,IReadOnlyList<ChatToolTrace> trace)

@@ -12,7 +12,10 @@ from .qdrant_store import QdrantKnowledgeStore
 LATEST_TERMS=("آخرین","جدیدترین","تازه ترین","تازه‌ترین","امروز","اخیر")
 NEWS_TERMS=("خبر","اخبار","اطلاعیه")
 HISTORY_TERMS=("سابق","قبلی","پیشین")
-RELEVANCE_STOP={"چیست","چیه","کیه","کیست","چه","دارد","داره","است","هست","بود","شد","شود","میشه","می‌شود","در","از","به","با","برای","را","رو","و","یا","آخرین","جدیدترین","خبر","اخبار","اطلاعیه","وضعیت"}
+RELEVANCE_STOP={"چیست","چیه","کیه","کیست","چه","دارد","داره","است","هست","بود","شد","شود","میشه","می‌شود","در","از","به","با","برای","را","رو","و","یا","آخرین","جدیدترین","خبر","اخبار","اطلاعیه","وضعیت","متن","کامل","کاملش","کل","اصل","عین","بدون","خلاصه","بده","ده","نمایش","کن"}
+INCOMPLETE_END_TERMS={"و","یا","که","اما","ولی","با","از","به","در","برای","تحت","شامل","مشتمل","بر","ضمن","تا"}
+RESPONSIBILITY_QUERY_TERMS={"مسئول","نهاد","متولی","عهده"}
+RESPONSIBILITY_EVIDENCE_TERMS={"مسئول","نهاد","متولی","عهده","مدیریت"}
 
 def _parse_dt(value):
     if not value:return None
@@ -48,9 +51,38 @@ def _is_relevant(query:str,title:str,text:str,lexical:float,phrase:float)->bool:
     query_terms={x for x in normalize_for_search(query).split() if len(x)>1 and x not in RELEVANCE_STOP}
     if not query_terms:return False
     document_terms=set(normalize_for_search(f"{title} {text}").split())
+    if query_terms & RESPONSIBILITY_QUERY_TERMS and not document_terms & RESPONSIBILITY_EVIDENCE_TERMS:
+        return False
     overlap=len(query_terms & document_terms)
-    required=1 if len(query_terms)==1 else 2
+    # A broad topical resemblance is not enough for a user-facing answer.
+    # Require coverage of most meaningful query terms so, for example, an FAQ
+    # about development plans cannot answer who is responsible for strategy.
+    required=1 if len(query_terms)==1 else max(2,math.ceil(len(query_terms)*.65))
     return overlap>=required and lexical>0
+
+def _looks_incomplete(row:dict)->bool:
+    payload=row.get("payload") or {}; meta=payload.get("metadata") or {}
+    if str(payload.get("source_type") or "").lower()!="faq": return False
+    if str(meta.get("body_truncated") or "").lower() in ("1","true","yes"): return True
+    text=normalize_for_search(str(payload.get("text") or ""))
+    if not text: return True
+    return text.split()[-1] in INCOMPLETE_END_TERMS
+
+def _merge_document_chunks(chunks:list[dict])->str:
+    """Reassemble a parent document while removing the chunker's overlap."""
+    ordered=sorted(chunks,key=lambda x:int(x.get("ordinal") or 0))
+    parts=[str(x.get("text") or "").strip() for x in ordered]
+    parts=[x for x in parts if x]
+    if not parts:return ""
+    merged=parts[0]
+    for part in parts[1:]:
+        max_overlap=min(600,len(merged),len(part)); overlap=0
+        for size in range(max_overlap,11,-1):
+            if merged[-size:]==part[:size]:
+                overlap=size; break
+        suffix=part[overlap:].lstrip()
+        if suffix: merged=merged.rstrip()+("" if overlap else "\n")+suffix
+    return merged.strip()
 
 class KnowledgeService:
     def __init__(self,store:QdrantKnowledgeStore,embeddings:EmbeddingProvider): self.store=store; self.embeddings=embeddings
@@ -69,6 +101,7 @@ class KnowledgeService:
         current_ids=[d.document_id for d in prepared if str(d.metadata.get("vectorization_policy") or "").lower()=="currentprojection"]
         existing_text=await self.store.get_document_text_hashes(current_ids) if current_ids else {}
         document_count=chunk_count=unchanged=policy_skipped=0
+        pending_chunks=[]
         for doc in prepared:
             content_hash=str(doc.metadata.get("content_hash") or "")
             policy=str(doc.metadata.get("vectorization_policy") or "ChangedTextOnly").lower()
@@ -83,8 +116,11 @@ class KnowledgeService:
                 await self.store.archive_document(doc.document_id,existing[doc.document_id],datetime.now(timezone.utc).isoformat())
             chunks=chunk_document(doc); await self.store.delete_document(doc.document_id)
             if chunks:
-                vectors=await self.embeddings.embed([f"{c.title}\n{c.text}" for c in chunks]); await self.store.upsert(chunks,vectors)
+                pending_chunks.extend(chunks)
                 document_count+=1; chunk_count+=len(chunks)
+        if pending_chunks:
+            vectors=await self.embeddings.embed_batched([f"{c.title}\n{c.text}" for c in pending_chunks])
+            await self.store.upsert(pending_chunks,vectors)
         return {"documents":document_count,"chunks":chunk_count,"unchanged":unchanged,"policy_skipped":policy_skipped,"skipped":skipped,"deleted":deleted,"routes":dict(routes),"skip_reasons":dict(skip_reasons)}
 
     async def retrieve(self,query:str,limit:int=8,source_type:str|None=None,symbol:str|None=None,category:str|None=None,route:str|None=None,content_type_id:int|None=None,language_id:int|None=None,date_from:str|None=None,date_to:str|None=None,latest_first:bool|None=None,topic:str|None=None,company:str|None=None,current_only:bool|None=None)->dict:
@@ -123,17 +159,29 @@ class KnowledgeService:
             if latest_first: score += .42*freshness
             scored.append((score,vector,lexical,phrase,entity,freshness,payload,row.get("id"),route_value,authority))
         scored.sort(key=lambda x:x[0],reverse=True)
-        items=[]; per_doc=Counter()
+        candidates=[]; seen_docs=set()
         for score,vector,lexical,phrase,entity,freshness,payload,cid,route_value,authority in scored:
             if not _is_relevant(query,str(payload.get("title") or ""),str(payload.get("text") or ""),lexical,phrase): continue
             doc_id=str(payload.get("document_id") or "")
-            if per_doc[doc_id]>=2: continue
-            per_doc[doc_id]+=1; meta=payload.get("metadata") or {}
-            items.append({"chunk_id":cid,"score":round(score,6),"vector_score":round(vector,6),"bm25_score":round(lexical,6),"keyword_score":round(lexical,6),"phrase_score":round(phrase,6),"entity_score":round(entity,6),"freshness_score":round(freshness,6),"title":payload.get("title"),"text":payload.get("text"),"source":{"document_id":payload.get("document_id"),"source_type":payload.get("source_type"),"source_id":payload.get("source_id"),"url":payload.get("url"),"published_at":payload.get("published_at")},"metadata":{"symbol":payload.get("symbol"),"category":payload.get("category"),**meta}})
-            if len(items)>=limit: break
-        if items:
+            if not doc_id or doc_id in seen_docs: continue
+            seen_docs.add(doc_id)
+            candidates.append((score,vector,lexical,phrase,entity,freshness,payload,cid))
+            if len(candidates)>=limit: break
+        if candidates:
             # Never expose the long semantic tail. Keep only evidence close to the
-            # best match; adjacent FAQ fragments survive, unrelated sources do not.
-            threshold=max(.25,float(items[0]["score"])*.82)
-            items=[x for x in items if float(x["score"])>=threshold][:5]
-        return {"query":query,"count":len(items),"strategy":"dense+bm25-like+metadata+freshness-v1","latest_first":bool(latest_first),"filters":{k:v for k,v in filters.items() if v is not None},"items":items}
+            # best match; unrelated parent documents do not.
+            threshold=max(.25,float(candidates[0][0])*.82)
+            candidates=[x for x in candidates if float(x[0])>=threshold][:5]
+        parent_chunks=await self.store.get_document_chunks([str(x[6].get("document_id") or "") for x in candidates])
+        items=[]
+        for score,vector,lexical,phrase,entity,freshness,payload,cid in candidates:
+            doc_id=str(payload.get("document_id") or "")
+            chunks=parent_chunks.get(doc_id) or [payload]
+            parent_text=_merge_document_chunks(chunks)
+            parent_payload={**payload,"text":parent_text}
+            # Validate FAQ completeness only after reconstructing the whole parent;
+            # a middle chunk is naturally incomplete and must not be rejected alone.
+            if _looks_incomplete({"payload":parent_payload}): continue
+            meta=payload.get("metadata") or {}
+            items.append({"chunk_id":cid,"score":round(score,6),"vector_score":round(vector,6),"bm25_score":round(lexical,6),"keyword_score":round(lexical,6),"phrase_score":round(phrase,6),"entity_score":round(entity,6),"freshness_score":round(freshness,6),"title":payload.get("title"),"text":parent_text,"source":{"document_id":payload.get("document_id"),"source_type":payload.get("source_type"),"source_id":payload.get("source_id"),"url":payload.get("url"),"published_at":payload.get("published_at")},"metadata":{"symbol":payload.get("symbol"),"category":payload.get("category"),**meta,"retrieval_scope":"parent_document","document_chunk_count":len(chunks),"matched_chunk_ordinal":int(payload.get("ordinal") or 0)}})
+        return {"query":query,"count":len(items),"strategy":"dense+bm25-like+metadata+freshness+parent-document-v2","latest_first":bool(latest_first),"filters":{k:v for k,v in filters.items() if v is not None},"items":items}

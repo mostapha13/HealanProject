@@ -22,7 +22,7 @@ services:
   knowledge-worker:
     container_name: tseai-rc31-knowledge-worker
     environment:
-      Knowledge__BatchSize: 25
+      Knowledge__BatchSize: 10
       Knowledge__MaxDocumentsPerSourceRun: 500
   ai-engine:
     container_name: tseai-rc31-ai
@@ -34,6 +34,7 @@ services:
       - tseai_rc31_models:/models:ro
   local-embedding:
     container_name: tseai-rc31-local-embedding
+    command: !override ["-m", "/models/Qwen3-Embedding-0.6B-Q8_0.gguf", "--alias", "qwen3-embedding-0.6b", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--embedding", "--pooling", "last", "-c", "4096", "-b", "512", "-np", "1", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "4"]
   sqlserver:
     container_name: tseai-rc31-sqlserver
   redis:

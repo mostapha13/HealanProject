@@ -8,6 +8,13 @@ from app.knowledge.chunking import chunk_document
 from app.knowledge.embedding import HashingEmbeddingProvider
 from app.knowledge.service import KnowledgeService
 
+class RecordingEmbeddingProvider(HashingEmbeddingProvider):
+    def __init__(self,dimension=32):
+        super().__init__(dimension); self.batch_sizes=[]
+    async def embed(self,texts):
+        self.batch_sizes.append(len(texts))
+        return await super().embed(texts)
+
 class FakeStore:
     def __init__(self): self.rows=[]
     async def ensure_collection(self,dimension): self.dimension=dimension
@@ -35,9 +42,16 @@ class FakeStore:
                 h=(p.get("metadata") or {}).get("text_hash")
                 if h: out[p["document_id"]]=h
         return out
+    async def get_document_chunks(self,document_ids):
+        wanted=set(document_ids); out={x:[] for x in wanted}
+        for x in self.rows:
+            payload=x["payload"]
+            if payload.get("document_id") in wanted: out[payload["document_id"]].append(payload)
+        for chunks in out.values(): chunks.sort(key=lambda x:x.get("ordinal",0))
+        return out
     async def upsert(self,chunks,vectors):
         for c,v in zip(chunks,vectors):
-            self.rows.append({"id":c.chunk_id,"score":sum(a*b for a,b in zip(v,v)),"vector":v,"payload":{"document_id":c.document_id,"source_type":c.source_type,"source_id":c.source_id,"title":c.title,"text":c.text,"url":c.url,"symbol":c.symbol,"category":c.category,"published_at":c.published_at,"metadata":c.metadata}})
+            self.rows.append({"id":c.chunk_id,"score":sum(a*b for a,b in zip(v,v)),"vector":v,"payload":{"document_id":c.document_id,"source_type":c.source_type,"source_id":c.source_id,"title":c.title,"text":c.text,"ordinal":c.ordinal,"url":c.url,"symbol":c.symbol,"category":c.category,"published_at":c.published_at,"metadata":c.metadata}})
     async def search(self,vector,limit,filters):
         out=[]
         for x in self.rows:
@@ -59,12 +73,35 @@ class FakeStore:
         return sorted(out,key=lambda x:x["score"],reverse=True)[:limit*4]
 
 def test_persian_normalization():
-    assert normalize_persian("شركت  توسعه‌ي  بازار") == "شرکت توسعه ی بازار"
+    assert normalize_persian("شركت  توسعه‌ي  بازار") == "شرکت توسعه‌ی بازار"
+    assert normalize_for_search("شرکت توسعه‌ی بازار") == "شرکت توسعه ی بازار"
+    assert normalize_persian("استراتژیهای برنامهریزی و برنامههای توسعهای اجرا میشود") == "استراتژی‌های برنامه‌ریزی و برنامه‌های توسعه‌ای اجرا می‌شود"
 
 def test_chunk_ids_are_stable():
     d=KnowledgeDocument("d1","notice","1","عنوان","متن "*800)
     a=chunk_document(d); b=chunk_document(d)
     assert len(a)>1 and [x.chunk_id for x in a]==[x.chunk_id for x in b]
+
+def test_embedding_micro_batches_preserve_order_and_bound_request_size():
+    async def run():
+        provider=RecordingEmbeddingProvider()
+        texts=[f"document {i}" for i in range(53)]
+        expected=await HashingEmbeddingProvider(32).embed(texts)
+        actual=await provider.embed_batched(texts,batch_size=8)
+        assert provider.batch_sizes==[8,8,8,8,8,8,5]
+        assert actual==expected
+    asyncio.run(run())
+
+def test_index_batches_chunks_across_documents():
+    async def run():
+        store=FakeStore(); provider=RecordingEmbeddingProvider(32)
+        svc=KnowledgeService(store,provider)
+        docs=[KnowledgeDocument(f"d{i}","faq",str(i),f"Question {i}",f"Answer {i}") for i in range(25)]
+        result=await svc.index(docs)
+        assert result["documents"]==25 and result["chunks"]==25
+        assert provider.batch_sizes==[8,8,8,1]
+        assert len(store.rows)==25
+    asyncio.run(run())
 
 def test_hybrid_retrieval_and_metadata_filter():
     async def run():
@@ -77,6 +114,31 @@ def test_hybrid_retrieval_and_metadata_filter():
         assert r["count"]==1
         assert r["items"][0]["source"]["document_id"]=="d1"
         assert r["items"][0]["keyword_score"]>0
+    asyncio.run(run())
+
+def test_retrieval_returns_reassembled_parent_document_not_only_matched_chunk():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(128))
+        beginning="این بخش آغاز سند و معرفی سیاست نگهداری سوابق است."
+        ending="مصطفی مهدوی مدیرعامل جدید سازمان است و سوابق مدیر قبلی نیز حفظ می‌شود."
+        body=beginning+(" توضیحات تکمیلی درباره سازمان و ساختار اطلاعات."*45)+ending
+        await svc.index([KnowledgeDocument("long-manager-policy","faq","91","مدیرعامل جدید سازمان کیست؟",body,metadata={"language_id":1})])
+        result=await svc.retrieve("مصطفی مهدوی مدیرعامل جدید سازمان کیست؟",limit=5,language_id=1)
+        assert result["count"]==1
+        item=result["items"][0]
+        assert beginning in item["text"] and ending in item["text"]
+        assert item["metadata"]["retrieval_scope"]=="parent_document"
+        assert item["metadata"]["document_chunk_count"]>1
+        assert item["text"].count("توضیحات تکمیلی") == 45
+    asyncio.run(run())
+
+def test_full_text_display_directive_does_not_block_parent_retrieval():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(128))
+        body="مشتریان بازار سرمایه پس از دریافت کد معاملاتی می‌توانند سفارش خود را از مسیرهای مختلف ثبت کنند."
+        await svc.index([KnowledgeDocument("access","faq","488","دسترسی مشتریان بازار سرمایه",body,metadata={"language_id":1})])
+        result=await svc.retrieve("متن کامل دسترسی مشتریان بازار سرمایه را بده",limit=5,language_id=1)
+        assert result["count"]==1 and result["items"][0]["source"]["document_id"]=="access"
     asyncio.run(run())
 
 
@@ -208,6 +270,29 @@ def test_retrieval_drops_related_but_materially_weaker_tail():
         result=await svc.retrieve("مدیرعامل بورس تهران کیه؟",limit=8,language_id=1)
         assert result["items"][0]["source"]["document_id"]=="exact"
         assert all(x["source"]["document_id"]!="weak" for x in result["items"])
+    asyncio.run(run())
+
+
+def test_retrieval_drops_visibly_truncated_faq_answer():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("broken","faq","22","چه نهادی مسئول تدوین استراتژی است؟","تدوین استراتژی‌های کلان با نظارت هیئت‌مدیره و",metadata={"language_id":1}),
+            KnowledgeDocument("complete","faq","24","نقش واحد برنامه‌ریزی چیست؟","این واحد بر پیشرفت برنامه‌های کلان نظارت می‌کند.",metadata={"language_id":1}),
+        ])
+        broken=await svc.retrieve("چه نهادی مسئول تدوین استراتژی است؟",limit=8,source_type="faq",language_id=1)
+        assert all(x["source"]["document_id"]!="broken" for x in broken["items"])
+    asyncio.run(run())
+
+
+def test_retrieval_rejects_broad_topic_match_that_does_not_answer_question():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument("broad","faq","340","برنامه‌های توسعه‌ای بورس تهران در چه حوزه‌هایی است؟","این برنامه‌ها با اهداف کلان و استراتژی بورس هم‌راستا هستند.",metadata={"language_id":1}),
+        ])
+        result=await svc.retrieve("چه نهادی مسئول تدوین استراتژی‌های کلان بورس تهران است؟",limit=8,source_type="faq",language_id=1)
+        assert result["items"]==[]
     asyncio.run(run())
 
 

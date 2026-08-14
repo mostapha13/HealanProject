@@ -42,7 +42,7 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         }
         if(hits.Count>0)
         {
-            parts.Add(ComposeKnowledge(hits));
+            parts.Add(ComposeKnowledge(context,hits));
         }
         return parts.Count==0?"داده قابل اتکایی برای پاسخ پیدا نشد.":string.Join("\n\n",parts);
     }
@@ -83,51 +83,87 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         return AnswerVerbosity.Standard;
     }
     private static void Add(List<string> xs,string label,AnalyticsMetric<decimal> m){if(m.Availability==AnalyticsAvailability.Available&&m.Value is not null)xs.Add($"{label} {m.Value.Value:0.##}");}
-    private static string ComposeKnowledge(IReadOnlyList<KnowledgeHit> hits)
+    private static string ComposeKnowledge(AnswerComposeContext context,IReadOnlyList<KnowledgeHit> hits)
     {
         var hit=hits[0];
-        var text=Regex.Replace(hit.Text??"",@"\s+"," ").Trim();
+        var text=NormalizeDocumentText(hit.Text);
         var title=Regex.Replace(hit.Citation.Title??"",@"\s+"," ").Trim();
         if(hit.Citation.SourceType.Equals("organization_person",StringComparison.OrdinalIgnoreCase))
         {
             var name=Regex.Match(hit.Text??"",@"(?:^|\n)\s*نام\s*:\s*(?<value>[^\r\n]+)",RegexOptions.CultureInvariant).Groups["value"].Value.Trim();
             var role=Regex.Match(hit.Text??"",@"(?:^|\n)\s*سمت\s*:\s*(?<value>[^\r\n]+)",RegexOptions.CultureInvariant).Groups["value"].Value.Trim();
             if(string.IsNullOrWhiteSpace(role)) role=title;
-            if(!string.IsNullOrWhiteSpace(name)) return string.IsNullOrWhiteSpace(role)?EnsureSentence(name):$"{name}، {role} است.";
+            if(!string.IsNullOrWhiteSpace(name)) return PersianDisplayText.Normalize(string.IsNullOrWhiteSpace(role)?EnsureSentence(name):$"{name}، {role} است.");
         }
         if(hit.Citation.SourceType.Equals("faq",StringComparison.OrdinalIgnoreCase))
         {
-            var faq=ComposeFaq(hits);
-            if(!string.IsNullOrWhiteSpace(faq)) return EnsureSentence(Trim(faq,360));
+            text=ExtractFaqAnswer(text);
         }
         if(!string.IsNullOrWhiteSpace(title) && text.StartsWith(title,StringComparison.OrdinalIgnoreCase)) text=text[title.Length..].Trim(' ','-','–','—',':','؛');
         if(string.IsNullOrWhiteSpace(text)) text=title;
-        return EnsureSentence(Trim(text,320));
+        var answer=RequestsFullDocument(context.Question)?text:SummarizeDocument(context.Question,text,context.Verbosity);
+        return PersianDisplayText.Normalize(EnsureSentence(answer));
     }
-    private static string ComposeFaq(IReadOnlyList<KnowledgeHit> hits)
+    private static string NormalizeDocumentText(string? value)
     {
-        var first=hits[0];
-        if(!int.TryParse(first.Citation.SourceId,out var anchor)) return ExtractFaqAnswer(first.Text);
-        var fragments=hits
-            .Where(x=>x.Citation.SourceType.Equals("faq",StringComparison.OrdinalIgnoreCase) && int.TryParse(x.Citation.SourceId,out var id) && id>=anchor && id<=anchor+4)
-            .OrderBy(x=>int.Parse(x.Citation.SourceId))
-            .Select(x=>Regex.Replace(x.Text??"",@"\s+"," ").Trim())
-            .Where(x=>x.Length>0)
-            .ToArray();
-        if(fragments.Length==0) return ExtractFaqAnswer(first.Text);
-        fragments[0]=ExtractFaqAnswer(fragments[0]);
-        return Regex.Replace(string.Join(" ",fragments),@"\s+"," ").Trim();
+        var text=PersianDisplayText.Normalize(value);
+        text=Regex.Replace(text,@"[ \t]+"," ");
+        return Regex.Replace(text,@"(?:\r?\n){2,}","\n").Trim();
     }
     private static string ExtractFaqAnswer(string? value)
     {
-        var text=Regex.Replace(value??"",@"\s+"," ").Trim();
+        var text=NormalizeDocumentText(value);
         var question=text.IndexOf('؟');
         return question>=0 && question<text.Length-1?text[(question+1)..].Trim():text;
     }
+    private static bool RequestsFullDocument(string question)
+    {
+        var q=PersianDisplayText.Normalize(question).Replace('‌',' ');
+        return new[]{"متن کامل","کل متن","کاملش","بدون خلاصه","عین متن","اصل متن"}.Any(x=>q.Contains(x,StringComparison.Ordinal));
+    }
+    private static string SummarizeDocument(string question,string document,AnswerVerbosity verbosity)
+    {
+        var directLimit=verbosity switch { AnswerVerbosity.Compact=>420,AnswerVerbosity.Standard=>700,_=>1000 };
+        if(document.Length<=directLimit) return document;
+        var sentences=Regex.Split(document,@"(?<=[.!؟!؛])\s+|\r?\n+")
+            .Select(x=>x.Trim()).Where(x=>x.Length>0).ToArray();
+        if(sentences.Length<=1) return document;
+        var queryTerms=MeaningfulTerms(question);
+        var ranked=sentences.Select((sentence,index)=>
+        {
+            var terms=MeaningfulTerms(sentence);
+            var overlap=queryTerms.Count==0?0:queryTerms.Count(terms.Contains);
+            var coverage=queryTerms.Count==0?0d:(double)overlap/queryTerms.Count;
+            return new{Sentence=sentence,Index=index,Score=overlap*10d+coverage};
+        }).ToArray();
+        var positive=ranked.Where(x=>x.Score>0).ToArray();
+        var bestScore=positive.Select(x=>x.Score).DefaultIfEmpty(0).Max();
+        var relevant=positive.Where(x=>x.Score>=Math.Max(10,bestScore*.55)).ToArray();
+        var source=relevant.Length>0?relevant:ranked;
+        var maxSentences=verbosity switch { AnswerVerbosity.Compact=>2,AnswerVerbosity.Standard=>4,_=>6 };
+        var maxChars=verbosity switch { AnswerVerbosity.Compact=>700,AnswerVerbosity.Standard=>1200,_=>1800 };
+        var selected=source.OrderByDescending(x=>x.Score).ThenBy(x=>x.Index).Take(maxSentences).OrderBy(x=>x.Index);
+        var output=new List<string>(); var size=0;
+        foreach(var item in selected)
+        {
+            if(output.Count>0 && size+1+item.Sentence.Length>maxChars) continue;
+            output.Add(item.Sentence); size+=item.Sentence.Length+1;
+        }
+        return output.Count==0?sentences[0]:string.Join(" ",output);
+    }
+    private static HashSet<string> MeaningfulTerms(string value)
+    {
+        var normalized=PersianDisplayText.Normalize(value).Replace('‌',' ').ToLowerInvariant();
+        return Regex.Matches(normalized,@"[\p{L}\p{Nd}]+")
+            .Select(x=>x.Value).Where(x=>x.Length>1&&!SummaryStopWords.Contains(x)).ToHashSet(StringComparer.Ordinal);
+    }
+    private static readonly HashSet<string> SummaryStopWords=new(StringComparer.Ordinal)
+    {
+        "است","هست","بود","شد","شود","می","در","از","به","با","برای","را","رو","و","یا","که","چه","کی","کیست","چیه","چیست","دارد","داره","این","آن","یک","بر"
+    };
     private static string EnsureSentence(string value)
     {
         value=value.Trim();
         return value.Length==0?"داده مرتبط و قابل اتکایی پیدا نشد.":".!؟".Contains(value[^1])?value:value+".";
     }
-    private static string Trim(string s,int n)=>s.Length<=n?s:s[..n]+"…";
 }

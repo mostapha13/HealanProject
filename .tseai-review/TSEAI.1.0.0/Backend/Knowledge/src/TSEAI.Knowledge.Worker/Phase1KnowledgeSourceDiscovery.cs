@@ -59,9 +59,17 @@ SELECT CONVERT(nvarchar(200),[Id]) AS SourceId,
        {ColOrNull(c,"SourceCollectedAt")} AS SourceCollectedAt,
        {watermark} AS WatermarkAt,
        NULL AS MetadataJson
-FROM dbo.Content
-WHERE [Body] IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
-ORDER BY {watermark},[Id]
+FROM dbo.Content c
+INNER JOIN (
+    SELECT TOP (@Take) [Id] AS SelectedId
+    FROM dbo.Content
+    WHERE NULLIF(LTRIM(RTRIM([Body])),N'') IS NOT NULL
+      AND (@AfterWatermark IS NULL
+           OR {watermark} > @AfterWatermark
+           OR ({watermark} = @AfterWatermark AND [Id] > TRY_CONVERT(int,@AfterSourceId)))
+    ORDER BY {watermark},[Id]
+) selected ON selected.SelectedId=c.[Id]
+ORDER BY {watermark},c.[Id]
 """,true,60,IngestionChangeMode.Upsert);
     }
 
@@ -85,6 +93,7 @@ SELECT {id} AS SourceId,
        NULL AS MetadataJson
 FROM dbo.FAQ
 WHERE [QuestionText] IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
+ORDER BY WatermarkAt,SourceId
 """,true,600,IngestionChangeMode.Upsert);
     }
 
@@ -109,6 +118,7 @@ SELECT {sourceId} AS SourceId,
        NULL AS MetadataJson
 FROM dbo.Companystate
 WHERE {Q(bodyName)} IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
+ORDER BY WatermarkAt,SourceId
 """,true,3600,IngestionChangeMode.Append);
     }
 
@@ -135,6 +145,7 @@ SELECT CONVERT(nvarchar(200),{Q(idName)}) AS SourceId,
        NULL AS MetadataJson
 FROM dbo.EDeliveryObject
 WHERE {Q(titleName)} IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
+ORDER BY WatermarkAt,SourceId
 """,true,900,IngestionChangeMode.Upsert);
     }
 
@@ -144,16 +155,40 @@ WHERE {Q(titleName)} IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
         var keyword=c.Contains("Keywords")?"COALESCE(CONVERT(nvarchar(1000),[Keywords]),N'')":"N''";
         var resource=c.Contains("ResourceCode")?"COALESCE(CONVERT(bigint,[ResourceCode]),-1)":"CAST(-1 AS bigint)";
         var created=c.Contains("CreatedDate")?"[CreatedDate]":"CAST('19000101' AS datetime2)";
-        return Source("phase1-tse-faq","faq",$"""
-SELECT CONVERT(nvarchar(200),MIN([Id])) AS SourceId,
-       CONVERT(nvarchar(1000),LEFT(STRING_AGG(CONVERT(nvarchar(max),[Title]),N' ') WITHIN GROUP (ORDER BY [Id]),1000)) AS Title,
-       STRING_AGG(CONVERT(nvarchar(max),[Title]),N' ') WITHIN GROUP (ORDER BY [Id]) AS Body,
+        const string faqIdMetadata="N'{\"fragmented_source\":true,\"parent_key\":\"FaqId\"}'";
+        if(c.Contains("FaqId"))
+        {
+            // FaqId is the authoritative parent key. Keywords are nullable for
+            // thousands of market rows and therefore cannot define document
+            // boundaries: grouping by them collapses unrelated symbols into one
+            // huge document and poisons parent-document retrieval.
+            return Source("phase1-tse-faq","faq",$"""
+SELECT CONVERT(nvarchar(200),[FaqId]) AS SourceId,
+       CONVERT(nvarchar(1000),LEFT(COALESCE(NULLIF(MAX({keyword}),N''),STRING_AGG(CONVERT(nvarchar(max),[Title]),NCHAR(30)) WITHIN GROUP (ORDER BY [Id])),1000)) AS Title,
+       STRING_AGG(CONVERT(nvarchar(max),[Title]),NCHAR(30)) WITHIN GROUP (ORDER BY [Id]) AS Body,
        NULL AS Url, NULL AS Symbol, N'faq' AS Category,
        MAX({created}) AS PublishedAt,
        CAST(1 AS int) AS LanguageId,
        NULLIF(MAX({resource}),-1) AS ResourceCode,
        MAX({created}) AS WatermarkAt,
-       NULL AS MetadataJson
+       {faqIdMetadata} AS MetadataJson
+FROM dbo.TseFaq
+WHERE [Title] IS NOT NULL
+GROUP BY [FaqId]
+HAVING @Since IS NULL OR MAX({created}) >= @Since
+ORDER BY WatermarkAt,SourceId
+""",true,900,IngestionChangeMode.Append);
+        }
+        return Source("phase1-tse-faq","faq",$"""
+SELECT CONVERT(nvarchar(200),MIN([Id])) AS SourceId,
+       CONVERT(nvarchar(1000),LEFT(STRING_AGG(CONVERT(nvarchar(max),[Title]),NCHAR(30)) WITHIN GROUP (ORDER BY [Id]),1000)) AS Title,
+       STRING_AGG(CONVERT(nvarchar(max),[Title]),NCHAR(30)) WITHIN GROUP (ORDER BY [Id]) AS Body,
+       NULL AS Url, NULL AS Symbol, N'faq' AS Category,
+       MAX({created}) AS PublishedAt,
+       CAST(1 AS int) AS LanguageId,
+       NULLIF(MAX({resource}),-1) AS ResourceCode,
+       MAX({created}) AS WatermarkAt,
+       N'{"fragmented_source":true}' AS MetadataJson
 FROM (
     SELECT x.*,SUM(x.IsNewGroup) OVER (ORDER BY x.Id ROWS UNBOUNDED PRECEDING) AS FragmentGroup
     FROM (
@@ -167,6 +202,7 @@ FROM (
 WHERE [Title] IS NOT NULL
 GROUP BY FragmentGroup
 HAVING @Since IS NULL OR MAX({created}) >= @Since
+ORDER BY WatermarkAt,SourceId
 """,true,900,IngestionChangeMode.Append);
     }
 
@@ -191,6 +227,7 @@ FROM dbo.TsePerson
 WHERE [Role] IS NOT NULL AND [ContentId] IN
       (SELECT MAX([ContentId]) FROM dbo.TsePerson GROUP BY [TsePersonCateryId],[Role])
   AND (@Since IS NULL OR [SourceCollectedAt] >= @Since)
+ORDER BY WatermarkAt,SourceId
 """,true,3600,IngestionChangeMode.SlowlyChangingDimension2,VectorizationPolicy.CurrentProjection);
     }
 

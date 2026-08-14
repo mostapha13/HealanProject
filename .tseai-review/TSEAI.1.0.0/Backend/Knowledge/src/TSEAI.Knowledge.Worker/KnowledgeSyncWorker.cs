@@ -57,6 +57,11 @@ public sealed class KnowledgeSyncWorker(
                         count+=batch.Documents.Count; batches++;
                         if(batch.MaxCheckpoint is not null && (candidate is null || IngestionCheckpoint.Compare(batch.MaxCheckpoint,candidate)>0))
                             candidate=batch.MaxCheckpoint;
+                        // The downstream index call is idempotent. Persist progress after
+                        // every acknowledged batch so a restart resumes at the last durable
+                        // boundary instead of replaying the entire source run.
+                        if(candidate is not null)
+                            await checkpoints.SaveAsync(source.Name,candidate with { LastSuccessfulRunUtc=DateTimeOffset.UtcNow });
                     }
                     candidate ??= new IngestionCheckpoint(
                         new DateTimeOffset(1753,1,1,0,0,0,TimeSpan.Zero),"",DateTimeOffset.UtcNow);
