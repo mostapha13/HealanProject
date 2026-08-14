@@ -1,0 +1,59 @@
+{
+  "version": "orderbookcurrent-1.0",
+  "generatedAtUtc": "2026-08-14T11:18:07.924499+00:00",
+  "total": 2,
+  "passed": 2,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 6166.86,
+  "p95LatencyMs": 8322.84,
+  "clusters": {
+    "depth": {
+      "total": 1,
+      "passed": 1
+    },
+    "notional": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "OB-017",
+      "cluster": "depth",
+      "question": "مجموع حجم فروش فملی در پنج ردیف را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 8322.84,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: مجموع حجم فروش پنج سطح 525,776 سهم، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "error": null
+    },
+    {
+      "id": "OB-023",
+      "cluster": "notional",
+      "question": "ارزش سمت فروش اردربوک فملی را حساب کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4010.89,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: ارزش اسمی سفارش‌های فروش پنج سطح 11,406,367,280 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "error": null
+    }
+  ],
+  "failures": []
+}

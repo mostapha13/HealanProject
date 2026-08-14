@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 from collections import Counter
 from datetime import datetime, timezone
 import math
@@ -11,7 +12,7 @@ from .qdrant_store import QdrantKnowledgeStore
 
 LATEST_TERMS=("آخرین","جدیدترین","تازه ترین","تازه‌ترین","امروز","اخیر")
 NEWS_TERMS=("خبر","اخبار","اطلاعیه")
-HISTORY_TERMS=("سابق","قبلی","پیشین")
+HISTORY_TERMS=("سابق","سابقه","سوابق","قبلی","پیشین","نماینده","از طرف","از سوی")
 RELEVANCE_STOP={"چیست","چیه","کیه","کیست","چه","دارد","داره","است","هست","بود","شد","شود","میشه","می‌شود","در","از","به","با","برای","را","رو","و","یا","آخرین","جدیدترین","خبر","اخبار","اطلاعیه","وضعیت","متن","کامل","کاملش","کل","اصل","عین","بدون","خلاصه","بده","ده","نمایش","کن"}
 INCOMPLETE_END_TERMS={"و","یا","که","اما","ولی","با","از","به","در","برای","تحت","شامل","مشتمل","بر","ضمن","تا"}
 RESPONSIBILITY_QUERY_TERMS={"مسئول","نهاد","متولی","عهده"}
@@ -134,7 +135,22 @@ class KnowledgeService:
         # Latest queries need a wider semantic candidate set; otherwise a highly
         # similar but very old article can hide the newest relevant document.
         pool=max(limit*(40 if latest_first else 12),300 if latest_first else 60)
-        raw=await self.store.search(qvec,pool,filters)
+        if hasattr(self.store,"search_text"):
+            dense,lexical=await asyncio.gather(
+                self.store.search(qvec,pool,filters),
+                self.store.search_text(norm,max(limit*8,40),filters),
+            )
+        else:
+            dense=await self.store.search(qvec,pool,filters)
+            lexical=[]
+        raw=[]; seen_points=set()
+        # Dense rows come first so an item found by both routes keeps its real
+        # vector score; lexical-only rows are then appended as recall support.
+        for row in [*dense,*lexical]:
+            point_id=str(row.get("id") or "")
+            if point_id and point_id in seen_points: continue
+            if point_id: seen_points.add(point_id)
+            raw.append(row)
         bm25=_bm25_scores(query,raw)
         now=datetime.now(timezone.utc); scored=[]
         parsed_dates=[_parse_dt((row.get("payload") or {}).get("published_at") or ((row.get("payload") or {}).get("metadata") or {}).get("last_modified_at") or ((row.get("payload") or {}).get("metadata") or {}).get("source_collected_at")) for row in raw]
@@ -166,12 +182,24 @@ class KnowledgeService:
             if not doc_id or doc_id in seen_docs: continue
             seen_docs.add(doc_id)
             candidates.append((score,vector,lexical,phrase,entity,freshness,payload,cid))
-            if len(candidates)>=limit: break
+            # Do not stop at the dense top-k. Exact lexical evidence for a rare
+            # Persian name can legitimately score below a short current profile.
+            if len(candidates)>=max(limit*4,32): break
         if candidates:
             # Never expose the long semantic tail. Keep only evidence close to the
-            # best match; unrelated parent documents do not.
+            # best match, plus exact lexical evidence. The latter preserves source
+            # diversity (for example a current SQL projection and a dated CMS news
+            # item about the same person) without reopening the weak semantic tail.
             threshold=max(.25,float(candidates[0][0])*.82)
-            candidates=[x for x in candidates if float(x[0])>=threshold][:5]
+            strong=[x for x in candidates if float(x[0])>=threshold]
+            exact=[x for x in candidates if float(x[3])>=1.0 or (float(x[2])>=.92 and float(x[0])>=.25)]
+            selected=[]; selected_docs=set()
+            for row in sorted([*strong,*exact],key=lambda x:float(x[0]),reverse=True):
+                doc_id=str(row[6].get("document_id") or "")
+                if not doc_id or doc_id in selected_docs: continue
+                selected_docs.add(doc_id); selected.append(row)
+                if len(selected)>=min(limit,8): break
+            candidates=selected
         parent_chunks=await self.store.get_document_chunks([str(x[6].get("document_id") or "") for x in candidates])
         items=[]
         for score,vector,lexical,phrase,entity,freshness,payload,cid in candidates:

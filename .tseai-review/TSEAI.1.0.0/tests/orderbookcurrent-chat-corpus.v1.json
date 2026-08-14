@@ -1,0 +1,70 @@
+{
+  "version": "orderbookcurrent-1.0",
+  "description": "50 SQL-grounded questions for dbo.OrderBookCurrent covering beginner wording, five-level quotes, derived microstructure metrics, source identity/freshness and market-wide rankings.",
+  "cases": [
+    {"id":"OB-001","cluster":"best-bid","question":"بهترین قیمت خرید فملی چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین قیمت خرید 21,660 ریال","1405/04/03"],"mustNotContain":["آخرین قیمت"],"maxAnswerChars":260},
+    {"id":"OB-002","cluster":"best-bid","question":"سرخط تقاضای ملی مس روی چه نرخی است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین قیمت خرید 21,660 ریال"],"maxAnswerChars":260},
+    {"id":"OB-003","cluster":"best-bid","question":"حجم ردیف اول خرید فملی چند سهمه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["حجم بهترین سفارش خرید 72,599 سهم"],"mustNotContain":["حجم معاملات"],"maxAnswerChars":280},
+    {"id":"OB-004","cluster":"best-bid","question":"تعداد سفارش بهترین خرید فملی؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد سفارش‌های بهترین خرید 2"],"maxAnswerChars":260},
+    {"id":"OB-005","cluster":"best-bid","question":"بهترین سفارش خرید فملی رو کامل بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["قیمت 21,660 ریال","حجم 72,599 سهم","2 سفارش"],"maxAnswerChars":320},
+
+    {"id":"OB-006","cluster":"best-ask","question":"بهترین قیمت فروش فملی چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین قیمت فروش 21,660 ریال"],"mustNotContain":["آخرین قیمت"],"maxAnswerChars":260},
+    {"id":"OB-007","cluster":"best-ask","question":"حجم عرضه در سرخط فملی چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["حجم بهترین سفارش فروش 20,000 سهم"],"maxAnswerChars":280},
+    {"id":"OB-008","cluster":"best-ask","question":"چند سفارش در بهترین فروش فملی هست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد سفارش‌های بهترین فروش 1"],"maxAnswerChars":280},
+    {"id":"OB-009","cluster":"best-ask","question":"بهترین سفارش فروش فملی را با جزئیات بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["قیمت 21,660 ریال","حجم 20,000 سهم","1 سفارش"],"maxAnswerChars":320},
+    {"id":"OB-010","cluster":"top-quotes","question":"بهترین سفارش‌های خرید و فروش فملی را کنار هم بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین سفارش خرید","72,599 سهم","بهترین سفارش فروش","20,000 سهم"],"maxAnswerChars":430},
+    {"id":"OB-011","cluster":"cross-table","question":"آخرین قیمت و بهترین قیمت خرید فملی را یکجا بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت 21,680 ریال","بهترین قیمت خرید 21,660 ریال"],"maxAnswerChars":340},
+
+    {"id":"OB-012","cluster":"spread","question":"اختلاف قیمت خرید و فروش فملی در اردربوک چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["اختلاف بهترین قیمت فروش و خرید 0 ریال"],"maxAnswerChars":280},
+    {"id":"OB-013","cluster":"spread","question":"اسپرد ریالی خساپا را بگو","expectedType":"marketsymbol","expectedEntity":"خساپا","mustContain":["اختلاف بهترین قیمت فروش و خرید 2 ریال"],"maxAnswerChars":280},
+    {"id":"OB-014","cluster":"spread","question":"درصد اسپرد خساپا نسبت به قیمت میانی چند است؟","expectedType":"marketsymbol","expectedEntity":"خساپا","mustContain":["0.3454٪"],"mustNotContain":["آخرین قیمت"],"maxAnswerChars":300},
+    {"id":"OB-015","cluster":"spread","question":"قیمت میانی بهترین خرید و فروش خساپا چقدره؟","expectedType":"marketsymbol","expectedEntity":"خساپا","mustContain":["قیمت میانی بهترین مظنه‌ها 579.00 ریال"],"mustNotContain":["حجم"],"maxAnswerChars":300},
+
+    {"id":"OB-016","cluster":"depth","question":"عمق خرید فملی چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجموع حجم خرید پنج سطح 659,478 سهم"],"maxAnswerChars":290},
+    {"id":"OB-017","cluster":"depth","question":"مجموع حجم فروش فملی در پنج ردیف را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجموع حجم فروش پنج سطح 525,776 سهم"],"maxAnswerChars":300},
+    {"id":"OB-018","cluster":"depth","question":"کل تعداد سفارش خرید فملی در پنج سطح چندتاست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجموع تعداد سفارش‌های خرید پنج سطح 29"],"maxAnswerChars":310},
+    {"id":"OB-019","cluster":"depth","question":"کل تعداد سفارش فروش فملی در اردربوک چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجموع تعداد سفارش‌های فروش پنج سطح 28"],"maxAnswerChars":310},
+    {"id":"OB-020","cluster":"depth","question":"عدم تعادل اردربوک فملی چند درصده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["عدم‌تعادل حجم پنج سطح +11.28٪"],"maxAnswerChars":300},
+    {"id":"OB-021","cluster":"depth","question":"نسبت تقاضا به عرضه فملی در عمق پنج سطح چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["نسبت عمق خرید به فروش 1.2543"],"maxAnswerChars":300},
+    {"id":"OB-022","cluster":"notional","question":"ارزش سفارش‌های خرید فملی در پنج سطح چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["14,273,628,910 ریال"],"maxAnswerChars":330},
+    {"id":"OB-023","cluster":"notional","question":"ارزش سمت فروش اردربوک فملی را حساب کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["11,406,367,280 ریال"],"maxAnswerChars":330},
+
+    {"id":"OB-024","cluster":"levels","question":"بزرگترین ردیف خرید فملی کدامه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 2","267,804 سهم","21,650 ریال"],"maxAnswerChars":330},
+    {"id":"OB-025","cluster":"levels","question":"بزرگترین ردیف فروش فملی کدام است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 4","268,081 سهم","21,700 ریال"],"maxAnswerChars":330},
+    {"id":"OB-026","cluster":"levels","question":"قیمت و حجم خرید سطح دوم فملی را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 2: خرید 21,650 ریال، 267,804 سهم، 11 سفارش"],"mustNotContain":["فروش"],"maxAnswerChars":350},
+    {"id":"OB-027","cluster":"levels","question":"جزئیات فروش ردیف سوم فملی چیست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 3: فروش 21,690 ریال، 198,198 سهم، 7 سفارش"],"mustNotContain":["خرید"],"maxAnswerChars":350},
+    {"id":"OB-028","cluster":"levels","question":"سطح چهارم اردربوک فملی در دو سمت چه وضعی دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 4","خرید 21,630 ریال","125,817 سهم","فروش 21,700 ریال","268,081 سهم"],"maxAnswerChars":440},
+    {"id":"OB-029","cluster":"levels","question":"اردربوک کامل فملی را در پنج سطح نشان بده","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 1","سطح 2","سطح 3","سطح 4","سطح 5","72,599 سهم","268,081 سهم"],"mustNotContain":["تحلیل محاسباتی"],"maxAnswerChars":1200},
+    {"id":"OB-030","cluster":"levels","question":"همه ردیف‌های خرید اردربوک فملی را بده","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 1: خرید","سطح 5: خرید","267,804 سهم"],"mustNotContain":["فروش"],"maxAnswerChars":800},
+    {"id":"OB-031","cluster":"levels","question":"فقط سمت فروش اردربوک فملی را در پنج ردیف بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["سطح 1: فروش","سطح 5: فروش","268,081 سهم"],"mustNotContain":["خرید"],"maxAnswerChars":800},
+
+    {"id":"OB-032","cluster":"book-state","question":"وضعیت اردربوک فملی چطوره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["دوطرفه و قفل‌شده","بهترین قیمت خرید و فروش برابرند"],"maxAnswerChars":360},
+    {"id":"OB-033","cluster":"book-state","question":"شپنا صف خرید دارد؟","expectedType":"marketsymbol","expectedEntity":"شپنا","mustContain":["یک‌طرفه خرید","صف خرید رسمی را اثبات نمی‌کند"],"maxAnswerChars":420},
+    {"id":"OB-034","cluster":"book-state","question":"تکنو صف فروش دارد؟","expectedType":"marketsymbol","expectedEntity":"تکنو","mustContain":["یک‌طرفه فروش","صف فروش رسمی را اثبات نمی‌کند"],"maxAnswerChars":420},
+    {"id":"OB-035","cluster":"missing-book","question":"بهترین سفارش خرید رانیز چیه؟","expectedType":"marketsymbol","expectedEntity":"رانیز","mustContain":["در جدول OrderBookCurrent رکوردی ثبت نشده"],"mustNotContain":["قیمت 0"],"maxAnswerChars":230},
+
+    {"id":"OB-036","cluster":"source-metadata","question":"زمان به‌روزرسانی منبع و زمان جمع‌آوری اردربوک فملی را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1405/04/03","1405/05/20","زمان جمع‌آوری آن در SQL"],"maxAnswerChars":360},
+    {"id":"OB-037","cluster":"source-metadata","question":"بهترین قیمت خرید وبملت چند است؟","expectedType":"marketsymbol","expectedEntity":"وبملت","mustContain":["بهترین قیمت خرید 1,331 ریال"],"maxAnswerChars":280},
+    {"id":"OB-038","cluster":"source-metadata","question":"InsCode وبملت در اردربوک چیست؟","expectedType":"marketsymbol","expectedEntity":"وبملت","mustContain":["InsCode برابر 778253364357513"],"maxAnswerChars":300},
+    {"id":"OB-039","cluster":"source-metadata","question":"InstrumentID فملی در OrderBookCurrent چیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["InstrumentID برابر IRO1MSMI0001"],"maxAnswerChars":320},
+    {"id":"OB-040","cluster":"source-metadata","question":"BestLimitCounter اردربوک فملی چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["BestLimitCounter برابر 2,357,835"],"maxAnswerChars":320},
+
+    {"id":"OB-041","cluster":"ranking","question":"پنج نماد با بیشترین حجم بهترین سفارش خرید را بده","expectedType":"structured_query","mustContain":["شستا","حکشتی","وتجارت","وبصادر","وفیروزه","حجم بهترین سفارش خرید"],"maxAnswerChars":1200},
+    {"id":"OB-042","cluster":"ranking","question":"پنج سهم با بیشترین حجم سرخط فروش کدام‌اند؟","expectedType":"structured_query","mustContain":["تکنو","سخزر","کمرجان","اروند","سبهان","حجم بهترین سفارش فروش"],"maxAnswerChars":1200},
+    {"id":"OB-043","cluster":"ranking","question":"پنج نماد با بیشترین عمق خرید پنج سطح را فهرست کن","expectedType":"structured_query","mustContain":["شستا","حکشتی","وتجارت","وبصادر","وفیروزه","عمق خرید پنج سطح"],"maxAnswerChars":1200},
+    {"id":"OB-044","cluster":"ranking","question":"پنج نماد با بیشترین عمق فروش اردربوک را بده","expectedType":"structured_query","mustContain":["تکنو","سخزر","کمرجان","اروند","سبهان","عمق فروش پنج سطح"],"maxAnswerChars":1200},
+    {"id":"OB-045","cluster":"ranking","question":"پنج نماد با بیشترین مجموع تعداد سفارش خرید در پنج سطح کدام‌اند؟","expectedType":"structured_query","mustContain":["حکشتی","شپنا","ذرت","شبندر","رمپنا","مجموع سفارش‌های خرید پنج سطح"],"maxAnswerChars":1200},
+    {"id":"OB-046","cluster":"ranking","question":"پنج نماد با بیشترین عدم تعادل مثبت اردربوک را بده","expectedType":"structured_query","mustContain":["آردینه","آسیا","اخابر","البرز","انرژی","100.00٪"],"maxAnswerChars":1200},
+    {"id":"OB-047","cluster":"ranking","question":"پنج نماد با بیشترین عدم تعادل منفی اردربوک را بده","expectedType":"structured_query","mustContain":["آبادا","اروند","افق","بالاس","پدرخش","-100.00٪"],"maxAnswerChars":1200},
+    {"id":"OB-048","cluster":"ranking","question":"پنج نماد با بیشترین درصد اسپرد را نشان بده","expectedType":"structured_query","mustContain":["بوعلی","شکلر","خکار","خدیزل","واتی","اسپرد نسبی"],"maxAnswerChars":1200},
+    {"id":"OB-049","cluster":"ranking","question":"پنج نماد با بزرگترین صف خرید در اردربوک را بده","expectedType":"structured_query","mustContain":["وفیروزه","شپنا","درازک","توسن","رمپنا","صف رسمی تأیید نمی‌شود"],"maxAnswerChars":1500},
+    {"id":"OB-050","cluster":"ranking","question":"پنج نماد با بزرگترین صف فروش در اردربوک کدام‌اند؟","expectedType":"structured_query","mustContain":["تکنو","اروند","سبهان","ساوه","سغرب","صف رسمی تأیید نمی‌شود"],"maxAnswerChars":1500}
+  ],
+  "globalMustNotContain": [
+    "داده قابل اتکایی برای پاسخ پیدا نشد",
+    "Unexpected token",
+    "not valid JSON",
+    "سرویس هوش مصنوعی موقتاً در دسترس نیست",
+    "پاسخ بالقوه توسط Answer Validation"
+  ]
+}

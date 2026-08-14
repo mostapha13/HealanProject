@@ -16,7 +16,8 @@ public sealed record ChatPlan(
     string? KnowledgeQuery,
     double Confidence,
     string? Clarification,
-    IReadOnlyList<string> Reasons);
+    IReadOnlyList<string> Reasons,
+    IReadOnlyList<string>? RequestedFields = null);
 
 public interface IAiChatPlanner
 {
@@ -26,7 +27,7 @@ public interface IAiChatPlanner
 public sealed record KnowledgeCitation(string SourceType,string SourceId,string Title,string? Url,string? Symbol,string? PublishedAt);
 public sealed record KnowledgeHit(string Text,double Score,KnowledgeCitation Citation,IReadOnlyDictionary<string,object?> Metadata);
 public sealed record KnowledgeSearchResult(IReadOnlyList<KnowledgeHit> Hits,string Query);
-public sealed record KnowledgeRetrievalContext(string? Symbol=null,string? DateFrom=null,string? DateTo=null,bool? LatestFirst=null,int? ContentTypeId=null,string? Route=null,int? LanguageId=1,string? SourceType=null);
+public sealed record KnowledgeRetrievalContext(string? Symbol=null,string? DateFrom=null,string? DateTo=null,bool? LatestFirst=null,int? ContentTypeId=null,string? Route=null,int? LanguageId=1,string? SourceType=null,bool? CurrentOnly=null);
 
 public interface IKnowledgeRetriever
 {

@@ -53,9 +53,9 @@ public sealed partial class DeterministicFilterTemporalPolicy : IFilterTemporalP
         {
             if (temporal.Start!.MarketDayKind == MarketDayKind.WeekendClosed)
                 return Decision(false, FilterTemporalExecutionMode.CurrentWeekendClosed, temporal,
-                    $"امروز {temporal.Start.JalaliDate} ({temporal.Start.GregorianIso}) تعطیلی هفتگی بازار است؛ Snapshot معاملاتی به‌عنوان داده زنده امروز اجرا نمی‌شود.");
+                    $"امروز {temporal.Start.JalaliDate} تعطیلی هفتگی بازار است؛ Snapshot معاملاتی به‌عنوان داده زنده امروز اجرا نمی‌شود.");
             return Decision(true, FilterTemporalExecutionMode.CurrentSnapshot, temporal,
-                $"فیلتر برای امروز {temporal.Start!.JalaliDate} ({temporal.Start.GregorianIso}) روی Snapshot جاری اجرا می‌شود.");
+                $"فیلتر برای امروز {temporal.Start!.JalaliDate} روی Snapshot جاری اجرا می‌شود.");
         }
 
         if (temporal.IsFuture)
@@ -72,7 +72,7 @@ public sealed partial class DeterministicFilterTemporalPolicy : IFilterTemporalP
             historicalWeekend ? FilterTemporalExecutionMode.HistoricalWeekendClosed : FilterTemporalExecutionMode.HistoricalUnavailable,
             temporal,
             historicalWeekend
-                ? $"تاریخ {temporal.Start!.JalaliDate} ({temporal.Start.GregorianIso}) تعطیلی هفتگی بازار بوده است؛ Snapshot امروز جایگزین آن نمی‌شود."
+                ? $"تاریخ {temporal.Start!.JalaliDate} تعطیلی هفتگی بازار بوده است؛ Snapshot امروز جایگزین آن نمی‌شود."
                 : $"محدوده تاریخی {temporal.Start!.JalaliDate} تا {temporal.End?.JalaliDate ?? temporal.Start.JalaliDate} شناسایی شد، اما MarketDailyHistory هنوز متصل نیست؛ اجرای فیلتر برای جلوگیری از نتیجه ساختگی متوقف شد.");
     }
 

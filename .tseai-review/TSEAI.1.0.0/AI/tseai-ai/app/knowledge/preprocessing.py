@@ -79,6 +79,17 @@ def prepare_document(document:KnowledgeDocument)->tuple[KnowledgeDocument|None,s
     if document.source_type == "faq" and not text:
         return None,"faq-without-answer"
     content_type_id=_as_int(metadata.get("content_type_id"))
+    placeholder_title=document.source_type == "cms_content" and bool(
+        re.fullmatch(r"(?:content|cms_content)\s+\d+",normalize_for_search(title),flags=re.IGNORECASE)
+    )
+    if placeholder_title:
+        # dbo.Content has no title column. Short remnants are overwhelmingly
+        # banners, test payloads or links without enough context for safe QA.
+        searchable=normalize_for_search(text)
+        if len(searchable) < 40:
+            return None,"cms-body-too-short-without-title"
+        first=re.split(r"(?:\n+|(?<=[.!؟؛])\s+)",text,maxsplit=1)[0].strip()
+        title=(first or text).strip()[:180].rstrip(" ،؛:-")
     decision=decide_route(document.source_type,content_type_id,text)
     if not decision.indexable:
         return None,decision.reason

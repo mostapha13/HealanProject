@@ -7,7 +7,8 @@ namespace TSEAI.Application.Chat.Context;
 
 public sealed class ConversationContextService(
     IConversationContextStore store,
-    IPersianEntityResolver entities) : IConversationContextService
+    IPersianEntityResolver entities,
+    IConversationQueryRewriter rewriter) : IConversationContextService
 {
     private static readonly string[] ClearCues = ["موضوع جدید","مکالمه جدید","کانتکست رو پاک کن","کانتکست را پاک کن","زمینه رو پاک کن","زمینه را پاک کن"];
     private static readonly string[] ComparisonCues = ["مقایسه","مقایسه کن","مقایسه‌شون","مقایسه شون","در مقایسه با","نسبت به"];
@@ -15,6 +16,14 @@ public sealed class ConversationContextService(
     private static readonly string[] KnowledgeFollowUps = ["خبرش","اخبارش","اطلاعیه‌ش","اطلاعیه اش","اطلاعیه‌اش","گزارشش","آخرین خبرش","خبر جدیدش"];
     private static readonly string[] HybridFollowUps = ["چرا افت","چرا رشد","چرا منفی","چرا مثبت","دلیل افت","دلیل رشد","علتش"];
     private static readonly string[] ReferentialCues = ["همون","همان","اون","آن سهم","این سهم","این نماد","همین نماد","همین سهم"];
+    private static readonly string[] OrganizationFollowUps =
+    [
+        "نماینده کدام", "نماینده کدوم", "نماینده چه", "از طرف کدام", "از طرف کدوم", "از سوی کدام",
+        "سابقه اش", "سابقه‌اش", "سوابقش", "رزومه اش", "رزومه‌اش", "تحصیلاتش", "درباره اش", "درباره‌اش",
+        "کدام شرکت است", "کدوم شرکت هست", "چه شرکتی است", "سمتش چیست", "سمتش چیه",
+        "زیر مجموعه", "زیرمجموعه", "واحدهای تابع", "مدیران تابع", "وابسته", "بالادست",
+        "گزارش می دهد", "گزارش میدهد", "گزارش می ده", "گزارش میده", "مدیر مستقیم", "مسئول مستقیم", "معاونتش"
+    ];
 
     public async Task<ConversationTurnContext> PrepareAsync(string subject,string conversationId,string question,TemporalResolution temporal,CancellationToken ct)
     {
@@ -63,6 +72,19 @@ public sealed class ConversationContextService(
             }
         }
 
+        var recent=state.RecentTurns??[];
+        if(state.ActiveReference is not null
+            && !LooksLikeExplicitMarketQuestion(q)
+            && OrganizationFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
+        {
+            var reference=state.ActiveReference;
+            var referenceSubject=reference.SubjectName??reference.Topic;
+            var role=string.IsNullOrWhiteSpace(reference.SubjectRole)?"":$" با سمت {reference.SubjectRole}";
+            reasons.Add("organization-followup-with-active-reference");
+            return new(question,$"{question} درباره {referenceSubject}{role} در بورس تهران",state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
         if(primary is not null)
         {
             if(HybridFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
@@ -75,29 +97,71 @@ public sealed class ConversationContextService(
                 reasons.Add("knowledge-followup-with-primary-entity");
                 return Applied(question,state,primary,ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,reasons);
             }
-            if(MarketFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)) || ReferentialCues.Any(x=>q.Contains(x,StringComparison.Ordinal)))
+            if(MarketFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)) || ReferentialCues.Any(x=>ContainsWholeCue(q,x)))
             {
                 reasons.Add("market-followup-with-primary-entity");
                 return Applied(question,state,primary,ConversationFollowUpKind.Market,ChatIntent.MarketSymbol,reasons);
             }
         }
 
-        return new(question,question,state,new(ConversationFollowUpKind.None,null,primary?.BestLookup,null,false,[]),primary,null,false,false);
+        if(recent.Count>0)
+        {
+            var rewritten=await rewriter.RewriteAsync(new(question,state.ActiveReference,recent.TakeLast(12).ToArray()),ct);
+            if(rewritten?.ContextApplied==true && IsSafeRewrite(question,rewritten.StandaloneQuestion))
+            {
+                reasons.Add("semantic-conversation-rewrite");
+                if(!string.IsNullOrWhiteSpace(rewritten.Reason)) reasons.Add(rewritten.Reason!);
+                var preferred=state.ActiveReference?.Kind.StartsWith("organization",StringComparison.Ordinal)==true
+                    ? ChatIntent.Knowledge
+                    : PreferredFromPrevious(state);
+                var rewrittenPrimary=preferred==ChatIntent.Knowledge && state.ActiveReference?.Kind.StartsWith("organization",StringComparison.Ordinal)==true
+                    ? null
+                    : primary;
+                var kind=preferred==ChatIntent.Hybrid?ConversationFollowUpKind.Hybrid:
+                    preferred==ChatIntent.Knowledge?ConversationFollowUpKind.Knowledge:ConversationFollowUpKind.Market;
+                return new(question,rewritten.StandaloneQuestion,state,
+                    new(kind,preferred,rewrittenPrimary?.BestLookup,null,true,reasons),rewrittenPrimary,null,false,false);
+            }
+        }
+
+        return new(question,question,state,new(ConversationFollowUpKind.None,null,null,null,false,[]),null,null,false,false);
     }
 
     public async Task<ConversationContextState> RecordAsync(
         string subject,string conversationId,string question,ChatIntent intent,ChatCapabilityRoute route,
-        TemporalResolution temporal,EntityResolution? primary,EntityResolution? secondary,CancellationToken ct)
+        TemporalResolution temporal,EntityResolution? primary,EntityResolution? secondary,CancellationToken ct,
+        string? answer=null,string answerType="chat")
     {
         var current=await store.GetAsync(subject,conversationId,ct);
-        var p=Selected(primary)??current.PrimaryEntity;
+        var selectedPrimary=Selected(primary);
+        var p=selectedPrimary??current.PrimaryEntity;
         var s=Selected(secondary);
         // A new resolved primary entity starts a new comparison context unless the current turn explicitly supplied a secondary.
         if(Selected(primary) is not null && s is null) s=null;
         var temporalRef=temporal.HasTemporalReference
             ? new ConversationTemporalReference(temporal.OriginalText,temporal.Start?.JalaliDate,temporal.End?.JalaliDate,temporal.Start?.GregorianIso,temporal.End?.GregorianIso,temporal.Kind.ToString())
             : current.LastTemporal;
-        var next=new ConversationContextState(conversationId,p,s,intent,route,temporalRef,question,current.Revision+1,DateTimeOffset.UtcNow);
+        var turns=AppendTurn(current.RecentTurns,question,question,answer,answerType,current.ActiveReference?.SubjectName);
+        var activeReference=selectedPrimary is null?current.ActiveReference:null;
+        var next=new ConversationContextState(conversationId,p,s,intent,route,temporalRef,question,current.Revision+1,DateTimeOffset.UtcNow,activeReference,turns);
+        await store.SaveAsync(subject,next,ct);
+        return next;
+    }
+
+    public async Task<ConversationContextState> RecordReferenceAsync(
+        string subject,string conversationId,string originalQuestion,string effectiveQuestion,string answer,
+        CanonicalReferenceAnswer reference,TemporalResolution temporal,CancellationToken ct)
+    {
+        var current=await store.GetAsync(subject,conversationId,ct);
+        var temporalRef=temporal.HasTemporalReference
+            ? new ConversationTemporalReference(temporal.OriginalText,temporal.Start?.JalaliDate,temporal.End?.JalaliDate,temporal.Start?.GregorianIso,temporal.End?.GregorianIso,temporal.Kind.ToString())
+            : current.LastTemporal;
+        var active=new ConversationReference(reference.Reference.Kind,reference.Reference.Topic,reference.Reference.SubjectName,
+            reference.Reference.SubjectRole,reference.Reference.RelatedSubjects);
+        var turns=AppendTurn(current.RecentTurns,originalQuestion,effectiveQuestion,answer,"structured_reference",active.SubjectName??active.Topic);
+        var clearsMarketContext=reference.Reference.Kind.StartsWith("organization",StringComparison.Ordinal);
+        var next=new ConversationContextState(conversationId,clearsMarketContext?null:current.PrimaryEntity,clearsMarketContext?null:current.SecondaryEntity,ChatIntent.Knowledge,
+            ChatCapabilityRoute.Knowledge,temporalRef,originalQuestion,current.Revision+1,DateTimeOffset.UtcNow,active,turns);
         await store.SaveAsync(subject,next,ct);
         return next;
     }
@@ -158,4 +222,35 @@ public sealed class ConversationContextService(
 
     private static string Normalize(string s)
         => Regex.Replace((s??string.Empty).Replace('ي','ی').Replace('ك','ک'),@"\s+"," ").Trim();
+
+    private static IReadOnlyList<ConversationMemoryTurn> AppendTurn(
+        IReadOnlyList<ConversationMemoryTurn>? existing,string question,string effectiveQuestion,string? answer,string answerType,string? subjectName)
+    {
+        var turns=(existing??[]).TakeLast(49).ToList();
+        if(!string.IsNullOrWhiteSpace(answer))
+            turns.Add(new(question,effectiveQuestion,answer.Length<=2000?answer:answer[..2000]+"…",answerType,subjectName,DateTimeOffset.UtcNow));
+        return turns;
+    }
+
+    private static bool IsSafeRewrite(string original,string rewritten)
+    {
+        if(string.IsNullOrWhiteSpace(rewritten) || rewritten.Length>4000) return false;
+        var originalTerms=Normalize(original).Split(' ',StringSplitOptions.RemoveEmptyEntries)
+            .Where(x=>x.Length>1).ToHashSet(StringComparer.Ordinal);
+        var rewrittenTerms=Normalize(rewritten).Split(' ',StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
+        return originalTerms.Count==0 || originalTerms.Count(x=>rewrittenTerms.Contains(x))>=Math.Min(2,originalTerms.Count);
+    }
+
+    private static bool LooksLikeExplicitMarketQuestion(string normalized)
+        => normalized.Contains("نماد",StringComparison.Ordinal)
+            || normalized.Contains("سهم",StringComparison.Ordinal)
+            || normalized.Contains("قیمت",StringComparison.Ordinal)
+            || normalized.Contains("حجم معاملات",StringComparison.Ordinal)
+            || normalized.Contains("ارزش معاملات",StringComparison.Ordinal)
+            || normalized.Contains("اردربوک",StringComparison.Ordinal)
+            || normalized.Contains("سفارش خرید",StringComparison.Ordinal)
+            || normalized.Contains("سفارش فروش",StringComparison.Ordinal);
+
+    private static bool ContainsWholeCue(string normalized,string cue)
+        => Regex.IsMatch(normalized,$@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(cue)}(?![\p{{L}}\p{{N}}])",RegexOptions.CultureInvariant);
 }

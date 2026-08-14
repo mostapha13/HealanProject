@@ -1,9 +1,15 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {HubConnectionBuilder,LogLevel} from '@microsoft/signalr';
 import AdminOperations from './AdminOperations';
+import {formatPersianDate,formatPersianDateTime} from './persianDate';
 
 const getAnon=()=>{let v=localStorage.getItem('tseai-anonymous-id');if(!v){v=crypto.randomUUID().replaceAll('-','');localStorage.setItem('tseai-anonymous-id',v)}return v};
 const getConversation=()=>{let v=localStorage.getItem('tseai-filter-conversation-id');if(!v){v=crypto.randomUUID().replaceAll('-','');localStorage.setItem('tseai-filter-conversation-id',v)}return v};
+const chatHistoryKey=id=>'tseai-chat-history-v1:'+id;
+const loadChatHistory=()=>{try{const rows=JSON.parse(localStorage.getItem(chatHistoryKey(getConversation()))||'[]');return Array.isArray(rows)?rows.slice(-50).map(x=>({...x,restored:true})):[]}catch{return []}};
+const compactHistoryMessage=m=>m.role==='assistant'
+ ?{role:'assistant',data:{answer:m.data?.answer||''}}
+ :{role:m.role,text:String(m.text||'').slice(0,4000)};
 const nativeFetch=globalThis.fetch.bind(globalThis);
 let accessToken=null;
 let accessTokenExpiresAt=0;
@@ -34,6 +40,7 @@ function normalizeApiResponse(response){
  return new Response(JSON.stringify({code:'upstream_non_json_error',message}),{status:response.status,statusText:response.statusText,headers:{'Content-Type':'application/json; charset=utf-8'}});
 }
 const fetch=apiFetch;
+const TYPEWRITER_WORD_INTERVAL_MS=60;
 async function responseJson(response){
  const text=await response.text();
  if(!text)return {};
@@ -49,7 +56,7 @@ async function responseJson(response){
 export default function App(){
  const[q,setQ]=useState('');
  const[loading,setLoading]=useState(false);
- const[messages,setMessages]=useState([]);
+ const[messages,setMessages]=useState(loadChatHistory);
  const[mobile,setMobile]=useState('');
  const[code,setCode]=useState('');
  const[otpSent,setOtpSent]=useState(false);
@@ -72,6 +79,7 @@ export default function App(){
  const end=useRef();
 
  useEffect(()=>{end.current?.scrollIntoView({behavior:'smooth'})},[messages]);
+ useEffect(()=>{try{localStorage.setItem(chatHistoryKey(getConversation()),JSON.stringify(messages.slice(-50).map(compactHistoryMessage)))}catch{}},[messages]);
  useEffect(()=>{loadConversation()},[]);
  useEffect(()=>{localStorage.removeItem('tseai-access-token');localStorage.removeItem('tseai-refresh-token');let active=true;refreshSession().then(ok=>{if(active){setLogged(ok);if(ok)loadConversation()}});return()=>{active=false}},[]);
  useEffect(()=>{if(logged&&savedOpen)loadSavedFilters()},[logged,savedOpen]);
@@ -88,7 +96,7 @@ export default function App(){
  async function ask(e){e.preventDefault();const question=q.trim();if(!question||loading)return;setQ('');await sendCommand(question,true)}
  async function executeSource(source,options={}){const r=await fetch('/api/filters/execute',{method:'POST',headers:apiHeaders(),body:JSON.stringify({source,page:options.page??1,pageSize:options.pageSize??current?.pageSize??100,sortBy:options.sortBy??current?.sortBy??null,sortDescending:options.sortDescending??current?.sortDescending??true})});const d=await r.json();if(!r.ok)throw new Error(d.message||'اجرای فیلتر انجام نشد');return d}
  async function runCurrent(options={}){if(!current?.filter||loading)return;setLoading(true);try{const d=await executeSource(current.filter,{page:options.page??current.page??1,pageSize:current.pageSize??100,sortBy:options.sortBy??current.sortBy??null,sortDescending:options.sortDescending??current.sortDescending??true});setCurrent(x=>({...x,scanned:d.scanned,matched:d.matched,page:d.page,pageSize:d.pageSize,totalPages:d.totalPages,sortBy:d.sortBy,sortDescending:d.sortDescending,results:d.results}))}catch(err){setMessages(m=>[...m,{role:'error',text:err.message}])}finally{setLoading(false)}}
- function newConversation(){localStorage.setItem('tseai-filter-conversation-id',crypto.randomUUID().replaceAll('-',''));setMessages([]);setCurrent(null);setSelectedSaved(null)}
+ function newConversation(){const id=crypto.randomUUID().replaceAll('-','');localStorage.setItem('tseai-filter-conversation-id',id);localStorage.removeItem(chatHistoryKey(id));setMessages([]);setCurrent(null);setSelectedSaved(null)}
 
  async function loadSavedFilters(){if(!logged)return;setSavedBusy(true);try{const r=await fetch('/api/saved-filters/',{headers:apiHeaders()});const d=await r.json();if(!r.ok)throw new Error(d.message||'دریافت فیلترهای ذخیره‌شده انجام نشد');setSavedFilters(d.items||[])}catch(err){alert(err.message)}finally{setSavedBusy(false)}}
  async function openSaved(){if(!logged)return alert('برای ذخیره فیلتر ابتدا با شماره موبایل وارد شوید.');setSavedOpen(true);await loadSavedFilters()}
@@ -117,7 +125,7 @@ export default function App(){
   {savedOpen&&<SavedFiltersPanel busy={savedBusy} items={savedFilters} selected={selectedSaved} saveName={saveName} setSaveName={setSaveName} importCode={importCode} setImportCode={setImportCode} current={current} createSaved={createSaved} importSaved={importSaved} inspect={inspectSaved} load={loadSaved} favorite={toggleFavorite} newVersion={saveNewVersion} restore={restoreVersion} duplicate={duplicateSaved} remove={deleteSaved} close={()=>setSavedOpen(false)}/>}
   <section className="workspace">
    <aside className="filter-state"><div className="filter-state-title"><strong>فیلتر فعال</strong>{current?.version>0&&<span>نسخه {current.version}</span>}</div>{current?.filter?<><code>{current.filter}</code><div className="condition-list">{(current.conditions||[]).map(c=><button type="button" key={c.index} title={c.code} onClick={()=>sendCommand(`شرط ${c.index} را حذف کن`)}><b>{c.index}</b><span>{c.explanation}</span></button>)}</div><div className="filter-actions"><button type="button" disabled={!current?.canUndo||loading} onClick={()=>sendCommand('یک مرحله برگرد')}>↶ بازگشت</button><button type="button" disabled={!current?.canRedo||loading} onClick={()=>sendCommand('دوباره اعمال کن')}>↷ اعمال مجدد</button><button type="button" disabled={loading} onClick={()=>sendCommand('کل فیلتر رو پاک کن')}>پاک کردن</button>{logged?<button type="button" className="primary" onClick={openSaved}>ذخیره / نسخه‌بندی</button>:<button type="button" onClick={()=>alert('برای ذخیره فیلتر وارد شوید.')}>ورود برای ذخیره</button>}</div><div className="result-tools"><label>مرتب‌سازی<select value={current?.sortBy||''} onChange={e=>runCurrent({page:1,sortBy:e.target.value||null})}><option value="">بدون مرتب‌سازی</option><option value="tradeValue">ارزش معاملات</option><option value="tradeVolume">حجم معاملات</option><option value="lastPrice">آخرین قیمت</option><option value="closingPrice">قیمت پایانی</option><option value="symbol">نماد</option></select></label><button type="button" onClick={()=>runCurrent({page:1,sortDescending:!(current?.sortDescending??true)})}>{current?.sortDescending===false?'صعودی ↑':'نزولی ↓'}</button></div>{current?.totalPages>1&&<div className="pager"><button type="button" disabled={current.page<=1||loading} onClick={()=>runCurrent({page:current.page-1})}>قبلی</button><span>صفحه {current.page} از {current.totalPages}</span><button type="button" disabled={current.page>=current.totalPages||loading} onClick={()=>runCurrent({page:current.page+1})}>بعدی</button></div>}{typeof current?.matched==='number'&&<div className="current-results"><small>{current.matched} نماد منطبق</small><div className="symbols">{(current.results||[]).slice(0,30).map(x=><span key={`current-${x.insCode}-${x.symbol}`}>{x.symbol}</span>)}</div></div>}</>:<p className="empty">هنوز شرطی ساخته نشده است.</p>}</aside>
-   <section className="chat">{messages.length===0&&<div className="hero"><h1>از TSEAI بپرس</h1><p>درباره بازار، شرکت‌ها، مدیران، اخبار و قوانین بازار سرمایه سؤال کنید.</p></div>}{messages.map((m,i)=><RichChatMessage key={i} message={m}/>)}{loading&&<div className="msg assistant">در حال بررسی…</div>}<div ref={end}/></section>
+   <section className="chat">{messages.length===0&&<div className="hero"><h1>از TSEAI بپرس</h1><p>درباره بازار، شرکت‌ها، مدیران، اخبار و قوانین بازار سرمایه سؤال کنید.</p></div>}{messages.map((m,i)=><RichChatMessage key={i} message={m}/>)}{loading&&<SearchLoader/>}<div ref={end}/></section>
   </section>
   <form onSubmit={ask}><textarea value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit()}}} title="Enter برای ارسال؛ Shift+Enter برای رفتن به خط بعد" placeholder="سؤال خود را درباره بورس تهران بنویسید…"/><button disabled={loading}>ارسال</button></form>
  </main>;
@@ -128,21 +136,28 @@ function RichChatMessage({message:m}){
  if(m.role==='user'||m.role==='error')return <div className={'msg '+m.role}><p>{m.text}</p></div>;
  const d=m.data||{};
  return <div className="msg assistant rich-answer">
-  {d.answer&&<TypewriterText text={String(d.answer)}/>}
+  {d.answer&&<TypewriterText text={String(d.answer)} instant={m.restored===true}/>}
  </div>
 }
-function TypewriterText({text}){
- const[visible,setVisible]=useState('');const[done,setDone]=useState(false);
- useEffect(()=>{setVisible('');setDone(false);const parts=text.split(/(\s+)/);let i=0;const timer=setInterval(()=>{i=Math.min(parts.length,i+2);setVisible(parts.slice(0,i).join(''));if(i>=parts.length){clearInterval(timer);setDone(true)}},90);return()=>clearInterval(timer)},[text]);
+function TypewriterText({text,instant=false}){
+ const[visible,setVisible]=useState(instant?text:'');const[done,setDone]=useState(instant);
+ useEffect(()=>{const reduceMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;if(instant||reduceMotion){setVisible(text);setDone(true);return}setVisible('');setDone(false);const words=text.match(/\S+\s*/g)||[text];let i=0;const timer=setInterval(()=>{i=Math.min(words.length,i+1);setVisible(words.slice(0,i).join(''));if(i>=words.length){clearInterval(timer);setDone(true)}},TYPEWRITER_WORD_INTERVAL_MS);return()=>clearInterval(timer)},[text,instant]);
  return <div className={'answer-text '+(done?'':'typing')}>{visible.split('\n').map((x,i)=><p key={i}>{x||'\u00a0'}</p>)}</div>
+}
+function SearchLoader(){
+ return <div className="msg assistant search-loader" role="status" aria-live="polite" aria-label="در حال جستجو">
+  <span className="search-loader-mark" aria-hidden="true"/>
+  <span>در حال جستجو</span>
+  <span className="search-loader-dots" aria-hidden="true"><i/><i/><i/></span>
+ </div>
 }
 function titleFor(d){if(d.type==='market_comparison')return 'مقایسه بازار';if(d.structuredQuery)return 'نتیجه جستجوی ساختاریافته';if(d.market)return 'وضعیت نماد';if(d.filter)return 'نتیجه فیلتر';if((d.knowledge||[]).length)return 'پاسخ مستند';return 'TSEAI'}
 function MarketCard({market:m,analytics:a}){return <section className="market-card"><div><h3>{m.symbol}</h3><small>{m.symbolName}</small></div><div className="market-grid"><Metric t="آخرین قیمت" v={fmt(m.lastPrice)}/><Metric t="پایانی" v={fmt(m.closingPrice)}/><Metric t="تغییر" v={m.lastPricePercent==null?'—':m.lastPricePercent+'٪'}/><Metric t="حجم" v={fmt(m.tradeVolume)}/><Metric t="ارزش" v={fmt(m.tradeValue)}/><Metric t="P/E" v={m.pe??m.pE??'—'}/></div>{a&&<div className="analytics-row"><Metric t="قدرت خریدار" v={metric(a.tradingPower?.buyerPower)}/><Metric t="عدم تعادل اردربوک" v={metric(a.orderBook?.imbalance)}/><Metric t="حجم/مبنا" v={metric(a.volume?.volumeVsBaseVolume)}/></div>}</section>}
 function ComparisonCard({value:c}){return <section className="comparison-card"><MarketCard market={c.primary} analytics={c.primaryAnalytics}/><span className="vs">VS</span><MarketCard market={c.secondary} analytics={c.secondaryAnalytics}/></section>}
 function StructuredResultCard({value:v}){return <section className="result-card"><div className="result-summary"><b>{v.matched??0}</b><span>تطابق از {v.scanned??0} نماد</span></div><div className="result-table">{(v.results||[]).slice(0,50).map((x,i)=><div className="result-row" key={x.symbolCode||x.insCode||i}><b>{i+1}</b><strong>{x.symbol}</strong><span>{x.symbolName}</span><small>{x.qualityStatus}</small></div>)}</div></section>}
 function FilterResultCard({value:v}){return <section className="filter-result-card">{(v.code||v.filter)&&<code>{v.code||v.filter}</code>}<div><b>{v.matched??0}</b> نماد منطبق · {v.scanned??0} بررسی‌شده</div><div className="symbols">{(v.results||[]).slice(0,30).map((x,i)=><span key={x.insCode||i}>{x.symbol}</span>)}</div></section>}
-function KnowledgeCards({items}){return <section className="knowledge-cards">{items.slice(0,6).map((x,i)=><article key={i}><b>{x.citation?.title||'منبع دانش'}</b><p>{String(x.text||'').slice(0,320)}</p>{x.citation?.publishedAt&&<small>{x.citation.publishedAt}</small>}{x.citation?.url&&<a href={x.citation.url} target="_blank" rel="noreferrer">مشاهده منبع</a>}</article>)}</section>}
-function EvidenceTray({evidence}){return <details className="evidence-tray"><summary>منابع و شواهد ({evidence.length})</summary>{evidence.map(e=><article key={e.evidenceId}><span className="citation-label">[{e.citationLabel}]</span><div><b>{e.title}</b><small>{e.authority} · {e.sourceType} · {e.sourceId}</small>{e.observedAtUtc&&<small>{new Date(e.observedAtUtc).toLocaleString('fa-IR')}</small>}</div></article>)}</details>}
+function KnowledgeCards({items}){return <section className="knowledge-cards">{items.slice(0,6).map((x,i)=><article key={i}><b>{x.citation?.title||'منبع دانش'}</b><p>{String(x.text||'').slice(0,320)}</p>{x.citation?.publishedAt&&<small>{formatPersianDate(x.citation.publishedAt)}</small>}{x.citation?.url&&<a href={x.citation.url} target="_blank" rel="noreferrer">مشاهده منبع</a>}</article>)}</section>}
+function EvidenceTray({evidence}){return <details className="evidence-tray"><summary>منابع و شواهد ({evidence.length})</summary>{evidence.map(e=><article key={e.evidenceId}><span className="citation-label">[{e.citationLabel}]</span><div><b>{e.title}</b><small>{e.authority} · {e.sourceType} · {e.sourceId}</small>{e.observedAtUtc&&<small>{formatPersianDateTime(e.observedAtUtc)}</small>}</div></article>)}</details>}
 function Metric({t,v}){return <div className="metric"><small>{t}</small><strong>{v??'—'}</strong></div>}
 const fmt=v=>v==null?'—':Number(v).toLocaleString('fa-IR');
 const metric=x=>x?.availability==='Available'||x?.availability===0?(x.value??'—'):'—';
@@ -151,7 +166,7 @@ function SavedFiltersPanel({busy,items,selected,saveName,setSaveName,importCode,
  return <div className="modal-backdrop"><section className="saved-panel"><div className="saved-head"><div><h2>فیلترهای من</h2><small>{items.length} فیلتر ذخیره‌شده</small></div><button type="button" onClick={close}>بستن</button></div>
   <div className="save-current"><input value={saveName} onChange={e=>setSaveName(e.target.value)} placeholder="نام فیلتر جدید / Import"/><button type="button" className="primary" disabled={!current?.filter||busy} onClick={createSaved}>ذخیره فیلتر فعال</button></div><div className="import-filter"><textarea value={importCode} onChange={e=>setImportCode(e.target.value)} placeholder="یا کد Simple Filter از TSETMC را Paste کنید؛ مثال: (pl)>(pc) && (tvol)>1000000"/><button type="button" disabled={!importCode.trim()||busy} onClick={importSaved}>Import و ذخیره</button></div>
   <div className="saved-layout"><div className="saved-list">{busy&&<p>در حال دریافت…</p>}{!busy&&items.length===0&&<p className="empty">هنوز فیلتر ذخیره‌شده‌ای ندارید.</p>}{items.map(x=><article className={selected?.id===x.id?'saved-card active':'saved-card'} key={x.id}><button type="button" className="saved-main" onClick={()=>inspect(x.id)}><strong>{x.name}</strong><small>نسخه {x.currentVersion}</small><span>{x.persianExplanation}</span></button><button type="button" className="star" title="علاقه‌مندی" onClick={()=>favorite(x)}>{x.isFavorite?'★':'☆'}</button><button type="button" onClick={()=>load(x.id)}>بارگذاری</button></article>)}</div>
-   <div className="saved-details">{selected?<><div className="details-title"><div><h3>{selected.name}</h3><code>{selected.tsetmcCode}</code><p>{selected.persianExplanation}</p></div><span>نسخه فعلی {selected.currentVersion}</span></div><div className="saved-actions"><button type="button" className="primary" onClick={()=>load(selected.id)}>بارگذاری در مکالمه</button><button type="button" disabled={!current?.filter||busy} onClick={()=>newVersion(selected.id)}>ذخیره فیلتر فعال به‌عنوان نسخه جدید</button><button type="button" onClick={()=>navigator.clipboard?.writeText(selected.tsetmcCode)}>کپی کد TSETMC</button><button type="button" onClick={()=>duplicate(selected.id)}>ایجاد کپی</button><button type="button" className="danger" onClick={()=>remove(selected.id)}>حذف</button></div><h4>تاریخچه نسخه‌ها</h4><div className="versions">{(selected.versions||[]).map(v=><div className={v.version===selected.currentVersion?'version current':'version'} key={v.version}><div><b>نسخه {v.version}</b><small>{v.changeType} · {new Date(v.createdAtUtc).toLocaleString('fa-IR')}</small><code>{v.tsetmcCode}</code>{v.changeNote&&<span>{v.changeNote}</span>}</div>{v.version!==selected.currentVersion&&<button type="button" onClick={()=>restore(selected.id,v.version)}>بازگردانی</button>}</div>)}</div></>:<p className="empty">برای مشاهده تاریخچه، یک فیلتر را انتخاب کنید.</p>}</div>
+   <div className="saved-details">{selected?<><div className="details-title"><div><h3>{selected.name}</h3><code>{selected.tsetmcCode}</code><p>{selected.persianExplanation}</p></div><span>نسخه فعلی {selected.currentVersion}</span></div><div className="saved-actions"><button type="button" className="primary" onClick={()=>load(selected.id)}>بارگذاری در مکالمه</button><button type="button" disabled={!current?.filter||busy} onClick={()=>newVersion(selected.id)}>ذخیره فیلتر فعال به‌عنوان نسخه جدید</button><button type="button" onClick={()=>navigator.clipboard?.writeText(selected.tsetmcCode)}>کپی کد TSETMC</button><button type="button" onClick={()=>duplicate(selected.id)}>ایجاد کپی</button><button type="button" className="danger" onClick={()=>remove(selected.id)}>حذف</button></div><h4>تاریخچه نسخه‌ها</h4><div className="versions">{(selected.versions||[]).map(v=><div className={v.version===selected.currentVersion?'version current':'version'} key={v.version}><div><b>نسخه {v.version}</b><small>{v.changeType} · {formatPersianDateTime(v.createdAtUtc)}</small><code>{v.tsetmcCode}</code>{v.changeNote&&<span>{v.changeNote}</span>}</div>{v.version!==selected.currentVersion&&<button type="button" onClick={()=>restore(selected.id,v.version)}>بازگردانی</button>}</div>)}</div></>:<p className="empty">برای مشاهده تاریخچه، یک فیلتر را انتخاب کنید.</p>}</div>
   </div>
  </section></div>
 }
@@ -167,7 +182,7 @@ function AlertsPanel({busy,rules,events,filters,create,toggle,remove,markRead,cl
  return <div className="modal-backdrop"><section className="saved-panel alert-panel"><div className="saved-head"><div><h2>هشدارهای بازار</h2><small>فقط انتقال false → true اعلان ایجاد می‌کند؛ مشاهده اولیه شرط اعلان نمی‌دهد.</small></div><button type="button" onClick={close}>بستن</button></div>
   <div className="alert-create"><select value={filterId} onChange={e=>setFilterId(e.target.value)}><option value="">انتخاب فیلتر ذخیره‌شده</option>{filters.map(f=><option key={f.id} value={f.id}>{f.name} · v{f.currentVersion}</option>)}</select><input value={name} onChange={e=>setName(e.target.value)} placeholder="نام هشدار (اختیاری)"/><input value={cooldown} onChange={e=>setCooldown(e.target.value)} inputMode="numeric" placeholder="Cooldown ثانیه"/><label className="alert-version-mode"><input type="checkbox" checked={followLatest} onChange={e=>setFollowLatest(e.target.checked)}/><span>دنبال‌کردن آخرین نسخه فیلتر</span></label>{!followLatest&&<input value={pinnedVersion} min="1" max={selectedFilter?.currentVersion||1} type="number" onChange={e=>setPinnedVersion(e.target.value)} placeholder="نسخه ثابت"/>}<button type="button" className="primary" disabled={busy||!filterId||(!followLatest&&!pinnedVersion)} onClick={()=>create(filterId,name,cooldown,followLatest,followLatest?null:Number(pinnedVersion))}>ساخت هشدار</button></div>
   <div className="alert-layout"><div><h3>قوانین فعال</h3><div className="alert-rules">{rules.length===0&&<p className="empty">هنوز هشداری ندارید.</p>}{rules.map(a=><article key={a.id} className={a.isEnabled?'alert-rule enabled':'alert-rule'}><div><b>{a.name}</b><span>{a.savedFilterName} · نسخه {a.effectiveFilterVersion}</span><small>Cooldown: {a.cooldownSeconds} ثانیه {a.followLatestVersion?'· دنبال‌کردن آخرین نسخه':'· نسخه ثابت'}</small></div><button type="button" className={a.isEnabled?'ghost':'primary'} onClick={()=>toggle(a)}>{a.isEnabled?'توقف':'فعال'}</button><button type="button" className="danger" onClick={()=>remove(a.id)}>حذف</button></article>)}</div></div>
-   <div><h3>آخرین رویدادها</h3><div className="alert-events">{events.length===0&&<p className="empty">هنوز هشداری Trigger نشده است.</p>}{events.map(e=><article key={e.id} className={e.readAtUtc?'alert-event read':'alert-event'} onClick={()=>!e.readAtUtc&&markRead(e.id)}><div><b>{e.symbol} · {e.alertName}</b><span>{e.message}</span><small>{new Date(e.triggeredAtUtc).toLocaleString('fa-IR')} · نسخه فیلتر {e.filterVersion}</small></div>{!e.readAtUtc&&<i>جدید</i>}</article>)}</div></div>
+   <div><h3>آخرین رویدادها</h3><div className="alert-events">{events.length===0&&<p className="empty">هنوز هشداری Trigger نشده است.</p>}{events.map(e=><article key={e.id} className={e.readAtUtc?'alert-event read':'alert-event'} onClick={()=>!e.readAtUtc&&markRead(e.id)}><div><b>{e.symbol} · {e.alertName}</b><span>{e.message}</span><small>{formatPersianDateTime(e.triggeredAtUtc)} · نسخه فیلتر {e.filterVersion}</small></div>{!e.readAtUtc&&<i>جدید</i>}</article>)}</div></div>
   </div>
  </section></div>
 }

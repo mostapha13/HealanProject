@@ -34,8 +34,9 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.OrderBookCurrent') AND name=N'IX_OrderBookCurrent_InstrumentLevel')
     CREATE INDEX IX_OrderBookCurrent_InstrumentLevel ON dbo.OrderBookCurrent(InstrumentID,[Level]) INCLUDE (SourceCollectedAt,OrderBookUpdatedAt);
 GO
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.ClientType') AND name=N'IX_ClientType_InsCodeTime')
-    CREATE INDEX IX_ClientType_InsCodeTime ON dbo.ClientType(InsCode,creationTime DESC,ClientType_counter DESC,Id DESC) INCLUDE (SourceCollectedAt);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.ClientType') AND name=N'IX_ClientType_InsCodeSourceTime')
+    CREATE INDEX IX_ClientType_InsCodeSourceTime ON dbo.ClientType(InsCode,SourceCollectedAt DESC,Id DESC)
+        INCLUDE (creationTime,ClientType_counter,Buy_CountI,Buy_CountN,Buy_I_Volume,Buy_N_Volume,Sell_CountI,Sell_CountN,Sell_I_Volume,Sell_N_Volume);
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.Content') AND name=N'IX_Content_Watermark')
     CREATE INDEX IX_Content_Watermark ON dbo.Content(SourceCollectedAt,Id) INCLUDE (CreatedAt,LastModifiedAt,DeletedAt,IsDeleted,ContentTypeId,LanguageId,ContentStatusId);

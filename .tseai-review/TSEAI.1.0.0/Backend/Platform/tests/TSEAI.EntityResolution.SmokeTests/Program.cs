@@ -10,6 +10,9 @@ var rows = new EntitySourceCandidate[]
     new(EntityKind.Instrument,"IRO1IKCO0001","ایران خودرو","خودرو","IRO1IKCO0001",46348559193224090,"IRO1IKCO0001",["ایران خودرو","ایران‌خودرو"],new Dictionary<string,string?>()),
     new(EntityKind.Instrument,"IRO1BMLT0001","بانک ملت","وبملت","IRO1BMLT0001",778253364357513,"IRO1BMLT0001",["بانک ملت"],new Dictionary<string,string?>()),
     new(EntityKind.Instrument,"IRO1BSDR0001","بانک صادرات ایران","وبصادر","IRO1BSDR0001",28320293733348826,"IRO1BSDR0001",["بانک صادرات","بانک صادرات ایران"],new Dictionary<string,string?>()),
+    new(EntityKind.Instrument,"IRO1MSMI0001","ملی صنایع مس ایران","فملی","IRO1MSMI0001",35425587644337450,"IRO1MSMI0001",["ملی صنایع مس ایران"],new Dictionary<string,string?> { ["marketCategory"]="cash" }),
+    new(EntityKind.Instrument,"IRO1MSMI0003","ملی صنایع مس ایران","فملی3","IRO1MSMI0003",35425587644337452,"IRO1MSMI0003",["ملی صنایع مس ایران"],new Dictionary<string,string?> { ["marketCategory"]="cash" }),
+    new(EntityKind.Instrument,"IRO9MSMI2005","اختیار خرید ملی مس","ضملی2005","IRO9MSMI2005",35425587644337451,"IRO9MSMI2005",["اختیار خرید ملی مس"],new Dictionary<string,string?>()),
     new(EntityKind.MarketIndex,"IRX6XTPI0006","شاخص کل بورس","شاخص کل","IRX6XTPI0006",32097828799138957,"IRX6XTPI0006",["شاخص کل","شاخص کل بورس"],new Dictionary<string,string?>()),
     new(EntityKind.TsePerson,"25:1:2","علی رضایی",null,null,null,null,["علی رضایی"],new Dictionary<string,string?> { ["role"]="مدیر" }),
     new(EntityKind.RegionHall,"10","تالار منطقه‌ای خوزستان",null,null,null,null,["خوزستان","تالار خوزستان"],new Dictionary<string,string?>()),
@@ -34,6 +37,18 @@ Ensure(byArabic.Status == EntityResolutionStatus.Resolved && byArabic.Selected?.
 
 var byCorporatePrefix = await resolver.ResolveAsync("شرکت ایران خودرو", new EntityResolveOptions([EntityKind.Instrument]), default);
 Ensure(byCorporatePrefix.Status == EntityResolutionStatus.Resolved && byCorporatePrefix.Selected?.Symbol == "خودرو", "Corporate-prefix resolution failed.");
+
+var byOrderedNameTokens = await resolver.ResolveAsync("شرکت ملی مس", new EntityResolveOptions([EntityKind.Instrument]), default);
+Ensure(byOrderedNameTokens.Status == EntityResolutionStatus.Resolved && byOrderedNameTokens.Selected?.Symbol == "فملی", "Multi-token company-name resolution failed.");
+
+var byNaturalSentence = await resolver.ResolveAsync("نسبت قیمت به سود ملی مس را می‌گویی", new EntityResolveOptions([EntityKind.Instrument]), default);
+Ensure(byNaturalSentence.Status == EntityResolutionStatus.Resolved && byNaturalSentence.Selected?.Symbol == "فملی", "Entity resolution inside a natural sentence failed.");
+
+var primaryFromFullCompanyName = await resolver.ResolveAsync("شرکت ملی صنایع مس ایران", new EntityResolveOptions([EntityKind.Instrument]), default);
+Ensure(primaryFromFullCompanyName.Status == EntityResolutionStatus.Resolved && primaryFromFullCompanyName.Selected?.Symbol == "فملی", "Primary cash instrument preference failed.");
+
+var explicitDerivative = await resolver.ResolveAsync("اختیار ملی مس", new EntityResolveOptions([EntityKind.Instrument]), default);
+Ensure(explicitDerivative.Status == EntityResolutionStatus.Resolved && explicitDerivative.Selected?.Symbol == "ضملی2005", "Explicit derivative-class resolution failed.");
 
 var byInsCode = await resolver.ResolveAsync("۴۶۳۴۸۵۵۹۱۹۳۲۲۴۰۹۰", new EntityResolveOptions([EntityKind.Instrument]), default);
 Ensure(byInsCode.Status == EntityResolutionStatus.Resolved && byInsCode.Selected?.Symbol == "خودرو", "Persian-digit InsCode resolution failed.");

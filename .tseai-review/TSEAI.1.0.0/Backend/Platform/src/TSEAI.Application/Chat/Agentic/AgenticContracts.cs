@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TSEAI.Application.Chat.Context;
 
 namespace TSEAI.Application.Chat.Agentic;
 
@@ -8,7 +9,8 @@ public sealed record ChatReflectionRequest(
     ChatIntent Intent,
     double Confidence,
     int EvidenceCount,
-    IReadOnlyList<string> FailedTools);
+    IReadOnlyList<string> FailedTools,
+    IReadOnlyList<string>? Evidence = null);
 
 public sealed record ChatReflectionResult(
     string Action,
@@ -19,6 +21,24 @@ public sealed record ChatReflectionResult(
 public interface IChatReflector
 {
     Task<ChatReflectionResult> ReviewAsync(ChatReflectionRequest request, CancellationToken ct);
+}
+
+public sealed record GroundedSynthesisEvidence(
+    string SourceId,
+    string? PublishedAt,
+    string Text);
+
+public sealed record GroundedAnswerSynthesisRequest(
+    string Question,
+    string StructuredAnswer,
+    IReadOnlyList<CanonicalReferenceFact> StructuredFacts,
+    IReadOnlyList<GroundedSynthesisEvidence> Evidence,
+    IReadOnlyList<string> MissingFacets,
+    IReadOnlyList<ConversationMemoryTurn> RecentTurns);
+
+public interface IChatAnswerSynthesizer
+{
+    Task<string?> SynthesizeAsync(GroundedAnswerSynthesisRequest request,CancellationToken ct);
 }
 
 public interface IChatToolPolicy

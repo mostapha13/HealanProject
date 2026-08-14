@@ -26,6 +26,21 @@ public sealed record ConversationTemporalReference(
     string? EndGregorian,
     string Kind);
 
+public sealed record ConversationReference(
+    string Kind,
+    string Topic,
+    string? SubjectName,
+    string? SubjectRole,
+    IReadOnlyList<string> RelatedSubjects);
+
+public sealed record ConversationMemoryTurn(
+    string Question,
+    string EffectiveQuestion,
+    string Answer,
+    string AnswerType,
+    string? SubjectName,
+    DateTimeOffset CreatedAtUtc);
+
 public sealed record ConversationContextState(
     string ConversationId,
     ConversationEntityReference? PrimaryEntity,
@@ -35,10 +50,12 @@ public sealed record ConversationContextState(
     ConversationTemporalReference? LastTemporal,
     string? LastQuestion,
     long Revision,
-    DateTimeOffset UpdatedAtUtc)
+    DateTimeOffset UpdatedAtUtc,
+    ConversationReference? ActiveReference = null,
+    IReadOnlyList<ConversationMemoryTurn>? RecentTurns = null)
 {
     public static ConversationContextState Empty(string conversationId)
-        => new(conversationId,null,null,null,null,null,null,0,DateTimeOffset.UtcNow);
+        => new(conversationId,null,null,null,null,null,null,0,DateTimeOffset.UtcNow,null,[]);
 }
 
 public enum ConversationFollowUpKind
@@ -91,5 +108,31 @@ public interface IConversationContextService
         TemporalResolution temporal,
         EntityResolution? primary,
         EntityResolution? secondary,
+        CancellationToken ct,
+        string? answer = null,
+        string answerType = "chat");
+    Task<ConversationContextState> RecordReferenceAsync(
+        string subject,
+        string conversationId,
+        string originalQuestion,
+        string effectiveQuestion,
+        string answer,
+        CanonicalReferenceAnswer reference,
+        TemporalResolution temporal,
         CancellationToken ct);
+}
+
+public sealed record ConversationRewriteRequest(
+    string Question,
+    ConversationReference? ActiveReference,
+    IReadOnlyList<ConversationMemoryTurn> RecentTurns);
+
+public sealed record ConversationRewriteResult(
+    string StandaloneQuestion,
+    bool ContextApplied,
+    string? Reason);
+
+public interface IConversationQueryRewriter
+{
+    Task<ConversationRewriteResult?> RewriteAsync(ConversationRewriteRequest request,CancellationToken ct);
 }

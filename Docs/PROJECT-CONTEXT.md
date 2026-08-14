@@ -103,3 +103,18 @@ other secrets in this file.
 - Never persist test or production passwords in repository documentation.
 - Inspect relevant code and dependencies before deleting legacy components.
 - Validate changes in proportion to their impact before merging into `master`.
+
+## PBAI project
+
+- `PBAI` refers to the standalone **Enterprise Semantic Intelligence Platform**
+  maintained at `C:\SourceCode\Mst\PBAI`.
+- PBAI is intentionally a separate product and repository. It integrates with
+  Healan's shared `IdentityProvider`, `FileManager`, and `WorkFlow` services
+  through explicit HTTP/OIDC contracts; their production implementations must
+  not be duplicated inside PBAI.
+- PBAI local Docker acceptance may use the packaged Keycloak and shared-service
+  simulators. Those simulators are development-only and must never be treated
+  as the production shared-service architecture.
+- The target GitHub repository is the private repository `mostapha13/PBAI`.
+- PBAI secrets are generated into its ignored local `.env`; never copy them into
+  documentation, source control, examples, logs, or the Healan repository.

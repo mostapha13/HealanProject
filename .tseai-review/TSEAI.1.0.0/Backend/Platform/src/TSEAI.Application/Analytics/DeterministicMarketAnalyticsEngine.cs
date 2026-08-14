@@ -32,9 +32,12 @@ public sealed class DeterministicMarketAnalyticsEngine : IMarketAnalyticsEngine
         var spread = bid.Availability == AnalyticsAvailability.Available && ask.Availability == AnalyticsAvailability.Available
             ? AnalyticsMetric<decimal>.Of(ask.Value!.Value - bid.Value!.Value)
             : AnalyticsMetric<decimal>.Missing("best_bid_or_ask_not_available");
-        var spreadPercent = spread.Availability == AnalyticsAvailability.Available && lastPrice > 0
-            ? AnalyticsMetric<decimal>.Of(spread.Value!.Value * 100m / lastPrice)
-            : AnalyticsMetric<decimal>.Missing("last_price_or_spread_not_available");
+        var midpoint = bid.Availability == AnalyticsAvailability.Available && ask.Availability == AnalyticsAvailability.Available
+            ? (bid.Value!.Value + ask.Value!.Value) / 2m
+            : 0m;
+        var spreadPercent = spread.Availability == AnalyticsAvailability.Available && midpoint > 0
+            ? AnalyticsMetric<decimal>.Of(spread.Value!.Value * 100m / midpoint)
+            : AnalyticsMetric<decimal>.Missing("midpoint_or_spread_not_available");
         var totalBid = valid.Length > 0 ? AnalyticsMetric<long>.Of(valid.Sum(x => x.BuyVolume)) : AnalyticsMetric<long>.Missing("order_book_not_available");
         var totalAsk = valid.Length > 0 ? AnalyticsMetric<long>.Of(valid.Sum(x => x.SellVolume)) : AnalyticsMetric<long>.Missing("order_book_not_available");
         AnalyticsMetric<decimal> imbalance;

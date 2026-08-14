@@ -53,6 +53,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddTseaiInfrastructure(this IServiceCollection services, IConfiguration cfg)
     {
+        services.AddMemoryCache();
         services.AddDbContext<ApplicationDbContext>(o => o.UseSqlServer(cfg.GetConnectionString("ApplicationDb")));
         services.AddStackExchangeRedisCache(o => o.Configuration = cfg["Redis:ConnectionString"]);
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(cfg["Redis:ConnectionString"] ?? "redis:6379"));
@@ -86,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IAlertRepository, EfAlertRepository>();
         services.AddScoped<AlertRuleService>();
         services.AddScoped<IConversationContextStore, RedisConversationContextStore>();
+        services.AddHttpClient<IConversationQueryRewriter, HttpAiConversationQueryRewriter>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(12); });
         services.AddScoped<IConversationContextService, ConversationContextService>();
         services.AddScoped<IConversationTemporalContextResolver, ConversationTemporalContextResolver>();
         services.AddScoped<IChatCapabilityRouter, DeterministicCapabilityRouter>();
@@ -95,11 +97,12 @@ public static class DependencyInjection
         services.AddSingleton<IPersianFinancialAnswerComposer, PersianFinancialAnswerComposer>();
         services.AddScoped<ChatOrchestrator>();
         services.AddSingleton<IChatToolPolicy, ChatToolPolicy>();
-        services.AddHttpClient<IChatReflector, HttpAiChatReflector>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(8); });
+        services.AddHttpClient<IChatReflector, HttpAiChatReflector>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(30); });
+        services.AddHttpClient<IChatAnswerSynthesizer, HttpAiGroundedAnswerSynthesizer>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(45); });
         services.AddHttpClient("ai-health", c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(3); });
         services.AddHttpClient("mcp", c => c.Timeout = TimeSpan.FromSeconds(15));
         services.AddScoped<IMcpToolGateway, HttpMcpToolGateway>();
-        services.AddHttpClient<IAiChatPlanner, HttpAiChatPlanner>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(8); });
+        services.AddHttpClient<IAiChatPlanner, HttpAiChatPlanner>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(Math.Clamp(cfg.GetValue("AI:PlannerTimeoutSeconds",15),5,60)); });
         services.AddSingleton<IPerformanceTelemetry, InMemoryPerformanceTelemetry>();
         services.AddSingleton<IAgenticSecurityGuard, DeterministicAgenticSecurityGuard>();
         services.AddHttpClient<HttpKnowledgeRetriever>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(12); });

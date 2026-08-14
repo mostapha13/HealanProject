@@ -1,0 +1,1059 @@
+{
+  "version": "nahad-mali-1.0",
+  "generatedAtUtc": "2026-08-14T16:51:53.211231+00:00",
+  "total": 50,
+  "passed": 24,
+  "passRate": 0.48,
+  "allPassed": false,
+  "p50LatencyMs": 3900.08,
+  "p95LatencyMs": 9478.7,
+  "clusters": {
+    "statistics": {
+      "total": 2,
+      "passed": 1
+    },
+    "type-distribution": {
+      "total": 2,
+      "passed": 1
+    },
+    "hall-distribution": {
+      "total": 3,
+      "passed": 1
+    },
+    "hall-count": {
+      "total": 4,
+      "passed": 2
+    },
+    "hall-list": {
+      "total": 2,
+      "passed": 1
+    },
+    "type-list": {
+      "total": 4,
+      "passed": 2
+    },
+    "direct-type": {
+      "total": 3,
+      "passed": 2
+    },
+    "contact": {
+      "total": 5,
+      "passed": 3
+    },
+    "branches": {
+      "total": 5,
+      "passed": 1
+    },
+    "record-id": {
+      "total": 3,
+      "passed": 3
+    },
+    "comparison": {
+      "total": 2,
+      "passed": 0
+    },
+    "quality": {
+      "total": 7,
+      "passed": 3
+    },
+    "timestamp": {
+      "total": 1,
+      "passed": 1
+    },
+    "schema": {
+      "total": 4,
+      "passed": 2
+    },
+    "not-found": {
+      "total": 1,
+      "passed": 1
+    },
+    "type-normalization": {
+      "total": 1,
+      "passed": 0
+    },
+    "temporal-limit": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "NM-001",
+      "cluster": "statistics",
+      "question": "جدول Nahad_Mali چند رکورد، شناسه، نام متمایز، نوع و تالار دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "807 رکورد",
+        "807 شناسه یکتا",
+        "287 نام متمایز",
+        "31 تالار",
+        "4 نوع"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Nahad_Mali دارای 807 رکورد شعبه/دفتر، 807 شناسه یکتا و 287 نام متمایز است. این رکوردها در 31 تالار منطقه‌ای و 4 نوع استفاده‌شده قرار دارند. Broker_TypeId در هر 807 رکورد خالی است؛ زمان جمع‌آوری Snapshot 1405/05/20 ساعت 14:33:43 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4942.84
+    },
+    {
+      "id": "NM-002",
+      "cluster": "statistics",
+      "question": "آمار کلی نهادهای مالی ثبت‌شده در SQL را خلاصه بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "807 رکورد",
+        "287 نام متمایز",
+        "Snapshot"
+      ],
+      "maxAnswerChars": 700,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:807 رکورد",
+        "missing:287 نام متمایز",
+        "missing:Snapshot"
+      ],
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "actualType": "knowledge",
+      "latencyMs": 16081.08
+    },
+    {
+      "id": "NM-003",
+      "cluster": "type-distribution",
+      "question": "تعداد هر نوع نهاد مالی را به تفکیک بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "کارگزاری: 796 رکورد",
+        "سبدگردان: 8 رکورد",
+        "مشاور سرمایه‌گذاری: 2 رکورد",
+        "تأمین سرمایه: 1 رکورد"
+      ],
+      "maxAnswerChars": 900,
+      "passed": true,
+      "issues": [],
+      "answer": "توزیع Nahad_Mali بر اساس نوع نهاد:\n1. کارگزاری: 796 رکورد؛ 279 نام متمایز\n2. سبدگردان: 8 رکورد؛ 5 نام متمایز\n3. مشاور سرمایه‌گذاری: 2 رکورد؛ 2 نام متمایز\n4. تأمین سرمایه: 1 رکورد؛ 1 نام متمایز\n5. پردازش اطلاعات مالی: 0 رکورد؛ 0 نام متمایز\n6. موسسه رتبه بندی: 0 رکورد؛ 0 نام متمایز\nجدول مرجع Nahad_Mali_Type شامل 6 نوع است؛ 4 نوع در Nahad_Mali فعلی استفاده شده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3922.51
+    },
+    {
+      "id": "NM-004",
+      "cluster": "type-distribution",
+      "question": "نوع‌های مرجع نهاد مالی که فعلاً هیچ رکوردی ندارند کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "پردازش اطلاعات مالی: 0 رکورد",
+        "رتبه‌بندی: 0 رکورد",
+        "6 نوع",
+        "4 نوع"
+      ],
+      "maxAnswerChars": 900,
+      "passed": false,
+      "issues": [
+        "missing:پردازش اطلاعات مالی: 0 رکورد",
+        "missing:رتبه‌بندی: 0 رکورد",
+        "missing:6 نوع",
+        "missing:4 نوع"
+      ],
+      "answer": "نهاد مالی «های مرجع که فعلا هیچ رکوردی ندارند اند» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3977.93
+    },
+    {
+      "id": "NM-005",
+      "cluster": "hall-distribution",
+      "question": "نهادهای مالی را بر اساس تالار منطقه‌ای رتبه‌بندی کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "اصفهان",
+        "105 رکورد",
+        "خراسان رضوی (مشهد)",
+        "81 رکورد",
+        "آذربایجان شرقی (تبریز)",
+        "66 رکورد"
+      ],
+      "maxAnswerChars": 1500,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:اصفهان",
+        "missing:105 رکورد",
+        "missing:خراسان رضوی (مشهد)",
+        "missing:81 رکورد",
+        "missing:آذربایجان شرقی (تبریز)",
+        "missing:66 رکورد"
+      ],
+      "answer": "بر این اساس، در گام نخست مطالعه تطبیقی از روش‌های رتبه بندی شرکت از این منظر در بورس‌های جهان در سطوح مختلف از جمله بورس لندن، نیویورک، فیلیپین، مالزی، هند، برزیل، پاکستان و ترکیه پرداخته شد. مدیر نظارت بر شرکت‌های بورس اوراق بهادار تهران با مد نظر قرار دادن روند رتبه بندی شرکت‌ها اظهار داشت: فرایند کار برای بیش از 300 شرکت پذیرفته شده در بورس تهران سالی یکبار انجام می شود و با توجه به آنکه سال مالی بیش از 85 درصد شرکت‌های بورس تهران پایان اسفندماه است، این رتبه بندی در تیرماه هر سال انجام و نتایج آن قابل انتشار است. چنانچه حسابرسی شدن این چک لیست‌ها ضروری نباشد می توان به طور تصادفی 10 درصد از چک لیست‌های اخذ شده را توسط کارشناسان بورس، بررسی و سپس بر اساس وزن هر بخش، امتیازدهی لازم انجام می شود که در پایان رتبه بندی شرکت‌ها بر اساس امتیازی که کسب کرده اند انجام می شود. مدیر نظارت بر شرکت‌های بورس تهران گفت: روش سوم نیز سپردن موضوع رتبه بندی و امتیاز دهی به نهاد بیرونی و مستقل نظیر موسسات رتبه بند است.",
+      "actualType": "knowledge",
+      "latencyMs": 14845.58
+    },
+    {
+      "id": "NM-006",
+      "cluster": "hall-count",
+      "question": "در تالار اصفهان چند نهاد مالی ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تالار اصفهان",
+        "105 رکورد"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار اصفهان، 105 رکورد نهاد مالی با 66 نام متمایز ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3901.87
+    },
+    {
+      "id": "NM-007",
+      "cluster": "hall-count",
+      "question": "تعداد نهادهای مالی تالار خوزستان چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خوزستان (اهواز)",
+        "21 رکورد",
+        "15 نام متمایز"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار خوزستان (اهواز)، 21 رکورد نهاد مالی با 15 نام متمایز ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3857.98
+    },
+    {
+      "id": "NM-008",
+      "cluster": "hall-list",
+      "question": "نهادهای مالی تالار خوزستان را فقط اسم بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه",
+        "فارابی",
+        "مفید"
+      ],
+      "mustNotContain": [
+        "فملی"
+      ],
+      "maxAnswerChars": 900,
+      "passed": true,
+      "issues": [],
+      "answer": "نام‌های نهاد مالی ثبت‌شده در تالار خوزستان (اهواز) (15 نام):\n1. آگاه\n2. الوند\n3. بانک تجارت\n4. بانک صنعت و معدن\n5. بانک کشاورزی\n6. بانک ملی ایران\n7. بورس بیمه ایران\n8. تامین سرمایه تمدن\n9. ستاره جنوب\n10. سرمایه‌گذاری ملی\n11. سی ولکس\n12. فارابی\n13. گنجینه سپهر پارت\n14. مبین سرمایه\n15. مفید",
+      "actualType": "structured_reference",
+      "latencyMs": 3870.89
+    },
+    {
+      "id": "NM-009",
+      "cluster": "hall-list",
+      "question": "فهرست کارگزاری‌های تالار خوزستان را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه",
+        "بانک تجارت",
+        "مفید",
+        "کارگزاری"
+      ],
+      "mustNotContain": [
+        "سبدگردان"
+      ],
+      "maxAnswerChars": 1800,
+      "passed": false,
+      "issues": [
+        "missing:مفید"
+      ],
+      "answer": "10 رکورد اول از 21 رکورد کارگزاری در تالار خوزستان (اهواز):\n1. آگاه — 06142532030 — دزفول، میدان فتح المبین، ابتدای خیابان اندرزگو، نبش گلخانه\n2. بورس بیمه ایران — 33914158 — اهواز، کیانپارس، نبش خیابان 17 غربی ، ساختمان دانش ، طبقه 6\n3. آگاه — 33383145 — اهواز ، کیانپارس، خیابان شهید بنی نجار(ششم) ، بلوار شهید چمران، نور، پلاک 67، طبقه 2، واحد 4\n4. آگاه — 06152230495 — بندر امام خمینی، هفتصد دستگاه، بلوار شهید آزاده، جنب بانک تجارت بازار\n5. الوند — 06152342156 — ماهشهر، ناحیه صنعتی ، روبروی بانک ملی ، جنب بانک سپه ( بانک کوثر سابق )، جنب پلاک 17 ، طبقه B\n6. بانک کشاورزی — 33911240 — اهواز، کیانپارس، خیابان 14 غربی، نبش فاز2، تالار بورس منطقه ای استان خوزستان\n7. بانک تجارت — 32222301 — اهواز،خیابان آزادگان (24 متری)، مقابل سینما ساحل، شعبه مرکزی بانک تجارت\n8. بانک ملی ایران — 33911241 — اهواز، کیانپارس، خیابان 14 غربی، نبش فاز 2، تالار بورس منطقه ای استان خوزستان\n9. آگاه — 33764649 — اهواز، کیانپارس، نبش خیابان مهر غربی ، پلاک 5\n10. فارابی — 06132235006 — اهواز ، خیابان غفاری، نبش آزادگان، نرسیده به میدان شهداء، مجتمع ولیعصر ، طبقه سوم ، واحد هشتم",
+      "actualType": "structured_reference",
+      "latencyMs": 3893.06
+    },
+    {
+      "id": "NM-010",
+      "cluster": "hall-count",
+      "question": "تالار مشهد چند رکورد نهاد مالی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خراسان رضوی (مشهد)",
+        "81 رکورد"
+      ],
+      "maxAnswerChars": 400,
+      "passed": false,
+      "issues": [
+        "missing:خراسان رضوی (مشهد)",
+        "missing:81 رکورد"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4164.08
+    },
+    {
+      "id": "NM-011",
+      "cluster": "hall-count",
+      "question": "در یزد چند نهاد مالی و چند نام متمایز داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تالار یزد",
+        "30 رکورد",
+        "21 نام متمایز"
+      ],
+      "maxAnswerChars": 400,
+      "passed": false,
+      "issues": [
+        "missing:21 نام متمایز"
+      ],
+      "answer": "در تالار یزد، 30 رکورد نهاد مالی با 20 نام متمایز ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3879.04
+    },
+    {
+      "id": "NM-012",
+      "cluster": "hall-distribution",
+      "question": "کدام تالار بیشترین نهاد مالی ثبت‌شده را دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "اصفهان",
+        "105 رکورد"
+      ],
+      "maxAnswerChars": 1500,
+      "passed": true,
+      "issues": [],
+      "answer": "10 تالار اول از نظر تعداد رکورد نهاد مالی:\n1. اصفهان (کد 6): 105 رکورد؛ 66 نام متمایز\n2. خراسان رضوی (مشهد) (کد 9): 81 رکورد؛ 64 نام متمایز\n3. آذربایجان شرقی (تبریز) (کد 2): 66 رکورد؛ 46 نام متمایز\n4. البرز (کرج) (کد 22): 66 رکورد؛ 53 نام متمایز\n5. فارس (شیراز) (کد 13): 48 رکورد؛ 37 نام متمایز\n6. زنجان (کد 10): 41 رکورد؛ 37 نام متمایز\n7. مازندران (ساری) (کد 19): 33 رکورد؛ 26 نام متمایز\n8. یزد (کد 21): 30 رکورد؛ 21 نام متمایز\n9. آذربایجان غربی (ارومیه) (کد 3): 28 رکورد؛ 21 نام متمایز\n10. کرمانشاه (کد 1): 27 رکورد؛ 25 نام متمایز",
+      "actualType": "structured_reference",
+      "latencyMs": 3964.31
+    },
+    {
+      "id": "NM-013",
+      "cluster": "hall-distribution",
+      "question": "سه تالار اول از نظر تعداد شعب نهادهای مالی کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "اصفهان",
+        "خراسان رضوی (مشهد)",
+        "آذربایجان شرقی (تبریز)"
+      ],
+      "maxAnswerChars": 1500,
+      "passed": false,
+      "issues": [
+        "missing:اصفهان",
+        "missing:خراسان رضوی (مشهد)",
+        "missing:آذربایجان شرقی (تبریز)"
+      ],
+      "answer": "نهاد مالی «سه نظر‌های اند» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3887.37
+    },
+    {
+      "id": "NM-014",
+      "cluster": "type-list",
+      "question": "فهرست سبدگردان‌های ثبت‌شده را فقط با نام بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "رایا سهم",
+        "ایساتیس پویا کیش",
+        "برلیان",
+        "هدف"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "نهادهای نوع سبدگردان: 8 رکورد و 4 نام متمایز.\n1. رایا سهم — 1 رکورد در 1 تالار\n2. سبد گردان ایساتیس پویا کیش — 1 رکورد در 1 تالار\n3. سبد گردان برلیان — 1 رکورد در 1 تالار\n4. سبدگردان هدف — 5 رکورد در 5 تالار",
+      "actualType": "structured_reference",
+      "latencyMs": 3928.77
+    },
+    {
+      "id": "NM-015",
+      "cluster": "type-list",
+      "question": "چند مشاور سرمایه‌گذاری در Nahad_Mali وجود دارد و نامشان چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2 رکورد",
+        "ایساتیس پویا کیش",
+        "مشاور سرمایه‌گذاری ترنج"
+      ],
+      "maxAnswerChars": 650,
+      "passed": false,
+      "issues": [
+        "missing:2 رکورد",
+        "missing:ایساتیس پویا کیش",
+        "missing:مشاور سرمایه‌گذاری ترنج"
+      ],
+      "answer": "نهاد مالی «وجود نامشان» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3884.67
+    },
+    {
+      "id": "NM-016",
+      "cluster": "type-list",
+      "question": "کدام نهاد مالی از نوع تأمین سرمایه ثبت شده است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تأمین سرمایه",
+        "صندوق سرمایه‌گذاری مشترک ایساتیس پویا",
+        "1 رکورد"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "نهادهای نوع تأمین سرمایه: 1 رکورد و 1 نام متمایز.\n1. صندوق سرمایه‌گذاری مشترک ایساتیس پویا — 1 رکورد در 1 تالار",
+      "actualType": "structured_reference",
+      "latencyMs": 3927.9
+    },
+    {
+      "id": "NM-017",
+      "cluster": "direct-type",
+      "question": "سبدگردان هدف چه نوع نهاد مالی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "هدف",
+        "سبدگردان"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "«سبدگردان هدف» در Nahad_Mali از نوع سبدگردان ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 36.6
+    },
+    {
+      "id": "NM-018",
+      "cluster": "contact",
+      "question": "شماره تماس کارگزاری مفید در اهواز چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مفید",
+        "33387700"
+      ],
+      "mustNotContain": [
+        "فملی"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "مفید — تلفن: 33387700.",
+      "actualType": "structured_reference",
+      "latencyMs": 3890.16
+    },
+    {
+      "id": "NM-019",
+      "cluster": "contact",
+      "question": "آدرس کارگزاری مفید در ماهشهر را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مفید",
+        "ماهشهر",
+        "ناحیه صنعتی"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "مفید — نشانی: ماهشهر، ناحیه صنعتی ، خیابان فرهنگسرا، نبش کویتی‌ها ( نبش بلوار ملک الشعرای بهار)، طبقه دوم.",
+      "actualType": "structured_reference",
+      "latencyMs": 3910.55
+    },
+    {
+      "id": "NM-020",
+      "cluster": "branches",
+      "question": "کارگزاری مفید چند شعبه دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مفید",
+        "20 رکورد شعبه/دفتر",
+        "17 تالار"
+      ],
+      "maxAnswerChars": 350,
+      "passed": false,
+      "issues": [
+        "missing:20 رکورد شعبه/دفتر",
+        "missing:17 تالار"
+      ],
+      "answer": "برای «مفید» 23 رکورد شعبه/دفتر در 20 تالار منطقه‌ای ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 25.19
+    },
+    {
+      "id": "NM-021",
+      "cluster": "branches",
+      "question": "کارگزاری مفید در کدام تالارها شعبه دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "17 تالار",
+        "اصفهان",
+        "خوزستان (اهواز)",
+        "یزد"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "missing:17 تالار"
+      ],
+      "answer": "«مفید» در 20 تالار منطقه‌ای ثبت شده است: آذربایجان غربی (ارومیه)، اردبیل، اصفهان، البرز (کرج)، بوشهر، چهارمحال و بختیاری، خراسان جنوبی (بیرجند)، خوزستان (اهواز)، زنجان، فارس (شیراز)، قزوین، قم، کرمان، کرمانشاه، گلستان، لرستان، مازندران (ساری)، مرکزی، هرمزگان (بندرعباس)، یزد.",
+      "actualType": "structured_reference",
+      "latencyMs": 22.24
+    },
+    {
+      "id": "NM-022",
+      "cluster": "contact",
+      "question": "تلفن کارگزاری آگاه در ایلام چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه",
+        "08433354241",
+        "ایلام"
+      ],
+      "maxAnswerChars": 500,
+      "passed": false,
+      "issues": [
+        "missing:ایلام"
+      ],
+      "answer": "آگاه — تلفن: 08433354241.",
+      "actualType": "structured_reference",
+      "latencyMs": 3896.28
+    },
+    {
+      "id": "NM-023",
+      "cluster": "branches",
+      "question": "آگاه چند شعبه و در چند تالار دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "49 رکورد شعبه/دفتر",
+        "22 تالار"
+      ],
+      "maxAnswerChars": 350,
+      "passed": false,
+      "issues": [
+        "missing:49 رکورد شعبه/دفتر",
+        "missing:22 تالار"
+      ],
+      "answer": "برای «آگاه» 55 رکورد شعبه/دفتر در 25 تالار منطقه‌ای ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 27.96
+    },
+    {
+      "id": "NM-024",
+      "cluster": "branches",
+      "question": "کارگزاری آگاه در تالار خوزستان چند رکورد شعبه دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه",
+        "5 رکورد شعبه/دفتر",
+        "1 تالار"
+      ],
+      "maxAnswerChars": 350,
+      "passed": false,
+      "issues": [
+        "missing:5 رکورد شعبه/دفتر"
+      ],
+      "answer": "برای «آگاه» 5 رکورد منطبق در 1 تالار پیدا شد:\n1. تلفن: 33383145؛ تالار: خوزستان (اهواز) (کد 4).\n2. تلفن: 33764649؛ تالار: خوزستان (اهواز) (کد 4).\n3. تلفن: 06152230495؛ تالار: خوزستان (اهواز) (کد 4).\n4. تلفن: 06152734888؛ تالار: خوزستان (اهواز) (کد 4).\n5. تلفن: 06142532030؛ تالار: خوزستان (اهواز) (کد 4).",
+      "actualType": "structured_reference",
+      "latencyMs": 54.17
+    },
+    {
+      "id": "NM-025",
+      "cluster": "branches",
+      "question": "شماره تماس شعب کارگزاری آگاه در خوزستان را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "06142532030",
+        "33383145",
+        "06152734888"
+      ],
+      "maxAnswerChars": 1100,
+      "passed": true,
+      "issues": [],
+      "answer": "برای «آگاه» 5 رکورد منطبق در 1 تالار پیدا شد:\n1. تلفن: 33383145.\n2. تلفن: 33764649.\n3. تلفن: 06152230495.\n4. تلفن: 06152734888.\n5. تلفن: 06142532030.",
+      "actualType": "structured_reference",
+      "latencyMs": 39.62
+    },
+    {
+      "id": "NM-026",
+      "cluster": "record-id",
+      "question": "مشخصات کامل رکورد نهاد مالی با شناسه 4971c524-a410-4c07-a8cc-30758761f26d را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مفید",
+        "33387700",
+        "اهواز",
+        "4971c524-a410-4c07-a8cc-30758761f26d",
+        "1405/05/20"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "مفید — نوع: کارگزاری؛ تلفن: 33387700؛ نشانی: اهواز، کیانپارس، خیابان 2 شرقی، برج تشریفات، طبقه 7، واحد 709؛ تالار: خوزستان (اهواز) (کد 4)؛ شناسه: 4971c524-a410-4c07-a8cc-30758761f26d؛ زمان جمع‌آوری: 1405/05/20 ساعت 14:33:43.",
+      "actualType": "structured_reference",
+      "latencyMs": 3893.95
+    },
+    {
+      "id": "NM-027",
+      "cluster": "record-id",
+      "question": "رکورد نهاد مالی با شناسه 00000000-0000-0000-0000-000000000000 وجود دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "00000000-0000-0000-0000-000000000000",
+        "پیدا نشد"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "نهاد مالی «00000000-0000-0000-0000-000000000000» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3903.13
+    },
+    {
+      "id": "NM-028",
+      "cluster": "direct-type",
+      "question": "آگاه کارگزاری است یا سبدگردان؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه",
+        "کارگزاری"
+      ],
+      "mustNotContain": [
+        "از نوع سبدگردان"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "«آگاه» در Nahad_Mali از نوع کارگزاری ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 42.53
+    },
+    {
+      "id": "NM-029",
+      "cluster": "contact",
+      "question": "شماره تماس و نشانی سبدگردان برلیان در اصفهان چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "برلیان",
+        "3131306870",
+        "خیابان آزادی",
+        "پلاک 62"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "سبد گردان برلیان — تلفن: 3131306870؛ نشانی: اصفهان، خیابان آزادی، پلاک 62.",
+      "actualType": "structured_reference",
+      "latencyMs": 3885.07
+    },
+    {
+      "id": "NM-030",
+      "cluster": "contact",
+      "question": "اطلاعات تماس مشاور سرمایه‌گذاری ترنج در مشهد را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ترنج",
+        "09153752707",
+        "میدان جانباز",
+        "واحد 604"
+      ],
+      "maxAnswerChars": 550,
+      "passed": false,
+      "issues": [
+        "missing:میدان جانباز",
+        "missing:واحد 604"
+      ],
+      "answer": "مشاور سرمایه‌گذاری ترنج — تلفن: 09153752707.",
+      "actualType": "structured_reference",
+      "latencyMs": 3958.72
+    },
+    {
+      "id": "NM-031",
+      "cluster": "direct-type",
+      "question": "صندوق سرمایه‌گذاری مشترک ایساتیس پویا چه نوع نهاد مالی و مربوط به کدام تالار است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تأمین سرمایه",
+        "یزد"
+      ],
+      "maxAnswerChars": 450,
+      "passed": false,
+      "issues": [
+        "missing:تأمین سرمایه",
+        "too_long:572"
+      ],
+      "answer": "برای «ایساتیس پویا» 18 رکورد منطبق در 8 تالار پیدا شد:\n1. نوع: کارگزاری؛ تالار: آذربایجان شرقی (تبریز) (کد 2).\n2. نوع: کارگزاری؛ تالار: اصفهان (کد 6).\n3. نوع: کارگزاری؛ تالار: خراسان رضوی (مشهد) (کد 9).\n4. نوع: کارگزاری؛ تالار: خراسان رضوی (مشهد) (کد 9).\n5. نوع: کارگزاری؛ تالار: زنجان (کد 10).\n6. نوع: کارگزاری؛ تالار: زنجان (کد 10).\n7. نوع: کارگزاری؛ تالار: کیش (کد 17).\n8. نوع: کارگزاری؛ تالار: هرمزگان (بندرعباس) (کد 7).\n9. نوع: کارگزاری؛ تالار: همدان (کد 20).\n10. نوع: کارگزاری؛ تالار: یزد (کد 21).\n… 8 رکورد دیگر نمایش داده نشد؛ برای پاسخ دقیق‌تر نام شهر را بنویسید.",
+      "actualType": "structured_reference",
+      "latencyMs": 50.13
+    },
+    {
+      "id": "NM-032",
+      "cluster": "comparison",
+      "question": "تعداد شعب آگاه را با مفید مقایسه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آگاه: 49 رکورد در 22 تالار",
+        "مفید: 20 رکورد در 17 تالار",
+        "آگاه رکورد شعب بیشتری دارد"
+      ],
+      "maxAnswerChars": 450,
+      "passed": false,
+      "issues": [
+        "missing:آگاه: 49 رکورد در 22 تالار",
+        "missing:مفید: 20 رکورد در 17 تالار"
+      ],
+      "answer": "آگاه: 55 رکورد در 25 تالار؛ مفید: 23 رکورد در 20 تالار. آگاه رکورد شعب بیشتری دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3898.51
+    },
+    {
+      "id": "NM-033",
+      "cluster": "comparison",
+      "question": "فارابی یا مفید؛ کدام کارگزاری شعب ثبت‌شده بیشتری دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فارابی: 27 رکورد در 20 تالار",
+        "مفید: 20 رکورد در 17 تالار",
+        "فارابی رکورد شعب بیشتری دارد"
+      ],
+      "maxAnswerChars": 450,
+      "passed": false,
+      "issues": [
+        "missing:فارابی: 27 رکورد در 20 تالار",
+        "missing:مفید: 20 رکورد در 17 تالار",
+        "missing:فارابی رکورد شعب بیشتری دارد"
+      ],
+      "answer": "نهاد مالی «فارابی مفید بیشتری» در جدول Nahad_Mali پیدا نشد. نام‌های نزدیک: «فارابی»، «مفید».",
+      "actualType": "structured_reference",
+      "latencyMs": 3913.04
+    },
+    {
+      "id": "NM-034",
+      "cluster": "type-list",
+      "question": "همه سبدگردان‌ها در مجموع چند رکورد و چند نام نرمال‌شده دارند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "8 رکورد",
+        "4 نام متمایز"
+      ],
+      "maxAnswerChars": 650,
+      "passed": false,
+      "issues": [
+        "missing:8 رکورد",
+        "missing:4 نام متمایز"
+      ],
+      "answer": "نهاد مالی «همه‌ها مجموع نرمال» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3940.3
+    },
+    {
+      "id": "NM-035",
+      "cluster": "quality",
+      "question": "آیا در جدول Nahad_Mali عنوان، تلفن یا آدرس خالی داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "عنوان، تلفن و نشانی خالی نداریم",
+        "رکورد یتیم",
+        "صفر"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "missing:عنوان، تلفن و نشانی خالی نداریم",
+        "missing:رکورد یتیم",
+        "missing:صفر"
+      ],
+      "answer": "نهاد مالی «آیا عنوان خالی داریم» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3910.8
+    },
+    {
+      "id": "NM-036",
+      "cluster": "quality",
+      "question": "چند شماره تلفن نامعتبر یا مشکوک در Nahad_Mali وجود دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "12 شماره",
+        "مشکوک"
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 4018.66
+    },
+    {
+      "id": "NM-037",
+      "cluster": "quality",
+      "question": "Broker_TypeId چند رکورد نهاد مالی خالی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "Broker_TypeId",
+        "807 رکورد",
+        "خالی"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "missing:Broker_TypeId",
+        "missing:807 رکورد"
+      ],
+      "answer": "نهاد مالی «broker_typeid خالی» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3934.51
+    },
+    {
+      "id": "NM-038",
+      "cluster": "quality",
+      "question": "رکوردهای کاملاً تکراری Nahad_Mali چند گروه و چند ردیف اضافه‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2 گروه تکراری کاملاً یکسان",
+        "2 ردیف اضافه"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "missing:2 گروه تکراری کاملاً یکسان",
+        "missing:2 ردیف اضافه"
+      ],
+      "answer": "نهاد مالی «های کاملا تکراری گروه ردیف اضافه اند» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3900.21
+    },
+    {
+      "id": "NM-039",
+      "cluster": "quality",
+      "question": "تکرار نام یک نهاد در یک تالار چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "97 گروه نام یکسان",
+        "149 ردیف اضافه",
+        "لزوماً خطا نیست"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:97 گروه نام یکسان",
+        "missing:149 ردیف اضافه",
+        "missing:لزوماً خطا نیست"
+      ],
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "actualType": "knowledge",
+      "latencyMs": 12680.56
+    },
+    {
+      "id": "NM-040",
+      "cluster": "quality",
+      "question": "آیا نهاد مالی بدون نوع یا بدون تالار داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "رکورد یتیم",
+        "صفر"
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3979.17
+    },
+    {
+      "id": "NM-041",
+      "cluster": "timestamp",
+      "question": "آخرین زمان جمع‌آوری کل جدول Nahad_Mali چه تاریخی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "807 رکورد",
+        "1405/05/20",
+        "14:33:43"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "هر 807 رکورد Nahad_Mali در Snapshot منبعِ 1405/05/20 ساعت 14:33:43 جمع‌آوری شده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3978.29
+    },
+    {
+      "id": "NM-042",
+      "cluster": "schema",
+      "question": "جدول Nahad_Mali چه ستون‌هایی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "هشت ستون",
+        "Id",
+        "Title",
+        "Nahad_Mali_Type_Id",
+        "TelNo",
+        "Address",
+        "Talar_Id",
+        "Broker_TypeId",
+        "SourceCollectedAt"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "Nahad_Mali هشت ستون دارد: Id، Title، Nahad_Mali_Type_Id، TelNo، Address، Talar_Id، Broker_TypeId و SourceCollectedAt. هر ردیف یک شعبه/دفتر منطقه‌ای است و جدول تاریخچه تغییرات ندارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3888.24
+    },
+    {
+      "id": "NM-043",
+      "cluster": "schema",
+      "question": "Nahad_Mali کلید اصلی، ایندکس یا Foreign Key دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "هیچ Primary Key، Index یا Foreign Key",
+        "Id",
+        "807 رکورد فعلی یکتا"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "Nahad_Mali در Schema فعلی هیچ Primary Key، Index یا Foreign Key فیزیکی ندارد؛ با این حال Id در 807 رکورد فعلی یکتا است و Nahad_Mali_Type_Id و Talar_Id به‌صورت منطقی با Nahad_Mali_Type.Id و Talar.Id تطبیق دارند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3899.96
+    },
+    {
+      "id": "NM-044",
+      "cluster": "schema",
+      "question": "آیا از جدول Nahad_Mali می‌توان قیمت یا حجم معاملات یک کارگزاری را گرفت؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قیمت، حجم یا ارزش معاملات",
+        "ندارد",
+        "اطلاعات تماس"
+      ],
+      "maxAnswerChars": 500,
+      "passed": false,
+      "issues": [
+        "missing:اطلاعات تماس"
+      ],
+      "answer": "Nahad_Mali قیمت، حجم یا ارزش معاملات و صورت مالی ندارد؛ این جدول فقط Snapshot مرجع شعب نهادهای مالی شامل نام، نوع، تلفن، نشانی، تالار و زمان جمع‌آوری را نگهداری می‌کند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3888.25
+    },
+    {
+      "id": "NM-045",
+      "cluster": "schema",
+      "question": "رابطه Nahad_Mali با Talar و Nahad_Mali_Type چگونه است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "Nahad_Mali_Type_Id",
+        "Talar_Id",
+        "منطقی",
+        "Foreign Key"
+      ],
+      "maxAnswerChars": 500,
+      "passed": false,
+      "issues": [
+        "missing:Nahad_Mali_Type_Id",
+        "missing:Talar_Id",
+        "missing:منطقی",
+        "missing:Foreign Key"
+      ],
+      "answer": "نهاد مالی «رابطه talar nahad_mali_type چگونه» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3892.19
+    },
+    {
+      "id": "NM-046",
+      "cluster": "quality",
+      "question": "در بررسی کیفیت داده، آیا هر نام تکراری در Nahad_Mali خطاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "لزوماً خطا نیست",
+        "شعب متعدد",
+        "97 گروه"
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3990.11
+    },
+    {
+      "id": "NM-047",
+      "cluster": "record-id",
+      "question": "زمان جمع‌آوری رکورد نهاد مالی 4971c524-a410-4c07-a8cc-30758761f26d چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مفید",
+        "1405/05/20",
+        "14:33:43"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "رکوردهای «مفید» در 1405/05/20 ساعت 14:33:43 جمع‌آوری شده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3947.22
+    },
+    {
+      "id": "NM-048",
+      "cluster": "not-found",
+      "question": "شماره تلفن کارگزاری وجودندارد را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وجودندارد",
+        "پیدا نشد"
+      ],
+      "mustNotContain": [
+        "فملی",
+        "خساپا"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "نهاد مالی «وجودندارد» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3889.44
+    },
+    {
+      "id": "NM-049",
+      "cluster": "type-normalization",
+      "question": "فهرست مشاوران سرمایه‌گذاری ثبت‌شده را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مشاور سرمایه‌گذاری",
+        "ایساتیس پویا کیش",
+        "ترنج"
+      ],
+      "mustNotContain": [
+        "سرمایه گذرای"
+      ],
+      "maxAnswerChars": 700,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:مشاور سرمایه‌گذاری",
+        "missing:ایساتیس پویا کیش",
+        "missing:ترنج"
+      ],
+      "answer": "و اشخاص دارای مجوز ارزشگذاری اوراق بهادار در راستای الزام بند 4 ماده 6 مکرر دستورالعمل پذیره نویسی و عرضه اولیه اوراق بهادار در بورس اوراق بهادار تهران و فرابورس ایران، رتبه­ بندی نهاد‌های مالی فوق بر اساس جلسات معارفه برگزار شده در طی سال 1401 انجام شده است.\nبراساس رویه اجرایی تدوین شده، معیار‌های رتبه ­بندی عمدتا مربوط به مشارکت فعال و موثر در جلسات معارفه شرکت­ های در شرف عرضه اولیه و همچنین ایفای نقش به عنوان یکی از ارکان عرضه اولیه (شامل متعهد خرید و مشاور عرضه) است.",
+      "actualType": "knowledge",
+      "latencyMs": 9478.7
+    },
+    {
+      "id": "NM-050",
+      "cluster": "temporal-limit",
+      "question": "کارگزاری مفید در سال ۱۴۰۰ چند شعبه داشت؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "Snapshot فعلی",
+        "تاریخچه زمانی",
+        "قابل پاسخ نیست"
+      ],
+      "maxAnswerChars": 500,
+      "passed": false,
+      "issues": [
+        "missing:Snapshot فعلی",
+        "missing:تاریخچه زمانی",
+        "missing:قابل پاسخ نیست"
+      ],
+      "answer": "برای «مفید» 23 رکورد شعبه/دفتر در 20 تالار منطقه‌ای ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 53.86
+    }
+  ]
+}

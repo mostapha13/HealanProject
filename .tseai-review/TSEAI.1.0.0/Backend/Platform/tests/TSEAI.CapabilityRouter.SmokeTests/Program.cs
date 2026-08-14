@@ -18,7 +18,17 @@ Assert(f.Route==ChatCapabilityRoute.FilterConversation && !f.PlannerUsed,"filter
 var q=await router.RouteAsync("10 نماد با بیشترین حجم معاملات را بده",100,CancellationToken.None);
 Assert(q.Route==ChatCapabilityRoute.StructuredQuery && !q.PlannerUsed && q.StructuredQuery?.Plan is not null,"structured route failed");
 var m=await router.RouteAsync("قیمت فولاد چنده؟",100,CancellationToken.None);
-Assert(m.Route==ChatCapabilityRoute.MarketSymbol && m.PlannerUsed,"market fallback route failed");
+Assert(m.Route==ChatCapabilityRoute.MarketSymbol && !m.PlannerUsed && m.Plan?.RequestedFields?.Contains("last_price")==true,"market ontology route failed");
+var colloquial=await router.RouteAsync("فملی چند درصد بالا رفته؟",100,CancellationToken.None);
+Assert(colloquial.Route==ChatCapabilityRoute.MarketSymbol && colloquial.Plan?.RequestedFields?.Contains("last_price_change_percent")==true,"single-symbol growth must not become a market-wide ranking");
+var classification=await router.RouteAsync("فملی در چه صنعت و زیرصنعتی قرار دارد؟",100,CancellationToken.None);
+Assert(classification.Route==ChatCapabilityRoute.MarketSymbol && classification.Plan?.RequestedFields?.Contains("industry")==true,"market classification must not route to document search");
+var bestBid=await router.RouteAsync("حجم سرخط خرید فملی چقدره؟",100,CancellationToken.None);
+Assert(bestBid.Route==ChatCapabilityRoute.MarketSymbol && bestBid.Plan?.RequestedFields?.Contains("best_bid_volume")==true,"order-book best bid must route deterministically");
+var fullBook=await router.RouteAsync("اردربوک کامل فملی را بده",100,CancellationToken.None);
+Assert(fullBook.Route==ChatCapabilityRoute.MarketSymbol && fullBook.Plan?.RequestedFields?.Contains("orderbook")==true,"full order book must route deterministically");
+var bookRank=await router.RouteAsync("پنج نماد با بیشترین حجم بهترین سفارش خرید را بده",100,CancellationToken.None);
+Assert(bookRank.Route==ChatCapabilityRoute.StructuredQuery && bookRank.StructuredQuery?.Plan?.SortBy==StructuredQueryMetric.BestBidVolume,"order-book ranking route failed");
 var k=await router.RouteAsync("قانون اختیار معامله چیست؟",100,CancellationToken.None);
 Assert(k.Route==ChatCapabilityRoute.Knowledge && k.PlannerUsed,"knowledge fallback route failed");
 var h=await router.RouteAsync("قیمت فولاد و آخرین خبرش رو بگو",100,CancellationToken.None);

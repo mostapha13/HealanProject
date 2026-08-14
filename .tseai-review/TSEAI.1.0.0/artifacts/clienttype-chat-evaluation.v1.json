@@ -1,0 +1,973 @@
+{
+  "version": "clienttype-1.0",
+  "generatedAtUtc": "2026-08-14T13:07:50.496004+00:00",
+  "total": 50,
+  "passed": 47,
+  "passRate": 0.94,
+  "allPassed": false,
+  "p50LatencyMs": 4033.38,
+  "p95LatencyMs": 4652.84,
+  "clusters": {
+    "raw-volume": {
+      "total": 4,
+      "passed": 4
+    },
+    "participant-count": {
+      "total": 4,
+      "passed": 4
+    },
+    "totals": {
+      "total": 2,
+      "passed": 2
+    },
+    "net-flow": {
+      "total": 2,
+      "passed": 2
+    },
+    "per-capita": {
+      "total": 2,
+      "passed": 2
+    },
+    "buyer-power": {
+      "total": 2,
+      "passed": 2
+    },
+    "share-percent": {
+      "total": 4,
+      "passed": 4
+    },
+    "full": {
+      "total": 1,
+      "passed": 1
+    },
+    "metadata": {
+      "total": 3,
+      "passed": 2
+    },
+    "schema": {
+      "total": 4,
+      "passed": 4
+    },
+    "money-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "comparison": {
+      "total": 2,
+      "passed": 2
+    },
+    "cross-table": {
+      "total": 1,
+      "passed": 1
+    },
+    "temporal-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "entity-safety": {
+      "total": 1,
+      "passed": 0
+    },
+    "statistics": {
+      "total": 2,
+      "passed": 2
+    },
+    "coverage": {
+      "total": 3,
+      "passed": 2
+    },
+    "data-quality": {
+      "total": 3,
+      "passed": 3
+    },
+    "ranking": {
+      "total": 7,
+      "passed": 7
+    },
+    "variant-symbol": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CT-001",
+      "cluster": "raw-volume",
+      "question": "حجم خرید حقیقی فملی چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی",
+        "حجم خرید حقیقی 366,725,759 سهم"
+      ],
+      "mustNotContain": [
+        "حجم معاملات 583,222,314",
+        "ریال"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 5250.11
+    },
+    {
+      "id": "CT-002",
+      "cluster": "raw-volume",
+      "question": "حقوقی‌ها چند سهم فملی خریده‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی",
+        "حجم خرید حقوقی 31,502,288 سهم"
+      ],
+      "mustNotContain": [
+        "ارزش معاملات"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم خرید حقوقی 31,502,288 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 7524.02
+    },
+    {
+      "id": "CT-003",
+      "cluster": "raw-volume",
+      "question": "حجم فروش افراد حقیقی در فملی رو بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی",
+        "حجم فروش حقیقی 20,264,230 سهم"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم فروش حقیقی 20,264,230 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3978.17
+    },
+    {
+      "id": "CT-004",
+      "cluster": "raw-volume",
+      "question": "فروش حقوقی فملی چه حجمی بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی",
+        "حجم فروش حقوقی 377,963,817 سهم"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم فروش حقوقی 377,963,817 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4075.89
+    },
+    {
+      "id": "CT-005",
+      "cluster": "participant-count",
+      "question": "تعداد خریداران حقیقی فملی چند نفر بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد خریداران حقیقی 1,565 کد معاملاتی"
+      ],
+      "mustNotContain": [
+        "تعداد معاملات"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد خریداران حقیقی 1,565 کد معاملاتی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4033.31
+    },
+    {
+      "id": "CT-006",
+      "cluster": "participant-count",
+      "question": "تعداد خریداران حقوقی فملی چندتاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد خریداران حقوقی 61 کد معاملاتی"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد خریداران حقوقی 61 کد معاملاتی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4055.97
+    },
+    {
+      "id": "CT-007",
+      "cluster": "participant-count",
+      "question": "چند فروشنده حقیقی روی فملی بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد فروشندگان حقیقی 1,165 کد معاملاتی"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد فروشندگان حقیقی 1,165 کد معاملاتی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4099.63
+    },
+    {
+      "id": "CT-008",
+      "cluster": "participant-count",
+      "question": "Sell_CountN فملی چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد فروشندگان حقوقی 9 کد معاملاتی"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد فروشندگان حقوقی 9 کد معاملاتی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4005.55
+    },
+    {
+      "id": "CT-009",
+      "cluster": "totals",
+      "question": "مجموع حجم خرید فملی در ClientType چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مجموع حجم خرید 398,228,047 سهم"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: مجموع حجم خرید 398,228,047 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4115.06
+    },
+    {
+      "id": "CT-010",
+      "cluster": "totals",
+      "question": "کل حجم فروش حقیقی و حقوقی فملی روی هم چند سهم است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مجموع حجم فروش 398,228,047 سهم"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم فروش حقیقی 20,264,230 سهم، حجم فروش حقوقی 377,963,817 سهم، مجموع حجم فروش 398,228,047 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4014.28
+    },
+    {
+      "id": "CT-011",
+      "cluster": "net-flow",
+      "question": "خالص خرید حقیقی فملی را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خالص حجم حقیقی +346,461,529 سهم"
+      ],
+      "mustNotContain": [
+        "حجم خرید حقیقی 366,725,759",
+        "ریال"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: خالص حجم حقیقی +346,461,529 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3970.49
+    },
+    {
+      "id": "CT-012",
+      "cluster": "net-flow",
+      "question": "خالص حجم حقوقی فملی چقدر شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خالص حجم حقوقی -346,461,529 سهم"
+      ],
+      "mustNotContain": [
+        "ورود پول ریالی"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: خالص حجم حقوقی -346,461,529 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4072.76
+    },
+    {
+      "id": "CT-013",
+      "cluster": "per-capita",
+      "question": "سرانه خرید حقیقی فملی چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سرانه خرید حقیقی 234,329.56 سهم"
+      ],
+      "mustNotContain": [
+        "حجم خرید حقیقی 366,725,759"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سرانه خرید حقیقی 234,329.56 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4203.73
+    },
+    {
+      "id": "CT-014",
+      "cluster": "per-capita",
+      "question": "میانگین فروش هر حقیقی فملی چند سهم است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سرانه فروش حقیقی 17,394.19 سهم"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سرانه فروش حقیقی 17,394.19 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4230.47
+    },
+    {
+      "id": "CT-015",
+      "cluster": "buyer-power",
+      "question": "قدرت خریدار فملی چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قدرت خریدار حقیقی 13.4717"
+      ],
+      "mustNotContain": [
+        "ویرایش فیلتر"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3966.89
+    },
+    {
+      "id": "CT-016",
+      "cluster": "buyer-power",
+      "question": "وضعیت قدرت خریدار حقیقی فملی رو تفسیر کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سمت خرید حقیقی قوی‌تر"
+      ],
+      "mustNotContain": [
+        "توصیه خرید"
+      ],
+      "maxAnswerChars": 380,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، سرانه خرید حقیقی 13.47 برابر سرانه فروش است و سمت خرید حقیقی قوی‌تر است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4055.64
+    },
+    {
+      "id": "CT-017",
+      "cluster": "share-percent",
+      "question": "درصد خرید حقیقی فملی از کل خرید چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سهم حقیقی از حجم خرید 92.09٪"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سهم حقیقی از حجم خرید 92.09٪ است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3964.96
+    },
+    {
+      "id": "CT-018",
+      "cluster": "share-percent",
+      "question": "سهم حقوقی از خرید فملی چند درصده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سهم حقوقی از حجم خرید 7.91٪"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سهم حقوقی از حجم خرید 7.91٪ است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4037.13
+    },
+    {
+      "id": "CT-019",
+      "cluster": "share-percent",
+      "question": "چه درصدی از فروش فملی متعلق به حقیقی‌هاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سهم حقیقی از حجم فروش 5.09٪"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سهم حقیقی از حجم فروش 5.09٪ است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4033.45
+    },
+    {
+      "id": "CT-020",
+      "cluster": "share-percent",
+      "question": "درصد فروش حقوقی فملی رو حساب کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سهم حقوقی از حجم فروش 94.91٪"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: سهم حقوقی از حجم فروش 94.91٪ است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4025.85
+    },
+    {
+      "id": "CT-021",
+      "cluster": "full",
+      "question": "اطلاعات حقیقی و حقوقی فملی را کامل بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,565 کد معاملاتی",
+        "61 کد معاملاتی",
+        "366,725,759 سهم",
+        "377,963,817 سهم",
+        "13.4717",
+        "1405/05/11",
+        "1405/05/20"
+      ],
+      "mustNotContain": [
+        "2026/08/"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد خریداران حقیقی 1,565 کد معاملاتی، تعداد خریداران حقوقی 61 کد معاملاتی، تعداد فروشندگان حقیقی 1,165 کد معاملاتی، تعداد فروشندگان حقوقی 9 کد معاملاتی، حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم، حجم فروش حقیقی 20,264,230 سهم، حجم فروش حقوقی 377,963,817 سهم، خالص حجم حقیقی +346,461,529 سهم، قدرت خریدار حقیقی 13.4717، زمان Snapshot منبع 1405/05/11 ساعت 12:58:46، زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3996.88
+    },
+    {
+      "id": "CT-022",
+      "cluster": "metadata",
+      "question": "ClientType_counter فملی چند است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "شمارنده منبع ClientType برابر 2,638,624",
+        "تعداد معامله نیست"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: شمارنده منبع ClientType برابر 2,638,624 (این مقدار تعداد معامله نیست) است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4091.18
+    },
+    {
+      "id": "CT-023",
+      "cluster": "metadata",
+      "question": "زمان Snapshot منبع ClientType فملی چه موقع است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/11",
+        "12:58:46"
+      ],
+      "mustNotContain": [
+        "2026/08/02"
+      ],
+      "maxAnswerChars": 300,
+      "passed": false,
+      "issues": [
+        "missing:1405/05/11",
+        "missing:12:58:46"
+      ],
+      "answer": "اکنون ساعت 16:35:49 به وقت تهران است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3872.98
+    },
+    {
+      "id": "CT-024",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری ClientType فملی در SQL را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "13:28:05"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4035.43
+    },
+    {
+      "id": "CT-025",
+      "cluster": "schema",
+      "question": "فرق creationTime و SourceCollectedAt در ClientType چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "creationTime زمان Snapshot",
+        "SourceCollectedAt زمان دریافت و ثبت رکورد در SQL"
+      ],
+      "maxAnswerChars": 440,
+      "passed": true,
+      "issues": [],
+      "answer": "creationTime زمان Snapshot اعلام‌شده توسط منبع است؛ SourceCollectedAt زمان دریافت و ثبت رکورد در SQL است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3871.58
+    },
+    {
+      "id": "CT-026",
+      "cluster": "schema",
+      "question": "Buy_CountI یعنی چه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد کدهای خریدار حقیقی",
+        "نه تعداد معاملات"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "Buy_CountI تعداد کدهای خریدار حقیقی است، نه تعداد معاملات.",
+      "actualType": "structured_reference",
+      "latencyMs": 3868.95
+    },
+    {
+      "id": "CT-027",
+      "cluster": "schema",
+      "question": "ستون Buy_I_Volume چه مفهومی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "حجم خرید حقیقی",
+        "سهم/واحد",
+        "نه ریال"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "Buy_I_Volume حجم خرید حقیقی بر حسب سهم/واحد است، نه ریال.",
+      "actualType": "structured_reference",
+      "latencyMs": 3885.44
+    },
+    {
+      "id": "CT-028",
+      "cluster": "schema",
+      "question": "فیلد ClientType_counter چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "شمارنده/نسخه منبع",
+        "تعداد معامله نیست"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ClientType_counter شمارنده/نسخه منبع است و تعداد معامله نیست.",
+      "actualType": "structured_reference",
+      "latencyMs": 3903.6
+    },
+    {
+      "id": "CT-029",
+      "cluster": "money-safety",
+      "question": "ورود پول حقیقی فملی چقدر بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ارزش ریالی خرید و فروش حقیقی در ClientType وجود ندارد",
+        "خالص ورود پول ریالی قابل محاسبه نیست",
+        "+346,461,529 سهم"
+      ],
+      "mustNotContain": [
+        "است است"
+      ],
+      "maxAnswerChars": 460,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: ارزش ریالی خرید و فروش حقیقی در ClientType وجود ندارد؛ خالص ورود پول ریالی قابل محاسبه نیست، اما خالص حجم حقیقی +346,461,529 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4130.24
+    },
+    {
+      "id": "CT-030",
+      "cluster": "comparison",
+      "question": "قدرت خریدار فملی را با خودرو مقایسه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی: قدرت خریدار حقیقی 13.4717",
+        "خودرو: قدرت خریدار حقیقی 1.1593"
+      ],
+      "maxAnswerChars": 440,
+      "passed": true,
+      "issues": [],
+      "answer": "مقایسه بر پایه Snapshot جاری ClientType:\n- فملی: قدرت خریدار حقیقی 13.4717\n- خودرو: قدرت خریدار حقیقی 1.1593",
+      "actualType": "structured_reference",
+      "latencyMs": 259.8
+    },
+    {
+      "id": "CT-031",
+      "cluster": "comparison",
+      "question": "در فملی حقیقی‌ها بیشتر خریده‌اند یا حقوقی‌ها؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "حجم خرید حقیقی 366,725,759 سهم",
+        "حجم خرید حقوقی 31,502,288 سهم"
+      ],
+      "maxAnswerChars": 380,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4062.87
+    },
+    {
+      "id": "CT-032",
+      "cluster": "cross-table",
+      "question": "قیمت پایانی و قدرت خریدار فملی را باهم بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قدرت خریدار حقیقی 13.4717",
+        "قیمت پایانی 21,660 ریال",
+        "زمان Snapshot بازار و ClientType یکسان نیست"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، قیمت پایانی 21,660 ریال، زمان داده Cashmarket 1405/05/20 ساعت 11:29:22 است. توجه: زمان Snapshot بازار و ClientType یکسان نیست و اعداد هم‌زمان فرض نشده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 4229.33
+    },
+    {
+      "id": "CT-033",
+      "cluster": "temporal-safety",
+      "question": "قدرت خریدار فملی در 10 تیر 1405 چند بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فقط یک Snapshot جاری دارد",
+        "تاریخچه روزانه",
+        "پاسخ قابل اتکا"
+      ],
+      "maxAnswerChars": 440,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول ClientType فعلی فقط یک Snapshot جاری دارد و تاریخچه روزانه در آن نگهداری نشده است؛ بنابراین پاسخ قابل اتکا برای تاریخ درخواستی وجود ندارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3882.7
+    },
+    {
+      "id": "CT-034",
+      "cluster": "entity-safety",
+      "question": "حجم خرید حقیقی نماد خیالی‌تست چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "در داده‌های مرجع ClientType پیدا نشد",
+        "نماد دقیق‌تری"
+      ],
+      "mustNotContain": [
+        "فملی"
+      ],
+      "maxAnswerChars": 380,
+      "passed": false,
+      "issues": [
+        "missing:در داده‌های مرجع ClientType پیدا نشد",
+        "missing:نماد دقیق‌تری"
+      ],
+      "answer": "برای نماد تست در جدول ClientType رکوردی ثبت نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4236.75
+    },
+    {
+      "id": "CT-035",
+      "cluster": "statistics",
+      "question": "جدول ClientType چند رکورد دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,880 رکورد",
+        "1,880 InsCode متمایز",
+        "1405/05/11",
+        "1405/05/20"
+      ],
+      "mustNotContain": [
+        "2026/08/"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول ClientType دارای 1,880 رکورد برای 1,880 InsCode متمایز است. آخرین زمان Snapshot منبع 1405/05/11 ساعت 12:58:46 و زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است؛ 1 مقدار متمایز برای شمارنده منبع ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3918.23
+    },
+    {
+      "id": "CT-036",
+      "cluster": "statistics",
+      "question": "در ClientType تعداد InsCode متمایز چندتاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,880 InsCode متمایز"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول ClientType دارای 1,880 رکورد برای 1,880 InsCode متمایز است. آخرین زمان Snapshot منبع 1405/05/11 ساعت 12:58:46 و زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است؛ 1 مقدار متمایز برای شمارنده منبع ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3893.82
+    },
+    {
+      "id": "CT-037",
+      "cluster": "coverage",
+      "question": "پوشش ClientType در Instrument چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,880 رکورد",
+        "1,729 رکورد به Instrument متصل",
+        "151 رکورد فاقد تطبیق"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "از 1,880 رکورد ClientType، تعداد 1,729 رکورد به Instrument متصل و 151 رکورد فاقد تطبیق است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4476.96
+    },
+    {
+      "id": "CT-038",
+      "cluster": "coverage",
+      "question": "چند رکورد یتیم ClientType بدون Instrument داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "151 رکورد",
+        "هیچ InsCode در Instrument متصل نمی‌شود"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "در ClientType، 151 رکورد به هیچ InsCode در Instrument متصل نمی‌شود.",
+      "actualType": "structured_reference",
+      "latencyMs": 4299.98
+    },
+    {
+      "id": "CT-039",
+      "cluster": "coverage",
+      "question": "پوشش Cashmarket برای ClientType چند رکورد است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "516 رکورد",
+        "زمان Snapshot دو جدول باید جداگانه بررسی شود"
+      ],
+      "maxAnswerChars": 420,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:516 رکورد",
+        "missing:زمان Snapshot دو جدول باید جداگانه بررسی شود"
+      ],
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "actualType": "knowledge",
+      "latencyMs": 12270.13
+    },
+    {
+      "id": "CT-040",
+      "cluster": "data-quality",
+      "question": "در ClientType چند رکورد مقدار منفی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "0 رکورد دارای مقدار منفی"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در ClientType، 0 رکورد دارای مقدار منفی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3899.46
+    },
+    {
+      "id": "CT-041",
+      "cluster": "data-quality",
+      "question": "آیا مجموع خرید و فروش در ClientType نامتوازن است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "0 رکورد",
+        "مجموع حجم خریدی نابرابر با مجموع حجم فروش"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در ClientType، 0 رکورد مجموع حجم خریدی نابرابر با مجموع حجم فروش دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 3896.68
+    },
+    {
+      "id": "CT-042",
+      "cluster": "data-quality",
+      "question": "کیفیت داده جدول ClientType و تعدادهای صفر را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "رکورد منفی 0",
+        "رکورد نامتوازن 0",
+        "خریدار حقیقی صفر 173",
+        "خریدار حقوقی صفر 762",
+        "فروشنده حقیقی صفر 198",
+        "فروشنده حقوقی صفر 594"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "کنترل کیفیت ClientType: رکورد منفی 0، رکورد نامتوازن 0؛ تعداد خریدار حقیقی صفر 173، خریدار حقوقی صفر 762، فروشنده حقیقی صفر 198 و فروشنده حقوقی صفر 594 رکورد است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3887.15
+    },
+    {
+      "id": "CT-043",
+      "cluster": "ranking",
+      "question": "نمادهای دارای بیشترین خالص خرید حقیقی کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وتجارت3",
+        "1,823,000,000 سهم",
+        "وتجارت",
+        "1,483,330,037 سهم",
+        "خودرو",
+        "658,564,053 سهم"
+      ],
+      "maxAnswerChars": 1100,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین خالص حجم حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. وتجارت3 — بانک تجارت: 1,823,000,000 سهم\n2. وتجارت — بانک تجارت: 1,483,330,037 سهم\n3. خودرو — ایران‌ خودرو: 658,564,053 سهم\n4. خساپا — سایپا: 569,121,536 سهم\n5. وهامونح — ح . سرمایه گذاری هامون صبا: 423,867,747 سهم\n6. وبصادر — بانک صادرات ایران: 423,167,664 سهم\n7. اخابر — مخابرات ایران: 374,374,876 سهم\n8. کرازیح — ح . ‌تولیدی‌شیشه‌رازی‌: 349,085,845 سهم\n9. فملی — ملی‌ صنایع‌ مس‌ ایران‌: 346,461,529 سهم\n10. ومعادن — توسعه‌معادن‌وفلزات‌: 330,417,627 سهم",
+      "actualType": "structured_reference",
+      "latencyMs": 4247.86
+    },
+    {
+      "id": "CT-044",
+      "cluster": "ranking",
+      "question": "نمادهای با بالاترین قدرت خریدار حقیقی را لیست کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ومعادن3",
+        "1,750.4581",
+        "آستانه حداقل حجم یا تعداد مشارکت‌کننده"
+      ],
+      "maxAnswerChars": 1300,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین قدرت خریدار حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. ومعادن3 — توسعه‌معادن‌وفلزات‌: 1,750.4581\n2. وپارس3 — بانک‌پارسیان‌: 1,550.9203\n3. ضبساما726 — اختیارخ بساما-9000-14050726: 1,428.8571\n4. ضبساما727 — اختیارخ بساما-9500-14050726: 982.5556\n5. رادان — صندوق س در سهام راد-سهام: 757.1168\n6. الکترومادح — ح . صنایع الکترونیک مادیران: 332.3347\n7. خبهمن3 — گروه‌بهمن‌: 326.9020\n8. ولکار — لیزینگ کارآفرین: 283.2332\n9. آوید — صندوق س. مشترک امین آوید-س: 264.4005\n10. الماس — صندوق س.امین تدبیرگران فردا-س: 235.4533\nاین رتبه‌بندی خام است و آستانه حداقل حجم یا تعداد مشارکت‌کننده روی آن اعمال نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4652.84
+    },
+    {
+      "id": "CT-045",
+      "cluster": "ranking",
+      "question": "5 نماد با بیشترین حجم خرید حقیقی را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خودرو",
+        "6,373,916,772 سهم",
+        "وتجارت",
+        "3,587,925,244 سهم",
+        "خساپا",
+        "2,759,068,013 سهم"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین حجم خرید حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 6,373,916,772 سهم\n2. وتجارت — بانک تجارت: 3,587,925,244 سهم\n3. خساپا — سایپا: 2,759,068,013 سهم\n4. وتجارت3 — بانک تجارت: 1,824,687,815 سهم\n5. های وب — داده گسترعصرنوین-های وب: 988,671,568 سهم",
+      "actualType": "structured_reference",
+      "latencyMs": 4112.11
+    },
+    {
+      "id": "CT-046",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین حجم خرید حقوقی کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "کارین2",
+        "2,160,242,971 سهم",
+        "خودرو",
+        "786,457,010 سهم",
+        "پترول2",
+        "735,000,000 سهم"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین حجم خرید حقوقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. کارین2 — صندوق س نگین سامان-ثابت: 2,160,242,971 سهم\n2. خودرو — ایران‌ خودرو: 786,457,010 سهم\n3. پترول2 — گ.س.وت.ص.پتروشیمی خلیج فارس: 735,000,000 سهم",
+      "actualType": "structured_reference",
+      "latencyMs": 3970.3
+    },
+    {
+      "id": "CT-047",
+      "cluster": "ranking",
+      "question": "3 نماد با بالاترین حجم فروش حقیقی را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خودرو",
+        "5,715,352,719 سهم",
+        "خساپا",
+        "2,189,946,477 سهم",
+        "وتجارت",
+        "2,104,595,207 سهم"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین حجم فروش حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 5,715,352,719 سهم\n2. خساپا — سایپا: 2,189,946,477 سهم\n3. وتجارت — بانک تجارت: 2,104,595,207 سهم",
+      "actualType": "structured_reference",
+      "latencyMs": 4022.73
+    },
+    {
+      "id": "CT-048",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین سرانه خرید حقیقی را رتبه‌بندی کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ومدیر2",
+        "30,000,000.00 سهم",
+        "کرازیح",
+        "9,186,469.61 سهم",
+        "آستانه حداقل حجم یا تعداد مشارکت‌کننده"
+      ],
+      "maxAnswerChars": 760,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین سرانه خرید حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. ومدیر2 — گ.مدیریت ارزش سرمایه ص ب کشوری: 30,000,000.00 سهم\n2. کرازیح — ح . ‌تولیدی‌شیشه‌رازی‌: 9,186,469.61 سهم\n3. وتجارت3 — بانک تجارت: 7,540,032.29 سهم\nاین رتبه‌بندی خام است و آستانه حداقل حجم یا تعداد مشارکت‌کننده روی آن اعمال نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3991.67
+    },
+    {
+      "id": "CT-049",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین تعداد خریدار حقیقی را نشان بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "عیار",
+        "14,065 کد معاملاتی",
+        "فزر",
+        "9,822 کد معاملاتی",
+        "سینرژی",
+        "4,569 کد معاملاتی"
+      ],
+      "maxAnswerChars": 680,
+      "passed": true,
+      "issues": [],
+      "answer": "نمادهای دارای بیشترین تعداد خریداران حقیقی میان رکوردهای ClientType قابل اتصال به Instrument:\n1. عیار — صندوق طلای عیار مفید: 14,065 کد معاملاتی\n2. فزر — پویا زرکان آق دره: 9,822 کد معاملاتی\n3. سینرژی — ص.س. مبتنی بر کالای فارابی: 4,569 کد معاملاتی",
+      "actualType": "structured_reference",
+      "latencyMs": 4000.72
+    },
+    {
+      "id": "CT-050",
+      "cluster": "variant-symbol",
+      "question": "نسبت قدرت خریدار سهم خساپا الان چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خساپا",
+        "قدرت خریدار حقیقی 1.2191"
+      ],
+      "mustNotContain": [
+        "ویرایش فیلتر"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "خساپا: قدرت خریدار حقیقی 1.2191 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4131.66
+    }
+  ]
+}

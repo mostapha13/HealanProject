@@ -89,3 +89,14 @@ def test_company_state_question_does_not_trigger_live_market_tool():
 def test_explicit_current_market_status_still_uses_market_tool():
     p=plan_chat("وضعیت امروز ایران خودرو چطوره؟")
     assert p.intent=="marketsymbol"
+    assert p.symbol=="ایران خودرو"
+
+def test_market_symbol_with_related_tail_words():
+    p=plan_chat("حجم فملی مربوط به چه تاریخی است؟")
+    assert p.intent=="marketsymbol"
+    assert p.symbol=="فملی"
+
+def test_market_symbol_with_related_tail_words_and_time_word():
+    p=plan_chat("قیمت فملی مربوط چه تاریخی است؟")
+    assert p.intent=="marketsymbol"
+    assert p.symbol=="فملی"

@@ -13,7 +13,7 @@ public sealed class MarketDbReader(IConfiguration cfg, IOptions<MarketRuntimeOpt
     private SqlConnection CreateConnection()
     {
         var raw = cfg.GetConnectionString("MarketDb") ?? throw new InvalidOperationException("MarketDb connection missing");
-        var builder = new SqlConnectionStringBuilder(raw) { ApplicationIntent = ApplicationIntent.ReadOnly };
+        var builder = new SqlConnectionStringBuilder(raw);
         return new SqlConnection(builder.ConnectionString);
     }
 

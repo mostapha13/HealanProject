@@ -191,6 +191,10 @@ public sealed class DataQualityService(
         };
         foreach (var (field, value) in values.Where(x => x.Value < 0))
             issues.Add(new("client_type.negative", DataQualitySeverity.Error, "مقدار حقیقی/حقوقی منفی و نامعتبر است.", field, value.ToString(), ">= 0"));
+        if(c.HasData&&c.BuyIVolume+c.BuyNVolume!=c.SellIVolume+c.SellNVolume)
+            issues.Add(new("client_type.unbalanced_volume",DataQualitySeverity.Error,
+                "مجموع حجم خرید حقیقی/حقوقی با مجموع حجم فروش برابر نیست.","ClientType.TotalVolume",
+                $"{c.BuyIVolume+c.BuyNVolume}/{c.SellIVolume+c.SellNVolume}","buy volume = sell volume"));
     }
 
     private static void ValidateOrderBook(IReadOnlyList<OrderBookLevel>? levels, List<DataQualityIssue> issues)

@@ -107,6 +107,7 @@ services:
         condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      IdentityServer__SemanticAIServiceClientSecret: ${SEMANTICAI_SERVICE_CLIENT_SECRET:-}
     volumes:
       - ./docker/config/identity-server/appsettings.Production.json:/app/appsettings.Production.json:ro
 

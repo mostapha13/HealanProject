@@ -1,0 +1,73 @@
+{
+  "version": "cashmarket-1.0",
+  "description": "50 sequential SQL-grounded questions for dbo.Cashmarket, from beginner colloquial wording to professional screening.",
+  "cases": [
+    {"id":"CM-001","cluster":"last-price","question":"آخرین قیمت فملی چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680 ریال"],"mustNotContain":["قیمت پایانی"],"maxAnswerChars":180},
+    {"id":"CM-002","cluster":"last-price","question":"ملی صنایع مس الان روی چه قیمتی معامله میشه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680"],"maxAnswerChars":220},
+    {"id":"CM-003","cluster":"last-price","question":"آخرین نرخ وبملت رو بگو","expectedType":"marketsymbol","expectedEntity":"وبملت","mustContain":["1,331 ریال"],"maxAnswerChars":180},
+    {"id":"CM-004","cluster":"last-price","question":"قیمت لحظه‌ای ایران خودرو چند است؟","expectedType":"marketsymbol","expectedEntity":"خودرو","mustContain":["584"],"maxAnswerChars":220},
+
+    {"id":"CM-005","cluster":"closing-price","question":"قیمت پایانی فملی را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,660 ریال"],"mustNotContain":["آخرین قیمت"],"maxAnswerChars":180},
+    {"id":"CM-006","cluster":"closing-price","question":"فملی چند بسته شد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,660"],"maxAnswerChars":220},
+    {"id":"CM-007","cluster":"closing-price","question":"پایانی شپنا؟","expectedType":"marketsymbol","expectedEntity":"شپنا","mustContain":["9,650 ریال"],"maxAnswerChars":180},
+
+    {"id":"CM-008","cluster":"trading-activity","question":"حجم معاملات فملی چقدر بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["583,222,314 سهم"],"maxAnswerChars":200},
+    {"id":"CM-009","cluster":"trading-activity","question":"امروز چندتا سهم خودرو دست به دست شده؟","expectedType":"marketsymbol","expectedEntity":"خودرو","mustContain":["7,553,067,214 سهم"],"maxAnswerChars":220},
+    {"id":"CM-010","cluster":"trading-activity","question":"ارزش دادوستد فملی رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["12,630,826,540,900 ریال"],"maxAnswerChars":220},
+    {"id":"CM-011","cluster":"trading-activity","question":"چند معامله روی فملی انجام شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["45,797"],"mustNotContain":["583,222,314"],"maxAnswerChars":180},
+
+    {"id":"CM-012","cluster":"valuation","question":"ارزش بازار فملی چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["31,219,200,000,000,000 ریال"],"maxAnswerChars":220},
+    {"id":"CM-013","cluster":"valuation","question":"نسبت قیمت به سود ملی مس چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E","15.35"],"maxAnswerChars":180},
+    {"id":"CM-014","cluster":"valuation","question":"سود هر سهم فملی را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS","1,411 ریال"],"maxAnswerChars":180},
+
+    {"id":"CM-015","cluster":"session-price","question":"قیمت اولین معامله فملی چند بود؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["22,060 ریال"],"maxAnswerChars":190},
+    {"id":"CM-016","cluster":"session-price","question":"فملی با چه قیمتی باز شد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["22,060"],"maxAnswerChars":220},
+    {"id":"CM-017","cluster":"session-price","question":"قیمت روز قبل فملی چقدر ثبت شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,430 ریال"],"maxAnswerChars":200},
+    {"id":"CM-018","cluster":"session-price","question":"مبنای فملی چند بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,430"],"maxAnswerChars":200},
+    {"id":"CM-019","cluster":"session-price","question":"سقف قیمت روز فملی چند بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["22,070 ریال"],"maxAnswerChars":190},
+    {"id":"CM-020","cluster":"session-price","question":"کمترین نرخ معامله فملی را بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["20,970 ریال"],"mustNotContain":["14,420"],"maxAnswerChars":190},
+    {"id":"CM-021","cluster":"session-price","question":"فملی امروز بین چه قیمت‌هایی معامله شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["20,970","22,070"],"maxAnswerChars":240},
+
+    {"id":"CM-022","cluster":"price-change","question":"تغییر آخرین قیمت فملی چند ریال بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["+250.00 ریال"],"maxAnswerChars":200},
+    {"id":"CM-023","cluster":"price-change","question":"فملی چند درصد بالا رفته؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["+1.17"],"maxAnswerChars":220},
+    {"id":"CM-024","cluster":"price-change","question":"تغییر قیمت پایانی فملی را به ریال بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["+230.00 ریال"],"mustNotContain":["+250.00"],"maxAnswerChars":210},
+    {"id":"CM-025","cluster":"price-change","question":"درصد تغییر پایانی فملی چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["+1.07"],"mustNotContain":["+1.17"],"maxAnswerChars":210},
+    {"id":"CM-026","cluster":"index-effect","question":"فملی چند واحد روی شاخص اثر گذاشته؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["+22,074.17 واحد"],"maxAnswerChars":210},
+
+    {"id":"CM-027","cluster":"classification","question":"فملی در کدام بازار معامله می‌شود؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بازار «بورس»","نرمال"],"maxAnswerChars":220},
+    {"id":"CM-028","cluster":"classification","question":"تابلوی معاملاتی ملی صنایع مس ایران چیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بازار اول - اصلی"],"maxAnswerChars":220},
+    {"id":"CM-029","cluster":"classification","question":"فملی در چه صنعت و زیرصنعتی قرار دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["فلزات اساسی","تولید فلزات گرانب‌های غیرآهن"],"maxAnswerChars":260},
+    {"id":"CM-030","cluster":"classification","question":"وضعیت معاملاتی نماد فملی چیست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجاز"],"maxAnswerChars":180},
+    {"id":"CM-031","cluster":"observation-time","question":"داده قیمت فملی مربوط به چه تاریخیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1405/05/20","2026/08/11"],"maxAnswerChars":260},
+    {"id":"CM-032","cluster":"summary","question":"یه گزارش کامل و خلاصه از وضعیت فعلی فملی بده","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680","21,660","583,222,314","12,630,826,540,900","15.35","1405/05/20"],"maxAnswerChars":800},
+
+    {"id":"CM-033","cluster":"combined","question":"آخرین قیمت، پایانی و قیمت روز قبل فملی را یکجا بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680","21,660","21,430"],"maxAnswerChars":300},
+    {"id":"CM-034","cluster":"combined","question":"حجم، ارزش و تعداد معاملات فملی چقدر بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["583,222,314 سهم","12,630,826,540,900 ریال","45,797"],"maxAnswerChars":320},
+
+    {"id":"CM-035","cluster":"derived","question":"میانگین وزنی قیمت معاملات فملی چقدر می‌شود؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,656.97 ریال"],"maxAnswerChars":230},
+    {"id":"CM-036","cluster":"derived","question":"متوسط ارزش هر معامله فملی را حساب کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["275,800,304 ریال"],"maxAnswerChars":240},
+    {"id":"CM-037","cluster":"derived","question":"به طور میانگین در هر معامله فملی چند سهم جابه‌جا شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["12,734.95 سهم"],"maxAnswerChars":260},
+    {"id":"CM-038","cluster":"derived","question":"فاصله سقف تا کف قیمت فملی چقدر بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1,100 ریال","20,970","22,070"],"maxAnswerChars":260},
+    {"id":"CM-039","cluster":"derived","question":"نسبت ارزش معاملات به ارزش بازار فملی را محاسبه کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["0.0405٪"],"mustNotContain":["12,630,826,540,900"],"maxAnswerChars":240},
+
+    {"id":"CM-040","cluster":"ranking","question":"پنج نماد با بیشترین حجم معاملات را بگو","expectedType":"structured_query","mustContain":["وبملت","خودرو","وتجارت","وبصادر","خساپا","حجم معاملات"],"maxAnswerChars":900},
+    {"id":"CM-041","cluster":"ranking","question":"بالاترین ارزش معاملات بازار متعلق به چه نمادهایی است؟","expectedType":"structured_query","mustContain":["فملی","وبملت","وغدیر","خودرو","پخش","ارزش معاملات"],"maxAnswerChars":1400},
+    {"id":"CM-042","cluster":"ranking","question":"سه سهمی که بیشترین تعداد دادوستد را داشته‌اند کدام‌اند؟","expectedType":"structured_query","mustContain":["پاریز","وبملت","خودرو","تعداد معاملات"],"maxAnswerChars":700},
+    {"id":"CM-043","cluster":"ranking","question":"پنج شرکت با بزرگترین ارزش بازار را فهرست کن","expectedType":"structured_query","mustContain":["فملی","شپنا","وپاسار","شبندر","وبملت","ارزش بازار"],"maxAnswerChars":1200},
+    {"id":"CM-044","cluster":"ranking","question":"پنج نماد با بیشترین اثر مثبت روی شاخص را بده","expectedType":"structured_query","mustContain":["فملی","شپنا","شبندر","وپاسار","شستا","اثر بر شاخص"],"maxAnswerChars":1000},
+    {"id":"CM-045","cluster":"ranking","question":"پنج نماد با بیشترین رشد آخرین قیمت کدام‌اند؟","expectedType":"structured_query","mustContain":["پخش","دسبحان","دسینا","تغییر آخرین قیمت"],"maxAnswerChars":1000},
+    {"id":"CM-046","cluster":"ranking","question":"پنج سهم با بیشترین افت قیمت را نشان بده","expectedType":"structured_query","mustContain":["واتی","-3.37٪","-3.00٪","تغییر آخرین قیمت"],"maxAnswerChars":1000},
+
+    {"id":"CM-047","cluster":"missing-source-field","question":"بهترین قیمت خرید فملی در Cashmarket چیست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین سفارش خرید","ثبت نشده"],"mustNotContain":["21,680"],"maxAnswerChars":230},
+    {"id":"CM-048","cluster":"missing-source-field","question":"حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین سفارش فروش","ثبت نشده"],"mustNotContain":["583,222,314"],"maxAnswerChars":250},
+
+    {"id":"CM-049","cluster":"screening","question":"نمادهایی که P/E کمتر از ۶ دارند را پیدا کن","expectedType":"structured_query","mustContain":["آردینه","5.93","آسیا","1.69","253 نماد منطبق"],"maxAnswerChars":1500},
+    {"id":"CM-050","cluster":"screening","question":"پنج نماد با ارزش معاملات بیشتر از ۳ همت را از بیشترین به کمترین بده","expectedType":"structured_query","mustContain":["فملی","وبملت","وغدیر","خودرو","پخش","ارزش معاملات"],"maxAnswerChars":1200}
+  ],
+  "globalMustNotContain": [
+    "داده قابل اتکایی برای پاسخ پیدا نشد",
+    "Unexpected token",
+    "not valid JSON",
+    "سرویس هوش مصنوعی موقتاً در دسترس نیست"
+  ]
+}

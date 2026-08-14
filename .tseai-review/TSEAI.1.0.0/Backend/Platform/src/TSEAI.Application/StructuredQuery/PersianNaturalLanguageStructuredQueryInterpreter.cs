@@ -19,13 +19,34 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
         AddCondition(q, conditions, rules, StructuredQueryMetric.EPS, ["eps", "ای پی اس", "ای‌پی‌اس"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.TradeVolume, ["حجم معاملات", "حجم"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.TradeValue, ["ارزش معاملات"], ref confidence);
-        AddCondition(q, conditions, rules, StructuredQueryMetric.TradeCount, ["تعداد معاملات"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TradeCount, ["تعداد معاملات", "تعداد دادوستد", "تعداد تراکنش"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.LastPricePercent, ["درصد آخرین قیمت", "درصد قیمت", "درصد تغییر"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.LastPrice, ["آخرین قیمت", "قیمت آخر"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.ClosingPrice, ["قیمت پایانی", "پایانی"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.MarketValue, ["ارزش بازار"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.FirstPrice, ["قیمت اولین معامله", "اولین قیمت", "قیمت آغازین", "قیمت بازگشایی"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.YesterdayPrice, ["قیمت روز قبل", "قیمت دیروز", "قیمت مبنا"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.HighPrice, ["بالاترین قیمت روز", "بیشترین قیمت روز", "سقف قیمت روز"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.LowPrice, ["کمترین قیمت روز", "پایین ترین قیمت روز", "کف قیمت روز"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.EffectOnIndex, ["اثر مثبت روی شاخص", "اثر منفی روی شاخص", "اثر مثبت بر شاخص", "اثر منفی بر شاخص", "اثر روی شاخص", "اثر بر شاخص", "تاثیر روی شاخص"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.IntradayRange, ["دامنه نوسان روز", "بازه قیمت روز", "فاصله سقف و کف"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.AverageTradePrice, ["میانگین قیمت معامله", "متوسط قیمت معامله"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.AverageTradeValue, ["میانگین ارزش هر معامله", "متوسط ارزش هر معامله"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.AverageTradeVolume, ["میانگین حجم هر معامله", "متوسط حجم هر معامله"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TurnoverRatio, ["نسبت گردش معاملات", "نسبت ارزش معاملات به ارزش بازار"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.BuyerPower, ["قدرت خریدار", "قدرت خرید حقیقی"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.OrderBookImbalance, ["عدم تعادل اردربوک", "عدم‌تعادل اردربوک", "orderbook imbalance"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.BestBidPrice, ["بهترین قیمت خرید", "قیمت سرخط خرید"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.BestBidVolume, ["حجم بهترین سفارش خرید", "حجم سرخط خرید", "حجم بهترین تقاضا"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.BestAskPrice, ["بهترین قیمت فروش", "قیمت سرخط فروش"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.BestAskVolume, ["حجم بهترین سفارش فروش", "حجم سرخط فروش", "حجم بهترین عرضه"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.SpreadPercent, ["درصد اختلاف مظنه", "درصد اسپرد"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.Spread, ["اختلاف مظنه", "اسپرد", "فاصله خرید و فروش"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TotalBidVolume, ["عمق خرید", "مجموع حجم خرید", "کل حجم خرید"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TotalAskVolume, ["عمق فروش", "مجموع حجم فروش", "کل حجم فروش"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TotalBidCount, ["مجموع تعداد سفارش خرید", "کل تعداد سفارش خرید"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.TotalAskCount, ["مجموع تعداد سفارش فروش", "کل تعداد سفارش فروش"], ref confidence);
+        AddCondition(q, conditions, rules, StructuredQueryMetric.DepthRatio, ["نسبت عمق خرید به فروش", "نسبت تقاضا به عرضه"], ref confidence);
         AddCondition(q, conditions, rules, StructuredQueryMetric.VolumeVsBaseVolume, ["نسبت حجم به حجم مبنا", "حجم نسبت به حجم مبنا"], ref confidence);
 
         var (sortBy, desc) = DetectSort(q, rules, ref confidence);
@@ -94,7 +115,10 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
     }
 
     private static bool IsMoneyMetric(StructuredQueryMetric metric) =>
-        metric is StructuredQueryMetric.TradeValue or StructuredQueryMetric.MarketValue or StructuredQueryMetric.LastPrice or StructuredQueryMetric.ClosingPrice;
+        metric is StructuredQueryMetric.TradeValue or StructuredQueryMetric.MarketValue or StructuredQueryMetric.LastPrice or StructuredQueryMetric.ClosingPrice
+            or StructuredQueryMetric.FirstPrice or StructuredQueryMetric.YesterdayPrice or StructuredQueryMetric.HighPrice or StructuredQueryMetric.LowPrice
+            or StructuredQueryMetric.AverageTradePrice or StructuredQueryMetric.AverageTradeValue or StructuredQueryMetric.BestBidPrice
+            or StructuredQueryMetric.BestAskPrice or StructuredQueryMetric.Spread;
 
     private static (StructuredQueryMetric? Metric, bool Desc) DetectSort(string q, List<string> rules, ref double confidence)
     {
@@ -102,13 +126,45 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
         bool asc = ContainsAny(q, "کمترین", "پایین ترین", "پایین‌ترین", "کوچکترین");
         if (!desc && !asc) return (null, true);
         StructuredQueryMetric? metric = null;
-        if (ContainsAny(q, "حجم معاملات", "حجم")) metric = StructuredQueryMetric.TradeVolume;
+        if (ContainsAny(q,"صف خرید")) metric=StructuredQueryMetric.BuyQueueVolume;
+        else if (ContainsAny(q,"صف فروش")) metric=StructuredQueryMetric.SellQueueVolume;
+        else if (ContainsAny(q,"حجم بهترین سفارش خرید","حجم سرخط خرید","حجم بهترین تقاضا")) metric=StructuredQueryMetric.BestBidVolume;
+        else if (ContainsAny(q,"تعداد سفارش بهترین خرید","تعداد سفارش سرخط خرید")) metric=StructuredQueryMetric.BestBidCount;
+        else if (ContainsAny(q,"حجم بهترین سفارش فروش","حجم سرخط فروش","حجم بهترین عرضه")) metric=StructuredQueryMetric.BestAskVolume;
+        else if (ContainsAny(q,"تعداد سفارش بهترین فروش","تعداد سفارش سرخط فروش")) metric=StructuredQueryMetric.BestAskCount;
+        else if (ContainsAny(q,"مجموع تعداد سفارش خرید","کل تعداد سفارش خرید")) metric=StructuredQueryMetric.TotalBidCount;
+        else if (ContainsAny(q,"مجموع تعداد سفارش فروش","کل تعداد سفارش فروش")) metric=StructuredQueryMetric.TotalAskCount;
+        else if (ContainsAny(q,"عمق خرید","مجموع حجم خرید","کل حجم خرید")) metric=StructuredQueryMetric.TotalBidVolume;
+        else if (ContainsAny(q,"عمق فروش","مجموع حجم فروش","کل حجم فروش")) metric=StructuredQueryMetric.TotalAskVolume;
+        else if (ContainsAny(q,"عدم تعادل","ایمبالانس","orderbook imbalance")) metric=StructuredQueryMetric.OrderBookImbalance;
+        else if (ContainsAny(q,"درصد اختلاف مظنه","درصد اسپرد","اسپرد درصدی")) metric=StructuredQueryMetric.SpreadPercent;
+        else if (ContainsAny(q,"اختلاف مظنه","اسپرد","فاصله خرید و فروش")) metric=StructuredQueryMetric.Spread;
+        else if (ContainsAny(q,"نسبت عمق خرید به فروش","نسبت تقاضا به عرضه")) metric=StructuredQueryMetric.DepthRatio;
+        else if (ContainsAny(q,"بهترین قیمت خرید","قیمت سرخط خرید")) metric=StructuredQueryMetric.BestBidPrice;
+        else if (ContainsAny(q,"بهترین قیمت فروش","قیمت سرخط فروش")) metric=StructuredQueryMetric.BestAskPrice;
+        else if (ContainsAny(q, "نسبت گردش معاملات", "نسبت ارزش معاملات به ارزش بازار")) metric = StructuredQueryMetric.TurnoverRatio;
+        else if (ContainsAny(q, "حجم معاملات", "حجم")) metric = StructuredQueryMetric.TradeVolume;
         else if (ContainsAny(q, "ارزش معاملات")) metric = StructuredQueryMetric.TradeValue;
-        else if (ContainsAny(q, "تعداد معاملات")) metric = StructuredQueryMetric.TradeCount;
+        else if (ContainsAny(q, "تعداد معاملات", "تعداد دادوستد", "تعداد تراکنش")) metric = StructuredQueryMetric.TradeCount;
         else if (ContainsAny(q, "ارزش بازار")) metric = StructuredQueryMetric.MarketValue;
+        else if (ContainsAny(q, "اثر مثبت روی شاخص", "اثر منفی روی شاخص", "اثر مثبت بر شاخص", "اثر منفی بر شاخص", "اثر روی شاخص", "اثر بر شاخص", "تاثیر روی شاخص")) metric = StructuredQueryMetric.EffectOnIndex;
+        else if (ContainsAny(q, "دامنه نوسان روز", "بازه قیمت روز", "فاصله سقف و کف")) metric = StructuredQueryMetric.IntradayRange;
+        else if (ContainsAny(q, "میانگین قیمت معامله", "متوسط قیمت معامله")) metric = StructuredQueryMetric.AverageTradePrice;
+        else if (ContainsAny(q, "میانگین ارزش هر معامله", "متوسط ارزش هر معامله")) metric = StructuredQueryMetric.AverageTradeValue;
+        else if (ContainsAny(q, "میانگین حجم هر معامله", "متوسط حجم هر معامله")) metric = StructuredQueryMetric.AverageTradeVolume;
+        else if (ContainsAny(q, "درصد تغییر", "رشد", "افت", "ریزش", "منفی ترین", "منفی‌ترین")) metric = StructuredQueryMetric.LastPricePercent;
+        else if (ContainsAny(q, "بالاترین قیمت روز", "بیشترین قیمت روز", "سقف قیمت روز")) metric = StructuredQueryMetric.HighPrice;
+        else if (ContainsAny(q, "کمترین قیمت روز", "پایین ترین قیمت روز", "پایین‌ترین قیمت روز", "کف قیمت روز")) metric = StructuredQueryMetric.LowPrice;
+        else if (ContainsAny(q, "قیمت اولین معامله", "اولین قیمت", "قیمت آغازین", "قیمت بازگشایی")) metric = StructuredQueryMetric.FirstPrice;
+        else if (ContainsAny(q, "قیمت روز قبل", "قیمت دیروز", "قیمت مبنا")) metric = StructuredQueryMetric.YesterdayPrice;
+        else if (ContainsAny(q, "قیمت پایانی", "پایانی")) metric = StructuredQueryMetric.ClosingPrice;
+        else if (ContainsAny(q, "آخرین قیمت", "قیمت آخر")) metric = StructuredQueryMetric.LastPrice;
         else if (ContainsAny(q, "p/e", "pe", "پی ای", "پی‌ای")) metric = StructuredQueryMetric.PE;
         else if (ContainsAny(q, "قدرت خریدار")) metric = StructuredQueryMetric.BuyerPower;
-        else if (ContainsAny(q, "درصد", "رشد", "افت")) metric = StructuredQueryMetric.LastPricePercent;
+        else if (ContainsAny(q, "درصد")) metric = StructuredQueryMetric.LastPricePercent;
+        if(metric==StructuredQueryMetric.EffectOnIndex && ContainsAny(q,"اثر منفی","تاثیر منفی","تأثیر منفی")) { desc=false; asc=true; }
+        if(metric==StructuredQueryMetric.LastPricePercent && ContainsAny(q,"بیشترین افت","بیشترین ریزش","منفی ترین","منفی‌ترین")) { desc=false; asc=true; }
+        if(metric==StructuredQueryMetric.OrderBookImbalance && ContainsAny(q,"منفی","فشار فروش","عرضه")) { desc=false; asc=true; }
         if (metric is not null) { rules.Add($"sort:{metric}:{(desc ? "desc" : "asc")}"); confidence += 0.16; }
         return (metric, desc || !asc);
     }
@@ -122,6 +178,12 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
             if (!ContainsAny(head, "اول", "برتر", "بیشترین", "کمترین", "تاپ", "top") && !ContainsAny(tail, "نماد", "سهم")) continue;
             if (int.TryParse(NormalizeDigits(m.Groups["n"].Value), out var n)) return n;
         }
+        var words=new Dictionary<string,int>(StringComparer.Ordinal)
+        {
+            ["یک"]=1,["دو"]=2,["سه"]=3,["چهار"]=4,["پنج"]=5,["شش"]=6,["هفت"]=7,["هشت"]=8,["نه"]=9,["ده"]=10
+        };
+        foreach(var pair in words)
+            if(Regex.IsMatch(q,$@"(?:^|\s){Regex.Escape(pair.Key)}\s+(?:نماد|سهم)")) return pair.Value;
         return null;
     }
 

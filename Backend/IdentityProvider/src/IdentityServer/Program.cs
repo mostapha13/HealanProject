@@ -1,4 +1,4 @@
-using IdentityServer.Domain;
+﻿using IdentityServer.Domain;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -45,6 +45,7 @@ namespace IdentityServer
 
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+                    await SemanticAIAccessSeed.SeedAsync(context, roleManager);
                     await context.SeedAdmin(userManager, roleManager);
 
                     try
@@ -56,10 +57,10 @@ namespace IdentityServer
                     catch (Exception accessEx)
                     {
                         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                        logger.LogError(accessEx, "Healan access seed failed — clinic users were still seeded.");
+                        logger.LogError(accessEx, "Healan access seed failed â€” clinic users were still seeded.");
                     }
 
-                    // بعد از AccessSystem — نقش‌های رضا/سارا/مریم فقط Doctor/Secretary/Accountant
+                    // Ø¨Ø¹Ø¯ Ø§Ø² AccessSystem â€” Ù†Ù‚Ø´â€ŒÙ‡Ø§ÛŒ Ø±Ø¶Ø§/Ø³Ø§Ø±Ø§/Ù…Ø±ÛŒÙ… ÙÙ‚Ø· Doctor/Secretary/Accountant
                     await HealanClinicUserSeed.SeedAsync(context, userManager, roleManager);
                 }
                 catch (Exception ex)

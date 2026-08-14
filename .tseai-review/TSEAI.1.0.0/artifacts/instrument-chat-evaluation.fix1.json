@@ -1,0 +1,205 @@
+{
+  "version": "instrument-1.0",
+  "generatedAtUtc": "2026-08-14T12:18:31.635087+00:00",
+  "total": 9,
+  "passed": 9,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 4015.8,
+  "p95LatencyMs": 8225.49,
+  "clusters": {
+    "allowed-price": {
+      "total": 1,
+      "passed": 1
+    },
+    "categories": {
+      "total": 2,
+      "passed": 2
+    },
+    "compound": {
+      "total": 1,
+      "passed": 1
+    },
+    "cross-table": {
+      "total": 2,
+      "passed": 2
+    },
+    "dates": {
+      "total": 1,
+      "passed": 1
+    },
+    "identity": {
+      "total": 1,
+      "passed": 1
+    },
+    "order-limits": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "INS-002",
+      "cluster": "identity",
+      "question": "اسم کامل سهم خودرو رو بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 5221.22,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "خودرو: نام کامل «ایران‌ خودرو» است.",
+      "error": null
+    },
+    {
+      "id": "INS-020",
+      "cluster": "allowed-price",
+      "question": "دامنه قیمت مجاز فملی در جدول Instrument چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3936.17,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند.",
+      "error": null
+    },
+    {
+      "id": "INS-021",
+      "cluster": "order-limits",
+      "question": "حداقل حجم هر سفارش فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7828.56,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: حداقل حجم هر سفارش 1 است.",
+      "error": null
+    },
+    {
+      "id": "INS-026",
+      "cluster": "dates",
+      "question": "زمان جمع‌آوری داده Instrument فملی چه موقع بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4015.8,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: زمان جمع‌آوری داده 1405/05/20 ساعت 11:13:13 است.",
+      "error": null
+    },
+    {
+      "id": "INS-028",
+      "cluster": "compound",
+      "question": "تعداد سهام، ارزش اسمی و حجم مبنای خودرو را خلاصه بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4023.42,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "خودرو: ارزش اسمی 1,000 ریال، تعداد سهام منتشره 2,563,746,068,000 سهم، حجم مبنا 1 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-044",
+      "cluster": "categories",
+      "question": "تعداد اوراق بدهی فعال در Instrument چندتاست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 8225.49,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 776 ابزار معتبر از گروه debt (اوراق بدهی) ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-045",
+      "cluster": "categories",
+      "question": "چه تعداد قرارداد آتی معتبر ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3913.89,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 8 ابزار معتبر از گروه future (قرارداد آتی) ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-048",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument به Cashmarket وصل است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3916.83,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "از ابزارهای معتبر Instrument، 516 ابزار با InstrumentID یکسان به Cashmarket متصل‌اند.",
+      "error": null
+    },
+    {
+      "id": "INS-049",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument در OrderBookCurrent رکورد دارند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3952.27,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "از ابزارهای معتبر Instrument، 513 ابزار با InstrumentID یکسان در OrderBookCurrent رکورد دارند.",
+      "error": null
+    }
+  ],
+  "failures": []
+}

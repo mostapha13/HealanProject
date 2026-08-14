@@ -1,0 +1,66 @@
+{
+  "version": "clienttype-1.0",
+  "description": "50 SQL-grounded Persian questions for dbo.ClientType, including raw individual/legal facts, derived analytics, timestamps, schema meaning, table quality, rankings, comparisons, temporal safety and cross-table composition.",
+  "cases": [
+    {"id":"CT-001","cluster":"raw-volume","question":"حجم خرید حقیقی فملی چقدر است؟","expectedType":"structured_reference","mustContain":["فملی","حجم خرید حقیقی 366,725,759 سهم"],"mustNotContain":["حجم معاملات 583,222,314","ریال"],"maxAnswerChars":260},
+    {"id":"CT-002","cluster":"raw-volume","question":"حقوقی‌ها چند سهم فملی خریده‌اند؟","expectedType":"structured_reference","mustContain":["فملی","حجم خرید حقوقی 31,502,288 سهم"],"mustNotContain":["ارزش معاملات"],"maxAnswerChars":280},
+    {"id":"CT-003","cluster":"raw-volume","question":"حجم فروش افراد حقیقی در فملی رو بگو","expectedType":"structured_reference","mustContain":["فملی","حجم فروش حقیقی 20,264,230 سهم"],"maxAnswerChars":280},
+    {"id":"CT-004","cluster":"raw-volume","question":"فروش حقوقی فملی چه حجمی بوده؟","expectedType":"structured_reference","mustContain":["فملی","حجم فروش حقوقی 377,963,817 سهم"],"maxAnswerChars":280},
+
+    {"id":"CT-005","cluster":"participant-count","question":"تعداد خریداران حقیقی فملی چند نفر بوده؟","expectedType":"structured_reference","mustContain":["تعداد خریداران حقیقی 1,565 کد معاملاتی"],"mustNotContain":["تعداد معاملات"],"maxAnswerChars":300},
+    {"id":"CT-006","cluster":"participant-count","question":"تعداد خریداران حقوقی فملی چندتاست؟","expectedType":"structured_reference","mustContain":["تعداد خریداران حقوقی 61 کد معاملاتی"],"maxAnswerChars":280},
+    {"id":"CT-007","cluster":"participant-count","question":"چند فروشنده حقیقی روی فملی بوده؟","expectedType":"structured_reference","mustContain":["تعداد فروشندگان حقیقی 1,165 کد معاملاتی"],"maxAnswerChars":300},
+    {"id":"CT-008","cluster":"participant-count","question":"Sell_CountN فملی چنده؟","expectedType":"structured_reference","mustContain":["تعداد فروشندگان حقوقی 9 کد معاملاتی"],"maxAnswerChars":280},
+
+    {"id":"CT-009","cluster":"totals","question":"مجموع حجم خرید فملی در ClientType چقدر است؟","expectedType":"structured_reference","mustContain":["مجموع حجم خرید 398,228,047 سهم"],"maxAnswerChars":300},
+    {"id":"CT-010","cluster":"totals","question":"کل حجم فروش حقیقی و حقوقی فملی روی هم چند سهم است؟","expectedType":"structured_reference","mustContain":["مجموع حجم فروش 398,228,047 سهم"],"maxAnswerChars":320},
+    {"id":"CT-011","cluster":"net-flow","question":"خالص خرید حقیقی فملی را بگو","expectedType":"structured_reference","mustContain":["خالص حجم حقیقی +346,461,529 سهم"],"mustNotContain":["حجم خرید حقیقی 366,725,759","ریال"],"maxAnswerChars":300},
+    {"id":"CT-012","cluster":"net-flow","question":"خالص حجم حقوقی فملی چقدر شده؟","expectedType":"structured_reference","mustContain":["خالص حجم حقوقی -346,461,529 سهم"],"mustNotContain":["ورود پول ریالی"],"maxAnswerChars":300},
+
+    {"id":"CT-013","cluster":"per-capita","question":"سرانه خرید حقیقی فملی چقدره؟","expectedType":"structured_reference","mustContain":["سرانه خرید حقیقی 234,329.56 سهم"],"mustNotContain":["حجم خرید حقیقی 366,725,759"],"maxAnswerChars":300},
+    {"id":"CT-014","cluster":"per-capita","question":"میانگین فروش هر حقیقی فملی چند سهم است؟","expectedType":"structured_reference","mustContain":["سرانه فروش حقیقی 17,394.19 سهم"],"maxAnswerChars":300},
+    {"id":"CT-015","cluster":"buyer-power","question":"قدرت خریدار فملی چنده؟","expectedType":"structured_reference","mustContain":["قدرت خریدار حقیقی 13.4717"],"mustNotContain":["ویرایش فیلتر"],"maxAnswerChars":260},
+    {"id":"CT-016","cluster":"buyer-power","question":"وضعیت قدرت خریدار حقیقی فملی رو تفسیر کن","expectedType":"structured_reference","mustContain":["سمت خرید حقیقی قوی‌تر"],"mustNotContain":["توصیه خرید"],"maxAnswerChars":380},
+
+    {"id":"CT-017","cluster":"share-percent","question":"درصد خرید حقیقی فملی از کل خرید چقدر است؟","expectedType":"structured_reference","mustContain":["سهم حقیقی از حجم خرید 92.09٪"],"maxAnswerChars":300},
+    {"id":"CT-018","cluster":"share-percent","question":"سهم حقوقی از خرید فملی چند درصده؟","expectedType":"structured_reference","mustContain":["سهم حقوقی از حجم خرید 7.91٪"],"maxAnswerChars":300},
+    {"id":"CT-019","cluster":"share-percent","question":"چه درصدی از فروش فملی متعلق به حقیقی‌هاست؟","expectedType":"structured_reference","mustContain":["سهم حقیقی از حجم فروش 5.09٪"],"maxAnswerChars":300},
+    {"id":"CT-020","cluster":"share-percent","question":"درصد فروش حقوقی فملی رو حساب کن","expectedType":"structured_reference","mustContain":["سهم حقوقی از حجم فروش 94.91٪"],"maxAnswerChars":300},
+
+    {"id":"CT-021","cluster":"full","question":"اطلاعات حقیقی و حقوقی فملی را کامل بگو","expectedType":"structured_reference","mustContain":["1,565 کد معاملاتی","61 کد معاملاتی","366,725,759 سهم","377,963,817 سهم","13.4717","1405/05/11","1405/05/20"],"mustNotContain":["2026/08/"],"maxAnswerChars":1200},
+    {"id":"CT-022","cluster":"metadata","question":"ClientType_counter فملی چند است؟","expectedType":"structured_reference","mustContain":["شمارنده منبع ClientType برابر 2,638,624","تعداد معامله نیست"],"maxAnswerChars":340},
+    {"id":"CT-023","cluster":"metadata","question":"زمان Snapshot منبع ClientType فملی چه موقع است؟","expectedType":"structured_reference","mustContain":["1405/05/11","12:58:46"],"mustNotContain":["2026/08/02"],"maxAnswerChars":300},
+    {"id":"CT-024","cluster":"metadata","question":"زمان جمع‌آوری ClientType فملی در SQL را بگو","expectedType":"structured_reference","mustContain":["1405/05/20","13:28:05"],"mustNotContain":["2026/08/11"],"maxAnswerChars":320},
+    {"id":"CT-025","cluster":"schema","question":"فرق creationTime و SourceCollectedAt در ClientType چیست؟","expectedType":"structured_reference","mustContain":["creationTime زمان Snapshot","SourceCollectedAt زمان دریافت و ثبت رکورد در SQL"],"maxAnswerChars":440},
+
+    {"id":"CT-026","cluster":"schema","question":"Buy_CountI یعنی چه؟","expectedType":"structured_reference","mustContain":["تعداد کدهای خریدار حقیقی","نه تعداد معاملات"],"maxAnswerChars":300},
+    {"id":"CT-027","cluster":"schema","question":"ستون Buy_I_Volume چه مفهومی دارد؟","expectedType":"structured_reference","mustContain":["حجم خرید حقیقی","سهم/واحد","نه ریال"],"maxAnswerChars":320},
+    {"id":"CT-028","cluster":"schema","question":"فیلد ClientType_counter چیست؟","expectedType":"structured_reference","mustContain":["شمارنده/نسخه منبع","تعداد معامله نیست"],"maxAnswerChars":300},
+    {"id":"CT-029","cluster":"money-safety","question":"ورود پول حقیقی فملی چقدر بوده؟","expectedType":"structured_reference","mustContain":["ارزش ریالی خرید و فروش حقیقی در ClientType وجود ندارد","خالص ورود پول ریالی قابل محاسبه نیست","+346,461,529 سهم"],"mustNotContain":["است است"],"maxAnswerChars":460},
+
+    {"id":"CT-030","cluster":"comparison","question":"قدرت خریدار فملی را با خودرو مقایسه کن","expectedType":"structured_reference","mustContain":["فملی: قدرت خریدار حقیقی 13.4717","خودرو: قدرت خریدار حقیقی 1.1593"],"maxAnswerChars":440},
+    {"id":"CT-031","cluster":"comparison","question":"در فملی حقیقی‌ها بیشتر خریده‌اند یا حقوقی‌ها؟","expectedType":"structured_reference","mustContain":["حجم خرید حقیقی 366,725,759 سهم","حجم خرید حقوقی 31,502,288 سهم"],"maxAnswerChars":380},
+    {"id":"CT-032","cluster":"cross-table","question":"قیمت پایانی و قدرت خریدار فملی را باهم بگو","expectedType":"structured_reference","mustContain":["قدرت خریدار حقیقی 13.4717","قیمت پایانی 21,660 ریال","زمان Snapshot بازار و ClientType یکسان نیست"],"maxAnswerChars":520},
+    {"id":"CT-033","cluster":"temporal-safety","question":"قدرت خریدار فملی در 10 تیر 1405 چند بوده؟","expectedType":"structured_reference","mustContain":["فقط یک Snapshot جاری دارد","تاریخچه روزانه","پاسخ قابل اتکا"],"maxAnswerChars":440},
+    {"id":"CT-034","cluster":"entity-safety","question":"حجم خرید حقیقی نماد خیالی‌تست چقدر است؟","expectedType":"structured_reference","mustContain":["در داده‌های مرجع ClientType پیدا نشد","نماد دقیق‌تری"],"mustNotContain":["فملی"],"maxAnswerChars":380},
+
+    {"id":"CT-035","cluster":"statistics","question":"جدول ClientType چند رکورد دارد؟","expectedType":"structured_reference","mustContain":["1,880 رکورد","1,880 InsCode متمایز","1405/05/11","1405/05/20"],"mustNotContain":["2026/08/"],"maxAnswerChars":520},
+    {"id":"CT-036","cluster":"statistics","question":"در ClientType تعداد InsCode متمایز چندتاست؟","expectedType":"structured_reference","mustContain":["1,880 InsCode متمایز"],"maxAnswerChars":520},
+    {"id":"CT-037","cluster":"coverage","question":"پوشش ClientType در Instrument چقدر است؟","expectedType":"structured_reference","mustContain":["1,880 رکورد","1,729 رکورد به Instrument متصل","151 رکورد فاقد تطبیق"],"maxAnswerChars":400},
+    {"id":"CT-038","cluster":"coverage","question":"چند رکورد یتیم ClientType بدون Instrument داریم؟","expectedType":"structured_reference","mustContain":["151 رکورد","هیچ InsCode در Instrument متصل نمی‌شود"],"maxAnswerChars":340},
+    {"id":"CT-039","cluster":"coverage","question":"پوشش Cashmarket برای ClientType چند رکورد است؟","expectedType":"structured_reference","mustContain":["516 رکورد","زمان Snapshot دو جدول باید جداگانه بررسی شود"],"maxAnswerChars":420},
+
+    {"id":"CT-040","cluster":"data-quality","question":"در ClientType چند رکورد مقدار منفی دارد؟","expectedType":"structured_reference","mustContain":["0 رکورد دارای مقدار منفی"],"maxAnswerChars":280},
+    {"id":"CT-041","cluster":"data-quality","question":"آیا مجموع خرید و فروش در ClientType نامتوازن است؟","expectedType":"structured_reference","mustContain":["0 رکورد","مجموع حجم خریدی نابرابر با مجموع حجم فروش"],"maxAnswerChars":320},
+    {"id":"CT-042","cluster":"data-quality","question":"کیفیت داده جدول ClientType و تعدادهای صفر را بگو","expectedType":"structured_reference","mustContain":["رکورد منفی 0","رکورد نامتوازن 0","خریدار حقیقی صفر 173","خریدار حقوقی صفر 762","فروشنده حقیقی صفر 198","فروشنده حقوقی صفر 594"],"maxAnswerChars":520},
+
+    {"id":"CT-043","cluster":"ranking","question":"نمادهای دارای بیشترین خالص خرید حقیقی کدام‌اند؟","expectedType":"structured_reference","mustContain":["وتجارت3","1,823,000,000 سهم","وتجارت","1,483,330,037 سهم","خودرو","658,564,053 سهم"],"maxAnswerChars":1100},
+    {"id":"CT-044","cluster":"ranking","question":"نمادهای با بالاترین قدرت خریدار حقیقی را لیست کن","expectedType":"structured_reference","mustContain":["ومعادن3","1,750.4581","آستانه حداقل حجم یا تعداد مشارکت‌کننده"],"maxAnswerChars":1300},
+    {"id":"CT-045","cluster":"ranking","question":"5 نماد با بیشترین حجم خرید حقیقی را بگو","expectedType":"structured_reference","mustContain":["خودرو","6,373,916,772 سهم","وتجارت","3,587,925,244 سهم","خساپا","2,759,068,013 سهم"],"maxAnswerChars":800},
+    {"id":"CT-046","cluster":"ranking","question":"3 نماد با بیشترین حجم خرید حقوقی کدام‌اند؟","expectedType":"structured_reference","mustContain":["کارین2","2,160,242,971 سهم","خودرو","786,457,010 سهم","پترول2","735,000,000 سهم"],"maxAnswerChars":650},
+    {"id":"CT-047","cluster":"ranking","question":"3 نماد با بالاترین حجم فروش حقیقی را بده","expectedType":"structured_reference","mustContain":["خودرو","5,715,352,719 سهم","خساپا","2,189,946,477 سهم","وتجارت","2,104,595,207 سهم"],"maxAnswerChars":650},
+    {"id":"CT-048","cluster":"ranking","question":"3 نماد با بیشترین سرانه خرید حقیقی را رتبه‌بندی کن","expectedType":"structured_reference","mustContain":["ومدیر2","30,000,000.00 سهم","کرازیح","9,186,469.61 سهم","آستانه حداقل حجم یا تعداد مشارکت‌کننده"],"maxAnswerChars":760},
+    {"id":"CT-049","cluster":"ranking","question":"3 نماد با بیشترین تعداد خریدار حقیقی را نشان بده","expectedType":"structured_reference","mustContain":["عیار","14,065 کد معاملاتی","فزر","9,822 کد معاملاتی","سینرژی","4,569 کد معاملاتی"],"maxAnswerChars":680},
+    {"id":"CT-050","cluster":"variant-symbol","question":"نسبت قدرت خریدار سهم خساپا الان چقدره؟","expectedType":"structured_reference","mustContain":["خساپا","قدرت خریدار حقیقی 1.2191"],"mustNotContain":["ویرایش فیلتر"],"maxAnswerChars":300}
+  ]
+}

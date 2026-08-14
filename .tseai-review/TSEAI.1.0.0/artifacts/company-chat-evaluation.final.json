@@ -1,0 +1,925 @@
+{
+  "version": "company-1.0",
+  "generatedAtUtc": "2026-08-14T14:32:32.711106+00:00",
+  "total": 50,
+  "passed": 50,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 3927.42,
+  "p95LatencyMs": 4133.54,
+  "clusters": {
+    "identity": {
+      "total": 2,
+      "passed": 2
+    },
+    "contact": {
+      "total": 6,
+      "passed": 6
+    },
+    "hall": {
+      "total": 3,
+      "passed": 3
+    },
+    "ipo": {
+      "total": 3,
+      "passed": 3
+    },
+    "ceo-safety": {
+      "total": 2,
+      "passed": 2
+    },
+    "metadata": {
+      "total": 3,
+      "passed": 3
+    },
+    "full": {
+      "total": 1,
+      "passed": 1
+    },
+    "comparison": {
+      "total": 1,
+      "passed": 1
+    },
+    "statistics": {
+      "total": 6,
+      "passed": 6
+    },
+    "quality": {
+      "total": 7,
+      "passed": 7
+    },
+    "website-coverage": {
+      "total": 1,
+      "passed": 1
+    },
+    "hall-aggregate": {
+      "total": 5,
+      "passed": 5
+    },
+    "ipo-aggregate": {
+      "total": 4,
+      "passed": 4
+    },
+    "schema": {
+      "total": 5,
+      "passed": 5
+    },
+    "strict-safety": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CO-001",
+      "cluster": "identity",
+      "question": "نام شرکت مربوط به نماد فملی چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ملی صنایع مس ایران",
+        "نماد فملی"
+      ],
+      "mustNotContain": [
+        "قیمت پایانی"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است",
+      "actualType": "structured_reference",
+      "latencyMs": 5099.32
+    },
+    {
+      "id": "CO-002",
+      "cluster": "identity",
+      "question": "نماد بورسی شرکت ملی صنایع مس ایران چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "نماد بورسی فملی"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): نماد بورسی فملی است",
+      "actualType": "structured_reference",
+      "latencyMs": 7389.71
+    },
+    {
+      "id": "CO-003",
+      "cluster": "contact",
+      "question": "شماره تلفن فملی چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "02188724410"
+      ],
+      "mustNotContain": [
+        "حجم معاملات"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): تلفن ثبت‌شده 02188724410 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3968.67
+    },
+    {
+      "id": "CO-004",
+      "cluster": "contact",
+      "question": "شماره تماس شرکت ایران خودرو را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "02166947723-6"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "ایران خودرو (نماد خودرو): تلفن ثبت‌شده 02166947723-6 است",
+      "actualType": "structured_reference",
+      "latencyMs": 4133.54
+    },
+    {
+      "id": "CO-005",
+      "cluster": "contact",
+      "question": "تلفن خساپا چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "02144904290"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "شرکت ایرانی تولید اتومبیل (سایپا) (نماد خساپا): تلفن ثبت‌شده 02144904290 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3967.56
+    },
+    {
+      "id": "CO-006",
+      "cluster": "contact",
+      "question": "وب‌سایت رسمی فولاد مبارکه چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "www.mobarakeh-steel.ir"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فولاد مبارکه اصفهان (نماد فولاد): وب‌سایت ثبت‌شده www.mobarakeh-steel.ir است",
+      "actualType": "structured_reference",
+      "latencyMs": 4034.47
+    },
+    {
+      "id": "CO-007",
+      "cluster": "contact",
+      "question": "سایت شرکت ملی صنایع مس ایران را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وب‌سایتی در Company ثبت نشده"
+      ],
+      "mustNotContain": [
+        "حدس"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): وب‌سایتی در Company ثبت نشده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4036.08
+    },
+    {
+      "id": "CO-008",
+      "cluster": "contact",
+      "question": "آدرس سایت دانش بنیان پویا نیرو چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "www.pooyapower.com"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "دانش‌بنیان پویا نیرو: وب‌سایت ثبت‌شده www.pooyapower.com است",
+      "actualType": "structured_reference",
+      "latencyMs": 4076.32
+    },
+    {
+      "id": "CO-009",
+      "cluster": "hall",
+      "question": "فملی در کدام تالار منطقه‌ای ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تالار کرمان"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): در Company به تالار کرمان منتسب است",
+      "actualType": "structured_reference",
+      "latencyMs": 3934.02
+    },
+    {
+      "id": "CO-010",
+      "cluster": "hall",
+      "question": "تالار شرکت فولاد مبارکه کجاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تالار اصفهان"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فولاد مبارکه اصفهان (نماد فولاد): در Company به تالار اصفهان منتسب است",
+      "actualType": "structured_reference",
+      "latencyMs": 4018.39
+    },
+    {
+      "id": "CO-011",
+      "cluster": "hall",
+      "question": "استان شرکت ایران خودرو در Company چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تالار تهران"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ایران خودرو (نماد خودرو): در Company به تالار تهران منتسب است",
+      "actualType": "structured_reference",
+      "latencyMs": 4034.95
+    },
+    {
+      "id": "CO-012",
+      "cluster": "ipo",
+      "question": "تاریخ عرضه اولیه فملی چه روزی بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1385/11/15"
+      ],
+      "mustNotContain": [
+        "2007/02/04"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): تاریخ عرضه اولیه ثبت‌شده 1385/11/15 است",
+      "actualType": "structured_reference",
+      "latencyMs": 4245.29
+    },
+    {
+      "id": "CO-013",
+      "cluster": "ipo",
+      "question": "فولاد مبارکه چه تاریخی وارد بورس شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1385/12/20"
+      ],
+      "mustNotContain": [
+        "2007"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فولاد مبارکه اصفهان (نماد فولاد): تاریخ عرضه اولیه ثبت‌شده 1385/12/20 است",
+      "actualType": "structured_reference",
+      "latencyMs": 4034.24
+    },
+    {
+      "id": "CO-014",
+      "cluster": "ipo",
+      "question": "Ipo_Date خودرو چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1371/12/01"
+      ],
+      "mustNotContain": [
+        "1993"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ایران خودرو (نماد خودرو): تاریخ عرضه اولیه ثبت‌شده 1371/12/01 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3997.82
+    },
+    {
+      "id": "CO-015",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "نام مدیرعامل در ستون Ceo جدول Company ثبت نشده"
+      ],
+      "mustNotContain": [
+        "محمود گودرزی"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام مدیرعامل در ستون Ceo جدول Company ثبت نشده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4000.31
+    },
+    {
+      "id": "CO-016",
+      "cluster": "ceo-safety",
+      "question": "CEO فولاد مبارکه چه کسی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "نام مدیرعامل در ستون Ceo جدول Company ثبت نشده"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "فولاد مبارکه اصفهان (نماد فولاد): نام مدیرعامل در ستون Ceo جدول Company ثبت نشده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4048.9
+    },
+    {
+      "id": "CO-017",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری رکورد Company فملی چه موقع بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "14:34:17"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): داده در 1405/05/20 ساعت 14:34:17 جمع‌آوری شده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4072.88
+    },
+    {
+      "id": "CO-018",
+      "cluster": "metadata",
+      "question": "Company ID شرکت ملی صنایع مس ایران چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "61ca0d96-9cd4-4f4e-8a34-c5aa38b75938"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): شناسه رکورد Company برابر 61ca0d96-9cd4-4f4e-8a34-c5aa38b75938 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3994.85
+    },
+    {
+      "id": "CO-019",
+      "cluster": "metadata",
+      "question": "شناسه منبع Instrument فملی در Company را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1974ebcc-8bd1-4cea-a372-39715d7211b3"
+      ],
+      "maxAnswerChars": 360,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): شناسه منبع Instrument در Company برابر 1974ebcc-8bd1-4cea-a372-39715d7211b3 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3955.38
+    },
+    {
+      "id": "CO-020",
+      "cluster": "full",
+      "question": "اطلاعات کامل Company فملی را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ملی صنایع مس ایران",
+        "نماد فملی",
+        "تالار کرمان",
+        "02188724410",
+        "1385/11/15",
+        "وب‌سایتی در Company ثبت نشده",
+        "مدیرعامل در ستون Ceo"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 1000,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است؛ نماد بورسی فملی است؛ در Company به تالار کرمان منتسب است؛ وب‌سایتی در Company ثبت نشده است؛ نام مدیرعامل در ستون Ceo جدول Company ثبت نشده است؛ تلفن ثبت‌شده 02188724410 است؛ تاریخ عرضه اولیه ثبت‌شده 1385/11/15 است؛ داده در 1405/05/20 ساعت 14:34:17 جمع‌آوری شده است؛ شناسه رکورد Company برابر 61ca0d96-9cd4-4f4e-8a34-c5aa38b75938 است؛ شناسه منبع Instrument در Company برابر 1974ebcc-8bd1-4cea-a372-39715d7211b3 است",
+      "actualType": "structured_reference",
+      "latencyMs": 3961.51
+    },
+    {
+      "id": "CO-021",
+      "cluster": "comparison",
+      "question": "تاریخ عرضه اولیه فملی را با فولاد مقایسه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1385/11/15",
+        "1385/12/20",
+        "ملی صنایع مس ایران زودتر عرضه شده"
+      ],
+      "maxAnswerChars": 460,
+      "passed": true,
+      "issues": [],
+      "answer": "تاریخ عرضه اولیه ثبت‌شده ملی صنایع مس ایران، 1385/11/15 و فولاد مبارکه اصفهان، 1385/12/20 است؛ ملی صنایع مس ایران زودتر عرضه شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4041.26
+    },
+    {
+      "id": "CO-022",
+      "cluster": "statistics",
+      "question": "جدول Company چند رکورد دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "403 رکورد",
+        "388 عنوان غیرخالی متمایز",
+        "386 شناسه منبع Instrument",
+        "31 تالار متمایز"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3911.95
+    },
+    {
+      "id": "CO-023",
+      "cluster": "statistics",
+      "question": "در Company چند عنوان شرکت متمایز داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "388 عنوان غیرخالی متمایز"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3896.42
+    },
+    {
+      "id": "CO-024",
+      "cluster": "statistics",
+      "question": "تعداد InstrumentId متمایز جدول Company چندتاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "386 شناسه منبع Instrument"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3902.91
+    },
+    {
+      "id": "CO-025",
+      "cluster": "statistics",
+      "question": "Company چند تالار متمایز دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "31 تالار متمایز"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3892.72
+    },
+    {
+      "id": "CO-026",
+      "cluster": "statistics",
+      "question": "بازه تاریخ عرضه اولیه در کل جدول Company چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1346/11/01",
+        "1403/10/24"
+      ],
+      "mustNotContain": [
+        "1968",
+        "2025"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3891.4
+    },
+    {
+      "id": "CO-027",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل Company را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "14:34:17"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3898.86
+    },
+    {
+      "id": "CO-028",
+      "cluster": "quality",
+      "question": "چند رکورد Company عنوان خالی دارند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "13 عنوان خالی"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4012.79
+    },
+    {
+      "id": "CO-029",
+      "cluster": "quality",
+      "question": "چند شرکت در Company وب‌سایت معتبر ندارند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "315 رکورد فاقد وب‌سایت معتبر"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "از 403 رکورد Company، 88 رکورد وب‌سایت قابل استفاده دارند و 315 رکورد فاقد وب‌سایت معتبرند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3914.02
+    },
+    {
+      "id": "CO-030",
+      "cluster": "quality",
+      "question": "مدیرعامل چند شرکت در جدول Company ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "هر 403 رکورد",
+        "خالی است",
+        "هیچ شرکت"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "ستون Ceo در هر 403 رکورد جدول Company خالی است؛ بنابراین مدیرعامل هیچ شرکت از این جدول قابل تأیید نیست.",
+      "actualType": "structured_reference",
+      "latencyMs": 3970.08
+    },
+    {
+      "id": "CO-031",
+      "cluster": "quality",
+      "question": "در Company چند شماره تلفن خالی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2 تلفن خالی"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3912.59
+    },
+    {
+      "id": "CO-032",
+      "cluster": "quality",
+      "question": "چند گروه InstrumentId تکراری در Company وجود دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "17 گروه InstrumentId"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3919.64
+    },
+    {
+      "id": "CO-033",
+      "cluster": "quality",
+      "question": "تعداد عنوان‌های تکراری Company چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2 گروه عنوان تکراری"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3875.93
+    },
+    {
+      "id": "CO-034",
+      "cluster": "quality",
+      "question": "Company رکوردی با Talar_Id یتیم دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعداد Talar_Id یتیم 0"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3924.66
+    },
+    {
+      "id": "CO-035",
+      "cluster": "website-coverage",
+      "question": "چند شرکت وب‌سایت قابل استفاده دارند و چندتا ندارند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "88 رکورد وب‌سایت قابل استفاده",
+        "315 رکورد فاقد وب‌سایت معتبر"
+      ],
+      "maxAnswerChars": 360,
+      "passed": true,
+      "issues": [],
+      "answer": "از 403 رکورد Company، 88 رکورد وب‌سایت قابل استفاده دارند و 315 رکورد فاقد وب‌سایت معتبرند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3898.07
+    },
+    {
+      "id": "CO-036",
+      "cluster": "hall-aggregate",
+      "question": "پنج مورد اول توزیع شرکت‌ها به تفکیک تالار را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تهران: 176 شرکت",
+        "اصفهان: 28 شرکت",
+        "آذربایجان شرقی (تبریز): 21 شرکت",
+        "فارس (شیراز): 17 شرکت",
+        "خراسان رضوی (مشهد): 15 شرکت"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "تالارهای دارای بیشترین رکورد Company:\n1. تهران: 176 شرکت\n2. اصفهان: 28 شرکت\n3. آذربایجان شرقی (تبریز): 21 شرکت\n4. فارس (شیراز): 17 شرکت\n5. خراسان رضوی (مشهد): 15 شرکت",
+      "actualType": "structured_reference",
+      "latencyMs": 3889.85
+    },
+    {
+      "id": "CO-037",
+      "cluster": "hall-aggregate",
+      "question": "چند شرکت Company به تالار تهران منتسب‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "176 شرکت",
+        "تالار تهران"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 176 شرکت به تالار تهران منتسب‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3922.94
+    },
+    {
+      "id": "CO-038",
+      "cluster": "hall-aggregate",
+      "question": "تعداد شرکت‌های تالار خوزستان چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "11 شرکت",
+        "تالار خوزستان (اهواز)"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 11 شرکت به تالار خوزستان (اهواز) منتسب‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3868.35
+    },
+    {
+      "id": "CO-039",
+      "cluster": "hall-aggregate",
+      "question": "پنج شرکت اول تالار کرمان را فقط نام ببر",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سرمایه‌گذاری استان کرمان",
+        "صنایع سیمان کرمان",
+        "صنایع مس شهید باهنر",
+        "فولاد سیرجان ایرانیان",
+        "گروه صنعتی بارز"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "5 شرکت اول از 7 رکورد منتسب به تالار کرمان:\n1. سرمایه‌گذاری استان کرمان\n2. صنایع سیمان کرمان\n3. صنایع مس شهید باهنر\n4. فولاد سیرجان ایرانیان\n5. گروه صنعتی بارز",
+      "actualType": "structured_reference",
+      "latencyMs": 3930.19
+    },
+    {
+      "id": "CO-040",
+      "cluster": "hall-aggregate",
+      "question": "سه شرکت اول منتسب به تالار اهواز را فهرست کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "پتروشیمی بوعلی سینا",
+        "پتروشیمی غدیر",
+        "پتروشیمی فن آوران"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "3 شرکت اول از 11 رکورد منتسب به تالار خوزستان (اهواز):\n1. پتروشیمی بوعلی سینا\n2. پتروشیمی غدیر\n3. پتروشیمی فن آوران",
+      "actualType": "structured_reference",
+      "latencyMs": 3879.07
+    },
+    {
+      "id": "CO-041",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با جدیدترین تاریخ عرضه اولیه در Company کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فرآورده‌های دامی ولبنی دالاهو",
+        "1403/10/24",
+        "فولاد سیرجان ایرانیان",
+        "1403/10/12",
+        "دانش‌بنیان پویا نیرو",
+        "1403/09/28"
+      ],
+      "mustNotContain": [
+        "2025"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. فرآورده‌های دامی ولبنی دالاهو — 1403/10/24\n2. فولاد سیرجان ایرانیان — 1403/10/12\n3. دانش‌بنیان پویا نیرو — 1403/09/28",
+      "actualType": "structured_reference",
+      "latencyMs": 3895.01
+    },
+    {
+      "id": "CO-042",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با قدیمی‌ترین عرضه اولیه ثبت‌شده را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "نفت پارس",
+        "1346/11/01",
+        "سیمان تهران",
+        "1347/09/01",
+        "قند نیشابور",
+        "1347/11/01"
+      ],
+      "mustNotContain": [
+        "1968"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. نفت پارس — 1346/11/01\n2. سیمان تهران — 1347/09/01\n3. قند نیشابور — 1347/11/01",
+      "actualType": "structured_reference",
+      "latencyMs": 3881.27
+    },
+    {
+      "id": "CO-043",
+      "cluster": "ipo-aggregate",
+      "question": "چند شرکت در سال ۱۴۰۲ عرضه اولیه شدند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سال 1402",
+        "6 رکورد عرضه اولیه",
+        "تامین سرمایه کاردان",
+        "پرداخت الکترونیک پاسارگاد"
+      ],
+      "maxAnswerChars": 900,
+      "passed": true,
+      "issues": [],
+      "answer": "در سال 1402، 6 رکورد عرضه اولیه در Company ثبت شده است:\n1. تامین سرمایه کاردان — 1402/06/08\n2. بیمه کارآفرین — 1402/04/17\n3. پالایش نفت شیراز — 1402/04/17\n4. گروه مالی شهر — 1402/03/21\n5. پرداخت الکترونیک پاسارگاد — 1402/01/16",
+      "actualType": "structured_reference",
+      "latencyMs": 3914.3
+    },
+    {
+      "id": "CO-044",
+      "cluster": "ipo-aggregate",
+      "question": "فقط اسم شرکت‌های عرضه‌شده در سال 1403 را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فرآورده‌های دامی ولبنی دالاهو",
+        "فولاد سیرجان ایرانیان",
+        "دانش‌بنیان پویا نیرو"
+      ],
+      "mustNotContain": [
+        "تاریخ",
+        "رکورد"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فرآورده‌های دامی ولبنی دالاهو، فولاد سیرجان ایرانیان، دانش‌بنیان پویا نیرو",
+      "actualType": "structured_reference",
+      "latencyMs": 3912.89
+    },
+    {
+      "id": "CO-045",
+      "cluster": "schema",
+      "question": "InstrumentId جدول Company مستقیم به Instrument وصل می‌شود؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "شناسه GUID منبع",
+        "Foreign Key مستقیمی",
+        "Instrument.InstrumentID از نوع nvarchar",
+        "Join مستقیم"
+      ],
+      "maxAnswerChars": 560,
+      "passed": true,
+      "issues": [],
+      "answer": "Company.InstrumentId یک شناسه GUID منبع است؛ در Schema فعلی Foreign Key مستقیمی به dbo.Instrument ندارد و با Instrument.InstrumentID از نوع nvarchar نیز هم‌نوع نیست. اتصال نماد به شرکت باید با نام ناشر و تطبیق کنترل‌شده انجام شود، نه Join مستقیم این دو ستون.",
+      "actualType": "structured_reference",
+      "latencyMs": 3874.45
+    },
+    {
+      "id": "CO-046",
+      "cluster": "schema",
+      "question": "رابطه Talar_Id در Company با جدول Talar چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "uniqueidentifier",
+        "Talar.Id",
+        "403 رکورد",
+        "Foreign Key فیزیکی"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "Company.Talar_Id از نوع uniqueidentifier است و به‌صورت منطقی با Talar.Id تطبیق داده می‌شود؛ هر 403 رکورد فعلی دارای تالار قابل تطبیق‌اند، هرچند Foreign Key فیزیکی در Schema تعریف نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3871.67
+    },
+    {
+      "id": "CO-047",
+      "cluster": "schema",
+      "question": "معنی ستون Ipo_Date در Company چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تاریخ عرضه اولیه ثبت‌شده",
+        "تقویم شمسی"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "Company.Ipo_Date تاریخ عرضه اولیه ثبت‌شده شرکت است؛ برای نمایش کاربر به تقویم شمسی تبدیل می‌شود.",
+      "actualType": "structured_reference",
+      "latencyMs": 3898.6
+    },
+    {
+      "id": "CO-048",
+      "cluster": "schema",
+      "question": "SourceCollectedAt جدول Company چه مفهومی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "زمان جمع‌آوری و ثبت Snapshot",
+        "تاریخ عرضه اولیه شرکت نیست"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "Company.SourceCollectedAt زمان جمع‌آوری و ثبت Snapshot منبع در SQL است و تاریخ عرضه اولیه شرکت نیست.",
+      "actualType": "structured_reference",
+      "latencyMs": 3873.66
+    },
+    {
+      "id": "CO-049",
+      "cluster": "schema",
+      "question": "آیا جدول Company قیمت و حجم معاملات هم دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قیمت، حجم و ارزش معاملات",
+        "ندارد",
+        "اطلاعات مرجع هویتی"
+      ],
+      "maxAnswerChars": 380,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Company قیمت، حجم و ارزش معاملات یا صورت مالی ندارد؛ این جدول فقط اطلاعات مرجع هویتی، تماس، تالار، تاریخ عرضه اولیه و زمان جمع‌آوری شرکت را نگهداری می‌کند.",
+      "actualType": "structured_reference",
+      "latencyMs": 3881.24
+    },
+    {
+      "id": "CO-050",
+      "cluster": "strict-safety",
+      "question": "سایت فملی چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وب‌سایتی در Company ثبت نشده"
+      ],
+      "mustNotContain": [
+        "فملی —",
+        "آخرین قیمت",
+        "داده قابل اتکایی"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "ملی صنایع مس ایران (نماد فملی): وب‌سایتی در Company ثبت نشده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4044.5
+    }
+  ]
+}

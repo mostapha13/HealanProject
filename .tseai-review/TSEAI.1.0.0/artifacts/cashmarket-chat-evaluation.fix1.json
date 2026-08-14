@@ -1,0 +1,128 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-14T10:20:15.289312+00:00",
+  "total": 35,
+  "passed": 32,
+  "passRate": 0.9142857142857143,
+  "allPassed": false,
+  "p50LatencyMs": 3937.05,
+  "p95LatencyMs": 4026.62,
+  "clusters": {
+    "classification": {
+      "total": 4,
+      "passed": 4
+    },
+    "closing-price": {
+      "total": 2,
+      "passed": 2
+    },
+    "combined": {
+      "total": 2,
+      "passed": 2
+    },
+    "derived": {
+      "total": 4,
+      "passed": 4
+    },
+    "index-effect": {
+      "total": 1,
+      "passed": 1
+    },
+    "last-price": {
+      "total": 2,
+      "passed": 2
+    },
+    "missing-source-field": {
+      "total": 2,
+      "passed": 1
+    },
+    "observation-time": {
+      "total": 1,
+      "passed": 1
+    },
+    "price-change": {
+      "total": 4,
+      "passed": 4
+    },
+    "ranking": {
+      "total": 3,
+      "passed": 2
+    },
+    "screening": {
+      "total": 1,
+      "passed": 0
+    },
+    "session-price": {
+      "total": 5,
+      "passed": 5
+    },
+    "summary": {
+      "total": 1,
+      "passed": 1
+    },
+    "trading-activity": {
+      "total": 2,
+      "passed": 2
+    },
+    "valuation": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [
+    {
+      "id": "CM-046",
+      "cluster": "ranking",
+      "question": "پنج سهم با بیشترین افت قیمت را نشان بده",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 34.1,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. واتی — سرمایه‌ گذاری‌ آتیه‌ دماوند: تغییر آخرین قیمت -3.37٪\n2. اروند — پتروشیمی اروند: تغییر آخرین قیمت -3.00٪\n3. تماوند — تامین سرمایه دماوند: تغییر آخرین قیمت -3.00٪\n4. خراسان — پتروشیمی خراسان: تغییر آخرین قیمت -3.00٪\n5. سخوز — سیمان خوزستان: تغییر آخرین قیمت -3.00٪\n5 نتیجه اول از 516 نماد منطبق نمایش داده شد.",
+      "error": null
+    },
+    {
+      "id": "CM-048",
+      "cluster": "missing-source-field",
+      "question": "حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": false,
+        "answerLength": true
+      },
+      "latencyMs": 3916.88,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم، بهترین سفارش فروش در Cashmarket ثبت نشده است.",
+      "error": null
+    },
+    {
+      "id": "CM-049",
+      "cluster": "screening",
+      "question": "نمادهایی که P/E کمتر از ۶ دارند را پیدا کن",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 47.51,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. آردینه — نشاسته و گلوکز آردینه: P/E برابر 5.93\n2. آسیا — بیمه آسیا: P/E برابر 1.69\n3. اتکاسا — بیمه اتکایی سامان: P/E برابر 4.30\n4. اتکام — بیمه اتکایی امین: P/E برابر 2.17\n5. اتکای — بیمه اتکایی ایرانیان: P/E برابر 2.80\n6. اخابر — مخابرات ایران: P/E برابر 5.58\n7. اردستان — سیمان اردستان: P/E برابر 5.81\n8. ارفع — شرکت آهن و فولاد ارفع: P/E برابر 4.13\n9. اسیاتک — انتقال داده های آسیاتک: P/E برابر 2.37\n10. اعتلا — شرکت سرمایه گذاری اعتلاء البرز: P/E برابر 4.60\n10 نتیجه اول از 230 نماد منطبق نمایش داده شد.",
+      "error": null
+    }
+  ]
+}

@@ -7,7 +7,7 @@ class EmbeddingProvider:
     dimension: int
     async def embed(self, texts: list[str]) -> list[list[float]]: raise NotImplementedError
 
-    async def embed_batched(self,texts:list[str],batch_size:int=8)->list[list[float]]:
+    async def embed_batched(self,texts:list[str],batch_size:int=32)->list[list[float]]:
         """Bound local-model requests while preserving input order."""
         if batch_size<1: raise ValueError("batch_size must be positive")
         vectors=[]

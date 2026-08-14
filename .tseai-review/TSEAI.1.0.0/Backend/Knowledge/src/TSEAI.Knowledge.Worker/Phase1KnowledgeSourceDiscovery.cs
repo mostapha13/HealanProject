@@ -8,7 +8,7 @@ public sealed class Phase1KnowledgeSourceDiscovery(KnowledgeOptions options, ILo
     public async Task<IReadOnlyList<KnowledgeSourceOptions>> DiscoverAsync(CancellationToken ct)
     {
         if (!options.EnablePhase1AutoSources || string.IsNullOrWhiteSpace(options.ConnectionString)) return [];
-        var csb=new SqlConnectionStringBuilder(options.ConnectionString){ ApplicationIntent=ApplicationIntent.ReadOnly };
+        var csb=new SqlConnectionStringBuilder(options.ConnectionString);
         await using var connection=new SqlConnection(csb.ConnectionString); await connection.OpenAsync(ct);
         var sources=new List<KnowledgeSourceOptions>();
         foreach (var spec in new[] { "Content", "FAQ", "TseFaq", "Companystate", "EDeliveryObject", "TsePerson" })
@@ -43,8 +43,12 @@ public sealed class Phase1KnowledgeSourceDiscovery(KnowledgeOptions options, ILo
     private static KnowledgeSourceOptions? BuildContent(HashSet<string> c)
     {
         if (!Has(c,"Id","Body")) return null;
-        var watermark=Coalesce(c,"LastModifiedAt","DeletedAt","CreatedAt","PublishAt","SourceCollectedAt");
+        var watermark=GreatestDate(c,"LastModifiedAt","DeletedAt","CreatedAt","PublishAt");
         var title=FirstExpr(c,"Title","Subject","Name") ?? "CONCAT(N'Content ',CONVERT(nvarchar(64),[Id]))";
+        var isDeleted=c.Contains("IsDeleted")?"COALESCE([IsDeleted],CAST(0 AS bit))":"CAST(0 AS bit)";
+        var isPublished=c.Contains("ContentStatusId")?"[ContentStatusId]=3":"1=1";
+        const string hasBody="NULLIF(LTRIM(RTRIM([Body])),N'') IS NOT NULL";
+        var vectorDeleted=$"CASE WHEN {isDeleted}=1 OR NOT ({isPublished}) OR NOT ({hasBody}) THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END";
         return Source("phase1-content","cms_content",$"""
 SELECT CONVERT(nvarchar(200),[Id]) AS SourceId,
        {title} AS Title,
@@ -54,7 +58,7 @@ SELECT CONVERT(nvarchar(200),[Id]) AS SourceId,
        {ColOrNull(c,"ContentTypeId")} AS ContentTypeId,
        {ColOrNull(c,"LanguageId")} AS LanguageId,
        {ColOrNull(c,"ContentStatusId")} AS ContentStatusId,
-       {ColOrNull(c,"IsDeleted")} AS IsDeleted,
+       {vectorDeleted} AS IsDeleted,
        {ColOrNull(c,"LastModifiedAt")} AS LastModifiedAt,
        {ColOrNull(c,"SourceCollectedAt")} AS SourceCollectedAt,
        {watermark} AS WatermarkAt,
@@ -63,7 +67,7 @@ FROM dbo.Content c
 INNER JOIN (
     SELECT TOP (@Take) [Id] AS SelectedId
     FROM dbo.Content
-    WHERE NULLIF(LTRIM(RTRIM([Body])),N'') IS NOT NULL
+    WHERE (@AfterWatermark IS NOT NULL OR ({hasBody} AND {isDeleted}=0 AND {isPublished}))
       AND (@AfterWatermark IS NULL
            OR {watermark} > @AfterWatermark
            OR ({watermark} = @AfterWatermark AND [Id] > TRY_CONVERT(int,@AfterSourceId)))
@@ -101,25 +105,44 @@ ORDER BY WatermarkAt,SourceId
     {
         var bodyName=First(c,"ReasonRawHtml","Reasons","Reason","Dalil","Vaziyatdesc","Description","RawTitle","Title");
         if (bodyName is null) return null;
-        var titleName=First(c,"StateTitle","Title","companyName","Nam","Namad","RawTitle");
-        var title=titleName is null?"N'وضعیت شرکت'":Q(titleName);
-        var sourceId=c.Contains("Id")?"CONVERT(nvarchar(200),[Id])":$"CONVERT(varchar(64),HASHBYTES('SHA2_256',CONVERT(nvarchar(max),{Q(bodyName)})),2)";
+        var titleName=First(c,"companyName","StateTitle","Title","Nam","Namad","RawTitle");
+        var company=titleName is null?"N'نامشخص'":$"COALESCE(CONVERT(nvarchar(1000),{Q(titleName)}),N'نامشخص')";
+        var symbol=c.Contains("Namad")?"COALESCE(CONVERT(nvarchar(512),[Namad]),N'نامشخص')":"N'نامشخص'";
+        var status=c.Contains("Vaziyatdesc")?"COALESCE(CONVERT(nvarchar(100),[Vaziyatdesc]),N'نامشخص')":"N'نامشخص'";
+        var changed=c.Contains("Lastdatechange")?"COALESCE(CONVERT(nvarchar(32),[Lastdatechange]),N'نامشخص')":"N'نامشخص'";
+        var ceo=c.Contains("CEO")?"COALESCE(CONVERT(nvarchar(1000),[CEO]),N'ثبت نشده')":"N'ثبت نشده'";
+        var board=c.Contains("BOARDMEMBER")?"COALESCE(REPLACE(CONVERT(nvarchar(max),[BOARDMEMBER]),N'<br>',NCHAR(10)),N'ثبت نشده')":"N'ثبت نشده'";
+        var reason=$"REPLACE(CONVERT(nvarchar(max),{Q(bodyName)}),N'<br>',NCHAR(10))";
+        var title=$"CONCAT({symbol},N' — ',{company})";
+        const string stateMetadata="N'{\"snapshot\":\"current\",\"date_calendar\":\"jalali\"}'";
+        var sourceId=c.Contains("Kodnamaddarsamane")?"CONVERT(nvarchar(200),[Kodnamaddarsamane])"
+            :c.Contains("Namad")?"CONVERT(nvarchar(200),[Namad])"
+            :c.Contains("Id")?"CONVERT(nvarchar(200),[Id])"
+            :$"CONVERT(varchar(64),HASHBYTES('SHA2_256',CONVERT(nvarchar(max),{Q(bodyName)})),2)";
         var watermark=Coalesce(c,"CreatedDate","SourceCollectedAt");
         return Source("phase1-company-state","company_state",$"""
 SELECT {sourceId} AS SourceId,
        CONVERT(nvarchar(1000),{title}) AS Title,
-       CONVERT(nvarchar(max),{Q(bodyName)}) AS Body,
-       NULL AS Url, NULL AS Symbol, N'company_state_reason' AS Category,
-       {ColOrNull(c,"CreatedDate")} AS PublishedAt,
+       CONCAT(N'نماد: ',{symbol},NCHAR(10),
+              N'نام شرکت: ',{company},NCHAR(10),
+              N'وضعیت: ',{status},NCHAR(10),
+              N'آخرین تغییر وضعیت (شمسی): ',{changed},NCHAR(10),
+              N'علت‌ها: ',{reason},NCHAR(10),
+              N'مدیرعامل: ',{ceo},NCHAR(10),
+              N'اعضای هیئت‌مدیره: ',{board}) AS Body,
+       NULL AS Url, {(c.Contains("Namad")?"[Namad]":"NULL")} AS Symbol, N'company_state' AS Category,
+       NULL AS PublishedAt,
        CAST(1 AS int) AS LanguageId,
        {ColOrNull(c,"ResourceCode")} AS ResourceCode,
+       {ColOrNull(c,"SourceCollectedAt")} AS EffectiveFrom,
+       CAST(1 AS bit) AS IsCurrent,
        {ColOrNull(c,"SourceCollectedAt")} AS SourceCollectedAt,
        {watermark} AS WatermarkAt,
-       NULL AS MetadataJson
+       {stateMetadata} AS MetadataJson
 FROM dbo.Companystate
 WHERE {Q(bodyName)} IS NOT NULL AND (@Since IS NULL OR {watermark} >= @Since)
 ORDER BY WatermarkAt,SourceId
-""",true,3600,IngestionChangeMode.Append);
+""",true,300,IngestionChangeMode.SlowlyChangingDimension2,VectorizationPolicy.CurrentProjection);
     }
 
     private static KnowledgeSourceOptions? BuildDelivery(HashSet<string> c)
@@ -246,6 +269,16 @@ ORDER BY WatermarkAt,SourceId
     {
         var cols=names.Where(x=>x is not null && c.Contains(x!)).Select(x=>Q(x!)).ToArray();
         return cols.Length switch {0=>"CAST('19000101' AS datetime2)",1=>cols[0],_=>$"COALESCE({string.Join(',',cols)})"};
+    }
+    private static string GreatestDate(HashSet<string> c,params string[] names)
+    {
+        var cols=names.Where(c.Contains).Select(Q).ToArray();
+        return cols.Length switch
+        {
+            0=>"CAST('19000101' AS datetime2)",
+            1=>cols[0],
+            _=>$"(SELECT MAX(v) FROM (VALUES ({string.Join("),(",cols)})) AS watermark_values(v))"
+        };
     }
     private static string Q(string name)
     {

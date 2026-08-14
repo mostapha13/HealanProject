@@ -1,0 +1,64 @@
+{
+  "version": "content-1.0",
+  "description": "50 SQL- and RAG-grounded Persian questions for dbo.Content, from casual news questions to professional debt/fund details, exact record metadata, quality and schema checks.",
+  "cases": [
+    {"id":"CT-001","cluster":"latest-news","question":"آخرین خبر ثبت‌شده بورس تهران چیه؟","expectedType":"structured_reference","mustContain":["1405/04/16","اوراق گواهی اعتبار مولد","بانک ملت","اگ050512"],"mustNotContain":["2026/07/07","<p>"],"maxAnswerChars":800},
+    {"id":"CT-002","cluster":"latest-news","question":"آخرین خبر بورس تهران در چه تاریخی منتشر شده؟","expectedType":"structured_reference","mustContain":["1405/04/16"],"mustNotContain":["2026/"],"maxAnswerChars":260},
+    {"id":"CT-003","cluster":"latest-news","question":"نماد اوراقی که در جدیدترین خبر آمده چیست؟","expectedType":"structured_reference","mustContain":["اگ050512"],"maxAnswerChars":260},
+    {"id":"CT-004","cluster":"latest-news","question":"مبلغ اوراق در آخرین خبر چقدر است؟","expectedType":"structured_reference","mustContain":["میلیارد ریال"],"mustContainAny":[["1686.5","۱۶۸۶.۵"]],"maxAnswerChars":280},
+    {"id":"CT-005","cluster":"latest-news","question":"سررسید اوراق آخرین خبر چه روزی است؟","expectedType":"structured_reference","mustContain":["1405","05","31"],"mustNotContain":["2026/"],"maxAnswerChars":280},
+    {"id":"CT-006","cluster":"latest-news","question":"ضمانت و عاملیت اوراق خبر آخر با کدام بانک است؟","expectedType":"structured_reference","mustContain":["بانک ملت"],"maxAnswerChars":300},
+    {"id":"CT-007","cluster":"latest-news","question":"توی خبر تازه بورس چه نوع اوراقی درج شده؟","mustContain":["اوراق گام","بانک ملت"],"maxAnswerChars":700},
+
+    {"id":"CT-008","cluster":"irandar-bond","question":"نماد اوراق مرابحه شرکت ایراندار چیست؟","mustContain":["صدار704"],"mustNotContain":["اگ050512","فملی"],"maxAnswerChars":500},
+    {"id":"CT-009","cluster":"irandar-bond","question":"ارزش و نرخ سود اوراق ایراندار را خلاصه بگو","mustContain":["میلیارد ریال","درصد"],"mustContainAny":[["3,000","۳,۰۰۰","3000","۳۰۰۰"],["23","۲۳"]],"maxAnswerChars":550},
+    {"id":"CT-010","cluster":"irandar-bond","question":"اوراق صدار704 برای چه هدفی منتشر شده؟","mustContain":["خرید مواد اولیه"],"maxAnswerChars":450},
+    {"id":"CT-011","cluster":"irandar-bond","question":"دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟","mustContain":["سال","ماه"],"mustContainAny":[["2","۲"],["3","۳"]],"maxAnswerChars":500},
+    {"id":"CT-012","cluster":"irandar-bond","question":"ناشر اوراق مرابحه ایراندار چه شرکتی است؟","mustContain":["شرکت واسط مالی اسفند پنجم"],"maxAnswerChars":450},
+    {"id":"CT-013","cluster":"irandar-bond","question":"تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟","mustContain":["رتبه اعتباری","BBB-","A3"],"maxAnswerChars":650},
+    {"id":"CT-014","cluster":"irandar-bond","question":"بازارگردان صدار704 کدام صندوق است؟","mustContain":["صندوق سرمایه‌گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار"],"maxAnswerChars":550},
+    {"id":"CT-015","cluster":"irandar-bond","question":"مؤسسه رتبه‌بندی اوراق ایراندار کیست؟","mustContain":["شرکت رتبه‌بندی اعتباری پایا"],"maxAnswerChars":450},
+    {"id":"CT-016","cluster":"irandar-bond","question":"حسابرس اوراق صدار 704 را نام ببر","mustContain":["موسسه حسابرسی بیات رایان"],"maxAnswerChars":450},
+    {"id":"CT-017","cluster":"irandar-bond","question":"عامل فروش و عامل پرداخت اوراق ایراندار چه نهادهایی هستند؟","mustContain":["شرکت کارگزاری کارآمد","شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه"],"maxAnswerChars":700},
+
+    {"id":"CT-018","cluster":"green-fund","question":"صندوق مسیر سبز آبنوس با چه نمادی و چند واحد پذیره‌نویسی شد؟","mustContain":["سبز آبنوس","واحد"],"mustContainAny":[["98,000,000","۹۸,۰۰۰,۰۰۰","98000000","۹۸۰۰۰۰۰۰"]],"maxAnswerChars":600},
+    {"id":"CT-019","cluster":"green-fund","question":"مؤسسین صندوق مسیر سبز آبنوس چه کسانی‌اند؟","mustContain":["شرکت سبدگردان آبنوس","محمد صدرائی","مجتبی حسن پور","مسعود الفتی","امین امیری"],"maxAnswerChars":800},
+    {"id":"CT-020","cluster":"green-fund","question":"مدیریت صندوق سبز آبنوس بر عهده کدام شرکت است؟","mustContain":["شرکت سبدگردان آبنوس"],"maxAnswerChars":450},
+    {"id":"CT-021","cluster":"green-fund","question":"متولی و حسابرس صندوق مسیر سبز آبنوس را بگو","mustContain":["اوراق بهادار پاداش","ارقام نگر آریا"],"maxAnswerChars":650},
+    {"id":"CT-022","cluster":"green-fund","question":"بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟","mustContain":["گسترش نوویرا","کارگزاری پارسیان"],"maxAnswerChars":650},
+    {"id":"CT-023","cluster":"green-fund","question":"برای اطلاعات بیشتر صندوق سبز آبنوس باید به چه سایتی مراجعه کنم؟","mustContain":["green.abnouspmc.ir"],"maxAnswerChars":450},
+
+    {"id":"CT-024","cluster":"delta-fund","question":"صندوق بخشی صنایع تمدن با چه نمادی و چند واحد عرضه شد؟","mustContain":["دلتا","واحد"],"mustContainAny":[["970,000,000","۹۷۰,۰۰۰,۰۰۰","970000000","۹۷۰۰۰۰۰۰۰"]],"maxAnswerChars":600},
+    {"id":"CT-025","cluster":"delta-fund","question":"بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟","mustContain":["آسان سرمایه گستر ایرانیان","رهپویان پردازش گستر صحرا","تامین سرمایه تمدن"],"maxAnswerChars":750},
+    {"id":"CT-026","cluster":"delta-fund","question":"مدیر صندوق دلتا کیه؟","mustContain":["شرکت تامین سرمایه تمدن"],"maxAnswerChars":450},
+    {"id":"CT-027","cluster":"delta-fund","question":"بازارگردان و کارگزار بازارگردان صندوق دلتا را بگو","mustContain":["توسعه بازار تمدن","کارگزاری تامین سرمایه تمدن"],"maxAnswerChars":650},
+
+    {"id":"CT-028","cluster":"trading-microstructure","question":"حداکثر حجم هر سفارش طبق تغییر جدید از چند طبقه به چند طبقه رسید؟","mustContain":["طبقه"],"mustContainAny":[["۴ طبقه به ۸ طبقه","4 طبقه به 8 طبقه"]],"maxAnswerChars":500},
+    {"id":"CT-029","cluster":"trading-microstructure","question":"حداقل تغییر قیمت در اصلاح ریزساختار معاملات چه تغییری کرد؟","mustContain":["طبقه"],"mustContainAny":[["۲ طبقه به ۳ طبقه","2 طبقه به 3 طبقه"]],"maxAnswerChars":500},
+    {"id":"CT-030","cluster":"trading-microstructure","question":"چه کسی تغییرات جدید سفارش‌گذاری بورس تهران را توضیح داده؟","mustContain":["سید ناصر جعفری","مدیر عملیات بازار سهام"],"maxAnswerChars":500},
+    {"id":"CT-031","cluster":"trading-microstructure","question":"اصلاح طبقات حجمی سفارش چه آثار مثبتی دارد؟","mustContain":["کاهش اثر بازاری","افزایش انعطاف‌پذیری","کیفیت اجرای معاملات"],"maxAnswerChars":800},
+
+    {"id":"CT-032","cluster":"private-market","question":"چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟","mustContain":["محمود گودرزی","مدیرعامل بورس تهران"],"maxAnswerChars":500},
+    {"id":"CT-033","cluster":"private-market","question":"بازار خصوصی بورس تهران برای چه شرکت‌هایی و با چه هدفی طراحی می‌شود؟","mustContain":["شرکت‌های سهامی خاص","حاکمیت شرکتی","تامین مالی","بازارهای اصلی"],"maxAnswerChars":850},
+    {"id":"CT-034","cluster":"private-market","question":"گودرزی چه شرکت‌هایی را در اولویت پذیرش بورس اعلام کرده؟","mustContain":["سود خالص","میلیارد تومان","اولویت پذیرش"],"mustContainAny":[["100","۱۰۰"]],"maxAnswerChars":650},
+    {"id":"CT-035","cluster":"private-market","question":"قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟","mustContain":["فرآیندهای پذیرش","تعامل با ناشران","امضای امیدنامه","دیجیتال"],"maxAnswerChars":800},
+
+    {"id":"CT-036","cluster":"saipa-history","question":"مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟","mustContain":["علی شیخ زاده"],"maxAnswerChars":450},
+    {"id":"CT-037","cluster":"saipa-history","question":"سایپا در چه سالی تأسیس شد؟","mustContain":["1345"],"mustNotContain":["1375"],"maxAnswerChars":350},
+    {"id":"CT-038","cluster":"saipa-history","question":"خساپا چه سالی به جمع ناشران بورسی پیوست؟","mustContain":["1375"],"maxAnswerChars":400},
+    {"id":"CT-039","cluster":"saipa-history","question":"ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟","mustContain":["93 همت"],"maxAnswerChars":450},
+    {"id":"CT-040","cluster":"saipa-history","question":"در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟","mustContain":["26 شرکت","رتبه دوم"],"maxAnswerChars":550},
+
+    {"id":"CT-041","cluster":"record-metadata","question":"تاریخ انتشار رکورد Content 100756 چیست؟","expectedType":"structured_reference","mustContain":["1405/04/16","15:45:00"],"mustNotContain":["2026/07/07"],"maxAnswerChars":320},
+    {"id":"CT-042","cluster":"record-metadata","question":"نوع محتوا، زبان، وضعیت انتشار و دپارتمان رکورد Content 100756 را بده","expectedType":"structured_reference","mustContain":["ContentTypeId: 1","LanguageId: 1","ContentStatusId: 3","DepartmentId: 0"],"maxAnswerChars":450},
+    {"id":"CT-043","cluster":"record-metadata","question":"زمان ایجاد، آخرین ویرایش و زمان جمع‌آوری رکورد Content 100756 را بگو","expectedType":"structured_reference","mustContain":["1405/04/16","15:48:23","آخرین ویرایش: ثبت نشده","1405/05/20","13:53:17"],"mustNotContain":["2026/"],"maxAnswerChars":520},
+    {"id":"CT-044","cluster":"record-metadata","question":"رکورد Content 999999 وجود دارد؟","expectedType":"structured_reference","mustContain":["رکوردی با شناسه 999999","وجود ندارد"],"maxAnswerChars":300},
+
+    {"id":"CT-045","cluster":"statistics","question":"جدول Content چند رکورد و چند شناسه متمایز دارد؟","expectedType":"structured_reference","mustContain":["42,536 رکورد","42,536 شناسه متمایز","9,697 رکورد بدنه غیرخالی","20 ContentTypeId"],"maxAnswerChars":650},
+    {"id":"CT-046","cluster":"quality","question":"چند رکورد جدول Content بدنه خالی دارند؟","expectedType":"structured_reference","mustContain":["32,839 رکورد بدنه خالی","9,697 رکورد بدنه غیرخالی"],"maxAnswerChars":350},
+    {"id":"CT-047","cluster":"distribution","question":"نوع‌های محتوای جدول Content را به تفکیک تعداد بده","expectedType":"structured_reference","mustContain":["ContentTypeId=1: 33,377 رکورد","ContentTypeId=5: 3,532 رکورد","ContentTypeId=26: 2,083 رکورد","برچسب معنایی حدس زده نمی‌شود"],"maxAnswerChars":2400},
+    {"id":"CT-048","cluster":"quality","question":"آیا بدنه‌های تکراری در جدول Content داریم؟","expectedType":"structured_reference","mustContain":["76 گروه متن کاملاً تکراری","151 ردیف تکراری اضافه"],"maxAnswerChars":380},
+    {"id":"CT-049","cluster":"schema","question":"آیا جدول Content ستون Title یا Subject دارد؟","expectedType":"structured_reference","mustContain":["ستون Title یا Subject ندارد","اولین جمله بدنه پاک‌سازی‌شده"],"maxAnswerChars":420},
+    {"id":"CT-050","cluster":"schema","question":"جدول Content کلید اصلی، ایندکس یا Foreign Key دارد؟","expectedType":"structured_reference","mustContain":["هیچ Primary Key، Index یا Foreign Key","یکتایی Id فقط در داده فعلی"],"maxAnswerChars":420}
+  ]
+}

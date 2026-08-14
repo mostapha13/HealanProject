@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "description": "Meaning-equivalent Persian questions. Examples are regression probes, not runtime phrase rules.",
+  "cases": [
+    {"id":"SE-001","cluster":"current-date","question":"امروز چندمه؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
+    {"id":"SE-002","cluster":"current-date","question":"الان چه تاریخی است؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
+    {"id":"SE-003","cluster":"current-date","question":"تاریخ امروز را می‌گویی؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
+
+    {"id":"SE-010","cluster":"technology-role","question":"مدیر فناوری بورس تهران کیه؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+    {"id":"SE-011","cluster":"technology-role","question":"چه کسی مدیر فناوری بورس تهران است؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+    {"id":"SE-012","cluster":"technology-role","question":"مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+    {"id":"SE-013","cluster":"technology-role","question":"مدیر واحد فناوری بورس تهران چه کسی می‌باشد؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+
+    {"id":"SE-020","cluster":"ceo-role","question":"مدیرعامل بورس تهران کیه؟","expectedType":"structured_reference","mustContain":["محمود گودرزی"],"maxAnswerChars":180},
+    {"id":"SE-021","cluster":"ceo-role","question":"چه فردی مدیر عامل بورس تهران است؟","expectedType":"structured_reference","mustContain":["محمود گودرزی"],"maxAnswerChars":180},
+    {"id":"SE-022","cluster":"ceo-role","question":"نام مدیرعامل فعلی بورس تهران چیست؟","expectedType":"structured_reference","mustContain":["محمود گودرزی"],"maxAnswerChars":180},
+
+    {"id":"SE-023","cluster":"board-members","question":"هیئت مدیره بورس کیا هستن؟","expectedType":"structured_reference","mustContain":["بهروز خالق‌ویردی","عسگر نوربخش","مجتبی افشاری","حامد شادکام","میلاد فروغی","عباس نعیمی"],"mustNotContain":["به گزارش","محمد ابراهیم محمد پورزرندی"],"maxAnswerChars":500},
+    {"id":"SE-024","cluster":"board-members","question":"کلیه اعضای هیئت مدیره رو بهم بگو","expectedType":"structured_reference","mustContain":["بهروز خالق‌ویردی","عباس نعیمی"],"mustNotContain":["به گزارش","سرامیک صنعتی اردکان"],"maxAnswerChars":500},
+    {"id":"SE-025","cluster":"board-members","question":"آخرین اعضای هیئت مدیره بورس کیا هستند؟","expectedType":"structured_reference","mustContain":["بهروز خالق‌ویردی","حامد شادکام"],"mustNotContain":["کمیته حسابرسی","منشور کمیته"],"maxAnswerChars":500},
+    {"id":"SE-026","cluster":"board-members-names-only","question":"فقط اسم اعضای هیئت مدیره بورس تهران رو بهم بگو","expectedType":"structured_reference","mustContain":["بهروز خالق‌ویردی","عسگر نوربخش","مجتبی افشاری","حامد شادکام","میلاد فروغی","عباس نعیمی"],"mustNotContain":["رئیس هیئت‌مدیره","عضو هیئت‌مدیره","به گزارش"],"maxAnswerChars":180},
+    {"id":"SE-027","cluster":"executive-deputy-subordinates","question":"زیرمجموعه معاون اجرایی بورس چه کسانی هستند؟","expectedType":"structured_reference","mustContain":["اسماعیل رازقی","سعید رضایی","سید احسان عدل","رضا قلیچ‌خانی","محمدحسین نوری‌زاده"],"mustNotContain":["خساپا","سایپا","حجم معاملات"],"maxAnswerChars":500},
+
+    {"id":"SE-030","cluster":"pe","question":"نسبت قیمت به سود ملی مس رو میگی؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
+    {"id":"SE-031","cluster":"pe","question":"پی بر ای شرکت ملی مس چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
+    {"id":"SE-032","cluster":"pe","question":"فملی چه P/E ای دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
+
+    {"id":"SE-040","cluster":"eps","question":"میزان سود هر سهم ملی مس چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"]},
+    {"id":"SE-041","cluster":"eps","question":"ملی مس به ازای هر سهم چقدر سود ساخته؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"]},
+
+    {"id":"SE-050","cluster":"market-value","question":"ارزش بازار فملی چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
+    {"id":"SE-051","cluster":"market-value","question":"سرمایه بازار شرکت ملی مس الان چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
+    {"id":"SE-052","cluster":"market-value","question":"ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
+
+    {"id":"SE-060","cluster":"trade-count","question":"چند بار روی فملی معامله انجام شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
+    {"id":"SE-061","cluster":"trade-count","question":"تعداد دادوستدهای فملی چند تا بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
+
+    {"id":"SE-070","cluster":"price-time","question":"آخرین نرخ فملی مال چه روزیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["شمسی","میلادی"]},
+    {"id":"SE-071","cluster":"price-time","question":"قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت","شمسی","میلادی"]},
+
+    {"id":"SE-080","cluster":"market-ranking","question":"کدام نمادها بیشترین حجم معامله را دارند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]},
+    {"id":"SE-081","cluster":"market-ranking","question":"سهام با بالاترین حجم دادوستد کدام‌اند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]}
+  ],
+  "globalMustNotContain": [
+    "داده قابل اتکایی برای پاسخ پیدا نشد",
+    "Unexpected token",
+    "not valid JSON"
+  ]
+}

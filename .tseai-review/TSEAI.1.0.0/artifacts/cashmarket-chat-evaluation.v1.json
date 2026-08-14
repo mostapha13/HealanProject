@@ -1,0 +1,704 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-14T10:06:01.006689+00:00",
+  "total": 50,
+  "passed": 15,
+  "passRate": 0.3,
+  "allPassed": false,
+  "p50LatencyMs": 4915.01,
+  "p95LatencyMs": 12500.23,
+  "clusters": {
+    "classification": {
+      "total": 4,
+      "passed": 0
+    },
+    "closing-price": {
+      "total": 3,
+      "passed": 1
+    },
+    "combined": {
+      "total": 2,
+      "passed": 0
+    },
+    "derived": {
+      "total": 5,
+      "passed": 1
+    },
+    "index-effect": {
+      "total": 1,
+      "passed": 0
+    },
+    "last-price": {
+      "total": 4,
+      "passed": 2
+    },
+    "missing-source-field": {
+      "total": 2,
+      "passed": 0
+    },
+    "observation-time": {
+      "total": 1,
+      "passed": 0
+    },
+    "price-change": {
+      "total": 4,
+      "passed": 0
+    },
+    "ranking": {
+      "total": 7,
+      "passed": 4
+    },
+    "screening": {
+      "total": 2,
+      "passed": 1
+    },
+    "session-price": {
+      "total": 7,
+      "passed": 2
+    },
+    "summary": {
+      "total": 1,
+      "passed": 0
+    },
+    "trading-activity": {
+      "total": 4,
+      "passed": 2
+    },
+    "valuation": {
+      "total": 3,
+      "passed": 2
+    }
+  },
+  "failures": [
+    {
+      "id": "CM-002",
+      "cluster": "last-price",
+      "question": "ملی صنایع مس الان روی چه قیمتی معامله میشه؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7715.18,
+      "type": "clarification",
+      "entity": "",
+      "answer": "درخواست ویرایش فیلتر با اطمینان کافی تشخیص داده نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-003",
+      "cluster": "last-price",
+      "question": "آخرین نرخ خساپا رو بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12825.99,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-005",
+      "cluster": "closing-price",
+      "question": "قیمت پایانی فملی را بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3911.74,
+      "type": "clarification",
+      "entity": "",
+      "answer": "نماد یا شاخص «بگو» در داده‌های مرجع TSEAI پیدا نشد؛ نام یا نماد دقیق‌تری وارد کنید.",
+      "error": null
+    },
+    {
+      "id": "CM-006",
+      "cluster": "closing-price",
+      "question": "فملی چند بسته شد؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12114.68,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-009",
+      "cluster": "trading-activity",
+      "question": "امروز چندتا سهم خودرو دست به دست شده؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7843.72,
+      "type": "marketsymbol",
+      "entity": "خودرو",
+      "answer": "خودرو — ایران‌ خودرو: آخرین قیمت 584، قیمت پایانی 582 و تغییر قیمت 3٪ است.\n\nحجم معاملات 7,553,067,214 و ارزش معاملات 4,394,039,140,773 است؛ P/E برابر -11.88 است.",
+      "error": null
+    },
+    {
+      "id": "CM-011",
+      "cluster": "trading-activity",
+      "question": "چند معامله روی فملی انجام شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12169.44,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-014",
+      "cluster": "valuation",
+      "question": "سود هر سهم فملی را بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12100.55,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-016",
+      "cluster": "session-price",
+      "question": "فملی با چه قیمتی باز شد؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7721.4,
+      "type": "clarification",
+      "entity": "",
+      "answer": "درخواست ویرایش فیلتر با اطمینان کافی تشخیص داده نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-017",
+      "cluster": "session-price",
+      "question": "قیمت روز قبل فملی چقدر ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3897.63,
+      "type": "clarification",
+      "entity": "",
+      "answer": "نماد یا شاخص «ثبت» در داده‌های مرجع TSEAI پیدا نشد؛ نام یا نماد دقیق‌تری وارد کنید.",
+      "error": null
+    },
+    {
+      "id": "CM-018",
+      "cluster": "session-price",
+      "question": "مبنای فملی چند بوده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12500.23,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-020",
+      "cluster": "session-price",
+      "question": "کمترین نرخ معامله فملی را بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12617.82,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-021",
+      "cluster": "session-price",
+      "question": "فملی امروز بین چه قیمت‌هایی معامله شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4169.39,
+      "type": "market_unavailable",
+      "entity": "آسال",
+      "answer": "داده Structured برای «ص.س.درآمد ثابت آسال-د» در دسترس نیست (market_snapshot_not_found).",
+      "error": null
+    },
+    {
+      "id": "CM-022",
+      "cluster": "price-change",
+      "question": "تغییر آخرین قیمت فملی چند ریال بوده؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7793.74,
+      "type": "marketsymbol",
+      "entity": "والبر",
+      "answer": "والبر: آخرین قیمت 3,032 ریال، تغییر آخرین قیمت -93.00 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-023",
+      "cluster": "price-change",
+      "question": "فملی چند درصد بالا رفته؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": false
+      },
+      "latencyMs": 64.89,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. پخش — پخش البرز: تغییر آخرین قیمت 23.96٪\n2. دسبحان — سبحان دارو: تغییر آخرین قیمت 4.50٪\n3. دسینا — داروسازی‌ سینا: تغییر آخرین قیمت 3.63٪\n4. اوان — مبین وان کیش: تغییر آخرین قیمت 3.00٪\n5. بنیرو — نیروترانس‌: تغییر آخرین قیمت 3.00٪\n6. بورس — بورس اوراق بهادار تهران: تغییر آخرین قیمت 3.00٪\n7. پی پاد — پرداخت الکترونیک پاسارگاد: تغییر آخرین قیمت 3.00٪\n8. جم پیلن — پتروشیمی جم پیلن: تغییر آخرین قیمت 3.00٪\n9. خگستر — گسترش‌سرمایه‌گذاری‌ایران‌خودرو: تغییر آخرین قیمت 3.00٪\n10. خودرو — ایران‌ خودرو: تغییر آخرین قیمت 3.00٪",
+      "error": null
+    },
+    {
+      "id": "CM-024",
+      "cluster": "price-change",
+      "question": "تغییر قیمت پایانی فملی را به ریال بگو",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7807.75,
+      "type": "marketsymbol",
+      "entity": "والبر",
+      "answer": "والبر: قیمت پایانی 3,033 ریال، تغییر قیمت پایانی -92.00 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-025",
+      "cluster": "price-change",
+      "question": "درصد تغییر پایانی فملی چقدر است؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4175.4,
+      "type": "clarification",
+      "entity": "",
+      "answer": "عبارت «درصد» مبهم است. یکی از این موارد را مشخص کنید: مشارکت نفت فصلی 17درصد (پانفت)، اجاره امید سه ماهه 20 درصد (صامید)، اجاره سپهر سه ماهه 20 درصد (سپهر)، اجاره مسکن سه ماهه 20 درصد (صسکن)",
+      "error": null
+    },
+    {
+      "id": "CM-026",
+      "cluster": "index-effect",
+      "question": "فملی چند واحد روی شاخص اثر گذاشته؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4515.86,
+      "type": "clarification",
+      "entity": "",
+      "answer": "نماد یا شاخص «واحد روی شاخص اثر گذاشته» در داده‌های مرجع TSEAI پیدا نشد؛ نام یا نماد دقیق‌تری وارد کنید.",
+      "error": null
+    },
+    {
+      "id": "CM-027",
+      "cluster": "classification",
+      "question": "فملی در کدام بازار معامله می‌شود؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": false
+      },
+      "latencyMs": 8179.57,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "نماد معاملاتی شرکت ملی صنایع مس ایران(فملی)با توجه به افشای اطلاعات با اهمیت گروه'الف' بدون محدودیت نوسان قیمت با استفاده از مکانیزم حراج آماده انجام معامله می باشد.بازگشایی نماد‌های معاملاتی(فاراک)،(مرقام)،(خموتور)،(خاور) در بازار بدهی که اوراق مشارکت، گواهی سپرده و صکوک معامله می شود، تعداد 106 هزار برگه اوراق مشارکت به ارزش کل بیش از 106 میلیارد ریال معامله شد. صندوق های قابل معامله (ETF)در بازار صندوق های قابل معامله که صندوق های قابل معامله و صندوق های سرمایه گذاری شاخصی قابل معامله داد و ستد می شود، 38 میلیون و 968 هزار واحد از صندوق سرمایه گذاری به ارزش کل بیش از 394 میلیارد ریال مورد معامله قرار گرفت. در بازار اوراق مشتقه تعداد 810 قرارداد به ارزش بیش از 224 میلیون و 400 هزار ریال مورد معامله قرار گرفت.",
+      "error": null
+    },
+    {
+      "id": "CM-028",
+      "cluster": "classification",
+      "question": "تابلوی معاملاتی ملی صنایع مس ایران چیه؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 8310.55,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "چهارشنبه مورخ 24/4/1388 - بر اساس گزارش مدیریت بازار ، نماد معاملاتی شرکت ملی صنایع مس ایران پس از برگزاری مجمع عمومی عادی سالیانه مبنی بر تقسیم سود نقدی آماده انجام معامله می باشد .",
+      "error": null
+    },
+    {
+      "id": "CM-029",
+      "cluster": "classification",
+      "question": "فملی در چه صنعت و زیرصنعتی قرار دارد؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3926.78,
+      "type": "market_unavailable",
+      "entity": "پایدار",
+      "answer": "داده Structured برای «ص.س.درآمد ثابت رایا پایدار-د» در دسترس نیست (market_snapshot_not_found).",
+      "error": null
+    },
+    {
+      "id": "CM-030",
+      "cluster": "classification",
+      "question": "وضعیت معاملاتی نماد فملی چیست؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": false
+      },
+      "latencyMs": 5034.13,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "نماد معاملاتی شرکت پالایش نفت تبریز (شبریز1)، مهندسی نصیرماشین (خنصیر1)، گروه صنعتی بارز (پکرمان1( با توجه به افشای اطلاعات با اهمیت گروه الف، متوقف گردید. توقف نماد معاملاتی (فملی(در پایان معاملات امروز شرکت ملی صنایع مس ایران(فملی) جهت برگزاری مجمع عمومی فوق العاده به منظور تصمیم گیری در خصوص افزایش سرمایه متوقف خواهد شد. نماد معاملاتی شرکت درخشان تهران (پدرخش1) با توجه به تغییرات بیش از 20 درصدی قیمت سهام، به مدت 60 دقیقه در وضعیت سفارش گیری قرار می گیرد و سپس معاملات در دامنه نوسان فعلی ادامه خواهد یافت. نماد معاملاتی شرکت کشاورزی ودامپروی مگسال (زمگسا1) با توجه به تغییرات بیش از 20 درصدی قیمت سهام، به مدت 60 دقیقه در وضعیت سفارش گیری قرار می گیرد و سپس معاملات در دامنه نوسان فعلی ادامه خواهد یافت.",
+      "error": null
+    },
+    {
+      "id": "CM-031",
+      "cluster": "observation-time",
+      "question": "داده قیمت فملی مربوط به چه تاریخیه؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2340.4,
+      "type": "clarification",
+      "entity": "",
+      "answer": "نماد یا شاخص «تاریخیه» در داده‌های مرجع TSEAI پیدا نشد؛ نام یا نماد دقیق‌تری وارد کنید.",
+      "error": null
+    },
+    {
+      "id": "CM-032",
+      "cluster": "summary",
+      "question": "یه گزارش کامل و خلاصه از وضعیت فعلی فملی بده",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7418.24,
+      "type": "answer_validation_blocked",
+      "entity": "فملی",
+      "answer": "پاسخ بالقوه توسط Answer Validation / Hallucination Guard مسدود شد؛ Evidence برای ادعاهای پاسخ کافی نبود.",
+      "error": null
+    },
+    {
+      "id": "CM-033",
+      "cluster": "combined",
+      "question": "آخرین قیمت، پایانی و قیمت روز قبل فملی را یکجا بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2622.14,
+      "type": "clarification",
+      "entity": "",
+      "answer": "عبارت «یکجا» مبهم است. یکی از این موارد را مشخص کنید: صنایع چوب خزر کاسپین-یکجا (چخزر-یکجا)، عمران و مسکن سازان ایران-یکجا (مسکن ایران)، صنایع چوب خزر کاسپین-یکجا (چخزر-یکجا4)، صنایع چوب خزر کاسپین-یکجا (چخزر-یکجا2)",
+      "error": null
+    },
+    {
+      "id": "CM-034",
+      "cluster": "combined",
+      "question": "حجم، ارزش و تعداد معاملات فملی چقدر بوده؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4785.12,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم، تعداد معاملات 45,797 است.",
+      "error": null
+    },
+    {
+      "id": "CM-035",
+      "cluster": "derived",
+      "question": "میانگین وزنی قیمت معاملات فملی چقدر می‌شود؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4795.9,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی — ملی‌ صنایع‌ مس‌ ایران‌: آخرین قیمت 21,680، قیمت پایانی 21,660 و تغییر قیمت 1.17٪ است.",
+      "error": null
+    },
+    {
+      "id": "CM-036",
+      "cluster": "derived",
+      "question": "متوسط ارزش هر معامله فملی را حساب کن",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2756.91,
+      "type": "market_unavailable",
+      "entity": "ارزش",
+      "answer": "داده Structured برای «صندوق س ارزش آفرین بیدار-سهام» در دسترس نیست (market_snapshot_not_found).",
+      "error": null
+    },
+    {
+      "id": "CM-037",
+      "cluster": "derived",
+      "question": "به طور میانگین در هر معامله فملی چند سهم جابه‌جا شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 7564.57,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-038",
+      "cluster": "derived",
+      "question": "فاصله سقف تا کف قیمت فملی چقدر بوده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2530.78,
+      "type": "market_unavailable",
+      "entity": "خشککن",
+      "answer": "داده Structured برای «بدن خشک کن سقفی» در دسترس نیست (market_snapshot_not_found).",
+      "error": null
+    },
+    {
+      "id": "CM-042",
+      "cluster": "ranking",
+      "question": "سه سهمی که بیشترین تعداد دادوستد را داشته‌اند کدام‌اند؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4597.65,
+      "type": "clarification",
+      "entity": "",
+      "answer": "درخواست ویرایش فیلتر با اطمینان کافی تشخیص داده نشد.",
+      "error": null
+    },
+    {
+      "id": "CM-045",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین رشد آخرین قیمت کدام‌اند؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 20.27,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. وملی — گروه‌ صنعتی‌ ملی‌ (هلدینگ‌: آخرین قیمت 220,830 ریال\n2. سباقر — سیمان باقران: آخرین قیمت 220,700 ریال\n3. سفار — سیمان‌فارس‌: آخرین قیمت 205,000 ریال\n4. سهگمت — سیمان‌هگمتان‌: آخرین قیمت 188,490 ریال\n5. سصوفی — سیمان‌ صوفیان‌: آخرین قیمت 186,200 ریال",
+      "error": null
+    },
+    {
+      "id": "CM-046",
+      "cluster": "ranking",
+      "question": "پنج سهم با بیشترین افت قیمت را نشان بده",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 22.43,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. واتی — سرمایه‌ گذاری‌ آتیه‌ دماوند: تغییر آخرین قیمت -3.37٪\n2. اروند — پتروشیمی اروند: تغییر آخرین قیمت -3.00٪\n3. تماوند — تامین سرمایه دماوند: تغییر آخرین قیمت -3.00٪\n4. خراسان — پتروشیمی خراسان: تغییر آخرین قیمت -3.00٪\n5. سخوز — سیمان خوزستان: تغییر آخرین قیمت -3.00٪",
+      "error": null
+    },
+    {
+      "id": "CM-047",
+      "cluster": "missing-source-field",
+      "question": "بهترین قیمت خرید فملی در Cashmarket چیست؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": false,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2337.62,
+      "type": "clarification",
+      "entity": "",
+      "answer": "نماد یا شاخص «Cashmarket» در داده‌های مرجع TSEAI پیدا نشد؛ نام یا نماد دقیق‌تری وارد کنید.",
+      "error": null
+    },
+    {
+      "id": "CM-048",
+      "cluster": "missing-source-field",
+      "question": "حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": false,
+        "answerLength": true
+      },
+      "latencyMs": 4778.01,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "CM-049",
+      "cluster": "screening",
+      "question": "نمادهایی که P/E کمتر از ۶ دارند را پیدا کن",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 25.19,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. آردینه — نشاسته و گلوکز آردینه\n2. آسیا — بیمه آسیا\n3. اتکاسا — بیمه اتکایی سامان\n4. اتکام — بیمه اتکایی امین\n5. اتکای — بیمه اتکایی ایرانیان\n6. اخابر — مخابرات ایران\n7. اردستان — سیمان اردستان\n8. ارفع — شرکت آهن و فولاد ارفع\n9. اسیاتک — انتقال داده های آسیاتک\n10. اعتلا — شرکت سرمایه گذاری اعتلاء البرز",
+      "error": null
+    }
+  ]
+}

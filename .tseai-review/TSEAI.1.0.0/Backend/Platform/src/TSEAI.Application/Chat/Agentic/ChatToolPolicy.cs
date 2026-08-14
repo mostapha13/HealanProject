@@ -21,7 +21,9 @@ public sealed class ChatToolPolicy : IChatToolPolicy
         "filter.conversation","filter.chat","filter.assets",
         "structured.query",
         "structured.reference",
-        "reflection.review"
+        "answer.synthesize",
+        "reflection.review",
+        "reflection.review.final"
     };
 
     public void Demand(string toolName)

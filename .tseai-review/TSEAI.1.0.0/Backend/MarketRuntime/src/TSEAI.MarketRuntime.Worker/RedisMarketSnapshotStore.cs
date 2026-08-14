@@ -22,6 +22,21 @@ public sealed class RedisMarketSnapshotStore(IConnectionMultiplexer redis)
 
     public Task EnsureCurrentTradingDateAsync(int tradingDate) => _db.StringSetAsync(CurrentDateKey, tradingDate);
 
+    public async Task ReconcileActiveUniverseAsync(int tradingDate, IEnumerable<long> insCodes)
+    {
+        var key = $"tseai:market:active:{tradingDate}:v1";
+        var expected = insCodes.Distinct().Select(x => (RedisValue)x).ToArray();
+        var expectedSet = expected.ToHashSet();
+        var existing = await _db.SetMembersAsync(key);
+        var stale = existing.Where(x => !expectedSet.Contains(x)).ToArray();
+        if (stale.Length > 0)
+        {
+            await _db.SetRemoveAsync(key, stale);
+            await _db.HashDeleteAsync(SnapshotHash, stale);
+        }
+        if (expected.Length > 0) await _db.SetAddAsync(key, expected);
+    }
+
     public async Task PutAsync(MarketSymbolSnapshot s, bool active = true)
     {
         s.SnapshotUpdatedAtUtc = DateTime.UtcNow;

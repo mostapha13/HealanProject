@@ -1,4 +1,5 @@
 using TSEAI.Application.Temporal;
+using TSEAI.Application.Chat;
 using TSEAI.Shared.Application;
 
 var referenceUtc = DateTimeOffset.Parse("2026-08-11T08:00:00Z");
@@ -44,6 +45,18 @@ Date("هفته آینده", "1405/05/24", "2026-08-15", "1405/05/30");
 Date("ماه آینده", "1405/06/01", "2026-08-23", "1405/06/31");
 Date("امسال", "1405/01/01", "2026-03-21", "1405/05/20");
 Date("سال گذشته", "1404/01/01", "2025-03-21", "1404/12/29");
+
+var todayResolution=resolver.Resolve("امروز");
+var todayAnswer=CanonicalClockAnswer.TryAnswer("امروز چندمه؟",todayResolution,referenceUtc);
+Must(todayAnswer?.Contains("1405/05/20",StringComparison.Ordinal)==true,"pure current-date answer failed");
+Must(todayAnswer?.Contains("2026",StringComparison.Ordinal)==false,"current-date answer must not display Gregorian date");
+Must(CanonicalClockAnswer.TryAnswer("قیمت امروز فملی چنده؟",todayResolution,referenceUtc) is null,"market question must not be intercepted by clock answer");
+Must(PersianDisplayText.LocalizeDates("آخرین داده (2026/08/11) است.")=="آخرین داده (1405/05/20) است.","Gregorian slash date must be Jalali in display text");
+Must(PersianDisplayText.LocalizeDates("زمان 2026-08-11T12:18:59Z است.")=="زمان 1405/05/20 ساعت 12:18:59 است.","ISO timestamp must be Jalali in display text");
+Must(PersianDisplayText.LocalizeDates("تاریخ 11/08/2026 میلادی")=="تاریخ 1405/05/20","day-first Gregorian date must be Jalali in display text");
+Must(PersianDisplayText.LocalizeDates("تاریخ ۱۴۰۵/۰۵/۲۰")=="تاریخ ۱۴۰۵/۰۵/۲۰","Jalali display date must remain unchanged");
+Must(PersianDisplayText.FormatCompactDate(20260811)=="1405/05/20","compact Gregorian date must be Jalali");
+Must(PersianDisplayText.FormatCompactDate(14050520)=="1405/05/20","compact Jalali date must remain Jalali");
 
 var tomorrow = resolver.Resolve("فردا");
 Must(tomorrow.Start?.MarketDayKind == MarketDayKind.FutureTradingDayCandidate, "tomorrow trading-day classification");

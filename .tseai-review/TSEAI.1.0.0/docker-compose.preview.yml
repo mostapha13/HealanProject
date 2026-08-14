@@ -22,8 +22,8 @@ services:
   knowledge-worker:
     container_name: tseai-rc31-knowledge-worker
     environment:
-      Knowledge__BatchSize: 10
-      Knowledge__MaxDocumentsPerSourceRun: 500
+      Knowledge__BatchSize: 40
+      Knowledge__MaxDocumentsPerSourceRun: 100000
   ai-engine:
     container_name: tseai-rc31-ai
   local-llm:

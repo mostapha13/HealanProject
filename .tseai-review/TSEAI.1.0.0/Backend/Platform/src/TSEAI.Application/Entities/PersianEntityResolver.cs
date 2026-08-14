@@ -49,6 +49,7 @@ public sealed class PersianEntityResolver(IEntityCandidateSource source) : IPers
     private static EntityCandidateMatch Score(EntitySourceCandidate candidate, IReadOnlyList<string> queryForms, IReadOnlyList<string> compactForms)
     {
         var best = (Score: 0d, Kind: EntityMatchKind.None, Value: candidate.DisplayName);
+        var queryTokenSets=queryForms.Select(x=>x.Split(' ',StringSplitOptions.RemoveEmptyEntries).Where(t=>t.Length>=2).ToHashSet(StringComparer.Ordinal)).ToArray();
 
         void Consider(string? value, double exactScore, EntityMatchKind exactKind)
         {
@@ -70,6 +71,26 @@ public sealed class PersianEntityResolver(IEntityCandidateSource source) : IPers
                 else if (compactQuery.Length >= 3 && c.Contains(compactQuery, StringComparison.Ordinal))
                     Set(0.78 - LengthPenalty(c, compactQuery), EntityMatchKind.Contains, value);
             }
+
+            var candidateTokens=n.Split(' ',StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
+            foreach(var queryTokens in queryTokenSets)
+            {
+                if(queryTokens.Count<2) continue;
+                if(queryTokens.All(candidateTokens.Contains))
+                {
+                    var coverage=queryTokens.Count/(double)Math.Max(candidateTokens.Count,1);
+                    Set(0.835+Math.Min(.04,coverage*.04),EntityMatchKind.Contains,value);
+                    continue;
+                }
+
+                var shared=queryTokens.Count(candidateTokens.Contains);
+                if(shared<2) continue;
+                var candidateCoverage=shared/(double)Math.Max(candidateTokens.Count,1);
+                Set(0.75+Math.Min(.08,candidateCoverage*.08)+Math.Min(.03,shared*.01),EntityMatchKind.Contains,value);
+            }
+
+            if(exactKind==EntityMatchKind.ExactSymbol&&queryTokenSets.Any(tokens=>tokens.Contains(n)))
+                Set(0.965,EntityMatchKind.ExactSymbol,value);
         }
 
         void Set(double score, EntityMatchKind kind, string value)
@@ -86,17 +107,39 @@ public sealed class PersianEntityResolver(IEntityCandidateSource source) : IPers
         Consider(candidate.DisplayName, 0.945, EntityMatchKind.ExactName);
         foreach (var alias in candidate.Aliases) Consider(alias, 0.940, EntityMatchKind.ExactAlias);
 
+        var preferPrimaryInstrument=InstrumentQuerySemantics.PrefersPrimaryInstrument(queryForms);
+        var domainPriority=best.Score<=0?0:InstrumentDomainPriority(candidate,preferPrimaryInstrument);
         return new(candidate.Kind, candidate.CanonicalId, candidate.DisplayName, candidate.Symbol,
             candidate.InstrumentId, candidate.InsCode, candidate.Isin,
-            Math.Round(Math.Max(0, best.Score), 4), best.Kind, best.Value, candidate.Metadata);
+            Math.Round(Math.Clamp(best.Score+domainPriority,0,1), 4), best.Kind, best.Value, candidate.Metadata);
+    }
+
+    private static double InstrumentDomainPriority(EntitySourceCandidate candidate,bool preferPrimaryInstrument)
+    {
+        if(candidate.Kind!=EntityKind.Instrument||!preferPrimaryInstrument) return 0;
+        var boost=0d;
+        if(candidate.Metadata.TryGetValue("marketCategory",out var category)&&string.Equals(category,"cash",StringComparison.OrdinalIgnoreCase)) boost+=.035;
+        if(candidate.InstrumentId?.EndsWith("0001",StringComparison.OrdinalIgnoreCase)==true) boost+=.04;
+        if(!string.IsNullOrWhiteSpace(candidate.Symbol)&&!candidate.Symbol.Any(char.IsDigit)&&!candidate.Symbol.EndsWith("ح",StringComparison.Ordinal)) boost+=.02;
+        return boost;
     }
 
     private static bool IsAmbiguous(EntityCandidateMatch first, EntityCandidateMatch second, double delta)
     {
         if (first.MatchKind is EntityMatchKind.ExactIdentifier) return false;
         if (first.CanonicalId == second.CanonicalId && first.Kind == second.Kind) return false;
+        if(IsPrimaryCashInstrument(first)&&!IsPrimaryCashInstrument(second)) return false;
         return first.Score - second.Score <= Math.Clamp(delta, 0.005, 0.15);
     }
+
+    private static bool IsPrimaryCashInstrument(EntityCandidateMatch candidate) =>
+        candidate.Kind==EntityKind.Instrument
+        && candidate.Metadata.TryGetValue("marketCategory",out var category)
+        && string.Equals(category,"cash",StringComparison.OrdinalIgnoreCase)
+        && candidate.InstrumentId?.EndsWith("0001",StringComparison.OrdinalIgnoreCase)==true
+        && !string.IsNullOrWhiteSpace(candidate.Symbol)
+        && !candidate.Symbol.Any(char.IsDigit)
+        && !candidate.Symbol.EndsWith("ح",StringComparison.Ordinal);
 
     private static double LengthPenalty(string candidate, string query)
     {

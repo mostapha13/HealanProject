@@ -11,7 +11,7 @@ public sealed class HttpKnowledgeRetriever(HttpClient http,ILogger<HttpKnowledge
     {
         try
         {
-            using var response=await http.PostAsJsonAsync("knowledge/retrieve",new { query,limit,source_type=context.SourceType,symbol=context.Symbol,date_from=context.DateFrom,date_to=context.DateTo,latest_first=context.LatestFirst,content_type_id=context.ContentTypeId,route=context.Route,language_id=context.LanguageId },ct);
+            using var response=await http.PostAsJsonAsync("knowledge/retrieve",new { query,limit,source_type=context.SourceType,symbol=context.Symbol,date_from=context.DateFrom,date_to=context.DateTo,latest_first=context.LatestFirst,content_type_id=context.ContentTypeId,route=context.Route,language_id=context.LanguageId,current_only=context.CurrentOnly },ct);
             if(!response.IsSuccessStatusCode)
             {
                 logger.LogWarning("Knowledge retrieval returned HTTP {Status}; returning an empty grounded result.",(int)response.StatusCode);

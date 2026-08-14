@@ -48,10 +48,12 @@ public sealed class DeterministicCapabilityRouter(
             return Decision(ChatCapabilityRoute.FilterAssets,ChatIntent.MarketFilter,1,["deterministic-filter-asset-command"],
                 [new("filter.assets","persistent-user-assets")]);
 
-        var filter=filters.Detect(question);
-        if(filter.IsFilter)
-            return Decision(ChatCapabilityRoute.FilterConversation,ChatIntent.MarketFilter,1,[filter.Reason],
-                [new("filter.chat","canonical-market-snapshot"),new("temporal.resolve","calendar-authority")]);
+        var requestedFields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
+        if(requestedFields.Count>0&&!PersianMarketQuestionSemantics.IsScreeningQuestion(question)&&!PersianMarketQuestionSemantics.HasKnowledgeFacet(question))
+            return FromPlan(ChatCapabilityRoute.MarketSymbol,
+                new ChatPlan(ChatIntent.MarketSymbol,question,null,0.99,null,["deterministic-market-ontology"],requestedFields),
+                [new("entity.resolve","sql-ai-reference"),new("structured.market.symbol","canonical-market-snapshot"),new("analytics.symbol","deterministic-calculation")],
+                ["deterministic-market-ontology"]);
 
         var sq=structured.Interpret(question,requestedPageSize);
         if(sq.Success && sq.Plan is not null)
@@ -59,6 +61,11 @@ public sealed class DeterministicCapabilityRouter(
                 ["deterministic-structured-query",..sq.Plan.MatchedRules],
                 [new("structured.query","canonical-market-snapshot"),new("data-quality","quality-gate")],
                 StructuredQuery:sq);
+
+        var filter=filters.Detect(question);
+        if(filter.IsFilter)
+            return Decision(ChatCapabilityRoute.FilterConversation,ChatIntent.MarketFilter,1,[filter.Reason],
+                [new("filter.chat","canonical-market-snapshot"),new("temporal.resolve","calendar-authority")]);
 
         // The AI planner is a bounded fallback for semantic intent/entity hints only.
         // It never chooses arbitrary tools: the returned intent is projected onto this fixed capability registry.

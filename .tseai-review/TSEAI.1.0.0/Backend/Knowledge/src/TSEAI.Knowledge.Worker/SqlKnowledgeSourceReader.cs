@@ -120,7 +120,7 @@ public sealed class SqlKnowledgeSourceReader
     private SqlConnection CreateConnection()
     {
         if (string.IsNullOrWhiteSpace(_options.ConnectionString)) throw new InvalidOperationException("Knowledge:ConnectionString is not configured.");
-        var csb=new SqlConnectionStringBuilder(_options.ConnectionString){ ApplicationIntent=ApplicationIntent.ReadOnly };
+        var csb=new SqlConnectionStringBuilder(_options.ConnectionString);
         return new SqlConnection(csb.ConnectionString);
     }
 

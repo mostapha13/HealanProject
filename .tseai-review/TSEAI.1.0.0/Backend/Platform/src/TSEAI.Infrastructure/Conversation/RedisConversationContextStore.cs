@@ -7,7 +7,7 @@ namespace TSEAI.Infrastructure.Conversation;
 public sealed class RedisConversationContextStore(IConnectionMultiplexer redis) : IConversationContextStore
 {
     private static readonly JsonSerializerOptions JsonOptions=new(JsonSerializerDefaults.Web);
-    private static readonly TimeSpan Ttl=TimeSpan.FromHours(6);
+    private static readonly TimeSpan Ttl=TimeSpan.FromDays(30);
     private readonly IDatabase _db=redis.GetDatabase();
     private static string Key(string subject,string conversationId)=>$"tseai:chat-context:v1:{subject}:{conversationId}";
 

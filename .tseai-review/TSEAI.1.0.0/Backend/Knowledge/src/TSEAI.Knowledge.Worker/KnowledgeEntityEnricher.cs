@@ -41,7 +41,7 @@ public sealed partial class KnowledgeEntityEnricher(KnowledgeOptions options, IL
             if(DateTimeOffset.UtcNow-_loadedAt<TimeSpan.FromMinutes(30)) return;
             var map=new Dictionary<string,(string,string?)>(StringComparer.OrdinalIgnoreCase);
             if(string.IsNullOrWhiteSpace(options.ConnectionString)) return;
-            var csb=new SqlConnectionStringBuilder(options.ConnectionString){ApplicationIntent=ApplicationIntent.ReadOnly};
+            var csb=new SqlConnectionStringBuilder(options.ConnectionString);
             await using var connection=new SqlConnection(csb.ConnectionString); await connection.OpenAsync(ct);
             await using(var exists=new SqlCommand("SELECT CASE WHEN OBJECT_ID('dbo.Instrument','U') IS NULL THEN 0 ELSE 1 END",connection))
                 if(Convert.ToInt32(await exists.ExecuteScalarAsync(ct))==0){ _loadedAt=DateTimeOffset.UtcNow; return; }

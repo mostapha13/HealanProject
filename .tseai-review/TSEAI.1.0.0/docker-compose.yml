@@ -57,6 +57,7 @@ services:
       TZ: ${TZ:-Asia/Tehran}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "sql-ai-host:${SQL_AI_HOST_GATEWAY:-host-gateway}"
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -116,6 +117,7 @@ services:
       TZ: ${TZ:-Asia/Tehran}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "sql-ai-host:${SQL_AI_HOST_GATEWAY:-host-gateway}"
     depends_on:
       redis:
         condition: service_healthy
@@ -207,6 +209,8 @@ services:
       Knowledge__WatermarkOverlapMinutes: ${KNOWLEDGE_WATERMARK_OVERLAP_MINUTES:-5}
       Knowledge__AiRequestTimeoutSeconds: ${KNOWLEDGE_AI_REQUEST_TIMEOUT_SECONDS:-300}
       TZ: ${TZ:-Asia/Tehran}
+    extra_hosts:
+      - "sql-ai-host:${SQL_AI_HOST_GATEWAY:-host-gateway}"
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -227,6 +231,7 @@ services:
       QDRANT_URL: http://qdrant:6333
       REDIS_URL: redis://redis:6379/0
       TZ: ${TZ:-Asia/Tehran}
+      LLM_CHAT_PLANNER_ENABLED: ${LLM_CHAT_PLANNER_ENABLED:-true}
       LLM_FILTER_PLANNER_ENABLED: ${LLM_FILTER_PLANNER_ENABLED:-true}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://local-llm:8080/v1}
       LLM_MODEL: ${LLM_MODEL:-qwen3.5-4b-fa}

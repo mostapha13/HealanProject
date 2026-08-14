@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using TSEAI.Application.Chat;
 
@@ -19,7 +20,7 @@ public sealed class HttpAiChatPlanner(HttpClient http,ILogger<HttpAiChatPlanner>
             var dto=await response.Content.ReadFromJsonAsync<PlanDto>(cancellationToken:ct);
             if(dto is null) return Unavailable();
             if(!Enum.TryParse<ChatIntent>(dto.Intent,true,out var intent)) intent=ChatIntent.Clarification;
-            return new(intent,dto.Symbol,dto.KnowledgeQuery,Math.Clamp(dto.Confidence,0,1),dto.Clarification,dto.Reasons??[]);
+            return new(intent,dto.Symbol,dto.KnowledgeQuery,Math.Clamp(dto.Confidence,0,1),dto.Clarification,dto.Reasons??[],dto.RequestedFields??[]);
         }
         catch(OperationCanceledException) when(ct.IsCancellationRequested) { throw; }
         catch(Exception ex)
@@ -29,5 +30,12 @@ public sealed class HttpAiChatPlanner(HttpClient http,ILogger<HttpAiChatPlanner>
         }
     }
     private static ChatPlan Unavailable()=>new(ChatIntent.Clarification,null,null,0,"سرویس هوش مصنوعی موقتاً در دسترس نیست؛ چند لحظه دیگر دوباره تلاش کنید.",["ai-planner-unavailable"]);
-    private sealed record PlanDto(string Intent,string? Symbol,string? KnowledgeQuery,double Confidence,string? Clarification,string[]? Reasons);
+    private sealed record PlanDto(
+        string Intent,
+        string? Symbol,
+        [property: JsonPropertyName("knowledge_query")] string? KnowledgeQuery,
+        double Confidence,
+        string? Clarification,
+        string[]? Reasons,
+        [property: JsonPropertyName("requested_fields")] string[]? RequestedFields);
 }

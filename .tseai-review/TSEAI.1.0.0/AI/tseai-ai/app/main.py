@@ -17,6 +17,10 @@ from .filter_planner import interpret_filter
 from .knowledge import KnowledgeDocument, KnowledgeService, QdrantKnowledgeStore, create_embedding_provider
 from .llm_conversation_planner import plan_conversation_with_llm
 from .llm_filter_planner import plan_with_llm
+from .llm_chat_planner import plan_chat_with_llm
+from .llm_conversation_rewriter import rewrite_conversation_with_llm
+from .llm_grounded_answer import synthesize_grounded_answer
+from .llm_chat_reflection import reflect_chat_with_llm
 
 knowledge_service = KnowledgeService(QdrantKnowledgeStore(), create_embedding_provider())
 knowledge_index_lock = asyncio.Lock()
@@ -81,6 +85,22 @@ class ChatReflectionRequest(BaseModel):
     confidence: float = Field(ge=0, le=1)
     evidenceCount: int = Field(default=0, ge=0, le=100)
     failedTools: list[str] = Field(default_factory=list, max_length=20)
+    evidence: list[str] = Field(default_factory=list, max_length=20)
+
+
+class ConversationRewriteRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=4000)
+    activeReference: dict | None = None
+    recentTurns: list[dict] = Field(default_factory=list, max_length=12)
+
+
+class GroundedAnswerRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=4000)
+    structuredAnswer: str = Field(min_length=1, max_length=20000)
+    structuredFacts: list[dict] = Field(default_factory=list, max_length=50)
+    evidence: list[dict] = Field(default_factory=list, max_length=20)
+    missingFacets: list[str] = Field(default_factory=list, max_length=20)
+    recentTurns: list[dict] = Field(default_factory=list, max_length=12)
 
 
 async def body(request: Request, model: type[BaseModel]) -> BaseModel:
@@ -126,22 +146,51 @@ async def health(_: Request) -> JSONResponse:
 
 async def chat_plan(request: Request) -> JSONResponse:
     req = await body(request, ChatPlanRequest)
-    plan = plan_chat(req.question)
+    plan = await plan_chat_with_llm(req.question)
+    planner_name = "llm-semantic-v1"
+    if plan is None:
+        plan = plan_chat(req.question)
+        planner_name = "deterministic-allowlist-v1"
     return JSONResponse({
         "intent": plan.intent, "symbol": plan.symbol, "knowledge_query": plan.knowledge_query,
         "confidence": plan.confidence, "clarification": plan.clarification,
-        "reasons": plan.reasons, "planner": "deterministic-allowlist-v1",
+        "reasons": plan.reasons, "requested_fields": plan.requested_fields or [], "planner": planner_name,
     })
 
 
 async def chat_reflect(request: Request) -> JSONResponse:
     req = await body(request, ChatReflectionRequest)
-    result = reflect_chat(req.question, req.answer, req.intent, req.confidence, req.evidenceCount, req.failedTools)
+    result = await reflect_chat_with_llm(req.model_dump())
+    reflector_name = "bounded-llm-v1"
+    if result is None:
+        result = reflect_chat(req.question, req.answer, req.intent, req.confidence, req.evidenceCount, req.failedTools)
+        reflector_name = "bounded-deterministic-v1"
     return JSONResponse({
         "action": result.action, "improvedQuery": result.improved_query,
         "clarification": result.clarification, "reasons": result.reasons,
-        "reflector": "bounded-deterministic-v1",
+        "reflector": reflector_name,
     })
+
+
+async def chat_rewrite(request: Request) -> JSONResponse:
+    req = await body(request, ConversationRewriteRequest)
+    result = await rewrite_conversation_with_llm(req.question, req.activeReference, req.recentTurns)
+    if result is None:
+        result = {"standalone_question": req.question, "context_applied": False, "reason": "rewriter-unavailable"}
+    return JSONResponse({
+        "standaloneQuestion": result["standalone_question"],
+        "contextApplied": result["context_applied"],
+        "reason": result.get("reason"),
+        "rewriter": "llm-context-v1" if result["context_applied"] else "no-context-v1",
+    })
+
+
+async def chat_synthesize(request: Request) -> JSONResponse:
+    req = await body(request, GroundedAnswerRequest)
+    answer = await synthesize_grounded_answer(req.model_dump())
+    if answer is None:
+        return JSONResponse({"code": "synthesis_unavailable"}, status_code=503)
+    return JSONResponse({"answer": answer, "synthesizer": "grounded-local-llm-v1"})
 
 
 async def filter_interpret(request: Request) -> JSONResponse:
@@ -224,6 +273,8 @@ routes = [
     Route("/health", health, methods=["GET"]),
     Route("/chat/plan", chat_plan, methods=["POST"]),
     Route("/chat/reflect", chat_reflect, methods=["POST"]),
+    Route("/chat/rewrite", chat_rewrite, methods=["POST"]),
+    Route("/chat/synthesize", chat_synthesize, methods=["POST"]),
     Route("/filter/interpret", filter_interpret, methods=["POST"]),
     Route("/filter/conversation/interpret", filter_conversation_interpret, methods=["POST"]),
     Route("/knowledge/index", knowledge_index, methods=["POST"]),

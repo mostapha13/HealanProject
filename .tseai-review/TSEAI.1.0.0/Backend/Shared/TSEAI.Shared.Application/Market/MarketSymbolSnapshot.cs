@@ -29,6 +29,32 @@ public sealed class MarketSymbolSnapshot
     public decimal FirstPrice { get; set; }
     public decimal YesterdayPrice { get; set; }
 
+    // Cashmarket source facts that must remain available to deterministic chat
+    // answers. Keeping them in the canonical Redis snapshot avoids a second SQL
+    // read for every question and lets the evidence guard validate every number.
+    public decimal? RawMinValue { get; set; }
+    public decimal? RawMaxValue { get; set; }
+    public decimal? EffectOnIndex { get; set; }
+    public decimal? BestAskPrice { get; set; }
+    public long? BestAskQuantity { get; set; }
+    public long? BestAskCount { get; set; }
+    public decimal? BestBidPrice { get; set; }
+    public long? BestBidQuantity { get; set; }
+    public long? BestBidCount { get; set; }
+    public int? MarketId { get; set; }
+    public string? MarketName { get; set; }
+    public string? MarketTypeCode { get; set; }
+    public string? MarketTypeName { get; set; }
+    public string? BoardId { get; set; }
+    public string? BoardName { get; set; }
+    public string? IndustryName { get; set; }
+    public long? IndustrySubId { get; set; }
+    public string? IndustrySubName { get; set; }
+    public string? SecuritiesId { get; set; }
+    public string? SecuritiesName { get; set; }
+    public string? StateId { get; set; }
+    public string? StateName { get; set; }
+
     // If the source supplies TSETMC-calculated percentage/change columns, keep them verbatim.
     // Otherwise V1 falls back to deterministic calculation from prices.
     public decimal? SourceLastPricePercent { get; set; }
@@ -47,6 +73,8 @@ public sealed class MarketSymbolSnapshot
     public decimal? NavCancellation { get; set; }
     public ClientTypeSnapshot ClientType { get; set; } = new();
     public OrderBookLevel[] OrderBook { get; set; } = Enumerable.Range(1, 5).Select(i => new OrderBookLevel { Level = i }).ToArray();
+    public DateTime? OrderBookUpdatedAt { get; set; }
+    public DateTime? OrderBookSourceCollectedAt { get; set; }
     public DateTime? SourceLastModified { get; set; }
     public DateTime SnapshotUpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
@@ -57,6 +85,9 @@ public sealed class MarketSymbolSnapshot
 
 public sealed class ClientTypeSnapshot
 {
+    public long? Counter { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? SourceCollectedAt { get; set; }
     public long BuyCountI { get; set; }
     public long BuyCountN { get; set; }
     public long BuyIVolume { get; set; }
@@ -65,11 +96,13 @@ public sealed class ClientTypeSnapshot
     public long SellCountN { get; set; }
     public long SellIVolume { get; set; }
     public long SellNVolume { get; set; }
+    public bool HasData => SourceCollectedAt.HasValue;
 }
 
 public sealed class OrderBookLevel
 {
     public int Level { get; set; }
+    public long? BestLimitCounter { get; set; }
     public decimal BuyPrice { get; set; }
     public long BuyCount { get; set; }
     public long BuyVolume { get; set; }

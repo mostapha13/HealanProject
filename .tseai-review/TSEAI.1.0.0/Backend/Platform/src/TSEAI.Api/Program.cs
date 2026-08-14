@@ -290,6 +290,14 @@ app.MapPost("/api/chat/ask", async (
             s.Subject, s.Authenticated, s.AnonymousSubject, assetAuthorization,
             new ChatOrchestrationRequest(req.Question, conversationId, req.Page ?? 1, req.PageSize ?? req.MaxResults ?? 100, req.SortBy, req.SortDescending ?? true), ct);
 
+        // UI prose is Persian-calendar only. Typed DTO timestamps intentionally
+        // remain ISO/Gregorian so API contracts and date arithmetic stay stable.
+        result = result with
+        {
+            Answer = PersianDisplayText.LocalizeDates(result.Answer),
+            Clarification = result.Clarification is null ? null : PersianDisplayText.LocalizeDates(result.Clarification)
+        };
+
         if (result.Intent == ChatIntent.Clarification || IsChatAssetResult(result.Type))
             await quota.ReleaseAsync(s.Subject, s.Authenticated, ct);
 

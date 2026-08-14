@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "generatedAtUtc": "2026-08-14T07:50:42.767118+00:00",
+  "total": 24,
+  "passed": 24,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 860.48,
+  "p95LatencyMs": 3588.92,
+  "clusters": {
+    "ceo-role": {
+      "total": 3,
+      "passed": 3
+    },
+    "current-date": {
+      "total": 3,
+      "passed": 3
+    },
+    "eps": {
+      "total": 2,
+      "passed": 2
+    },
+    "market-ranking": {
+      "total": 2,
+      "passed": 2
+    },
+    "market-value": {
+      "total": 3,
+      "passed": 3
+    },
+    "pe": {
+      "total": 3,
+      "passed": 3
+    },
+    "price-time": {
+      "total": 2,
+      "passed": 2
+    },
+    "technology-role": {
+      "total": 4,
+      "passed": 4
+    },
+    "trade-count": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "failures": []
+}

@@ -8,27 +8,42 @@ namespace TSEAI.MarketRuntime.Worker;
 public static class DefaultMarketQueries
 {
     public const string Instruments = """
+        WITH book_codes AS
+        (
+            SELECT InstrumentID, MAX(InsCode) AS InsCode
+            FROM dbo.OrderBookCurrent
+            GROUP BY InstrumentID
+        )
         SELECT
-            CONVERT(nvarchar(255), i.InstrumentID) AS InstrumentId,
-            CONVERT(nvarchar(255), i.InstrumentID) AS SymbolCode,
-            COALESCE(NULLIF(i.LVal18AFC, N''), NULLIF(c.Instrumentname, N''), i.InstrumentID) AS Symbol,
-            COALESCE(NULLIF(i.LVal30, N''), NULLIF(c.Instrumentname, N''), i.InstrumentID) AS SymbolName,
+            CONVERT(nvarchar(255), c.InstrumentID) AS InstrumentId,
+            CONVERT(nvarchar(255), c.InstrumentID) AS SymbolCode,
+            COALESCE(NULLIF(i.LVal18AFC, N''), NULLIF(c.Instrumentname, N''), c.InstrumentID) AS Symbol,
+            COALESCE(NULLIF(i.LVal30, N''), NULLIF(c.Companynamepersian,N''), NULLIF(c.Instrumentname, N''), c.InstrumentID) AS SymbolName,
             COALESCE(NULLIF(c.Companynamepersian, N''), NULLIF(i.LSoc30, N'')) AS CompanyName,
             COALESCE(TRY_CONVERT(int, c.Markettypeid), i.MarketCateryId) AS MarketTypeId,
             TRY_CONVERT(bigint, i.ZTitad) AS Investment,
-            i.InsCode
-        FROM dbo.Instrument i
-        INNER JOIN dbo.Cashmarket c ON c.Instrumentid = i.InstrumentID
-        WHERE i.Valid = 1 AND i.InsCode > 0;
+            COALESCE(i.InsCode, ob.InsCode,
+                CONVERT(bigint,8000000000000000000 + ABS(CONVERT(bigint,SUBSTRING(HASHBYTES('SHA2_256',CONVERT(varbinary(max),c.Instrumentid)),1,8)) % 1000000000000000000))) AS InsCode
+        FROM dbo.Cashmarket c
+        LEFT JOIN dbo.Instrument i ON c.Instrumentid = i.InstrumentID
+        LEFT JOIN book_codes ob ON ob.InstrumentID = c.Instrumentid
+        WHERE (i.InstrumentID IS NULL OR (i.Valid = 1 AND i.InsCode > 0));
         """;
 
     public const string CurrentState = """
+        WITH book_codes AS
+        (
+            SELECT InstrumentID, MAX(InsCode) AS InsCode
+            FROM dbo.OrderBookCurrent
+            GROUP BY InstrumentID
+        )
         SELECT
-            i.InsCode,
+            COALESCE(i.InsCode, ob.InsCode,
+                CONVERT(bigint,8000000000000000000 + ABS(CONVERT(bigint,SUBSTRING(HASHBYTES('SHA2_256',CONVERT(varbinary(max),c.Instrumentid)),1,8)) % 1000000000000000000))) AS InsCode,
             CONVERT(int, CONVERT(char(8), c.SourceCollectedAt, 112)) AS TradingDate,
             CONVERT(int, REPLACE(CONVERT(char(8), c.SourceCollectedAt, 108), ':', '')) AS EventTime,
-            COALESCE(NULLIF(i.LVal18AFC, N''), NULLIF(c.Instrumentname, N''), i.InstrumentID) AS Symbol,
-            COALESCE(NULLIF(i.LVal30, N''), NULLIF(c.Instrumentname, N''), i.InstrumentID) AS SymbolName,
+            COALESCE(NULLIF(i.LVal18AFC, N''), NULLIF(c.Instrumentname, N''), c.InstrumentID) AS Symbol,
+            COALESCE(NULLIF(i.LVal30, N''), NULLIF(c.Companynamepersian,N''), NULLIF(c.Instrumentname, N''), c.InstrumentID) AS SymbolName,
             COALESCE(c.Tradecount, 0) AS TradeCount,
             COALESCE(c.Tradevolume, 0) AS TradeVolume,
             COALESCE(c.Tradevalue, 0) AS TradeValue,
@@ -42,6 +57,28 @@ public static class DefaultMarketQueries
             COALESCE(c.Highvalue, 0) AS MaxPrice,
             COALESCE(c.Firstprice, 0) AS FirstPrice,
             COALESCE(c.YesterdayPrice, 0) AS YesterdayPrice,
+            TRY_CONVERT(decimal(38, 10), c.MinValue) AS RawMinValue,
+            TRY_CONVERT(decimal(38, 10), c.MaxValue) AS RawMaxValue,
+            TRY_CONVERT(decimal(38, 10), c.Effectonindex) AS EffectOnIndex,
+            TRY_CONVERT(decimal(38, 10), c.Sellprice) AS BestAskPrice,
+            TRY_CONVERT(bigint, c.Sellquantity) AS BestAskQuantity,
+            TRY_CONVERT(bigint, c.Sellcount) AS BestAskCount,
+            TRY_CONVERT(decimal(38, 10), c.Buyprice) AS BestBidPrice,
+            TRY_CONVERT(bigint, c.Buyquantity) AS BestBidQuantity,
+            TRY_CONVERT(bigint, c.Buycount) AS BestBidCount,
+            c.Marketid AS MarketId,
+            c.Marketname AS MarketName,
+            c.Markettypeid AS MarketTypeCode,
+            c.Markettypename AS MarketTypeName,
+            c.Boardid AS BoardId,
+            c.Boardname AS BoardName,
+            c.Industryname AS IndustryName,
+            TRY_CONVERT(bigint, c.Industrysubid) AS IndustrySubId,
+            c.Industrysubname AS IndustrySubName,
+            c.Securitiesid AS SecuritiesId,
+            c.Securitiesname AS SecuritiesName,
+            c.Stateid AS StateId,
+            c.Statename AS StateName,
             c.Eps,
             c.Pe AS PE,
             i.PSaiSMinOkValMdv AS MinAllowedPrice,
@@ -54,8 +91,9 @@ public static class DefaultMarketQueries
             CAST(NULL AS decimal(38, 10)) AS NavCancellation,
             c.SourceCollectedAt AS LastModified
         FROM dbo.Cashmarket c
-        INNER JOIN dbo.Instrument i ON i.InstrumentID = c.Instrumentid
-        WHERE i.Valid = 1
+        LEFT JOIN dbo.Instrument i ON i.InstrumentID = c.Instrumentid
+        LEFT JOIN book_codes ob ON ob.InstrumentID = c.Instrumentid
+        WHERE (i.InstrumentID IS NULL OR i.Valid = 1)
           AND c.SourceCollectedAt > @Watermark;
         """;
 
@@ -72,6 +110,9 @@ public static class DefaultMarketQueries
         SELECT
             InsCode,
             SourceCollectedAt AS LastModified,
+            ClientType_counter AS Counter,
+            creationTime AS UpdatedAt,
+            SourceCollectedAt,
             COALESCE(Buy_CountI, 0) AS BuyCountI,
             COALESCE(Buy_CountN, 0) AS BuyCountN,
             COALESCE(TRY_CONVERT(bigint, Buy_I_Volume), 0) AS BuyIVolume,
@@ -87,8 +128,11 @@ public static class DefaultMarketQueries
     public const string OrderBook = """
         SELECT
             ob.InsCode,
-            COALESCE(ob.OrderBookUpdatedAt, ob.SourceCollectedAt) AS LastModified,
+            ob.SourceCollectedAt AS LastModified,
+            ob.OrderBookUpdatedAt,
+            ob.SourceCollectedAt,
             TRY_CONVERT(int, ob.[Level]) AS [Level],
+            ob.BestLimitCounter,
             COALESCE(ob.BuyPrice, 0) AS BuyPrice,
             COALESCE(ob.BuyCount, 0) AS BuyCount,
             COALESCE(ob.BuyQuantity, 0) AS BuyVolume,

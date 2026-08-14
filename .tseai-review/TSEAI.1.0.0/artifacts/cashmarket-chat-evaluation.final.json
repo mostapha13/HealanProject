@@ -1,0 +1,975 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-14T10:38:37.150857+00:00",
+  "total": 50,
+  "passed": 50,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 3934.61,
+  "p95LatencyMs": 4087.27,
+  "clusters": {
+    "classification": {
+      "total": 4,
+      "passed": 4
+    },
+    "closing-price": {
+      "total": 3,
+      "passed": 3
+    },
+    "combined": {
+      "total": 2,
+      "passed": 2
+    },
+    "derived": {
+      "total": 5,
+      "passed": 5
+    },
+    "index-effect": {
+      "total": 1,
+      "passed": 1
+    },
+    "last-price": {
+      "total": 4,
+      "passed": 4
+    },
+    "missing-source-field": {
+      "total": 2,
+      "passed": 2
+    },
+    "observation-time": {
+      "total": 1,
+      "passed": 1
+    },
+    "price-change": {
+      "total": 4,
+      "passed": 4
+    },
+    "ranking": {
+      "total": 7,
+      "passed": 7
+    },
+    "screening": {
+      "total": 2,
+      "passed": 2
+    },
+    "session-price": {
+      "total": 7,
+      "passed": 7
+    },
+    "summary": {
+      "total": 1,
+      "passed": 1
+    },
+    "trading-activity": {
+      "total": 4,
+      "passed": 4
+    },
+    "valuation": {
+      "total": 3,
+      "passed": 3
+    }
+  },
+  "results": [
+    {
+      "id": "CM-001",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4275.5,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: آخرین قیمت 21,680 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-002",
+      "cluster": "last-price",
+      "question": "ملی صنایع مس الان روی چه قیمتی معامله میشه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4087.27,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: آخرین قیمت 21,680 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-003",
+      "cluster": "last-price",
+      "question": "آخرین نرخ وبملت رو بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3909.37,
+      "type": "marketsymbol",
+      "entity": "وبملت",
+      "answer": "وبملت: آخرین قیمت 1,331 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-004",
+      "cluster": "last-price",
+      "question": "قیمت لحظه‌ای ایران خودرو چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4027.62,
+      "type": "marketsymbol",
+      "entity": "خودرو",
+      "answer": "خودرو: آخرین قیمت 584 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-005",
+      "cluster": "closing-price",
+      "question": "قیمت پایانی فملی را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3934.48,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت پایانی 21,660 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-006",
+      "cluster": "closing-price",
+      "question": "فملی چند بسته شد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3932.46,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت پایانی 21,660 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-007",
+      "cluster": "closing-price",
+      "question": "پایانی شپنا؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3944.24,
+      "type": "marketsymbol",
+      "entity": "شپنا",
+      "answer": "شپنا: قیمت پایانی 9,650 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-008",
+      "cluster": "trading-activity",
+      "question": "حجم معاملات فملی چقدر بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3908.15,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "CM-009",
+      "cluster": "trading-activity",
+      "question": "امروز چندتا سهم خودرو دست به دست شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3934.43,
+      "type": "marketsymbol",
+      "entity": "خودرو",
+      "answer": "خودرو: حجم معاملات 7,553,067,214 سهم است.",
+      "error": null
+    },
+    {
+      "id": "CM-010",
+      "cluster": "trading-activity",
+      "question": "ارزش دادوستد فملی رو اعلام کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3940.68,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: ارزش معاملات 12,630,826,540,900 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-011",
+      "cluster": "trading-activity",
+      "question": "چند معامله روی فملی انجام شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4001.38,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: تعداد معاملات 45,797 است.",
+      "error": null
+    },
+    {
+      "id": "CM-012",
+      "cluster": "valuation",
+      "question": "ارزش بازار فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4045.01,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: ارزش بازار 31,219,200,000,000,000 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-013",
+      "cluster": "valuation",
+      "question": "نسبت قیمت به سود ملی مس چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4006.16,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: P/E برابر 15.35 است.",
+      "error": null
+    },
+    {
+      "id": "CM-014",
+      "cluster": "valuation",
+      "question": "سود هر سهم فملی را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3929.68,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: EPS برابر 1,411 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-015",
+      "cluster": "session-price",
+      "question": "قیمت اولین معامله فملی چند بود؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3936.29,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت اولین معامله 22,060 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-016",
+      "cluster": "session-price",
+      "question": "فملی با چه قیمتی باز شد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3967.86,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت اولین معامله 22,060 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-017",
+      "cluster": "session-price",
+      "question": "قیمت روز قبل فملی چقدر ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3933.78,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت روز قبل 21,430 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-018",
+      "cluster": "session-price",
+      "question": "مبنای فملی چند بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3924.28,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت روز قبل 21,430 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-019",
+      "cluster": "session-price",
+      "question": "سقف قیمت روز فملی چند بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4022.12,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: بالاترین قیمت روز 22,070 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-020",
+      "cluster": "session-price",
+      "question": "کمترین نرخ معامله فملی را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3958.87,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: کمترین قیمت روز 20,970 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-021",
+      "cluster": "session-price",
+      "question": "فملی امروز بین چه قیمت‌هایی معامله شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3933.98,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: فاصله کمترین تا بیشترین قیمت روز 1,100 ریال (20,970 تا 22,070) است.",
+      "error": null
+    },
+    {
+      "id": "CM-022",
+      "cluster": "price-change",
+      "question": "تغییر آخرین قیمت فملی چند ریال بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3951.85,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: آخرین قیمت 21,680 ریال، تغییر آخرین قیمت +250.00 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-023",
+      "cluster": "price-change",
+      "question": "فملی چند درصد بالا رفته؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4037.96,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: درصد تغییر آخرین قیمت +1.17٪ است.",
+      "error": null
+    },
+    {
+      "id": "CM-024",
+      "cluster": "price-change",
+      "question": "تغییر قیمت پایانی فملی را به ریال بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3941.91,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت پایانی 21,660 ریال، تغییر قیمت پایانی +230.00 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-025",
+      "cluster": "price-change",
+      "question": "درصد تغییر پایانی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3934.84,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: قیمت پایانی 21,660 ریال، تغییر قیمت پایانی +230.00 ریال، درصد تغییر قیمت پایانی +1.07٪ است.",
+      "error": null
+    },
+    {
+      "id": "CM-026",
+      "cluster": "index-effect",
+      "question": "فملی چند واحد روی شاخص اثر گذاشته؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3946.17,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: اثر بر شاخص +22,074.17 واحد است.",
+      "error": null
+    },
+    {
+      "id": "CM-027",
+      "cluster": "classification",
+      "question": "فملی در کدام بازار معامله می‌شود؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4023.69,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: بازار «بورس» با نوع «نرمال» است.",
+      "error": null
+    },
+    {
+      "id": "CM-028",
+      "cluster": "classification",
+      "question": "تابلوی معاملاتی ملی صنایع مس ایران چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4070.14,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: تابلوی معاملاتی «بازار اول - اصلی» است.",
+      "error": null
+    },
+    {
+      "id": "CM-029",
+      "cluster": "classification",
+      "question": "فملی در چه صنعت و زیرصنعتی قرار دارد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3993.79,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: صنعت «فلزات اساسی»، زیرصنعت «تولید فلزات گرانب‌های غیرآهن» است.",
+      "error": null
+    },
+    {
+      "id": "CM-030",
+      "cluster": "classification",
+      "question": "وضعیت معاملاتی نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3934.75,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: وضعیت معاملاتی «مجاز» است.",
+      "error": null
+    },
+    {
+      "id": "CM-031",
+      "cluster": "observation-time",
+      "question": "داده قیمت فملی مربوط به چه تاریخیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3979.19,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده برای فملی مربوط به 1405/05/20 شمسی (2026/08/11 میلادی) ساعت 11:29:22 است.",
+      "error": null
+    },
+    {
+      "id": "CM-032",
+      "cluster": "summary",
+      "question": "یه گزارش کامل و خلاصه از وضعیت فعلی فملی بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4100.93,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی — ملی‌ صنایع‌ مس‌ ایران‌\nآخرین قیمت 21,680 ریال (+1.17٪) و قیمت پایانی 21,660 ریال (+1.07٪) است؛ بازه روز 20,970 تا 22,070 ریال بوده است.\nحجم معاملات 583,222,314 سهم در 45,797 معامله و ارزش معاملات 12,630,826,540,900 ریال است.\nارزش بازار 31,219,200,000,000,000 ریال، P/E 15.35، EPS 1,411 ریال.\nبازار بورس، تابلوی بازار اول - اصلی، وضعیت مجاز؛ زمان داده 1405/05/20 شمسی (2026/08/11 میلادی) ساعت 11:29:22.\n\nتحلیل محاسباتی: قدرت خریدار حقیقی 13.47، عدم‌تعادل اردربوک 0.11، نسبت حجم به حجم مبنا 583222314.",
+      "error": null
+    },
+    {
+      "id": "CM-033",
+      "cluster": "combined",
+      "question": "آخرین قیمت، پایانی و قیمت روز قبل فملی را یکجا بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3920.38,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: آخرین قیمت 21,680 ریال، قیمت پایانی 21,660 ریال، قیمت روز قبل 21,430 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-034",
+      "cluster": "combined",
+      "question": "حجم، ارزش و تعداد معاملات فملی چقدر بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3917.66,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم، ارزش معاملات 12,630,826,540,900 ریال، تعداد معاملات 45,797 است.",
+      "error": null
+    },
+    {
+      "id": "CM-035",
+      "cluster": "derived",
+      "question": "میانگین وزنی قیمت معاملات فملی چقدر می‌شود؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4081.35,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: آخرین قیمت 21,680 ریال، میانگین وزنی قیمت معامله حدود 21,656.97 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-036",
+      "cluster": "derived",
+      "question": "متوسط ارزش هر معامله فملی را حساب کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3924.0,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: میانگین ارزش هر معامله حدود 275,800,304 ریال است.",
+      "error": null
+    },
+    {
+      "id": "CM-037",
+      "cluster": "derived",
+      "question": "به طور میانگین در هر معامله فملی چند سهم جابه‌جا شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3907.35,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم، میانگین حجم هر معامله حدود 12,734.95 سهم است.",
+      "error": null
+    },
+    {
+      "id": "CM-038",
+      "cluster": "derived",
+      "question": "فاصله سقف تا کف قیمت فملی چقدر بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3913.45,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: کمترین قیمت روز 20,970 ریال، فاصله کمترین تا بیشترین قیمت روز 1,100 ریال (20,970 تا 22,070) است.",
+      "error": null
+    },
+    {
+      "id": "CM-039",
+      "cluster": "derived",
+      "question": "نسبت ارزش معاملات به ارزش بازار فملی را محاسبه کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4063.43,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: نسبت ارزش معاملات به ارزش بازار 0.0405٪ است.",
+      "error": null
+    },
+    {
+      "id": "CM-040",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین حجم معاملات را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 162.92,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. وبملت — بانک ملت: حجم معاملات 9,435,728,461 سهم\n2. خودرو — ایران‌ خودرو: حجم معاملات 7,553,067,214 سهم\n3. وتجارت — بانک تجارت: حجم معاملات 4,309,491,482 سهم\n4. وبصادر — بانک صادرات ایران: حجم معاملات 2,722,937,868 سهم\n5. خساپا — سایپا: حجم معاملات 2,605,035,886 سهم",
+      "error": null
+    },
+    {
+      "id": "CM-041",
+      "cluster": "ranking",
+      "question": "بالاترین ارزش معاملات بازار متعلق به چه نمادهایی است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 40.19,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: ارزش معاملات 12,630,826,540,900 ریال\n2. وبملت — بانک ملت: ارزش معاملات 12,520,769,000,526 ریال\n3. وغدیر — سرمایه‌گذاری‌غدیر(هلدینگ‌: ارزش معاملات 4,948,285,897,640 ریال\n4. خودرو — ایران‌ خودرو: ارزش معاملات 4,394,039,140,773 ریال\n5. پخش — پخش البرز: ارزش معاملات 3,967,159,106,010 ریال\n6. اروند — پتروشیمی اروند: ارزش معاملات 3,707,900,496,840 ریال\n7. سهگمت — سیمان‌هگمتان‌: ارزش معاملات 3,215,350,826,320 ریال\n8. جم — پتروشیمی جم: ارزش معاملات 3,058,359,059,070 ریال\n9. شتران — پالایش نفت تهران: ارزش معاملات 2,919,311,626,670 ریال\n10. شپدیس — پتروشیمی پردیس: ارزش معاملات 2,808,547,343,120 ریال",
+      "error": null
+    },
+    {
+      "id": "CM-042",
+      "cluster": "ranking",
+      "question": "سه سهمی که بیشترین تعداد دادوستد را داشته‌اند کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 25.35,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. پاریز — پاریز شرق: تعداد معاملات 196,698\n2. وبملت — بانک ملت: تعداد معاملات 65,654\n3. خودرو — ایران‌ خودرو: تعداد معاملات 46,429",
+      "error": null
+    },
+    {
+      "id": "CM-043",
+      "cluster": "ranking",
+      "question": "پنج شرکت با بزرگترین ارزش بازار را فهرست کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 28.03,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: ارزش بازار 31,219,200,000,000,000 ریال\n2. شپنا — پالایش نفت اصفهان: ارزش بازار 6,052,810,155,450,000 ریال\n3. وپاسار — بانک  پاسارگاد: ارزش بازار 4,985,916,246,180,000 ریال\n4. شبندر — پالایش نفت بندرعباس: ارزش بازار 4,855,452,915,885,000 ریال\n5. وبملت — بانک ملت: ارزش بازار 4,501,442,000,000,000 ریال\n6. شستا — سرمایه گذاری تامین اجتماعی: ارزش بازار 3,535,425,078,416,000 ریال\n7. پارسان — گسترش نفت و گاز پارسیان: ارزش بازار 3,517,425,000,000,000 ریال\n8. نوری — پتروشیمی نوری: ارزش بازار 3,480,000,000,000,000 ریال\n9. شتران — پالایش نفت تهران: ارزش بازار 3,464,775,000,000,000 ریال\n10. وغدیر — سرمایه‌گذاری‌غدیر(هلدینگ‌: ارزش بازار 3,242,160,000,000,000 ریال",
+      "error": null
+    },
+    {
+      "id": "CM-044",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین اثر مثبت روی شاخص را بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 24.4,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: اثر بر شاخص 22,074.17 واحد\n2. شپنا — پالایش نفت اصفهان: اثر بر شاخص 6,555.72 واحد\n3. شبندر — پالایش نفت بندرعباس: اثر بر شاخص 4,853.55 واحد\n4. وپاسار — بانک  پاسارگاد: اثر بر شاخص 4,416.25 واحد\n5. شستا — سرمایه گذاری تامین اجتماعی: اثر بر شاخص 3,818.84 واحد",
+      "error": null
+    },
+    {
+      "id": "CM-045",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین رشد آخرین قیمت کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 46.58,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. پخش — پخش البرز: تغییر آخرین قیمت 23.96٪\n2. دسبحان — سبحان دارو: تغییر آخرین قیمت 4.50٪\n3. دسینا — داروسازی‌ سینا: تغییر آخرین قیمت 3.63٪\n4. اپال — فرآوری معدنی اپال کانی پارس: تغییر آخرین قیمت 3.00٪\n5. اوان — مبین وان کیش: تغییر آخرین قیمت 3.00٪",
+      "error": null
+    },
+    {
+      "id": "CM-046",
+      "cluster": "ranking",
+      "question": "پنج سهم با بیشترین افت قیمت را نشان بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 56.42,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. واتی — سرمایه‌ گذاری‌ آتیه‌ دماوند: تغییر آخرین قیمت -3.37٪\n2. اروند — پتروشیمی اروند: تغییر آخرین قیمت -3.00٪\n3. تماوند — تامین سرمایه دماوند: تغییر آخرین قیمت -3.00٪\n4. خراسان — پتروشیمی خراسان: تغییر آخرین قیمت -3.00٪\n5. داوه — داروسازی آوه سینا: تغییر آخرین قیمت -3.00٪",
+      "error": null
+    },
+    {
+      "id": "CM-047",
+      "cluster": "missing-source-field",
+      "question": "بهترین قیمت خرید فملی در Cashmarket چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3919.8,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: بهترین سفارش خرید در Cashmarket ثبت نشده است.",
+      "error": null
+    },
+    {
+      "id": "CM-048",
+      "cluster": "missing-source-field",
+      "question": "حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3891.09,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: بهترین سفارش فروش در Cashmarket ثبت نشده است.",
+      "error": null
+    },
+    {
+      "id": "CM-049",
+      "cluster": "screening",
+      "question": "نمادهایی که P/E کمتر از ۶ دارند را پیدا کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 44.58,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. آردینه — نشاسته و گلوکز آردینه: P/E برابر 5.93\n2. آسیا — بیمه آسیا: P/E برابر 1.69\n3. اتکاسا — بیمه اتکایی سامان: P/E برابر 4.30\n4. اتکام — بیمه اتکایی امین: P/E برابر 2.17\n5. اتکای — بیمه اتکایی ایرانیان: P/E برابر 2.80\n6. اخابر — مخابرات ایران: P/E برابر 5.58\n7. اردستان — سیمان اردستان: P/E برابر 5.81\n8. ارفع — شرکت آهن و فولاد ارفع: P/E برابر 4.13\n9. اسیاتک — انتقال داده های آسیاتک: P/E برابر 2.37\n10. اعتلا — شرکت سرمایه گذاری اعتلاء البرز: P/E برابر 4.60\n10 نتیجه اول از 253 نماد منطبق نمایش داده شد.",
+      "error": null
+    },
+    {
+      "id": "CM-050",
+      "cluster": "screening",
+      "question": "پنج نماد با ارزش معاملات بیشتر از ۳ همت را از بیشترین به کمترین بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 42.72,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: ارزش معاملات 12,630,826,540,900 ریال\n2. وبملت — بانک ملت: ارزش معاملات 12,520,769,000,526 ریال\n3. وغدیر — سرمایه‌گذاری‌غدیر(هلدینگ‌: ارزش معاملات 4,948,285,897,640 ریال\n4. خودرو — ایران‌ خودرو: ارزش معاملات 4,394,039,140,773 ریال\n5. پخش — پخش البرز: ارزش معاملات 3,967,159,106,010 ریال\n5 نتیجه اول از 8 نماد منطبق نمایش داده شد.",
+      "error": null
+    }
+  ],
+  "failures": []
+}

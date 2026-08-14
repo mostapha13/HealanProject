@@ -1,0 +1,1043 @@
+{
+  "version": "orderbookcurrent-1.0",
+  "generatedAtUtc": "2026-08-14T18:09:53.487258+00:00",
+  "total": 50,
+  "passed": 38,
+  "passRate": 0.76,
+  "allPassed": false,
+  "p50LatencyMs": 3994.88,
+  "p95LatencyMs": 4105.49,
+  "clusters": {
+    "best-bid": {
+      "total": 5,
+      "passed": 5
+    },
+    "best-ask": {
+      "total": 4,
+      "passed": 4
+    },
+    "top-quotes": {
+      "total": 1,
+      "passed": 1
+    },
+    "cross-table": {
+      "total": 1,
+      "passed": 1
+    },
+    "spread": {
+      "total": 4,
+      "passed": 4
+    },
+    "depth": {
+      "total": 6,
+      "passed": 5
+    },
+    "notional": {
+      "total": 2,
+      "passed": 2
+    },
+    "levels": {
+      "total": 8,
+      "passed": 8
+    },
+    "book-state": {
+      "total": 3,
+      "passed": 3
+    },
+    "missing-book": {
+      "total": 1,
+      "passed": 1
+    },
+    "source-metadata": {
+      "total": 5,
+      "passed": 2
+    },
+    "ranking": {
+      "total": 10,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "OB-001",
+      "cluster": "best-bid",
+      "question": "بهترین قیمت خرید فملی چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین قیمت خرید 21,660 ریال",
+        "1405/04/03"
+      ],
+      "mustNotContain": [
+        "آخرین قیمت"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین قیمت خرید 21,660 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 7911.97
+    },
+    {
+      "id": "OB-002",
+      "cluster": "best-bid",
+      "question": "سرخط تقاضای ملی مس روی چه نرخی است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین قیمت خرید 21,660 ریال"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین قیمت خرید 21,660 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4247.6
+    },
+    {
+      "id": "OB-003",
+      "cluster": "best-bid",
+      "question": "حجم ردیف اول خرید فملی چند سهمه؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "حجم بهترین سفارش خرید 72,599 سهم"
+      ],
+      "mustNotContain": [
+        "حجم معاملات"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم بهترین سفارش خرید 72,599 سهم، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4023.91
+    },
+    {
+      "id": "OB-004",
+      "cluster": "best-bid",
+      "question": "تعداد سفارش بهترین خرید فملی؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "تعداد سفارش‌های بهترین خرید 2"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد سفارش‌های بهترین خرید 2، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3924.22
+    },
+    {
+      "id": "OB-005",
+      "cluster": "best-bid",
+      "question": "بهترین سفارش خرید فملی رو کامل بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "قیمت 21,660 ریال",
+        "حجم 72,599 سهم",
+        "2 سفارش"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین سفارش خرید با قیمت 21,660 ریال، حجم 72,599 سهم و 2 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4003.36
+    },
+    {
+      "id": "OB-006",
+      "cluster": "best-ask",
+      "question": "بهترین قیمت فروش فملی چند است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین قیمت فروش 21,660 ریال"
+      ],
+      "mustNotContain": [
+        "آخرین قیمت"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین قیمت فروش 21,660 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3907.66
+    },
+    {
+      "id": "OB-007",
+      "cluster": "best-ask",
+      "question": "حجم عرضه در سرخط فملی چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "حجم بهترین سفارش فروش 20,000 سهم"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم بهترین سفارش فروش 20,000 سهم، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3980.02
+    },
+    {
+      "id": "OB-008",
+      "cluster": "best-ask",
+      "question": "چند سفارش در بهترین فروش فملی هست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "تعداد سفارش‌های بهترین فروش 1"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد سفارش‌های بهترین فروش 1، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3919.1
+    },
+    {
+      "id": "OB-009",
+      "cluster": "best-ask",
+      "question": "بهترین سفارش فروش فملی را با جزئیات بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "قیمت 21,660 ریال",
+        "حجم 20,000 سهم",
+        "1 سفارش"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین سفارش فروش با قیمت 21,660 ریال، حجم 20,000 سهم و 1 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3988.36
+    },
+    {
+      "id": "OB-010",
+      "cluster": "top-quotes",
+      "question": "بهترین سفارش‌های خرید و فروش فملی را کنار هم بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین سفارش خرید",
+        "72,599 سهم",
+        "بهترین سفارش فروش",
+        "20,000 سهم"
+      ],
+      "maxAnswerChars": 430,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بهترین سفارش خرید با قیمت 21,660 ریال، حجم 72,599 سهم و 2 سفارش، بهترین سفارش فروش با قیمت 21,660 ریال، حجم 20,000 سهم و 1 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3999.82
+    },
+    {
+      "id": "OB-011",
+      "cluster": "cross-table",
+      "question": "آخرین قیمت و بهترین قیمت خرید فملی را یکجا بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "آخرین قیمت 21,680 ریال",
+        "بهترین قیمت خرید 21,660 ریال"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: آخرین قیمت 21,680 ریال، بهترین قیمت خرید 21,660 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3914.32
+    },
+    {
+      "id": "OB-012",
+      "cluster": "spread",
+      "question": "اختلاف قیمت خرید و فروش فملی در اردربوک چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "اختلاف بهترین قیمت فروش و خرید 0 ریال"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اختلاف بهترین قیمت فروش و خرید 0 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4003.9
+    },
+    {
+      "id": "OB-013",
+      "cluster": "spread",
+      "question": "اسپرد ریالی خساپا را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "خساپا",
+      "mustContain": [
+        "اختلاف بهترین قیمت فروش و خرید 2 ریال"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "خساپا: اختلاف بهترین قیمت فروش و خرید 2 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3975.98
+    },
+    {
+      "id": "OB-014",
+      "cluster": "spread",
+      "question": "درصد اسپرد خساپا نسبت به قیمت میانی چند است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "خساپا",
+      "mustContain": [
+        "0.3454٪"
+      ],
+      "mustNotContain": [
+        "آخرین قیمت"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "خساپا: درصد اختلاف مظنه نسبت به قیمت میانی 0.3454٪، قیمت میانی بهترین مظنه‌ها 579.00 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3911.65
+    },
+    {
+      "id": "OB-015",
+      "cluster": "spread",
+      "question": "قیمت میانی بهترین خرید و فروش خساپا چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "خساپا",
+      "mustContain": [
+        "قیمت میانی بهترین مظنه‌ها 579.00 ریال"
+      ],
+      "mustNotContain": [
+        "حجم"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "خساپا: قیمت میانی بهترین مظنه‌ها 579.00 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3992.58
+    },
+    {
+      "id": "OB-016",
+      "cluster": "depth",
+      "question": "عمق خرید فملی چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "مجموع حجم خرید پنج سطح 659,478 سهم"
+      ],
+      "maxAnswerChars": 290,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: مجموع حجم خرید پنج سطح 659,478 سهم، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3962.39
+    },
+    {
+      "id": "OB-017",
+      "cluster": "depth",
+      "question": "مجموع حجم فروش فملی در پنج ردیف را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "مجموع حجم فروش پنج سطح 525,776 سهم"
+      ],
+      "maxAnswerChars": 300,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:مجموع حجم فروش پنج سطح 525,776 سهم"
+      ],
+      "answer": "نماد یا ابزار «فملی پنج ردیف» در داده‌های مرجع ClientType پیدا نشد؛ نماد دقیق‌تری وارد کنید.",
+      "actualType": "structured_reference",
+      "latencyMs": 4042.75
+    },
+    {
+      "id": "OB-018",
+      "cluster": "depth",
+      "question": "کل تعداد سفارش خرید فملی در پنج سطح چندتاست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "مجموع تعداد سفارش‌های خرید پنج سطح 29"
+      ],
+      "maxAnswerChars": 310,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: مجموع تعداد سفارش‌های خرید پنج سطح 29، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4002.65
+    },
+    {
+      "id": "OB-019",
+      "cluster": "depth",
+      "question": "کل تعداد سفارش فروش فملی در اردربوک چند است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "مجموع تعداد سفارش‌های فروش پنج سطح 28"
+      ],
+      "maxAnswerChars": 310,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: مجموع تعداد سفارش‌های فروش پنج سطح 28، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3903.15
+    },
+    {
+      "id": "OB-020",
+      "cluster": "depth",
+      "question": "عدم تعادل اردربوک فملی چند درصده؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "عدم‌تعادل حجم پنج سطح +11.28٪"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: عدم‌تعادل حجم پنج سطح +11.28٪، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3987.16
+    },
+    {
+      "id": "OB-021",
+      "cluster": "depth",
+      "question": "نسبت تقاضا به عرضه فملی در عمق پنج سطح چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "نسبت عمق خرید به فروش 1.2543"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: نسبت عمق خرید به فروش 1.2543، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3997.19
+    },
+    {
+      "id": "OB-022",
+      "cluster": "notional",
+      "question": "ارزش سفارش‌های خرید فملی در پنج سطح چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "14,273,628,910 ریال"
+      ],
+      "maxAnswerChars": 330,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: ارزش اسمی سفارش‌های خرید پنج سطح 14,273,628,910 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3978.54
+    },
+    {
+      "id": "OB-023",
+      "cluster": "notional",
+      "question": "ارزش سمت فروش اردربوک فملی را حساب کن",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "11,406,367,280 ریال"
+      ],
+      "maxAnswerChars": 330,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: ارزش اسمی سفارش‌های فروش پنج سطح 11,406,367,280 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4052.56
+    },
+    {
+      "id": "OB-024",
+      "cluster": "levels",
+      "question": "بزرگترین ردیف خرید فملی کدامه؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 2",
+        "267,804 سهم",
+        "21,650 ریال"
+      ],
+      "maxAnswerChars": 330,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بزرگ‌ترین ردیف خرید سطح 2 با حجم 267,804 سهم در قیمت 21,650 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3991.98
+    },
+    {
+      "id": "OB-025",
+      "cluster": "levels",
+      "question": "بزرگترین ردیف فروش فملی کدام است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 4",
+        "268,081 سهم",
+        "21,700 ریال"
+      ],
+      "maxAnswerChars": 330,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: بزرگ‌ترین ردیف فروش سطح 4 با حجم 268,081 سهم در قیمت 21,700 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3942.53
+    },
+    {
+      "id": "OB-026",
+      "cluster": "levels",
+      "question": "قیمت و حجم خرید سطح دوم فملی را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 2: خرید 21,650 ریال، 267,804 سهم، 11 سفارش"
+      ],
+      "mustNotContain": [
+        "فروش"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 2: خرید 21,650 ریال، 267,804 سهم، 11 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3923.97
+    },
+    {
+      "id": "OB-027",
+      "cluster": "levels",
+      "question": "جزئیات فروش ردیف سوم فملی چیست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 3: فروش 21,690 ریال، 198,198 سهم، 7 سفارش"
+      ],
+      "mustNotContain": [
+        "خرید"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 3: فروش 21,690 ریال، 198,198 سهم، 7 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4009.15
+    },
+    {
+      "id": "OB-028",
+      "cluster": "levels",
+      "question": "سطح چهارم اردربوک فملی در دو سمت چه وضعی دارد؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 4",
+        "خرید 21,630 ریال",
+        "125,817 سهم",
+        "فروش 21,700 ریال",
+        "268,081 سهم"
+      ],
+      "maxAnswerChars": 440,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 4: خرید 21,630 ریال، 125,817 سهم، 5 سفارش | فروش 21,700 ریال، 268,081 سهم، 14 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4005.87
+    },
+    {
+      "id": "OB-029",
+      "cluster": "levels",
+      "question": "اردربوک کامل فملی را در پنج سطح نشان بده",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 1",
+        "سطح 2",
+        "سطح 3",
+        "سطح 4",
+        "سطح 5",
+        "72,599 سهم",
+        "268,081 سهم"
+      ],
+      "mustNotContain": [
+        "تحلیل محاسباتی"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 1: خرید 21,660 ریال، 72,599 سهم، 2 سفارش | فروش 21,660 ریال، 20,000 سهم، 1 سفارش\nسطح 2: خرید 21,650 ریال، 267,804 سهم، 11 سفارش | فروش 21,680 ریال، 19,497 سهم، 4 سفارش\nسطح 3: خرید 21,640 ریال، 175,915 سهم، 8 سفارش | فروش 21,690 ریال، 198,198 سهم، 7 سفارش\nسطح 4: خرید 21,630 ریال، 125,817 سهم، 5 سفارش | فروش 21,700 ریال، 268,081 سهم، 14 سفارش\nسطح 5: خرید 21,620 ریال، 17,343 سهم، 3 سفارش | فروش 21,710 ریال، 20,000 سهم، 2 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3986.95
+    },
+    {
+      "id": "OB-030",
+      "cluster": "levels",
+      "question": "همه ردیف‌های خرید اردربوک فملی را بده",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 1: خرید",
+        "سطح 5: خرید",
+        "267,804 سهم"
+      ],
+      "mustNotContain": [
+        "فروش"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 1: خرید 21,660 ریال، 72,599 سهم، 2 سفارش\nسطح 2: خرید 21,650 ریال، 267,804 سهم، 11 سفارش\nسطح 3: خرید 21,640 ریال، 175,915 سهم، 8 سفارش\nسطح 4: خرید 21,630 ریال، 125,817 سهم، 5 سفارش\nسطح 5: خرید 21,620 ریال، 17,343 سهم، 3 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 4006.5
+    },
+    {
+      "id": "OB-031",
+      "cluster": "levels",
+      "question": "فقط سمت فروش اردربوک فملی را در پنج ردیف بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "سطح 1: فروش",
+        "سطح 5: فروش",
+        "268,081 سهم"
+      ],
+      "mustNotContain": [
+        "خرید"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: اردربوک:\nسطح 1: فروش 21,660 ریال، 20,000 سهم، 1 سفارش\nسطح 2: فروش 21,680 ریال، 19,497 سهم، 4 سفارش\nسطح 3: فروش 21,690 ریال، 198,198 سهم، 7 سفارش\nسطح 4: فروش 21,700 ریال، 268,081 سهم، 14 سفارش\nسطح 5: فروش 21,710 ریال، 20,000 سهم، 2 سفارش، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3998.4
+    },
+    {
+      "id": "OB-032",
+      "cluster": "book-state",
+      "question": "وضعیت اردربوک فملی چطوره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "دوطرفه و قفل‌شده",
+        "بهترین قیمت خرید و فروش برابرند"
+      ],
+      "maxAnswerChars": 360,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: دفتر سفارش دوطرفه و قفل‌شده است؛ بهترین قیمت خرید و فروش برابرند، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3976.47
+    },
+    {
+      "id": "OB-033",
+      "cluster": "book-state",
+      "question": "شپنا صف خرید دارد؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "شپنا",
+      "mustContain": [
+        "یک‌طرفه خرید",
+        "صف خرید رسمی را اثبات نمی‌کند"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "شپنا: دفتر سفارش در سطح اول یک‌طرفه خرید است؛ چون دامنه مجاز قیمت در منبع موجود نیست، این وضعیت به‌تنهایی صف خرید رسمی را اثبات نمی‌کند، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3925.34
+    },
+    {
+      "id": "OB-034",
+      "cluster": "book-state",
+      "question": "تکنو صف فروش دارد؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "تکنو",
+      "mustContain": [
+        "یک‌طرفه فروش",
+        "صف فروش رسمی را اثبات نمی‌کند"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "تکنو: دفتر سفارش در سطح اول یک‌طرفه فروش است؛ چون دامنه مجاز قیمت در منبع موجود نیست، این وضعیت به‌تنهایی صف فروش رسمی را اثبات نمی‌کند، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3956.09
+    },
+    {
+      "id": "OB-035",
+      "cluster": "missing-book",
+      "question": "بهترین سفارش خرید رانیز چیه؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "رانیز",
+      "mustContain": [
+        "در جدول OrderBookCurrent رکوردی ثبت نشده"
+      ],
+      "mustNotContain": [
+        "قیمت 0"
+      ],
+      "maxAnswerChars": 230,
+      "passed": true,
+      "issues": [],
+      "answer": "برای رانیز در جدول OrderBookCurrent رکوردی ثبت نشده است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3898.39
+    },
+    {
+      "id": "OB-036",
+      "cluster": "source-metadata",
+      "question": "زمان به‌روزرسانی منبع و زمان جمع‌آوری اردربوک فملی را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "1405/04/03",
+        "1405/05/20",
+        "زمان جمع‌آوری آن در SQL"
+      ],
+      "maxAnswerChars": 360,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:1405/04/03",
+        "missing:زمان جمع‌آوری آن در SQL"
+      ],
+      "answer": "ملی صنایع مس ایران (نماد فملی): داده در 1405/05/20 ساعت 14:34:17 جمع‌آوری شده است",
+      "actualType": "structured_reference",
+      "latencyMs": 4173.11
+    },
+    {
+      "id": "OB-037",
+      "cluster": "source-metadata",
+      "question": "بهترین قیمت خرید وبملت چند است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "وبملت",
+      "mustContain": [
+        "بهترین قیمت خرید 1,331 ریال"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "وبملت: بهترین قیمت خرید 1,331 ریال، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3926.01
+    },
+    {
+      "id": "OB-038",
+      "cluster": "source-metadata",
+      "question": "InsCode وبملت در اردربوک چیست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "وبملت",
+      "mustContain": [
+        "InsCode برابر 778253364357513"
+      ],
+      "maxAnswerChars": 300,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:InsCode برابر 778253364357513"
+      ],
+      "answer": "برای ابزار «وبملت» رکورد منطبقی در جدول Instrument وجود ندارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 4046.64
+    },
+    {
+      "id": "OB-039",
+      "cluster": "source-metadata",
+      "question": "InstrumentID فملی در OrderBookCurrent چیه؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "InstrumentID برابر IRO1MSMI0001"
+      ],
+      "maxAnswerChars": 320,
+      "passed": false,
+      "issues": [
+        "type:structured_reference"
+      ],
+      "answer": "فملی: InstrumentID برابر IRO1MSMI0001 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4024.12
+    },
+    {
+      "id": "OB-040",
+      "cluster": "source-metadata",
+      "question": "BestLimitCounter اردربوک فملی چند است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "BestLimitCounter برابر 2,357,835"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: BestLimitCounter برابر 2,357,835، زمان به‌روزرسانی اردربوک 1405/04/03 ساعت 16:59:58 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 3912.51
+    },
+    {
+      "id": "OB-041",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین حجم بهترین سفارش خرید را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "شستا",
+        "حکشتی",
+        "وتجارت",
+        "وبصادر",
+        "وفیروزه",
+        "حجم بهترین سفارش خرید"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:شستا",
+        "missing:حکشتی",
+        "missing:وتجارت",
+        "missing:وبصادر",
+        "missing:وفیروزه",
+        "missing:حجم بهترین سفارش خرید"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4105.49
+    },
+    {
+      "id": "OB-042",
+      "cluster": "ranking",
+      "question": "پنج سهم با بیشترین حجم سرخط فروش کدام‌اند؟",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "تکنو",
+        "سخزر",
+        "کمرجان",
+        "اروند",
+        "سبهان",
+        "حجم بهترین سفارش فروش"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:تکنو",
+        "missing:سخزر",
+        "missing:کمرجان",
+        "missing:اروند",
+        "missing:سبهان",
+        "missing:حجم بهترین سفارش فروش"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4049.18
+    },
+    {
+      "id": "OB-043",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین عمق خرید پنج سطح را فهرست کن",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "شستا",
+        "حکشتی",
+        "وتجارت",
+        "وبصادر",
+        "وفیروزه",
+        "عمق خرید پنج سطح"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:شستا",
+        "missing:حکشتی",
+        "missing:وتجارت",
+        "missing:وبصادر",
+        "missing:وفیروزه",
+        "missing:عمق خرید پنج سطح"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4017.64
+    },
+    {
+      "id": "OB-044",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین عمق فروش اردربوک را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "تکنو",
+        "سخزر",
+        "کمرجان",
+        "اروند",
+        "سبهان",
+        "عمق فروش پنج سطح"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:تکنو",
+        "missing:سخزر",
+        "missing:کمرجان",
+        "missing:اروند",
+        "missing:سبهان",
+        "missing:عمق فروش پنج سطح"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4012.76
+    },
+    {
+      "id": "OB-045",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین مجموع تعداد سفارش خرید در پنج سطح کدام‌اند؟",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "حکشتی",
+        "شپنا",
+        "ذرت",
+        "شبندر",
+        "رمپنا",
+        "مجموع سفارش‌های خرید پنج سطح"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:حکشتی",
+        "missing:شپنا",
+        "missing:ذرت",
+        "missing:شبندر",
+        "missing:رمپنا",
+        "missing:مجموع سفارش‌های خرید پنج سطح"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4011.74
+    },
+    {
+      "id": "OB-046",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین عدم تعادل مثبت اردربوک را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "آردینه",
+        "آسیا",
+        "اخابر",
+        "البرز",
+        "انرژی",
+        "100.00٪"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:آردینه",
+        "missing:آسیا",
+        "missing:اخابر",
+        "missing:البرز",
+        "missing:انرژی",
+        "missing:100.00٪"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4028.23
+    },
+    {
+      "id": "OB-047",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین عدم تعادل منفی اردربوک را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "آبادا",
+        "اروند",
+        "افق",
+        "بالاس",
+        "پدرخش",
+        "-100.00٪"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:آبادا",
+        "missing:اروند",
+        "missing:افق",
+        "missing:بالاس",
+        "missing:پدرخش",
+        "missing:-100.00٪"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4047.02
+    },
+    {
+      "id": "OB-048",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین درصد اسپرد را نشان بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "بوعلی",
+        "شکلر",
+        "خکار",
+        "خدیزل",
+        "واتی",
+        "اسپرد نسبی"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": false,
+      "issues": [
+        "type:structured_reference",
+        "missing:بوعلی",
+        "missing:شکلر",
+        "missing:خکار",
+        "missing:خدیزل",
+        "missing:واتی",
+        "missing:اسپرد نسبی"
+      ],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4041.41
+    },
+    {
+      "id": "OB-049",
+      "cluster": "ranking",
+      "question": "پنج نماد با بزرگترین صف خرید در اردربوک را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "وفیروزه",
+        "شپنا",
+        "درازک",
+        "توسن",
+        "رمپنا",
+        "صف رسمی تأیید نمی‌شود"
+      ],
+      "maxAnswerChars": 1500,
+      "passed": true,
+      "issues": [],
+      "answer": "1. وفیروزه — گروه توسعه مالی فیروزه: حجم سمت خرید یک‌طرفه 893,354,422 سهم\n2. شپنا — پالایش نفت اصفهان: حجم سمت خرید یک‌طرفه 836,471,167 سهم\n3. درازک — دارویی‌ رازک‌: حجم سمت خرید یک‌طرفه 595,581,846 سهم\n4. توسن — توسعه سامانه ی نرم افزاری نگین: حجم سمت خرید یک‌طرفه 397,654,744 سهم\n5. رمپنا — گروه مپنا (سهامی عام): حجم سمت خرید یک‌طرفه 387,595,263 سهم\nاین رتبه‌بندی فقط یک‌طرفه‌بودن سطح اول اردربوک را نشان می‌دهد؛ به‌دلیل نبود دامنه مجاز قیمت، صف رسمی تأیید نمی‌شود.",
+      "actualType": "structured_query",
+      "latencyMs": 64.34
+    },
+    {
+      "id": "OB-050",
+      "cluster": "ranking",
+      "question": "پنج نماد با بزرگترین صف فروش در اردربوک کدام‌اند؟",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "تکنو",
+        "اروند",
+        "سبهان",
+        "ساوه",
+        "سغرب",
+        "صف رسمی تأیید نمی‌شود"
+      ],
+      "maxAnswerChars": 1500,
+      "passed": true,
+      "issues": [],
+      "answer": "1. تکنو — تکنوتار: حجم سمت فروش یک‌طرفه 143,556,120 سهم\n2. اروند — پتروشیمی اروند: حجم سمت فروش یک‌طرفه 69,956,147 سهم\n3. سبهان — سیمان‌ بهبهان‌: حجم سمت فروش یک‌طرفه 60,735,635 سهم\n4. ساوه — سیمان ساوه: حجم سمت فروش یک‌طرفه 50,905,369 سهم\n5. سغرب — سیمان‌غرب‌: حجم سمت فروش یک‌طرفه 26,772,720 سهم\nاین رتبه‌بندی فقط یک‌طرفه‌بودن سطح اول اردربوک را نشان می‌دهد؛ به‌دلیل نبود دامنه مجاز قیمت، صف رسمی تأیید نمی‌شود.",
+      "actualType": "structured_query",
+      "latencyMs": 41.2
+    }
+  ]
+}

@@ -17,7 +17,7 @@ public interface IAnswerValidationGuard
 
 public sealed class DeterministicAnswerValidationGuard : IAnswerValidationGuard
 {
-    private static readonly Regex CitationRegex = new(@"\[(?<label>[MKQAF]\d+)\]", RegexOptions.Compiled);
+    private static readonly Regex CitationRegex = new(@"\[(?<label>[MKQAFR]\d+)\]", RegexOptions.Compiled);
     private static readonly Regex NumericRegex = new(@"(?<![A-Za-z])[-+]?\d[\d,]*(?:\.\d+)?%?", RegexOptions.Compiled);
 
     public AnswerValidationReport Validate(string answer, ChatIntent intent, IReadOnlyList<ChatEvidenceItem> evidence, EvidenceValidationReport evidenceValidation)
@@ -33,7 +33,7 @@ public sealed class DeterministicAnswerValidationGuard : IAnswerValidationGuard
         var numericCount=NumericRegex.Matches(answer).Count;
         if(numericCount>0)
         {
-            var numericAuthority=evidence.Any(x=>x.Authority is EvidenceAuthority.CanonicalMarketSnapshot or EvidenceAuthority.DeterministicCalculation or EvidenceAuthority.CanonicalQueryResult or EvidenceAuthority.FilterEngine);
+            var numericAuthority=evidence.Any(x=>x.Authority is EvidenceAuthority.CanonicalMarketSnapshot or EvidenceAuthority.DeterministicCalculation or EvidenceAuthority.CanonicalQueryResult or EvidenceAuthority.FilterEngine or EvidenceAuthority.CanonicalReferenceData);
             if(!numericAuthority && intent!=ChatIntent.Knowledge) issues.Add("numeric_claim_without_authoritative_evidence");
             if(intent==ChatIntent.Knowledge && evidence.Any(x=>x.Authority==EvidenceAuthority.QdrantGroundedEvidence) && !evidence.Any(x=>x.Authority!=EvidenceAuthority.QdrantGroundedEvidence))
             {

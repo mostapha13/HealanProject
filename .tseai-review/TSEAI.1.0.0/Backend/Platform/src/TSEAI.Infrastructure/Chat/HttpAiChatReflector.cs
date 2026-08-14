@@ -10,7 +10,7 @@ public sealed class HttpAiChatReflector(HttpClient http, ILogger<HttpAiChatRefle
     {
         try
         {
-            var payload = new { request.Question, request.Answer, Intent=request.Intent.ToString(), request.Confidence, request.EvidenceCount, request.FailedTools };
+            var payload = new { request.Question, request.Answer, Intent=request.Intent.ToString(), request.Confidence, request.EvidenceCount, request.FailedTools, Evidence=request.Evidence??[] };
             using var response = await http.PostAsJsonAsync("chat/reflect", payload, ct);
             if (!response.IsSuccessStatusCode)
             {

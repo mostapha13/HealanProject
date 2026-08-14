@@ -1,0 +1,29 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-14T10:31:05.918307+00:00",
+  "total": 12,
+  "passed": 12,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 62.18,
+  "p95LatencyMs": 8129.11,
+  "clusters": {
+    "last-price": {
+      "total": 1,
+      "passed": 1
+    },
+    "missing-source-field": {
+      "total": 2,
+      "passed": 2
+    },
+    "ranking": {
+      "total": 7,
+      "passed": 7
+    },
+    "screening": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "failures": []
+}

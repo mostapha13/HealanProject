@@ -28,10 +28,7 @@ public sealed class SqlAiCanonicalDataGateway(IConfiguration configuration) : IC
         if (string.IsNullOrWhiteSpace(raw))
             throw new InvalidOperationException("ConnectionStrings:SqlAi is not configured.");
 
-        var builder = new SqlConnectionStringBuilder(raw)
-        {
-            ApplicationIntent = ApplicationIntent.ReadOnly
-        };
+        var builder = new SqlConnectionStringBuilder(raw);
         return new SqlConnection(builder.ConnectionString);
     }
 
@@ -96,16 +93,20 @@ public sealed class SqlAiCanonicalDataGateway(IConfiguration configuration) : IC
         var key = NormalizeRequiredKey(instrumentIdOrInsCodeOrSymbol);
         const string sql = """
             SELECT TOP (1)
-                InstrumentID, InsCode, CIsin, LVal18AFC, LVal30, CSocCSAC, LSoc30,
+                InstrumentID, InsCode, CIsin, LVal18AFC, LVal30, CValMne, LVal18, CSocCSAC, LSoc30,
                 marketcatery AS marketcategory, MarketCateryId AS MarketCategoryId,
-                Industryid, Industrysubid, BaseVol, Valid, SourceCollectedAt
+                Industryid, Industrysubid, QNmVlo, ZTitad, BaseVol,
+                PSaiSMinOkValMdv, PSaiSMaxOkValMdv, QtitMinSaiOmProd, QtitMaxSaiOmProd,
+                DInMar, DEVen, Flow, YVal, YMarNSC, Valid, SourceCollectedAt
             FROM dbo.Instrument
             WHERE InstrumentID = @Key
                OR CONVERT(nvarchar(64), InsCode) = @Key
                OR LVal18AFC = @Key
                OR CSocCSAC = @Key
                OR LVal30 = @Key
-            ORDER BY CASE
+            ORDER BY Valid DESC,
+                CASE WHEN marketcatery=N'cash' AND InstrumentID LIKE N'%0001' THEN 0 ELSE 1 END,
+                CASE
                 WHEN InstrumentID = @Key THEN 0
                 WHEN LVal18AFC = @Key THEN 1
                 WHEN CSocCSAC = @Key THEN 2
@@ -222,13 +223,26 @@ public sealed class SqlAiCanonicalDataGateway(IConfiguration configuration) : IC
         x.CIsin,
         x.LVal18AFC,
         x.LVal30,
+        x.CValMne,
+        x.LVal18,
         x.CSocCSAC,
         x.LSoc30,
         x.marketcategory,
         ToNullableInt(x.MarketCategoryId),
         ToNullableInt(x.Industryid),
         ToNullableInt(x.Industrysubid),
+        x.QNmVlo,
+        x.ZTitad,
         x.BaseVol,
+        x.PSaiSMinOkValMdv,
+        x.PSaiSMaxOkValMdv,
+        ToNullableLong(x.QtitMinSaiOmProd),
+        ToNullableLong(x.QtitMaxSaiOmProd),
+        ToNullableInt(x.DInMar),
+        ToNullableInt(x.DEVen),
+        ToNullableInt(x.Flow),
+        ToNullableInt(x.YVal),
+        x.YMarNSC,
         ToNullableInt(x.Valid),
         x.SourceCollectedAt);
 
@@ -296,13 +310,26 @@ public sealed class SqlAiCanonicalDataGateway(IConfiguration configuration) : IC
         public string? CIsin { get; set; }
         public string? LVal18AFC { get; set; }
         public string? LVal30 { get; set; }
+        public string? CValMne { get; set; }
+        public string? LVal18 { get; set; }
         public string? CSocCSAC { get; set; }
         public string? LSoc30 { get; set; }
         public string? marketcategory { get; set; }
         public decimal? MarketCategoryId { get; set; }
         public decimal? Industryid { get; set; }
         public decimal? Industrysubid { get; set; }
+        public decimal? QNmVlo { get; set; }
+        public decimal? ZTitad { get; set; }
         public decimal? BaseVol { get; set; }
+        public decimal? PSaiSMinOkValMdv { get; set; }
+        public decimal? PSaiSMaxOkValMdv { get; set; }
+        public decimal? QtitMinSaiOmProd { get; set; }
+        public decimal? QtitMaxSaiOmProd { get; set; }
+        public decimal? DInMar { get; set; }
+        public decimal? DEVen { get; set; }
+        public decimal? Flow { get; set; }
+        public decimal? YVal { get; set; }
+        public string? YMarNSC { get; set; }
         public decimal? Valid { get; set; }
         public DateTime? SourceCollectedAt { get; set; }
     }

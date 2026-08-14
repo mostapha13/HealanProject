@@ -65,7 +65,7 @@ class FakeStore:
             if filters.get("topic") and filters["topic"] not in (meta.get("topics") or []): continue
             if filters.get("company") and filters["company"] not in (meta.get("companies") or []): continue
             if filters.get("current_only") is True and meta.get("is_current") is False: continue
-            if filters.get("current_only") is False and meta.get("is_current") is not False: continue
+            # False means history is permitted alongside current material.
             pub=p.get("published_at")
             if filters.get("date_from") and (not pub or pub < filters["date_from"]): continue
             if filters.get("date_to") and (not pub or pub > filters["date_to"]): continue
@@ -164,6 +164,22 @@ def test_prepare_faq_cleans_html_and_adds_hash_topics():
     assert clean.metadata["route"]=="rag"
     assert len(clean.metadata["content_hash"])==64
     assert "capital_increase" in clean.metadata["topics"]
+
+
+def test_cms_placeholder_title_is_derived_and_short_noise_is_rejected():
+    useful=KnowledgeDocument(
+        "cms_content:100756","cms_content","100756","Content 100756",
+        "<p>اوراق گواهی اعتبار مولد بانک ملت با نماد اگ050512 در بازار اوراق بدهی درج شد.</p>",
+        metadata={"content_type_id":1,"language_id":1})
+    clean,reason=prepare_document(useful)
+    assert clean is not None and reason=="cms-rag-first"
+    assert clean.title.startswith("اوراق گواهی اعتبار مولد") and clean.title!="Content 100756"
+
+    noise=KnowledgeDocument(
+        "cms_content:9","cms_content","9","Content 9","<p>testtest</p>",
+        metadata={"content_type_id":1,"language_id":1})
+    clean,reason=prepare_document(noise)
+    assert clean is None and reason=="cms-body-too-short-without-title"
 
 
 def test_deleted_document_removes_existing_vector():
@@ -270,6 +286,29 @@ def test_retrieval_drops_related_but_materially_weaker_tail():
         result=await svc.retrieve("مدیرعامل بورس تهران کیه؟",limit=8,language_id=1)
         assert result["items"][0]["source"]["document_id"]=="exact"
         assert all(x["source"]["document_id"]!="weak" for x in result["items"])
+    asyncio.run(run())
+
+
+def test_historical_scope_keeps_current_projection_and_exact_dated_evidence():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(64))
+        await svc.index([
+            KnowledgeDocument(
+                "person:asgar","organization_person","77","عسگر نوربخش",
+                "عسگر نوربخش نائب رئیس هیئت مدیره بورس تهران است.",
+                metadata={"language_id":1,"is_current":True}),
+            KnowledgeDocument(
+                "news:93747","cms_content","93747","انتخاب هیئت مدیره بورس تهران",
+                "عسگر نوربخش به نمایندگی از سرمایه گذاری تدبیر انتخاب شد.",
+                published_at="2024-12-21T00:00:00+00:00",
+                metadata={"language_id":1,"content_type_id":1,"is_current":False}),
+        ])
+        current=await svc.retrieve("عسگر نوربخش",limit=8,language_id=1)
+        historical=await svc.retrieve("عسگر نوربخش",limit=8,language_id=1,current_only=False)
+        current_ids={x["source"]["document_id"] for x in current["items"]}
+        historical_ids={x["source"]["document_id"] for x in historical["items"]}
+        assert current_ids=={"person:asgar"}
+        assert {"person:asgar","news:93747"}.issubset(historical_ids)
     asyncio.run(run())
 
 

@@ -1,0 +1,1146 @@
+{
+  "version": "instrument-1.0",
+  "generatedAtUtc": "2026-08-14T12:15:18.049822+00:00",
+  "total": 50,
+  "passed": 41,
+  "passRate": 0.82,
+  "allPassed": false,
+  "p50LatencyMs": 3998.66,
+  "p95LatencyMs": 12129.18,
+  "clusters": {
+    "allowed-price": {
+      "total": 2,
+      "passed": 1
+    },
+    "capital": {
+      "total": 3,
+      "passed": 3
+    },
+    "catalog-analysis": {
+      "total": 1,
+      "passed": 1
+    },
+    "categories": {
+      "total": 5,
+      "passed": 3
+    },
+    "classification": {
+      "total": 10,
+      "passed": 10
+    },
+    "compound": {
+      "total": 2,
+      "passed": 1
+    },
+    "cross-table": {
+      "total": 2,
+      "passed": 0
+    },
+    "data-quality": {
+      "total": 1,
+      "passed": 1
+    },
+    "dates": {
+      "total": 3,
+      "passed": 2
+    },
+    "full": {
+      "total": 1,
+      "passed": 1
+    },
+    "identifier": {
+      "total": 3,
+      "passed": 3
+    },
+    "identity": {
+      "total": 4,
+      "passed": 3
+    },
+    "issuer": {
+      "total": 2,
+      "passed": 2
+    },
+    "order-limits": {
+      "total": 2,
+      "passed": 1
+    },
+    "reverse-lookup": {
+      "total": 2,
+      "passed": 2
+    },
+    "statistics": {
+      "total": 6,
+      "passed": 6
+    },
+    "validity": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "INS-001",
+      "cluster": "identity",
+      "question": "نام کامل نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 5048.22,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌» است.",
+      "error": null
+    },
+    {
+      "id": "INS-002",
+      "cluster": "identity",
+      "question": "اسم کامل سهم خودرو رو بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12146.16,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-003",
+      "cluster": "identifier",
+      "question": "InstrumentID فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3963.68,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: InstrumentID برابر IRO1MSMI0001 است.",
+      "error": null
+    },
+    {
+      "id": "INS-004",
+      "cluster": "identifier",
+      "question": "InsCode نماد فملی را اعلام کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4089.27,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: InsCode برابر 35425587644337450 است.",
+      "error": null
+    },
+    {
+      "id": "INS-005",
+      "cluster": "identifier",
+      "question": "کد ISIN فملی چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4052.67,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: ISIN برابر IRO1MSMI0000 است.",
+      "error": null
+    },
+    {
+      "id": "INS-006",
+      "cluster": "identity",
+      "question": "نماد انگلیسی فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3963.77,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نماد انگلیسی MSMI1 است.",
+      "error": null
+    },
+    {
+      "id": "INS-007",
+      "cluster": "identity",
+      "question": "نام انگلیسی فملی را بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3921.87,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نام انگلیسی S*I. N. C. Ind. است.",
+      "error": null
+    },
+    {
+      "id": "INS-008",
+      "cluster": "issuer",
+      "question": "ناشر فملی کدام شرکت است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4072.49,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌» است.",
+      "error": null
+    },
+    {
+      "id": "INS-009",
+      "cluster": "issuer",
+      "question": "کد ناشر فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3933.63,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌»، نماد ناشر MSMI است.",
+      "error": null
+    },
+    {
+      "id": "INS-010",
+      "cluster": "classification",
+      "question": "نوع ابزار فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3949.51,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: گروه ابزار cash (بازار نقدی) است.",
+      "error": null
+    },
+    {
+      "id": "INS-011",
+      "cluster": "classification",
+      "question": "MarketCateryId فملی چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3915.16,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: گروه ابزار cash (بازار نقدی)، شناسه دسته بازار 1 است.",
+      "error": null
+    },
+    {
+      "id": "INS-012",
+      "cluster": "classification",
+      "question": "کد صنعت فملی را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3933.63,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: کد صنعت 27 است.",
+      "error": null
+    },
+    {
+      "id": "INS-013",
+      "cluster": "classification",
+      "question": "شناسه زیرصنعت فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3922.62,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: کد زیرصنعت 2720 است.",
+      "error": null
+    },
+    {
+      "id": "INS-014",
+      "cluster": "reverse-lookup",
+      "question": "InstrumentID IRO1MSMI0001 متعلق به کدام نماد است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 6727.19,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InstrumentID برابر IRO1MSMI0001 است.",
+      "error": null
+    },
+    {
+      "id": "INS-015",
+      "cluster": "reverse-lookup",
+      "question": "InsCode 35425587644337450 مال کدوم نماده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3949.13,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InsCode برابر 35425587644337450 است.",
+      "error": null
+    },
+    {
+      "id": "INS-016",
+      "cluster": "capital",
+      "question": "حجم مبنای فملی چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3970.96,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: حجم مبنا 1 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-017",
+      "cluster": "capital",
+      "question": "تعداد کل سهام منتشره فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4204.6,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: تعداد سهام منتشره 1,440,000,000,000 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-018",
+      "cluster": "capital",
+      "question": "ارزش اسمی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3940.85,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: ارزش اسمی 1,000 ریال است.",
+      "error": null
+    },
+    {
+      "id": "INS-019",
+      "cluster": "allowed-price",
+      "question": "حداقل قیمت مجاز فملی در Instrument چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3946.35,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند.",
+      "error": null
+    },
+    {
+      "id": "INS-020",
+      "cluster": "allowed-price",
+      "question": "دامنه قیمت مجاز فملی در جدول Instrument چیست؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 17685.48,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "error": null
+    },
+    {
+      "id": "INS-021",
+      "cluster": "order-limits",
+      "question": "حداقل حجم هر سفارش فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": false,
+        "answerLength": true
+      },
+      "latencyMs": 7961.58,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-022",
+      "cluster": "order-limits",
+      "question": "حداکثر حجم سفارش فملی را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3925.45,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: حداکثر حجم هر سفارش 100,000 است.",
+      "error": null
+    },
+    {
+      "id": "INS-023",
+      "cluster": "validity",
+      "question": "آیا ابزار فملی معتبر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4080.9,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: وضعیت ابزار معتبر/فعال است.",
+      "error": null
+    },
+    {
+      "id": "INS-024",
+      "cluster": "dates",
+      "question": "تاریخ رویداد ابزار فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3960.82,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: تاریخ رویداد منبع 1405/05/10 است.",
+      "error": null
+    },
+    {
+      "id": "INS-025",
+      "cluster": "dates",
+      "question": "تاریخ ورود به بازار فملی در DInMar چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3923.37,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: فیلد DInMar مقدار پیش‌فرض دارد و تاریخ درج واقعی از آن قابل تأیید نیست.",
+      "error": null
+    },
+    {
+      "id": "INS-026",
+      "cluster": "dates",
+      "question": "زمان جمع‌آوری داده Instrument فملی چه موقع بوده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12129.18,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-027",
+      "cluster": "compound",
+      "question": "InstrumentID، InsCode و ISIN فملی را یکجا بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3985.31,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: InstrumentID برابر IRO1MSMI0001، InsCode برابر 35425587644337450، ISIN برابر IRO1MSMI0000 است.",
+      "error": null
+    },
+    {
+      "id": "INS-028",
+      "cluster": "compound",
+      "question": "تعداد سهام، ارزش اسمی و حجم مبنای خودرو را خلاصه بگو",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4122.1,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "خودرو: ارزش اسمی 1,000 ریال، حجم مبنا 1 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-029",
+      "cluster": "full",
+      "question": "مشخصات کامل ابزار فملی را بده",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3937.94,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InstrumentID برابر IRO1MSMI0001، InsCode برابر 35425587644337450، ISIN برابر IRO1MSMI0000، ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌»، گروه ابزار cash (بازار نقدی)، کد صنعت 27، کد زیرصنعت 2720، ارزش اسمی 1,000 ریال، تعداد سهام منتشره 1,440,000,000,000 سهم، حجم مبنا 1 سهم، حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند، حداقل حجم هر سفارش 1، حداکثر حجم هر سفارش 100,000، وضعیت ابزار معتبر/فعال است، تاریخ رویداد منبع 1405/05/10، فیلد DInMar مقدار پیش‌فرض دارد و تاریخ درج واقعی از آن قابل تأیید نیست، زمان جمع‌آوری داده 1405/05/20 ساعت 11:13:13 است.",
+      "error": null
+    },
+    {
+      "id": "INS-030",
+      "cluster": "classification",
+      "question": "نوع نماد اتوکار چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4030.93,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اتوکار: گروه ابزار ETF (صندوق قابل معامله) است.",
+      "error": null
+    },
+    {
+      "id": "INS-031",
+      "cluster": "classification",
+      "question": "ارزش اسمی صندوق اتوکار چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4096.39,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اتوکار: ارزش اسمی 10,000 ریال است.",
+      "error": null
+    },
+    {
+      "id": "INS-032",
+      "cluster": "classification",
+      "question": "اگ060459 چه نوع ابزاریه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4092.8,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اگ060459: گروه ابزار debt (اوراق بدهی) است.",
+      "error": null
+    },
+    {
+      "id": "INS-033",
+      "cluster": "classification",
+      "question": "ارزش اسمی اگ060459 چند ریاله؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4051.9,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اگ060459: ارزش اسمی 1,000,000 ریال است.",
+      "error": null
+    },
+    {
+      "id": "INS-034",
+      "cluster": "classification",
+      "question": "نوع ابزار جهرم0507 را بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3919.05,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "جهرم0507: گروه ابزار future (قرارداد آتی) است.",
+      "error": null
+    },
+    {
+      "id": "INS-035",
+      "cluster": "classification",
+      "question": "ضتاص9017 در کدام گروه ابزار است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3931.62,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "ضتاص9017: گروه ابزار tradeoption (اختیار معامله) است.",
+      "error": null
+    },
+    {
+      "id": "INS-036",
+      "cluster": "statistics",
+      "question": "جدول Instrument در مجموع چند رکورد دارد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4080.3,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "error": null
+    },
+    {
+      "id": "INS-037",
+      "cluster": "statistics",
+      "question": "چند ابزار معتبر و فعال در Instrument داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4026.88,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-038",
+      "cluster": "statistics",
+      "question": "تعداد ابزارهای نامعتبر جدول Instrument چنده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4012.01,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در جدول Instrument، 62,404 ابزار نامعتبر/غیرفعال ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-039",
+      "cluster": "statistics",
+      "question": "چند ناشر متمایز بین ابزارهای معتبر وجود دارد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3977.58,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در میان ابزارهای معتبر Instrument، 2,261 نام شرکت/ناشر متمایز ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-040",
+      "cluster": "statistics",
+      "question": "چند صنعت در ابزارهای معتبر Instrument ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4014.29,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در میان ابزارهای معتبر Instrument، 59 کد صنعت متمایز وجود دارد.",
+      "error": null
+    },
+    {
+      "id": "INS-041",
+      "cluster": "statistics",
+      "question": "تعداد زیرصنعت‌های متمایز ابزارهای فعال چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4043.75,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در میان ابزارهای معتبر Instrument، 157 کد زیرصنعت متمایز وجود دارد.",
+      "error": null
+    },
+    {
+      "id": "INS-042",
+      "cluster": "categories",
+      "question": "تعداد ابزارهای معتبر را به تفکیک دسته‌بندی بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3893.3,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "تعداد ابزارهای معتبر به تفکیک گروه:\n- ثبت‌نشده: 8,055\n- cash (بازار نقدی): 2,719\n- tradeoption (اختیار معامله): 829\n- debt (اوراق بدهی): 776\n- ETF (صندوق قابل معامله): 362\n- option (اختیار معامله): 85\n- future (قرارداد آتی): 8",
+      "error": null
+    },
+    {
+      "id": "INS-043",
+      "cluster": "categories",
+      "question": "چند ابزار ETF معتبر داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3906.48,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 362 ابزار معتبر از گروه ETF (صندوق قابل معامله) ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-044",
+      "cluster": "categories",
+      "question": "تعداد اوراق بدهی فعال در Instrument چندتاست؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12026.07,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-045",
+      "cluster": "categories",
+      "question": "چه تعداد قرارداد آتی معتبر ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": false
+      },
+      "latencyMs": 8068.51,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "بر اساس آمار فدراسیون جهانی بورس ها تنها در سال 2010، حدود 3/1 میلیارد قرارداد آتی سهام با ارزش بالغ بر 3 میلیارد دلار معامله شده است که نسبت به رقم مشابه در سال قبل، علی رغم ادام? تبعات بحران مالی جهانی، رشد 17 درصدی را نشان می دهد. با آغاز معاملات قرارداد‌های آتی سهام در سوم مرداد ماه سال گذشته، بازار از حالت تک محصولی خارج شد و علاوه بر فراهم شدن امکان پوشش ریسک، گزینه های سرمایه گذاری بیشتری پیش روی اشخاص ریسک پذیر قرار گرفت.در کارنام? یک سال? بازار آتی بورس تهران طی 232 روز معاملاتی، معامل? حدود 13 هزار قرارداد با ارزش بیش از 650 میلیارد ریال ثبت شده است که از این بین 1,204 قرارداد با ارزش 40 میلیارد ریال (9 درصد تعداد قرارداد‌ها) به تحویل فیزیکی منجر شده است. تعداد سهام پای? قرارداد‌های آتی و نماد‌های معاملاتی در شروع معاملات بازار آتی، 2 سهم (بانک کارآفرین و بانک پارسیان) با 8 نماد معاملاتی بوده است.",
+      "error": null
+    },
+    {
+      "id": "INS-046",
+      "cluster": "categories",
+      "question": "چند ابزار اختیار معامله فعال داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3949.36,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 914 ابزار معتبر از گروه اختیار معامله ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-047",
+      "cluster": "data-quality",
+      "question": "چند ابزار معتبر در Instrument قیمت مجاز صفر دارند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4031.56,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 4,819 ابزار معتبر حداقل و حداکثر قیمت مجاز صفر دارند؛ هر 516 ابزار دارای تطبیق مستقیم با Cashmarket نیز در همین وضعیت‌اند. این فیلدها برای تأیید صف رسمی قابل اتکا نیستند.",
+      "error": null
+    },
+    {
+      "id": "INS-048",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument به Cashmarket وصل است؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3903.85,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 2,719 ابزار معتبر از گروه cash (بازار نقدی) ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-049",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument در OrderBookCurrent رکورد دارند؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4041.73,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-050",
+      "cluster": "catalog-analysis",
+      "question": "۵ نماد معتبر با بیشترین حجم مبنا را فهرست کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3912.3,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "بیشترین حجم مبنای ثبت‌شده میان ابزارهای معتبر:\n1. دی — بانک دی: 247,858,644 سهم\n2. جوین — کشت و صنعت جوین: 28,115,119 سهم\n3. واحیا — م .صنایع و معادن احیاء سپاهان: 26,637,494 سهم\n4. لکما — کارخانجات‌مخابراتی‌ایران‌: 17,757,813 سهم\n5. شگستر — گسترش سوخت سبززاگرس(سهامی عام): 16,393,788 سهم",
+      "error": null
+    }
+  ],
+  "failures": [
+    {
+      "id": "INS-002",
+      "cluster": "identity",
+      "question": "اسم کامل سهم خودرو رو بگو",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12146.16,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-020",
+      "cluster": "allowed-price",
+      "question": "دامنه قیمت مجاز فملی در جدول Instrument چیست؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 17685.48,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "error": null
+    },
+    {
+      "id": "INS-021",
+      "cluster": "order-limits",
+      "question": "حداقل حجم هر سفارش فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": false,
+        "answerLength": true
+      },
+      "latencyMs": 7961.58,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "فملی: حجم معاملات 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-026",
+      "cluster": "dates",
+      "question": "زمان جمع‌آوری داده Instrument فملی چه موقع بوده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12129.18,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-028",
+      "cluster": "compound",
+      "question": "تعداد سهام، ارزش اسمی و حجم مبنای خودرو را خلاصه بگو",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4122.1,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "خودرو: ارزش اسمی 1,000 ریال، حجم مبنا 1 سهم است.",
+      "error": null
+    },
+    {
+      "id": "INS-044",
+      "cluster": "categories",
+      "question": "تعداد اوراق بدهی فعال در Instrument چندتاست؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12026.07,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "error": null
+    },
+    {
+      "id": "INS-045",
+      "cluster": "categories",
+      "question": "چه تعداد قرارداد آتی معتبر ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": false
+      },
+      "latencyMs": 8068.51,
+      "type": "knowledge",
+      "entity": "",
+      "answer": "بر اساس آمار فدراسیون جهانی بورس ها تنها در سال 2010، حدود 3/1 میلیارد قرارداد آتی سهام با ارزش بالغ بر 3 میلیارد دلار معامله شده است که نسبت به رقم مشابه در سال قبل، علی رغم ادام? تبعات بحران مالی جهانی، رشد 17 درصدی را نشان می دهد. با آغاز معاملات قرارداد‌های آتی سهام در سوم مرداد ماه سال گذشته، بازار از حالت تک محصولی خارج شد و علاوه بر فراهم شدن امکان پوشش ریسک، گزینه های سرمایه گذاری بیشتری پیش روی اشخاص ریسک پذیر قرار گرفت.در کارنام? یک سال? بازار آتی بورس تهران طی 232 روز معاملاتی، معامل? حدود 13 هزار قرارداد با ارزش بیش از 650 میلیارد ریال ثبت شده است که از این بین 1,204 قرارداد با ارزش 40 میلیارد ریال (9 درصد تعداد قرارداد‌ها) به تحویل فیزیکی منجر شده است. تعداد سهام پای? قرارداد‌های آتی و نماد‌های معاملاتی در شروع معاملات بازار آتی، 2 سهم (بانک کارآفرین و بانک پارسیان) با 8 نماد معاملاتی بوده است.",
+      "error": null
+    },
+    {
+      "id": "INS-048",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument به Cashmarket وصل است؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3903.85,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در Instrument، 2,719 ابزار معتبر از گروه cash (بازار نقدی) ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "INS-049",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument در OrderBookCurrent رکورد دارند؟",
+      "passed": false,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4041.73,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "error": null
+    }
+  ]
+}

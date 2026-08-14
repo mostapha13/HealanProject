@@ -1,0 +1,980 @@
+{
+  "version": "companystate-1.0",
+  "generatedAtUtc": "2026-08-14T15:26:28.548865+00:00",
+  "total": 50,
+  "passed": 50,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 50.76,
+  "p95LatencyMs": 143.12,
+  "clusters": {
+    "state-detail": {
+      "total": 5,
+      "passed": 5
+    },
+    "reason": {
+      "total": 4,
+      "passed": 4
+    },
+    "date": {
+      "total": 1,
+      "passed": 1
+    },
+    "identity": {
+      "total": 2,
+      "passed": 2
+    },
+    "codes": {
+      "total": 2,
+      "passed": 2
+    },
+    "people": {
+      "total": 6,
+      "passed": 6
+    },
+    "metadata": {
+      "total": 1,
+      "passed": 1
+    },
+    "missing-data": {
+      "total": 2,
+      "passed": 2
+    },
+    "safe-absence": {
+      "total": 1,
+      "passed": 1
+    },
+    "comparison": {
+      "total": 1,
+      "passed": 1
+    },
+    "statistics": {
+      "total": 3,
+      "passed": 3
+    },
+    "distribution": {
+      "total": 3,
+      "passed": 3
+    },
+    "status-list": {
+      "total": 2,
+      "passed": 2
+    },
+    "date-ranking": {
+      "total": 2,
+      "passed": 2
+    },
+    "year": {
+      "total": 2,
+      "passed": 2
+    },
+    "reason-analysis": {
+      "total": 4,
+      "passed": 4
+    },
+    "quality": {
+      "total": 5,
+      "passed": 5
+    },
+    "schema": {
+      "total": 4,
+      "passed": 4
+    }
+  },
+  "results": [
+    {
+      "id": "CS-001",
+      "cluster": "state-detail",
+      "question": "وضعیت نماد جم چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "جم — پتروشیمی جم",
+        "وضعیت «تعلیق شده»"
+      ],
+      "mustNotContain": [
+        "قیمت پایانی"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است.",
+      "actualType": "structured_reference",
+      "latencyMs": 844.33
+    },
+    {
+      "id": "CS-002",
+      "cluster": "state-detail",
+      "question": "جم تعلیقه یا مشمول فرایند تعلیق؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعلیق شده"
+      ],
+      "mustNotContain": [
+        "مشمول فرایند تعلیق است"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است.",
+      "actualType": "structured_reference",
+      "latencyMs": 58.44
+    },
+    {
+      "id": "CS-003",
+      "cluster": "reason",
+      "question": "چرا نماد جم تعلیق شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "دلیل:",
+        "بررسی وضعیت شفافیت اطلاعاتی ناشر"
+      ],
+      "mustNotContain": [
+        "<br>"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است؛ دلیل: بررسی وضعیت شفافیت اطلاعاتی ناشر.",
+      "actualType": "structured_reference",
+      "latencyMs": 74.12
+    },
+    {
+      "id": "CS-004",
+      "cluster": "date",
+      "question": "آخرین تغییر وضعیت جم چه تاریخی بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است؛ آخرین تاریخ تغییر وضعیت 1405/04/16 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 48.83
+    },
+    {
+      "id": "CS-005",
+      "cluster": "state-detail",
+      "question": "وضعیت و علت تعلیق جم را خلاصه بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "تعلیق شده",
+        "بررسی وضعیت شفافیت اطلاعاتی ناشر"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است؛ دلیل: بررسی وضعیت شفافیت اطلاعاتی ناشر.",
+      "actualType": "structured_reference",
+      "latencyMs": 33.67
+    },
+    {
+      "id": "CS-006",
+      "cluster": "identity",
+      "question": "نام شرکت نماد جم در Companystate چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "نام شرکت پتروشیمی جم"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: نام شرکت پتروشیمی جم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 49.65
+    },
+    {
+      "id": "CS-007",
+      "cluster": "identity",
+      "question": "کد سامانه نماد جم را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "IRO1PJMZ0001"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: کد نماد در سامانه IRO1PJMZ0001 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 43.31
+    },
+    {
+      "id": "CS-008",
+      "cluster": "codes",
+      "question": "StatusCode جم چند است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "StatusCode برابر 2"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: StatusCode برابر 2 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 46.72
+    },
+    {
+      "id": "CS-009",
+      "cluster": "codes",
+      "question": "Laststate نماد جم چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "Laststate برابر 3"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: Laststate برابر 3 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 57.03
+    },
+    {
+      "id": "CS-010",
+      "cluster": "people",
+      "question": "مدیرعامل جم کیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "امیر اکبری"
+      ],
+      "mustNotContain": [
+        "مدیرعامل در ستون Ceo جدول Company ثبت نشده"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: مدیرعامل ثبت‌شده امیر اکبری است.",
+      "actualType": "structured_reference",
+      "latencyMs": 50.18
+    },
+    {
+      "id": "CS-011",
+      "cluster": "people",
+      "question": "فقط اسم اعضای هیئت مدیره جم را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "امیر اکبری",
+        "محمدسجاد سیاهکارزاده",
+        "حسن معینی",
+        "حبیب اله دیباچی",
+        "کاوشگران بازار سرمایه"
+      ],
+      "mustNotContain": [
+        "به گزارش",
+        "<br>"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "امیر اکبری، محمدسجاد سیاهکارزاده، حسن معینی، حبیب اله دیباچی، کاوشگران بازار سرمایه",
+      "actualType": "structured_reference",
+      "latencyMs": 40.75
+    },
+    {
+      "id": "CS-012",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری وضعیت جم چه موقع بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "13:46:46"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است؛ Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 50.18
+    },
+    {
+      "id": "CS-013",
+      "cluster": "state-detail",
+      "question": "آبادا الان چه وضعیتی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مشمول فرایند تعلیق"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "آبادا — تولید نیروی برق آبادان: وضعیت «مشمول فرایند تعلیق» است.",
+      "actualType": "structured_reference",
+      "latencyMs": 53.21
+    },
+    {
+      "id": "CS-014",
+      "cluster": "reason",
+      "question": "علت وضعیت آبادا چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "عدم رعایت الزامات پذیرش",
+        "بند 1 ماده 38"
+      ],
+      "mustNotContain": [
+        "<br>"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "آبادا — تولید نیروی برق آبادان: وضعیت «مشمول فرایند تعلیق» است؛ دلیل: عدم رعایت الزامات پذیرش (بند 1 ماده 38 دستورالعمل پذیرش).",
+      "actualType": "structured_reference",
+      "latencyMs": 43.14
+    },
+    {
+      "id": "CS-015",
+      "cluster": "people",
+      "question": "مدیر عامل نماد آبادا چه کسی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "امیرعباس مطلبی فینی"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "آبادا — تولید نیروی برق آبادان: مدیرعامل ثبت‌شده امیرعباس مطلبی فینی است.",
+      "actualType": "structured_reference",
+      "latencyMs": 58.72
+    },
+    {
+      "id": "CS-016",
+      "cluster": "people",
+      "question": "اعضای هیئت‌مدیره آبادا کیا هستند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "داریوش خرمی راد",
+        "محمدمهدی بادامچی",
+        "علیرضا میرزائی",
+        "امین تاج دانی",
+        "امیرعباس مطلبی فینی"
+      ],
+      "mustNotContain": [
+        "<br>"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "اعضای هیئت‌مدیره ثبت‌شده آبادا: داریوش خرمی راد، محمدمهدی بادامچی، علیرضا میرزائی، امین تاج دانی، امیرعباس مطلبی فینی",
+      "actualType": "structured_reference",
+      "latencyMs": 67.46
+    },
+    {
+      "id": "CS-017",
+      "cluster": "reason",
+      "question": "دلایل مشمول فرایند تعلیق شدن حفارس را کامل بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "گزارش هیئت‌مدیره به مجمع",
+        "جدول زمانبندی پرداخت سود نقدی",
+        "گزارش تفسیری مدیریت",
+        "صورت‌های مالی",
+        "گزارش کنترل داخلی"
+      ],
+      "mustNotContain": [
+        "<br>"
+      ],
+      "maxAnswerChars": 1000,
+      "passed": true,
+      "issues": [],
+      "answer": "حفارس — حمل و نقل بین المللی خلیج فارس: وضعیت «مشمول فرایند تعلیق» است؛ دلیل: عدم ارائه گزارش هیئت‌مدیره به مجمع و اظهارنظر حسابرس در مورد آن؛ عدم ارائه اطلاعات جدول زمانبندی پرداخت سود نقدی پیشنهادی توسط هیئت‌مدیره؛ عدم ارائه گزارش تفسیری مدیریت 12 ماهه حسابرسی شده؛ عدم ارائه صورت‌های مالی 12 ماهه حسابرسی شده؛ عدم ارائه گزارش کنترل داخلی.",
+      "actualType": "structured_reference",
+      "latencyMs": 62.84
+    },
+    {
+      "id": "CS-018",
+      "cluster": "people",
+      "question": "CEO حفارس کیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "عبدالکریم نعناکار"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "حفارس — حمل و نقل بین المللی خلیج فارس: مدیرعامل ثبت‌شده عبدالکریم نعناکار است.",
+      "actualType": "structured_reference",
+      "latencyMs": 87.68
+    },
+    {
+      "id": "CS-019",
+      "cluster": "people",
+      "question": "اسامی هیات مدیره دابور رو بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "سیدحمیدرضا موسوی",
+        "محسن رشیدی",
+        "عاطفه حکمت",
+        "داریوش دارابی",
+        "شهرام ودودی"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "اعضای هیئت‌مدیره ثبت‌شده دابور: سیدحمیدرضا موسوی، محسن رشیدی، عاطفه حکمت، داریوش دارابی، شهرام ودودی",
+      "actualType": "structured_reference",
+      "latencyMs": 48.4
+    },
+    {
+      "id": "CS-020",
+      "cluster": "missing-data",
+      "question": "مدیرعامل زکوثر طبق Companystate کیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "مدیرعامل ثبت نشده"
+      ],
+      "mustNotContain": [
+        "حدس"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "زکوثر — سرمایه‌گذاری کشاورزی کوثر: مدیرعامل ثبت نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 36.44
+    },
+    {
+      "id": "CS-021",
+      "cluster": "missing-data",
+      "question": "اعضای هیئت مدیره زکوثر را نام ببر",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ثبت نشده‌اند"
+      ],
+      "mustNotContain": [
+        "کاوشگران بازار سرمایه"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "اعضای هیئت‌مدیره برای نماد زکوثر در Companystate ثبت نشده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 60.84
+    },
+    {
+      "id": "CS-022",
+      "cluster": "reason",
+      "question": "شخارک برای چه دلایلی تعلیق شده است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "بررسی وضعیت شفافیت اطلاعاتی ناشر",
+        "گزارش فعالیت ماهانه خرداد",
+        "گزارش فعالیت ماهانه اردیبهشت",
+        "گزارش فعالیت ماهانه فروردین"
+      ],
+      "mustNotContain": [
+        "<br>"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "شخارک — پتروشیمی‌ خارک‌: وضعیت «تعلیق شده» است؛ دلیل: بررسی وضعیت شفافیت اطلاعاتی ناشر؛ عدم ارائه گزارش فعالیت ماهانه خرداد ماه؛ عدم ارائه گزارش فعالیت ماهانه اردیبهشت ماه؛ عدم ارائه گزارش فعالیت ماهانه فروردین ماه.",
+      "actualType": "structured_reference",
+      "latencyMs": 38.73
+    },
+    {
+      "id": "CS-023",
+      "cluster": "safe-absence",
+      "question": "وضعیت نماد فملی در Companystate چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "رکوردی برای «فملی» وجود ندارد",
+        "نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت"
+      ],
+      "mustNotContain": [
+        "قیمت پایانی",
+        "داده قابل اتکایی"
+      ],
+      "maxAnswerChars": 380,
+      "passed": true,
+      "issues": [],
+      "answer": "در Snapshot فعلی جدول Companystate رکوردی برای «فملی» وجود ندارد؛ بنابراین از این جدول نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.",
+      "actualType": "structured_reference",
+      "latencyMs": 34.21
+    },
+    {
+      "id": "CS-024",
+      "cluster": "state-detail",
+      "question": "فولاد تعلیق شده یا نه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فولاد مبارکه اصفهان",
+        "تعلیق شده"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "فولاد — فولاد مبارکه اصفهان: وضعیت «تعلیق شده» است.",
+      "actualType": "structured_reference",
+      "latencyMs": 37.37
+    },
+    {
+      "id": "CS-025",
+      "cluster": "comparison",
+      "question": "تاریخ آخرین تغییر وضعیت جم را با شخارک مقایسه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16",
+        "1405/04/09",
+        "تغییر وضعیت جم جدیدتر است"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "آخرین تغییر وضعیت شخارک در 1405/04/09 و جم در 1405/04/16 ثبت شده است؛ تغییر وضعیت جم جدیدتر است.",
+      "actualType": "structured_reference",
+      "latencyMs": 40.84
+    },
+    {
+      "id": "CS-026",
+      "cluster": "statistics",
+      "question": "جدول Companystate چند رکورد و چند نماد متمایز دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "58 رکورد",
+        "58 نماد متمایز",
+        "58 کد سامانه متمایز"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Companystate دارای 58 رکورد، 58 نماد متمایز و 58 کد سامانه متمایز است. بازه آخرین تغییر وضعیت از 1401/03/08 تا 1405/04/17 شمسی است و Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 33.54
+    },
+    {
+      "id": "CS-027",
+      "cluster": "statistics",
+      "question": "بازه تاریخ آخرین تغییر وضعیت در کل Companystate چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1401/03/08",
+        "1405/04/17",
+        "شمسی"
+      ],
+      "mustNotContain": [
+        "میلادی"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Companystate دارای 58 رکورد، 58 نماد متمایز و 58 کد سامانه متمایز است. بازه آخرین تغییر وضعیت از 1401/03/08 تا 1405/04/17 شمسی است و Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 44.39
+    },
+    {
+      "id": "CS-028",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل جدول Companystate را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "13:46:46"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Companystate دارای 58 رکورد، 58 نماد متمایز و 58 کد سامانه متمایز است. بازه آخرین تغییر وضعیت از 1401/03/08 تا 1405/04/17 شمسی است و Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 37.22
+    },
+    {
+      "id": "CS-029",
+      "cluster": "distribution",
+      "question": "توزیع وضعیت نمادهای Companystate چطور است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "34 نماد «تعلیق‌شده»",
+        "24 نماد «مشمول فرایند تعلیق»"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "از 58 رکورد Companystate، 34 نماد «تعلیق‌شده» و 24 نماد «مشمول فرایند تعلیق» هستند.",
+      "actualType": "structured_reference",
+      "latencyMs": 51.35
+    },
+    {
+      "id": "CS-030",
+      "cluster": "distribution",
+      "question": "چند نماد تعلیق شده داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "34 نماد",
+        "تعلیق‌شده"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در Snapshot فعلی Companystate، 34 نماد در وضعیت تعلیق‌شده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 39.93
+    },
+    {
+      "id": "CS-031",
+      "cluster": "distribution",
+      "question": "تعداد شرکت‌های مشمول فرایند تعلیق چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "24 نماد مشمول فرایند تعلیق"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در Snapshot فعلی Companystate، 24 نماد مشمول فرایند تعلیق‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 52.4
+    },
+    {
+      "id": "CS-032",
+      "cluster": "status-list",
+      "question": "پنج نماد تعلیق‌شده را فهرست کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "بفجر",
+        "جم",
+        "زکوثر",
+        "شخارک",
+        "فاذر"
+      ],
+      "mustNotContain": [
+        "آبادا"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "5 نماد اول از 34 نماد با وضعیت «تعلیق شده»:\n1. بفجر — فجر انرژی خلیج فارس\n2. جم — پتروشیمی جم\n3. زکوثر — سرمایه‌گذاری کشاورزی کوثر\n4. شخارک — پتروشیمی‌ خارک‌\n5. فاذر — صنایع‌ آذرآب‌",
+      "actualType": "structured_reference",
+      "latencyMs": 55.23
+    },
+    {
+      "id": "CS-033",
+      "cluster": "status-list",
+      "question": "پنج نماد مشمول فرایند تعلیق را لیست کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "آبادا",
+        "بشهاب",
+        "بکاب",
+        "پارسان",
+        "ثشرق"
+      ],
+      "maxAnswerChars": 600,
+      "passed": true,
+      "issues": [],
+      "answer": "5 نماد اول از 24 نماد با وضعیت «مشمول فرایند تعلیق»:\n1. آبادا — تولید نیروی برق آبادان\n2. بشهاب — لامپ‌ پارس‌ شهاب‌\n3. بکاب — صنایع‌جوشکاب‌یزد\n4. پارسان — گسترش نفت و گاز پارسیان\n5. ثشرق — سرمایه‌گذاری مسکن شمال شرق",
+      "actualType": "structured_reference",
+      "latencyMs": 54.28
+    },
+    {
+      "id": "CS-034",
+      "cluster": "date-ranking",
+      "question": "پنج نماد با جدیدترین تاریخ تغییر وضعیت کدام‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "لابسا — 1405/04/17",
+        "ومعادن — 1405/04/17",
+        "جم — 1405/04/16",
+        "حفارس — 1405/04/16",
+        "خاذین — 1405/04/16"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "جدیدترین تغییر وضعیت‌های ثبت‌شده:\n1. لابسا — 1405/04/17 — مشمول فرایند تعلیق\n2. ومعادن — 1405/04/17 — مشمول فرایند تعلیق\n3. جم — 1405/04/16 — تعلیق شده\n4. حفارس — 1405/04/16 — مشمول فرایند تعلیق\n5. خاذین — 1405/04/16 — مشمول فرایند تعلیق",
+      "actualType": "structured_reference",
+      "latencyMs": 55.98
+    },
+    {
+      "id": "CS-035",
+      "cluster": "date-ranking",
+      "question": "پنج مورد با قدیمی‌ترین آخرین تغییر وضعیت را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وساربیل — 1401/03/08",
+        "وسبوشهر — 1401/03/08",
+        "وسگلستا — 1401/03/08",
+        "وسیزد — 1401/03/08",
+        "وسهمدا — 1401/05/09"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "قدیمی‌ترین تغییر وضعیت‌های ثبت‌شده:\n1. وساربیل — 1401/03/08 — تعلیق شده\n2. وسبوشهر — 1401/03/08 — تعلیق شده\n3. وسگلستا — 1401/03/08 — تعلیق شده\n4. وسیزد — 1401/03/08 — تعلیق شده\n5. وسهمدا — 1401/05/09 — تعلیق شده",
+      "actualType": "structured_reference",
+      "latencyMs": 32.08
+    },
+    {
+      "id": "CS-036",
+      "cluster": "year",
+      "question": "در سال ۱۴۰۵ آخرین تغییر وضعیت چند نماد ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "32 نماد",
+        "سال 1405",
+        "لابسا — 1405/04/17"
+      ],
+      "maxAnswerChars": 1000,
+      "passed": true,
+      "issues": [],
+      "answer": "در Snapshot فعلی، آخرین تغییر وضعیت 32 نماد مربوط به سال 1405 است:\n1. لابسا — 1405/04/17 — مشمول فرایند تعلیق\n2. ومعادن — 1405/04/17 — مشمول فرایند تعلیق\n3. جم — 1405/04/16 — تعلیق شده\n4. حفارس — 1405/04/16 — مشمول فرایند تعلیق\n5. خاذین — 1405/04/16 — مشمول فرایند تعلیق\n6. دابور — 1405/04/16 — مشمول فرایند تعلیق\n7. دلقما — 1405/04/16 — مشمول فرایند تعلیق\n8. چفیبر — 1405/04/10 — مشمول فرایند تعلیق\n9. زکوثر — 1405/04/10 — تعلیق شده\n10. بشهاب — 1405/04/09 — مشمول فرایند تعلیق",
+      "actualType": "structured_reference",
+      "latencyMs": 64.49
+    },
+    {
+      "id": "CS-037",
+      "cluster": "year",
+      "question": "فقط نمادهایی را بگو که آخرین تغییر وضعیتشان در سال 1401 بوده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "وسکهبو",
+        "وسهرمز",
+        "وسیستا",
+        "وساشرقی",
+        "وسفارس",
+        "وسهمدا",
+        "وساربیل",
+        "وسبوشهر",
+        "وسگلستا",
+        "وسیزد"
+      ],
+      "mustNotContain": [
+        "تاریخ",
+        "رکورد"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "وسکهبو، وسهرمز، وسیستا، وساشرقی، وسفارس، وسهمدا، وساربیل، وسبوشهر، وسگلستا، وسیزد",
+      "actualType": "structured_reference",
+      "latencyMs": 43.93
+    },
+    {
+      "id": "CS-038",
+      "cluster": "reason-analysis",
+      "question": "چند نماد به دلیل بررسی وضعیت شفافیت اطلاعاتی ناشر در این جدول هستند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "33 رکورد",
+        "بررسی وضعیت شفافیت اطلاعاتی ناشر"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در 33 رکورد، «بررسی وضعیت شفافیت اطلاعاتی ناشر» جزو دلایل ثبت‌شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 129.38
+    },
+    {
+      "id": "CS-039",
+      "cluster": "reason-analysis",
+      "question": "عدم ارائه گزارش فعالیت ماهانه در دلایل چند شرکت آمده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "18 رکورد",
+        "گزارش فعالیت ماهانه"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در 18 رکورد، عدم ارائه گزارش فعالیت ماهانه جزو دلایل ثبت‌شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 105.53
+    },
+    {
+      "id": "CS-040",
+      "cluster": "reason-analysis",
+      "question": "چند رکورد به عدم ارائه صورت مالی اشاره دارند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "38 رکورد",
+        "صورت‌های مالی"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در 38 رکورد، عدم ارائه یکی از صورت‌های مالی جزو دلایل ثبت‌شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 110.62
+    },
+    {
+      "id": "CS-041",
+      "cluster": "reason-analysis",
+      "question": "رایج‌ترین دسته دلایل وضعیت شرکت‌ها را با تعداد بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "صورت‌های مالی 38 رکورد",
+        "گزارش تفسیری مدیریت 38",
+        "شفافیت ناشر 33",
+        "گزارش فعالیت ماهانه 18",
+        "گزارش کنترل داخلی 4",
+        "چند دسته"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "فراوانی چند دسته پرتکرار در ۵۸ رکورد Companystate: عدم ارائه صورت‌های مالی 38 رکورد، گزارش تفسیری مدیریت 38، بررسی شفافیت ناشر 33، گزارش فعالیت ماهانه 18 و گزارش کنترل داخلی 4 رکورد. یک رکورد ممکن است در چند دسته شمرده شود.",
+      "actualType": "structured_reference",
+      "latencyMs": 144.34
+    },
+    {
+      "id": "CS-042",
+      "cluster": "quality",
+      "question": "کیفیت داده جدول Companystate را خلاصه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "58 رکورد",
+        "28 مدیرعامل",
+        "6 هیئت‌مدیره",
+        "نماد و کد تکراری به‌ترتیب 0 و 0"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Companystate: از 58 رکورد، نماد، نام شرکت، تاریخ تغییر و دلیلِ خالی هرکدام 0، 0، 0 و 0 رکورد است؛ 28 مدیرعامل و 6 هیئت‌مدیره خالی‌اند. گروه نماد و کد تکراری به‌ترتیب 0 و 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 205.56
+    },
+    {
+      "id": "CS-043",
+      "cluster": "quality",
+      "question": "چند رکورد Companystate مدیرعامل دارند و چندتا فاقد مدیرعامل‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "30 رکورد مدیرعامل دارند",
+        "28 رکورد فاقد مدیرعامل"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "از 58 رکورد Companystate، 30 رکورد مدیرعامل دارند و 28 رکورد فاقد مدیرعامل‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 115.57
+    },
+    {
+      "id": "CS-044",
+      "cluster": "quality",
+      "question": "چند شرکت در Companystate بدون اعضای هیئت مدیره هستند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "52 رکورد اعضای هیئت‌مدیره دارند",
+        "6 رکورد فاقد آن"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "از 58 رکورد Companystate، 52 رکورد اعضای هیئت‌مدیره دارند و 6 رکورد فاقد آن‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 127.88
+    },
+    {
+      "id": "CS-045",
+      "cluster": "quality",
+      "question": "Companystate نماد یا کد سامانه تکراری دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "گروه نماد تکراری 0",
+        "گروه کد سامانه تکراری 0"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در Companystate تعداد گروه نماد تکراری 0 و تعداد گروه کد سامانه تکراری 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 109.2
+    },
+    {
+      "id": "CS-046",
+      "cluster": "quality",
+      "question": "کد سامانه چند رکورد Companystate قابل اتصال به Instrument است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "۵۵ رکورد از ۵۸ رکورد",
+        "۳ رکورد",
+        "Foreign Key فیزیکی"
+      ],
+      "maxAnswerChars": 460,
+      "passed": true,
+      "issues": [],
+      "answer": "کد سامانه ۵۵ رکورد از ۵۸ رکورد با Instrument.InstrumentID تطبیق مستقیم دارد؛ ۳ رکورد فعلی تطبیق ندارند. این ارتباط منطقی است و Foreign Key فیزیکی تعریف نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 143.12
+    },
+    {
+      "id": "CS-047",
+      "cluster": "schema",
+      "question": "StatusCode در Companystate چه معنایی دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "StatusCode=2",
+        "تعلیق‌شده",
+        "StatusCode=3",
+        "مشمول فرایند تعلیق",
+        "Constraint"
+      ],
+      "maxAnswerChars": 480,
+      "passed": true,
+      "issues": [],
+      "answer": "در Snapshot فعلی Companystate، StatusCode=2 با «تعلیق‌شده» و StatusCode=3 با «مشمول فرایند تعلیق» همراه است. این نگاشت از داده موجود استنباط شده، نه از Constraint پایگاه‌داده.",
+      "actualType": "structured_reference",
+      "latencyMs": 39.82
+    },
+    {
+      "id": "CS-048",
+      "cluster": "schema",
+      "question": "Lastdatechange جدول Companystate شمسی است یا میلادی؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "nvarchar(10)",
+        "تاریخ شمسی",
+        "yyyy/MM/dd",
+        "DateTime میلادی نیست"
+      ],
+      "maxAnswerChars": 430,
+      "passed": true,
+      "issues": [],
+      "answer": "Companystate.Lastdatechange از نوع nvarchar(10) و به‌صورت تاریخ شمسی yyyy/MM/dd ذخیره شده است؛ DateTime میلادی نیست و برای مرتب‌سازی معتبر باید همین قالب ثابت حفظ شود.",
+      "actualType": "structured_reference",
+      "latencyMs": 50.06
+    },
+    {
+      "id": "CS-049",
+      "cluster": "schema",
+      "question": "آیا Companystate قیمت و حجم معاملات هم دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قیمت، حجم یا ارزش معاملات ندارد",
+        "Snapshot وضعیت تعلیق"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "Companystate قیمت، حجم یا ارزش معاملات ندارد؛ این جدول فقط Snapshot وضعیت تعلیق، علت، تاریخ تغییر، مدیرعامل، اعضای هیئت‌مدیره و شناسه‌های ناشر را نگهداری می‌کند.",
+      "actualType": "structured_reference",
+      "latencyMs": 41.09
+    },
+    {
+      "id": "CS-050",
+      "cluster": "schema",
+      "question": "جدول Companystate کلید اصلی یا ایندکس دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "هیچ Primary Key، Index یا Foreign Key",
+        "یکتایی آن‌ها در Schema تضمین نشده"
+      ],
+      "maxAnswerChars": 430,
+      "passed": true,
+      "issues": [],
+      "answer": "روی جدول فعلی Companystate هیچ Primary Key، Index یا Foreign Key تعریف نشده است؛ Namad و Kodnamaddarsamane در ۵۸ رکورد فعلی متمایزند، اما یکتایی آن‌ها در Schema تضمین نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 29.8
+    }
+  ]
+}

@@ -21,7 +21,8 @@ class QdrantKnowledgeStore:
                 if r.status_code==404:
                     x=await c.put(f"{self.base}/collections/{self.collection}",json={"vectors":{"size":dimension,"distance":"Cosine"}}); x.raise_for_status()
                 else: r.raise_for_status()
-                for field,schema in (("document_id","keyword"),("source_type","keyword"),("symbol","keyword"),("category","keyword"),("published_at","datetime"),("metadata.route","keyword"),("metadata.content_type_id","integer"),("metadata.language_id","integer"),("metadata.topics","keyword"),("metadata.companies","keyword"),("metadata.symbols","keyword"),("metadata.is_current","bool")):
+                text_schema={"type":"text","tokenizer":"word","min_token_len":2,"lowercase":True}
+                for field,schema in (("document_id","keyword"),("source_type","keyword"),("symbol","keyword"),("category","keyword"),("published_at","datetime"),("text",text_schema),("title",text_schema),("metadata.route","keyword"),("metadata.content_type_id","integer"),("metadata.language_id","integer"),("metadata.topics","keyword"),("metadata.companies","keyword"),("metadata.symbols","keyword"),("metadata.persons","keyword"),("metadata.is_current","bool")):
                     try:
                         x=await c.put(f"{self.base}/collections/{self.collection}/index",json={"field_name":field,"field_schema":schema})
                         if x.status_code not in (200,201,409): x.raise_for_status()
@@ -133,9 +134,45 @@ class QdrantKnowledgeStore:
         if current_only is True:
             body["filter"]={"must":must,"must_not":[{"key":"metadata.is_current","match":{"value":False}}]}
         elif current_only is False:
-            must.append({"key":"metadata.is_current","match":{"value":False}}); body["filter"]={"must":must}
+            # False means the caller permits historical material as well as current
+            # material. It must not accidentally mean "archives only".
+            if must: body["filter"]={"must":must}
         elif must:body["filter"]={"must":must}
         if should:
             body.setdefault("filter",{"must":must})["should"]=should
         async with httpx.AsyncClient(timeout=30) as c:
             r=await c.post(f"{self.base}/collections/{self.collection}/points/search",json=body); r.raise_for_status(); return r.json().get("result",[])
+
+    async def search_text(self,query:str,limit:int,filters:dict[str,Any])->list[dict[str,Any]]:
+        """Retrieve exact lexical candidates so rare Persian names cannot fall outside the dense top-k."""
+        must=[{"key":"text","match":{"text":query}}]
+        for key in ("source_type","symbol","category"):
+            value=filters.get(key)
+            if value: must.append({"key":key,"match":{"value":value}})
+        for key in ("route","content_type_id"):
+            value=filters.get(key)
+            if value is not None: must.append({"key":f"metadata.{key}","match":{"value":value}})
+        language_id=filters.get("language_id")
+        should=[]
+        if language_id==1:
+            should=[{"key":"metadata.language_id","match":{"value":1}},{"is_empty":{"key":"metadata.language_id"}}]
+        elif language_id is not None:
+            must.append({"key":"metadata.language_id","match":{"value":language_id}})
+        if filters.get("topic"): must.append({"key":"metadata.topics","match":{"value":filters["topic"]}})
+        if filters.get("company"): must.append({"key":"metadata.companies","match":{"value":filters["company"]}})
+        date_range={}
+        if filters.get("date_from"): date_range["gte"]=filters["date_from"]
+        if filters.get("date_to"): date_range["lte"]=filters["date_to"]
+        if date_range: must.append({"key":"published_at","range":date_range})
+        condition={"must":must}
+        if should: condition["should"]=should
+        if filters.get("current_only") is True:
+            condition["must_not"]=[{"key":"metadata.is_current","match":{"value":False}}]
+        body={"filter":condition,"limit":max(limit,20),"with_payload":True,"with_vector":False}
+        async with httpx.AsyncClient(timeout=30) as c:
+            r=await c.post(f"{self.base}/collections/{self.collection}/points/scroll",json=body)
+            if r.status_code in (400,404): return []
+            r.raise_for_status()
+            points=(r.json().get("result") or {}).get("points",[])
+            for row in points: row.setdefault("score",0.0)
+            return points

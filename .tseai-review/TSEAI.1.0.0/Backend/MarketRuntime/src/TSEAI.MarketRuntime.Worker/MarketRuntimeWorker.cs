@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using TSEAI.Shared.Application.Alerts;
+using TSEAI.Shared.Application.Market;
 
 namespace TSEAI.MarketRuntime.Worker;
 
@@ -71,11 +72,24 @@ public sealed class MarketRuntimeWorker(
             ? currentRows.Where(x => x.TradingDate > 0).Select(x => x.TradingDate).DefaultIfEmpty(tradingDate).Max()
             : tradingDate;
         if (currentRows.Count > 0)
+        {
             await store.EnsureCurrentTradingDateAsync(activeTradingDate);
+            if (!_hydrated)
+                await store.ReconcileActiveUniverseAsync(activeTradingDate, currentRows.Select(x => x.InsCode));
+        }
         foreach (var row in currentRows)
         {
             var snapshot = await store.GetAsync(row.InsCode);
             var instrument = await store.GetInstrumentByInsCode(row.InsCode);
+
+            // OrderBookCurrent is a replaceable current-state table. A full startup
+            // hydration must clear levels that disappeared since the last process run.
+            if (!_hydrated)
+            {
+                snapshot.OrderBook = Enumerable.Range(1, 5).Select(i => new OrderBookLevel { Level = i }).ToArray();
+                snapshot.OrderBookUpdatedAt = null;
+                snapshot.OrderBookSourceCollectedAt = null;
+            }
 
             snapshot.TsetmcSymbol = row.Symbol;
             snapshot.TsetmcName = row.SymbolName;
@@ -109,6 +123,28 @@ public sealed class MarketRuntimeWorker(
             snapshot.MaxPrice = row.MaxPrice;
             snapshot.FirstPrice = row.FirstPrice;
             snapshot.YesterdayPrice = row.YesterdayPrice;
+            snapshot.RawMinValue = row.RawMinValue;
+            snapshot.RawMaxValue = row.RawMaxValue;
+            snapshot.EffectOnIndex = row.EffectOnIndex;
+            snapshot.BestAskPrice = row.BestAskPrice;
+            snapshot.BestAskQuantity = row.BestAskQuantity;
+            snapshot.BestAskCount = row.BestAskCount;
+            snapshot.BestBidPrice = row.BestBidPrice;
+            snapshot.BestBidQuantity = row.BestBidQuantity;
+            snapshot.BestBidCount = row.BestBidCount;
+            snapshot.MarketId = row.MarketId;
+            snapshot.MarketName = row.MarketName;
+            snapshot.MarketTypeCode = row.MarketTypeCode;
+            snapshot.MarketTypeName = row.MarketTypeName;
+            snapshot.BoardId = row.BoardId;
+            snapshot.BoardName = row.BoardName;
+            snapshot.IndustryName = row.IndustryName;
+            snapshot.IndustrySubId = row.IndustrySubId;
+            snapshot.IndustrySubName = row.IndustrySubName;
+            snapshot.SecuritiesId = row.SecuritiesId;
+            snapshot.SecuritiesName = row.SecuritiesName;
+            snapshot.StateId = row.StateId;
+            snapshot.StateName = row.StateName;
             snapshot.Eps = row.Eps;
             snapshot.PE = row.PE;
             snapshot.MinAllowedPrice = row.MinAllowedPrice;
@@ -136,6 +172,9 @@ public sealed class MarketRuntimeWorker(
             if (snapshot.TradingDate == 0) continue;
             snapshot.ClientType = new()
             {
+                Counter = row.Counter,
+                UpdatedAt = row.UpdatedAt,
+                SourceCollectedAt = row.SourceCollectedAt,
                 BuyCountI = row.BuyCountI,
                 BuyCountN = row.BuyCountN,
                 BuyIVolume = row.BuyIVolume,
@@ -164,6 +203,7 @@ public sealed class MarketRuntimeWorker(
                 snapshot.OrderBook[index] = new()
                 {
                     Level = row.Level,
+                    BestLimitCounter = row.BestLimitCounter,
                     BuyPrice = row.BuyPrice,
                     BuyCount = row.BuyCount,
                     BuyVolume = row.BuyVolume,
@@ -172,6 +212,15 @@ public sealed class MarketRuntimeWorker(
                     SellVolume = row.SellVolume
                 };
             }
+            snapshot.OrderBookUpdatedAt = group.Where(x => x.OrderBookUpdatedAt.HasValue).Select(x => x.OrderBookUpdatedAt).Max();
+            snapshot.OrderBookSourceCollectedAt = group.Where(x => x.SourceCollectedAt.HasValue).Select(x => x.SourceCollectedAt).Max();
+            var best = snapshot.OrderBook.FirstOrDefault(x => x.Level == 1);
+            snapshot.BestBidPrice = best is not null && best.BuyPrice > 0 ? best.BuyPrice : null;
+            snapshot.BestBidQuantity = best is not null && best.BuyPrice > 0 ? best.BuyVolume : null;
+            snapshot.BestBidCount = best is not null && best.BuyPrice > 0 ? best.BuyCount : null;
+            snapshot.BestAskPrice = best is not null && best.SellPrice > 0 ? best.SellPrice : null;
+            snapshot.BestAskQuantity = best is not null && best.SellPrice > 0 ? best.SellVolume : null;
+            snapshot.BestAskCount = best is not null && best.SellPrice > 0 ? best.SellCount : null;
             await store.PutAsync(snapshot, snapshot.TradingDate > 0);
             Mark(changed, group.Key, MarketChangeKind.OrderBook);
         }
