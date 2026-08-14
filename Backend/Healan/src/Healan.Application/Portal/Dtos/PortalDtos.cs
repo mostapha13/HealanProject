@@ -122,9 +122,28 @@ public class RagSettingDto
     public int AuthenticatedDailyLimit { get; set; } = 200;
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    public bool SummarizeEnabled { get; set; } = true;
     public string SttModel { get; set; } = "small";
     public bool SaveChatLogs { get; set; } = true;
     public DateTime? LastSyncedAt { get; set; }
+}
+
+public class RagRuntimeStatusDto
+{
+    public bool IsAvailable { get; set; }
+    public int DocumentCount { get; set; }
+    public bool Ingesting { get; set; }
+    public string? LastIngestError { get; set; }
+    public string? DataSource { get; set; }
+    public string? EmbeddingModel { get; set; }
+}
+
+public class RagReindexResultDto
+{
+    public int Indexed { get; set; }
+    public int DocumentCount { get; set; }
+    public string? Source { get; set; }
+    public string? EmbeddingModel { get; set; }
 }
 
 public class RagAskRequestDto

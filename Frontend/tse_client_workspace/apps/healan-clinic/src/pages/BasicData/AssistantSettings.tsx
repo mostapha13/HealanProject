@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
-import type { RagSetting } from '../../api/types';
+import type { RagRuntimeStatus, RagSetting } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { convertDateAndTimeToJalali } from '@tse/tools';
 
@@ -20,6 +20,7 @@ function emptySettings(): RagSetting {
     authenticatedDailyLimit: 200,
     embeddingModel: DEFAULT_EMBEDDING,
     summarizeModel: DEFAULT_SUMMARIZE,
+    summarizeEnabled: true,
     sttModel: DEFAULT_STT,
     saveChatLogs: true,
   };
@@ -37,6 +38,7 @@ function mapSettings(res: Partial<RagSetting> | null | undefined, fallback?: Rag
     authenticatedDailyLimit: res?.authenticatedDailyLimit ?? base.authenticatedDailyLimit,
     embeddingModel: (res?.embeddingModel || base.embeddingModel || DEFAULT_EMBEDDING).trim(),
     summarizeModel: (res?.summarizeModel || base.summarizeModel || DEFAULT_SUMMARIZE).trim(),
+    summarizeEnabled: res?.summarizeEnabled ?? base.summarizeEnabled ?? true,
     sttModel: (res?.sttModel || base.sttModel || DEFAULT_STT).trim(),
     saveChatLogs: res?.saveChatLogs ?? base.saveChatLogs ?? true,
     lastSyncedAt: res?.lastSyncedAt ?? base.lastSyncedAt,
@@ -47,17 +49,51 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
   const [settings, setSettings] = useState<RagSetting | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [runtime, setRuntime] = useState<RagRuntimeStatus | null>(null);
+  const [checkingRuntime, setCheckingRuntime] = useState(false);
+  const [reindexing, setReindexing] = useState(false);
+
+  const loadRuntime = async () => {
+    setCheckingRuntime(true);
+    try {
+      setRuntime(await healanApi.portal.ragRuntimeStatus());
+    } catch (err) {
+      onAlert(err);
+      setRuntime(null);
+    } finally {
+      setCheckingRuntime(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await healanApi.portal.ragSettingGet();
       setSettings(mapSettings(res));
+      void loadRuntime();
     } catch (err) {
       onAlert(err);
       setSettings(emptySettings());
     } finally {
       setLoading(false);
+    }
+  };
+
+  const reindex = async () => {
+    if (!settings) return;
+    setReindexing(true);
+    try {
+      const saved = await healanApi.portal.ragSettingSave(settings);
+      setSettings(mapSettings(saved, settings));
+      const result = await healanApi.portal.ragReindex();
+      onAlert({ type: 'success', message: `ایندکس با ${result.documentCount} سند بازسازی شد.` });
+      await loadRuntime();
+      await load();
+    } catch (err) {
+      onAlert(err);
+      await loadRuntime();
+    } finally {
+      setReindexing(false);
     }
   };
 
@@ -106,6 +142,20 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
               />
               <small className="healan-muted">
                 برای جستجوی معنایی. نمونه: heydariAI/persian-embeddings یا simple
+              </small>
+            </div>
+
+            <div className="healan-form-field healan-form-field--full">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={settings.summarizeEnabled !== false}
+                  onChange={(e) => setSettings({ ...settings, summarizeEnabled: e.target.checked })}
+                />{' '}
+                خلاصه‌سازی بلاگ و نظرات هنگام ساخت ایندکس فعال باشد
+              </label>
+              <small className="healan-muted">
+                اگر Ollama در دسترس نیست این گزینه را خاموش کنید تا بازسازی ایندکس بدون مدل خلاصه‌ساز انجام شود.
               </small>
             </div>
 
@@ -258,6 +308,57 @@ function AssistantSettingsPage({ onAlert }: { onAlert: (msg: unknown) => void })
               ذخیره تنظیمات
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="healan-card" style={{ marginTop: '1rem' }}>
+        <div className="healan-card__header">
+          <h3>وضعیت و بازیابی ایندکس RAG</h3>
+        </div>
+        <div className="healan-card__body">
+          <div className="healan-form-grid">
+            <div className="healan-form-field">
+              <label>وضعیت سرویس</label>
+              <div>{runtime?.isAvailable ? 'در دسترس' : 'در دسترس نیست'}</div>
+            </div>
+            <div className="healan-form-field">
+              <label>تعداد اسناد ایندکس‌شده</label>
+              <div>{runtime?.documentCount ?? '—'}</div>
+            </div>
+            <div className="healan-form-field">
+              <label>عملیات جاری</label>
+              <div>{runtime?.ingesting ? 'در حال بازسازی ایندکس' : 'آماده'}</div>
+            </div>
+            {runtime?.lastIngestError && (
+              <div className="healan-form-field healan-form-field--full">
+                <label>آخرین خطای ایندکس</label>
+                <div style={{ color: '#b42318', direction: 'ltr', textAlign: 'left' }}>
+                  {runtime.lastIngestError}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="healan-actions" style={{ marginTop: '1rem' }}>
+            <button
+              type="button"
+              className="healan-btn healan-btn--muted"
+              disabled={checkingRuntime}
+              onClick={() => void loadRuntime()}
+            >
+              بازخوانی وضعیت
+            </button>
+            <button
+              type="button"
+              className="healan-btn healan-btn--primary"
+              disabled={reindexing || runtime?.ingesting}
+              onClick={() => void reindex()}
+            >
+              {reindexing ? 'در حال بازسازی…' : 'بازسازی ایندکس اکنون'}
+            </button>
+          </div>
+          <small className="healan-muted">
+            بازسازی جدید ابتدا اسناد را درج می‌کند و فقط پس از موفقیت، داده‌های قدیمی را پاک می‌کند؛ در صورت خطا ایندکس قبلی حفظ می‌شود.
+          </small>
         </div>
       </div>
     </>

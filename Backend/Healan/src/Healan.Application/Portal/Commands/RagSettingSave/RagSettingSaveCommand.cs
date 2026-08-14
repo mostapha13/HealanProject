@@ -17,6 +17,7 @@ public class RagSettingSaveCommand : IRequest<RagSettingDto>
     public int AuthenticatedDailyLimit { get; set; } = 200;
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    public bool SummarizeEnabled { get; set; } = true;
     public string SttModel { get; set; } = "small";
     public bool SaveChatLogs { get; set; } = true;
 }
@@ -61,6 +62,7 @@ public class RagSettingSaveCommandHandler : IRequestHandler<RagSettingSaveComman
         setting.AuthenticatedDailyLimit = request.AuthenticatedDailyLimit;
         setting.EmbeddingModel = request.EmbeddingModel.Trim();
         setting.SummarizeModel = request.SummarizeModel.Trim();
+        setting.SummarizeEnabled = request.SummarizeEnabled;
         setting.SttModel = request.SttModel.Trim();
         setting.SaveChatLogs = request.SaveChatLogs;
         setting.UpdatedAt = DateTime.UtcNow;

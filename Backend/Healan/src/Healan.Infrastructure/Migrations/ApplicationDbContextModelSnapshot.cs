@@ -2527,6 +2527,11 @@ namespace Healan.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasDefaultValue("qwen2.5:3b");
 
+                    b.Property<bool>("SummarizeEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int>("SyncIntervalMinutes")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")

@@ -34,6 +34,9 @@ def apply_rag_sql_overrides(settings: Settings) -> Settings:
         if not (settings.openai_model or "").strip() or settings.openai_model == "gpt-4o-mini":
             settings.openai_model = summarize
 
+    if sql.get("summarize_enabled") is not None:
+        settings.rag_summarize_enabled = bool(sql["summarize_enabled"])
+
     stt = (sql.get("stt_model") or "").strip()
     if stt:
         settings.stt_model = stt

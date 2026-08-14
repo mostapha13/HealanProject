@@ -60,15 +60,10 @@ class VectorStore:
         except ValueError as exc:
             if "embedding function" not in str(exc).lower():
                 raise
-            try:
-                self._client.delete_collection(collection_name)
-            except Exception:
-                pass
-            self._collection = self._client.get_or_create_collection(
-                name=collection_name,
-                embedding_function=chroma_ef,
-                metadata={"hnsw:space": "cosine"},
-            )
+            raise ValueError(
+                "Embedding model/configuration does not match the live collection; "
+                "the existing index was preserved"
+            ) from exc
         self._embedding_model = embedding_model
 
     @property
@@ -101,6 +96,24 @@ class VectorStore:
             )
             total += len(batch)
         return total
+
+    def synchronize_documents(self, documents: list[Document]) -> int:
+        """Upsert the new snapshot before removing stale rows.
+
+        Keeping the existing collection populated until every new batch has
+        been embedded prevents a failed refresh from taking the live RAG index
+        down to zero documents.
+        """
+        if not documents:
+            raise ValueError("RAG source returned no documents; existing index was preserved")
+
+        count = self.add_documents(documents)
+        wanted_ids = {document.id for document in documents}
+        existing = self._collection.get(include=[]).get("ids") or []
+        stale_ids = [item_id for item_id in existing if item_id not in wanted_ids]
+        if stale_ids:
+            self._collection.delete(ids=stale_ids)
+        return count
 
     def search(self, query: str, top_k: int) -> list[dict]:
         if self.document_count == 0:

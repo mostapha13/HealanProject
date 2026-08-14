@@ -14,6 +14,16 @@ public record RagPythonAskResult(
 
 public record RagPythonSttResult(string Text, string Language, double? DurationSeconds, string? Model);
 
+public record RagPythonStatusResult(
+    bool IsAvailable,
+    int DocumentCount,
+    bool Ingesting,
+    string? LastIngestError,
+    string? DataSource,
+    string? EmbeddingModel);
+
+public record RagPythonIngestResult(int Indexed, int DocumentCount, string? Source, string? EmbeddingModel);
+
 public interface IRagPythonService
 {
     Task<RagPythonAskResult> AskAsync(
@@ -27,5 +37,13 @@ public interface IRagPythonService
         byte[] audioContent,
         string fileName,
         string contentType,
+        CancellationToken cancellationToken = default);
+
+    Task<RagPythonStatusResult> GetStatusAsync(
+        string baseUrl,
+        CancellationToken cancellationToken = default);
+
+    Task<RagPythonIngestResult> IngestAsync(
+        string baseUrl,
         CancellationToken cancellationToken = default);
 }

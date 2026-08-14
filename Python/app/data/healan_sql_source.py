@@ -234,6 +234,7 @@ class HealanSqlDataSource(DataSource):
             "is_enabled": bool(row.get("IsEnabled", True)),
             "embedding_model": str(row.get("EmbeddingModel") or "").strip(),
             "summarize_model": str(row.get("SummarizeModel") or "").strip(),
+            "summarize_enabled": bool(row.get("SummarizeEnabled", True)),
             "stt_model": str(row.get("SttModel") or "").strip(),
         }
 

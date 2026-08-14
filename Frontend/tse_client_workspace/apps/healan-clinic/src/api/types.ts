@@ -511,9 +511,26 @@ export interface RagSetting {
   authenticatedDailyLimit: number;
   embeddingModel: string;
   summarizeModel: string;
+  summarizeEnabled: boolean;
   sttModel: string;
   saveChatLogs: boolean;
   lastSyncedAt?: string;
+}
+
+export interface RagRuntimeStatus {
+  isAvailable: boolean;
+  documentCount: number;
+  ingesting: boolean;
+  lastIngestError?: string;
+  dataSource?: string;
+  embeddingModel?: string;
+}
+
+export interface RagReindexResult {
+  indexed: number;
+  documentCount: number;
+  source?: string;
+  embeddingModel?: string;
 }
 
 export interface RagChatLogItem {

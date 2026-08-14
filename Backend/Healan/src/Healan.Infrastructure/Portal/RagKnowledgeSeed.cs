@@ -95,6 +95,7 @@ public static class RagKnowledgeSeed
             AuthenticatedDailyLimit = 200,
             EmbeddingModel = "heydariAI/persian-embeddings",
             SummarizeModel = "qwen2.5:3b",
+            SummarizeEnabled = true,
             SttModel = "small",
             SaveChatLogs = true,
             UpdatedAt = DateTime.UtcNow,

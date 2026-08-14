@@ -62,8 +62,7 @@ class RagPipeline:
         source = build_data_source(self.settings)
         documents = source.load()
         documents = enrich_documents_with_summaries(documents, self.settings)
-        self.store.clear()
-        count = self.store.add_documents(documents)
+        count = self.store.synchronize_documents(documents)
         return {
             "indexed": count,
             "source": self.settings.data_source,

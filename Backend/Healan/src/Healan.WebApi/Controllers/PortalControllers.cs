@@ -17,6 +17,7 @@ using Healan.Application.Portal.Commands.PortalSiteSettingSave;
 using Healan.Application.Portal.Commands.RagChatLogDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeDelete;
 using Healan.Application.Portal.Commands.RagKnowledgeRegister;
+using Healan.Application.Portal.Commands.RagReindex;
 using Healan.Application.Portal.Commands.RagSettingSave;
 using Healan.Application.Portal.PatientArea;
 using Healan.Application.Portal.Queries.BlogPostInfo;
@@ -36,6 +37,7 @@ using Healan.Application.Portal.Queries.RagKnowledgeInfo;
 using Healan.Application.Portal.Queries.RagKnowledgeList;
 using Healan.Application.Portal.Queries.RagQuotaStatus;
 using Healan.Application.Portal.Queries.RagSettingGet;
+using Healan.Application.Portal.Queries.RagRuntimeStatus;
 using Healan.Domain.Portal.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -177,6 +179,14 @@ public class RagKnowledgeController : ApiControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> SettingSave([FromBody] RagSettingSaveCommand request) =>
         Ok(await Mediator.Send(request));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> RuntimeStatus() =>
+        Ok(await Mediator.Send(new RagRuntimeStatusQuery()));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Reindex() =>
+        Ok(await Mediator.Send(new RagReindexCommand()));
 
     [HttpGet("[action]")]
     [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]

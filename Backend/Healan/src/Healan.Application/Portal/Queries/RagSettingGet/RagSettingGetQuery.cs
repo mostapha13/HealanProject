@@ -42,6 +42,7 @@ public class RagSettingGetQueryHandler : IRequestHandler<RagSettingGetQuery, Rag
         SummarizeModel = string.IsNullOrWhiteSpace(setting.SummarizeModel)
             ? "qwen2.5:3b"
             : setting.SummarizeModel,
+        SummarizeEnabled = setting.SummarizeEnabled,
         SttModel = string.IsNullOrWhiteSpace(setting.SttModel)
             ? "small"
             : setting.SttModel,

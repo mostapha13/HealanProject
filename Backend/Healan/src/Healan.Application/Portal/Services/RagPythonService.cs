@@ -196,6 +196,59 @@ public class RagPythonService : IRagPythonService
             parsed.Model);
     }
 
+    public async Task<RagPythonStatusResult> GetStatusAsync(
+        string baseUrl,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"{baseUrl.TrimEnd('/')}/api/v1/rag/status";
+        try
+        {
+            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return new RagPythonStatusResult(false, 0, false, TryReadDetail(body), null, null);
+
+            var parsed = System.Text.Json.JsonSerializer.Deserialize<RagPythonStatusResponse>(body);
+            return parsed == null
+                ? new RagPythonStatusResult(false, 0, false, "Invalid status response", null, null)
+                : new RagPythonStatusResult(
+                    true,
+                    parsed.DocumentCount,
+                    parsed.Ingesting,
+                    parsed.LastIngestError,
+                    parsed.DataSource,
+                    parsed.EmbeddingModel);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "RAG status connection failed. Url={Url}", url);
+            return new RagPythonStatusResult(false, 0, false, ex.Message, null, null);
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return new RagPythonStatusResult(false, 0, false, "RAG status request timed out", null, null);
+        }
+    }
+
+    public async Task<RagPythonIngestResult> IngestAsync(
+        string baseUrl,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"{baseUrl.TrimEnd('/')}/api/v1/rag/ingest";
+        using var response = await _httpClient.PostAsync(url, content: null, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            throw new BadRequestExceptions(TryReadDetail(body) ?? "بازسازی ایندکس RAG ناموفق بود.");
+
+        var parsed = System.Text.Json.JsonSerializer.Deserialize<RagPythonIngestResponse>(body)
+            ?? throw new BadRequestExceptions("پاسخ بازسازی ایندکس RAG نامعتبر بود.");
+        return new RagPythonIngestResult(
+            parsed.Indexed,
+            parsed.DocumentCount,
+            parsed.Source,
+            parsed.EmbeddingModel);
+    }
+
     private static string? TryReadDetail(string body)
     {
         try
@@ -260,5 +313,38 @@ public class RagPythonService : IRagPythonService
 
         [JsonPropertyName("model")]
         public string? Model { get; set; }
+    }
+
+    private sealed class RagPythonStatusResponse
+    {
+        [JsonPropertyName("document_count")]
+        public int DocumentCount { get; set; }
+
+        [JsonPropertyName("ingesting")]
+        public bool Ingesting { get; set; }
+
+        [JsonPropertyName("last_ingest_error")]
+        public string? LastIngestError { get; set; }
+
+        [JsonPropertyName("data_source")]
+        public string? DataSource { get; set; }
+
+        [JsonPropertyName("embedding_model")]
+        public string? EmbeddingModel { get; set; }
+    }
+
+    private sealed class RagPythonIngestResponse
+    {
+        [JsonPropertyName("indexed")]
+        public int Indexed { get; set; }
+
+        [JsonPropertyName("document_count")]
+        public int DocumentCount { get; set; }
+
+        [JsonPropertyName("source")]
+        public string? Source { get; set; }
+
+        [JsonPropertyName("embedding_model")]
+        public string? EmbeddingModel { get; set; }
     }
 }

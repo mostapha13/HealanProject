@@ -32,6 +32,8 @@ import type {
   PortalSeoPage,
   RagKnowledgeItem,
   RagSetting,
+  RagRuntimeStatus,
+  RagReindexResult,
   RagChatLogItem,
   SmsOutboxItem,
   SmsSetting,
@@ -362,6 +364,8 @@ export const healanApi = {
     ragRestore: (id: number) => post('RagKnowledge/Restore', { id }),
     ragSettingGet: () => get<RagSetting>('RagKnowledge/SettingGet'),
     ragSettingSave: (data: RagSetting) => post<RagSetting>('RagKnowledge/SettingSave', data),
+    ragRuntimeStatus: () => get<RagRuntimeStatus>('RagKnowledge/RuntimeStatus'),
+    ragReindex: () => post<RagReindexResult>('RagKnowledge/Reindex', {}),
     ragChatLogList: (params?: {
       filterText?: string;
       phone?: string;

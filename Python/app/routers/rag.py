@@ -3,10 +3,9 @@ from openai import AsyncOpenAI
 import logging
 
 from app.config import Settings, get_settings
-from app.rag.pipeline import build_data_source
 from app.rag.rerank import filter_and_rerank
 from app.rag.direct_answer import INDEXING_MESSAGE
-from app.rag.service import get_rag_pipeline, is_ingesting, reset_rag_pipeline
+from app.rag.service import document_count, get_rag_pipeline, init_rag, is_ingesting, last_ingest_error
 from app.schemas import (
     RagAskRequest,
     RagAskResponse,
@@ -43,35 +42,28 @@ def _rag_deps_error(exc: Exception) -> HTTPException:
 
 @router.get("/status", response_model=RagStatusResponse)
 async def rag_status(settings: Settings = Depends(get_settings)):
-    try:
-        pipeline = get_rag_pipeline()
-    except ImportError as exc:
-        raise _rag_deps_error(exc) from exc
     return RagStatusResponse(
-        document_count=pipeline.store.document_count,
+        document_count=document_count(),
         data_source=settings.data_source,
         excel_path=str(settings.excel_path),
         excel_exists=settings.excel_path.exists(),
         embedding_model=settings.embedding_model,
         llm_model=settings.openai_model,
+        ingesting=is_ingesting(),
+        last_ingest_error=last_ingest_error(),
     )
 
 
 @router.post("/ingest", response_model=RagIngestResponse)
 async def rag_ingest(settings: Settings = Depends(get_settings)):
-    try:
-        build_data_source(settings).load()
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    import asyncio
 
-    reset_rag_pipeline()
-    try:
-        pipeline = get_rag_pipeline()
-    except ImportError as exc:
-        raise _rag_deps_error(exc) from exc
-    result = pipeline.ingest()
+    if is_ingesting():
+        raise HTTPException(status_code=409, detail="RAG ingest is already running")
+    result = await asyncio.to_thread(init_rag, settings, force=True)
+    if result is None:
+        raise HTTPException(status_code=503, detail=last_ingest_error() or "RAG ingest failed")
+    pipeline = get_rag_pipeline()
     return RagIngestResponse(
         indexed=result["indexed"],
         source=result["source"],
@@ -120,27 +112,24 @@ async def rag_ask(
     body: RagAskRequest,
     settings: Settings = Depends(get_settings),
 ):
+    if document_count() == 0 and is_ingesting():
+        logger.info("RAG ask while indexing. question=%r document_count=0", body.question)
+        return RagAskResponse(
+            answer=INDEXING_MESSAGE,
+            was_answered=False,
+            similarity_score=None,
+            matched_id=None,
+            source_type=None,
+            sources=[],
+            model="direct",
+            embedding_model=settings.embedding_model,
+            answer_mode="direct",
+        )
     try:
         pipeline = get_rag_pipeline()
     except ImportError as exc:
         raise _rag_deps_error(exc) from exc
     if pipeline.store.document_count == 0:
-        if is_ingesting():
-            logger.info(
-                "RAG ask while indexing. question=%r document_count=0",
-                body.question,
-            )
-            return RagAskResponse(
-                answer=INDEXING_MESSAGE,
-                was_answered=False,
-                similarity_score=None,
-                matched_id=None,
-                source_type=None,
-                sources=[],
-                model="direct",
-                embedding_model=settings.embedding_model,
-                answer_mode="direct",
-            )
         logger.warning(
             "RAG ask rejected: index empty. question=%r document_count=0 ingesting=%s",
             body.question,

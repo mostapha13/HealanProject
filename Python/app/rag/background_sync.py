@@ -7,8 +7,7 @@ import logging
 
 from app.config import Settings
 from app.data.healan_sql_source import HealanSqlDataSource
-from app.rag.pipeline import RagPipeline
-from app.rag.service import is_ingesting, reset_rag_pipeline
+from app.rag.service import init_rag, is_ingesting
 
 logger = logging.getLogger(__name__)
 
@@ -57,20 +56,14 @@ async def run_background_sync(settings: Settings, stop_event: asyncio.Event) -> 
 
 
 def _sync_once(settings: Settings) -> None:
-    from app.rag.runtime_settings import apply_rag_sql_overrides
-
-    reset_rag_pipeline()
-    runtime = apply_rag_sql_overrides(settings)
-    pipeline = RagPipeline(runtime)
-    from app.rag import service as rag_service
-
-    rag_service._pipeline = pipeline
-    result = pipeline.ingest()
+    result = init_rag(settings, force=True)
+    if result is None:
+        raise RuntimeError("RAG ingest failed; existing index was preserved")
     HealanSqlDataSource.touch_last_synced(settings.sql_server_connection_string)
     logger.info(
         "RAG synced %s documents (source=%s, embedding=%s, summarize=%s)",
         result.get("indexed"),
         result.get("source"),
-        runtime.embedding_model,
-        runtime.rag_summarize_model or runtime.openai_model,
+        result.get("embedding_model"),
+        settings.rag_summarize_model or settings.openai_model,
     )

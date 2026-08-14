@@ -15,6 +15,8 @@ public class RagSetting
     public string EmbeddingModel { get; set; } = "heydariAI/persian-embeddings";
     /// <summary>مدل خلاصه‌ساز بلاگ/نظرات (مثلاً qwen2.5:3b روی Ollama).</summary>
     public string SummarizeModel { get; set; } = "qwen2.5:3b";
+    /// <summary>Whether blog/review text is summarized through the configured LLM before indexing.</summary>
+    public bool SummarizeEnabled { get; set; } = true;
     /// <summary>مدل گفتار به متن Whisper (مثلاً small / base / tiny).</summary>
     public string SttModel { get; set; } = "small";
     /// <summary>اگر true باشد، سوال/جواب دستیار در «گفتگوهای دستیار» ذخیره می‌شود.</summary>

@@ -77,6 +77,8 @@ class RagStatusResponse(BaseModel):
     excel_exists: bool
     embedding_model: str
     llm_model: str
+    ingesting: bool = False
+    last_ingest_error: str | None = None
 
 
 class SttResponse(BaseModel):

@@ -11,7 +11,7 @@ from app import __version__
 from app.config import get_settings
 from app.rag.background_sync import run_background_sync
 from app.rag.runtime_settings import apply_rag_sql_overrides
-from app.rag.service import get_rag_pipeline, init_rag
+from app.rag.service import document_count, init_rag
 from app.routers import chat, rag, stt
 from app.services.stt import warmup_stt
 
@@ -46,7 +46,18 @@ async def lifespan(_: FastAPI):
     stt_task = asyncio.create_task(_warmup_stt())
 
     stop_event = asyncio.Event()
-    sync_task = asyncio.create_task(run_background_sync(settings, stop_event))
+
+    async def _run_sync_after_initial_ingest() -> None:
+        # Chroma's embedded client must not be initialized concurrently for
+        # the same persistence path. It also avoids doing two full ingests at
+        # process startup.
+        try:
+            await ingest_task
+        except asyncio.CancelledError:
+            return
+        await run_background_sync(settings, stop_event)
+
+    sync_task = asyncio.create_task(_run_sync_after_initial_ingest())
 
     yield
 
@@ -95,11 +106,7 @@ async def ui():
 @app.get("/health")
 async def health():
     settings = get_settings()
-    rag_documents = 0
-    try:
-        rag_documents = get_rag_pipeline().store.document_count
-    except Exception:
-        pass
+    rag_documents = document_count()
     return {
         "status": "ok",
         "version": __version__,
