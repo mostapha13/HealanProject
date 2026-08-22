@@ -251,6 +251,17 @@ function BlogAdminPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                 />
               </div>
               <div className="healan-form-field">
+                <label>نامک (slug)</label>
+                <input
+                  className="healan-input"
+                  dir="ltr"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: slugPreview(e.target.value) })}
+                  placeholder="مثلاً: فشار-خون"
+                />
+                <small>این مقدار در آدرس عمومی مطلب استفاده می‌شود.</small>
+              </div>
+              <div className="healan-form-field">
                 <label>برچسب‌ها</label>
                 <input
                   className="healan-input"
