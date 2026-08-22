@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import {
   fetchBlogPost,
   fetchSite,
+  decodeRouteSegment,
   portalSectionEnabled,
   portalSetting,
 } from '@/lib/api';
@@ -23,7 +24,8 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const routeParams = await params;
+  const slug = decodeRouteSegment(routeParams.slug);
   const [site, post] = await Promise.all([fetchSite(), fetchBlogPost(slug)]);
   if (!portalSectionEnabled(site, 'blog') || !post) {
     return {
@@ -66,7 +68,8 @@ function formatDate(value?: string) {
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
+  const routeParams = await params;
+  const slug = decodeRouteSegment(routeParams.slug);
   const [site, post] = await Promise.all([fetchSite(), fetchBlogPost(slug)]);
   const doctor = doctorFromSettings(site);
   const topbar = portalSetting(site, 'site.topbar', 'مطب تخصصی قلب و عروق · شوشتر');
