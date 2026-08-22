@@ -32,6 +32,7 @@ import { colors, fonts, spacing } from '../theme';
 type BlogForm = {
   blogPostId: number;
   title: string;
+  slug: string;
   excerpt: string;
   body: string;
   tags: string;
@@ -43,6 +44,7 @@ type BlogForm = {
 const emptyForm = (): BlogForm => ({
   blogPostId: 0,
   title: '',
+  slug: '',
   excerpt: '',
   body: '',
   tags: '',
@@ -107,6 +109,7 @@ export function BlogModuleView({ title }: { title: string }) {
       setForm({
         blogPostId: id,
         title: String(detail.title ?? ''),
+        slug: String(detail.slug ?? ''),
         excerpt: String(detail.excerpt ?? ''),
         body: String(detail.body ?? ''),
         tags: String(detail.tags ?? ''),
@@ -177,6 +180,7 @@ export function BlogModuleView({ title }: { title: string }) {
         ...(form.blogPostId > 0 ? { blogPostId: form.blogPostId } : {}),
         title: form.title.trim(),
         // slug خالی → سرور از عنوان می‌سازد
+        slug: form.slug.trim() || undefined,
         excerpt: form.excerpt.trim() || undefined,
         body: form.body.trim(),
         tags: form.tags.trim() || undefined,
@@ -264,7 +268,13 @@ export function BlogModuleView({ title }: { title: string }) {
             value={form.title}
             onChangeText={(v) => setForm({ ...form, title: v })}
           />
-          <Text style={styles.hint}>نامک (slug) خودکار از عنوان ساخته می‌شود.</Text>
+          <FormField
+            label="نامک (slug)"
+            value={form.slug}
+            onChangeText={(v) => setForm({ ...form, slug: v })}
+            placeholder="مثلاً: فشار-خون"
+          />
+          <Text style={styles.hint}>برای ساخت خودکار از عنوان، نامک را خالی بگذارید.</Text>
           <FormField
             label="برچسب‌ها"
             value={form.tags}
