@@ -155,8 +155,9 @@ export async function fetchBlogList(
 }
 
 export async function fetchBlogPost(slug: string): Promise<BlogPostDetail | null> {
-  if (!slug) return null;
-  const qs = new URLSearchParams({ slug });
+  const normalizedSlug = decodeRouteSegment(slug);
+  if (!normalizedSlug) return null;
+  const qs = new URLSearchParams({ slug: normalizedSlug });
   try {
     const data = await getJson<BlogPostDetail | null>(
       `${portalPublicBase()}BlogPost?${qs}`
@@ -165,6 +166,24 @@ export async function fetchBlogPost(slug: string): Promise<BlogPostDetail | null
   } catch (err) {
     console.error('[healan-www] PortalPublic/BlogPost failed', err);
     return null;
+  }
+}
+
+/**
+ * nginx forwards the original escaped request URI to Next.js. Depending on the
+ * Next.js/runtime combination, a dynamic route param can therefore still be
+ * percent-encoded. URLSearchParams would encode the percent signs again and
+ * the API would receive `%D9%...` instead of the Persian slug stored in the DB.
+ */
+export function decodeRouteSegment(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  try {
+    return decodeURIComponent(trimmed);
+  } catch {
+    // Keep malformed/legacy slugs usable instead of turning the page into 500.
+    return trimmed;
   }
 }
 
