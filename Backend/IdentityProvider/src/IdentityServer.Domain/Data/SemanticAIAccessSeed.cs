@@ -33,7 +33,7 @@ public static class SemanticAIAccessSeed
             ["SemanticAIPublisher"] = ReadOnly().Concat(["semantic-model.publish", "query.execute", "query.review", "dashboard.manage", "dashboard.publish", "powerbi.manage", "powerbi.publish", "governance.approve", "artifacts.write"]).Distinct().ToArray(),
             ["SemanticAIAgent"] = ["platform.read", "knowledge.read", "knowledge.search", "agent.read", "agent.use", "query.read", "query.execute", "artifacts.read", "artifacts.write", "dashboard.read", "dashboard.manage"],
             ["SemanticAIPowerBiAgent"] = ["powerbi.agent"],
-            ["SemanticAIService"] = ["platform.read", "integrations.read", "artifacts.read", "artifacts.write", "workflows.read", "knowledge.read", "knowledge.manage", "knowledge.search", "agent.read", "agent.use", "agent.manage", "connections.read", "connections.test", "query.read", "query.execute", "query.manage", "powerbi.agent", "operations.read"]
+            ["SemanticAIService"] = ["platform.read", "integrations.read", "artifacts.read", "artifacts.write", "workflows.read", "knowledge.read", "knowledge.manage", "knowledge.search", "agent.read", "agent.use", "agent.manage", "connections.read", "connections.test", "query.read", "query.execute", "query.manage", "powerbi.agent", "forms.read", "forms.manage", "operations.read"]
         };
 
     public static async Task SeedAsync(ApplicationDbContext db, RoleManager<ApplicationRole> roleManager)
