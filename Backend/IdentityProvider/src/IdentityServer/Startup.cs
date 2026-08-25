@@ -1,4 +1,5 @@
-﻿using IdentityServer.Application;
+﻿using System.Linq;
+using IdentityServer.Application;
 using IdentityServer.CustomTokenProvider;
 using IdentityServer.Domain;
 using IdentityServer.Domain.Data;
@@ -93,9 +94,9 @@ namespace IdentityServer
             })
                   .AddInMemoryPersistedGrants()
                   .AddInMemoryIdentityResources(Config.IdentityResources)
-                  .AddInMemoryApiResources(Config.ApiResources)
-                  .AddInMemoryApiScopes(Config.ApiScopes)
-                  .AddInMemoryClients(Config.GetClients(Configuration))
+                  .AddInMemoryApiResources(Config.ApiResources.Concat(SemanticAIIdentityConfiguration.ApiResources))
+                  .AddInMemoryApiScopes(Config.ApiScopes.Concat(SemanticAIIdentityConfiguration.ApiScopes))
+                  .AddInMemoryClients(Config.GetClients(Configuration).Concat(SemanticAIIdentityConfiguration.GetClients(Configuration)))
                   .AddDeveloperSigningCredential()
                   .AddAspNetIdentity<ApplicationUser>()
                   .AddExtensionGrantValidator<ImpersonationGrantValidator>();
@@ -241,5 +242,4 @@ namespace IdentityServer
             }
         }
     }
-
 }

@@ -1,11 +1,14 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# syntax=docker/dockerfile:1.7
+FROM mcr.microsoft.com/dotnet/sdk:9.0.316 AS build
 ARG PROJECT_PATH
 WORKDIR /src
 COPY . .
-RUN dotnet restore "${PROJECT_PATH}"
-RUN dotnet publish "${PROJECT_PATH}" -c Release -o /app/publish /p:UseAppHost=false
+RUN --mount=type=cache,id=healan-nuget-packages,target=/root/.nuget/packages \
+    dotnet restore "${PROJECT_PATH}" --disable-parallel
+RUN --mount=type=cache,id=healan-nuget-packages,target=/root/.nuget/packages \
+    dotnet publish "${PROJECT_PATH}" --no-restore -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0.18 AS runtime
 ARG DLL_NAME
 ENV APP_DLL=${DLL_NAME}
 ENV ASPNETCORE_URLS=http://+:8080

@@ -107,6 +107,12 @@ services:
         condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      IdentityServer__SemanticAIServiceClientSecret: ${SEMANTICAI_SERVICE_CLIENT_SECRET:?Set the shared SemanticAI service client secret}
+      IdentityServer__SemanticAITrayClientSecret: ${SEMANTICAI_TRAY_CLIENT_SECRET:?Set the shared SemanticAI tray client secret}
+      IdentityServer__SemanticAIDefaultOrganizationId: ${SEMANTICAI_ORGANIZATION_ID:-11111111-1111-1111-1111-111111111111}
+      IdentityServer__SemanticAIRedirectUris: ${SEMANTICAI_REDIRECT_URIS:-http://localhost:8098/api/auth/callback}
+      IdentityServer__SemanticAIPostLogoutRedirectUris: ${SEMANTICAI_POST_LOGOUT_REDIRECT_URIS:-http://localhost:8098}
+      IdentityServer__SemanticAIAllowedCorsOrigins: ${SEMANTICAI_ALLOWED_CORS_ORIGINS:-http://localhost:8098}
     volumes:
       - ./docker/config/identity-server/appsettings.Production.json:/app/appsettings.Production.json:ro
 

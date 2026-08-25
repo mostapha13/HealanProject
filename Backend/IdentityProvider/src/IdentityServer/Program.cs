@@ -45,6 +45,7 @@ namespace IdentityServer
 
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+                    await SemanticAIAccessSeed.SeedAsync(context, roleManager);
                     await context.SeedAdmin(userManager, roleManager);
 
                     try
