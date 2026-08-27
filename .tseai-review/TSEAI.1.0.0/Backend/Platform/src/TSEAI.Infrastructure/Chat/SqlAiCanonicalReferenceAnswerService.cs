@@ -1224,7 +1224,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             .GroupBy(x=>PersianDisplayText.Normalize(x.Role),StringComparer.Ordinal)
             .Select(group=>group.OrderByDescending(x=>x.EffectiveAt).ThenByDescending(x=>x.ContentId).First())
             .OrderBy(x=>x.Position).ToArray();
-        var answer=CanonicalOrganizationHierarchyAnswer.Compose(master.Role,current);
+        var answer=CanonicalOrganizationHierarchyAnswer.Compose(question,master.Role,current);
         if(string.IsNullOrWhiteSpace(answer)) return null;
         var masterName=PersianDisplayText.Normalize(master.FullName);
         var masterRole=PersianDisplayText.Normalize(master.Role);

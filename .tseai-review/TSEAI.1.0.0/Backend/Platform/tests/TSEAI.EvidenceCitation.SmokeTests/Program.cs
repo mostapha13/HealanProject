@@ -120,6 +120,12 @@ var hierarchyAnswer=CanonicalOrganizationHierarchyAnswer.Compose("معاون ا�
     new CanonicalBoardMember{ContentId=2,Position=2,FullName="سعید رضایی",Role="مدیر سرمایه‌های انسانی"}
 ]);
 Must(hierarchyAnswer?.Contains("اسماعیل رازقی — مدیر اداری",StringComparison.Ordinal)==true && hierarchyAnswer.Contains("سعید رضایی",StringComparison.Ordinal),"organization hierarchy answer must list structured subordinates");
+var hierarchyNames=CanonicalOrganizationHierarchyAnswer.Compose("فقط نام مدیران را بگو","معاون اجرایی",[
+    new CanonicalBoardMember{ContentId=1,Position=1,FullName="اسماعیل رازقی",Role="مدیر اداری"},
+    new CanonicalBoardMember{ContentId=2,Position=2,FullName="رضا قلیچ‌خانی",Role="مدیر امور مالی"}
+]);
+Must(hierarchyNames=="اسماعیل رازقی، رضا قلیچ‌خانی"&&!hierarchyNames.Contains("مدیر اداری",StringComparison.Ordinal),
+    "names-only organization follow-ups must not add roles or explanatory prose");
 var companyPhone=CanonicalCompanyQuestion.Parse("شماره تلفن فملی چنده؟");
 Must(companyPhone.IsMatch&&companyPhone.Fields.Contains("phone")&&companyPhone.Lookups.Single()=="فملی","Company phone question must retain only the company/symbol lookup");
 var companyWeb=CanonicalCompanyQuestion.Parse("وب‌سایت رسمی فولاد مبارکه چیست؟");

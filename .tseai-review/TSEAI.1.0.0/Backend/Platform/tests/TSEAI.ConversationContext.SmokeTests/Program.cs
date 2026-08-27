@@ -36,6 +36,24 @@ Assert(hierarchy.EffectiveQuestion.Contains("بهروز خالق‌ویردی") 
 var parent=await svc.PrepareAsync("u1","c1","زیر مجموعه چه معاونتیه؟",temporal,CancellationToken.None);
 Assert(parent.EffectiveQuestion.Contains("بهروز خالق‌ویردی") && parent.PrimaryEntity is null,"upward organization follow-up must inherit only the active person");
 
+var board=CanonicalReferenceAnswer.Exact("بهروز خالق‌ویردی، عسگر نوربخش","organization_board","هیئت‌مدیره بورس تهران",
+    [new("board_member:1:name","بهروز خالق‌ویردی","TsePerson:1"),new("board_member:2:name","عسگر نوربخش","TsePerson:2")],
+    relatedSubjects:["بهروز خالق‌ویردی","عسگر نوربخش"]);
+await svc.RecordReferenceAsync("u1","c1","اعضای هیئت مدیره بورس تهران کیا هستند؟","اعضای هیئت مدیره بورس تهران کیا هستند؟",board.Answer,board,temporal,CancellationToken.None);
+var boardNames=await svc.PrepareAsync("u1","c1","فقط اسم اعضا را بگو",temporal,CancellationToken.None);
+Assert(boardNames.RouteHint.ContextApplied && boardNames.RouteHint.PreferredIntent==ChatIntent.Knowledge
+    && boardNames.EffectiveQuestion.Contains("هیئت‌مدیره بورس تهران")
+    && CanonicalBoardMemberAnswer.Parse(boardNames.EffectiveQuestion).NamesOnly,
+    "a roster formatting follow-up must inherit the active board topic and preserve names-only intent");
+
+var unit=CanonicalReferenceAnswer.Exact("اسماعیل رازقی — مدیر اداری","organization_unit","معاون اجرایی",
+    [new("subordinate:1:name","اسماعیل رازقی","TsePerson:3")],"حمیدرضا اسمعیلی گیوی","معاون اجرایی",["اسماعیل رازقی"]);
+await svc.RecordReferenceAsync("u1","c1","زیرمجموعه معاون اجرایی کیا هستند؟","زیرمجموعه معاون اجرایی کیا هستند؟",unit.Answer,unit,temporal,CancellationToken.None);
+var unitNames=await svc.PrepareAsync("u1","c1","فقط نام مدیران را بگو",temporal,CancellationToken.None);
+Assert(unitNames.RouteHint.ContextApplied && unitNames.EffectiveQuestion.Contains("مدیران زیرمجموعه معاون اجرایی")
+    && CanonicalOrganizationHierarchyAnswer.IsSubordinateQuestion(unitNames.EffectiveQuestion),
+    "a subordinate roster follow-up must inherit its organization unit without relying on a symbol");
+
 var ipo=CanonicalReferenceAnswer.Exact("آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو است.","company_aggregate","جدیدترین عرضه‌های اولیه Company",
     [new("company_title","فرآورده‌های دامی ولبنی دالاهو","Company:1")],"فرآورده‌های دامی ولبنی دالاهو",sourceTool:CanonicalReferenceToolNames.CompanyIpo);
 await svc.RecordReferenceAsync("u1","c1","آخرین عرضه اولیه بورس چیه؟","آخرین عرضه اولیه بورس چیه؟",ipo.Answer,ipo,temporal,CancellationToken.None);

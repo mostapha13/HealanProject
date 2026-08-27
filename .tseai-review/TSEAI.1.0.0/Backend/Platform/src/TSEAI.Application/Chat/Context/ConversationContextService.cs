@@ -30,6 +30,14 @@ public sealed class ConversationContextService(
         "زیر مجموعه", "زیرمجموعه", "واحدهای تابع", "مدیران تابع", "وابسته", "بالادست",
         "گزارش می دهد", "گزارش میدهد", "گزارش می ده", "گزارش میده", "مدیر مستقیم", "مسئول مستقیم", "معاونتش"
     ];
+    private static readonly string[] OrganizationRosterFollowUps =
+    [
+        "فقط اسم", "فقط نام", "فقط اسامی", "اسم اعضا", "نام اعضا", "اسامی اعضا",
+        "همه اعضا", "تمام اعضا", "کلیه اعضا", "اعضا را بگو", "اعضا رو بگو",
+        "سمت اعضا", "سمت هاشون", "سمت‌هاشون", "سمتشون",
+        "شرکتشون", "شرکت هاشون", "شرکت‌هاشون", "نماینده هاشون", "نماینده‌هاشون",
+        "سابقه شون", "سابقه‌شون", "سوابقشون", "رزومه شون", "رزومه‌شون"
+    ];
 
     public async Task<ConversationTurnContext> PrepareAsync(string subject,string conversationId,string question,TemporalResolution temporal,CancellationToken ct)
     {
@@ -79,15 +87,21 @@ public sealed class ConversationContextService(
         }
 
         var recent=state.RecentTurns??[];
+        var rosterFollowUp=state.ActiveReference is not null&&IsOrganizationRosterFollowUp(state.ActiveReference,q);
         if(state.ActiveReference is not null
             && !LooksLikeExplicitMarketQuestion(q)
-            && OrganizationFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
+            && (OrganizationFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal))
+                || rosterFollowUp))
         {
             var reference=state.ActiveReference;
             var referenceSubject=reference.SubjectName??reference.Topic;
             var role=string.IsNullOrWhiteSpace(reference.SubjectRole)?"":$" با سمت {reference.SubjectRole}";
             reasons.Add("organization-followup-with-active-reference");
-            return new(question,$"{question} درباره {referenceSubject}{role} در بورس تهران",state,
+            if(rosterFollowUp) reasons.Add("organization-roster-followup");
+            var effective=rosterFollowUp
+                ? BuildOrganizationRosterQuestion(question,reference)
+                : $"{question} درباره {referenceSubject}{role} در بورس تهران";
+            return new(question,effective,state,
                 new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
         }
 
@@ -279,4 +293,13 @@ public sealed class ConversationContextService(
 
     private static bool ContainsWholeCue(string normalized,string cue)
         => Regex.IsMatch(normalized,$@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(cue)}(?![\p{{L}}\p{{N}}])",RegexOptions.CultureInvariant);
+
+    private static bool IsOrganizationRosterFollowUp(ConversationReference reference,string normalized)
+        => reference.Kind is "organization_board" or "organization_unit"
+            && OrganizationRosterFollowUps.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal));
+
+    private static string BuildOrganizationRosterQuestion(string question,ConversationReference reference)
+        => reference.Kind=="organization_board"
+            ? $"{question}؛ اعضای {reference.Topic}"
+            : $"{question}؛ مدیران زیرمجموعه {reference.SubjectRole??reference.Topic} بورس تهران";
 }

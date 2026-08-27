@@ -69,6 +69,9 @@ public static class CanonicalOrganizationHierarchyAnswer
     }
 
     public static string? Compose(string masterRole,IEnumerable<CanonicalBoardMember> members)
+        => Compose(null,masterRole,members);
+
+    public static string? Compose(string? question,string masterRole,IEnumerable<CanonicalBoardMember> members)
     {
         var rows=members
             .Where(x=>ContainsPersian(x.FullName))
@@ -80,8 +83,16 @@ public static class CanonicalOrganizationHierarchyAnswer
             .ToArray();
         if(rows.Length==0) return null;
         var role=PersianDisplayText.Normalize(masterRole);
+        if(WantsNamesOnly(question)) return string.Join("، ",rows.Select(x=>x.FullName));
         return $"مدیران ثبت‌شده زیرمجموعه {role} بورس تهران:\n\n"+
             string.Join("\n",rows.Select((row,index)=>$"{index+1}. {row.FullName} — {row.Role}"));
+    }
+
+    public static bool WantsNamesOnly(string? question)
+    {
+        var normalized=Normalize(question);
+        return new[]{"فقط اسم","فقط نام","فقط اسامی","اسم مدیران","نام مدیران","اسامی مدیران"}
+            .Any(cue=>normalized.Contains(cue,StringComparison.Ordinal));
     }
 
     public static bool ContainsPersian(string? value)
