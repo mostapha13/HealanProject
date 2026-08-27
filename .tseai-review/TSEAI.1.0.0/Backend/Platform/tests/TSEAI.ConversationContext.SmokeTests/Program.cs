@@ -45,6 +45,12 @@ Assert(boardNames.RouteHint.ContextApplied && boardNames.RouteHint.PreferredInte
     && boardNames.EffectiveQuestion.Contains("هیئت‌مدیره بورس تهران")
     && CanonicalBoardMemberAnswer.Parse(boardNames.EffectiveQuestion).NamesOnly,
     "a roster formatting follow-up must inherit the active board topic and preserve names-only intent");
+var boardRoles=await svc.PrepareAsync("u1","c1","نقش هرکدوم چیه؟",temporal,CancellationToken.None);
+Assert(boardRoles.RouteHint.ContextApplied && boardRoles.EffectiveQuestion.Contains("اعضای هیئت‌مدیره بورس تهران"),
+    "a plural role follow-up must inherit the active roster topic");
+var boardHistory=await svc.PrepareAsync("u1","c1","پیشینه‌شون رو بگو",temporal,CancellationToken.None);
+Assert(boardHistory.RouteHint.ContextApplied && CanonicalBoardMemberAnswer.Parse(boardHistory.EffectiveQuestion).WantsHistory,
+    "a plural history follow-up must preserve both the active roster and requested facet");
 
 var unit=CanonicalReferenceAnswer.Exact("اسماعیل رازقی — مدیر اداری","organization_unit","معاون اجرایی",
     [new("subordinate:1:name","اسماعیل رازقی","TsePerson:3")],"حمیدرضا اسمعیلی گیوی","معاون اجرایی",["اسماعیل رازقی"]);
@@ -53,6 +59,9 @@ var unitNames=await svc.PrepareAsync("u1","c1","فقط نام مدیران را 
 Assert(unitNames.RouteHint.ContextApplied && unitNames.EffectiveQuestion.Contains("مدیران زیرمجموعه معاون اجرایی")
     && CanonicalOrganizationHierarchyAnswer.IsSubordinateQuestion(unitNames.EffectiveQuestion),
     "a subordinate roster follow-up must inherit its organization unit without relying on a symbol");
+var unitPossessiveNames=await svc.PrepareAsync("u1","c1","اسمشون چیه؟",temporal,CancellationToken.None);
+Assert(unitPossessiveNames.RouteHint.ContextApplied && CanonicalOrganizationHierarchyAnswer.WantsNamesOnly(unitPossessiveNames.EffectiveQuestion),
+    "possessive names-only wording must inherit the active organization roster");
 
 var ipo=CanonicalReferenceAnswer.Exact("آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو است.","company_aggregate","جدیدترین عرضه‌های اولیه Company",
     [new("company_title","فرآورده‌های دامی ولبنی دالاهو","Company:1")],"فرآورده‌های دامی ولبنی دالاهو",sourceTool:CanonicalReferenceToolNames.CompanyIpo);

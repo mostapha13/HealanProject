@@ -91,7 +91,8 @@ public static class CanonicalOrganizationHierarchyAnswer
     public static bool WantsNamesOnly(string? question)
     {
         var normalized=Normalize(question);
-        return new[]{"فقط اسم","فقط نام","فقط اسامی","اسم مدیران","نام مدیران","اسامی مدیران"}
+        return new[]{"فقط اسم","فقط نام","فقط اسامی","اسم مدیران","نام مدیران","اسامی مدیران",
+                "اسمشون","نامشون","اسامی شون","اسامی شان","اسم آنها","نام آنها"}
             .Any(cue=>normalized.Contains(cue,StringComparison.Ordinal));
     }
 

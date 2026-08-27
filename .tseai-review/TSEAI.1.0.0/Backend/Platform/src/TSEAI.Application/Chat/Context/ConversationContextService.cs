@@ -38,6 +38,17 @@ public sealed class ConversationContextService(
         "شرکتشون", "شرکت هاشون", "شرکت‌هاشون", "نماینده هاشون", "نماینده‌هاشون",
         "سابقه شون", "سابقه‌شون", "سوابقشون", "رزومه شون", "رزومه‌شون"
     ];
+    private static readonly string[] OrganizationRosterFacetCues =
+    [
+        "اسم", "نام", "اسامی", "کیا", "چه کسانی", "چه افرادی",
+        "سمت", "نقش", "مسئولیت", "نماینده", "نمایندگی", "شرکت",
+        "سابقه", "سوابق", "رزومه", "پیشینه", "تحصیلات"
+    ];
+    private static readonly string[] PluralReferenceCues =
+    [
+        "شون", "شان", "آنها", "اونا", "ایشان", "اینها", "همشون",
+        "هرکدام", "هر کدام", "هرکدوم", "هر کدوم", "تک تک", "اعضا", "مدیران", "افراد"
+    ];
 
     public async Task<ConversationTurnContext> PrepareAsync(string subject,string conversationId,string question,TemporalResolution temporal,CancellationToken ct)
     {
@@ -296,7 +307,9 @@ public sealed class ConversationContextService(
 
     private static bool IsOrganizationRosterFollowUp(ConversationReference reference,string normalized)
         => reference.Kind is "organization_board" or "organization_unit"
-            && OrganizationRosterFollowUps.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal));
+            && (OrganizationRosterFollowUps.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal))
+                || OrganizationRosterFacetCues.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal))
+                    && PluralReferenceCues.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal)));
 
     private static string BuildOrganizationRosterQuestion(string question,ConversationReference reference)
         => reference.Kind=="organization_board"

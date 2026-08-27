@@ -65,6 +65,17 @@ Must(compositeBoard.IsMemberList && compositeBoard.WantsHistory && compositeBoar
 var namesIntent=CanonicalBoardMemberAnswer.Parse("فقط اسم اعضای هیئت مدیره بورس تهران رو بهم بگو");
 Must(namesIntent.IsMemberList && namesIntent.NamesOnly,"names-only constraint must be detected");
 Must(CanonicalBoardMemberAnswer.Parse("نام اعضای هیئت‌مدیره را ببر").NamesOnly,"natural names-only wording must be detected");
+Must(CanonicalBoardMemberAnswer.Parse("فقط اسمشون رو بگو؛ اعضای هیئت‌مدیره بورس تهران").NamesOnly,
+    "possessive colloquial names-only wording must be detected");
+Must(CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(
+        "بهروز خالق‌ویردی دارای سابقه مدیریت در بازار سرمایه و دانش‌آموخته مدیریت مالی است.",["بهروز خالق‌ویردی"]),
+    "a biography excerpt naming the current person and an explicit professional-history cue must pass");
+Must(!CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(
+        "طبق اطلاعیه تغییر ترکیب هیئت‌مدیره، عباس نعیمی به عنوان عضو هیئت‌مدیره معرفی شد.",["عباس نعیمی"]),
+    "a historical board appointment is not a professional biography and must not pass as one");
+Must(!CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(
+        "مطابق آیین‌نامه راهبری شرکتی، هیئت‌مدیره سه کمیته تخصصی تشکیل می‌دهد.",["بهروز خالق‌ویردی"]),
+    "generic governance documents must not pass as a current member's professional history");
 var namesOnly=CanonicalBoardMemberAnswer.Compose(namesIntent,boardMembers);
 Must(namesOnly=="بهروز خالق‌ویردی، عسگر نوربخش، مجتبی افشاری، حامد شادکام، میلاد فروغی، عباس نعیمی","names-only answer must contain no narrative or roles");
 var boardAnswer=CanonicalBoardMemberAnswer.Compose(CanonicalBoardMemberAnswer.Parse("اعضای هیئت مدیره بورس تهران کیا هستند؟"),boardMembers);
@@ -126,6 +137,8 @@ var hierarchyNames=CanonicalOrganizationHierarchyAnswer.Compose("فقط نام �
 ]);
 Must(hierarchyNames=="اسماعیل رازقی، رضا قلیچ‌خانی"&&!hierarchyNames.Contains("مدیر اداری",StringComparison.Ordinal),
     "names-only organization follow-ups must not add roles or explanatory prose");
+Must(CanonicalOrganizationHierarchyAnswer.WantsNamesOnly("اسمشون چیه؟"),
+    "possessive subordinate names-only wording must be detected");
 var companyPhone=CanonicalCompanyQuestion.Parse("شماره تلفن فملی چنده؟");
 Must(companyPhone.IsMatch&&companyPhone.Fields.Contains("phone")&&companyPhone.Lookups.Single()=="فملی","Company phone question must retain only the company/symbol lookup");
 var companyWeb=CanonicalCompanyQuestion.Parse("وب‌سایت رسمی فولاد مبارکه چیست؟");

@@ -367,7 +367,9 @@ public sealed class ChatOrchestrator(
                 new GroundedAnswerSynthesisRequest(effectiveQuestion,canonicalAnswer.Answer,canonicalAnswer.Facts,synthesisEvidence,
                     canonicalAnswer.MissingFacets,turnContext.Previous.RecentTurns??[]),ct),trace);
             answer=synthesized??ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
-            answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)??answer;
+            answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)
+                ??ComposeBoardHistorySummary(canonicalAnswer,synthesisEvidence)
+                ??answer;
             if(HasUnsafeRepresentationClaim(answer,canonicalAnswer,synthesisEvidence))
                 answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
         }
@@ -420,7 +422,9 @@ public sealed class ChatOrchestrator(
                         new GroundedAnswerSynthesisRequest(effectiveQuestion,canonicalAnswer.Answer,canonicalAnswer.Facts,synthesisEvidence,
                             canonicalAnswer.MissingFacets,turnContext.Previous.RecentTurns??[]),ct),trace);
                     answer=synthesized??ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
-                    answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)??answer;
+                    answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)
+                        ??ComposeBoardHistorySummary(canonicalAnswer,synthesisEvidence)
+                        ??answer;
                     if(HasUnsafeRepresentationClaim(answer,canonicalAnswer,synthesisEvidence))
                         answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
                 }
@@ -639,30 +643,49 @@ public sealed class ChatOrchestrator(
         CanonicalReferenceAnswer canonical,IReadOnlyList<KnowledgeHit> hits)
     {
         var evidence=hits.Select(x=>new GroundedSynthesisEvidence(x.Citation.SourceId,x.Citation.PublishedAt,x.Text)).ToArray();
-        if(!canonical.MissingFacets.Contains("representing_company",StringComparer.Ordinal)) return evidence;
+        var needsHistory=canonical.MissingFacets.Contains("member_history",StringComparer.Ordinal)
+            || canonical.MissingFacets.Contains("person_history",StringComparer.Ordinal);
+        var needsRepresentation=canonical.MissingFacets.Contains("representing_company",StringComparer.Ordinal);
+        if(!needsHistory&&!needsRepresentation) return evidence;
 
         var subjects=CanonicalSubjects(canonical);
         var validated=new List<GroundedSynthesisEvidence>();
-        foreach(var hit in hits)
+        if(needsHistory)
         {
-            var excerpts=Regex.Split(hit.Text??string.Empty,@"(?<=[.!؟?])\s+|[\r\n]+")
-                .Select(x=>x.Trim())
-                .Where(x=>x.Length>0 && HasRepresentationCue(x))
-                .Where(x=>subjects.Any(subject=>ContainsNormalized(x,subject)))
-                .Distinct(StringComparer.Ordinal)
-                .Take(4)
-                .ToArray();
-            if(excerpts.Length==0) continue;
-            var subjectLabels=subjects.Where(subject=>excerpts.Any(x=>ContainsNormalized(x,subject))).ToArray();
-            var date=FormatEvidenceDate(hit.Citation.PublishedAt);
-            var label=$"[رابطه صریح نام و نمایندگی؛ اشخاص: {string.Join("، ",subjectLabels)}; تاریخ سند: {date}; این سند به‌تنهایی وضعیت جاری نمایندگی را اثبات نمی‌کند]";
-            validated.Add(new(hit.Citation.SourceId,hit.Citation.PublishedAt,label+"\n"+string.Join("\n",excerpts)));
+            foreach(var hit in hits)
+            {
+                var excerpts=EvidenceExcerpts(hit.Text)
+                    .Where(x=>CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(x,subjects))
+                    .Take(4).ToArray();
+                if(excerpts.Length==0) continue;
+                var subjectLabels=subjects.Where(subject=>excerpts.Any(x=>ContainsNormalized(x,subject))).ToArray();
+                var label=$"[سابقه حرفه‌ای صریح؛ اشخاص: {string.Join("، ",subjectLabels)}; تاریخ سند: {FormatEvidenceDate(hit.Citation.PublishedAt)}]";
+                validated.Add(new(hit.Citation.SourceId,hit.Citation.PublishedAt,label+"\n"+string.Join("\n",excerpts)));
+            }
         }
-        return validated;
+        if(needsRepresentation)
+        {
+            foreach(var hit in hits)
+            {
+                var excerpts=EvidenceExcerpts(hit.Text)
+                    .Where(HasRepresentationCue)
+                    .Where(x=>subjects.Any(subject=>ContainsNormalized(x,subject)))
+                    .Take(4).ToArray();
+                if(excerpts.Length==0) continue;
+                var subjectLabels=subjects.Where(subject=>excerpts.Any(x=>ContainsNormalized(x,subject))).ToArray();
+                var date=FormatEvidenceDate(hit.Citation.PublishedAt);
+                var label=$"[رابطه صریح نام و نمایندگی؛ اشخاص: {string.Join("، ",subjectLabels)}; تاریخ سند: {date}; این سند به‌تنهایی وضعیت جاری نمایندگی را اثبات نمی‌کند]";
+                validated.Add(new(hit.Citation.SourceId,hit.Citation.PublishedAt,label+"\n"+string.Join("\n",excerpts)));
+            }
+        }
+        return validated.GroupBy(x=>x.SourceId+"\n"+x.Text,StringComparer.Ordinal).Select(x=>x.First()).ToArray();
     }
 
     private static string ComposeCanonicalFallback(CanonicalReferenceAnswer canonical,IReadOnlyList<GroundedSynthesisEvidence> evidence)
     {
+        var boardFacetSummary=ComposeBoardRepresentationSummary(canonical,evidence)
+            ??ComposeBoardHistorySummary(canonical,evidence);
+        if(boardFacetSummary is not null) return boardFacetSummary;
         var missing=canonical.MissingFacets.Select(x=>x switch
         {
             "member_history" or "person_history" => "سوابق",
@@ -715,6 +738,10 @@ public sealed class ChatOrchestrator(
     private static bool HasRepresentationCue(string text)
         => text.Contains("نماینده",StringComparison.Ordinal) || text.Contains("نمایندگی",StringComparison.Ordinal)
             || text.Contains("از طرف",StringComparison.Ordinal) || text.Contains("از سوی",StringComparison.Ordinal);
+
+    private static IEnumerable<string> EvidenceExcerpts(string? text)
+        => Regex.Split(text??string.Empty,@"(?<=[.!؟?])\s+|[\r\n]+")
+            .Select(x=>x.Trim()).Where(x=>x.Length>0).Distinct(StringComparer.Ordinal);
 
     private static bool HasAffirmativeRepresentationCue(string text)
         => text.Contains("به نمایندگی از",StringComparison.Ordinal)
@@ -788,6 +815,20 @@ public sealed class ChatOrchestrator(
             : string.Empty;
         return "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران و شواهد نمایندگی هرکدام:\n\n"
             +string.Join("\n",lines)+historyNote;
+    }
+
+    private static string? ComposeBoardHistorySummary(
+        CanonicalReferenceAnswer canonical,IReadOnlyList<GroundedSynthesisEvidence> evidence)
+    {
+        if(canonical.Reference.Kind!="organization_board"
+           || !canonical.MissingFacets.Contains("member_history",StringComparer.Ordinal)
+           || canonical.MissingFacets.Contains("representing_company",StringComparer.Ordinal)) return null;
+        if(evidence.Count==0)
+            return canonical.Answer+"\n\nبرای سوابق حرفه‌ای کامل اعضا، داده قابل اتکای کافی در منابع فعلی پیدا نشد؛ بنابراین سابقه‌ای حدس زده نشده است.";
+        var excerpts=evidence.Take(6)
+            .Select(x=>$"- سند مورخ {FormatEvidenceDate(x.PublishedAt)}: {Trim(StripEvidenceLabel(x.Text),500)}");
+        return canonical.Answer+"\n\nسوابق حرفه‌ای صریح و قابل استنادِ پیدا‌شده:\n"+string.Join("\n",excerpts)
+            +"\n\nبرای اعضایی که مدرک صریحی پیدا نشد، سابقه‌ای حدس زده نشده است.";
     }
 
     private static string? ExtractCompanyOrNull(string subject,string evidence)
