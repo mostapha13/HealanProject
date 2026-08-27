@@ -21,6 +21,7 @@ public sealed class ChatToolPolicy : IChatToolPolicy
         "filter.conversation","filter.chat","filter.assets",
         "structured.query",
         "structured.reference",
+        "structured.reference.facets",
         CanonicalReferenceToolNames.ClockCurrent,
         CanonicalReferenceToolNames.ContentLookup,
         CanonicalReferenceToolNames.CompanyLookup,

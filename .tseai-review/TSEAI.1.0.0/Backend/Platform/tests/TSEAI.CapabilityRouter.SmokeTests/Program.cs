@@ -51,6 +51,15 @@ Assert(targetedComposite.Route==ChatCapabilityRoute.Hybrid&&!targetedComposite.P
        &&targetedComposite.Plan?.Symbol=="خودرو"
        &&targetedComposite.Plan.RequestedFields?.Contains("trade_volume")==true,
     "targeted news plus market metric must execute a deterministic hybrid plan");
+var globalExchangeNews=await router.RouteAsync("آخرین خبر بورس تهران چیست؟",100,CancellationToken.None);
+Assert(globalExchangeNews.Route==ChatCapabilityRoute.Knowledge&&!globalExchangeNews.PlannerUsed
+       &&globalExchangeNews.Plan?.Symbol is null,
+    "global exchange news must remain an unfiltered deterministic knowledge query");
+var descriptiveComposite=await router.RouteAsync("درباره فملی چه میدانی و قیمت پایانی آن چقدر است؟",100,CancellationToken.None);
+Assert(descriptiveComposite.Route==ChatCapabilityRoute.Hybrid&&!descriptiveComposite.PlannerUsed
+       &&descriptiveComposite.Plan?.Symbol=="فملی"
+       &&descriptiveComposite.Plan.RequestedFields?.Contains("closing_price")==true,
+    "descriptive entity plus market metric must use a deterministic hybrid plan");
 var ipoPlannerTrap=await router.RouteAsync("آخرین عرضه اولیه بورس چیه؟",100,CancellationToken.None);
 Assert(ipoPlannerTrap.Route==ChatCapabilityRoute.Knowledge && ipoPlannerTrap.Plan?.Symbol is null
        && ipoPlannerTrap.ReasonCodes.Contains("deterministic-knowledge-evidence-route"),

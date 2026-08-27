@@ -50,6 +50,19 @@ public sealed class DeterministicCapabilityRouter(
 
         var ownership=CanonicalQuestionOwnership.Detect(question);
         var requestedFields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
+        var descriptiveEntity=PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity(question);
+        if(!string.IsNullOrWhiteSpace(descriptiveEntity))
+        {
+            var route=requestedFields.Count>0?ChatCapabilityRoute.Hybrid:ChatCapabilityRoute.Knowledge;
+            var intent=requestedFields.Count>0?ChatIntent.Hybrid:ChatIntent.Knowledge;
+            var reasons=new[] { "descriptive-entity",requestedFields.Count>0?"deterministic-composite-route":"deterministic-knowledge-route" };
+            var descriptivePlan=new ChatPlan(intent,descriptiveEntity,question,0.99,null,reasons,requestedFields);
+            var capabilities=requestedFields.Count>0
+                ? new CapabilityRequirement[] { new("entity.resolve","sql-ai-reference"),new("structured.market.symbol","canonical-market-snapshot"),
+                    new("knowledge.retrieve","qdrant-symbol-grounded-evidence"),new("analytics.symbol","deterministic-calculation",false) }
+                : [new("entity.resolve","sql-ai-reference",false),new("knowledge.retrieve","qdrant-symbol-grounded-evidence")];
+            return FromPlan(route,descriptivePlan,capabilities,reasons);
+        }
         var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(question);
         if(!string.IsNullOrWhiteSpace(targetedNewsEntity))
         {

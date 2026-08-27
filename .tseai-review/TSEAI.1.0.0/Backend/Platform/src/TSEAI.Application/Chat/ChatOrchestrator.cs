@@ -68,13 +68,52 @@ public sealed class ChatOrchestrator(
             trace.Add(new ChatToolTrace(canonicalAnswer.ToolName,"ok",0,
                 $"kind={canonicalAnswer.Reference.Kind};topic={canonicalAnswer.Reference.Topic};facts={canonicalAnswer.Facts.Count}"));
         }
+        var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(effectiveQuestion);
+        if(!turnContext.RouteHint.ContextApplied)
+        {
+            var clauses=PersianQuestionFacetAnalysis.SplitIndependentClauses(effectiveQuestion);
+            if(clauses.Count>1)
+            {
+                toolPolicy.Demand("structured.reference.facets");
+                var facetSw=Stopwatch.StartNew();
+                var facetAnswers=new List<CanonicalReferenceAnswer>();
+                foreach(var clause in clauses)
+                {
+                    var facet=await canonicalReferenceAnswers.TryAnswerAsync(clause,temporalContext,ct);
+                    if(facet is null||facet.Reference.Kind=="market_reference"
+                       ||(!string.IsNullOrWhiteSpace(targetedNewsEntity)&&facet.Reference.Kind=="news")) continue;
+                    facetAnswers.Add(facet);
+                    toolPolicy.Demand(facet.ToolName);
+                    trace.Add(new ChatToolTrace(facet.ToolName,"ok",0,
+                        $"facet={clause};kind={facet.Reference.Kind};facts={facet.Facts.Count}"));
+                }
+                facetSw.Stop();
+                var distinctFacets=facetAnswers
+                    .GroupBy(x=>$"{x.Reference.Kind}\n{x.Reference.Topic}\n{x.Answer}",StringComparer.Ordinal)
+                    .Select(x=>x.First()).ToArray();
+                trace.Add(new ChatToolTrace("structured.reference.facets","ok",(int)facetSw.ElapsedMilliseconds,
+                    $"clauses={clauses.Count};answers={distinctFacets.Length}"));
+                if(distinctFacets.Length>=2)
+                    canonicalAnswer=MergeCanonicalFacetAnswers(distinctFacets);
+                else if(canonicalAnswer is null&&distinctFacets.Length==1)
+                    canonicalAnswer=distinctFacets[0];
+            }
+        }
+        var canonicalKnowledgeComposite=canonicalAnswer is not null
+            &&!string.IsNullOrWhiteSpace(targetedNewsEntity)
+            &&canonicalAnswer.Reference.Kind is not "news" and not "content_reference";
         var compositeAnalysis=PersianQuestionFacetAnalysis.AnalyzeCanonicalMarket(effectiveQuestion,canonicalAnswer);
-        if(canonicalAnswer is not null && canonicalAnswer.IsComplete && !compositeAnalysis.IsComposite)
+        if(canonicalAnswer is not null && canonicalAnswer.IsComplete
+           &&!compositeAnalysis.IsComposite&&!canonicalKnowledgeComposite)
         {
             toolPolicy.Demand("reflection.review");
-            var review=await Timed("reflection.review",()=>reflector.ReviewAsync(
-                new ChatReflectionRequest(effectiveQuestion,canonicalAnswer.Answer,ChatIntent.Knowledge,canonicalAnswer.Confidence,
-                    canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer),ExactCanonical:true),ct),trace);
+            var review=canonicalAnswer.Reference.Kind=="composite_reference"
+                ? await Timed("reflection.review",()=>Task.FromResult(
+                    ReviewDeterministicCanonicalAnswer(canonicalAnswer.Answer,canonicalAnswer,[])),trace,
+                    result=>$"mode=deterministic-composite-reference;action={result.Action};reasons={string.Join('|',result.Reasons)}")
+                : await Timed("reflection.review",()=>reflector.ReviewAsync(
+                    new ChatReflectionRequest(effectiveQuestion,canonicalAnswer.Answer,ChatIntent.Knowledge,canonicalAnswer.Confidence,
+                        canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer),ExactCanonical:true),ct),trace);
             if(review.Action=="clarify")
                 return new("clarification",review.Clarification??"برای پاسخ دقیق‌تر، سؤال را کمی مشخص‌تر بیان کنید.",request.ConversationId,
                     ChatIntent.Clarification,canonicalAnswer.Confidence,null,null,[],[],trace,review.Clarification,temporalContext);
@@ -111,6 +150,19 @@ public sealed class ChatOrchestrator(
                 ["canonical-market-composite","deterministic-composite-route"],
                 [new("entity.resolve","sql-ai-reference"),new("structured.market.symbol","canonical-market-snapshot")],
                 compositePlan,PlannerUsed:false);
+            trace.Add(new ChatToolTrace("capability.route","ok",0,routeDecision.AuditSummary));
+        }
+        else if(canonicalKnowledgeComposite)
+        {
+            var symbol=canonicalAnswer!.Facts
+                .Where(x=>x.Key is "linked_symbol" or "symbol")
+                .Select(x=>x.Value).FirstOrDefault(x=>!string.IsNullOrWhiteSpace(x))??targetedNewsEntity;
+            var knowledgePlan=new ChatPlan(ChatIntent.Knowledge,symbol,effectiveQuestion,0.99,null,
+                ["canonical-knowledge-composite","targeted-news","deterministic-composite-route"]);
+            routeDecision=new(ChatCapabilityRoute.Knowledge,ChatIntent.Knowledge,0.99,
+                ["canonical-knowledge-composite","targeted-news","deterministic-composite-route"],
+                [new("entity.resolve","sql-ai-reference",false),new("knowledge.retrieve","qdrant-symbol-grounded-evidence")],
+                knowledgePlan,PlannerUsed:false);
             trace.Add(new ChatToolTrace("capability.route","ok",0,routeDecision.AuditSummary));
         }
         else if(CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonicalAnswer))
@@ -418,6 +470,17 @@ public sealed class ChatOrchestrator(
             trace.Add(new ChatToolTrace("answer.compose.composite","ok",0,
                 $"canonical={canonicalAnswer.Reference.Kind};marketFields={string.Join('|',compositeAnalysis.MarketFields)};qualityRejected={marketQualityRejected}"));
         }
+        else if(canonicalAnswer is not null&&canonicalKnowledgeComposite)
+        {
+            toolPolicy.Demand("answer.compose.composite");
+            var knowledgeAnswer=hits.Count==0
+                ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,ChatIntent.Knowledge,
+                    PersianFinancialAnswerComposer.DetectVerbosity(request.Question)),null,null,hits);
+            answer=canonicalAnswer.Answer+"\n\n"+knowledgeAnswer;
+            trace.Add(new ChatToolTrace("answer.compose.composite","ok",0,
+                $"canonical={canonicalAnswer.Reference.Kind};knowledgeHits={hits.Count};target={resolvedSymbol??plan.Symbol}"));
+        }
         else if(canonicalAnswer is not null)
         {
             var synthesisEvidence=BuildGroundedSynthesisEvidence(canonicalAnswer,hits);
@@ -431,6 +494,8 @@ public sealed class ChatOrchestrator(
             var answerSnapshot=marketQualityRejected||marketUnavailableMessage is not null?null:snapshot;
             var deterministicAnswer=plan.Reasons.Contains("targeted-news",StringComparer.Ordinal)&&hits.Count==0
                 ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                : plan.Reasons.Contains("descriptive-entity",StringComparer.Ordinal)&&hits.Count==0
+                    ? $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
                 : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),answerSnapshot,analytics,hits);
             if((plan.Intent is ChatIntent.Knowledge or ChatIntent.Hybrid)&&hits.Count>0)
             {
@@ -457,7 +522,7 @@ public sealed class ChatOrchestrator(
         {
             toolPolicy.Demand("reflection.review");
             var failed=trace.Where(x=>x.Status=="failed").Select(x=>x.Tool).Distinct().ToArray();
-            var deterministicCanonical=compositeAnalysis.IsComposite
+            var deterministicCanonical=compositeAnalysis.IsComposite||canonicalKnowledgeComposite
                 ||CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonicalAnswer);
             var review=deterministicCanonical
                 ? await Timed("reflection.review",()=>Task.FromResult(ReviewDeterministicCanonicalAnswer(answer,canonicalAnswer!,hits)),trace,
@@ -488,6 +553,14 @@ public sealed class ChatOrchestrator(
                             PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,[]);
                     answer=canonicalAnswer.Answer+"\n\n"+marketAnswer;
                 }
+                else if(canonicalAnswer is not null&&canonicalKnowledgeComposite)
+                {
+                    var knowledgeAnswer=hits.Count==0
+                        ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                        : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,ChatIntent.Knowledge,
+                            PersianFinancialAnswerComposer.DetectVerbosity(request.Question)),null,null,hits);
+                    answer=canonicalAnswer.Answer+"\n\n"+knowledgeAnswer;
+                }
                 else if(canonicalAnswer is not null)
                 {
                     var synthesisEvidence=BuildGroundedSynthesisEvidence(canonicalAnswer,hits);
@@ -501,6 +574,8 @@ public sealed class ChatOrchestrator(
                     var answerSnapshot=marketQualityRejected||marketUnavailableMessage is not null?null:snapshot;
                     var deterministicAnswer=plan.Reasons.Contains("targeted-news",StringComparer.Ordinal)&&hits.Count==0
                         ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                        : plan.Reasons.Contains("descriptive-entity",StringComparer.Ordinal)&&hits.Count==0
+                            ? $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
                         : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),answerSnapshot,analytics,hits);
                     if((plan.Intent is ChatIntent.Knowledge or ChatIntent.Hybrid)&&hits.Count>0)
                     {
@@ -551,7 +626,9 @@ public sealed class ChatOrchestrator(
         var savedContext=canonicalAnswer is not null
             ? await conversationContext.RecordReferenceAsync(subject,request.ConversationId,request.Question,effectiveQuestion,answer,canonicalAnswer,temporalContext,ct)
             : await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,plan.Intent,routeDecision.Route,temporalContext,entityContext,null,ct,answer,plan.Intent.ToString().ToLowerInvariant());
-        var resultType=compositeAnalysis.IsComposite?"composite_reference_market":plan.Intent.ToString().ToLowerInvariant();
+        var resultType=compositeAnalysis.IsComposite?"composite_reference_market"
+            :canonicalKnowledgeComposite?"composite_reference_knowledge"
+            :plan.Intent.ToString().ToLowerInvariant();
         return new(resultType,answer,request.ConversationId,plan.Intent,plan.Confidence,snapshot,filterResult,hits,citations,trace,null,temporalContext,entityContext,qualityReport,analytics,null,null,savedContext,Evidence:evidence,EvidenceValidation:evidenceValidation,AnswerValidation:answerValidation);
     }
 
@@ -771,6 +848,26 @@ public sealed class ChatOrchestrator(
             $"reference:{fact.SourceId}:{fact.Key}",$"R{index+1}",EvidenceKind.CanonicalReference,EvidenceAuthority.CanonicalReferenceData,
             "SQL_AI",fact.SourceId,answer.Reference.Topic,fact.EffectiveAt,null,null,null,null,null,
             new Dictionary<string,object?>{{fact.Key,fact.Value}})).ToArray();
+
+    private static CanonicalReferenceAnswer MergeCanonicalFacetAnswers(
+        IReadOnlyList<CanonicalReferenceAnswer> answers)
+    {
+        var facts=answers.SelectMany(x=>x.Facts)
+            .GroupBy(x=>$"{x.SourceId}\n{x.Key}\n{x.Value}",StringComparer.Ordinal)
+            .Select(x=>x.First()).ToArray();
+        var subjects=answers.SelectMany(x=>new[] { x.Reference.SubjectName }.Concat(x.Reference.RelatedSubjects))
+            .Where(x=>!string.IsNullOrWhiteSpace(x)).Select(x=>x!).Distinct(StringComparer.Ordinal).ToArray();
+        return new(
+            string.Join("\n\n",answers.Select(x=>x.Answer).Distinct(StringComparer.Ordinal)),
+            new("composite_reference",string.Join(" + ",answers.Select(x=>x.Reference.Topic)),
+                subjects.FirstOrDefault(),null,subjects.Skip(1).ToArray()),
+            facts,
+            answers.All(x=>x.IsComplete),
+            answers.SelectMany(x=>x.MissingFacets).Distinct(StringComparer.Ordinal).ToArray(),
+            answers.SelectMany(x=>x.KnowledgeQueries).Distinct(StringComparer.Ordinal).ToArray(),
+            answers.Min(x=>x.Confidence),
+            CanonicalReferenceToolNames.GenericReference);
+    }
 
     private static IReadOnlyList<GroundedSynthesisEvidence> BuildGroundedSynthesisEvidence(
         CanonicalReferenceAnswer canonical,IReadOnlyList<KnowledgeHit> hits)

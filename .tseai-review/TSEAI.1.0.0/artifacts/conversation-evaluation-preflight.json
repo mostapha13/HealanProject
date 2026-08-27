@@ -1,11 +1,11 @@
 {
   "mode": "structural-preflight",
-  "generatedAtUtc": "2026-08-27T18:53:29.477428+00:00",
+  "generatedAtUtc": "2026-08-27T19:36:32.281336+00:00",
   "version": "1.0.0-rc.31",
-  "suiteVersion": "1.2",
-  "suiteSha256": "9dd31642411c0a9e4815325a56b1197c9c452e675aee1db555cef3c85b6d04a7",
-  "flowCount": 12,
-  "total": 22,
+  "suiteVersion": "1.3",
+  "suiteSha256": "5aad15fa80025836a6d4f4092a4bb56db8059273738d00bea88a57cbcf831bab",
+  "flowCount": 13,
+  "total": 27,
   "passed": true,
   "issues": []
 }

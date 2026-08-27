@@ -260,7 +260,23 @@ Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("آخرین خب�
     "symbol-specific news extraction must preserve an arbitrary ticker");
 Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("جدیدترین خبر نماد خودرو را بگو")=="خودرو",
     "targeted-news extraction must not be hard-coded to one example symbol");
+Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("نام شرکت فملی چیست و آخرین خبرش را بگو")=="فملی",
+    "a possessive news facet must inherit the entity from the preceding clause");
+Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("امروز چندمه و آخرین خبر بورس تهران چیست؟") is null,
+    "global exchange news must not be misread as ticker-specific news");
+Must(PersianQuestionFacetAnalysis.SplitIndependentClauses("امروز چندمه و آخرین خبر بورس تهران چیست؟").Count==2,
+    "independent clock and news clauses must be decomposed before routing");
+Must(PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity("درباره فملی چه میدانی و قیمت پایانی آن چقدر است؟")=="فملی",
+    "descriptive compound questions must retain their arbitrary entity");
+var latestIpoCeo=CanonicalCompanyQuestion.Parse("آخرین عرضه اولیه چه زمانی بوده و مدیرعامل آن شرکت کیست؟");
+Must(latestIpoCeo.Aggregate==CompanyAggregateKind.LatestIpo&&latestIpoCeo.Lookups.Count==0
+     &&latestIpoCeo.Fields.Contains("ceo"),"IPO pronouns must retain the aggregate and requested CEO facet");
+var absentIssuerComposite=CanonicalCompanyStateQuestion.Parse("مدیرعامل فملی کیست و نسبت P/E آن چقدر است؟");
+Must(absentIssuerComposite.LookupHint=="فملی"&&absentIssuerComposite.Fields.Contains("ceo"),
+    "market metric words and pronouns must not contaminate issuer lookup extraction");
 Must(new ChatToolPolicy().IsAllowed("answer.compose.composite"),
     "deterministic composite composition must remain explicitly allow-listed");
+Must(new ChatToolPolicy().IsAllowed("structured.reference.facets"),
+    "bounded clause-level canonical lookup must remain explicitly allow-listed");
 Console.WriteLine("TSEAI evidence/citation smoke PASS");
 static void Must(bool ok,string msg){if(!ok)throw new Exception(msg);}

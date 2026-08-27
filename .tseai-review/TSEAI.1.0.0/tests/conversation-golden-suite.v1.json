@@ -1,7 +1,7 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding, response shape and bounded latency.",
-  "minimumTotalTurns": 22,
+  "minimumTotalTurns": 27,
   "minimumPassRate": 1.0,
   "maxTurnLatencyMs": 6500,
   "maxP95LatencyMs": 5000,
@@ -343,6 +343,7 @@
         {
           "id": "company-name-and-pe",
           "question": "نام شرکت و نسبت P/E نماد فملی را بگو",
+          "maxLatencyMs": 12000,
           "expectedTypes": ["composite_reference_market"],
           "mustContain": ["ملی صنایع مس ایران", "آخرین داده ثبت‌شده بازار مربوط به", "عدد قدیمی نمایش داده نشد"],
           "mustNotContain": ["داده قابل اتکایی برای پاسخ پیدا نشد"],
@@ -412,6 +413,87 @@
           "minimumEvidenceClaims": 1,
           "expectedTools": ["sql.company.state", "reflection.review", "answer.validate"],
           "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "general-facet-decomposition",
+      "minimumTurns": 5,
+      "turns": [
+        {
+          "id": "absent-issuer-ceo-and-pe",
+          "question": "مدیرعامل فملی کیست و نسبت P/E آن چقدر است؟",
+          "expectedTypes": ["composite_reference_market"],
+          "mustContain": ["فملی", "مدیرعامل از این منبع قابل تأیید نیست", "آخرین داده ثبت‌شده بازار مربوط به"],
+          "mustNotContain": ["محمود گودرزی", "فملی نسبت آن چقدر"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^symbol$"],
+          "expectedTools": ["sql.company.state", "structured.reference.facets", "structured.market.symbol", "answer.compose.composite", "answer.validate"],
+          "forbiddenTools": ["planner", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "company-name-and-targeted-news",
+          "question": "نام شرکت فملی چیست و آخرین خبرش را بگو",
+          "expectedTypes": ["composite_reference_knowledge"],
+          "mustContain": ["ملی صنایع مس ایران", "برای نماد «فملی» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد"],
+          "mustNotContain": ["اوراق گواهی اعتبار مولد", "آخرین خبر ثبت‌شده"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$", "^linked_symbol$"],
+          "expectedTools": ["sql.company.lookup", "structured.reference.facets", "knowledge.retrieve", "answer.compose.composite", "answer.validate"],
+          "forbiddenTools": ["planner", "sql.content.latest_news", "answer.synthesize"],
+          "traceDetailContains": {
+            "capability.route": ["canonical-knowledge-composite", "planner=False"],
+            "answer.compose.composite": ["knowledgeHits=0", "target=فملی"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "latest-ipo-and-ceo",
+          "question": "آخرین عرضه اولیه چه زمانی بوده و مدیرعامل آن شرکت کیست؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["فرآورده‌های دامی ولبنی دالاهو", "1403/10/24", "نام مدیرعامل در جدول Company ثبت نشده است"],
+          "mustNotContain": ["موضوع موردنظر", "سرویس هوش مصنوعی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$"],
+          "answerContainsJalaliEvidenceDateClaimPatterns": ["^ipo_date$"],
+          "expectedTools": ["sql.company.ipo", "structured.reference.facets", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "clock-and-global-news",
+          "question": "امروز چندمه و آخرین خبر بورس تهران چیست؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["امروز", "شمسی است", "آخرین خبر ثبت‌شده در"],
+          "answerRegex": ["\\b14\\d{2}/\\d{2}/\\d{2}\\b"],
+          "mustNotContain": ["موضوع موردنظر", "نماد یا شاخص"],
+          "minimumEvidenceClaims": 2,
+          "expectedTools": ["sql.clock.current", "sql.content.latest_news", "structured.reference.facets", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "traceDetailContains": {
+            "reflection.review": ["mode=deterministic-composite-reference", "action=accept"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "description-and-closing-price",
+          "question": "درباره فملی چه میدانی و قیمت پایانی آن چقدر است؟",
+          "expectedTypes": ["hybrid"],
+          "mustContain": ["فملی", "توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد", "آخرین داده ثبت‌شده بازار مربوط به"],
+          "mustNotContain": ["Internal Server Error", "Unexpected token"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["entity.resolve", "structured.market.symbol", "knowledge.retrieve", "answer.validate"],
+          "forbiddenTools": ["planner", "reflection.review", "answer.synthesize"],
+          "traceDetailContains": {
+            "capability.route": ["descriptive-entity", "planner=False"]
+          },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true
         }

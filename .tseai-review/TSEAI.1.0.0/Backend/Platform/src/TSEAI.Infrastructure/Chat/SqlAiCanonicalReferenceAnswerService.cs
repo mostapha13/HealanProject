@@ -595,7 +595,9 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             if(intent.Fields.Contains("status",StringComparer.Ordinal)) missing.Add("وضعیت معاملاتی");
             var requested=missing.Count==0?"فعال یا متوقف بودن آن":string.Join(" و ",missing);
             var answer=$"در Snapshot فعلی جدول Companystate رکوردی برای «{lookup}» وجود ندارد؛ بنابراین {requested} از این منبع قابل تأیید نیست.";
-            return CanonicalReferenceAnswer.Exact(answer,"company_state","نبود رکورد در Snapshot وضعیت ناشران",confidence:1);
+            var absenceSource=$"Companystate:absent:{CanonicalCompanyStateQuestion.MatchKey(lookup)}";
+            return CanonicalReferenceAnswer.Exact(answer,"company_state","نبود رکورد در Snapshot وضعیت ناشران",
+                [new("symbol",lookup,absenceSource),new("record_status","absent",absenceSource)],subjectName:lookup,confidence:1);
         }
         if(references.Count>1) return null;
 
@@ -881,9 +883,11 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             case CompanyAggregateKind.HallCompanies:
                 return Wrap(await CompanyHallCompanies(connection,normalizedQuestion,intent,ct),"company_aggregate","شرکت‌های تالار");
             case CompanyAggregateKind.LatestIpo:
-                return await CompanyIpoRanking(connection,intent.Limit,latest:true,intent.Fields.Contains("symbol",StringComparer.Ordinal),ct);
+                return await CompanyIpoRanking(connection,intent.Limit,latest:true,
+                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.EarliestIpo:
-                return await CompanyIpoRanking(connection,intent.Limit,latest:false,intent.Fields.Contains("symbol",StringComparer.Ordinal),ct);
+                return await CompanyIpoRanking(connection,intent.Limit,latest:false,
+                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.IpoYear when intent.JalaliYear is not null:
                 return Wrap(await CompanyIpoYear(connection,intent.JalaliYear.Value,intent.Limit,intent.NamesOnly,ct),"company_aggregate",$"عرضه‌های اولیه سال {intent.JalaliYear}");
             case CompanyAggregateKind.Schema:
@@ -1109,10 +1113,10 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
     }
 
     private async Task<CanonicalReferenceAnswer> CompanyIpoRanking(
-        SqlConnection connection,int limit,bool latest,bool includeSymbol,CancellationToken ct)
+        SqlConnection connection,int limit,bool latest,bool includeSymbol,bool includeCeo,CancellationToken ct)
     {
         var direction=latest?"DESC":"ASC";
-        var sql=$"SELECT TOP (@Limit) Id,Title,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL AND Ipo_Date IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
+        var sql=$"SELECT TOP (@Limit) Id,Title,Ceo,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL AND Ipo_Date IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
         var rows=(await connection.QueryAsync<CompanyRow>(new CommandDefinition(sql,new{Limit=limit},cancellationToken:ct,commandTimeout:20))).ToArray();
         var topic=latest?"جدیدترین عرضه‌های اولیه Company":"قدیمی‌ترین عرضه‌های اولیه Company";
         if(rows.Length==0)
@@ -1132,6 +1136,11 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                     ? string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(row.Id))
                         ? " نماد بورسی آن از ارتباط قابل اتکای فعلی پیدا نشد."
                         : $" نماد بورسی آن {symbols[row.Id]} است."
+                    : string.Empty)
+                +(includeCeo
+                    ? string.IsNullOrWhiteSpace(CleanOptional(row.Ceo))
+                        ? " نام مدیرعامل در جدول Company ثبت نشده است."
+                        : $" مدیرعامل ثبت‌شده آن {Display(row.Ceo)} است."
                     : string.Empty);
         }
         else
@@ -1139,7 +1148,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             var title=latest?"جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company":"قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company";
             answer=title+":\n"+string.Join("\n",rows.Select((x,i)=>
                 $"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"
-                +(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id))?$" — نماد {symbols[x.Id]}":string.Empty)));
+                +(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id))?$" — نماد {symbols[x.Id]}":string.Empty)
+                +(includeCeo&&!string.IsNullOrWhiteSpace(CleanOptional(x.Ceo))?$" — مدیرعامل {Display(x.Ceo)}":string.Empty)));
         }
         var facts=rows.SelectMany(x=>
         {
@@ -1151,6 +1161,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             };
             if(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id)))
                 rowFacts.Add(new("linked_symbol",symbols[x.Id]!,source));
+            if(includeCeo)
+                rowFacts.Add(new("ceo",CleanOptional(x.Ceo)??"",source));
             return rowFacts;
         }).ToArray();
         return CanonicalReferenceAnswer.Exact(answer,"company_aggregate",topic,facts,
