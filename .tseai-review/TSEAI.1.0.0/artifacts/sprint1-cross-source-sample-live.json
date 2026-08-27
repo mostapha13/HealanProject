@@ -1,0 +1,738 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T08:40:11.423779+00:00",
+  "runId": "31af407681f9",
+  "manifestVersion": "2.0",
+  "datasetSha256": "fdfa992ad43fbbf1f1f240012c21a72e08cdc3a8f14a98a2c4abc0837c4f973d",
+  "caseCount": 8,
+  "sources": {
+    "cash-market": {
+      "total": 1,
+      "passed": 0
+    },
+    "client-type": {
+      "total": 1,
+      "passed": 1
+    },
+    "company": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state": {
+      "total": 1,
+      "passed": 1
+    },
+    "content": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument": {
+      "total": 1,
+      "passed": 1
+    },
+    "order-book": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "total": 8,
+  "passed": 6,
+  "failed": 2,
+  "passRate": 0.75,
+  "p50LatencyMs": 454.17,
+  "p95LatencyMs": 969.2,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 2,
+    "mustContain": 2
+  },
+  "clusters": {
+    "cash-market:last-price": {
+      "total": 1,
+      "passed": 0
+    },
+    "client-type:raw-volume": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state:state-detail": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:identity": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:latest-news": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:identity": {
+      "total": 1,
+      "passed": 1
+    },
+    "order-book:best-bid": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "cash-market:CM-001",
+      "caseId": "CM-001",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 26,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 6484,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 277,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7348.17
+    },
+    {
+      "id": "order-book:OB-001",
+      "caseId": "OB-001",
+      "sourceCode": "order-book",
+      "table": "OrderBookCurrent",
+      "cluster": "best-bid",
+      "question": "بهترین قیمت خرید فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 448,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 141,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 769.87
+    }
+  ],
+  "results": [
+    {
+      "id": "cash-market:CM-001",
+      "caseId": "CM-001",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 26,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 6484,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 277,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7348.17
+    },
+    {
+      "id": "order-book:OB-001",
+      "caseId": "OB-001",
+      "sourceCode": "order-book",
+      "table": "OrderBookCurrent",
+      "cluster": "best-bid",
+      "question": "بهترین قیمت خرید فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 448,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 141,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 769.87
+    },
+    {
+      "id": "instrument:INS-001",
+      "caseId": "INS-001",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "نام کامل نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 262,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 340.39
+    },
+    {
+      "id": "client-type:CT-001",
+      "caseId": "CT-001",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "حجم خرید حقیقی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 244,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 41,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 328.75
+    },
+    {
+      "id": "company:CO-001",
+      "caseId": "CO-001",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نام شرکت مربوط به نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 433,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 65,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 567.94
+    },
+    {
+      "id": "company-state:CS-001",
+      "caseId": "CS-001",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "state-detail",
+      "question": "وضعیت نماد جم چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 129,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 44,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 232.58
+    },
+    {
+      "id": "content:CT-001",
+      "caseId": "CT-001",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "latest-news",
+      "question": "آخرین خبر ثبت‌شده بورس تهران چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین خبر ثبت‌شده در 1405/04/16: به گزارش مدیریت ارتباطات بورس تهران؛ با توجه به موافقت هیئت ‌پذیرش بورس تهران در جلسه مورخ 08 / 02/ 1405 با پذیرش اوراق گواهی اعتبار مولد (گام) بانک ملت در بورس تهران، از تاریخ 16/ 04 / 1405 مبلغ 1686.5 میلیارد ریال اوراق گام با سررسید 31 / 05 / 1405 با نماد \" اگ050512\" در بازار اوراق بدهی بورس تهران درج گردید. ضمانت و عاملیت این اوراق بر عهده بانک ملت می‌باشد. شایان ذکر است مجوز بانک مرکزی جمهوری اسلامی ایران و مجوز معاف از ثبت سازمان بورس و اوراق بهادار از فایل های مرتبط دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 813,
+          "detail": "kind=news;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 121,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 969.2
+    },
+    {
+      "id": "financial-institution:NM-001",
+      "caseId": "NM-001",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "statistics",
+      "question": "جدول Nahad_Mali چند رکورد، شناسه، نام متمایز، نوع و تالار دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Nahad_Mali دارای 807 رکورد شعبه/دفتر، 807 شناسه یکتا و 287 نام متمایز است. این رکوردها در 31 تالار منطقه‌ای و 4 نوع استفاده‌شده قرار دارند. Broker_TypeId در هر 807 رکورد خالی است؛ زمان جمع‌آوری Snapshot 1405/05/20 ساعت 14:33:43 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 90,
+          "detail": "kind=financial_institution_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 58,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 201.91
+    }
+  ]
+}

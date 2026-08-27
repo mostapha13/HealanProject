@@ -1,0 +1,311 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T14:16:43.618994+00:00",
+  "runId": "ab6305508177",
+  "manifestVersion": "2.0",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
+  "caseCount": 3,
+  "sources": {
+    "content": {
+      "total": 3,
+      "passed": 0
+    }
+  },
+  "total": 3,
+  "passed": 0,
+  "failed": 3,
+  "passRate": 0.0,
+  "p50LatencyMs": 60016.2,
+  "p95LatencyMs": 60016.2,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 3,
+    "mustContain": 3,
+    "transport": 2,
+    "nonEmptyAnswer": 2,
+    "trace": 2,
+    "authority": 2,
+    "HTTP 504: <html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n": 2
+  },
+  "clusters": {
+    "content:quality": {
+      "total": 2,
+      "passed": 0
+    },
+    "content:statistics": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "content:CT-045",
+      "caseId": "CT-045",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "statistics",
+      "question": "جدول Content چند رکورد و چند شناسه متمایز دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "لطفاً نام دقیق نماد یا شرکت مورد نظر را ذکر کنید. عبارت «جدول Content» به نظر می‌رسد نام یک نماد یا شرکت در بورس تهران نباشد و نیاز به شناسایی دقیق دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 55,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25257,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 7882,
+          "detail": "route=Clarification;intent=Clarification;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,عبارت «جدول Content» یک نماد شناخته شده در بورس تهران نیست.,سوال به دنبال تعداد رکوردها و شناسه‌های متمایز است که نیاز به داده‌های خاص یک نماد دارد.,بدون نام دقیق نماد، امکان پاسخ‌دهی وجود ندارد."
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33935.86
+    },
+    {
+      "id": "content:CT-046",
+      "caseId": "CT-046",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "چند رکورد جدول Content بدنه خالی دارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 504: <html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 504,
+      "latencyMs": 60016.2
+    },
+    {
+      "id": "content:CT-048",
+      "caseId": "CT-048",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "آیا بدنه‌های تکراری در جدول Content داریم؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 504: <html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 504,
+      "latencyMs": 60024.3
+    }
+  ],
+  "results": [
+    {
+      "id": "content:CT-045",
+      "caseId": "CT-045",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "statistics",
+      "question": "جدول Content چند رکورد و چند شناسه متمایز دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "لطفاً نام دقیق نماد یا شرکت مورد نظر را ذکر کنید. عبارت «جدول Content» به نظر می‌رسد نام یک نماد یا شرکت در بورس تهران نباشد و نیاز به شناسایی دقیق دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 55,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25257,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 7882,
+          "detail": "route=Clarification;intent=Clarification;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,عبارت «جدول Content» یک نماد شناخته شده در بورس تهران نیست.,سوال به دنبال تعداد رکوردها و شناسه‌های متمایز است که نیاز به داده‌های خاص یک نماد دارد.,بدون نام دقیق نماد، امکان پاسخ‌دهی وجود ندارد."
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33935.86
+    },
+    {
+      "id": "content:CT-046",
+      "caseId": "CT-046",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "چند رکورد جدول Content بدنه خالی دارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 504: <html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 504,
+      "latencyMs": 60016.2
+    },
+    {
+      "id": "content:CT-048",
+      "caseId": "CT-048",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "آیا بدنه‌های تکراری در جدول Content داریم؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 504: <html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body>\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 504,
+      "latencyMs": 60024.3
+    }
+  ]
+}

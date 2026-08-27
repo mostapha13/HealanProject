@@ -14,6 +14,12 @@ public sealed class ConversationContextService(
     private static readonly string[] ComparisonCues = ["مقایسه","مقایسه کن","مقایسه‌شون","مقایسه شون","در مقایسه با","نسبت به"];
     private static readonly string[] MarketFollowUps = ["حقیقی حقوقی","حقیقی‌حقوقی","اردربوک","اوردر بوک","سفارش خرید","سفارش فروش","قیمتش","حجمش","پایانیش","صف خریدش","صف فروشش","وضعیتش","تابلوش"];
     private static readonly string[] KnowledgeFollowUps = ["خبرش","اخبارش","اطلاعیه‌ش","اطلاعیه اش","اطلاعیه‌اش","گزارشش","آخرین خبرش","خبر جدیدش"];
+    private static readonly string[] CompanyReferenceFollowUps =
+    [
+        "نمادش", "نماد آن شرکت", "نماد این شرکت", "اسم نماد", "کد نماد",
+        "سایتش", "وب سایتش", "وب‌سایتش", "تلفنش", "شماره تماسش", "مدیرعاملش", "مدیر عاملش",
+        "تالارش", "تاریخ عرضه اش", "تاریخ عرضه‌اش", "کی عرضه شده", "چه زمانی عرضه شده"
+    ];
     private static readonly string[] HybridFollowUps = ["چرا افت","چرا رشد","چرا منفی","چرا مثبت","دلیل افت","دلیل رشد","علتش"];
     private static readonly string[] ReferentialCues = ["همون","همان","اون","آن سهم","این سهم","این نماد","همین نماد","همین سهم"];
     private static readonly string[] OrganizationFollowUps =
@@ -82,6 +88,16 @@ public sealed class ConversationContextService(
             var role=string.IsNullOrWhiteSpace(reference.SubjectRole)?"":$" با سمت {reference.SubjectRole}";
             reasons.Add("organization-followup-with-active-reference");
             return new(question,$"{question} درباره {referenceSubject}{role} در بورس تهران",state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { SubjectName.Length: > 0 } companyReference
+            &&companyReference.Kind.StartsWith("company",StringComparison.Ordinal)
+            &&CompanyReferenceFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
+        {
+            reasons.Add("company-followup-with-active-reference");
+            var effective=BuildCompanyReferenceQuestion(q,companyReference.SubjectName!);
+            return new(question,effective,state,
                 new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
         }
 
@@ -192,6 +208,16 @@ public sealed class ConversationContextService(
             ChatIntent.Hybrid => $"وضعیت بازار و اطلاعات مرتبط نماد {entity.BestLookup}",
             _ => $"وضعیت نماد {entity.BestLookup}"
         };
+
+    private static string BuildCompanyReferenceQuestion(string normalized,string subject)
+    {
+        if(normalized.Contains("نماد",StringComparison.Ordinal)) return $"نماد شرکت {subject} چیست؟";
+        if(normalized.Contains("سایت",StringComparison.Ordinal)) return $"وب‌سایت شرکت {subject} چیست؟";
+        if(normalized.Contains("تلفن",StringComparison.Ordinal)||normalized.Contains("تماس",StringComparison.Ordinal)) return $"شماره تماس شرکت {subject} چیست؟";
+        if(normalized.Contains("مدیرعامل",StringComparison.Ordinal)||normalized.Contains("مدیر عامل",StringComparison.Ordinal)) return $"مدیرعامل شرکت {subject} کیست؟";
+        if(normalized.Contains("تالار",StringComparison.Ordinal)) return $"شرکت {subject} در کدام تالار است؟";
+        return $"تاریخ عرضه اولیه شرکت {subject} چیست؟";
+    }
 
     private static bool LooksLikeCorrection(string q)
         => q.Contains("منظورم",StringComparison.Ordinal) || q.Contains("نه،",StringComparison.Ordinal) || q.StartsWith("نه ",StringComparison.Ordinal) || q.Contains("به جای",StringComparison.Ordinal);

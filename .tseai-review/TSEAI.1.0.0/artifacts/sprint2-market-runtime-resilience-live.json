@@ -1,0 +1,10 @@
+{
+  "executedAtUtc": "2026-08-27T09:06:00Z",
+  "test": "instrument-refresh-failure-does-not-block-market-poll",
+  "isolatedRedis": true,
+  "instrumentFailureObserved": true,
+  "marketPollingFailureObserved": false,
+  "snapshotCount": 567,
+  "tradingDate": "20260811",
+  "passed": true
+}

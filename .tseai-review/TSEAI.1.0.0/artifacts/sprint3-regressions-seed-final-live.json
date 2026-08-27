@@ -1,0 +1,730 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T15:09:54.857026+00:00",
+  "runId": "e73f55b331fb",
+  "manifestVersion": "2.0",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
+  "caseCount": 10,
+  "sources": {
+    "company": {
+      "total": 3,
+      "passed": 3
+    },
+    "content": {
+      "total": 4,
+      "passed": 4
+    },
+    "financial-institution": {
+      "total": 3,
+      "passed": 3
+    }
+  },
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 117.86,
+  "p95LatencyMs": 5713.47,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "company:contact": {
+      "total": 2,
+      "passed": 2
+    },
+    "company:identity": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:distribution": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:quality": {
+      "total": 2,
+      "passed": 2
+    },
+    "content:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:quality": {
+      "total": 3,
+      "passed": 3
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "company:CO-002",
+      "caseId": "CO-002",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نماد بورسی شرکت ملی صنایع مس ایران چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نماد بورسی فملی است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 35,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 906,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1838.76
+    },
+    {
+      "id": "company:CO-007",
+      "caseId": "CO-007",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "سایت شرکت ملی صنایع مس ایران را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): وب‌سایتی در Company ثبت نشده است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 66.83
+    },
+    {
+      "id": "company:CO-008",
+      "caseId": "CO-008",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "آدرس سایت دانش بنیان پویا نیرو چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "دانش‌بنیان پویا نیرو: وب‌سایت ثبت‌شده www.pooyapower.com است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5629,
+          "detail": "kind=company;complete=True;facts=9;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت دانش‌بنیان پویا نیرو;facts=9"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5713.47
+    },
+    {
+      "id": "content:CT-045",
+      "caseId": "CT-045",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "statistics",
+      "question": "جدول Content چند رکورد و چند شناسه متمایز دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Content دارای 42,536 رکورد و 42,536 شناسه متمایز در بازه 1 تا 100,785 است. 9,697 رکورد بدنه غیرخالی دارند؛ داده شامل 20 ContentTypeId، 2 LanguageId، 3 ContentStatusId و 3 DepartmentId متمایز است. زمان جمع‌آوری منبع 1405/05/20 ساعت 13:53:17 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5913,
+          "detail": "kind=content_reference;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=جدول Content;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5961.24
+    },
+    {
+      "id": "content:CT-046",
+      "caseId": "CT-046",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "چند رکورد جدول Content بدنه خالی دارند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 42,536 رکورد Content، تعداد 32,839 رکورد بدنه خالی و 9,697 رکورد بدنه غیرخالی دارند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=content_reference;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=جدول Content;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33.04
+    },
+    {
+      "id": "content:CT-047",
+      "caseId": "CT-047",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "distribution",
+      "question": "نوع‌های محتوای جدول Content را به تفکیک تعداد بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "توزیع جدول Content بر اساس نوع محتوا:\n1. ContentTypeId=1: 33,377 رکورد\n2. ContentTypeId=5: 3,532 رکورد\n3. ContentTypeId=26: 2,083 رکورد\n4. ContentTypeId=13: 1,069 رکورد\n5. ContentTypeId=14: 419 رکورد\n6. ContentTypeId=6: 303 رکورد\n7. ContentTypeId=12: 287 رکورد\n8. ContentTypeId=3: 280 رکورد\n9. ContentTypeId=17: 212 رکورد\n10. ContentTypeId=2: 175 رکورد\n11. ContentTypeId=8: 172 رکورد\n12. ContentTypeId=25: 171 رکورد\n13. ContentTypeId=22: 137 رکورد\n14. ContentTypeId=24: 128 رکورد\n15. ContentTypeId=4: 100 رکورد\n16. ContentTypeId=18: 48 رکورد\n17. ContentTypeId=9: 20 رکورد\n18. ContentTypeId=7: 19 رکورد\n19. ContentTypeId=10: 3 رکورد\n20. ContentTypeId=39: 1 رکورد\n جدول مرجع دارای نام برای این شناسه‌ها در داده فعلی خالی یا موجود نیست؛ بنابراین برچسب معنایی حدس زده نمی‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": "kind=content_reference;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=جدول Content;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 72.49
+    },
+    {
+      "id": "content:CT-048",
+      "caseId": "CT-048",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "quality",
+      "question": "آیا بدنه‌های تکراری در جدول Content داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در بدنه‌های حداقل 80 نویسه‌ای Content، 76 گروه متن کاملاً تکراری شامل 151 ردیف تکراری اضافه وجود دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 874,
+          "detail": "kind=content_reference;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=جدول Content;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 915.28
+    },
+    {
+      "id": "financial-institution:NM-035",
+      "caseId": "NM-035",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "quality",
+      "question": "آیا در جدول Nahad_Mali عنوان، تلفن یا آدرس خالی داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 129,
+          "detail": "kind=financial_institution_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_quality;topic=کیفیت جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 163.24
+    },
+    {
+      "id": "financial-institution:NM-036",
+      "caseId": "NM-036",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "quality",
+      "question": "چند شماره تلفن نامعتبر یا مشکوک در Nahad_Mali وجود دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=financial_institution_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_quality;topic=کیفیت جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 43.49
+    },
+    {
+      "id": "financial-institution:NM-037",
+      "caseId": "NM-037",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "quality",
+      "question": "Broker_TypeId چند رکورد نهاد مالی خالی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=financial_institution_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_quality;topic=کیفیت جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 38.94
+    }
+  ]
+}

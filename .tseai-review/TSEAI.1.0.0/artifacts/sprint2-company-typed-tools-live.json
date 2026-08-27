@@ -1,0 +1,300 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T09:05:53.124525+00:00",
+  "runId": "b93df5e90809",
+  "manifestVersion": "2.0",
+  "datasetSha256": "097f7cc997a9b722eceec72774ee42a04bac18434c262ca5830f0075d6d1876e",
+  "caseCount": 4,
+  "sources": {
+    "company": {
+      "total": 4,
+      "passed": 4
+    }
+  },
+  "total": 4,
+  "passed": 4,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 218.58,
+  "p95LatencyMs": 357.62,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "company:ipo-semantic-regression": {
+      "total": 4,
+      "passed": 4
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "company:CO-051",
+      "caseId": "CO-051",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "آخرین عرضه اولیه بورس چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 59,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 20,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 624,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 236,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1901.25
+    },
+    {
+      "id": "company:CO-052",
+      "caseId": "CO-052",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "تازه‌ترین IPO بورس تهران چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 74.63
+    },
+    {
+      "id": "company:CO-053",
+      "caseId": "CO-053",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "سه عرضه اولیه اخیر بورس را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. فرآورده‌های دامی ولبنی دالاهو — 1403/10/24\n2. فولاد سیرجان ایرانیان — 1403/10/12\n3. دانش‌بنیان پویا نیرو — 1403/09/28",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 18,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 79.53
+    },
+    {
+      "id": "company:CO-054",
+      "caseId": "CO-054",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "آخرین تاریخ عرضه اولیه فملی چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): تاریخ عرضه اولیه ثبت‌شده 1385/11/15 است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 297,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 32,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 357.62
+    }
+  ]
+}

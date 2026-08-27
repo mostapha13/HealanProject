@@ -38,7 +38,7 @@
     {"id":"CM-028","cluster":"classification","question":"تابلوی معاملاتی ملی صنایع مس ایران چیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بازار اول - اصلی"],"maxAnswerChars":220},
     {"id":"CM-029","cluster":"classification","question":"فملی در چه صنعت و زیرصنعتی قرار دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["فلزات اساسی","تولید فلزات گرانب‌های غیرآهن"],"maxAnswerChars":260},
     {"id":"CM-030","cluster":"classification","question":"وضعیت معاملاتی نماد فملی چیست؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["مجاز"],"maxAnswerChars":180},
-    {"id":"CM-031","cluster":"observation-time","question":"داده قیمت فملی مربوط به چه تاریخیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1405/05/20","2026/08/11"],"maxAnswerChars":260},
+    {"id":"CM-031","cluster":"observation-time","question":"داده قیمت فملی مربوط به چه تاریخیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1405/05/20"],"mustNotContain":["2026/08/11"],"maxAnswerChars":260},
     {"id":"CM-032","cluster":"summary","question":"یه گزارش کامل و خلاصه از وضعیت فعلی فملی بده","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680","21,660","583,222,314","12,630,826,540,900","15.35","1405/05/20"],"maxAnswerChars":800},
 
     {"id":"CM-033","cluster":"combined","question":"آخرین قیمت، پایانی و قیمت روز قبل فملی را یکجا بگو","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["21,680","21,660","21,430"],"maxAnswerChars":300},

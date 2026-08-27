@@ -1,0 +1,111 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T10:59:27.887084+00:00",
+  "total": 5,
+  "passed": 2,
+  "passRate": 0.4,
+  "allPassed": false,
+  "p50LatencyMs": 17749.89,
+  "p95LatencyMs": 20609.65,
+  "clusters": {
+    "irandar-bond": {
+      "total": 1,
+      "passed": 0
+    },
+    "green-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "private-market": {
+      "total": 1,
+      "passed": 0
+    },
+    "saipa-history": {
+      "total": 2,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CT-013",
+      "cluster": "irandar-bond",
+      "question": "تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟",
+      "mustContain": [
+        "رتبه اعتباری",
+        "BBB-",
+        "A3"
+      ],
+      "maxAnswerChars": 650,
+      "passed": false,
+      "issues": [
+        "missing:رتبه اعتباری"
+      ],
+      "answer": "تضمین اوراق مرابحه ایراندار بر اساس مجوز پذیره‌نویسی شماره 198135/122 مورخ 1405/04/09 سازمان بورس و اوراق بهادار است. رتبه‌های اعتباری آن به شرح زیر است: رتبه بلندمدت BBB- و رتبه کوتاه‌مدت A3.",
+      "actualType": "knowledge",
+      "latencyMs": 20609.65
+    },
+    {
+      "id": "CT-022",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "mustContain": [
+        "گسترش نوویرا",
+        "کارگزاری پارسیان"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "بازارگردان صندوق سبز آبنوس، «صندوق سرمایه‌گذاری اختصاصی بازارگردانی گسترش نوویرا» و کارگزار بازارگردان آن، «شرکت کارگزاری پارسیان» هستند.",
+      "actualType": "knowledge",
+      "latencyMs": 15317.67
+    },
+    {
+      "id": "CT-032",
+      "cluster": "private-market",
+      "question": "چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟",
+      "mustContain": [
+        "محمود گودرزی",
+        "مدیرعامل بورس تهران"
+      ],
+      "maxAnswerChars": 500,
+      "passed": false,
+      "issues": [
+        "missing:مدیرعامل بورس تهران"
+      ],
+      "answer": "محمود گودرزی",
+      "actualType": "knowledge",
+      "latencyMs": 17749.89
+    },
+    {
+      "id": "CT-036",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "mustContain": [
+        "علی شیخ زاده"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "علی شیخ زاده",
+      "actualType": "knowledge",
+      "latencyMs": 16651.49
+    },
+    {
+      "id": "CT-040",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "mustContain": [
+        "26 شرکت",
+        "رتبه دوم"
+      ],
+      "maxAnswerChars": 550,
+      "passed": false,
+      "issues": [
+        "missing:26 شرکت"
+      ],
+      "answer": "در حال حاضر تعداد 26شرکت در فهرست ناشران پذیرش شده در صنعت \"خودرو و ساخت قطعات\" وجود دارند، که در بین این تعداد، سایپا از نظر ارزش بازار رتبه دوم را در اختیار دارد.",
+      "actualType": "knowledge",
+      "latencyMs": 31431.56
+    }
+  ]
+}

@@ -1,0 +1,913 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T13:43:43.353284+00:00",
+  "runId": "090f271ebec6",
+  "manifestVersion": "2.0",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
+  "caseCount": 11,
+  "sources": {
+    "company": {
+      "total": 1,
+      "passed": 1
+    },
+    "content": {
+      "total": 10,
+      "passed": 10
+    }
+  },
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 2990.27,
+  "p95LatencyMs": 6219.65,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "company:ceo-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:delta-fund": {
+      "total": 2,
+      "passed": 2
+    },
+    "content:green-fund": {
+      "total": 4,
+      "passed": 4
+    },
+    "content:private-market": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:saipa-history": {
+      "total": 2,
+      "passed": 2
+    },
+    "content:trading-microstructure": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "company:CO-016",
+      "caseId": "CO-016",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "CEO فولاد مبارکه چه کسی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فولاد — فولاد مبارکه اصفهان: مدیرعامل ثبت‌شده سعید زرندی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 41,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 749,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=وضعیت نماد فولاد;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1679.26
+    },
+    {
+      "id": "content:CT-020",
+      "caseId": "CT-020",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "مدیریت صندوق سبز آبنوس بر عهده کدام شرکت است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیر: شرکت سبدگردان آبنوس.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 66,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2875,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 31,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3093.2
+    },
+    {
+      "id": "content:CT-021",
+      "caseId": "CT-021",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "متولی و حسابرس صندوق مسیر سبز آبنوس را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "حسابرس: موسسه حسابرسی ارقام نگر آریا؛ متولی: شرکت مشاور سرمایه‌گذاری اوراق بهادار پاداش.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1097,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4995,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 6219.65
+    },
+    {
+      "id": "content:CT-022",
+      "caseId": "CT-022",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "کارگزار بازارگردان: شرکت کارگزاری پارسیان؛ بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی گسترش نوویرا.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1597,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4825,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 6505.67
+    },
+    {
+      "id": "content:CT-023",
+      "caseId": "CT-023",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "برای اطلاعات بیشتر صندوق سبز آبنوس باید به چه سایتی مراجعه کنم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "برای اطلاعات بیشتر به green.abnouspmc.ir مراجعه کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 826,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2106,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2990.27
+    },
+    {
+      "id": "content:CT-025",
+      "caseId": "CT-025",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "موسسین: شرکت آسان سرمایه گستر ایرانیان، رهپویان پردازش گستر صحرا و شرکت تامین سرمایه تمدن.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 20,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1201,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1275.66
+    },
+    {
+      "id": "content:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "مدیر صندوق دلتا کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیر: شرکت تامین سرمایه تمدن.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 799,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 846.53
+    },
+    {
+      "id": "content:CT-031",
+      "caseId": "CT-031",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "trading-microstructure",
+      "question": "اصلاح طبقات حجمی سفارش چه آثار مثبتی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "از جمله نتایج قابل توجه آن می‌توان به کاهش اثر بازاری (market impact) سفارش‌های با ارزش بالا بر تابلوی معاملات، تسهیل انجام معاملات در سهام با قیمت‌های پایین و نیز کاهش اثرات ناشی از اشتباهات معاملاتی در سهام با قیمت‌های بالا اشاره کرد بر این اساس به طور کلی این تغییرات می‌تواند به بهبود نظم معاملاتی، افزایش انعطاف‌پذیری در ثبت سفارش‌ها و ارتقای کیفیت اجرای معاملات کمک کند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 984,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4084,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5120.91
+    },
+    {
+      "id": "content:CT-034",
+      "caseId": "CT-034",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "گودرزی چه شرکت‌هایی را در اولویت پذیرش بورس اعلام کرده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیرعامل بورس تهران با اشاره به تغییر رویکرد این بورس طی دو سال گذشته تصریح کرد: سیاست ما این است که هر شرکتی با سود خالص بیش از 100 میلیارد تومان، در اولویت پذیرش قرار گیرد و بورس تهران برای ورود چنین شرکت‌هایی فرش قرمز پهن خواهد کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 881,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 940.3
+    },
+    {
+      "id": "content:CT-036",
+      "caseId": "CT-036",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "علی شیخ زاده، مدیرعامل گروه خودروسازی سایپا بود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 772,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4150,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4977.69
+    },
+    {
+      "id": "content:CT-039",
+      "caseId": "CT-039",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "گفتنی است: سایپا در سال 1375 به جمع ناشران بورسی پیوست و امروز بیش از93 همت از ارزش بازار بورس تهران را به خود اختصاص داده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 826,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 880.13
+    }
+  ]
+}

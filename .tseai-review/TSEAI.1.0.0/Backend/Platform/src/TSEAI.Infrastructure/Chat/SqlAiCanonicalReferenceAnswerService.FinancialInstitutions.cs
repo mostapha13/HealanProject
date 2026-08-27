@@ -1,7 +1,10 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
 using TSEAI.Application.Chat;
 
 namespace TSEAI.Infrastructure.Chat;
@@ -166,8 +169,17 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService
             (take<groups.Length?$"\n… {groups.Length-take:N0} نام دیگر نمایش داده نشد.":string.Empty);
     }
 
-    private static async Task<string> FinancialInstitutionDataQuality(SqlConnection connection,CancellationToken ct)
+    private async Task<string> FinancialInstitutionDataQuality(SqlConnection connection,CancellationToken ct)
     {
+        var identity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
+        var cacheKey=$"financial-institution-quality:{identity}";
+        if(cache.TryGetValue<string>(cacheKey,out var cached)&&!string.IsNullOrWhiteSpace(cached)) return cached;
+        var distributed=await ReadDistributedCache<string>(cacheKey,ct);
+        if(!string.IsNullOrWhiteSpace(distributed))
+        {
+            cache.Set(cacheKey,distributed,ReferenceCacheTtl);
+            return distributed;
+        }
         const string sql="""
             SELECT COUNT_BIG(*) TotalRows,
               SUM(CASE WHEN NULLIF(LTRIM(RTRIM(n.Title)),N'') IS NULL THEN CONVERT(bigint,1) ELSE CONVERT(bigint,0) END) MissingTitle,
@@ -190,7 +202,10 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService
         var x=await grid.ReadSingleAsync<FinancialInstitutionQualityRow>();
         var exact=await grid.ReadSingleAsync<FinancialInstitutionDuplicateRow>();
         var titleHall=await grid.ReadSingleAsync<FinancialInstitutionDuplicateRow>();
-        return $"از {x.TotalRows:N0} رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. {x.SuspiciousPhone:N0} شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر {x.NullBrokerType:N0} رکورد خالی است. {exact.DuplicateGroups:N0} گروه تکراری کاملاً یکسان با {exact.ExtraRows:N0} ردیف اضافه وجود دارد. همچنین {titleHall.DuplicateGroups:N0} گروه نام یکسان در یک تالار با {titleHall.ExtraRows:N0} ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.";
+        var answer=$"از {x.TotalRows:N0} رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. {x.SuspiciousPhone:N0} شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر {x.NullBrokerType:N0} رکورد خالی است. {exact.DuplicateGroups:N0} گروه تکراری کاملاً یکسان با {exact.ExtraRows:N0} ردیف اضافه وجود دارد. همچنین {titleHall.DuplicateGroups:N0} گروه نام یکسان در یک تالار با {titleHall.ExtraRows:N0} ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.";
+        cache.Set(cacheKey,answer,ReferenceCacheTtl);
+        await WriteDistributedCache(cacheKey,answer,ct);
+        return answer;
     }
 
     private static async Task<string> FinancialInstitutionSourceTimestamp(SqlConnection connection,CancellationToken ct)

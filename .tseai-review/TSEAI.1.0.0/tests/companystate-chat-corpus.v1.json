@@ -51,7 +51,7 @@
     {"id":"CS-043","cluster":"quality","question":"چند رکورد Companystate مدیرعامل دارند و چندتا فاقد مدیرعامل‌اند؟","expectedType":"structured_reference","mustContain":["30 رکورد مدیرعامل دارند","28 رکورد فاقد مدیرعامل"],"maxAnswerChars":320},
     {"id":"CS-044","cluster":"quality","question":"چند شرکت در Companystate بدون اعضای هیئت مدیره هستند؟","expectedType":"structured_reference","mustContain":["52 رکورد اعضای هیئت‌مدیره دارند","6 رکورد فاقد آن"],"maxAnswerChars":340},
     {"id":"CS-045","cluster":"quality","question":"Companystate نماد یا کد سامانه تکراری دارد؟","expectedType":"structured_reference","mustContain":["گروه نماد تکراری 0","گروه کد سامانه تکراری 0"],"maxAnswerChars":320},
-    {"id":"CS-046","cluster":"quality","question":"کد سامانه چند رکورد Companystate قابل اتصال به Instrument است؟","expectedType":"structured_reference","mustContain":["۵۵ رکورد از ۵۸ رکورد","۳ رکورد","Foreign Key فیزیکی"],"maxAnswerChars":460},
+    {"id":"CS-046","cluster":"quality","question":"کد سامانه چند رکورد Companystate قابل اتصال به Instrument است؟","expectedType":"structured_reference","mustContain":["55 رکورد از 58 رکورد","3 رکورد","Foreign Key فیزیکی"],"maxAnswerChars":460},
 
     {"id":"CS-047","cluster":"schema","question":"StatusCode در Companystate چه معنایی دارد؟","expectedType":"structured_reference","mustContain":["StatusCode=2","تعلیق‌شده","StatusCode=3","مشمول فرایند تعلیق","Constraint"],"maxAnswerChars":480},
     {"id":"CS-048","cluster":"schema","question":"Lastdatechange جدول Companystate شمسی است یا میلادی؟","expectedType":"structured_reference","mustContain":["nvarchar(10)","تاریخ شمسی","yyyy/MM/dd","DateTime میلادی نیست"],"maxAnswerChars":430},

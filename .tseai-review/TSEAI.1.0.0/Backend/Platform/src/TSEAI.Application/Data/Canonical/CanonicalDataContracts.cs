@@ -16,12 +16,75 @@ public enum CanonicalSourceMode
     Derived = 4
 }
 
+public enum CanonicalRetrievalMode
+{
+    Structured = 1,
+    Knowledge = 2,
+    Hybrid = 3,
+    Ignore = 4
+}
+
+public enum CanonicalFreshnessClass
+{
+    Reference = 1,
+    SecondLevel = 2,
+    MinuteLevel = 3,
+    Hourly = 4,
+    Daily = 5,
+    EventDriven = 6,
+    SourceManaged = 7
+}
+
+public enum CanonicalHistoryMode
+{
+    None = 1,
+    CurrentOnly = 2,
+    AppendOnly = 3,
+    Versioned = 4,
+    AppendWithUpsert = 5
+}
+
+public sealed record CanonicalFieldDescriptor(
+    string Column,
+    string SemanticName,
+    string PersianLabel,
+    string DataType,
+    string? Unit = null,
+    bool Nullable = true,
+    bool IsEntityKey = false,
+    string? Description = null);
+
+public sealed record CanonicalRelationshipDescriptor(
+    string TargetSourceCode,
+    IReadOnlyList<string> LocalColumns,
+    IReadOnlyList<string> TargetColumns,
+    string Cardinality,
+    string Description);
+
+public sealed record CanonicalCatalogValidationIssue(
+    string Code,
+    string SourceCode,
+    string Message);
+
 public sealed record CanonicalSourceDescriptor(
     string Code,
     string TableName,
     CanonicalSourceMode Mode,
     IReadOnlyList<string> BusinessKeys,
-    bool RequiredForPhase1 = true);
+    bool RequiredForPhase1 = true,
+    string PersianName = "",
+    string Description = "",
+    CanonicalRetrievalMode RetrievalMode = CanonicalRetrievalMode.Structured,
+    CanonicalFreshnessClass FreshnessClass = CanonicalFreshnessClass.SourceManaged,
+    string? EventTimeColumn = null,
+    string? CollectionTimeColumn = "SourceCollectedAt",
+    CanonicalHistoryMode HistoryMode = CanonicalHistoryMode.CurrentOnly,
+    string UpdatePolicy = "source-managed",
+    string VectorizationPolicy = "not-vectorized",
+    IReadOnlyList<CanonicalFieldDescriptor>? Fields = null,
+    IReadOnlyList<CanonicalRelationshipDescriptor>? Relationships = null,
+    IReadOnlyList<string>? QuestionFamilies = null,
+    bool Sprint1Audited = false);
 
 public sealed record CanonicalSourceTableStatus(
     string Code,

@@ -2,9 +2,9 @@
   "version": "1.0",
   "description": "Meaning-equivalent Persian questions. Examples are regression probes, not runtime phrase rules.",
   "cases": [
-    {"id":"SE-001","cluster":"current-date","question":"امروز چندمه؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
-    {"id":"SE-002","cluster":"current-date","question":"الان چه تاریخی است؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
-    {"id":"SE-003","cluster":"current-date","question":"تاریخ امروز را می‌گویی؟","expectedType":"structured_reference","mustContain":["شمسی","میلادی"]},
+    {"id":"SE-001","cluster":"current-date","question":"امروز چندمه؟","expectedType":"structured_reference","mustContain":["شمسی"],"mustNotContain":["2026/"]},
+    {"id":"SE-002","cluster":"current-date","question":"الان چه تاریخی است؟","expectedType":"structured_reference","mustContain":["شمسی"],"mustNotContain":["2026/"]},
+    {"id":"SE-003","cluster":"current-date","question":"تاریخ امروز را می‌گویی؟","expectedType":"structured_reference","mustContain":["شمسی"],"mustNotContain":["2026/"]},
 
     {"id":"SE-010","cluster":"technology-role","question":"مدیر فناوری بورس تهران کیه؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
     {"id":"SE-011","cluster":"technology-role","question":"چه کسی مدیر فناوری بورس تهران است؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
@@ -35,8 +35,8 @@
     {"id":"SE-060","cluster":"trade-count","question":"چند بار روی فملی معامله انجام شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
     {"id":"SE-061","cluster":"trade-count","question":"تعداد دادوستدهای فملی چند تا بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
 
-    {"id":"SE-070","cluster":"price-time","question":"آخرین نرخ فملی مال چه روزیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["شمسی","میلادی"]},
-    {"id":"SE-071","cluster":"price-time","question":"قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت","شمسی","میلادی"]},
+    {"id":"SE-070","cluster":"price-time","question":"آخرین نرخ فملی مال چه روزیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["شمسی"],"mustNotContain":["2026/"]},
+    {"id":"SE-071","cluster":"price-time","question":"قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت","شمسی"],"mustNotContain":["2026/"]},
 
     {"id":"SE-080","cluster":"market-ranking","question":"کدام نمادها بیشترین حجم معامله را دارند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]},
     {"id":"SE-081","cluster":"market-ranking","question":"سهام با بالاترین حجم دادوستد کدام‌اند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]}

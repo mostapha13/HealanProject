@@ -8,23 +8,7 @@ from typing import Any
 from .local_inference import post_chat_completion
 
 
-_RESPONSE_FORMAT = {
-    "type": "json_schema",
-    "json_schema": {
-        "name": "tseai_conversation_rewrite",
-        "strict": True,
-        "schema": {
-            "type": "object",
-            "additionalProperties": False,
-            "properties": {
-                "standalone_question": {"type": "string", "maxLength": 4000},
-                "context_applied": {"type": "boolean"},
-                "reason": {"type": ["string", "null"], "maxLength": 100},
-            },
-            "required": ["standalone_question", "context_applied", "reason"],
-        },
-    },
-}
+_RESPONSE_FORMAT = {"type": "json_object"}
 
 _SYSTEM_PROMPT = """You rewrite a Persian follow-up question into a standalone question for TSEAI.
 Use only the supplied active reference and recent turns. Resolve pronouns, omitted subjects and phrases such as «او»، «ایشان»، «آن شرکت»، «نماینده کدام شرکت» or «سابقه‌اش» when the context makes the referent unambiguous.

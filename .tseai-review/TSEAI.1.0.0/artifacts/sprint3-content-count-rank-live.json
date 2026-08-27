@@ -1,0 +1,33 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T11:22:55.829530+00:00",
+  "total": 1,
+  "passed": 1,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 7366.73,
+  "p95LatencyMs": 7366.73,
+  "clusters": {
+    "saipa-history": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CT-040",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "mustContain": [
+        "26 شرکت",
+        "رتبه دوم"
+      ],
+      "maxAnswerChars": 550,
+      "passed": true,
+      "issues": [],
+      "answer": "در حال حاضر تعداد 26 شرکت در فهرست ناشران پذیرش شده در صنعت \"خودرو و ساخت قطعات\" وجود دارند، که در بین این تعداد، سایپا از نظر ارزش بازار رتبه دوم را در اختیار دارد.",
+      "actualType": "knowledge",
+      "latencyMs": 7366.73
+    }
+  ]
+}

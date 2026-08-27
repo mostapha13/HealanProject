@@ -1,0 +1,85 @@
+{
+  "version": "2.0",
+  "description": "Sprint 1 strict table-grounded evaluation suite. Every corpus is tied to one audited semantic source and exact SQL-grounded expectations.",
+  "minimumTotalCases": 400,
+  "minimumPassRate": 1.0,
+  "requireTrace": true,
+  "dateDisplayPolicy": "jalali-only",
+  "forbiddenAnswerFragments": [
+    "داده قابل اتکایی برای پاسخ پیدا نشد",
+    "Unexpected token",
+    "not valid JSON",
+    "<html",
+    "سرویس هوش مصنوعی موقتاً در دسترس نیست"
+  ],
+  "forbiddenAnswerRegex": [
+    "\\b(?:19|20)\\d{2}/\\d{2}/\\d{2}\\b"
+  ],
+  "corpora": [
+    {
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "file": "cashmarket-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "structured"
+    },
+    {
+      "sourceCode": "order-book",
+      "table": "OrderBookCurrent",
+      "file": "orderbookcurrent-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 10,
+      "authority": "structured"
+    },
+    {
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "file": "instrument-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "structured"
+    },
+    {
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "file": "clienttype-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "structured"
+    },
+    {
+      "sourceCode": "company",
+      "table": "Company",
+      "file": "company-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "structured"
+    },
+    {
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "file": "companystate-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "hybrid"
+    },
+    {
+      "sourceCode": "content",
+      "table": "Content",
+      "file": "content-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 10,
+      "authority": "hybrid",
+      "defaultExpectedType": "knowledge"
+    },
+    {
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "file": "nahad-mali-chat-corpus.v1.json",
+      "minimumCases": 50,
+      "minimumClusters": 12,
+      "authority": "structured"
+    }
+  ]
+}

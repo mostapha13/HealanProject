@@ -1,0 +1,35 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T12:17:09.575852+00:00",
+  "total": 1,
+  "passed": 0,
+  "passRate": 0.0,
+  "allPassed": false,
+  "p50LatencyMs": 1667.67,
+  "p95LatencyMs": 1667.67,
+  "clusters": {
+    "latest-news": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CT-007",
+      "cluster": "latest-news",
+      "question": "توی خبر تازه بورس چه نوع اوراقی درج شده؟",
+      "mustContain": [
+        "اوراق گام",
+        "بانک ملت"
+      ],
+      "maxAnswerChars": 700,
+      "passed": false,
+      "issues": [
+        "missing:اوراق گام"
+      ],
+      "answer": "در آخرین خبر ثبت‌شده، اوراق گواهی اعتبار مولد (گام) بانک ملت درج شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 1667.67
+    }
+  ]
+}

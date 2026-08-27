@@ -19,7 +19,7 @@
     {"id":"CO-013","cluster":"ipo","question":"فولاد مبارکه چه تاریخی وارد بورس شده؟","expectedType":"structured_reference","mustContain":["1385/12/20"],"mustNotContain":["2007"],"maxAnswerChars":300},
     {"id":"CO-014","cluster":"ipo","question":"Ipo_Date خودرو چنده؟","expectedType":"structured_reference","mustContain":["1371/12/01"],"mustNotContain":["1993"],"maxAnswerChars":300},
     {"id":"CO-015","cluster":"ceo-safety","question":"مدیرعامل شرکت ملی صنایع مس ایران کیه؟","expectedType":"structured_reference","mustContain":["نام مدیرعامل در ستون Ceo جدول Company ثبت نشده"],"mustNotContain":["محمود گودرزی"],"maxAnswerChars":340},
-    {"id":"CO-016","cluster":"ceo-safety","question":"CEO فولاد مبارکه چه کسی است؟","expectedType":"structured_reference","mustContain":["نام مدیرعامل در ستون Ceo جدول Company ثبت نشده"],"maxAnswerChars":340},
+    {"id":"CO-016","cluster":"ceo-safety","question":"CEO فولاد مبارکه چه کسی است؟","expectedType":"structured_reference","mustContain":["سعید زرندی","مدیرعامل"],"maxAnswerChars":340},
     {"id":"CO-017","cluster":"metadata","question":"زمان جمع‌آوری رکورد Company فملی چه موقع بوده؟","expectedType":"structured_reference","mustContain":["1405/05/20","14:34:17"],"mustNotContain":["2026/08/11"],"maxAnswerChars":320},
     {"id":"CO-018","cluster":"metadata","question":"Company ID شرکت ملی صنایع مس ایران چیست؟","expectedType":"structured_reference","mustContain":["61ca0d96-9cd4-4f4e-8a34-c5aa38b75938"],"maxAnswerChars":340},
     {"id":"CO-019","cluster":"metadata","question":"شناسه منبع Instrument فملی در Company را بده","expectedType":"structured_reference","mustContain":["1974ebcc-8bd1-4cea-a372-39715d7211b3"],"maxAnswerChars":360},
@@ -58,6 +58,11 @@
     {"id":"CO-047","cluster":"schema","question":"معنی ستون Ipo_Date در Company چیست؟","expectedType":"structured_reference","mustContain":["تاریخ عرضه اولیه ثبت‌شده","تقویم شمسی"],"maxAnswerChars":320},
     {"id":"CO-048","cluster":"schema","question":"SourceCollectedAt جدول Company چه مفهومی دارد؟","expectedType":"structured_reference","mustContain":["زمان جمع‌آوری و ثبت Snapshot","تاریخ عرضه اولیه شرکت نیست"],"maxAnswerChars":340},
     {"id":"CO-049","cluster":"schema","question":"آیا جدول Company قیمت و حجم معاملات هم دارد؟","expectedType":"structured_reference","mustContain":["قیمت، حجم و ارزش معاملات","ندارد","اطلاعات مرجع هویتی"],"maxAnswerChars":380},
-    {"id":"CO-050","cluster":"strict-safety","question":"سایت فملی چیه؟","expectedType":"structured_reference","mustContain":["وب‌سایتی در Company ثبت نشده"],"mustNotContain":["فملی —","آخرین قیمت","داده قابل اتکایی"],"maxAnswerChars":300}
+    {"id":"CO-050","cluster":"strict-safety","question":"سایت فملی چیه؟","expectedType":"structured_reference","mustContain":["وب‌سایتی در Company ثبت نشده"],"mustNotContain":["فملی —","آخرین قیمت","داده قابل اتکایی"],"maxAnswerChars":300},
+
+    {"id":"CO-051","cluster":"ipo-semantic-regression","question":"آخرین عرضه اولیه بورس چیه؟","expectedType":"structured_reference","mustContain":["فرآورده‌های دامی ولبنی دالاهو","1403/10/24"],"mustNotContain":["عبارت «اولیه» مبهم","تولیدمواداولیه"],"expectedTools":["structured.reference","sql.company.ipo","reflection.review","answer.validate"],"maxAnswerChars":240},
+    {"id":"CO-052","cluster":"ipo-semantic-regression","question":"تازه‌ترین IPO بورس تهران چیست؟","expectedType":"structured_reference","mustContain":["فرآورده‌های دامی ولبنی دالاهو","1403/10/24"],"mustNotContain":["مبهم"],"expectedTools":["structured.reference","sql.company.ipo","reflection.review","answer.validate"],"maxAnswerChars":240},
+    {"id":"CO-053","cluster":"ipo-semantic-regression","question":"سه عرضه اولیه اخیر بورس را بگو","expectedType":"structured_reference","mustContain":["فرآورده‌های دامی ولبنی دالاهو","فولاد سیرجان ایرانیان","دانش‌بنیان پویا نیرو"],"expectedTools":["structured.reference","sql.company.ipo","reflection.review","answer.validate"],"maxAnswerChars":600},
+    {"id":"CO-054","cluster":"ipo-semantic-regression","question":"آخرین تاریخ عرضه اولیه فملی چیه؟","expectedType":"structured_reference","mustContain":["ملی صنایع مس ایران","1385/11/15"],"mustNotContain":["فرآورده‌های دامی ولبنی دالاهو"],"expectedTools":["structured.reference","sql.company.ipo","reflection.review","answer.validate"],"maxAnswerChars":320}
   ]
 }

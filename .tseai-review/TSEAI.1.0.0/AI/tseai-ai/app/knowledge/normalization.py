@@ -28,4 +28,5 @@ def normalize_persian(text: str) -> str:
 
 def normalize_for_search(text: str) -> str:
     text=normalize_persian(text).replace("\u200c", " ").translate(_SEARCH_DIGITS).lower()
+    text=re.sub(r"[؟،؛«»…]", " ", text)
     return re.sub(r"[^0-9a-zA-Z\u0600-\u06ff]+", " ", text).strip()

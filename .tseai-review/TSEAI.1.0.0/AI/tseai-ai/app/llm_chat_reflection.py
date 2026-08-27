@@ -10,24 +10,7 @@ from .local_inference import post_chat_completion
 
 
 _ACTIONS = {"accept", "retrieve_more", "clarify"}
-_RESPONSE_FORMAT = {
-    "type": "json_schema",
-    "json_schema": {
-        "name": "tseai_answer_reflection",
-        "strict": True,
-        "schema": {
-            "type": "object",
-            "additionalProperties": False,
-            "properties": {
-                "action": {"type": "string", "enum": sorted(_ACTIONS)},
-                "improved_query": {"type": ["string", "null"], "maxLength": 2000},
-                "clarification": {"type": ["string", "null"], "maxLength": 500},
-                "reasons": {"type": "array", "items": {"type": "string"}, "maxItems": 4},
-            },
-            "required": ["action", "improved_query", "clarification", "reasons"],
-        },
-    },
-}
+_RESPONSE_FORMAT = {"type": "json_object"}
 
 _SYSTEM_PROMPT = """You are the bounded final-answer reviewer for a Persian RAG assistant.
 Compare the USER QUESTION, CANDIDATE ANSWER and supplied EVIDENCE.
@@ -68,6 +51,10 @@ def _parse(content: Any) -> ReflectionDecision | None:
         return None
     if clarification is not None and not isinstance(clarification, str):
         return None
+    if isinstance(improved, str) and len(improved) > 2000:
+        return None
+    if isinstance(clarification, str) and len(clarification) > 500:
+        return None
     if action == "retrieve_more" and not improved:
         return None
     if action == "clarify" and not clarification:
@@ -88,11 +75,14 @@ async def reflect_chat_with_llm(request: dict[str, Any]) -> ReflectionDecision |
         headers["Authorization"] = "Bearer " + key
     bounded = {
         "question": request.get("question"),
-        "candidate_answer": request.get("answer"),
+        "candidate_answer": str(request.get("answer") or "")[:1800],
         "intent": request.get("intent"),
         "confidence": request.get("confidence"),
         "failed_tools": request.get("failedTools") or [],
-        "evidence": [str(x)[:3500] for x in (request.get("evidence") or [])[:12]],
+        # The preview model has a 4096-token context. A previous 12x3500
+        # character envelope could exceed it, return 503 and open the shared
+        # circuit breaker. Four focused excerpts are enough for bounded review.
+        "evidence": [str(x)[:800] for x in (request.get("evidence") or [])[:4]],
     }
     payload = {
         "model": model,

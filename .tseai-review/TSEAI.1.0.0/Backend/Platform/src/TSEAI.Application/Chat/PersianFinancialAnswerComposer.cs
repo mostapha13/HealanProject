@@ -468,7 +468,12 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         {
             text=ExtractFaqAnswer(text);
         }
-        if(!string.IsNullOrWhiteSpace(title) && text.StartsWith(title,StringComparison.OrdinalIgnoreCase)) text=text[title.Length..].Trim(' ','-','–','—',':','؛');
+        // dbo.Content has no real title; its indexed title is generated from a
+        // bounded prefix of Body. Removing that prefix can cut a word in half
+        // (for example «مبلغ» -> «بلغ») and discard the most relevant facts.
+        if(!hit.Citation.SourceType.Equals("cms_content",StringComparison.OrdinalIgnoreCase)
+           && !string.IsNullOrWhiteSpace(title) && text.StartsWith(title,StringComparison.OrdinalIgnoreCase))
+            text=text[title.Length..].Trim(' ','-','–','—',':','؛');
         if(string.IsNullOrWhiteSpace(text)) text=title;
         var answer=RequestsFullDocument(context.Question)?text:SummarizeDocument(context.Question,text,context.Verbosity);
         return PersianDisplayText.Normalize(EnsureSentence(answer));

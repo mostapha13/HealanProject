@@ -1,5 +1,6 @@
 using TSEAI.Application.Tools;
 using TSEAI.Application.Usage;
+using TSEAI.Application.Data.Canonical;
 
 namespace TSEAI.Application.Admin;
 
@@ -10,6 +11,8 @@ public sealed record SemanticRegistrySnapshot(
     IReadOnlyList<SemanticAliasItem> Aliases,
     IReadOnlyList<SemanticPolicyItem> Policies,
     IReadOnlyList<string> ContentRoutes,
+    IReadOnlyList<CanonicalSourceDescriptor> DataSources,
+    IReadOnlyList<CanonicalCatalogValidationIssue> CatalogIssues,
     DateTimeOffset GeneratedAtUtc);
 
 public interface ISemanticRegistryService
@@ -32,7 +35,8 @@ public sealed class SemanticRegistryService(IStructuredToolGateway tools, ISyste
             .Select(x=>new SemanticPolicyItem(x.Key[15..],x.Value,"Semantic"))
             .OrderBy(x=>x.Key,StringComparer.Ordinal).ToArray();
         var routes=new[]{"1:rag-news","2:rag-content","3:ignore-banner","4:rag-video-text","5:hybrid-download-metadata","6-21:hybrid-structured-first","22:conditional-image-metadata","23:rag-bulletin","24:rag-brandbook","25:hybrid-managers","26:hybrid-company-state"};
-        return new(tools.Describe(),aliases,policies,routes,DateTimeOffset.UtcNow);
+        return new(tools.Describe(),aliases,policies,routes,
+            CanonicalSourceCatalog.All,CanonicalSourceCatalog.Validate(),DateTimeOffset.UtcNow);
     }
     public Task SetAliasAsync(string alias,string canonical,string kind,CancellationToken ct)
     {

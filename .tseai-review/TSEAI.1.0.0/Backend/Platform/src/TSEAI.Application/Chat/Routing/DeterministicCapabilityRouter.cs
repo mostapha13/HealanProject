@@ -48,8 +48,9 @@ public sealed class DeterministicCapabilityRouter(
             return Decision(ChatCapabilityRoute.FilterAssets,ChatIntent.MarketFilter,1,["deterministic-filter-asset-command"],
                 [new("filter.assets","persistent-user-assets")]);
 
+        var ownership=CanonicalQuestionOwnership.Detect(question);
         var requestedFields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
-        if(requestedFields.Count>0&&!PersianMarketQuestionSemantics.IsScreeningQuestion(question)&&!PersianMarketQuestionSemantics.HasKnowledgeFacet(question))
+        if(ownership!=CanonicalQuestionDomain.Knowledge && requestedFields.Count>0&&!PersianMarketQuestionSemantics.IsScreeningQuestion(question)&&!PersianMarketQuestionSemantics.HasKnowledgeFacet(question))
             return FromPlan(ChatCapabilityRoute.MarketSymbol,
                 new ChatPlan(ChatIntent.MarketSymbol,question,null,0.99,null,["deterministic-market-ontology"],requestedFields),
                 [new("entity.resolve","sql-ai-reference"),new("structured.market.symbol","canonical-market-snapshot"),new("analytics.symbol","deterministic-calculation")],
@@ -67,9 +68,26 @@ public sealed class DeterministicCapabilityRouter(
             return Decision(ChatCapabilityRoute.FilterConversation,ChatIntent.MarketFilter,1,[filter.Reason],
                 [new("filter.chat","canonical-market-snapshot"),new("temporal.resolve","calendar-authority")]);
 
+        if(ownership==CanonicalQuestionDomain.Knowledge ||
+           (requestedFields.Count==0 && PersianMarketQuestionSemantics.HasKnowledgeFacet(question) && !HasMixedMarketKnowledgeCue(question)))
+        {
+            var knowledgePlan=new ChatPlan(ChatIntent.Knowledge,null,question,0.99,null,["deterministic-knowledge-evidence-route"]);
+            return FromPlan(ChatCapabilityRoute.Knowledge,knowledgePlan,
+                [new("knowledge.retrieve","qdrant-grounded-evidence")],
+                ["deterministic-knowledge-evidence-route"]);
+        }
+
         // The AI planner is a bounded fallback for semantic intent/entity hints only.
         // It never chooses arbitrary tools: the returned intent is projected onto this fixed capability registry.
         var plan=await planner.PlanAsync(question,ct);
+        if(PlannerEntityHintGuard.IsUnsafe(question,plan))
+        {
+            var safePlan=new ChatPlan(ChatIntent.Knowledge,null,question,
+                Math.Min(plan.Confidence,0.85),null,[..plan.Reasons,"unsafe-generic-entity-hint-rejected"]);
+            return FromPlan(ChatCapabilityRoute.Knowledge,safePlan,
+                [new("knowledge.retrieve","qdrant-grounded-evidence")],
+                ["unsafe-generic-entity-hint-rejected","bounded-ai-planner"]);
+        }
         return plan.Intent switch
         {
             ChatIntent.MarketSymbol => FromPlan(ChatCapabilityRoute.MarketSymbol,plan,
@@ -92,4 +110,12 @@ public sealed class DeterministicCapabilityRouter(
 
     private static CapabilityRouteDecision Decision(ChatCapabilityRoute route,ChatIntent intent,double confidence,IReadOnlyList<string> reasons,IReadOnlyList<CapabilityRequirement> capabilities)
         => new(route,intent,confidence,reasons,capabilities);
+
+    private static bool HasMixedMarketKnowledgeCue(string question)
+    {
+        var q=PersianDisplayText.Normalize(question).Replace('‌',' ').ToLowerInvariant();
+        var hasMarketFact=new[]{"قیمت","حجم معاملات","ارزش معاملات","ارزش بازار","p/e","پی بر ای","eps","سود هر سهم"}
+            .Any(x=>q.Contains(x,StringComparison.Ordinal));
+        return hasMarketFact&&PersianMarketQuestionSemantics.HasKnowledgeFacet(question);
+    }
 }

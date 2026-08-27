@@ -184,7 +184,7 @@ public static class PersianMarketQuestionSemantics
     public static bool HasKnowledgeFacet(string question)
     {
         var q=Normalize(question);
-        return ContainsAny(q,"خبر","اخبار","اطلاعیه","گزارش کدال","مجمع","افزایش سرمایه","سود نقدی","چرا","دلیل","علت","تحلیل بنیادی","معرفی شرکت","تاریخچه","قانون","دستورالعمل");
+        return ContainsAny(q,"خبر","اخبار","اطلاعیه","گزارش کدال","مجمع","عرضه اولیه","افزایش سرمایه","سود نقدی","چرا","دلیل","علت","تحلیل بنیادی","معرفی شرکت","تاریخچه","قانون","دستورالعمل");
     }
 
     private static bool HasWord(string text,string word)=>Regex.IsMatch(text,$@"(?:^|\s){Regex.Escape(word)}(?:\s|$)");

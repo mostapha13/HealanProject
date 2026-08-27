@@ -1,0 +1,1210 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T09:53:19.221187+00:00",
+  "runId": "090ef432a1a8",
+  "manifestVersion": "2.0",
+  "datasetSha256": "30ced5df943b43d1f4f732964611add10aba0bc043ea4acd5b4f36b539247cbc",
+  "caseCount": 14,
+  "sources": {
+    "client-type": {
+      "total": 4,
+      "passed": 4
+    },
+    "company": {
+      "total": 7,
+      "passed": 5
+    },
+    "company-state": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "total": 14,
+  "passed": 12,
+  "failed": 2,
+  "passRate": 0.8571428571428571,
+  "p50LatencyMs": 1879.12,
+  "p95LatencyMs": 8165.94,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 1,
+    "mustContain": 2
+  },
+  "clusters": {
+    "client-type:coverage": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:data-quality": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:metadata": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:schema": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:ceo-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:hall-aggregate": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:ipo-aggregate": {
+      "total": 2,
+      "passed": 0
+    },
+    "company:schema": {
+      "total": 2,
+      "passed": 2
+    },
+    "company:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:dates": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:reverse-lookup": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [
+    {
+      "id": "company:CO-041",
+      "caseId": "CO-041",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با جدیدترین تاریخ عرضه اولیه در Company کدام‌اند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 122,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 116,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2369,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1915,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1553,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1204,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7353.25
+    },
+    {
+      "id": "company:CO-043",
+      "caseId": "CO-043",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "چند شرکت در سال ۱۴۰۲ عرضه اولیه شدند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در سال 1402، 6 رکورد عرضه اولیه در Company ثبت شده است:\n1. تامین سرمایه کاردان — 1402/06/08\n2. بیمه کارآفرین — 1402/04/17",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 74,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=عرضه‌های اولیه سال 1402;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1542,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1648.02
+    }
+  ],
+  "results": [
+    {
+      "id": "instrument:INS-014",
+      "caseId": "INS-014",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "reverse-lookup",
+      "question": "InstrumentID IRO1MSMI0001 متعلق به کدام نماد است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InstrumentID برابر IRO1MSMI0001 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 59,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8183,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 5568,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 15023.26
+    },
+    {
+      "id": "instrument:INS-026",
+      "caseId": "INS-026",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "dates",
+      "question": "زمان جمع‌آوری داده Instrument فملی چه موقع بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: زمان جمع‌آوری داده 1405/05/20 ساعت 11:13:13 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1185,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2312,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3592.81
+    },
+    {
+      "id": "client-type:CT-024",
+      "caseId": "CT-024",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری ClientType فملی در SQL را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 280,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2322,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2680.67
+    },
+    {
+      "id": "client-type:CT-027",
+      "caseId": "CT-027",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "ستون Buy_I_Volume چه مفهومی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Buy_I_Volume حجم خرید حقیقی بر حسب سهم/واحد است، نه ریال.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1483,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1565.18
+    },
+    {
+      "id": "client-type:CT-038",
+      "caseId": "CT-038",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "coverage",
+      "question": "چند رکورد یتیم ClientType بدون Instrument داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در ClientType، 151 رکورد به هیچ InsCode در Instrument متصل نمی‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 500,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 800,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1400.13
+    },
+    {
+      "id": "client-type:CT-042",
+      "caseId": "CT-042",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "data-quality",
+      "question": "کیفیت داده جدول ClientType و تعدادهای صفر را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "کنترل کیفیت ClientType: رکورد منفی 0، رکورد نامتوازن 0؛ تعداد خریدار حقیقی صفر 173، خریدار حقوقی صفر 762، فروشنده حقیقی صفر 198 و فروشنده حقوقی صفر 594 رکورد است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 838,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 917.18
+    },
+    {
+      "id": "company:CO-016",
+      "caseId": "CO-016",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "CEO فولاد مبارکه چه کسی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فولاد مبارکه اصفهان (نماد فولاد): نام مدیرعامل در ستون Ceo جدول Company ثبت نشده است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4498,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت فولاد مبارکه اصفهان;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3616,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 8165.94
+    },
+    {
+      "id": "company:CO-025",
+      "caseId": "CO-025",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "Company چند تالار متمایز دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 113,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=آمار جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1957,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2110.22
+    },
+    {
+      "id": "company:CO-036",
+      "caseId": "CO-036",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "پنج مورد اول توزیع شرکت‌ها به تفکیک تالار را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "تالارهای دارای بیشترین رکورد Company:\n1. تهران: 176 شرکت\n2. اصفهان: 28 شرکت\n3. آذربایجان شرقی (تبریز): 21 شرکت\n4. فارس (شیراز): 17 شرکت\n5. خراسان رضوی (مشهد): 15 شرکت",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 59,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=توزیع شرکت‌ها بر اساس تالار;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1344,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1441.6
+    },
+    {
+      "id": "company:CO-041",
+      "caseId": "CO-041",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با جدیدترین تاریخ عرضه اولیه در Company کدام‌اند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 122,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 116,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2369,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1915,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1553,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1204,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7353.25
+    },
+    {
+      "id": "company:CO-043",
+      "caseId": "CO-043",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "چند شرکت در سال ۱۴۰۲ عرضه اولیه شدند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در سال 1402، 6 رکورد عرضه اولیه در Company ثبت شده است:\n1. تامین سرمایه کاردان — 1402/06/08\n2. بیمه کارآفرین — 1402/04/17",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 74,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=عرضه‌های اولیه سال 1402;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1542,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1648.02
+    },
+    {
+      "id": "company:CO-045",
+      "caseId": "CO-045",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "InstrumentId جدول Company مستقیم به Instrument وصل می‌شود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.InstrumentId یک شناسه GUID منبع است؛ در Schema فعلی Foreign Key مستقیمی به dbo.Instrument ندارد و با Instrument.InstrumentID از نوع nvarchar نیز هم‌نوع نیست. اتصال نماد به شرکت باید با نام ناشر و تطبیق کنترل‌شده انجام شود، نه Join مستقیم این دو ستون.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3620,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3665.48
+    },
+    {
+      "id": "company:CO-048",
+      "caseId": "CO-048",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "SourceCollectedAt جدول Company چه مفهومی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.SourceCollectedAt زمان جمع‌آوری و ثبت Snapshot منبع در SQL است و تاریخ عرضه اولیه شرکت نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1151,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1205.39
+    },
+    {
+      "id": "company-state:CS-028",
+      "caseId": "CS-028",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل جدول Companystate را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Companystate دارای 58 رکورد، 58 نماد متمایز و 58 کد سامانه متمایز است. بازه آخرین تغییر وضعیت از 1401/03/08 تا 1405/04/17 شمسی است و Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 100,
+          "detail": "kind=company_state_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state_aggregate;topic=آمار جدول Companystate;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 848,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 989.58
+    }
+  ]
+}

@@ -50,6 +50,24 @@ public static partial class PersianDisplayText
         return text;
     }
 
+    public static string NormalizeAnswer(string? value)
+    {
+        var text=Normalize(value);
+        if(text.Length==0) return text;
+        Span<char> chars=stackalloc char[text.Length];
+        for(var index=0;index<text.Length;index++)
+        {
+            var ch=text[index];
+            chars[index]=ch switch
+            {
+                >= '۰' and <= '۹'=>(char)('0'+ch-'۰'),
+                >= '٠' and <= '٩'=>(char)('0'+ch-'٠'),
+                _=>ch
+            };
+        }
+        return NumberUnitBoundary().Replace(chars.ToString()," ");
+    }
+
     /// <summary>
     /// Converts Gregorian dates embedded in user-facing prose to the Persian
     /// calendar. Dates that are already Jalali are intentionally left intact.
@@ -138,6 +156,9 @@ public static partial class PersianDisplayText
 
     [GeneratedRegex(@"(?<!\p{Nd})(?<year>[0-9۰-۹]{4})\s*[/\.\-]\s*(?<month>[0-9۰-۹]{1,2})\s*[/\.\-]\s*(?<day>[0-9۰-۹]{1,2})(?:(?:T|\s+)(?<hour>[0-9۰-۹]{1,2}):(?<minute>[0-9۰-۹]{2})(?::(?<second>[0-9۰-۹]{2})(?:\.[0-9۰-۹]+)?)?(?:Z|[+\-][0-9۰-۹]{2}:?[0-9۰-۹]{2})?)?(?:\s*میلادی)?(?!\p{Nd})", RegexOptions.CultureInvariant)]
     private static partial Regex GregorianYearFirstDate();
+
+    [GeneratedRegex(@"(?<=[0-9])(?=(?:شرکت|همت|سال|ماه|درصد|ریال|تومان|سهم|واحد|نفر|روز)(?:\s|$))",RegexOptions.CultureInvariant)]
+    private static partial Regex NumberUnitBoundary();
 
     [GeneratedRegex(@"(?<!\p{Nd})(?<day>[0-9۰-۹]{1,2})\s*[/\.\-]\s*(?<month>[0-9۰-۹]{1,2})\s*[/\.\-]\s*(?<lastYear>[0-9۰-۹]{4})(?:(?:T|\s+)(?<hour>[0-9۰-۹]{1,2}):(?<minute>[0-9۰-۹]{2})(?::(?<second>[0-9۰-۹]{2})(?:\.[0-9۰-۹]+)?)?(?:Z|[+\-][0-9۰-۹]{2}:?[0-9۰-۹]{2})?)?(?:\s*میلادی)?(?!\p{Nd})", RegexOptions.CultureInvariant)]
     private static partial Regex GregorianYearLastDate();

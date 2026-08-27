@@ -26,16 +26,24 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
     IPersianEntityResolver entityResolver) : ICanonicalReferenceAnswerService
 {
     private static readonly SemaphoreSlim ReferenceCatalogLock=new(1,1);
+    private static readonly SemaphoreSlim ContentMetricsLock=new(1,1);
+    private static readonly TimeSpan ReferenceCacheTtl=TimeSpan.FromMinutes(15);
     private string? ConnectionString => configuration.GetConnectionString("SqlAi");
 
     public async Task<CanonicalReferenceAnswer?> TryAnswerAsync(string question, TemporalResolution temporal, CancellationToken ct)
     {
         var q = Normalize(question);
+        var ownership=CanonicalQuestionOwnership.Detect(q);
         var clientTypeIntent = CanonicalClientTypeQuestion.Parse(q);
         var companyIntent = CanonicalCompanyQuestion.Parse(q);
         var companyStateIntent = CanonicalCompanyStateQuestion.Parse(q);
         var contentIntent = CanonicalContentQuestion.Parse(q);
         var financialInstitutionIntent = CanonicalFinancialInstitutionQuestion.Parse(q);
+        clientTypeIntent=clientTypeIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.ClientType && clientTypeIntent.IsMatch };
+        companyIntent=companyIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Company && companyIntent.IsMatch };
+        companyStateIntent=companyStateIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.CompanyState && companyStateIntent.IsMatch };
+        contentIntent=contentIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Content && contentIntent.IsMatch };
+        financialInstitutionIntent=financialInstitutionIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.FinancialInstitution && financialInstitutionIntent.IsMatch };
         var isOrderBookQuestion=PersianMarketQuestionSemantics.IsOrderBookQuestion(q);
         if(isOrderBookQuestion)
         {
@@ -50,23 +58,25 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         if (string.IsNullOrWhiteSpace(ConnectionString)) return null;
         var currentScope = !temporal.HasTemporalReference || temporal.IsReferenceDayOnly;
         var instrumentIntent = currentScope ? CanonicalInstrumentQuestion.Parse(q) : new(false,InstrumentAggregateKind.None,[],null,null,10,false);
+        instrumentIntent=instrumentIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Instrument && instrumentIntent.IsMatch };
         if(isOrderBookQuestion&&instrumentIntent.Aggregate!=InstrumentAggregateKind.OrderBookCoverage)
             instrumentIntent=instrumentIntent with { IsMatch=false };
         var boardIntent = currentScope ? CanonicalBoardMemberAnswer.Parse(q) : default;
         var personFacets = currentScope ? CanonicalBoardMemberAnswer.AdditionalPersonFacets(q) : default;
         var symbol = SymbolAfter(q, "نماد");
         var aboutSymbol = SymbolAfter(q, "در مورد");
-        var isNews = currentScope && ContainsAny(q,"آخرین خبر","جدیدترین خبر","تازه ترین خبر","تازه‌ترین خبر","خبر آخر","خبر تازه","تازه ترین خبری","تازه‌ترین خبری");
+        var allowOrganizationReference=ownership!=CanonicalQuestionDomain.Knowledge;
+        var isNews = currentScope && ownership!=CanonicalQuestionDomain.Knowledge && ContainsAny(q,"آخرین خبر","جدیدترین خبر","تازه ترین خبر","تازه‌ترین خبر","خبر آخر","خبر تازه","تازه ترین خبری","تازه‌ترین خبری");
         var isLatestInstrument = currentScope && (q.Contains("آخرین نماد", StringComparison.Ordinal) || q.Contains("جدیدترین نماد", StringComparison.Ordinal));
         var isHall = q.Contains("تالار", StringComparison.Ordinal) &&
             (q.Contains("خوزستان", StringComparison.Ordinal) || q.Contains("اهواز", StringComparison.Ordinal));
         var isVolume = currentScope && !string.IsNullOrWhiteSpace(symbol) && q.Contains("حجم", StringComparison.Ordinal);
-        var isHierarchy = currentScope && CanonicalOrganizationHierarchyAnswer.IsSubordinateQuestion(q);
-        var isHierarchyParent = currentScope && CanonicalOrganizationHierarchyAnswer.IsParentQuestion(q);
-        var isPersonFacet = currentScope && (personFacets.WantsHistory || personFacets.WantsRepresentation);
-        var isPersonRole = currentScope && CanonicalPersonRoleMatcher.IsPersonRoleQuestion(q);
+        var isHierarchy = currentScope && allowOrganizationReference && CanonicalOrganizationHierarchyAnswer.IsSubordinateQuestion(q);
+        var isHierarchyParent = currentScope && allowOrganizationReference && CanonicalOrganizationHierarchyAnswer.IsParentQuestion(q);
+        var isPersonFacet = currentScope && allowOrganizationReference && (personFacets.WantsHistory || personFacets.WantsRepresentation);
+        var isPersonRole = currentScope && allowOrganizationReference && CanonicalPersonRoleMatcher.IsPersonRoleQuestion(q);
         if (!currentScope) aboutSymbol=null;
-        if (!companyStateIntent.IsMatch && !companyIntent.IsMatch && !clientTypeIntent.IsMatch && !contentIntent.IsMatch && !financialInstitutionIntent.IsMatch && !instrumentIntent.IsMatch && !isNews && !isLatestInstrument && !isHall && !isVolume && !isHierarchy && !isHierarchyParent && !isPersonFacet && !isPersonRole && !boardIntent.IsMemberList && string.IsNullOrWhiteSpace(aboutSymbol)) return null;
+        if (!companyStateIntent.IsMatch && !companyIntent.IsMatch && !clientTypeIntent.IsMatch && !contentIntent.IsMatch && !financialInstitutionIntent.IsMatch && !instrumentIntent.IsMatch && !isNews && !isLatestInstrument && !isHall && !isVolume && !isHierarchy && !isHierarchyParent && !isPersonFacet && !isPersonRole && (!allowOrganizationReference||!boardIntent.IsMemberList) && string.IsNullOrWhiteSpace(aboutSymbol)) return null;
 
         if(clientTypeIntent.IsMatch&&!currentScope)
             return CanonicalReferenceAnswer.Exact(
@@ -77,79 +87,104 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                 "جدول Nahad_Mali فقط Snapshot فعلی شعب و اطلاعات تماس نهادهای مالی را نگهداری می‌کند و تاریخچه زمانی در آن وجود ندارد؛ بنابراین وضعیت تاریخی درخواستی قابل پاسخ نیست.",
                 "financial_institution","نبود تاریخچه نهادهای مالی",confidence:1);
 
-        try
+        for(var attempt=1;attempt<=2;attempt++)
         {
-            await using var connection = new SqlConnection(new SqlConnectionStringBuilder(ConnectionString).ConnectionString);
-            if(financialInstitutionIntent.IsMatch)
+            try
             {
-                var financialInstitutionAnswer=await AnswerFinancialInstitutionQuestion(connection,question,q,financialInstitutionIntent,ct);
-                if(financialInstitutionAnswer is not null) return financialInstitutionAnswer;
+                await using var connection = new SqlConnection(new SqlConnectionStringBuilder(ConnectionString).ConnectionString);
+                await connection.OpenAsync(ct);
+                if(financialInstitutionIntent.IsMatch)
+                {
+                    var financialInstitutionAnswer=await AnswerFinancialInstitutionQuestion(connection,question,q,financialInstitutionIntent,ct);
+                    if(financialInstitutionAnswer is not null) return financialInstitutionAnswer;
+                }
+                if(contentIntent.IsMatch)
+                {
+                    var contentAnswer=await AnswerContentQuestion(connection,question,q,contentIntent,ct);
+                    if(contentAnswer is not null) return contentAnswer;
+                }
+                if(companyStateIntent.IsMatch)
+                {
+                    var companyStateAnswer=await AnswerCompanyStateQuestion(connection,question,q,companyStateIntent,ct);
+                    if(companyStateAnswer is not null) return companyStateAnswer;
+                }
+                if(companyIntent.IsMatch)
+                {
+                    var companyAnswer=await AnswerCompanyQuestion(connection,question,q,companyIntent,temporal,ct);
+                    if(companyAnswer is not null) return companyAnswer;
+                }
+                if(clientTypeIntent.IsMatch)
+                {
+                    var clientTypeAnswer=await AnswerClientTypeQuestion(connection,question,q,clientTypeIntent,ct);
+                    if(clientTypeAnswer is not null) return clientTypeAnswer;
+                }
+                if (boardIntent.IsMemberList)
+                {
+                    var boardMembers = await CurrentBoardMembers(connection, boardIntent, ct);
+                    if (boardMembers is not null)
+                        return boardMembers;
+                }
+                if(isHierarchy)
+                {
+                    var hierarchy=await CurrentOrganizationSubordinates(connection,q,ct);
+                    if(hierarchy is not null) return hierarchy;
+                }
+                if(isHierarchyParent)
+                {
+                    var parent=await CurrentOrganizationParent(connection,q,ct);
+                    if(parent is not null) return parent;
+                }
+                if(isPersonFacet)
+                {
+                    var personReference=await CurrentPersonReferenceByName(connection,q,personFacets,ct);
+                    if(personReference is not null) return personReference;
+                }
+                if (isPersonRole)
+                {
+                    var personRole = await CurrentPersonRole(connection, q, ct);
+                    if (personRole is not null)
+                        return personRole;
+                }
+                if (isNews) return Wrap(await LatestNews(connection, q, ct),"news","آخرین خبر بورس تهران");
+                if(instrumentIntent.IsMatch)
+                {
+                    var instrumentAnswer=await AnswerInstrumentQuestion(connection,question,q,instrumentIntent,ct);
+                    if(instrumentAnswer is not null) return instrumentAnswer;
+                }
+                if (isLatestInstrument) return Wrap(await LatestInstrument(connection, ct),"instrument","آخرین نماد ثبت‌شده");
+                if (isHall) return Wrap(await RegionHall(connection, q, ct),"hall","تالار استان خوزستان");
+                if (isVolume) return Wrap(await SymbolVolume(connection, symbol!, ct),"market_reference",$"حجم معاملات {symbol}",subjectName:symbol);
+                if (string.IsNullOrWhiteSpace(aboutSymbol)) return null;
+                return Wrap(await InstrumentSummary(connection, aboutSymbol!, ct),"instrument",$"نماد {aboutSymbol}",subjectName:aboutSymbol);
             }
-            if(contentIntent.IsMatch)
+            catch(Exception exception) when(attempt<2&&IsTransientSqlFailure(exception))
             {
-                var contentAnswer=await AnswerContentQuestion(connection,question,q,contentIntent,ct);
-                if(contentAnswer is not null) return contentAnswer;
+                logger.LogWarning(exception,"Transient canonical SQL failure on attempt {Attempt}; clearing the SQL pool and retrying once.",attempt);
+                SqlConnection.ClearAllPools();
+                await Task.Delay(TimeSpan.FromMilliseconds(150),ct);
             }
-            if(companyStateIntent.IsMatch)
+            catch (SqlException exception)
             {
-                var companyStateAnswer=await AnswerCompanyStateQuestion(connection,question,q,companyStateIntent,ct);
-                if(companyStateAnswer is not null) return companyStateAnswer;
+                logger.LogWarning(exception, "Canonical reference lookup failed; normal chat routing will continue.");
+                return null;
             }
-            if(companyIntent.IsMatch)
+            catch(InvalidOperationException exception) when(IsClosedSqlConnection(exception))
             {
-                var companyAnswer=await AnswerCompanyQuestion(connection,question,q,companyIntent,temporal,ct);
-                if(companyAnswer is not null) return companyAnswer;
+                logger.LogWarning(exception,"Canonical SQL connection was closed; normal chat routing will continue.");
+                SqlConnection.ClearAllPools();
+                return null;
             }
-            if(clientTypeIntent.IsMatch)
-            {
-                var clientTypeAnswer=await AnswerClientTypeQuestion(connection,question,q,clientTypeIntent,ct);
-                if(clientTypeAnswer is not null) return clientTypeAnswer;
-            }
-            if (boardIntent.IsMemberList)
-            {
-                var boardMembers = await CurrentBoardMembers(connection, boardIntent, ct);
-                if (boardMembers is not null)
-                    return boardMembers;
-            }
-            if(isHierarchy)
-            {
-                var hierarchy=await CurrentOrganizationSubordinates(connection,q,ct);
-                if(hierarchy is not null) return hierarchy;
-            }
-            if(isHierarchyParent)
-            {
-                var parent=await CurrentOrganizationParent(connection,q,ct);
-                if(parent is not null) return parent;
-            }
-            if(isPersonFacet)
-            {
-                var personReference=await CurrentPersonReferenceByName(connection,q,personFacets,ct);
-                if(personReference is not null) return personReference;
-            }
-            if (isPersonRole)
-            {
-                var personRole = await CurrentPersonRole(connection, q, ct);
-                if (personRole is not null)
-                    return personRole;
-            }
-            if (isNews) return Wrap(await LatestNews(connection, q, ct),"news","آخرین خبر بورس تهران");
-            if(instrumentIntent.IsMatch)
-            {
-                var instrumentAnswer=await AnswerInstrumentQuestion(connection,question,q,instrumentIntent,ct);
-                if(instrumentAnswer is not null) return instrumentAnswer;
-            }
-            if (isLatestInstrument) return Wrap(await LatestInstrument(connection, ct),"instrument","آخرین نماد ثبت‌شده");
-            if (isHall) return Wrap(await RegionHall(connection, q, ct),"hall","تالار استان خوزستان");
-            if (isVolume) return Wrap(await SymbolVolume(connection, symbol!, ct),"market_reference",$"حجم معاملات {symbol}",subjectName:symbol);
-            if (string.IsNullOrWhiteSpace(aboutSymbol)) return null;
-            return Wrap(await InstrumentSummary(connection, aboutSymbol!, ct),"instrument",$"نماد {aboutSymbol}",subjectName:aboutSymbol);
         }
-        catch (SqlException exception)
-        {
-            logger.LogWarning(exception, "Canonical reference lookup failed; normal chat routing will continue.");
-            return null;
-        }
+        return null;
     }
+
+    private static bool IsTransientSqlFailure(Exception exception)=>
+        exception is SqlException sqlException&&sqlException.Number is -2 or 20 or 64 or 233 or 10053 or 10054 or 10060
+        ||exception is InvalidOperationException invalidOperation&&IsClosedSqlConnection(invalidOperation);
+
+    private static bool IsClosedSqlConnection(InvalidOperationException exception)=>
+        exception.Message.Contains("connection is closed",StringComparison.OrdinalIgnoreCase)
+        ||exception.Message.Contains("connection was not closed",StringComparison.OrdinalIgnoreCase);
 
     private async Task<CanonicalReferenceAnswer?> AnswerContentQuestion(
         SqlConnection connection,string question,string normalizedQuestion,
@@ -175,9 +210,10 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         const string sql="""
             SELECT TOP (1) Id,ContentTypeId,LanguageId,PublishAt,ContentStatusId,Body,
                 CreatedAt,DepartmentId,LastModifiedAt,DeletedAt,IsDeleted,SourceCollectedAt
-            FROM dbo.Content WHERE Id=@Id;
+            FROM dbo.Content WITH (READUNCOMMITTED) WHERE Id=@Id
+            OPTION (MAXDOP 1);
             """;
-        var row=await connection.QuerySingleOrDefaultAsync<ContentRow>(new CommandDefinition(sql,new{Id=intent.ContentId.Value},cancellationToken:ct,commandTimeout:20));
+        var row=await GetContentRow(connection,intent.ContentId.Value,sql,ct);
         if(row is null)
             return CanonicalReferenceAnswer.Exact($"رکوردی با شناسه {intent.ContentId.Value} در جدول Content وجود ندارد.","content_reference","نبود رکورد Content",confidence:1);
         var fields=intent.Fields.ToHashSet(StringComparer.Ordinal);
@@ -215,31 +251,117 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         return CanonicalReferenceAnswer.Exact(text,"content_reference",$"رکورد Content {row.Id}",facts,subjectName:row.Id.ToString(CultureInfo.InvariantCulture),confidence:1);
     }
 
-    private static async Task<string> ContentStatistics(SqlConnection connection,CancellationToken ct)
+    private async Task<ContentRow?> GetContentRow(SqlConnection connection,int id,string sql,CancellationToken ct)
     {
+        var key=$"tseai:canonical:content-row:v2:{id}";
+        if(cache.TryGetValue<ContentRow>(key,out var memoryRow)) return memoryRow;
+        try
+        {
+            var serialized=await distributedCache.GetStringAsync(key,ct);
+            if(!string.IsNullOrWhiteSpace(serialized))
+            {
+                var distributedRow=JsonSerializer.Deserialize<ContentRow>(serialized);
+                if(distributedRow is not null)
+                {
+                    cache.Set(key,distributedRow,TimeSpan.FromMinutes(2));
+                    return distributedRow;
+                }
+            }
+        }
+        catch(Exception exception) when(exception is not OperationCanceledException)
+        {
+            logger.LogWarning(exception,"Distributed Content row cache read failed for {ContentId}.",id);
+        }
+
+        await ReferenceCatalogLock.WaitAsync(ct);
+        try
+        {
+            if(cache.TryGetValue<ContentRow>(key,out memoryRow)) return memoryRow;
+            ContentRow? row=null;
+            for(var attempt=1;attempt<=3;attempt++)
+            {
+                try
+                {
+                    row=await connection.QuerySingleOrDefaultAsync<ContentRow>(new CommandDefinition(
+                        sql,new{Id=id},cancellationToken:ct,commandTimeout:8));
+                    break;
+                }
+                catch(SqlException exception) when(exception.Number==-2&&attempt<3)
+                {
+                    logger.LogWarning(exception,"Content row {ContentId} timed out on attempt {Attempt}; retrying with a fresh SQL connection.",id,attempt);
+                    SqlConnection.ClearPool(connection);
+                    await connection.CloseAsync();
+                    await Task.Delay(TimeSpan.FromMilliseconds(150*attempt),ct);
+                }
+            }
+            if(row is null) return null;
+            cache.Set(key,row,TimeSpan.FromMinutes(2));
+            try
+            {
+                await distributedCache.SetStringAsync(key,JsonSerializer.Serialize(row),
+                    new DistributedCacheEntryOptions{AbsoluteExpirationRelativeToNow=TimeSpan.FromMinutes(2)},ct);
+            }
+            catch(Exception exception) when(exception is not OperationCanceledException)
+            {
+                logger.LogWarning(exception,"Distributed Content row cache write failed for {ContentId}.",id);
+            }
+            return row;
+        }
+        finally { ReferenceCatalogLock.Release(); }
+    }
+
+    private async Task<string> ContentStatistics(SqlConnection connection,CancellationToken ct)
+    {
+        var identity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
+        var cacheKey=$"content-statistics-answer:{identity}";
+        if(cache.TryGetValue<string>(cacheKey,out var cached)&&!string.IsNullOrWhiteSpace(cached)) return cached;
+        var distributed=await ReadDistributedCache<string>(cacheKey,ct);
+        if(!string.IsNullOrWhiteSpace(distributed))
+        {
+            cache.Set(cacheKey,distributed,ReferenceCacheTtl);
+            return distributed;
+        }
         const string sql="""
             SELECT COUNT_BIG(*) TotalRows,COUNT_BIG(DISTINCT Id) DistinctIds,
                 COUNT_BIG(DISTINCT ContentTypeId) ContentTypes,COUNT_BIG(DISTINCT LanguageId) Languages,
                 COUNT_BIG(DISTINCT ContentStatusId) Statuses,COUNT_BIG(DISTINCT DepartmentId) Departments,
-                SUM(CASE WHEN NULLIF(LTRIM(RTRIM(Body)),N'') IS NOT NULL THEN CONVERT(bigint,1) ELSE 0 END) NonEmptyBodies,
                 MIN(Id) MinId,MAX(Id) MaxId,MAX(SourceCollectedAt) SourceCollectedAt
             FROM dbo.Content;
             """;
         var x=await connection.QuerySingleAsync<ContentStatsRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:20));
-        return $"جدول Content دارای {x.TotalRows:N0} رکورد و {x.DistinctIds:N0} شناسه متمایز در بازه {x.MinId:N0} تا {x.MaxId:N0} است. {x.NonEmptyBodies:N0} رکورد بدنه غیرخالی دارند؛ داده شامل {x.ContentTypes:N0} ContentTypeId، {x.Languages:N0} LanguageId، {x.Statuses:N0} ContentStatusId و {x.Departments:N0} DepartmentId متمایز است. زمان جمع‌آوری منبع {ContentDateTime(x.SourceCollectedAt)} است.";
+        var bodyCounts=await GetContentBodyCounts(connection,ct);
+        var nonEmptyBodies=bodyCounts.TotalRows-bodyCounts.EmptyBodies;
+        var answer=$"جدول Content دارای {x.TotalRows:N0} رکورد و {x.DistinctIds:N0} شناسه متمایز در بازه {x.MinId:N0} تا {x.MaxId:N0} است. {nonEmptyBodies:N0} رکورد بدنه غیرخالی دارند؛ داده شامل {x.ContentTypes:N0} ContentTypeId، {x.Languages:N0} LanguageId، {x.Statuses:N0} ContentStatusId و {x.Departments:N0} DepartmentId متمایز است. زمان جمع‌آوری منبع {ContentDateTime(x.SourceCollectedAt)} است.";
+        cache.Set(cacheKey,answer,ReferenceCacheTtl);
+        await WriteDistributedCache(cacheKey,answer,ct);
+        return answer;
     }
 
-    private static async Task<string> ContentDistribution(SqlConnection connection,string column,string label,CancellationToken ct)
+    private async Task<string> ContentDistribution(SqlConnection connection,string column,string label,CancellationToken ct)
     {
         var allowed=new HashSet<string>(StringComparer.Ordinal){"ContentTypeId","LanguageId","ContentStatusId","DepartmentId"};
         if(!allowed.Contains(column)) throw new ArgumentOutOfRangeException(nameof(column));
-        var sql=$"SELECT {column} Value,COUNT_BIG(*) [Count],SUM(CASE WHEN NULLIF(LTRIM(RTRIM(Body)),N'') IS NOT NULL THEN CONVERT(bigint,1) ELSE 0 END) NonEmpty FROM dbo.Content GROUP BY {column} ORDER BY [Count] DESC,{column};";
-        var rows=(await connection.QueryAsync<ContentDistributionRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:20))).ToArray();
-        var body=string.Join("\n",rows.Select((x,i)=>$"{i+1}. {column}={x.Value}: {x.Count:N0} رکورد؛ بدنه غیرخالی {x.NonEmpty:N0}"));
+        var cacheKey=$"sql-ai:content-distribution:{column}";
+        if(cache.TryGetValue(cacheKey,out string? cached)&&!string.IsNullOrWhiteSpace(cached)) return cached;
+        var distributed=await ReadDistributedCache<string>(cacheKey,ct);
+        if(!string.IsNullOrWhiteSpace(distributed))
+        {
+            cache.Set(cacheKey,distributed,ReferenceCacheTtl);
+            return distributed;
+        }
+        // The question asks for identifier distribution. Reading the large Body
+        // column for a per-group non-empty count made this index-only aggregate
+        // degrade into a full LOB scan and time out on the local SQL instance.
+        var sql=$"SELECT {column} Value,COUNT_BIG(*) [Count] FROM dbo.Content GROUP BY {column} ORDER BY [Count] DESC,{column};";
+        var rows=(await connection.QueryAsync<ContentDistributionRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:45))).ToArray();
+        var body=string.Join("\n",rows.Select((x,i)=>$"{i+1}. {column}={x.Value}: {x.Count:N0} رکورد"));
         var caveat=column is "ContentTypeId" or "LanguageId"
             ? " جدول مرجع دارای نام برای این شناسه‌ها در داده فعلی خالی یا موجود نیست؛ بنابراین برچسب معنایی حدس زده نمی‌شود."
             : string.Empty;
-        return $"توزیع جدول Content بر اساس {label}:\n{body}\n{caveat}".Trim();
+        var answer=$"توزیع جدول Content بر اساس {label}:\n{body}\n{caveat}".Trim();
+        cache.Set(cacheKey,answer,ReferenceCacheTtl);
+        await WriteDistributedCache(cacheKey,answer,ct);
+        return answer;
     }
 
     private static async Task<string> ContentDateRange(SqlConnection connection,CancellationToken ct)
@@ -264,11 +386,22 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
 
     private async Task<string> ContentDataQuality(SqlConnection connection,string q,CancellationToken ct)
     {
+        if(ContainsAny(q,"بدنه خالی","body خالی","محتوای خالی","رکورد خالی"))
+        {
+            var bodyCounts=await GetContentBodyCounts(connection,ct);
+            return $"از {bodyCounts.TotalRows:N0} رکورد Content، تعداد {bodyCounts.EmptyBodies:N0} رکورد بدنه خالی و {bodyCounts.TotalRows-bodyCounts.EmptyBodies:N0} رکورد بدنه غیرخالی دارند.";
+        }
+        if(q.Contains("تکراری",StringComparison.Ordinal))
+        {
+            var duplicates=await GetContentDuplicateCounts(connection,ct);
+            return $"در بدنه‌های حداقل ۸۰ نویسه‌ای Content، {duplicates.DuplicateGroups:N0} گروه متن کاملاً تکراری شامل {duplicates.ExtraDuplicateRows:N0} ردیف تکراری اضافه وجود دارد.";
+        }
+
         var connectionIdentity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
         var key=$"content-quality:{connectionIdentity}";
         var x=await cache.GetOrCreateAsync(key,async entry=>
         {
-            entry.AbsoluteExpirationRelativeToNow=TimeSpan.FromMinutes(5);
+            entry.AbsoluteExpirationRelativeToNow=ReferenceCacheTtl;
             const string sql="""
                 WITH duplicate_bodies AS
                 (
@@ -290,14 +423,113 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                     (SELECT COALESCE(SUM(Copies-1),0) FROM duplicate_bodies) ExtraDuplicateRows
                 FROM dbo.Content;
                 """;
-            return await connection.QuerySingleAsync<ContentQualityRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:30));
+            return await connection.QuerySingleAsync<ContentQualityRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:60));
         });
         if(x is null) return "آمار کیفیت Content در دسترس نیست.";
-        if(ContainsAny(q,"بدنه خالی","body خالی","محتوای خالی","رکورد خالی")) return $"از {x.TotalRows:N0} رکورد Content، تعداد {x.EmptyBodies:N0} رکورد بدنه خالی و {x.TotalRows-x.EmptyBodies:N0} رکورد بدنه غیرخالی دارند.";
-        if(q.Contains("تکراری",StringComparison.Ordinal)) return $"در بدنه‌های حداقل ۸۰ نویسه‌ای Content، {x.DuplicateGroups:N0} گروه متن کاملاً تکراری شامل {x.ExtraDuplicateRows:N0} ردیف تکراری اضافه وجود دارد.";
         if(ContainsAny(q,"html","اچ تی ام ال")) return $"در {x.HtmlBodies:N0} رکورد Content نشانه‌های HTML دیده می‌شود؛ HTML پیش از chunk و embedding به متن ساده امن تبدیل می‌شود.";
         if(ContainsAny(q,"قابل بردارسازی","قابل vector")) return $"بر اساس کنترل اولیه SQL، {x.InitialVectorCandidates:N0} رکورد منتشرشده، حذف‌نشده و دارای بدنه حداقل ۸۰ نویسه‌اند. پاک‌سازی HTML و سیاست محتوایی ممکن است تعداد نهایی اسناد برداری را کمتر کند.";
         return $"کیفیت Content: از {x.TotalRows:N0} رکورد، {x.EmptyBodies:N0} بدنه خالی، {x.ShortBodies:N0} بدنه کوتاه‌تر از ۸۰ نویسه، {x.MissingPublishAt:N0} تاریخ انتشار خالی، {x.HtmlBodies:N0} بدنه دارای HTML و {x.MissingCreatorNames:N0} نام ایجادکننده خالی است. {x.DuplicateGroups:N0} گروه متن تکراری با {x.ExtraDuplicateRows:N0} ردیف اضافه و {x.ModifiedBeforeCreated:N0} ناسازگاری LastModifiedAt قبل از CreatedAt ثبت شده است.";
+    }
+
+    private async Task<ContentBodyCountRow> GetContentBodyCounts(SqlConnection connection,CancellationToken ct)
+    {
+        var identity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
+        var key=$"content-body-counts:{identity}";
+        if(cache.TryGetValue<ContentBodyCountRow>(key,out var cached)&&cached is not null) return cached;
+        var distributed=await ReadDistributedCache<ContentBodyCountRow>(key,ct);
+        if(distributed is not null)
+        {
+            cache.Set(key,distributed,ReferenceCacheTtl);
+            return distributed;
+        }
+        await ContentMetricsLock.WaitAsync(ct);
+        try
+        {
+            if(cache.TryGetValue<ContentBodyCountRow>(key,out cached)&&cached is not null) return cached;
+            distributed=await ReadDistributedCache<ContentBodyCountRow>(key,ct);
+            if(distributed is not null)
+            {
+                cache.Set(key,distributed,ReferenceCacheTtl);
+                return distributed;
+            }
+            const string sql="""
+                SELECT COUNT_BIG(*) TotalRows,
+                    SUM(CASE WHEN NULLIF(LTRIM(RTRIM(Body)),N'') IS NULL THEN CONVERT(bigint,1) ELSE 0 END) EmptyBodies
+                FROM dbo.Content;
+                """;
+            var result=await connection.QuerySingleAsync<ContentBodyCountRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:60));
+            cache.Set(key,result,ReferenceCacheTtl);
+            await WriteDistributedCache(key,result,ct);
+            return result;
+        }
+        finally { ContentMetricsLock.Release(); }
+    }
+
+    private async Task<ContentDuplicateCountRow> GetContentDuplicateCounts(SqlConnection connection,CancellationToken ct)
+    {
+        var identity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
+        var key=$"content-duplicate-counts:{identity}";
+        if(cache.TryGetValue<ContentDuplicateCountRow>(key,out var cached)&&cached is not null) return cached;
+        var distributed=await ReadDistributedCache<ContentDuplicateCountRow>(key,ct);
+        if(distributed is not null)
+        {
+            cache.Set(key,distributed,ReferenceCacheTtl);
+            return distributed;
+        }
+        await ContentMetricsLock.WaitAsync(ct);
+        try
+        {
+            if(cache.TryGetValue<ContentDuplicateCountRow>(key,out cached)&&cached is not null) return cached;
+            distributed=await ReadDistributedCache<ContentDuplicateCountRow>(key,ct);
+            if(distributed is not null)
+            {
+                cache.Set(key,distributed,ReferenceCacheTtl);
+                return distributed;
+            }
+            const string sql="""
+                WITH duplicate_bodies AS
+                (
+                    SELECT HASHBYTES('SHA2_256',CONVERT(varbinary(max),Body)) BodyHash,COUNT_BIG(*) Copies
+                    FROM dbo.Content WHERE LEN(LTRIM(RTRIM(Body)))>=80
+                    GROUP BY HASHBYTES('SHA2_256',CONVERT(varbinary(max),Body))
+                    HAVING COUNT_BIG(*)>1
+                )
+                SELECT COUNT_BIG(*) DuplicateGroups,COALESCE(SUM(Copies-1),0) ExtraDuplicateRows
+                FROM duplicate_bodies;
+                """;
+            var result=await connection.QuerySingleAsync<ContentDuplicateCountRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:60));
+            cache.Set(key,result,ReferenceCacheTtl);
+            await WriteDistributedCache(key,result,ct);
+            return result;
+        }
+        finally { ContentMetricsLock.Release(); }
+    }
+
+    private async Task<T?> ReadDistributedCache<T>(string key,CancellationToken ct)
+    {
+        try
+        {
+            var serialized=await distributedCache.GetStringAsync(key,ct);
+            return string.IsNullOrWhiteSpace(serialized)?default:JsonSerializer.Deserialize<T>(serialized);
+        }
+        catch(Exception exception) when(exception is not OperationCanceledException)
+        {
+            logger.LogWarning(exception,"Distributed canonical cache read failed for {CacheKey}.",key);
+            return default;
+        }
+    }
+
+    private async Task WriteDistributedCache<T>(string key,T value,CancellationToken ct)
+    {
+        try
+        {
+            await distributedCache.SetStringAsync(key,JsonSerializer.Serialize(value),
+                new DistributedCacheEntryOptions{AbsoluteExpirationRelativeToNow=ReferenceCacheTtl},ct);
+        }
+        catch(Exception exception) when(exception is not OperationCanceledException)
+        {
+            logger.LogWarning(exception,"Distributed canonical cache write failed for {CacheKey}.",key);
+        }
     }
 
     private static string ContentSchemaAnswer(string q)
@@ -637,9 +869,9 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             case CompanyAggregateKind.HallCompanies:
                 return Wrap(await CompanyHallCompanies(connection,normalizedQuestion,intent,ct),"company_aggregate","شرکت‌های تالار");
             case CompanyAggregateKind.LatestIpo:
-                return Wrap(await CompanyIpoRanking(connection,intent.Limit,latest:true,ct),"company_aggregate","جدیدترین عرضه‌های اولیه Company");
+                return await CompanyIpoRanking(connection,intent.Limit,latest:true,ct);
             case CompanyAggregateKind.EarliestIpo:
-                return Wrap(await CompanyIpoRanking(connection,intent.Limit,latest:false,ct),"company_aggregate","قدیمی‌ترین عرضه‌های اولیه Company");
+                return await CompanyIpoRanking(connection,intent.Limit,latest:false,ct);
             case CompanyAggregateKind.IpoYear when intent.JalaliYear is not null:
                 return Wrap(await CompanyIpoYear(connection,intent.JalaliYear.Value,intent.Limit,intent.NamesOnly,ct),"company_aggregate",$"عرضه‌های اولیه سال {intent.JalaliYear}");
             case CompanyAggregateKind.Schema:
@@ -674,7 +906,9 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         };
         if(!string.IsNullOrWhiteSpace(resolved.Symbol)) facts.Add(new("linked_symbol",resolved.Symbol!,source));
         var subject=Display(row.Title);
-        return CanonicalReferenceAnswer.Exact(answer,"company",$"اطلاعات شرکت {subject}",facts,subjectName:subject,confidence:resolved.Confidence);
+        return CanonicalReferenceAnswer.Exact(answer,"company",$"اطلاعات شرکت {subject}",facts,subjectName:subject,
+            confidence:resolved.Confidence,
+            sourceTool:fields.Contains("ipo_date")?CanonicalReferenceToolNames.CompanyIpo:null);
     }
 
     private async Task<ResolvedCompany?> ResolveCompany(SqlConnection connection,string lookup,CancellationToken ct)
@@ -683,7 +917,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         if(Guid.TryParse(lookup,out var guid))
         {
             var byId=rows.Where(x=>x.Id==guid||x.SourceInstrumentId==guid).OrderByDescending(x=>x.SourceCollectedAt).FirstOrDefault();
-            if(byId is not null) return new(byId,await SymbolForCompany(byId,ct),1);
+            if(byId is not null) return new(byId,await SymbolForCompany(connection,byId,ct),1);
         }
 
         var key=CanonicalCompanyQuestion.MatchKey(lookup);
@@ -693,7 +927,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             if(exact.Length>0)
             {
                 var selected=exact.OrderByDescending(x=>x.SourceCollectedAt).ThenByDescending(x=>x.Id).First();
-                return new(selected,await SymbolForCompany(selected,ct),exact.Length==1?1:0.98);
+                return new(selected,await SymbolForCompany(connection,selected,ct),exact.Length==1?1:0.98);
             }
         }
 
@@ -728,12 +962,25 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             .OrderBy(x=>Math.Abs(x.Key.Length-key.Length)).ToArray();
         if(fuzzyGroups.Length!=1) return null;
         var fuzzy=fuzzyGroups[0].OrderByDescending(x=>x.SourceCollectedAt).ThenByDescending(x=>x.Id).First();
-        return new(fuzzy,await SymbolForCompany(fuzzy,ct),0.9);
+        return new(fuzzy,await SymbolForCompany(connection,fuzzy,ct),0.9);
     }
 
-    private async Task<string?> SymbolForCompany(CompanyRow company,CancellationToken ct)
+    private async Task<string?> SymbolForCompany(SqlConnection connection,CompanyRow company,CancellationToken ct)
     {
         if(string.IsNullOrWhiteSpace(company.Title)) return null;
+        const string sql="""
+            SELECT TOP (1) LVal18AFC
+            FROM dbo.Instrument WITH (READUNCOMMITTED)
+            WHERE Valid=1 AND LSoc30=@Title AND LVal30=LSoc30
+              AND InstrumentID LIKE N'IRO1%'
+              AND NULLIF(LTRIM(RTRIM(LVal18AFC)),N'') IS NOT NULL
+            ORDER BY LEN(LVal18AFC),LVal18AFC,
+                     Id DESC
+            OPTION (MAXDOP 1);
+            """;
+        var direct=await connection.QuerySingleOrDefaultAsync<string>(new CommandDefinition(
+            sql,new{company.Title},cancellationToken:ct,commandTimeout:8));
+        if(!string.IsNullOrWhiteSpace(direct)) return Display(direct);
         var resolution=await entityResolver.ResolveAsync(company.Title,new EntityResolveOptions([EntityKind.Instrument],8,0.72,0.02),ct);
         return resolution.Status==EntityResolutionStatus.Resolved?resolution.Selected?.Symbol:null;
     }
@@ -849,13 +1096,35 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.Title)}"));
     }
 
-    private static async Task<string> CompanyIpoRanking(SqlConnection connection,int limit,bool latest,CancellationToken ct)
+    private static async Task<CanonicalReferenceAnswer> CompanyIpoRanking(SqlConnection connection,int limit,bool latest,CancellationToken ct)
     {
         var direction=latest?"DESC":"ASC";
-        var sql=$"SELECT TOP (@Limit) Id,Title,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
+        var sql=$"SELECT TOP (@Limit) Id,Title,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL AND Ipo_Date IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
         var rows=(await connection.QueryAsync<CompanyRow>(new CommandDefinition(sql,new{Limit=limit},cancellationToken:ct,commandTimeout:20))).ToArray();
-        var title=latest?"جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company":"قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company";
-        return title+":\n"+string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"));
+        var topic=latest?"جدیدترین عرضه‌های اولیه Company":"قدیمی‌ترین عرضه‌های اولیه Company";
+        if(rows.Length==0)
+            return CanonicalReferenceAnswer.Exact("تاریخ عرضه اولیه‌ای در جدول Company ثبت نشده است.","company_aggregate",topic,
+                sourceTool:CanonicalReferenceToolNames.CompanyIpo);
+        string answer;
+        if(limit==1)
+        {
+            var row=rows[0];
+            var prefix=latest?"آخرین":"اولین";
+            answer=$"{prefix} عرضه اولیه ثبت‌شده مربوط به {Display(row.Title)} در تاریخ {PersianDisplayText.FormatPersianDate(row.IpoDate!.Value)} است.";
+        }
+        else
+        {
+            var title=latest?"جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company":"قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company";
+            answer=title+":\n"+string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"));
+        }
+        var facts=rows.SelectMany(x=>new[]
+        {
+            new CanonicalReferenceFact("company_title",Display(x.Title),$"Company:{x.Id}"),
+            new CanonicalReferenceFact("ipo_date",x.IpoDate!.Value.ToString("O",CultureInfo.InvariantCulture),$"Company:{x.Id}",AsOffset(x.IpoDate))
+        }).ToArray();
+        return CanonicalReferenceAnswer.Exact(answer,"company_aggregate",topic,facts,
+            subjectName:Display(rows[0].Title),relatedSubjects:rows.Skip(1).Select(x=>Display(x.Title)).ToArray(),
+            sourceTool:CanonicalReferenceToolNames.CompanyIpo);
     }
 
     private static async Task<string> CompanyIpoYear(SqlConnection connection,int jalaliYear,int limit,bool namesOnly,CancellationToken ct)
@@ -1114,7 +1383,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
 
     private async Task<IReadOnlyList<T>> GetCatalog<T>(string key,Func<Task<IReadOnlyList<T>>> loader,CancellationToken ct,TimeSpan? maxAge=null)
     {
-        var freshness=maxAge??TimeSpan.FromMinutes(5);
+        var freshness=maxAge??ReferenceCacheTtl;
         var connectionIdentity=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(ConnectionString!)))[..16];
         var cacheKey=$"sql-ai:{key}:{connectionIdentity}";
         cache.TryGetValue(cacheKey,out CachedCatalog<T>? stale);
@@ -1767,6 +2036,18 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         var text = CleanHtml(row.Body);
         if (text.Length == 0) return null;
         var details=new List<string>();
+        if(ContainsAny(question,"نوع اوراق","چه اوراقی","چه اوراقی درج"))
+        {
+            var match=Regex.Match(text,@"(?:پذیرش|درج)\s+(?<value>اوراق\s+[^.!؟،؛]{2,160}?)\s+در\s+بورس",RegexOptions.CultureInvariant);
+            if(match.Success)
+            {
+                var value=Regex.Replace(match.Groups["value"].Value,@"\s+"," ").Trim();
+                var acronym=Regex.Match(value,@"^اوراق\s+(?<title>.+?)\s*\((?<abbr>[^)]+)\)\s*(?<tail>.*)$",RegexOptions.CultureInvariant);
+                if(acronym.Success)
+                    value=$"اوراق {acronym.Groups["abbr"].Value.Trim()} {acronym.Groups["tail"].Value.Trim()} ({acronym.Groups["title"].Value.Trim()})".Replace("  "," ",StringComparison.Ordinal);
+                details.Add($"{value} درج شده است");
+            }
+        }
         if(ContainsAny(question,"تاریخ انتشار","چه تاریخی","کی منتشر","زمان انتشار")) details.Add($"تاریخ انتشار {Date(row.PublishAt)} است");
         if(question.Contains("نماد",StringComparison.Ordinal))
         {
@@ -1927,6 +2208,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         public DateTime? SourceCollectedAt { get; set; }
     }
     private sealed class ContentDistributionRow { public int Value { get; set; } public long Count { get; set; } public long NonEmpty { get; set; } }
+    private sealed class ContentBodyCountRow { public long TotalRows { get; set; } public long EmptyBodies { get; set; } }
+    private sealed class ContentDuplicateCountRow { public long DuplicateGroups { get; set; } public long ExtraDuplicateRows { get; set; } }
     private sealed class ContentDateRangeRow
     {
         public DateTime? MinPublishAt { get; set; }

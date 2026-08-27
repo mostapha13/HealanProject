@@ -30,11 +30,25 @@ Assert(fullBook.Route==ChatCapabilityRoute.MarketSymbol && fullBook.Plan?.Reques
 var bookRank=await router.RouteAsync("پنج نماد با بیشترین حجم بهترین سفارش خرید را بده",100,CancellationToken.None);
 Assert(bookRank.Route==ChatCapabilityRoute.StructuredQuery && bookRank.StructuredQuery?.Plan?.SortBy==StructuredQueryMetric.BestBidVolume,"order-book ranking route failed");
 var k=await router.RouteAsync("قانون اختیار معامله چیست؟",100,CancellationToken.None);
-Assert(k.Route==ChatCapabilityRoute.Knowledge && k.PlannerUsed,"knowledge fallback route failed");
+Assert(k.Route==ChatCapabilityRoute.Knowledge && !k.PlannerUsed,"knowledge route must not depend on the LLM planner");
+var bond=await router.RouteAsync("بازارگردان صدار704 کدام صندوق است؟",100,CancellationToken.None);
+Assert(bond.Route==ChatCapabilityRoute.Knowledge && !bond.PlannerUsed,"document-backed bond facts must route directly to retrieval");
+var persianDigitBond=await router.RouteAsync("دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟",100,CancellationToken.None);
+Assert(persianDigitBond.Route==ChatCapabilityRoute.Knowledge && !persianDigitBond.PlannerUsed,
+    "Persian digits in a document-backed entity must not bypass deterministic knowledge routing");
+var reportValue=await router.RouteAsync("ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟",100,CancellationToken.None);
+Assert(reportValue.Route==ChatCapabilityRoute.Knowledge && !reportValue.PlannerUsed,"historical report metrics must not route to current market tools");
 var h=await router.RouteAsync("قیمت فولاد و آخرین خبرش رو بگو",100,CancellationToken.None);
 Assert(h.Route==ChatCapabilityRoute.Hybrid && h.PlannerUsed,"hybrid fallback route failed");
 Assert(h.Capabilities.Any(x=>x.Name=="structured.market.symbol") && h.Capabilities.Any(x=>x.Name=="knowledge.retrieve"),"hybrid capabilities incomplete");
 Assert(h.AuditSummary.Contains("route=Hybrid") && h.AuditSummary.Contains("planner=True"),"audit summary missing");
+var ipoPlannerTrap=await router.RouteAsync("آخرین عرضه اولیه بورس چیه؟",100,CancellationToken.None);
+Assert(ipoPlannerTrap.Route==ChatCapabilityRoute.Knowledge && ipoPlannerTrap.Plan?.Symbol is null
+       && ipoPlannerTrap.ReasonCodes.Contains("deterministic-knowledge-evidence-route"),
+    "generic IPO concept must not become an instrument entity");
+var explicitExchangeTicker=await router.RouteAsync("آخرین قیمت نماد بورس چقدره؟",100,CancellationToken.None);
+Assert(explicitExchangeTicker.Route==ChatCapabilityRoute.MarketSymbol,
+    "an explicitly marked ticker must remain eligible for market resolution");
 Console.WriteLine("TSEAI Capability Router smoke PASS");
 
 sealed class FakePlanner:IAiChatPlanner
@@ -43,6 +57,7 @@ sealed class FakePlanner:IAiChatPlanner
     {
         if(q.Contains("قیمت فولاد و")) return Task.FromResult(new ChatPlan(ChatIntent.Hybrid,"فولاد",q,.91,null,["fake-hybrid"]));
         if(q.Contains("قیمت فولاد")) return Task.FromResult(new ChatPlan(ChatIntent.MarketSymbol,"فولاد",null,.9,null,["fake-market"]));
+        if(q.Contains("عرضه اولیه")) return Task.FromResult(new ChatPlan(ChatIntent.MarketSymbol,"اولیه",null,.9,null,["fake-bad-entity"]));
         if(q.Contains("قانون")) return Task.FromResult(new ChatPlan(ChatIntent.Knowledge,null,q,.9,null,["fake-knowledge"]));
         return Task.FromResult(new ChatPlan(ChatIntent.Clarification,null,null,.4,"clarify",["fake-clarify"]));
     }

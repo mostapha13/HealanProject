@@ -8,7 +8,7 @@
     {"id":"CT-004","cluster":"latest-news","question":"مبلغ اوراق در آخرین خبر چقدر است؟","expectedType":"structured_reference","mustContain":["میلیارد ریال"],"mustContainAny":[["1686.5","۱۶۸۶.۵"]],"maxAnswerChars":280},
     {"id":"CT-005","cluster":"latest-news","question":"سررسید اوراق آخرین خبر چه روزی است؟","expectedType":"structured_reference","mustContain":["1405","05","31"],"mustNotContain":["2026/"],"maxAnswerChars":280},
     {"id":"CT-006","cluster":"latest-news","question":"ضمانت و عاملیت اوراق خبر آخر با کدام بانک است؟","expectedType":"structured_reference","mustContain":["بانک ملت"],"maxAnswerChars":300},
-    {"id":"CT-007","cluster":"latest-news","question":"توی خبر تازه بورس چه نوع اوراقی درج شده؟","mustContain":["اوراق گام","بانک ملت"],"maxAnswerChars":700},
+    {"id":"CT-007","cluster":"latest-news","question":"توی خبر تازه بورس چه نوع اوراقی درج شده؟","expectedType":"structured_reference","mustContain":["اوراق گام","بانک ملت"],"maxAnswerChars":700},
 
     {"id":"CT-008","cluster":"irandar-bond","question":"نماد اوراق مرابحه شرکت ایراندار چیست؟","mustContain":["صدار704"],"mustNotContain":["اگ050512","فملی"],"maxAnswerChars":500},
     {"id":"CT-009","cluster":"irandar-bond","question":"ارزش و نرخ سود اوراق ایراندار را خلاصه بگو","mustContain":["میلیارد ریال","درصد"],"mustContainAny":[["3,000","۳,۰۰۰","3000","۳۰۰۰"],["23","۲۳"]],"maxAnswerChars":550},
@@ -39,7 +39,7 @@
     {"id":"CT-031","cluster":"trading-microstructure","question":"اصلاح طبقات حجمی سفارش چه آثار مثبتی دارد؟","mustContain":["کاهش اثر بازاری","افزایش انعطاف‌پذیری","کیفیت اجرای معاملات"],"maxAnswerChars":800},
 
     {"id":"CT-032","cluster":"private-market","question":"چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟","mustContain":["محمود گودرزی","مدیرعامل بورس تهران"],"maxAnswerChars":500},
-    {"id":"CT-033","cluster":"private-market","question":"بازار خصوصی بورس تهران برای چه شرکت‌هایی و با چه هدفی طراحی می‌شود؟","mustContain":["شرکت‌های سهامی خاص","حاکمیت شرکتی","تامین مالی","بازارهای اصلی"],"maxAnswerChars":850},
+    {"id":"CT-033","cluster":"private-market","question":"بازار خصوصی بورس تهران برای چه شرکت‌هایی و با چه هدفی طراحی می‌شود؟","mustContain":["شرکت‌های سهامی خاص","حاکمیت شرکتی","تامین مالی"],"mustContainAny":[["بازارهای اصلی","بازار‌های اصلی"]],"maxAnswerChars":850},
     {"id":"CT-034","cluster":"private-market","question":"گودرزی چه شرکت‌هایی را در اولویت پذیرش بورس اعلام کرده؟","mustContain":["سود خالص","میلیارد تومان","اولویت پذیرش"],"mustContainAny":[["100","۱۰۰"]],"maxAnswerChars":650},
     {"id":"CT-035","cluster":"private-market","question":"قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟","mustContain":["فرآیندهای پذیرش","تعامل با ناشران","امضای امیدنامه","دیجیتال"],"maxAnswerChars":800},
 

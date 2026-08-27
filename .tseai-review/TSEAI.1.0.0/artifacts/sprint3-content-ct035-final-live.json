@@ -1,0 +1,111 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T13:23:11.439536+00:00",
+  "runId": "ba3933aa3b33",
+  "manifestVersion": "2.0",
+  "datasetSha256": "68c9d0a7690a1090b0e113625f86c2ab0b722b6eefe723de6395963af624b3db",
+  "caseCount": 1,
+  "sources": {
+    "content": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 8261.54,
+  "p95LatencyMs": 8261.54,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "content:private-market": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "content:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "وی همچنین از راه‌اندازی سامانه تعاملی جدید بورس تهران خبر داد و گفت: به‌زودی بخش عمده فرآیند‌های پذیرش و تعامل با ناشران به صورت کاملا الکترونیکی انجام خواهد شد و حتی امضای امیدنامه‌ها نیز به شکل دیجیتال خواهد بود تا بروکراسی اداری به حداقل برسد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1686,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 6426,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 8261.54
+    }
+  ]
+}

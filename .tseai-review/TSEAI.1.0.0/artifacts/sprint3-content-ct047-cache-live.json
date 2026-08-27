@@ -1,0 +1,99 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T14:03:02.863050+00:00",
+  "runId": "1a3efa667033",
+  "manifestVersion": "2.0",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
+  "caseCount": 1,
+  "sources": {
+    "content": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 175.79,
+  "p95LatencyMs": 175.79,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "content:distribution": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "content:CT-047",
+      "caseId": "CT-047",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "distribution",
+      "question": "نوع‌های محتوای جدول Content را به تفکیک تعداد بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "توزیع جدول Content بر اساس نوع محتوا:\n1. ContentTypeId=1: 33,377 رکورد\n2. ContentTypeId=5: 3,532 رکورد\n3. ContentTypeId=26: 2,083 رکورد\n4. ContentTypeId=13: 1,069 رکورد\n5. ContentTypeId=14: 419 رکورد\n6. ContentTypeId=6: 303 رکورد\n7. ContentTypeId=12: 287 رکورد\n8. ContentTypeId=3: 280 رکورد\n9. ContentTypeId=17: 212 رکورد\n10. ContentTypeId=2: 175 رکورد\n11. ContentTypeId=8: 172 رکورد\n12. ContentTypeId=25: 171 رکورد\n13. ContentTypeId=22: 137 رکورد\n14. ContentTypeId=24: 128 رکورد\n15. ContentTypeId=4: 100 رکورد\n16. ContentTypeId=18: 48 رکورد\n17. ContentTypeId=9: 20 رکورد\n18. ContentTypeId=7: 19 رکورد\n19. ContentTypeId=10: 3 رکورد\n20. ContentTypeId=39: 1 رکورد\n جدول مرجع دارای نام برای این شناسه‌ها در داده فعلی خالی یا موجود نیست؛ بنابراین برچسب معنایی حدس زده نمی‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 64,
+          "detail": "kind=content_reference;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=جدول Content;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 175.79
+    }
+  ]
+}

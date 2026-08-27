@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -54,14 +55,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 builder.Services.Configure<ForwardedHeadersOptions>(o => { o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto; o.KnownNetworks.Clear(); o.KnownProxies.Clear(); });
+var anonymousRateLimit = Math.Clamp(builder.Configuration.GetValue("RateLimit:AnonymousPerMinute", 60), 1, 100_000);
+var authenticatedRateLimit = Math.Clamp(builder.Configuration.GetValue("RateLimit:AuthenticatedPerMinute", 180), 1, 100_000);
+var rateLimitWindowSeconds = Math.Clamp(builder.Configuration.GetValue("RateLimit:WindowSeconds", 60), 1, 3_600);
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.OnRejected = async (context, cancellationToken) =>
+    {
+        var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var value)
+            ? Math.Max(1, (int)Math.Ceiling(value.TotalSeconds))
+            : rateLimitWindowSeconds;
+        context.HttpContext.Response.Headers.RetryAfter = retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        context.HttpContext.Response.ContentType = "application/json; charset=utf-8";
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            code = "rate_limit_reached",
+            message = "تعداد درخواست‌ها در بازه کوتاه از حد مجاز عبور کرده است؛ کمی بعد دوباره تلاش کنید.",
+            retryAfterSeconds = retryAfter
+        }, cancellationToken);
+    };
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext,string>(ctx =>
     {
         var key = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var authenticated = ctx.User.Identity?.IsAuthenticated == true;
-        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions { PermitLimit = authenticated ? 180 : 60, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true });
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = authenticated ? authenticatedRateLimit : anonymousRateLimit,
+            Window = TimeSpan.FromSeconds(rateLimitWindowSeconds),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
     });
 });
 
@@ -119,12 +143,22 @@ app.Use(async (ctx,next) =>
     var elapsedMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
     var correlationId = ctx.Response.Headers["X-Correlation-Id"].FirstOrDefault() ?? "missing";
     Guid? userId = Guid.TryParse(ctx.User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedUserId) ? parsedUserId : null;
-    var outcome = ctx.Response.StatusCode < 400 ? "success" : $"http_{ctx.Response.StatusCode}";
-    var metadata = JsonSerializer.Serialize(new { statusCode = ctx.Response.StatusCode, durationMs = Math.Round(elapsedMs, 2) });
+    var execution = ctx.Items.TryGetValue(ChatExecutionAudit.HttpContextItemKey,out var auditValue)
+        ? auditValue as ChatExecutionAudit
+        : null;
+    var outcome = ctx.Response.StatusCode >= 400
+        ? $"http_{ctx.Response.StatusCode}"
+        : execution?.AnswerValid==false ? "answer_validation_failed" : "success";
+    var metadata = JsonSerializer.Serialize(new
+    {
+        statusCode = ctx.Response.StatusCode,
+        durationMs = Math.Round(elapsedMs, 2),
+        execution
+    });
     try
     {
         await ctx.RequestServices.GetRequiredService<IOperationsStore>()
-            .RecordAuditAsync(userId, "chat.ask", "chat", null, outcome, correlationId, metadata, ctx.RequestAborted);
+            .RecordAuditAsync(userId, "chat.ask", "chat", execution?.ConversationId, outcome, correlationId, metadata, ctx.RequestAborted);
     }
     catch (Exception auditError)
     {
@@ -162,6 +196,9 @@ static string ConversationId(string? requested)
     if (requested.Length > 100) throw new ArgumentException("Conversation id is too long.");
     return requested;
 }
+
+static string AuditHash(string value) =>
+    Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLowerInvariant();
 
 static string RequireUserId(HttpContext context) =>
     context.User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -294,9 +331,30 @@ app.MapPost("/api/chat/ask", async (
         // remain ISO/Gregorian so API contracts and date arithmetic stay stable.
         result = result with
         {
-            Answer = PersianDisplayText.LocalizeDates(result.Answer),
-            Clarification = result.Clarification is null ? null : PersianDisplayText.LocalizeDates(result.Clarification)
+            Answer = PersianDisplayText.LocalizeDates(PersianDisplayText.NormalizeAnswer(result.Answer)),
+            Clarification = result.Clarification is null ? null : PersianDisplayText.LocalizeDates(PersianDisplayText.NormalizeAnswer(result.Clarification))
         };
+
+        var primaryEntity = result.Entity?.Selected?.Symbol
+            ?? result.Entity?.Selected?.DisplayName
+            ?? result.ConversationContext?.PrimaryEntity?.Symbol
+            ?? result.ConversationContext?.PrimaryEntity?.DisplayName
+            ?? result.ConversationContext?.ActiveReference?.SubjectName;
+        c.Items[ChatExecutionAudit.HttpContextItemKey] = new ChatExecutionAudit(
+            AuditHash(req.Question),
+            result.ConversationId,
+            result.Type,
+            result.Intent.ToString(),
+            result.Confidence,
+            primaryEntity,
+            result.Temporal.Kind.ToString(),
+            result.Temporal.Start?.JalaliDate,
+            result.Evidence?.Count??0,
+            result.Citations.Count,
+            result.AnswerValidation?.Status.ToString(),
+            result.AnswerValidation?.IsValid,
+            result.Trace.Select((step,index)=>new ChatExecutionStepAudit(
+                index+1,step.Tool,step.Status,step.DurationMs,step.Detail)).ToArray());
 
         if (result.Intent == ChatIntent.Clarification || IsChatAssetResult(result.Type))
             await quota.ReleaseAsync(s.Subject, s.Authenticated, ct);

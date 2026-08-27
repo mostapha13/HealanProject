@@ -12,6 +12,17 @@ class QdrantKnowledgeStore:
         self.collection=collection or os.getenv("QDRANT_KNOWLEDGE_COLLECTION","tseai_knowledge_v1")
         self._ensured_dimension=None
         self._ensure_lock=asyncio.Lock()
+        self._read_client=httpx.AsyncClient(timeout=30)
+
+    async def _read_post(self,path:str,body:dict[str,Any],timeout:float=30)->httpx.Response:
+        """Retry transient Docker DNS/socket failures on idempotent Qdrant reads."""
+        for attempt in range(3):
+            try:
+                return await self._read_client.post(f"{self.base}{path}",json=body,timeout=timeout)
+            except (httpx.TimeoutException,httpx.NetworkError):
+                if attempt==2: raise
+                await asyncio.sleep(.15*(2**attempt))
+        raise RuntimeError("unreachable")
     async def ensure_collection(self,dimension:int):
         if self._ensured_dimension==dimension:return
         async with self._ensure_lock:
@@ -21,7 +32,7 @@ class QdrantKnowledgeStore:
                 if r.status_code==404:
                     x=await c.put(f"{self.base}/collections/{self.collection}",json={"vectors":{"size":dimension,"distance":"Cosine"}}); x.raise_for_status()
                 else: r.raise_for_status()
-                text_schema={"type":"text","tokenizer":"word","min_token_len":2,"lowercase":True}
+                text_schema={"type":"text","tokenizer":"word","min_token_len":2,"lowercase":True,"phrase_matching":True}
                 for field,schema in (("document_id","keyword"),("source_type","keyword"),("symbol","keyword"),("category","keyword"),("published_at","datetime"),("text",text_schema),("title",text_schema),("metadata.route","keyword"),("metadata.content_type_id","integer"),("metadata.language_id","integer"),("metadata.topics","keyword"),("metadata.companies","keyword"),("metadata.symbols","keyword"),("metadata.persons","keyword"),("metadata.is_current","bool")):
                     try:
                         x=await c.put(f"{self.base}/collections/{self.collection}/index",json={"field_name":field,"field_schema":schema})
@@ -96,17 +107,16 @@ class QdrantKnowledgeStore:
         ids=[x for x in dict.fromkeys(document_ids) if x]
         if not ids:return {}
         result:dict[str,list[dict[str,Any]]]={x:[] for x in ids}; offset=None
-        async with httpx.AsyncClient(timeout=30) as c:
-            while True:
-                body={"filter":{"must":[{"key":"document_id","match":{"any":ids}}]},"limit":1000,"with_payload":True,"with_vector":False}
-                if offset is not None: body["offset"]=offset
-                r=await c.post(f"{self.base}/collections/{self.collection}/points/scroll",json=body); r.raise_for_status()
-                data=r.json().get("result") or {}
-                for row in data.get("points") or []:
-                    payload=row.get("payload") or {}; doc_id=str(payload.get("document_id") or "")
-                    if doc_id in result: result[doc_id].append(payload)
-                offset=data.get("next_page_offset")
-                if offset is None: break
+        while True:
+            body={"filter":{"must":[{"key":"document_id","match":{"any":ids}}]},"limit":1000,"with_payload":True,"with_vector":False}
+            if offset is not None: body["offset"]=offset
+            r=await self._read_post(f"/collections/{self.collection}/points/scroll",body); r.raise_for_status()
+            data=r.json().get("result") or {}
+            for row in data.get("points") or []:
+                payload=row.get("payload") or {}; doc_id=str(payload.get("document_id") or "")
+                if doc_id in result: result[doc_id].append(payload)
+            offset=data.get("next_page_offset")
+            if offset is None: break
         for chunks in result.values():
             chunks.sort(key=lambda x:int(x.get("ordinal") or 0))
         return result
@@ -140,12 +150,13 @@ class QdrantKnowledgeStore:
         elif must:body["filter"]={"must":must}
         if should:
             body.setdefault("filter",{"must":must})["should"]=should
-        async with httpx.AsyncClient(timeout=30) as c:
-            r=await c.post(f"{self.base}/collections/{self.collection}/points/search",json=body); r.raise_for_status(); return r.json().get("result",[])
+        r=await self._read_post(f"/collections/{self.collection}/points/search",body)
+        r.raise_for_status()
+        return r.json().get("result",[])
 
     async def search_text(self,query:str,limit:int,filters:dict[str,Any])->list[dict[str,Any]]:
         """Retrieve exact lexical candidates so rare Persian names cannot fall outside the dense top-k."""
-        must=[{"key":"text","match":{"text":query}}]
+        must=[{"key":"text","match":{"phrase":query}}]
         for key in ("source_type","symbol","category"):
             value=filters.get(key)
             if value: must.append({"key":key,"match":{"value":value}})
@@ -169,10 +180,9 @@ class QdrantKnowledgeStore:
         if filters.get("current_only") is True:
             condition["must_not"]=[{"key":"metadata.is_current","match":{"value":False}}]
         body={"filter":condition,"limit":max(limit,20),"with_payload":True,"with_vector":False}
-        async with httpx.AsyncClient(timeout=30) as c:
-            r=await c.post(f"{self.base}/collections/{self.collection}/points/scroll",json=body)
-            if r.status_code in (400,404): return []
-            r.raise_for_status()
-            points=(r.json().get("result") or {}).get("points",[])
-            for row in points: row.setdefault("score",0.0)
-            return points
+        r=await self._read_post(f"/collections/{self.collection}/points/scroll",body)
+        if r.status_code in (400,404): return []
+        r.raise_for_status()
+        points=(r.json().get("result") or {}).get("points",[])
+        for row in points: row.setdefault("score",0.0)
+        return points

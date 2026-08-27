@@ -10,7 +10,8 @@ public sealed record ChatReflectionRequest(
     double Confidence,
     int EvidenceCount,
     IReadOnlyList<string> FailedTools,
-    IReadOnlyList<string>? Evidence = null);
+    IReadOnlyList<string>? Evidence = null,
+    bool ExactCanonical = false);
 
 public sealed record ChatReflectionResult(
     string Action,

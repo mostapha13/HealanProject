@@ -11,6 +11,8 @@ services:
     container_name: tseai-rc31-api
     environment:
       DataQuality__OffHoursMaxAgeHours: 96
+      RateLimit__AnonymousPerMinute: 1200
+      RateLimit__AuthenticatedPerMinute: 1200
   identity-api:
     container_name: tseai-rc31-identity
   market-runtime:
@@ -35,6 +37,8 @@ services:
   local-embedding:
     container_name: tseai-rc31-local-embedding
     command: !override ["-m", "/models/Qwen3-Embedding-0.6B-Q8_0.gguf", "--alias", "qwen3-embedding-0.6b", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--embedding", "--pooling", "last", "-c", "4096", "-b", "512", "-np", "1", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "4"]
+    volumes: !override
+      - tseai_rc31_models:/models:ro
   sqlserver:
     container_name: tseai-rc31-sqlserver
   redis:

@@ -1,0 +1,62 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T11:28:43.080758+00:00",
+  "total": 2,
+  "passed": 1,
+  "passRate": 0.5,
+  "allPassed": false,
+  "p50LatencyMs": 10918.94,
+  "p95LatencyMs": 4825.95,
+  "clusters": {
+    "irandar-bond": {
+      "total": 2,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CT-009",
+      "cluster": "irandar-bond",
+      "question": "ارزش و نرخ سود اوراق ایراندار را خلاصه بگو",
+      "mustContain": [
+        "میلیارد ریال",
+        "درصد"
+      ],
+      "mustContainAny": [
+        [
+          "3,000",
+          "۳,۰۰۰",
+          "3000",
+          "۳۰۰۰"
+        ],
+        [
+          "23",
+          "۲۳"
+        ]
+      ],
+      "maxAnswerChars": 550,
+      "passed": false,
+      "issues": [
+        "missing_any:3,000|۳,۰۰۰|3000|۳۰۰۰"
+      ],
+      "answer": "بلغ 3,۰۰۰ میلیارد ریال، با نرخ سود ۲۳ درصد سالانه، با هدف خرید مواد اولیه مورد نیاز با نماد \"صدار704\" در فهرست نرخ‌های بازار اوراق بدهی بورس تهران درج شد.",
+      "actualType": "knowledge",
+      "latencyMs": 17011.93
+    },
+    {
+      "id": "CT-017",
+      "cluster": "irandar-bond",
+      "question": "عامل فروش و عامل پرداخت اوراق ایراندار چه نهادهایی هستند؟",
+      "mustContain": [
+        "شرکت کارگزاری کارآمد",
+        "شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "عامل پرداخت: شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه؛ عامل فروش: شرکت کارگزاری کارآمد.",
+      "actualType": "knowledge",
+      "latencyMs": 4825.95
+    }
+  ]
+}

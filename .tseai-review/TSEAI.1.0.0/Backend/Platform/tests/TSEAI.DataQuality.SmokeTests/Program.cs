@@ -51,6 +51,18 @@ var sourceResult = await service.EvaluateCanonicalSourcesAsync(default);
 Ensure(sourceResult.Sources.Count == CanonicalSourceCatalog.All.Count, "All canonical sources must be assessed.");
 Ensure(sourceResult.Sources.Single(x => x.Code == "cash-market").Status == DataQualityStatus.Valid, "Fresh current source must pass.");
 
+var catalogIssues=CanonicalSourceCatalog.Validate();
+Ensure(catalogIssues.Count==0,"Semantic data catalog must be internally consistent: "+string.Join(" | ",catalogIssues.Select(x=>$"{x.SourceCode}:{x.Code}")));
+Ensure(CanonicalSourceCatalog.Sprint1Audited.Count==8,"Sprint 1 must publish eight audited table contracts.");
+var cashCatalog=CanonicalSourceCatalog.All.Single(x=>x.Code=="cash-market");
+Ensure(cashCatalog.RetrievalMode==CanonicalRetrievalMode.Structured&&cashCatalog.HistoryMode==CanonicalHistoryMode.CurrentOnly,
+    "Cashmarket must remain a structured current snapshot and must never masquerade as history.");
+var contentCatalog=CanonicalSourceCatalog.All.Single(x=>x.Code=="content");
+Ensure(contentCatalog.RetrievalMode==CanonicalRetrievalMode.Hybrid&&contentCatalog.HistoryMode==CanonicalHistoryMode.AppendWithUpsert,
+    "Content must expose hybrid append-with-upsert semantics.");
+Ensure(contentCatalog.VectorizationPolicy.Contains("parent document",StringComparison.OrdinalIgnoreCase),
+    "Content vector policy must require parent-document reconstruction after chunk retrieval.");
+
 Console.WriteLine("TSEAI Data Quality & Freshness smoke tests PASS");
 
 static MarketSymbolSnapshot Snapshot(DateTime updatedAt) => new()

@@ -36,6 +36,14 @@ Assert(hierarchy.EffectiveQuestion.Contains("بهروز خالق‌ویردی") 
 var parent=await svc.PrepareAsync("u1","c1","زیر مجموعه چه معاونتیه؟",temporal,CancellationToken.None);
 Assert(parent.EffectiveQuestion.Contains("بهروز خالق‌ویردی") && parent.PrimaryEntity is null,"upward organization follow-up must inherit only the active person");
 
+var ipo=CanonicalReferenceAnswer.Exact("آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو است.","company_aggregate","جدیدترین عرضه‌های اولیه Company",
+    [new("company_title","فرآورده‌های دامی ولبنی دالاهو","Company:1")],"فرآورده‌های دامی ولبنی دالاهو",sourceTool:CanonicalReferenceToolNames.CompanyIpo);
+await svc.RecordReferenceAsync("u1","c1","آخرین عرضه اولیه بورس چیه؟","آخرین عرضه اولیه بورس چیه؟",ipo.Answer,ipo,temporal,CancellationToken.None);
+var ipoSymbol=await svc.PrepareAsync("u1","c1","نمادش چیه؟",temporal,CancellationToken.None);
+Assert(ipoSymbol.RouteHint.ContextApplied
+    &&ipoSymbol.EffectiveQuestion=="نماد شرکت فرآورده‌های دامی ولبنی دالاهو چیست؟",
+    "a company IPO follow-up must inherit the exact company subject");
+
 var resolvedMarket=await new FakeResolver().ResolveAsync("خساپا",new EntityResolveOptions([EntityKind.Instrument]),CancellationToken.None);
 await svc.RecordAsync("u1","c1","قیمت نماد خساپا",ChatIntent.MarketSymbol,ChatCapabilityRoute.MarketSymbol,temporal,resolvedMarket,null,CancellationToken.None,"خساپا ۵۸۰ ریال است.");
 Assert(store.State.ActiveReference is null && store.State.PrimaryEntity?.Symbol=="خساپا","a new market subject must clear stale organization references");

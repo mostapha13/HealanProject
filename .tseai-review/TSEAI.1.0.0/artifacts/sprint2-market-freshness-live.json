@@ -1,0 +1,324 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T08:51:10.422743+00:00",
+  "runId": "9c0b0c0eff06",
+  "manifestVersion": "2.0",
+  "datasetSha256": "fdfa992ad43fbbf1f1f240012c21a72e08cdc3a8f14a98a2c4abc0837c4f973d",
+  "caseCount": 2,
+  "sources": {
+    "cash-market": {
+      "total": 1,
+      "passed": 0
+    },
+    "order-book": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "total": 2,
+  "passed": 0,
+  "failed": 2,
+  "passRate": 0.0,
+  "p50LatencyMs": 3917.87,
+  "p95LatencyMs": 451.31,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 2,
+    "mustContain": 2
+  },
+  "clusters": {
+    "cash-market:last-price": {
+      "total": 1,
+      "passed": 0
+    },
+    "order-book:best-bid": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "cash-market:CM-001",
+      "caseId": "CM-001",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 60,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 6686,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 342,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7384.43
+    },
+    {
+      "id": "order-book:OB-001",
+      "caseId": "OB-001",
+      "sourceCode": "order-book",
+      "table": "OrderBookCurrent",
+      "cluster": "best-bid",
+      "question": "بهترین قیمت خرید فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 253,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 89,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 451.31
+    }
+  ],
+  "results": [
+    {
+      "id": "cash-market:CM-001",
+      "caseId": "CM-001",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 60,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 6686,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 342,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7384.43
+    },
+    {
+      "id": "order-book:OB-001",
+      "caseId": "OB-001",
+      "sourceCode": "order-book",
+      "table": "OrderBookCurrent",
+      "cluster": "best-bid",
+      "question": "بهترین قیمت خرید فملی چقدره؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "data_quality_unavailable",
+      "actualEntity": "فملی",
+      "answer": "داده جاری بازار از آستانه Freshness عبور کرده است؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 253,
+          "detail": "status=Resolved;input=فملی چقدره;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 89,
+          "detail": null
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 451.31
+    }
+  ]
+}

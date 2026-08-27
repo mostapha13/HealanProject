@@ -1,0 +1,53 @@
+{
+  "mode": "structural-preflight",
+  "generatedAtUtc": "2026-08-27T09:15:06.926026+00:00",
+  "manifestVersion": "2.0",
+  "datasetSha256": "722f814badafc7d1b66d4f16db81596bb9eb9fd1cea7472dcf81b7e2e12fb7bd",
+  "caseCount": 404,
+  "sources": [
+    "cash-market",
+    "client-type",
+    "company",
+    "company-state",
+    "content",
+    "financial-institution",
+    "instrument",
+    "order-book"
+  ],
+  "passed": true,
+  "issues": [],
+  "coverage": {
+    "cash-market": {
+      "cases": 50,
+      "clusters": 15
+    },
+    "client-type": {
+      "cases": 50,
+      "clusters": 20
+    },
+    "company": {
+      "cases": 54,
+      "clusters": 16
+    },
+    "company-state": {
+      "cases": 50,
+      "clusters": 18
+    },
+    "content": {
+      "cases": 50,
+      "clusters": 12
+    },
+    "financial-institution": {
+      "cases": 50,
+      "clusters": 17
+    },
+    "instrument": {
+      "cases": 50,
+      "clusters": 17
+    },
+    "order-book": {
+      "cases": 50,
+      "clusters": 12
+    }
+  }
+}

@@ -49,14 +49,14 @@ public sealed class SqlOperationsStore(IConfiguration configuration) : IOperatio
         await using var connection = new SqlConnection(ConnectionString);
         await connection.OpenAsync(ct);
         await using var command = new SqlCommand(
-            "SELECT TOP (@take) Id,UserId,Action,ResourceType,ResourceId,Outcome,CorrelationId,CreatedAtUtc FROM dbo.AuditEvents ORDER BY CreatedAtUtc DESC", connection);
+            "SELECT TOP (@take) Id,UserId,Action,ResourceType,ResourceId,Outcome,CorrelationId,CreatedAtUtc,MetadataJson FROM dbo.AuditEvents ORDER BY CreatedAtUtc DESC", connection);
         command.Parameters.Add("@take", System.Data.SqlDbType.Int).Value = take;
         await using var reader = await command.ExecuteReaderAsync(ct);
         while (await reader.ReadAsync(ct))
             rows.Add(new AuditItem(
                 reader.GetGuid(0), reader.IsDBNull(1) ? null : reader.GetGuid(1), reader.GetString(2),
                 reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetString(5),
-                reader.GetString(6), reader.GetDateTime(7)));
+                reader.GetString(6), reader.GetDateTime(7), reader.IsDBNull(8) ? null : reader.GetString(8)));
         return rows;
     }
 

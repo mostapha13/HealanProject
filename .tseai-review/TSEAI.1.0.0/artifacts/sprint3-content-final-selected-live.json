@@ -1,0 +1,403 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T11:25:38.765270+00:00",
+  "total": 21,
+  "passed": 19,
+  "passRate": 0.9047619047619048,
+  "allPassed": false,
+  "p50LatencyMs": 5655.2,
+  "p95LatencyMs": 7896.55,
+  "clusters": {
+    "latest-news": {
+      "total": 1,
+      "passed": 1
+    },
+    "irandar-bond": {
+      "total": 10,
+      "passed": 8
+    },
+    "green-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "delta-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "trading-microstructure": {
+      "total": 1,
+      "passed": 1
+    },
+    "private-market": {
+      "total": 1,
+      "passed": 1
+    },
+    "saipa-history": {
+      "total": 3,
+      "passed": 3
+    },
+    "record-metadata": {
+      "total": 3,
+      "passed": 3
+    }
+  },
+  "results": [
+    {
+      "id": "CT-007",
+      "cluster": "latest-news",
+      "question": "توی خبر تازه بورس چه نوع اوراقی درج شده؟",
+      "mustContain": [
+        "اوراق گام",
+        "بانک ملت"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "آخرین خبر ثبت‌شده در 1405/04/16: به گزارش مدیریت ارتباطات بورس تهران؛ با توجه به موافقت هیئت ‌پذیرش بورس تهران در جلسه مورخ 08 / 02/ 1405 با پذیرش اوراق گواهی اعتبار مولد (گام) بانک ملت در بورس تهران، از تاریخ 16/ 04 / 1405 مبلغ 1686.5 میلیارد ریال اوراق گام با سررسید 31 / 05 / 1405 با نماد \" اگ050512\" در بازار اوراق بدهی بورس تهران درج گردید. ضمانت و عاملیت این اوراق بر عهده بانک ملت می‌باشد. شایان ذکر است مجوز بانک مرکزی جمهوری اسلامی ایران و مجوز معاف از ثبت سازمان بورس و اوراق بهادار از فایل های مرتبط دریافت است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3805.64
+    },
+    {
+      "id": "CT-008",
+      "cluster": "irandar-bond",
+      "question": "نماد اوراق مرابحه شرکت ایراندار چیست؟",
+      "mustContain": [
+        "صدار704"
+      ],
+      "mustNotContain": [
+        "اگ050512",
+        "فملی"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "نماد اوراق مرابحه شرکت ایراندار «صدار704» است.",
+      "actualType": "knowledge",
+      "latencyMs": 5476.35
+    },
+    {
+      "id": "CT-009",
+      "cluster": "irandar-bond",
+      "question": "ارزش و نرخ سود اوراق ایراندار را خلاصه بگو",
+      "mustContain": [
+        "میلیارد ریال",
+        "درصد"
+      ],
+      "mustContainAny": [
+        [
+          "3,000",
+          "۳,۰۰۰",
+          "3000",
+          "۳۰۰۰"
+        ],
+        [
+          "23",
+          "۲۳"
+        ]
+      ],
+      "maxAnswerChars": 550,
+      "passed": false,
+      "issues": [
+        "missing_any:3,000|۳,۰۰۰|3000|۳۰۰۰"
+      ],
+      "answer": "بلغ 3,۰۰۰ میلیارد ریال، با نرخ سود ۲۳ درصد سالانه، با هدف خرید مواد اولیه مورد نیاز با نماد \"صدار704\" در فهرست نرخ‌های بازار اوراق بدهی بورس تهران درج شد.",
+      "actualType": "knowledge",
+      "latencyMs": 12149.4
+    },
+    {
+      "id": "CT-010",
+      "cluster": "irandar-bond",
+      "question": "اوراق صدار704 برای چه هدفی منتشر شده؟",
+      "mustContain": [
+        "خرید مواد اولیه"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "اوراق مرابحه با نماد «صدار704» با هدف خرید مواد اولیه مورد نیاز منتشر شده‌اند.",
+      "actualType": "knowledge",
+      "latencyMs": 6017.52
+    },
+    {
+      "id": "CT-011",
+      "cluster": "irandar-bond",
+      "question": "دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟",
+      "mustContain": [
+        "سال",
+        "ماه"
+      ],
+      "mustContainAny": [
+        [
+          "2",
+          "۲"
+        ],
+        [
+          "3",
+          "۳"
+        ]
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "دوره عمر این اوراق 2 سال و مواعد پرداخت آن هر ۳ ماه یک بار از تاریخ انتشار اوراق است.",
+      "actualType": "knowledge",
+      "latencyMs": 28338.42
+    },
+    {
+      "id": "CT-012",
+      "cluster": "irandar-bond",
+      "question": "ناشر اوراق مرابحه ایراندار چه شرکتی است؟",
+      "mustContain": [
+        "شرکت واسط مالی اسفند پنجم"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "ناشر: شرکت واسط مالی اسفند پنجم.",
+      "actualType": "knowledge",
+      "latencyMs": 5301.52
+    },
+    {
+      "id": "CT-013",
+      "cluster": "irandar-bond",
+      "question": "تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟",
+      "mustContain": [
+        "رتبه اعتباری",
+        "BBB-",
+        "A3"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "مبنای تضمین/ضامن: رتبه اعتباری با کاهش توثیق سهام (رتبه اعتباری در بلندمدت (BBB-) و در کوتاه‌مدت (A3)).",
+      "actualType": "knowledge",
+      "latencyMs": 6885.25
+    },
+    {
+      "id": "CT-014",
+      "cluster": "irandar-bond",
+      "question": "بازارگردان صدار704 کدام صندوق است؟",
+      "mustContain": [
+        "صندوق سرمایه‌گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار"
+      ],
+      "maxAnswerChars": 550,
+      "passed": true,
+      "issues": [],
+      "answer": "بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار.",
+      "actualType": "knowledge",
+      "latencyMs": 2170.97
+    },
+    {
+      "id": "CT-015",
+      "cluster": "irandar-bond",
+      "question": "مؤسسه رتبه‌بندی اوراق ایراندار کیست؟",
+      "mustContain": [
+        "شرکت رتبه‌بندی اعتباری پایا"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "موسسه رتبه‌بندی: شرکت رتبه‌بندی اعتباری پایا.",
+      "actualType": "knowledge",
+      "latencyMs": 7452.97
+    },
+    {
+      "id": "CT-016",
+      "cluster": "irandar-bond",
+      "question": "حسابرس اوراق صدار 704 را نام ببر",
+      "mustContain": [
+        "موسسه حسابرسی بیات رایان"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "حسابرس: موسسه حسابرسی بیات رایان.",
+      "actualType": "knowledge",
+      "latencyMs": 2590.32
+    },
+    {
+      "id": "CT-017",
+      "cluster": "irandar-bond",
+      "question": "عامل فروش و عامل پرداخت اوراق ایراندار چه نهادهایی هستند؟",
+      "mustContain": [
+        "شرکت کارگزاری کارآمد",
+        "شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه"
+      ],
+      "maxAnswerChars": 700,
+      "passed": false,
+      "issues": [
+        "missing:شرکت کارگزاری کارآمد"
+      ],
+      "answer": "عامل پرداخت: شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه است که در تاریخ­‌های مقرر، وجوه مرتبط با اوراق را به سرمایه­‌گذاران پرداخت می‌­نماید؛ عامل فروش: عامل فروش، یکی از شرکت‌­های کارگزاری عضو بورس اوراق بهادار تهران یا فرابورس ایران که نسبت به عرضه و فروش اوراق صکوک از طرف نهاد واسط اقدام می‌­نماید.",
+      "actualType": "knowledge",
+      "latencyMs": 7896.55
+    },
+    {
+      "id": "CT-022",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "mustContain": [
+        "گسترش نوویرا",
+        "کارگزاری پارسیان"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کارگزار بازارگردان: شرکت کارگزاری پارسیان؛ بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی گسترش نوویرا.",
+      "actualType": "knowledge",
+      "latencyMs": 3469.78
+    },
+    {
+      "id": "CT-027",
+      "cluster": "delta-fund",
+      "question": "بازارگردان و کارگزار بازارگردان صندوق دلتا را بگو",
+      "mustContain": [
+        "توسعه بازار تمدن",
+        "کارگزاری تامین سرمایه تمدن"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کارگزار بازارگردان: شرکت کارگزاری تامین سرمایه تمدن؛ بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی توسعه بازار تمدن.",
+      "actualType": "knowledge",
+      "latencyMs": 5755.66
+    },
+    {
+      "id": "CT-028",
+      "cluster": "trading-microstructure",
+      "question": "حداکثر حجم هر سفارش طبق تغییر جدید از چند طبقه به چند طبقه رسید؟",
+      "mustContain": [
+        "طبقه"
+      ],
+      "mustContainAny": [
+        [
+          "۴ طبقه به ۸ طبقه",
+          "4 طبقه به 8 طبقه"
+        ]
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "حداکثر حجم هر سفارش از ۴ طبقه به ۸ طبقه رسید.",
+      "actualType": "knowledge",
+      "latencyMs": 6110.41
+    },
+    {
+      "id": "CT-032",
+      "cluster": "private-market",
+      "question": "چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟",
+      "mustContain": [
+        "محمود گودرزی",
+        "مدیرعامل بورس تهران"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "actualType": "knowledge",
+      "latencyMs": 5655.2
+    },
+    {
+      "id": "CT-036",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "mustContain": [
+        "علی شیخ زاده"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "علی شیخ زاده",
+      "actualType": "knowledge",
+      "latencyMs": 4968.18
+    },
+    {
+      "id": "CT-039",
+      "cluster": "saipa-history",
+      "question": "ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟",
+      "mustContain": [
+        "93 همت"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "در گزارش مراسم تاریخ 1405/03/31، ارزش بازار سایپا بیش از 93 همت اعلام شد.",
+      "actualType": "knowledge",
+      "latencyMs": 4922.61
+    },
+    {
+      "id": "CT-040",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "mustContain": [
+        "26 شرکت",
+        "رتبه دوم"
+      ],
+      "maxAnswerChars": 550,
+      "passed": true,
+      "issues": [],
+      "answer": "در حال حاضر تعداد 26 شرکت در فهرست ناشران پذیرش شده در صنعت \"خودرو و ساخت قطعات\" وجود دارند، که در بین این تعداد، سایپا از نظر ارزش بازار رتبه دوم را در اختیار دارد.",
+      "actualType": "knowledge",
+      "latencyMs": 7141.93
+    },
+    {
+      "id": "CT-041",
+      "cluster": "record-metadata",
+      "question": "تاریخ انتشار رکورد Content 100756 چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16",
+        "15:45:00"
+      ],
+      "mustNotContain": [
+        "2026/07/07"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "رکورد Content با شناسه 100756:\nتاریخ انتشار: 1405/04/16 ساعت 15:45:00",
+      "actualType": "structured_reference",
+      "latencyMs": 2354.31
+    },
+    {
+      "id": "CT-042",
+      "cluster": "record-metadata",
+      "question": "نوع محتوا، زبان، وضعیت انتشار و دپارتمان رکورد Content 100756 را بده",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ContentTypeId: 1",
+        "LanguageId: 1",
+        "ContentStatusId: 3",
+        "DepartmentId: 0"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "رکورد Content با شناسه 100756:\nContentTypeId: 1\nLanguageId: 1\nContentStatusId: 3\nDepartmentId: 0",
+      "actualType": "structured_reference",
+      "latencyMs": 6383.67
+    },
+    {
+      "id": "CT-043",
+      "cluster": "record-metadata",
+      "question": "زمان ایجاد، آخرین ویرایش و زمان جمع‌آوری رکورد Content 100756 را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16",
+        "15:48:23",
+        "آخرین ویرایش: ثبت نشده",
+        "1405/05/20",
+        "13:53:17"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "رکورد Content با شناسه 100756:\nزمان ایجاد: 1405/04/16 ساعت 15:48:23\nآخرین ویرایش: ثبت نشده\nزمان جمع‌آوری منبع: 1405/05/20 ساعت 13:53:17",
+      "actualType": "structured_reference",
+      "latencyMs": 3142.93
+    }
+  ]
+}

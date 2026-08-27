@@ -33,6 +33,12 @@ var people=new[]
 var technologyManager=CanonicalPersonRoleMatcher.Match("چه کسی مدیر فناوری بورس تهران است؟",people);
 Must(technologyManager?.FullName=="آرش جدیری‌سلیمی","technology manager must resolve by exact role terms");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("چه کسی مدیر فناوری بورس تهران است؟"),"generic manager title must route to person lookup");
+Must(CanonicalReferenceToolRegistry.Resolve("company","آخرین عرضه اولیه شرکت") == CanonicalReferenceToolNames.CompanyIpo,
+    "IPO answers must expose the typed company IPO SQL tool");
+Must(CanonicalReferenceToolRegistry.Resolve("organization_board","هیئت‌مدیره بورس تهران") == CanonicalReferenceToolNames.OrganizationPeople,
+    "board answers must expose the typed organization SQL tool");
+Must(CanonicalReferenceToolNames.Allowed.Contains(CanonicalReferenceToolRegistry.Resolve("content_reference","جدول Content")),
+    "every mapped reference operation must be allow-listed");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("مدیر فناوری بورس تهران کیه؟"),"colloquial role question should also route to person lookup");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟"),"person wording variants must route to person lookup");
 Must(CanonicalPersonRoleMatcher.Match("مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟",people)?.FullName=="آرش جدیری‌سلیمی","role meaning must resolve independently of manager/responsible wording");
@@ -81,6 +87,14 @@ Must(CanonicalInstrumentQuestion.Parse("تعداد اوراق بدهی فعال 
 Must(CanonicalInstrumentQuestion.Parse("چه تعداد قرارداد آتی معتبر ثبت شده؟").Category=="future","future count wording must route to the future category");
 Must(CanonicalInstrumentQuestion.Parse("چند ابزار معتبر Instrument به Cashmarket وصل است؟").Aggregate==InstrumentAggregateKind.CashMarketCoverage,"Cashmarket coverage must outrank the cash category");
 Must(CanonicalInstrumentQuestion.Parse("چند ابزار معتبر Instrument در OrderBookCurrent رکورد دارند؟").Aggregate==InstrumentAggregateKind.OrderBookCoverage,"OrderBook coverage must use exact InstrumentID joins");
+Must(CanonicalQuestionOwnership.Detect("InstrumentID IRO1MSMI0001 متعلق به کدام نماد است؟")==CanonicalQuestionDomain.Instrument,"explicit Instrument identifier must own reverse lookup");
+Must(CanonicalQuestionOwnership.Detect("SourceCollectedAt جدول Company چه مفهومی دارد؟")==CanonicalQuestionDomain.Company,"explicit Company table must own shared timestamp fields");
+Must(CanonicalQuestionOwnership.Detect("زمان جمع‌آوری ClientType فملی در SQL را بگو")==CanonicalQuestionDomain.ClientType,"explicit ClientType source must outrank shared market fields");
+Must(CanonicalQuestionOwnership.Detect("بازارگردان و کارگزار بازارگردان صندوق دلتا را بگو")==CanonicalQuestionDomain.Knowledge,"event-specific fund roles must use document evidence");
+Must(CanonicalQuestionOwnership.Detect("ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟")==CanonicalQuestionDomain.Knowledge,"historical report values must not use current market snapshots");
+Must(CanonicalQuestionOwnership.Detect("CEO حفارس کیست؟")==CanonicalQuestionDomain.CompanyState,"natural CEO questions must use the current Companystate authority");
+Must(CanonicalQuestionOwnership.Detect("ستون CEO جدول Company برای حفارس چیست؟")==CanonicalQuestionDomain.Company,"an explicitly named Company table must retain source ownership");
+Must(CanonicalQuestionOwnership.Detect("قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟")==CanonicalQuestionDomain.Knowledge,"acceptance-process morphology must deterministically use document evidence");
 Must(PersianMarketQuestionSemantics.IsOrderBookQuestion("مجموع حجم فروش فملی در پنج ردیف را بگو"),"order-book depth totals must bypass canonical reference parsers");
 Must(PersianMarketQuestionSemantics.IsOrderBookQuestion("زمان به‌روزرسانی منبع و زمان جمع‌آوری اردربوک فملی را بگو"),"order-book timestamps must bypass Company metadata routing");
 Must(PersianMarketQuestionSemantics.IsOrderBookQuestion("InsCode وبملت در اردربوک چیست؟"),"order-book identifiers must remain in the market route");
@@ -115,6 +129,16 @@ Must(CanonicalCompanyQuestion.Parse("جدول Company چند رکورد دارد
 Must(CanonicalCompanyQuestion.Parse("کیفیت داده جدول Company چطوره؟").Aggregate==CompanyAggregateKind.DataQuality,"Company quality must be detected");
 Must(CanonicalCompanyQuestion.Parse("شرکت‌های تالار خوزستان را بگو").Aggregate==CompanyAggregateKind.HallCompanies,"Company hall membership must be detected");
 Must(CanonicalCompanyQuestion.Parse("پنج شرکت با جدیدترین عرضه اولیه را بگو").Aggregate==CompanyAggregateKind.LatestIpo,"latest Company IPO ranking must be detected");
+var exactLatestIpoCorpus=CanonicalCompanyQuestion.Parse("سه شرکت با جدیدترین تاریخ عرضه اولیه در Company کدام‌اند؟");
+Must(exactLatestIpoCorpus.Aggregate==CompanyAggregateKind.LatestIpo&&exactLatestIpoCorpus.Lookups.Count==0&&exactLatestIpoCorpus.Limit==3,$"aggregate Company IPO wording must not invent an entity lookup: aggregate={exactLatestIpoCorpus.Aggregate};lookups={string.Join('|',exactLatestIpoCorpus.Lookups)};limit={exactLatestIpoCorpus.Limit}");
+var latestIpo=CanonicalCompanyQuestion.Parse("آخرین عرضه اولیه بورس چیه؟");
+Must(latestIpo.Aggregate==CompanyAggregateKind.LatestIpo&&latestIpo.Lookups.Count==0&&latestIpo.Limit==1,"singular latest IPO wording must not be resolved as an instrument name");
+Must(CanonicalCompanyQuestion.Parse("تازه‌ترین IPO بورس تهران چیست؟").Aggregate==CompanyAggregateKind.LatestIpo,"freshest IPO synonym must route to Company");
+Must(CanonicalCompanyQuestion.Parse("سه عرضه اولیه اخیر بورس را بگو").Limit==3,"IPO ranking must recognize counts before the word offering");
+var earliestIpo=CanonicalCompanyQuestion.Parse("اولین عرضه اولیه بورس چه بود؟");
+Must(earliestIpo.Aggregate==CompanyAggregateKind.EarliestIpo&&earliestIpo.Lookups.Count==0&&earliestIpo.Limit==1,"singular earliest IPO wording must remain a structured Company query");
+var specificLatestIpo=CanonicalCompanyQuestion.Parse("آخرین تاریخ عرضه اولیه فملی چیه؟");
+Must(specificLatestIpo.Aggregate==CompanyAggregateKind.None&&specificLatestIpo.Lookups.Single()=="فملی","latest wording for a named company must remain a company detail lookup");
 var companyYear=CanonicalCompanyQuestion.Parse("چند شرکت در سال ۱۴۰۲ عرضه اولیه شدند؟");
 Must(companyYear.Aggregate==CompanyAggregateKind.IpoYear&&companyYear.JalaliYear==1402,"Jalali Company IPO year must be detected");
 var companyCompare=CanonicalCompanyQuestion.Parse("تاریخ عرضه اولیه فملی را با فولاد مقایسه کن");

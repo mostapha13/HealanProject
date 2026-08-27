@@ -1,0 +1,545 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T09:07:57.632748+00:00",
+  "runId": "d3581ac3c495",
+  "manifestVersion": "2.0",
+  "datasetSha256": "722f814badafc7d1b66d4f16db81596bb9eb9fd1cea7472dcf81b7e2e12fb7bd",
+  "caseCount": 7,
+  "sources": {
+    "client-type": {
+      "total": 1,
+      "passed": 1
+    },
+    "company": {
+      "total": 2,
+      "passed": 2
+    },
+    "company-state": {
+      "total": 1,
+      "passed": 1
+    },
+    "content": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "total": 7,
+  "passed": 7,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 230.1,
+  "p95LatencyMs": 682.96,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "client-type:raw-volume": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state:state-detail": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:identity": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:ipo-semantic-regression": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:latest-news": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:identity": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "instrument:INS-001",
+      "caseId": "INS-001",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "نام کامل نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 384,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 80,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 682.96
+    },
+    {
+      "id": "client-type:CT-001",
+      "caseId": "CT-001",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "حجم خرید حقیقی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 143,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 46,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 230.1
+    },
+    {
+      "id": "company:CO-001",
+      "caseId": "CO-001",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نام شرکت مربوط به نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 181,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 252.73
+    },
+    {
+      "id": "company:CO-051",
+      "caseId": "CO-051",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "آخرین عرضه اولیه بورس چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 50,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 115.43
+    },
+    {
+      "id": "company-state:CS-001",
+      "caseId": "CS-001",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "state-detail",
+      "question": "وضعیت نماد جم چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جم — پتروشیمی جم: وضعیت «تعلیق شده» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 89,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=وضعیت نماد جم;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 33,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 161.08
+    },
+    {
+      "id": "content:CT-001",
+      "caseId": "CT-001",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "latest-news",
+      "question": "آخرین خبر ثبت‌شده بورس تهران چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین خبر ثبت‌شده در 1405/04/16: به گزارش مدیریت ارتباطات بورس تهران؛ با توجه به موافقت هیئت ‌پذیرش بورس تهران در جلسه مورخ 08 / 02/ 1405 با پذیرش اوراق گواهی اعتبار مولد (گام) بانک ملت در بورس تهران، از تاریخ 16/ 04 / 1405 مبلغ 1686.5 میلیارد ریال اوراق گام با سررسید 31 / 05 / 1405 با نماد \" اگ050512\" در بازار اوراق بدهی بورس تهران درج گردید. ضمانت و عاملیت این اوراق بر عهده بانک ملت می‌باشد. شایان ذکر است مجوز بانک مرکزی جمهوری اسلامی ایران و مجوز معاف از ثبت سازمان بورس و اوراق بهادار از فایل های مرتبط دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 871,
+          "detail": "kind=news;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.latest_news",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=news;topic=آخرین خبر بورس تهران;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 939.79
+    },
+    {
+      "id": "financial-institution:NM-001",
+      "caseId": "NM-001",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "statistics",
+      "question": "جدول Nahad_Mali چند رکورد، شناسه، نام متمایز، نوع و تالار دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Nahad_Mali دارای 807 رکورد شعبه/دفتر، 807 شناسه یکتا و 287 نام متمایز است. این رکوردها در 31 تالار منطقه‌ای و 4 نوع استفاده‌شده قرار دارند. Broker_TypeId در هر 807 رکورد خالی است؛ زمان جمع‌آوری Snapshot 1405/05/20 ساعت 14:33:43 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 74,
+          "detail": "kind=financial_institution_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_aggregate;topic=آمار جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 59,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 182.37
+    }
+  ]
+}

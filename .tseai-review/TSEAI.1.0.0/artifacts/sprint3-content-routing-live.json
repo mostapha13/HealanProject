@@ -1,0 +1,2817 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T10:06:49.882143+00:00",
+  "runId": "91318c61ef42",
+  "manifestVersion": "2.0",
+  "datasetSha256": "9e3aab8b8f15296a7a409a80d805152ec3b32a0729f4a3793bc4e2652eb1b692",
+  "caseCount": 21,
+  "sources": {
+    "content": {
+      "total": 21,
+      "passed": 8
+    }
+  },
+  "total": 21,
+  "passed": 8,
+  "failed": 13,
+  "passRate": 0.38095238095238093,
+  "p50LatencyMs": 4809.36,
+  "p95LatencyMs": 15188.66,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "mustContain": 13,
+    "type": 2,
+    "mustContainAny": 3,
+    "mustNotContain": 1,
+    "answerLength": 1
+  },
+  "clusters": {
+    "content:delta-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:green-fund": {
+      "total": 1,
+      "passed": 0
+    },
+    "content:irandar-bond": {
+      "total": 10,
+      "passed": 4
+    },
+    "content:latest-news": {
+      "total": 1,
+      "passed": 0
+    },
+    "content:private-market": {
+      "total": 1,
+      "passed": 0
+    },
+    "content:record-metadata": {
+      "total": 3,
+      "passed": 2
+    },
+    "content:saipa-history": {
+      "total": 3,
+      "passed": 1
+    },
+    "content:trading-microstructure": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "content:CT-007",
+      "caseId": "CT-007",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "latest-news",
+      "question": "توی خبر تازه بورس چه نوع اوراقی درج شده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2039,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3803,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1779,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1587,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9372.86
+    },
+    {
+      "id": "content:CT-009",
+      "caseId": "CT-009",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "ارزش و نرخ سود اوراق ایراندار را خلاصه بگو",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": false,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain",
+        "mustContainAny",
+        "mustNotContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "سرویس هوش مصنوعی موقتاً در دسترس نیست؛ چند لحظه دیگر دوباره تلاش کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 15126,
+          "detail": "route=Clarification;intent=Clarification;confidence=0;planner=True;reasons=bounded-ai-planner,ai-planner-unavailable"
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 15188.66
+    },
+    {
+      "id": "content:CT-010",
+      "caseId": "CT-010",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "اوراق صدار704 برای چه هدفی منتشر شده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1067,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2640,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 526,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1282,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5631.92
+    },
+    {
+      "id": "content:CT-011",
+      "caseId": "CT-011",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "mustContainAny"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 14167,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.58;planner=True;reasons=bounded-ai-planner,knowledge-safe-default"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1011,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2323,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 306,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1335,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 19186.98
+    },
+    {
+      "id": "content:CT-013",
+      "caseId": "CT-013",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مجوز انتشار اوراق صادره توسط سازمان بورس و اوراق بهادار، گزارش رتبه‌بندی اعتباری و گزارش حسابرسی بیانیه ثبت تامین مالی اوراق مذکور از پیوند‌های زیر قابل دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 4230,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 747,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2589,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7629.04
+    },
+    {
+      "id": "content:CT-014",
+      "caseId": "CT-014",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "بازارگردان صدار704 کدام صندوق است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 526,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2143,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 439,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1509,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4657.62
+    },
+    {
+      "id": "content:CT-016",
+      "caseId": "CT-016",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "حسابرس اوراق صدار 704 را نام ببر",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 362,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2016,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 421,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1299,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4149.15
+    },
+    {
+      "id": "content:CT-022",
+      "caseId": "CT-022",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 829,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2297,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 319,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1305,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4809.36
+    },
+    {
+      "id": "content:CT-028",
+      "caseId": "CT-028",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "trading-microstructure",
+      "question": "حداکثر حجم هر سفارش طبق تغییر جدید از چند طبقه به چند طبقه رسید؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "mustContainAny"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 780,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2691,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 576,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1346,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5451.05
+    },
+    {
+      "id": "content:CT-032",
+      "caseId": "CT-032",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": false,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "answerLength"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "گودرزی از افزایش تمایل بخش خصوصی برای ورود به بازار سرمایه خبر داد و گفت: استقبال شرکت‌های خصوصی برای حضور در بورس به شکل محسوسی افزایش یافته است. در همین راستا، بورس تهران طراحی «بازار خصوصی» را در دستور کار قرار داده است؛ وی از برنامه‌های وزارت امور اقتصادی و دارایی برای حمایت از شرکت‌های دانش‌بنیان و فناورمحور نیز خبر داد و افزود: جلسات هیات پذیرش بورس تا پایان سال برنامه‌ریزی شده است، اما برای شرکت‌های فناور و دارای اولویت، خارج از روال معمول زمان و ظرفیت ویژه‌ای اختصاص خواهیم داد.مدیرعامل بورس تهران یکی از مهم‌ترین مزایای حضور در بورس را تثبیت حقوق مالکیت دانست و اظهار کرد: بسیاری از کسب‌وکار‌های خصوصی پس از سال‌ها فعالیت، نیازمند تثبیت و صیانت از حقوق مالکیت خود هستند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 503,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1675,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2248.21
+    },
+    {
+      "id": "content:CT-036",
+      "caseId": "CT-036",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 211,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2324,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 199,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1457,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4269.12
+    },
+    {
+      "id": "content:CT-040",
+      "caseId": "CT-040",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 621,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3876,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 741,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1747,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7049.57
+    },
+    {
+      "id": "content:CT-042",
+      "caseId": "CT-042",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "record-metadata",
+      "question": "نوع محتوا، زبان، وضعیت انتشار و دپارتمان رکورد Content 100756 را بده",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 20769,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 4713,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1366,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3354,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1076,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 2599,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33924.37
+    }
+  ],
+  "results": [
+    {
+      "id": "content:CT-007",
+      "caseId": "CT-007",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "latest-news",
+      "question": "توی خبر تازه بورس چه نوع اوراقی درج شده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2039,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3803,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1779,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1587,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9372.86
+    },
+    {
+      "id": "content:CT-008",
+      "caseId": "CT-008",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "نماد اوراق مرابحه شرکت ایراندار چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بلغ 3,۰۰۰ میلیارد ریال، با نرخ سود ۲۳ درصد سالانه، با هدف خرید مواد اولیه مورد نیاز با نماد \"صدار704\" در فهرست نرخ‌های بازار اوراق بدهی بورس تهران درج شد. عامل پرداخت: شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 693,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1973,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2765.67
+    },
+    {
+      "id": "content:CT-009",
+      "caseId": "CT-009",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "ارزش و نرخ سود اوراق ایراندار را خلاصه بگو",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": false,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain",
+        "mustContainAny",
+        "mustNotContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "سرویس هوش مصنوعی موقتاً در دسترس نیست؛ چند لحظه دیگر دوباره تلاش کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 15126,
+          "detail": "route=Clarification;intent=Clarification;confidence=0;planner=True;reasons=bounded-ai-planner,ai-planner-unavailable"
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 15188.66
+    },
+    {
+      "id": "content:CT-010",
+      "caseId": "CT-010",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "اوراق صدار704 برای چه هدفی منتشر شده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1067,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2640,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 526,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1282,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5631.92
+    },
+    {
+      "id": "content:CT-011",
+      "caseId": "CT-011",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "mustContainAny"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 14167,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.58;planner=True;reasons=bounded-ai-planner,knowledge-safe-default"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1011,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2323,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 306,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1335,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 19186.98
+    },
+    {
+      "id": "content:CT-012",
+      "caseId": "CT-012",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "ناشر اوراق مرابحه ایراندار چه شرکتی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بلغ 3,۰۰۰ میلیارد ریال، با نرخ سود ۲۳ درصد سالانه، با هدف خرید مواد اولیه مورد نیاز با نماد \"صدار704\" در فهرست نرخ‌های بازار اوراق بدهی بورس تهران درج شد. دوره عمر این اوراق 2 سال و مواعد پرداخت آن هر ۳ ماه یک بار از تاریخ انتشار اوراق است. همچنین ارکان اوراق به شرح زیر است: ناشر: شرکت واسط مالی اسفند پنجم.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 345,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1834,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2235.64
+    },
+    {
+      "id": "content:CT-013",
+      "caseId": "CT-013",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مجوز انتشار اوراق صادره توسط سازمان بورس و اوراق بهادار، گزارش رتبه‌بندی اعتباری و گزارش حسابرسی بیانیه ثبت تامین مالی اوراق مذکور از پیوند‌های زیر قابل دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 4230,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 747,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2589,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7629.04
+    },
+    {
+      "id": "content:CT-014",
+      "caseId": "CT-014",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "بازارگردان صدار704 کدام صندوق است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 526,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2143,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 439,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1509,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4657.62
+    },
+    {
+      "id": "content:CT-015",
+      "caseId": "CT-015",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "مؤسسه رتبه‌بندی اوراق ایراندار کیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "موسسه رتبه‌بندی: شرکت رتبه‌بندی اعتباری پایا مجوز انتشار اوراق صادره توسط سازمان بورس و اوراق بهادار، گزارش رتبه‌بندی اعتباری و گزارش حسابرسی بیانیه ثبت تامین مالی اوراق مذکور از پیوند‌های زیر قابل دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 3508,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 365,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1945,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5867.05
+    },
+    {
+      "id": "content:CT-016",
+      "caseId": "CT-016",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "حسابرس اوراق صدار 704 را نام ببر",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 362,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2016,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 421,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1299,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4149.15
+    },
+    {
+      "id": "content:CT-017",
+      "caseId": "CT-017",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "irandar-bond",
+      "question": "عامل فروش و عامل پرداخت اوراق ایراندار چه نهادهایی هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "دوره عمر این اوراق 2 سال و مواعد پرداخت آن هر ۳ ماه یک بار از تاریخ انتشار اوراق است. عامل فروش: شرکت کارگزاری کارآمد عامل پرداخت: شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 3347,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 600,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2553,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 555,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 2547,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9656.33
+    },
+    {
+      "id": "content:CT-022",
+      "caseId": "CT-022",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 829,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2297,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 319,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1305,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4809.36
+    },
+    {
+      "id": "content:CT-027",
+      "caseId": "CT-027",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "بازارگردان و کارگزار بازارگردان صندوق دلتا را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "طبق مجوز پذیره‌نویسی شماره 122/196345 مورخ 1405/03/11 سازمان بورس و اوراق بهادار، از تاریخ 1405/04/07 صندوق سرمایه‌گذاری بخشی صنایع تمدن (بانک‌ها و موسسات اعتباری) قابل معامله در سهام، با نماد \"دلتا\" در فهرست نرخ‌های بازار صندوق‌های سرمایه‌گذاری قابل معامله در بورس تهران درج شد‌. بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی توسعه بازار تمدن کارگزار بازارگردان: شرکت کارگزاری تامین سرمایه تمدن.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 408,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2974,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3441.01
+    },
+    {
+      "id": "content:CT-028",
+      "caseId": "CT-028",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "trading-microstructure",
+      "question": "حداکثر حجم هر سفارش طبق تغییر جدید از چند طبقه به چند طبقه رسید؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": false,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "mustContainAny"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 780,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2691,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 576,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1346,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5451.05
+    },
+    {
+      "id": "content:CT-032",
+      "caseId": "CT-032",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": false,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain",
+        "answerLength"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "گودرزی از افزایش تمایل بخش خصوصی برای ورود به بازار سرمایه خبر داد و گفت: استقبال شرکت‌های خصوصی برای حضور در بورس به شکل محسوسی افزایش یافته است. در همین راستا، بورس تهران طراحی «بازار خصوصی» را در دستور کار قرار داده است؛ وی از برنامه‌های وزارت امور اقتصادی و دارایی برای حمایت از شرکت‌های دانش‌بنیان و فناورمحور نیز خبر داد و افزود: جلسات هیات پذیرش بورس تا پایان سال برنامه‌ریزی شده است، اما برای شرکت‌های فناور و دارای اولویت، خارج از روال معمول زمان و ظرفیت ویژه‌ای اختصاص خواهیم داد.مدیرعامل بورس تهران یکی از مهم‌ترین مزایای حضور در بورس را تثبیت حقوق مالکیت دانست و اظهار کرد: بسیاری از کسب‌وکار‌های خصوصی پس از سال‌ها فعالیت، نیازمند تثبیت و صیانت از حقوق مالکیت خود هستند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 503,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1675,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2248.21
+    },
+    {
+      "id": "content:CT-036",
+      "caseId": "CT-036",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 211,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2324,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 199,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1457,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 4269.12
+    },
+    {
+      "id": "content:CT-039",
+      "caseId": "CT-039",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "گفتنی است: سایپا در سال 1375 به جمع ناشران بورسی پیوست و امروز بیش از93 همت از ارزش بازار بورس تهران را به خود اختصاص داده است. در حال حاضر تعداد 26شرکت در فهرست ناشران پذیرش شده در صنعت \"خودرو و ساخت قطعات\" وجود دارند، که در بین این تعداد، سایپا از نظر ارزش بازار رتبه دوم را در اختیار دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 46,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 611,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2022,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2754.83
+    },
+    {
+      "id": "content:CT-040",
+      "caseId": "CT-040",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 621,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3876,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 741,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 1747,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7049.57
+    },
+    {
+      "id": "content:CT-041",
+      "caseId": "CT-041",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "record-metadata",
+      "question": "تاریخ انتشار رکورد Content 100756 چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "رکورد Content با شناسه 100756:\nتاریخ انتشار: 1405/04/16 ساعت 15:45:00",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 824,
+          "detail": "kind=content_reference;complete=True;facts=7;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=رکورد Content 100756;facts=7"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2707,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3567.39
+    },
+    {
+      "id": "content:CT-042",
+      "caseId": "CT-042",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "record-metadata",
+      "question": "نوع محتوا، زبان، وضعیت انتشار و دپارتمان رکورد Content 100756 را بده",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "در داده‌های قابل اتکای فعلی، پاسخ مشخصی درباره «موضوع موردنظر» برای این سؤال پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 20769,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 4713,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1366,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 3354,
+          "detail": null
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1076,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review.final",
+          "status": "ok",
+          "durationMs": 2599,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33924.37
+    },
+    {
+      "id": "content:CT-043",
+      "caseId": "CT-043",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "record-metadata",
+      "question": "زمان ایجاد، آخرین ویرایش و زمان جمع‌آوری رکورد Content 100756 را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "رکورد Content با شناسه 100756:\nزمان ایجاد: 1405/04/16 ساعت 15:48:23\nآخرین ویرایش: ثبت نشده\nزمان جمع‌آوری منبع: 1405/05/20 ساعت 13:53:17",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 50,
+          "detail": "kind=content_reference;complete=True;facts=7;missing="
+        },
+        {
+          "tool": "sql.content.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=content_reference;topic=رکورد Content 100756;facts=7"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1945,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2067.48
+    }
+  ]
+}

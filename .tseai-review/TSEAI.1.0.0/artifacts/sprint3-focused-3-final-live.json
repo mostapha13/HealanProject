@@ -1,0 +1,359 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T13:12:43.230653+00:00",
+  "runId": "5a2c30750615",
+  "manifestVersion": "2.0",
+  "datasetSha256": "68c9d0a7690a1090b0e113625f86c2ab0b722b6eefe723de6395963af624b3db",
+  "caseCount": 3,
+  "sources": {
+    "content": {
+      "total": 3,
+      "passed": 2
+    }
+  },
+  "total": 3,
+  "passed": 2,
+  "failed": 1,
+  "passRate": 0.6666666666666666,
+  "p50LatencyMs": 7223.86,
+  "p95LatencyMs": 7223.86,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "mustContain": 1
+  },
+  "clusters": {
+    "content:delta-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:private-market": {
+      "total": 2,
+      "passed": 1
+    }
+  },
+  "failures": [
+    {
+      "id": "content:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بر اساس مستندات موجود، فرایند‌های پذیرش ناشران الکترونیکی نشده‌اند. مستندات تاریخی (2013 و 2019) تنها به «فرایند لغو پذیرش» و «طبقه‌بندی ناشران» اشاره کرده‌اند و هیچ مدرکی وجود ندارد که فرایند پذیرش را به صورت الکترونیکی معرفی کند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 6327,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,The user is asking about the processes for accepting electronic publishers, which is a procedural/re,No specific stock symbol or company is mentioned in the query.,The intent is to retrieve descriptive information about a process or rule, fitting the 'knowledge' i"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1296,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 5531,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1034,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 14311.23
+    }
+  ],
+  "results": [
+    {
+      "id": "content:CT-025",
+      "caseId": "CT-025",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "موسسین: شرکت آسان سرمایه گستر ایرانیان، رهپویان پردازش گستر صحرا و شرکت تامین سرمایه تمدن.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 3319,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2344,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5893.07
+    },
+    {
+      "id": "content:CT-033",
+      "caseId": "CT-033",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "بازار خصوصی بورس تهران برای چه شرکت‌هایی و با چه هدفی طراحی می‌شود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بازاری که در آن شرکت‌های سهامی خاص، بدون تبدیل فوری به سهامی عام، بتوانند با اصول حاکمیت شرکتی، اصلاح ساختار مالکیت و تامین مالی از طریق بازار سرمایه آشنا شوند و به تدریج برای پذیرش در بازار‌های اصلی آماده شوند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2159,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4959,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 7223.86
+    },
+    {
+      "id": "content:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بر اساس مستندات موجود، فرایند‌های پذیرش ناشران الکترونیکی نشده‌اند. مستندات تاریخی (2013 و 2019) تنها به «فرایند لغو پذیرش» و «طبقه‌بندی ناشران» اشاره کرده‌اند و هیچ مدرکی وجود ندارد که فرایند پذیرش را به صورت الکترونیکی معرفی کند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 6327,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,The user is asking about the processes for accepting electronic publishers, which is a procedural/re,No specific stock symbol or company is mentioned in the query.,The intent is to retrieve descriptive information about a process or rule, fitting the 'knowledge' i"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 1296,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 5531,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1034,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 14311.23
+    }
+  ]
+}

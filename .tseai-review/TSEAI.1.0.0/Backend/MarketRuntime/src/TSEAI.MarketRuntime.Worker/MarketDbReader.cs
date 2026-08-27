@@ -19,29 +19,54 @@ public sealed class MarketDbReader(IConfiguration cfg, IOptions<MarketRuntimeOpt
 
     public async Task<IReadOnlyList<InstrumentReference>> ReadInstruments(CancellationToken ct)
     {
-        await using var connection = CreateConnection();
         var sql = string.IsNullOrWhiteSpace(_options.InstrumentSql) ? DefaultMarketQueries.Instruments : _options.InstrumentSql;
-        return (await connection.QueryAsync<InstrumentReference>(new CommandDefinition(sql, cancellationToken: ct, commandTimeout: 30))).AsList();
+        return await QueryAsync<InstrumentReference>(sql, null, ct);
     }
 
     public async Task<IReadOnlyList<CurrentMarketRow>> ReadCurrent(DateTime? watermark, CancellationToken ct)
     {
-        await using var connection = CreateConnection();
         var sql = string.IsNullOrWhiteSpace(_options.CurrentStateSql) ? DefaultMarketQueries.CurrentState : _options.CurrentStateSql;
-        return (await connection.QueryAsync<CurrentMarketRow>(new CommandDefinition(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, cancellationToken: ct, commandTimeout: 30))).AsList();
+        return await QueryAsync<CurrentMarketRow>(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, ct);
     }
 
     public async Task<IReadOnlyList<ClientTypeRow>> ReadClientTypes(DateTime? watermark, CancellationToken ct)
     {
-        await using var connection = CreateConnection();
         var sql = string.IsNullOrWhiteSpace(_options.ClientTypeSql) ? DefaultMarketQueries.ClientTypes : _options.ClientTypeSql;
-        return (await connection.QueryAsync<ClientTypeRow>(new CommandDefinition(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, cancellationToken: ct, commandTimeout: 30))).AsList();
+        return await QueryAsync<ClientTypeRow>(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, ct);
     }
 
     public async Task<IReadOnlyList<OrderBookRow>> ReadOrderBook(DateTime? watermark, CancellationToken ct)
     {
-        await using var connection = CreateConnection();
         var sql = string.IsNullOrWhiteSpace(_options.OrderBookSql) ? DefaultMarketQueries.OrderBook : _options.OrderBookSql;
-        return (await connection.QueryAsync<OrderBookRow>(new CommandDefinition(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, cancellationToken: ct, commandTimeout: 30))).AsList();
+        return await QueryAsync<OrderBookRow>(sql, new { Watermark = watermark ?? SqlDateTimeMinimum }, ct);
+    }
+
+    private async Task<IReadOnlyList<T>> QueryAsync<T>(string sql, object? parameters, CancellationToken ct)
+    {
+        await using var connection = CreateConnection();
+        try
+        {
+            // Opening explicitly keeps connection failures separate from command
+            // failures and prevents Dapper from returning a half-open pooled
+            // connection after a cancelled/expired reader.
+            await connection.OpenAsync(ct);
+            var timeout = Math.Clamp(_options.CommandTimeoutSeconds, 5, 300);
+            return (await connection.QueryAsync<T>(new CommandDefinition(
+                sql, parameters, cancellationToken: ct, commandTimeout: timeout,
+                flags: CommandFlags.Buffered))).AsList();
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            SqlConnection.ClearPool(connection);
+            throw;
+        }
+        catch (Exception exception) when (exception is SqlException or InvalidOperationException or NotSupportedException)
+        {
+            // A timed-out SqlDataReader may poison its physical pooled
+            // connection ("another read operation is pending"). Remove only
+            // this pool entry so the next polling cycle starts cleanly.
+            SqlConnection.ClearPool(connection);
+            throw;
+        }
     }
 }

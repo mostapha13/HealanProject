@@ -1,0 +1,197 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T13:19:16.084137+00:00",
+  "runId": "32dbbfea3a0a",
+  "manifestVersion": "2.0",
+  "datasetSha256": "68c9d0a7690a1090b0e113625f86c2ab0b722b6eefe723de6395963af624b3db",
+  "caseCount": 1,
+  "sources": {
+    "content": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "total": 1,
+  "passed": 0,
+  "failed": 1,
+  "passRate": 0.0,
+  "p50LatencyMs": 9927.62,
+  "p95LatencyMs": 9927.62,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "mustContain": 1
+  },
+  "clusters": {
+    "content:private-market": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "content:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیرعامل بورس تهران با اشاره به تغییر رویکرد این بورس طی دو سال گذشته تصریح کرد: سیاست ما این است که هر شرکتی با سود خالص بیش از 100 میلیارد تومان، در اولویت پذیرش قرار گیرد و بورس تهران برای ورود چنین شرکت‌هایی فرش قرمز پهن خواهد کرد.وی همچنین از راه‌اندازی سامانه تعاملی جدید بورس تهران خبر داد و گفت: به‌زودی بخش عمده فرآیند‌های پذیرش و تعامل با ناشران به صورت کاملا الکترونیکی انجام خواهد شد و حتی امضای امیدنامه‌ها نیز به شکل دیجیتال خواهد بود تا بروکراسی اداری به حداقل برسد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 68,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 128,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 98,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2817,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 52,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 5233,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9927.62
+    }
+  ],
+  "results": [
+    {
+      "id": "content:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "private-market",
+      "question": "قرار است کدام فرایندهای پذیرش ناشران الکترونیکی شود؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیرعامل بورس تهران با اشاره به تغییر رویکرد این بورس طی دو سال گذشته تصریح کرد: سیاست ما این است که هر شرکتی با سود خالص بیش از 100 میلیارد تومان، در اولویت پذیرش قرار گیرد و بورس تهران برای ورود چنین شرکت‌هایی فرش قرمز پهن خواهد کرد.وی همچنین از راه‌اندازی سامانه تعاملی جدید بورس تهران خبر داد و گفت: به‌زودی بخش عمده فرآیند‌های پذیرش و تعامل با ناشران به صورت کاملا الکترونیکی انجام خواهد شد و حتی امضای امیدنامه‌ها نیز به شکل دیجیتال خواهد بود تا بروکراسی اداری به حداقل برسد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 68,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 128,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 98,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 2817,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 52,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 5233,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9927.62
+    }
+  ]
+}

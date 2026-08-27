@@ -1,0 +1,110 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-27T11:04:33.754858+00:00",
+  "total": 5,
+  "passed": 3,
+  "passRate": 0.6,
+  "allPassed": false,
+  "p50LatencyMs": 21198.36,
+  "p95LatencyMs": 22242.87,
+  "clusters": {
+    "irandar-bond": {
+      "total": 1,
+      "passed": 1
+    },
+    "green-fund": {
+      "total": 1,
+      "passed": 1
+    },
+    "private-market": {
+      "total": 1,
+      "passed": 1
+    },
+    "saipa-history": {
+      "total": 2,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CT-013",
+      "cluster": "irandar-bond",
+      "question": "تضمین اوراق ایراندار بر چه مبنایی است و رتبه‌هایش چیست؟",
+      "mustContain": [
+        "رتبه اعتباری",
+        "BBB-",
+        "A3"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "مبنای تضمین/ضامن: رتبه اعتباری با کاهش توثیق سهام (رتبه اعتباری در بلندمدت (BBB-) و در کوتاه‌مدت (A3)).",
+      "actualType": "knowledge",
+      "latencyMs": 17282.66
+    },
+    {
+      "id": "CT-022",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "mustContain": [
+        "گسترش نوویرا",
+        "کارگزاری پارسیان"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کارگزار بازارگردان: شرکت کارگزاری پارسیان؛ بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی گسترش نوویرا.",
+      "actualType": "knowledge",
+      "latencyMs": 16037.78
+    },
+    {
+      "id": "CT-032",
+      "cluster": "private-market",
+      "question": "چه کسی از طراحی بازار خصوصی بورس تهران خبر داده؟",
+      "mustContain": [
+        "محمود گودرزی",
+        "مدیرعامل بورس تهران"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "actualType": "knowledge",
+      "latencyMs": 37162.31
+    },
+    {
+      "id": "CT-036",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "mustContain": [
+        "علی شیخ زاده"
+      ],
+      "maxAnswerChars": 450,
+      "passed": false,
+      "issues": [
+        "missing:علی شیخ زاده"
+      ],
+      "answer": "داده قابل اتکایی برای پاسخ پیدا نشد.",
+      "actualType": "knowledge",
+      "latencyMs": 21198.36
+    },
+    {
+      "id": "CT-040",
+      "cluster": "saipa-history",
+      "question": "در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت و رتبه سایپا از نظر ارزش بازار چند بود؟",
+      "mustContain": [
+        "26 شرکت",
+        "رتبه دوم"
+      ],
+      "maxAnswerChars": 550,
+      "passed": false,
+      "issues": [
+        "missing:26 شرکت",
+        "missing:رتبه دوم"
+      ],
+      "answer": "داده قابل اتکایی برای پاسخ پیدا نشد.",
+      "actualType": "knowledge",
+      "latencyMs": 22242.87
+    }
+  ]
+}

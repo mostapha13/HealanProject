@@ -6,7 +6,7 @@ from app.knowledge.preprocessing import prepare_document
 from app.knowledge.content_policy import decide_route
 from app.knowledge.chunking import chunk_document
 from app.knowledge.embedding import HashingEmbeddingProvider
-from app.knowledge.service import KnowledgeService
+from app.knowledge.service import KnowledgeService, _lexical_probes
 
 class RecordingEmbeddingProvider(HashingEmbeddingProvider):
     def __init__(self,dimension=32):
@@ -76,6 +76,18 @@ def test_persian_normalization():
     assert normalize_persian("شركت  توسعه‌ي  بازار") == "شرکت توسعه‌ی بازار"
     assert normalize_for_search("شرکت توسعه‌ی بازار") == "شرکت توسعه ی بازار"
     assert normalize_persian("استراتژیهای برنامهریزی و برنامههای توسعهای اجرا میشود") == "استراتژی‌های برنامه‌ریزی و برنامه‌های توسعه‌ای اجرا می‌شود"
+    assert normalize_for_search("بازار خصوصی چیست؟") == "بازار خصوصی چیست"
+
+
+def test_lexical_probes_preserve_market_identifiers_and_entity_phrases():
+    assert "صدار704" in _lexical_probes("حسابرس اوراق صدار 704 را نام ببر")
+    assert "سبز آبنوس" in _lexical_probes("بازارگردان صندوق سبز آبنوس کیست؟")
+    assert "سبز آبنوس" in _lexical_probes("بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟")
+    assert "صندوق دلتا" in _lexical_probes("بازارگردان و کارگزار بازارگردان صندوق دلتا را بگو")
+    assert "ناشران پذیرش" in _lexical_probes("در صنعت خودرو چند ناشر پذیرفته‌شده وجود داشت؟")
+    assert "موسسین" in _lexical_probes("بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟")
+    assert "فرآیندهای پذیرش" in _lexical_probes("کدام فرایندهای پذیرش الکترونیکی می‌شود؟")
+    assert "دلتا" in _lexical_probes("بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟")
 
 def test_chunk_ids_are_stable():
     d=KnowledgeDocument("d1","notice","1","عنوان","متن "*800)
@@ -114,6 +126,28 @@ def test_hybrid_retrieval_and_metadata_filter():
         assert r["count"]==1
         assert r["items"][0]["source"]["document_id"]=="d1"
         assert r["items"][0]["keyword_score"]>0
+    asyncio.run(run())
+
+
+def test_persian_paraphrases_keep_exact_bond_evidence():
+    async def run():
+        store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(128))
+        await svc.index([
+            KnowledgeDocument(
+                "iran-dar-bond","cms_content","704","اوراق مرابحه شرکت ایراندار",
+                "اوراق مرابحه ایراندار با نماد صدار704 برای خرید مواد اولیه منتشر شد. "
+                "بازارگردان آن صندوق سرمایه گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار و "
+                "حسابرس آن موسسه حسابرسی بیات رایان است.",
+                metadata={"content_type_id":1,"language_id":1})
+        ])
+        for query in (
+            "اوراق صدار704 برای چه هدفی منتشر شده؟",
+            "بازارگردان صدار704 کدام صندوق است؟",
+            "حسابرس اوراق صدار 704 را نام ببر",
+        ):
+            result=await svc.retrieve(query,limit=8,language_id=1)
+            assert result["count"]==1, query
+            assert result["items"][0]["source"]["document_id"]=="iran-dar-bond"
     asyncio.run(run())
 
 def test_retrieval_returns_reassembled_parent_document_not_only_matched_chunk():

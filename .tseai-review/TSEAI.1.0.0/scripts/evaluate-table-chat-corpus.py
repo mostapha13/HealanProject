@@ -57,13 +57,26 @@ def main() -> int:
     parser.add_argument("--out", required=True)
     parser.add_argument("--timeout", type=float, default=60)
     parser.add_argument("--interval-ms", type=int, default=100)
+    parser.add_argument(
+        "--case-id",
+        action="append",
+        default=[],
+        help="Evaluate only this case id; repeat the option to select multiple cases.",
+    )
     args = parser.parse_args()
 
     corpus_path = Path(args.corpus)
     corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
+    cases = corpus["cases"]
+    if args.case_id:
+        selected = set(args.case_id)
+        cases = [case for case in cases if case["id"] in selected]
+        missing = selected.difference(case["id"] for case in cases)
+        if missing:
+            parser.error("unknown case id(s): " + ", ".join(sorted(missing)))
     results = []
     latencies = []
-    for index, case in enumerate(corpus["cases"], 1):
+    for index, case in enumerate(cases, 1):
         try:
             response, latency = ask(args.base_url, case["question"], args.timeout)
             passed, issues = evaluate(case, response)
@@ -74,7 +87,7 @@ def main() -> int:
             result = {**case, "passed": False, "issues": [f"request:{type(exc).__name__}:{exc}"],
                       "answer": None, "actualType": None, "latencyMs": None}
         results.append(result)
-        print(json.dumps({"progress": f"{index}/{len(corpus['cases'])}", "id": case["id"],
+        print(json.dumps({"progress": f"{index}/{len(cases)}", "id": case["id"],
                           "passed": result["passed"], "issues": result["issues"]}, ensure_ascii=False), flush=True)
         if args.interval_ms > 0:
             time.sleep(args.interval_ms / 1000)

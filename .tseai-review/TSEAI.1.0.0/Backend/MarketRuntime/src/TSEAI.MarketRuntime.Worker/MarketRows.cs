@@ -87,3 +87,49 @@ public sealed class OrderBookRow
     public long SellCount { get; set; }
     public long SellVolume { get; set; }
 }
+
+public sealed class MarketFeedSyncState
+{
+    public string Feed { get; set; } = "";
+    public string Status { get; set; } = "never";
+    public DateTime? Watermark { get; set; }
+    public DateTime? LatestSourceCollectedAt { get; set; }
+    public DateTime? LastAttemptAtUtc { get; set; }
+    public DateTime? LastSuccessAtUtc { get; set; }
+    public DateTime? LastFailureAtUtc { get; set; }
+    public int LastReadRowCount { get; set; }
+    public int LastFullRowCount { get; set; }
+    public bool LastAttemptWasFull { get; set; }
+    public string? LastError { get; set; }
+}
+
+public static class MarketReconciliationPolicy
+{
+    public static bool IsSafe(
+        int candidateRows,
+        int previousFullRows,
+        int minimumRows,
+        int minimumCoveragePercent,
+        out string reason)
+    {
+        if (candidateRows < Math.Max(0, minimumRows))
+        {
+            reason = $"candidate row count {candidateRows} is below the configured minimum {Math.Max(0, minimumRows)}";
+            return false;
+        }
+
+        if (previousFullRows > 0)
+        {
+            var coverage = candidateRows * 100m / previousFullRows;
+            var required = Math.Clamp(minimumCoveragePercent, 0, 100);
+            if (coverage < required)
+            {
+                reason = $"candidate coverage {coverage:0.##}% is below the configured minimum {required}% (previous={previousFullRows}, candidate={candidateRows})";
+                return false;
+            }
+        }
+
+        reason = "ok";
+        return true;
+    }
+}

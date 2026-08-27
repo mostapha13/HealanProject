@@ -1,0 +1,150 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T13:57:31.521001+00:00",
+  "runId": "76a90a05b07f",
+  "manifestVersion": "2.0",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
+  "caseCount": 1,
+  "sources": {
+    "content": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "total": 1,
+  "passed": 0,
+  "failed": 1,
+  "passRate": 0.0,
+  "p50LatencyMs": 37387.96,
+  "p95LatencyMs": 37387.96,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 1,
+    "mustContain": 1
+  },
+  "clusters": {
+    "content:distribution": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "content:CT-047",
+      "caseId": "CT-047",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "distribution",
+      "question": "نوع‌های محتوای جدول Content را به تفکیک تعداد بده",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "عبارت 'Content' به عنوان یک نماد یا شرکت در بورس تهران ثبت نشده است. لطفاً نام دقیق نماد یا شرکت مورد نظر را ذکر کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24496,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 12812,
+          "detail": "route=Clarification;intent=Clarification;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,عبارت 'Content' نمادی شناخته شده در بورس تهران نیست.,مفهوم 'جدول Content' مبهم است و نیاز به شفاف‌سازی دارد.,عدم وجود نماد مشخص باعث می‌شود نتوان اطلاعات بازار را جستجو کرد."
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 37387.96
+    }
+  ],
+  "results": [
+    {
+      "id": "content:CT-047",
+      "caseId": "CT-047",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "distribution",
+      "question": "نوع‌های محتوای جدول Content را به تفکیک تعداد بده",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true
+      },
+      "issues": [
+        "type",
+        "mustContain"
+      ],
+      "actualType": "clarification",
+      "actualEntity": "",
+      "answer": "عبارت 'Content' به عنوان یک نماد یا شرکت در بورس تهران ثبت نشده است. لطفاً نام دقیق نماد یا شرکت مورد نظر را ذکر کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24496,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 12812,
+          "detail": "route=Clarification;intent=Clarification;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan,عبارت 'Content' نمادی شناخته شده در بورس تهران نیست.,مفهوم 'جدول Content' مبهم است و نیاز به شفاف‌سازی دارد.,عدم وجود نماد مشخص باعث می‌شود نتوان اطلاعات بازار را جستجو کرد."
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 37387.96
+    }
+  ]
+}

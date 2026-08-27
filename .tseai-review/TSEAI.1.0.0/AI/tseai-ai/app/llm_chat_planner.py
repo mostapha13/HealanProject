@@ -80,34 +80,10 @@ _ALLOWED_FIELDS = {
     "turnover_ratio",
 }
 
-_RESPONSE_FORMAT = {
-    "type": "json_schema",
-    "json_schema": {
-        "name": "tseai_chat_plan",
-        "strict": True,
-        "schema": {
-            "type": "object",
-            "additionalProperties": False,
-            "properties": {
-                "intent": {"type": "string", "enum": sorted(_ALLOWED_INTENTS)},
-                "symbol": {"type": ["string", "null"]},
-                "knowledge_query": {"type": ["string", "null"]},
-                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-                "clarification": {"type": ["string", "null"]},
-                "reasons": {"type": "array", "items": {"type": "string"}, "maxItems": 0},
-                "requested_fields": {
-                    "type": "array",
-                    "items": {"type": "string", "enum": sorted(_ALLOWED_FIELDS)},
-                    "maxItems": 16,
-                },
-            },
-            "required": [
-                "intent", "symbol", "knowledge_query", "confidence",
-                "clarification", "reasons", "requested_fields",
-            ],
-        },
-    },
-}
+# llama.cpp expands bounded JSON-schema strings into a very large grammar.
+# JSON-object mode is portable; _parse_plan below remains the strict trust
+# boundary for allowed fields, enums, entity surfaces and output lengths.
+_RESPONSE_FORMAT = {"type": "json_object"}
 
 _SYSTEM_PROMPT = """You are the semantic query-understanding layer of TSEAI, a Persian Tehran Stock Exchange assistant.
 Understand meaning, not keyword spelling. Formal, colloquial, misspelled and differently worded Persian questions with the same meaning must produce the same plan.

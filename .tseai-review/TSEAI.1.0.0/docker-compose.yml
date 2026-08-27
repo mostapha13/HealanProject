@@ -47,6 +47,9 @@ services:
       DataQuality__CanonicalCurrentSnapshotMaxAgeHours: ${DATA_QUALITY_CANONICAL_CURRENT_MAX_AGE_HOURS:-24}
       DataQuality__CanonicalVersionedMaxAgeDays: ${DATA_QUALITY_CANONICAL_VERSIONED_MAX_AGE_DAYS:-14}
       DataQuality__CanonicalReferenceMaxAgeDays: ${DATA_QUALITY_CANONICAL_REFERENCE_MAX_AGE_DAYS:-30}
+      RateLimit__AnonymousPerMinute: ${RATE_LIMIT_ANONYMOUS_PER_MINUTE:-60}
+      RateLimit__AuthenticatedPerMinute: ${RATE_LIMIT_AUTHENTICATED_PER_MINUTE:-180}
+      RateLimit__WindowSeconds: ${RATE_LIMIT_WINDOW_SECONDS:-60}
       Redis__ConnectionString: redis:6379
       Security__JwtSigningKey: ${JWT_SIGNING_KEY}
       Security__Issuer: tseai-identity
@@ -109,6 +112,8 @@ services:
       Redis__ConnectionString: redis:6379
       Runtime__PollIntervalMilliseconds: ${MARKET_POLL_INTERVAL_MS:-1000}
       Runtime__InstrumentRefreshMinutes: ${INSTRUMENT_REFRESH_MINUTES:-30}
+      Runtime__InstrumentRetrySeconds: ${INSTRUMENT_RETRY_SECONDS:-60}
+      Runtime__CommandTimeoutSeconds: ${MARKET_COMMAND_TIMEOUT_SECONDS:-30}
       Runtime__UseWatermark: ${MARKET_USE_WATERMARK:-true}
       Runtime__InstrumentSql: ${MARKET_INSTRUMENT_SQL:-}
       Runtime__CurrentStateSql: ${MARKET_CURRENT_STATE_SQL:-}
@@ -239,6 +244,10 @@ services:
       LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-2}
       LLM_QUEUE_TIMEOUT_SECONDS: ${LLM_QUEUE_TIMEOUT_SECONDS:-15}
       LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-45}
+      LLM_CONNECT_TIMEOUT_SECONDS: ${LLM_CONNECT_TIMEOUT_SECONDS:-2}
+      LLM_POOL_TIMEOUT_SECONDS: ${LLM_POOL_TIMEOUT_SECONDS:-2}
+      LLM_CIRCUIT_FAILURE_THRESHOLD: ${LLM_CIRCUIT_FAILURE_THRESHOLD:-2}
+      LLM_CIRCUIT_OPEN_SECONDS: ${LLM_CIRCUIT_OPEN_SECONDS:-30}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://local-embedding:8080/v1}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding-0.6b}
       EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1024}

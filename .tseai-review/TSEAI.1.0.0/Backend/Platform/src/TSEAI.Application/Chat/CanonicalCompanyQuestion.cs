@@ -50,9 +50,10 @@ public static class CanonicalCompanyQuestion
         "نام","اسم","کامل","نماد","بورسی","وب","سایت","وبسایت","اینترنتی","آدرس","رسمی","تلفن","شماره","تماس","راه","ارتباطی",
         "مدیرعامل","مدیر","عامل","ceo","تالار","استان","منطقه","منطقه‌ای","منطقه ای","عرضه","اولیه","تاریخ","زمان","ورود","پذیرش","بورس",
         "شناسه","instrumentid","instrument","sourcecollectedat","جمع","آوری","بروزرسانی","به‌روزرسانی","به","روز","رسانی",
-        "چیست","چیه","کیه","کیست","کدام","کدوم","چه","چند","چقدر","است","هست","میباشد","می‌باشد","دارد","دارند",
-        "را","رو","بگو","بده","نمایش","اعلام","کن","کنید","لطفا","لطفاً","مربوط","متعلق","برای","در","از","به","و","یا",
-        "مقایسه","مقایسه‌کن","مقایسهکن","قدیمی","جدید","قدیمی‌ترین","جدیدترین","اولین","آخرین","بر اساس","براساس","فهرست","لیست"
+        "چیست","چیه","کیه","کیست","کدام","کدوم","چه","چند","چقدر","است","هست","هستند","اند","بود","بوده","نبود","میباشد","می‌باشد","دارد","دارند",
+        "یک","دو","سه","چهار","پنج","شش","هفت","هشت","نه","ده","تا","مورد","موارد",
+        "را","رو","بگو","بده","نمایش","اعلام","کن","کنید","لطفا","لطفاً","مربوط","متعلق","برای","در","از","به","با","و","یا",
+        "مقایسه","مقایسه‌کن","مقایسهکن","قدیمی","جدید","تازه","ترین","اخیر","اخیرترین","قدیمی‌ترین","جدیدترین","اولین","آخرین","بر اساس","براساس","فهرست","لیست"
     };
 
     public static CanonicalCompanyQuestionIntent Parse(string? question)
@@ -81,11 +82,14 @@ public static class CanonicalCompanyQuestion
             && fields.Contains("ipo_date");
         if(isComparison) aggregate=CompanyAggregateKind.Comparison;
         var lookups=ExtractLookupTexts(q,isComparison);
+        if(aggregate is CompanyAggregateKind.LatestIpo or CompanyAggregateKind.EarliestIpo
+            &&lookups.Count>0)
+            aggregate=CompanyAggregateKind.None;
         var mentionsCompanyTable=q.Contains("جدول company",StringComparison.Ordinal)
             ||q.Contains("در company",StringComparison.Ordinal)
             ||q.Contains("داده company",StringComparison.Ordinal);
         return new(fields.Count>0||aggregate!=CompanyAggregateKind.None||mentionsCompanyTable,
-            aggregate,fields.ToArray(),lookups,DetectLimit(q),year,ContainsAny(q,"فقط اسم","فقط نام","اسامی را","نام ها","نام‌ها"));
+            aggregate,fields.ToArray(),lookups,DetectLimit(q,aggregate),year,ContainsAny(q,"فقط اسم","فقط نام","اسامی را","نام ها","نام‌ها"));
     }
 
     private static CompanyAggregateKind DetectAggregate(string q,HashSet<string> fields,out int? jalaliYear)
@@ -109,8 +113,10 @@ public static class CanonicalCompanyQuestion
             return CompanyAggregateKind.DataQuality;
         if(fields.Contains("ipo_date")&&jalaliYear is not null&&ContainsAny(q,"شرکت ها","شرکت‌های","شرکت های","چند شرکت","تعداد شرکت","عرضه ها","عرضه‌های"))
             return CompanyAggregateKind.IpoYear;
-        if(fields.Contains("ipo_date")&&ContainsAny(q,"جدیدترین","آخرین شرکت","اخیرترین")) return CompanyAggregateKind.LatestIpo;
-        if(fields.Contains("ipo_date")&&ContainsAny(q,"قدیمی ترین","قدیمی‌ترین","اولین شرکت","نخستین شرکت")) return CompanyAggregateKind.EarliestIpo;
+        if(fields.Contains("ipo_date")&&ContainsAny(q,"جدیدترین","آخرین","اخیرترین","تازه ترین","تازه‌ترین","اخیر"))
+            return CompanyAggregateKind.LatestIpo;
+        if(fields.Contains("ipo_date")&&ContainsAny(q,"قدیمی ترین","قدیمی‌ترین","اولین","نخستین"))
+            return CompanyAggregateKind.EarliestIpo;
         if(fields.Contains("source_collected_at")&&q.Contains("company",StringComparison.Ordinal)&&ContainsAny(q,"کل company","کل جدول","آخرین زمان"))
             return CompanyAggregateKind.Statistics;
         if(q.Contains("company",StringComparison.Ordinal)&&ContainsAny(q,"چند رکورد","تعداد رکورد","چند شرکت","تعداد شرکت","چند عنوان","تعداد عنوان","چند تالار","تعداد تالار","چند instrumentid","تعداد instrumentid","آمار جدول","وضعیت جدول","کل جدول"))
@@ -121,6 +127,7 @@ public static class CanonicalCompanyQuestion
     private static IReadOnlyList<string> ExtractLookupTexts(string normalized,bool comparison)
     {
         var value=normalized;
+        value=Regex.Replace(value,@"\b(?:بورس(?: اوراق بهادار)? تهران|بازار سرمایه(?: ایران)?|بازار بورس(?: ایران)?)\b"," ",RegexOptions.CultureInvariant);
         foreach(var phrase in MetricPhrases.OrderByDescending(x=>x.Length)) value=value.Replace(phrase," ",StringComparison.OrdinalIgnoreCase);
         value=Regex.Replace(value,@"\b(?:فقط|لطفا|لطفاً|بهم|برا|برایم|جدول)\b"," ");
         var segments=comparison
@@ -140,13 +147,16 @@ public static class CanonicalCompanyQuestion
         return result.Take(comparison?2:1).ToArray();
     }
 
-    private static int DetectLimit(string q)
+    private static int DetectLimit(string q,CompanyAggregateKind aggregate)
     {
-        var match=Regex.Match(q,@"(?<n>[0-9۰-۹]{1,2})\s*(?:شرکت|مورد|تا)");
+        var match=Regex.Match(q,@"(?<![0-9۰-۹])(?<n>[0-9۰-۹]{1,2})(?![0-9۰-۹])\s*(?:شرکت|مورد|تا|عرضه)");
         if(match.Success&&int.TryParse(ToLatinDigits(match.Groups["n"].Value),out var value)) return Math.Clamp(value,1,20);
         var words=new Dictionary<string,int>(StringComparer.Ordinal){{"یک",1},{"دو",2},{"سه",3},{"چهار",4},{"پنج",5},{"شش",6},{"هفت",7},{"هشت",8},{"نه",9},{"ده",10}};
         foreach(var (word,count) in words)
-            if(Regex.IsMatch(q,$@"(?:^|\s){word}\s+(?:شرکت|مورد)")) return count;
+            if(Regex.IsMatch(q,$@"(?:^|\s){word}\s+(?:شرکت|مورد|عرضه)")) return count;
+        if(aggregate is CompanyAggregateKind.LatestIpo or CompanyAggregateKind.EarliestIpo
+            &&!ContainsAny(q,"فهرست","لیست","چند","شرکت ها","شرکت های","عرضه ها","عرضه های","موارد"))
+            return 1;
         return 10;
     }
 

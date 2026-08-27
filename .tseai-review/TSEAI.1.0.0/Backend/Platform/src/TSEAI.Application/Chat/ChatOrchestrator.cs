@@ -62,12 +62,18 @@ public sealed class ChatOrchestrator(
         toolPolicy.Demand("structured.reference");
         var canonicalAnswer=await Timed("structured.reference",()=>canonicalReferenceAnswers.TryAnswerAsync(effectiveQuestion,temporalContext,ct),trace,
             x=>x is null?"no-match":$"kind={x.Reference.Kind};complete={x.IsComplete};facts={x.Facts.Count};missing={string.Join('|',x.MissingFacets)}");
+        if(canonicalAnswer is not null)
+        {
+            toolPolicy.Demand(canonicalAnswer.ToolName);
+            trace.Add(new ChatToolTrace(canonicalAnswer.ToolName,"ok",0,
+                $"kind={canonicalAnswer.Reference.Kind};topic={canonicalAnswer.Reference.Topic};facts={canonicalAnswer.Facts.Count}"));
+        }
         if(canonicalAnswer is not null && canonicalAnswer.IsComplete)
         {
             toolPolicy.Demand("reflection.review");
             var review=await Timed("reflection.review",()=>reflector.ReviewAsync(
                 new ChatReflectionRequest(effectiveQuestion,canonicalAnswer.Answer,ChatIntent.Knowledge,canonicalAnswer.Confidence,
-                    canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer)),ct),trace);
+                    canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer),ExactCanonical:true),ct),trace);
             if(review.Action=="clarify")
                 return new("clarification",review.Clarification??"برای پاسخ دقیق‌تر، سؤال را کمی مشخص‌تر بیان کنید.",request.ConversationId,
                     ChatIntent.Clarification,canonicalAnswer.Confidence,null,null,[],[],trace,review.Clarification,temporalContext);
@@ -262,7 +268,10 @@ public sealed class ChatOrchestrator(
             if(!sr.Success)
             {
                 if(sr.Error=="market_data_quality_rejected")
-                    return new("data_quality_unavailable","داده جاری بازار در Quality Gate معتبر شناخته نشد؛ اجرای Hybrid متوقف شد.",request.ConversationId,plan.Intent,plan.Confidence,sr.Data as MarketSymbolSnapshot,null,[],[],trace,null,temporalContext,sr.Entity??entityContext,sr.Quality);
+                {
+                    var rejectedSnapshot=sr.Data as MarketSymbolSnapshot;
+                    return new("data_quality_unavailable",BuildRejectedMarketMessage(sr.Quality,rejectedSnapshot),request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,sr.Entity??entityContext,sr.Quality);
+                }
                 return new("market_unavailable",$"داده Structured برای «{entityContext?.Selected?.DisplayName ?? plan.Symbol}» در دسترس نیست ({sr.Error}).",request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,sr.Entity??entityContext,sr.Quality);
             }
             snapshot=sr.Data as MarketSymbolSnapshot; qualityReport=sr.Quality; entityContext=sr.Entity??entityContext;
@@ -284,11 +293,7 @@ public sealed class ChatOrchestrator(
                 {
                     snapshot=structuredResult.Data as MarketSymbolSnapshot;
                     qualityReport=structuredResult.Quality;
-                    var reason=qualityReport?.Status==DataQualityStatus.Stale
-                        ? "داده جاری بازار از آستانه Freshness عبور کرده است"
-                        : "داده جاری بازار در Quality Gate معتبر شناخته نشد";
-                    var message=$"{reason}؛ برای جلوگیری از ارائه عدد غیرقابل اتکا، TSEAI پاسخ بازار را متوقف کرد.";
-                    return new("data_quality_unavailable",message,request.ConversationId,plan.Intent,plan.Confidence,snapshot,null,[],[],trace,null,temporalContext,structuredResult.Entity??entityContext,qualityReport);
+                    return new("data_quality_unavailable",BuildRejectedMarketMessage(qualityReport,snapshot),request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,structuredResult.Entity??entityContext,qualityReport);
                 }
                 var unavailable=$"داده Structured برای «{entityContext?.Selected?.DisplayName ?? plan.Symbol}» در دسترس نیست ({structuredResult.Error}).";
                 return new("market_unavailable",unavailable,request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,structuredResult.Entity??entityContext,structuredResult.Quality);
@@ -367,7 +372,19 @@ public sealed class ChatOrchestrator(
                 answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
         }
         else
-            answer=answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,hits);
+        {
+            var deterministicAnswer=answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,hits);
+            if(plan.Intent==ChatIntent.Knowledge&&hits.Count>0)
+            {
+                toolPolicy.Demand("answer.synthesize");
+                var synthesisEvidence=hits.Take(12)
+                    .Select(x=>new GroundedSynthesisEvidence(x.Citation.SourceId,x.Citation.PublishedAt,x.Text)).ToArray();
+                var synthesized=await Timed("answer.synthesize",()=>answerSynthesizer.SynthesizeAsync(
+                    new GroundedAnswerSynthesisRequest(effectiveQuestion,deterministicAnswer,[],synthesisEvidence,[],turnContext.Previous.RecentTurns??[]),ct),trace);
+                answer=synthesized??deterministicAnswer;
+            }
+            else answer=deterministicAnswer;
+        }
         if(qualityReport?.Status==DataQualityStatus.Warning)
             answer="⚠️ برخی شاخص‌های کیفیت داده نیازمند توجه هستند؛ اعداد زیر از Snapshot معتبر ولی دارای Warning استخراج شده‌اند.\n\n"+answer;
 
@@ -408,7 +425,19 @@ public sealed class ChatOrchestrator(
                         answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
                 }
                 else
-                    answer=answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,hits);
+                {
+                    var deterministicAnswer=answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,hits);
+                    if(plan.Intent==ChatIntent.Knowledge&&hits.Count>0)
+                    {
+                        toolPolicy.Demand("answer.synthesize");
+                        var synthesisEvidence=hits.Take(12)
+                            .Select(x=>new GroundedSynthesisEvidence(x.Citation.SourceId,x.Citation.PublishedAt,x.Text)).ToArray();
+                        var synthesized=await Timed("answer.synthesize",()=>answerSynthesizer.SynthesizeAsync(
+                            new GroundedAnswerSynthesisRequest(effectiveQuestion,deterministicAnswer,[],synthesisEvidence,[],turnContext.Previous.RecentTurns??[]),ct),trace);
+                        answer=synthesized??deterministicAnswer;
+                    }
+                    else answer=deterministicAnswer;
+                }
                 if(qualityReport?.Status==DataQualityStatus.Warning)
                     answer="⚠️ برخی شاخص‌های کیفیت داده نیازمند توجه هستند؛ اعداد زیر از Snapshot معتبر ولی دارای Warning استخراج شده‌اند.\n\n"+answer;
 
@@ -439,6 +468,13 @@ public sealed class ChatOrchestrator(
             ? await conversationContext.RecordReferenceAsync(subject,request.ConversationId,request.Question,effectiveQuestion,answer,canonicalAnswer,temporalContext,ct)
             : await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,plan.Intent,routeDecision.Route,temporalContext,entityContext,null,ct,answer,plan.Intent.ToString().ToLowerInvariant());
         return new(plan.Intent.ToString().ToLowerInvariant(),answer,request.ConversationId,plan.Intent,plan.Confidence,snapshot,filterResult,hits,citations,trace,null,temporalContext,entityContext,qualityReport,analytics,null,null,savedContext,Evidence:evidence,EvidenceValidation:evidenceValidation,AnswerValidation:answerValidation);
+    }
+
+    private static string BuildRejectedMarketMessage(MarketDataQualityReport? report, MarketSymbolSnapshot? snapshot)
+    {
+        if(report?.Status==DataQualityStatus.Stale && snapshot?.SourceLastModified is DateTime sourceTime)
+            return $"آخرین داده ثبت‌شده بازار مربوط به {PersianDisplayText.FormatPersianDate(sourceTime,true)} است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.";
+        return "داده بازار در کنترل کیفیت معتبر شناخته نشد؛ برای جلوگیری از ارائه عدد نادرست، پاسخی از این Snapshot نمایش داده نشد.";
     }
 
     private async Task<EntityResolution> ResolveMarketEntityAsync(string input,CancellationToken ct)
@@ -521,7 +557,9 @@ public sealed class ChatOrchestrator(
 
     private static KnowledgeRetrievalContext BuildKnowledgeContext(string question,string? symbol,TemporalResolution temporal)
     {
-        var latest=question.Contains("آخرین",StringComparison.Ordinal)||question.Contains("جدیدترین",StringComparison.Ordinal)||question.Contains("تازه",StringComparison.Ordinal);
+        var documentEvidence=CanonicalQuestionOwnership.RequiresDocumentEvidence(question);
+        var latest=question.Contains("آخرین",StringComparison.Ordinal)||question.Contains("جدیدترین",StringComparison.Ordinal)||question.Contains("تازه",StringComparison.Ordinal)
+            || documentEvidence&&!temporal.HasTemporalReference;
         int? contentType=(question.Contains("خبر",StringComparison.Ordinal)||question.Contains("اخبار",StringComparison.Ordinal)||question.Contains("اطلاعیه",StringComparison.Ordinal))?1:null;
         string? from=null,to=null;
         if(temporal.HasTemporalReference)
@@ -539,7 +577,12 @@ public sealed class ChatOrchestrator(
         // A plain current-role question can stay on the authoritative projection.
         // History/representation needs both the current projection and dated CMS
         // evidence, so source_type must remain open and current_only must be false.
-        var sourceType=personQuestion && !historicalFacet?"organization_person":null;
+        // Event/report questions are owned by dbo.Content and its Qdrant
+        // projection. Keeping this boundary prevents a generic FAQ or a current
+        // organization profile from outranking the explicitly requested report.
+        var sourceType=documentEvidence
+            ? "cms_content"
+            : personQuestion && !historicalFacet?"organization_person":null;
         return new(symbol,from,to,latest?true:null,contentType,null,1,sourceType,historicalFacet?false:null);
     }
 

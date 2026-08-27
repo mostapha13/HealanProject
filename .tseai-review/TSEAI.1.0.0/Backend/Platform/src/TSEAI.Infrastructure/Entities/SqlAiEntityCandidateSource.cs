@@ -59,7 +59,7 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
                 ? "i.CIsin=@Original"
                 : looksLikeCanonicalId
                     ? "i.InstrumentID=@Original"
-                    : "i.LVal18AFC=@Original";
+                    : "(i.LVal18AFC=@Original OR i.LVal30=@Original)";
         var sql=$$"""
             SELECT TOP (@Limit)
                 CASE WHEN EXISTS (SELECT 1 FROM dbo.IndexLastLive ix WHERE ix.Instrumentid = i.InstrumentID) THEN 2 ELSE 1 END AS Kind,
