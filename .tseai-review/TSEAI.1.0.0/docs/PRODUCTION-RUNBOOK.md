@@ -23,7 +23,7 @@ The build agent must provide `pip-audit` 2.10.1 or newer as a trusted CI tool (`
 Linux: `./scripts/production-e2e.sh`  
 Windows: `scripts\production-e2e.cmd`
 
-The workflow builds and starts Compose, waits for readiness, captures runtime state, runs the 320-case live evaluation, load gate, DAST, backup/restore drill, final evidence validation and GA readiness. Evidence older than 24 hours or from another version is rejected.
+The workflow builds and starts Compose, waits for readiness, captures runtime state, runs the 320-case live evaluation plus the strict multi-turn Conversation Golden suite, load gate, DAST, backup/restore drill, final evidence validation and GA readiness. Evidence older than 24 hours, from another version or with a mismatched suite hash is rejected.
 
 ## Health and observation
 

@@ -12,6 +12,7 @@ REPORTS = {
     "static": "artifacts/release-static.json",
     "runtime": "artifacts/runtime-live.json",
     "evaluation": "artifacts/evaluation-live.json",
+    "conversationEvaluation": "artifacts/conversation-evaluation-live.json",
     "performance": "artifacts/performance-live.json",
     "security": "artifacts/security-live.json",
     "securityStatic": "artifacts/security-static.json",
@@ -103,6 +104,24 @@ if expected_cases < 300 or evaluation.get("total") != expected_cases:
 if evaluation.get("datasetSha256") != hashlib.sha256(dataset_bytes).hexdigest():
     blockers.append("golden_dataset_digest_mismatch")
 
+conversation_evaluation = reports["conversationEvaluation"]
+if conversation_evaluation.get("mode") != "live" or conversation_evaluation.get("gatePassed") is not True:
+    blockers.append("gate_not_passed:conversationEvaluation")
+conversation_suite = ROOT / "tests/conversation-golden-suite.v1.json"
+conversation_suite_bytes = conversation_suite.read_bytes() if conversation_suite.is_file() else b""
+try:
+    expected_conversation_turns = sum(
+        len(flow.get("turns", []))
+        for flow in json.loads(conversation_suite_bytes.decode("utf-8")).get("flows", [])
+    )
+except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+    expected_conversation_turns = 0
+    blockers.append("conversation_golden_suite_invalid")
+if expected_conversation_turns < 10 or conversation_evaluation.get("total") != expected_conversation_turns:
+    blockers.append("conversation_golden_turn_count_mismatch")
+if conversation_evaluation.get("suiteSha256") != hashlib.sha256(conversation_suite_bytes).hexdigest():
+    blockers.append("conversation_golden_suite_digest_mismatch")
+
 performance = reports["performance"]
 if performance.get("requests", 0) < 200 or performance.get("concurrency", 0) < 20:
     blockers.append("load_volume_below_minimum")
@@ -129,6 +148,7 @@ gates = {
     "frontendBuild": "PASS" if static_gates.get("frontendBuild") == "PASS" else "FAIL",
     "docker": "PASS" if reports["runtime"].get("passed") is True else "FAIL",
     "liveGoldenEvaluation": "PASS" if evaluation.get("gatePassed") is True else "FAIL",
+    "liveConversationEvaluation": "PASS" if conversation_evaluation.get("gatePassed") is True else "FAIL",
     "loadTest": "PASS" if performance.get("passed") is True else "FAIL",
     "securityDAST": "PASS" if security.get("passed") is True else "FAIL",
     "backupRestoreDrill": "PASS" if backup.get("passed") is True else "FAIL",

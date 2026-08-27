@@ -25,12 +25,15 @@ REQUIRED_STATIC = [
     "scripts/production-e2e.sh",
     "scripts/production-e2e.cmd",
     "scripts/generate-sbom.py",
+    "scripts/evaluate-conversation-golden.py",
+    "tests/conversation-golden-suite.v1.json",
 ]
 REQUIRED_LIVE_GATES = [
     "dotnet",
     "frontendBuild",
     "docker",
     "liveGoldenEvaluation",
+    "liveConversationEvaluation",
     "loadTest",
     "securityDAST",
     "backupRestoreDrill",
@@ -81,6 +84,7 @@ blockers.extend(f"static_missing:{path}" for path in missing_static)
 
 prod = load_json(ROOT / "artifacts/production-acceptance.json", blockers, "production_acceptance")
 evaluation = load_json(ROOT / "artifacts/evaluation-live.json", blockers, "live_ai_evaluation")
+conversation_evaluation = load_json(ROOT / "artifacts/conversation-evaluation-live.json", blockers, "live_conversation_evaluation")
 
 if prod.get("status") != "PASS":
     blockers.append("production_e2e_not_passed")
@@ -110,11 +114,32 @@ if evaluation.get("datasetSha256") != dataset_sha:
 if evaluation.get("total") != expected_total or expected_total < 300:
     blockers.append("evaluation_case_count_mismatch")
 
+conversation_suite_path = ROOT / "tests/conversation-golden-suite.v1.json"
+conversation_suite_bytes = conversation_suite_path.read_bytes() if conversation_suite_path.is_file() else b""
+try:
+    expected_conversation_turns = sum(
+        len(flow.get("turns", []))
+        for flow in json.loads(conversation_suite_bytes.decode("utf-8")).get("flows", [])
+    )
+except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+    expected_conversation_turns = 0
+    blockers.append("conversation_golden_suite_invalid")
+if conversation_evaluation.get("mode") != "live" or conversation_evaluation.get("gatePassed") is not True:
+    blockers.append("live_conversation_evaluation_not_passed")
+if conversation_evaluation.get("version") != version:
+    blockers.append("conversation_evaluation_version_mismatch")
+if conversation_evaluation.get("suiteSha256") != hashlib.sha256(conversation_suite_bytes).hexdigest():
+    blockers.append("conversation_evaluation_suite_mismatch")
+if conversation_evaluation.get("total") != expected_conversation_turns or expected_conversation_turns < 10:
+    blockers.append("conversation_evaluation_turn_count_mismatch")
+
 max_age = dt.timedelta(hours=max(0.1, args.max_age_hours))
 if not fresh(prod, max_age):
     blockers.append("production_evidence_stale_or_undated")
 if not fresh(evaluation, max_age):
     blockers.append("evaluation_evidence_stale_or_undated")
+if not fresh(conversation_evaluation, max_age):
+    blockers.append("conversation_evaluation_evidence_stale_or_undated")
 
 blockers = list(dict.fromkeys(blockers))
 status = "GA_READY" if not blockers else "GA_BLOCKED"
@@ -125,7 +150,9 @@ report = {
     "staticReady": not missing_static,
     "productionAcceptance": prod.get("status", "NOT_RUN"),
     "evaluationGate": evaluation.get("gatePassed") is True,
+    "conversationEvaluationGate": conversation_evaluation.get("gatePassed") is True,
     "expectedGoldenCases": expected_total,
+    "expectedConversationTurns": expected_conversation_turns,
     "blockingReasons": blockers,
 }
 (ROOT / "artifacts").mkdir(exist_ok=True)

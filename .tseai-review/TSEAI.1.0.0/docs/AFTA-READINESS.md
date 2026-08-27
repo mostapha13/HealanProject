@@ -34,10 +34,11 @@ This is an engineering evidence plan for an AFTA assessment, not a claim of cert
 - `artifacts/sbom.cdx.json`
 - `artifacts/runtime-live.json`
 - `artifacts/evaluation-live.json`
+- `artifacts/conversation-evaluation-live.json`
 - `artifacts/performance-live.json`
 - `artifacts/security-live.json`
 - `artifacts/backup-restore-live.json`
 - `artifacts/production-acceptance.json`
 - `artifacts/ga-readiness.json`
 
-The last seven artifacts must be regenerated in the target environment. Development-machine evidence cannot substitute for production acceptance.
+All live artifacts must be regenerated in the target environment. Development-machine evidence cannot substitute for production acceptance.

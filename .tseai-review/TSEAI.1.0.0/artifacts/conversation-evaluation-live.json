@@ -1,0 +1,994 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-27T17:18:08.218417+00:00",
+  "runId": "642ecc7f8cf0",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.0",
+  "suiteSha256": "c2ac815b0d728c70e6bd527a8df869506e627f01bc84a0f25781c5786690ac5f",
+  "flowCount": 7,
+  "total": 13,
+  "passed": 13,
+  "failed": 0,
+  "passRate": 1.0,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 49.02,
+  "p95LatencyMs": 8423.84,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "failures": [],
+  "results": [
+    {
+      "id": "board-roster-memory:current-members",
+      "flowId": "board-roster-memory",
+      "turn": 1,
+      "question": "اعضای هیئت مدیره بورس تهران کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 99.1
+    },
+    {
+      "id": "board-roster-memory:names-only-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 2,
+      "question": "فقط اسم اعضا را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "بهروز خالق‌ویردی، عسگر نوربخش، مجتبی افشاری، حامد شادکام، میلاد فروغی، عباس نعیمی",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 25.45
+    },
+    {
+      "id": "board-roster-memory:roles-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 3,
+      "question": "سمت‌هاشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 36.78
+    },
+    {
+      "id": "board-roster-memory:history-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 4,
+      "question": "پیشینه‌شون رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره\n\nبرای سوابق حرفه‌ای کامل اعضا، داده قابل اتکای کافی در منابع فعلی پیدا نشد؛ بنابراین سابقه‌ای حدس زده نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_board;complete=False;facts=12;missing=member_history"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 3108,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 3622,
+          "detail": "queries=7;hits=22"
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 4808,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 11595.1
+    },
+    {
+      "id": "organization-parent-memory:market-operations-manager",
+      "flowId": "organization-parent-memory",
+      "turn": 1,
+      "question": "مدیر عملیات بازار بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "سید ناصر جعفری، مدیر عملیات بازار سهام بورس تهران است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=مدیر عملیات بازار سهام;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 49.02
+    },
+    {
+      "id": "organization-parent-memory:parent-follow-up",
+      "flowId": "organization-parent-memory",
+      "turn": 2,
+      "question": "زیر مجموعه چه معاونتیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "سید ناصر جعفری، مدیر عملیات بازار سهام، زیرمجموعه معاونت عملیات بازار است؛ معاون عملیات بازار مهدی زمانی سبزی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_person;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=مدیر عملیات بازار سهام;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 29.24
+    },
+    {
+      "id": "executive-subordinates-memory:executive-manager",
+      "flowId": "executive-subordinates-memory",
+      "turn": 1,
+      "question": "معاون اجرایی بورس کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "حمیدرضا اسمعیلی گیوی، معاون اجرایی بورس تهران است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=معاون اجرایی;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 30.31
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-list",
+      "flowId": "executive-subordinates-memory",
+      "turn": 2,
+      "question": "زیر مجموعه معاون اجرایی بورس کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران:\n\n1. اسماعیل رازقی — مدیر اداری\n2. سعید رضایی — مدیر سرمایه‌های انسانی\n3. سید احسان عدل — مدیر توسعه ساختمان\n4. رضا قلیچ‌خانی — مدیر امور مالی\n5. محمدحسین نوری‌زاده — مدیر مرکز داده، زیرساخت و شبکه",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 55.36
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-names-only",
+      "flowId": "executive-subordinates-memory",
+      "turn": 3,
+      "question": "اسمشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اسماعیل رازقی، سعید رضایی، سید احسان عدل، رضا قلیچ‌خانی، محمدحسین نوری‌زاده",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 48.17
+    },
+    {
+      "id": "latest-ipo:independent-question",
+      "flowId": "latest-ipo",
+      "turn": 1,
+      "question": "آخرین عرضه اولیه بورس چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 49,
+          "detail": "kind=company_aggregate;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 93.27
+    },
+    {
+      "id": "board-composite-question:history-and-representation",
+      "flowId": "board-composite-question",
+      "turn": 1,
+      "question": "سابقه اعضای هیئت مدیره بورس تهران و از طرف کدام شرکت هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران و شواهد نمایندگی هرکدام:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره: طبق سند مورخ 1403/10/01، به نمایندگی از سرمایه‌گذاری تدبیر معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n3. مجتبی افشاری — عضو هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n4. حامد شادکام — عضو هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n5. میلاد فروغی — عضو هیئت‌مدیره: طبق سند مورخ 1401/05/30، به نمایندگی از شرکت‌های گسترش صنعت نوین ایرانیان معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n6. عباس نعیمی — عضو هیئت‌مدیره: طبق سند مورخ 1397/06/21، به نمایندگی از شرکت سرمایه‌گذاری توسعه ملی معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n\nبرای سوابق حرفه‌ای کامل اعضا، داده قابل اتکای کافی در منابع فعلی پیدا نشد؛ بنابراین سابقه‌ای حدس زده نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "kind=organization_board;complete=False;facts=12;missing=member_history|representing_company"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 3270,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 966,
+          "detail": "queries=7;hits=22"
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 4088,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 8423.84
+    },
+    {
+      "id": "jalali-clock:today",
+      "flowId": "jalali-clock",
+      "turn": 1,
+      "question": "امروز چندمه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "امروز پنجشنبه، 1405/06/05 شمسی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=2026-08-27;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=clock;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.clock.current",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=clock;topic=تاریخ و زمان جاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 44.69
+    },
+    {
+      "id": "stale-market-fail-closed:latest-price-date",
+      "flowId": "stale-market-fail-closed",
+      "turn": 1,
+      "question": "آخرین قیمت نماد فملی مربوط به چه تاریخی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true
+      },
+      "issues": [],
+      "actualType": "data_quality_unavailable",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 218,
+          "detail": "status=Resolved;input=فملی تاریخی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 53,
+          "detail": null
+        }
+      ],
+      "conversationRevision": null,
+      "httpStatus": 200,
+      "latencyMs": 315.79
+    }
+  ]
+}

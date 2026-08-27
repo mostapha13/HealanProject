@@ -7,6 +7,7 @@ All items are hard gates before GA:
 - [ ] SQL AI and Market credentials are verified read-only against authoritative schemas.
 - [ ] Redis context/cache, RabbitMQ alert delivery and Qdrant retrieval are live.
 - [ ] All 320 Golden cases pass the configured quality thresholds and dataset hash check.
+- [ ] All strict multi-turn Conversation Golden flows pass with the matching suite hash, preserved context and exact answer-shape checks.
 - [ ] Load test executes at least 200 requests for 20 distinct concurrent users with zero errors and p95 <= 5000 ms.
 - [ ] Security DAST verifies headers, anonymous admin denial, invalid JWT denial, body limits and adversarial prompts.
 - [ ] Backup/restore drill passes for `TSEAI_App` and `TSEAI_Identity`, including `RESTORE VERIFYONLY` and `DBCC CHECKDB`.

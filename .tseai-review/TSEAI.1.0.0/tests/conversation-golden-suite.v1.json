@@ -1,0 +1,259 @@
+{
+  "version": "1.0",
+  "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding and response shape.",
+  "minimumTotalTurns": 13,
+  "minimumPassRate": 1.0,
+  "maxAnswerChars": 2000,
+  "globalMustNotContain": [
+    "Unexpected token",
+    "not valid JSON",
+    "<html",
+    "سرویس هوش مصنوعی موقتاً در دسترس نیست"
+  ],
+  "globalAnswerNotRegex": [
+    "\\b(?:19|20)\\d{2}/\\d{2}/\\d{2}\\b"
+  ],
+  "flows": [
+    {
+      "id": "board-roster-memory",
+      "minimumTurns": 4,
+      "turns": [
+        {
+          "id": "current-members",
+          "question": "اعضای هیئت مدیره بورس تهران کیا هستند؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران"],
+          "mustNotContain": ["فملی", "خساپا", "محمد ابراهیم محمد پورزرندی", "علی اکبر امین تفرشی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:(?:name|role)$"],
+          "expectedTools": ["structured.reference", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=organization_board"],
+            "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "names-only-follow-up",
+          "question": "فقط اسم اعضا را بگو",
+          "expectedTypes": ["structured_reference"],
+          "minimumEvidenceClaims": 1,
+          "normalizedEqualsEvidenceClaimPattern": "^board_member:\\d+:name$",
+          "mustNotContain": ["رئیس", "نائب", "عضو هیئت", "فملی", "خساپا"],
+          "maxAnswerChars": 140,
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-roster-followup"],
+            "structured.reference": ["kind=organization_board"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "roles-follow-up",
+          "question": "سمت‌هاشون چیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:(?:name|role)$"],
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-roster-followup"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "history-follow-up",
+          "question": "پیشینه‌شون رو بگو",
+          "expectedTypes": ["knowledge"],
+          "mustContain": ["اعضای فعلی ثبت‌شده", "داده قابل اتکای کافی", "سابقه‌ای حدس زده نشده"],
+          "mustNotContain": ["فملی", "خساپا", "کمیته حسابرسی", "محمد ابراهیم محمد پورزرندی", "علی اکبر امین تفرشی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:name$"],
+          "maxAnswerChars": 800,
+          "expectedTools": ["conversation.context", "sql.organization.people", "knowledge.retrieve.multi", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-roster-followup"],
+            "structured.reference": ["missing=member_history"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "organization-parent-memory",
+      "minimumTurns": 2,
+      "turns": [
+        {
+          "id": "market-operations-manager",
+          "question": "مدیر عملیات بازار بورس تهران کیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["بورس تهران است"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^person_(?:name|role)$"],
+          "maxAnswerChars": 180,
+          "expectedTools": ["sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=organization_person"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "parent-follow-up",
+          "question": "زیر مجموعه چه معاونتیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["زیرمجموعه"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 4,
+          "answerContainsEvidenceClaimPatterns": ["^(?:person|parent)_(?:name|role)$"],
+          "maxAnswerChars": 260,
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-followup-with-active-reference"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "executive-subordinates-memory",
+      "minimumTurns": 3,
+      "turns": [
+        {
+          "id": "executive-manager",
+          "question": "معاون اجرایی بورس کیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["بورس تهران است"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^person_(?:name|role)$"],
+          "maxAnswerChars": 180,
+          "expectedTools": ["sql.organization.people", "reflection.review", "answer.validate"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "subordinate-list",
+          "question": "زیر مجموعه معاون اجرایی بورس کیا هستند؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^subordinate:\\d+:(?:name|role)$"],
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=organization_unit"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "subordinate-names-only",
+          "question": "اسمشون چیه؟",
+          "expectedTypes": ["structured_reference"],
+          "minimumEvidenceClaims": 1,
+          "normalizedEqualsEvidenceClaimPattern": "^subordinate:\\d+:name$",
+          "mustNotContain": ["مدیر اداری", "مدیر سرمایه", "مدیر توسعه", "مدیر امور", "مرکز داده", "فملی", "خساپا"],
+          "maxAnswerChars": 140,
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-roster-followup"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "latest-ipo",
+      "turns": [
+        {
+          "id": "independent-question",
+          "question": "آخرین عرضه اولیه بورس چیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["آخرین عرضه اولیه ثبت‌شده", "در تاریخ"],
+          "mustNotContain": ["عبارت «اولیه» مبهم", "دتماد", "شمواد", "مظنه اولیه1", "دبالک"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$"],
+          "answerContainsJalaliEvidenceDateClaimPatterns": ["^ipo_date$"],
+          "maxAnswerChars": 220,
+          "expectedTools": ["sql.company.ipo", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=company_aggregate"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "board-composite-question",
+      "turns": [
+        {
+          "id": "history-and-representation",
+          "question": "سابقه اعضای هیئت مدیره بورس تهران و از طرف کدام شرکت هستند؟",
+          "expectedTypes": ["knowledge"],
+          "mustContain": [
+            "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران",
+            "داده قابل اتکای کافی",
+            "سابقه‌ای حدس زده نشده است"
+          ],
+          "mustContainAny": [["به نمایندگی از", "مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد"]],
+          "mustNotContain": ["فملی", "خساپا", "کمیته حسابرسی", "محمد ابراهیم محمد پورزرندی", "علی اکبر امین تفرشی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:name$"],
+          "maxAnswerChars": 1300,
+          "expectedTools": ["sql.organization.people", "knowledge.retrieve.multi", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=organization_board", "member_history", "representing_company"],
+            "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "jalali-clock",
+      "turns": [
+        {
+          "id": "today",
+          "question": "امروز چندمه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["شمسی"],
+          "answerRegex": ["\\b14\\d{2}/\\d{2}/\\d{2}\\b"],
+          "mustNotContain": ["داده قابل اتکایی برای پاسخ پیدا نشد"],
+          "maxAnswerChars": 120,
+          "expectedTools": ["sql.clock.current", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "structured.reference": ["kind=clock"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "stale-market-fail-closed",
+      "turns": [
+        {
+          "id": "latest-price-date",
+          "question": "آخرین قیمت نماد فملی مربوط به چه تاریخی است؟",
+          "expectedTypes": ["data_quality_unavailable"],
+          "mustContain": ["آخرین داده ثبت‌شده بازار مربوط به", "برای پاسخ جاری قابل اتکا نیست", "عدد قدیمی نمایش داده نشد"],
+          "answerRegex": ["\\b14\\d{2}/\\d{2}/\\d{2}\\b"],
+          "mustNotContain": ["نماد یا شاخص «چه تاریخیه»", "نماد یا شاخص «فملی مربوط»"],
+          "maxAnswerChars": 300,
+          "expectedTools": ["structured.market.symbol"]
+        }
+      ]
+    }
+  ]
+}

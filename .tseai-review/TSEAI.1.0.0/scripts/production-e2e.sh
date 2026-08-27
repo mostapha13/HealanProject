@@ -21,6 +21,7 @@ for i in $(seq 1 150); do curl -fsS "$TSEAI_BASE_URL/api/health" >/dev/null && b
 curl -fsS "$TSEAI_BASE_URL/api/health" >/dev/null
 python scripts/runtime-readiness.py --base-url "$TSEAI_BASE_URL" --out artifacts/runtime-live.json
 python scripts/evaluate-golden-dataset.py --base-url "$TSEAI_BASE_URL" --out artifacts/evaluation-live.json
+python scripts/evaluate-conversation-golden.py --base-url "$TSEAI_BASE_URL" --out artifacts/conversation-evaluation-live.json
 python scripts/performance-smoke.py --base-url "$TSEAI_BASE_URL" --requests 200 --concurrency 20 --out artifacts/performance-live.json
 python scripts/security-dast.py --base-url "$TSEAI_BASE_URL" --out artifacts/security-live.json
 python scripts/backup-restore-drill.py --env-file .env.production --out artifacts/backup-restore-live.json

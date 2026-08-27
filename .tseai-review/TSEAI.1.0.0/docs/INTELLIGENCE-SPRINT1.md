@@ -57,6 +57,28 @@ python scripts/evaluate-table-chat-suite.py --base-url http://localhost:8280
 python scripts/evaluate-table-chat-suite.py --source company --ids CO-051,CO-052,CO-053,CO-054
 ```
 
+## Conversation Golden Suite
+
+مجموعه `tests/conversation-golden-suite.v1.json` شکاف میان تست سؤال‌های منفرد و رفتار واقعی چت را می‌بندد. هفت جریان و سیزده نوبت فعلی موارد زیر را انتها‌به‌انتها، از HTTP تا SQL/Retrieval/Reflection، کنترل می‌کنند:
+
+- حفظ هویت کاربر و `ConversationId` در تمام نوبت‌های یک جریان؛
+- ارجاع‌های فارسی مانند «اسمشون»، «سمت‌هاشون» و «زیر مجموعه چه معاونتیه؟»؛
+- خروجی دقیق «فقط نام‌ها» بدون عنوان و توضیح اضافه؛
+- پاسخ ترکیبی اعضا، نمایندگی شرکت و سابقه با عدم قطعیت صریح؛
+- ابزار SQL مورد انتظار، Trace زمینه، Reflection و Answer Validation؛
+- تطبیق نام‌ها، سمت‌ها و عرضه اولیه با Claimهای Evidence همان پاسخ؛ بنابراین به‌روزرسانی درست SQL به‌عنوان Regression کاذب گزارش نمی‌شود؛
+- منع پاسخ نامرتبط، HTML/JSON transport error و تاریخ نمایشی میلادی؛
+- پاسخ شمسی ساعت سیستم و توقف نمایش عدد بازار هنگام stale بودن منبع.
+
+پیش‌بررسی و اجرای زنده:
+
+```powershell
+python scripts/evaluate-conversation-golden.py --validate-only
+python scripts/evaluate-conversation-golden.py --base-url http://localhost:8280
+```
+
+این suite با نرخ قبولی اجباری ۱۰۰٪ در هر دو `production-e2e` لینوکس و ویندوز اجرا می‌شود. گزارش دارای نسخه محصول، SHA-256 مجموعه، زمان، latency هر نوبت و علت دقیق هر شکست است و `finalize-production-acceptance.py` بدون گزارش تازه و منطبق، انتشار را متوقف می‌کند.
+
 Gate ساختاری `validate-semantic-foundation.py` به Release Gate لینوکس و ویندوز اضافه شده است.
 
 ## Persistent Chat Trace
@@ -82,6 +104,7 @@ Gate ساختاری `validate-semantic-foundation.py` به Release Gate لینو
 - DataQuality smoke test شامل قواعد کاتالوگ پاس شود؛
 - پیش‌بررسی 404 Case پاس شود؛
 - چهار Regression مربوط به «آخرین عرضه اولیه» روی Runtime پاس شوند؛
+- تمام نوبت‌های Conversation Golden Suite روی Runtime پاس شوند؛
 - Audit یک درخواست واقعی شامل Trace مرحله‌ای و Question Hash باشد.
 
 موفقیت این Sprint به معنی دقیق‌شدن همه پاسخ‌ها نیست؛ معنی آن این است که از این پس هر خطا قابل بازتولید، قابل طبقه‌بندی و قابل اصلاح در لایه درست است. Sprint بعدی باید Entity Resolver و ابزارهای Typed SQL را بر اساس همین کاتالوگ ارتقا دهد.
