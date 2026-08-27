@@ -17,6 +17,7 @@ public static class IdentityConstants
         public const string AdminSettings = "Admin.Settings";
         public const string AdminUsers = "Admin.Users";
         public const string AdminUsage = "Admin.Usage";
-        public static readonly string[] All = [ChatAsk, FilterCreate, FilterSave, FilterExport, AlertCreate, AdminSettings, AdminUsers, AdminUsage];
+        public const string OperationsRead = "Operations.Read";
+        public static readonly string[] All = [ChatAsk, FilterCreate, FilterSave, FilterExport, AlertCreate, AdminSettings, AdminUsers, AdminUsage, OperationsRead];
     }
 }

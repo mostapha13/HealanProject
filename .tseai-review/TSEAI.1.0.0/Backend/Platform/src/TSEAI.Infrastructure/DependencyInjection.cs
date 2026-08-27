@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IMarketSnapshotQuery, RedisMarketSnapshotQuery>();
         services.AddScoped<ICanonicalDataGateway, SqlAiCanonicalDataGateway>();
         services.AddScoped<IDataQualityService, DataQualityService>();
+        services.AddScoped<IMarketRuntimeStatusService, MarketRuntimeStatusService>();
         services.AddSingleton<IMarketAnalyticsEngine, DeterministicMarketAnalyticsEngine>();
         services.AddScoped<IStructuredToolGateway, SecureStructuredToolGateway>();
         services.AddSingleton<INaturalLanguageStructuredQueryInterpreter, PersianNaturalLanguageStructuredQueryInterpreter>();

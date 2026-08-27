@@ -63,8 +63,42 @@ public sealed record CanonicalDataQualityReport(
     DateTimeOffset EvaluatedAtUtc,
     IReadOnlyList<CanonicalSourceQuality> Sources);
 
+public sealed record MarketRuntimeFeedStatus(
+    string Feed,
+    string SyncStatus,
+    DataQualityStatus Status,
+    bool WorkerHealthy,
+    bool SourceFresh,
+    DateTime? Watermark,
+    DateTime? LatestSourceCollectedAt,
+    DateTime? LastAttemptAtUtc,
+    DateTime? LastSuccessAtUtc,
+    DateTime? LastFailureAtUtc,
+    int LastReadRowCount,
+    int LastFullRowCount,
+    bool LastAttemptWasFull,
+    TimeSpan? SourceAge,
+    TimeSpan MaximumSourceAge,
+    string? LastError,
+    IReadOnlyList<DataQualityIssue> Issues);
+
+public sealed record MarketRuntimeStatusReport(
+    DataQualityStatus Status,
+    bool WorkerHealthy,
+    bool CanServeCashMarket,
+    bool CanServeOrderBook,
+    bool CanServeClientType,
+    bool IsLiveMarketWindow,
+    DateTimeOffset EvaluatedAtUtc,
+    IReadOnlyList<MarketRuntimeFeedStatus> Feeds);
+
 public interface IDataQualityService
 {
     MarketDataQualityReport EvaluateMarketSnapshot(MarketSymbolSnapshot snapshot);
     Task<CanonicalDataQualityReport> EvaluateCanonicalSourcesAsync(CancellationToken ct);
+}
+
+public interface IMarketRuntimeStatusService
+{
+    Task<MarketRuntimeStatusReport> GetAsync(CancellationToken ct);
 }

@@ -591,6 +591,9 @@ var dataQualityApi = app.MapGroup("/api/admin/data-quality")
 dataQualityApi.MapGet("/sources", async (IDataQualityService quality, CancellationToken ct) =>
     Results.Ok(await quality.EvaluateCanonicalSourcesAsync(ct)));
 
+dataQualityApi.MapGet("/market-runtime", async (IMarketRuntimeStatusService runtime, CancellationToken ct) =>
+    Results.Ok(await runtime.GetAsync(ct)));
+
 dataQualityApi.MapGet("/market/{key}", async (string key, IMarketSnapshotQuery market, IDataQualityService quality, CancellationToken ct) =>
 {
     var snapshot = await market.FindAsync(key, ct);
@@ -623,15 +626,23 @@ operations.MapGet("/audit", async (int? take, IOperationsStore store, Cancellati
     Results.Ok(await store.AuditAsync(take ?? 100, ct)));
 operations.MapGet("/incidents", async (string? status, int? take, IOperationsStore store, CancellationToken ct) =>
     Results.Ok(await store.IncidentsAsync(status, take ?? 100, ct)));
-operations.MapGet("/health", () => Results.Ok(new[]
+operations.MapGet("/health", async (IMarketRuntimeStatusService runtime, CancellationToken ct) =>
 {
-    new RuntimeHealth("platform-api","Healthy",null,DateTime.UtcNow),
-    new RuntimeHealth("identity-api","ExternalCheckRequired",null,DateTime.UtcNow),
-    new RuntimeHealth("market-runtime","ExternalCheckRequired",null,DateTime.UtcNow),
-    new RuntimeHealth("alert-engine","ExternalCheckRequired",null,DateTime.UtcNow),
-    new RuntimeHealth("knowledge-worker","ExternalCheckRequired",null,DateTime.UtcNow),
-    new RuntimeHealth("ai-engine","ExternalCheckRequired",null,DateTime.UtcNow)
-}));
+    var market = await runtime.GetAsync(ct);
+    var marketStatus = !market.WorkerHealthy ? "Unhealthy"
+        : market.Status is DataQualityStatus.Stale or DataQualityStatus.Warning or DataQualityStatus.Unknown ? "Degraded"
+        : "Healthy";
+    var marketDetail = $"source={market.Status};cash={market.CanServeCashMarket};orderbook={market.CanServeOrderBook};clienttype={market.CanServeClientType}";
+    return Results.Ok(new[]
+    {
+        new RuntimeHealth("platform-api","Healthy",null,DateTime.UtcNow),
+        new RuntimeHealth("identity-api","ExternalCheckRequired",null,DateTime.UtcNow),
+        new RuntimeHealth("market-runtime",marketStatus,marketDetail,DateTime.UtcNow),
+        new RuntimeHealth("alert-engine","ExternalCheckRequired",null,DateTime.UtcNow),
+        new RuntimeHealth("knowledge-worker","ExternalCheckRequired",null,DateTime.UtcNow),
+        new RuntimeHealth("ai-engine","ExternalCheckRequired",null,DateTime.UtcNow)
+    });
+});
 
 app.Run();
 
