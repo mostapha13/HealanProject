@@ -15,6 +15,19 @@ class RecordingEmbeddingProvider(HashingEmbeddingProvider):
         self.batch_sizes.append(len(texts))
         return await super().embed(texts)
 
+class ContendedEmbeddingProvider(HashingEmbeddingProvider):
+    def __init__(self,dimension=32):
+        super().__init__(dimension)
+        self.calls=[]
+        self.first_started=asyncio.Event()
+        self.release_first=asyncio.Event()
+    async def embed(self,texts):
+        self.calls.append(list(texts))
+        if len(self.calls)==1:
+            self.first_started.set()
+            await self.release_first.wait()
+        return await super().embed(texts)
+
 class FakeStore:
     def __init__(self): self.rows=[]
     async def ensure_collection(self,dimension): self.dimension=dimension
@@ -115,6 +128,22 @@ def test_index_batches_chunks_across_documents():
         assert len(store.rows)==25
     asyncio.run(run())
 
+def test_chat_retrieval_embedding_preempts_remaining_index_batches(monkeypatch):
+    async def run():
+        monkeypatch.setenv("EMBEDDING_MAX_CONCURRENCY","1")
+        monkeypatch.setenv("EMBEDDING_INDEX_BATCH_SIZE","8")
+        store=FakeStore(); embeddings=ContendedEmbeddingProvider(); svc=KnowledgeService(store,embeddings)
+        docs=[KnowledgeDocument(f"doc:{i}","faq",str(i),f"عنوان {i}",f"متن کامل سند {i}") for i in range(9)]
+        indexing=asyncio.create_task(svc.index(docs))
+        await embeddings.first_started.wait()
+        retrieval=asyncio.create_task(svc.retrieve("پرسش فوری کاربر",limit=2))
+        await asyncio.sleep(0)
+        embeddings.release_first.set()
+        await asyncio.gather(indexing,retrieval)
+        assert embeddings.calls[1]==["پرسش فوری کاربر"]
+        assert len(embeddings.calls)==3
+    asyncio.run(run())
+
 def test_hybrid_retrieval_and_metadata_filter():
     async def run():
         store=FakeStore(); svc=KnowledgeService(store,HashingEmbeddingProvider(128))
@@ -126,6 +155,20 @@ def test_hybrid_retrieval_and_metadata_filter():
         assert r["count"]==1
         assert r["items"][0]["source"]["document_id"]=="d1"
         assert r["items"][0]["keyword_score"]>0
+    asyncio.run(run())
+
+
+def test_multi_query_retrieval_uses_one_bounded_embedding_batch():
+    async def run():
+        store=FakeStore(); provider=RecordingEmbeddingProvider(64); svc=KnowledgeService(store,provider)
+        await svc.index([
+            KnowledgeDocument("person:a","organization_person","1","مدیر الف","مدیر الف دارای سابقه بازار سرمایه است",metadata={"language_id":1}),
+            KnowledgeDocument("person:b","organization_person","2","مدیر ب","مدیر ب دارای سابقه فناوری است",metadata={"language_id":1}),
+        ])
+        provider.batch_sizes.clear()
+        results=await svc.retrieve_many(["سابقه مدیر الف","سابقه مدیر ب"],limit=4,language_id=1,current_only=False)
+        assert provider.batch_sizes==[2]
+        assert len(results)==2 and all(result["query"].startswith("سابقه مدیر") for result in results)
     asyncio.run(run())
 
 

@@ -1,8 +1,8 @@
 {
   "mode": "structural-preflight",
-  "generatedAtUtc": "2026-08-27T09:15:06.926026+00:00",
+  "generatedAtUtc": "2026-08-27T18:01:20.920452+00:00",
   "manifestVersion": "2.0",
-  "datasetSha256": "722f814badafc7d1b66d4f16db81596bb9eb9fd1cea7472dcf81b7e2e12fb7bd",
+  "datasetSha256": "ba857705f20f6748fe15ae3ebcb95d7e58effecd323e7cd68b5d216ec9954e85",
   "caseCount": 404,
   "sources": [
     "cash-market",

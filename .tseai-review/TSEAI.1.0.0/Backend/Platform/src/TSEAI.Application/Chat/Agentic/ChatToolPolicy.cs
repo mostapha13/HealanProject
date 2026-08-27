@@ -34,6 +34,7 @@ public sealed class ChatToolPolicy : IChatToolPolicy
         CanonicalReferenceToolNames.RegionHall,
         CanonicalReferenceToolNames.MarketReference,
         CanonicalReferenceToolNames.GenericReference,
+        "answer.compose.canonical",
         "answer.synthesize",
         "reflection.review",
         "reflection.review.final"

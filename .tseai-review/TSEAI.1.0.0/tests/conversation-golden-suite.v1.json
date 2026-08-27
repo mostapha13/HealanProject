@@ -1,8 +1,10 @@
 {
-  "version": "1.0",
-  "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding and response shape.",
-  "minimumTotalTurns": 13,
+  "version": "1.1",
+  "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding, response shape and bounded latency.",
+  "minimumTotalTurns": 17,
   "minimumPassRate": 1.0,
+  "maxTurnLatencyMs": 6500,
+  "maxP95LatencyMs": 5000,
   "maxAnswerChars": 2000,
   "globalMustNotContain": [
     "Unexpected token",
@@ -74,10 +76,13 @@
           "minimumEvidenceClaims": 2,
           "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:name$"],
           "maxAnswerChars": 800,
-          "expectedTools": ["conversation.context", "sql.organization.people", "knowledge.retrieve.multi", "reflection.review", "answer.validate"],
+          "expectedTools": ["conversation.context", "sql.organization.people", "knowledge.retrieve.multi", "answer.compose.canonical", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["answer.synthesize"],
           "traceDetailContains": {
             "conversation.context": ["applied=True", "organization-roster-followup"],
-            "structured.reference": ["missing=member_history"]
+            "structured.reference": ["missing=member_history"],
+            "capability.route": ["planner=False", "deterministic-canonical-route"],
+            "reflection.review": ["mode=deterministic-canonical", "action=accept"]
           },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true
@@ -124,7 +129,7 @@
     },
     {
       "id": "executive-subordinates-memory",
-      "minimumTurns": 3,
+      "minimumTurns": 4,
       "turns": [
         {
           "id": "executive-manager",
@@ -168,11 +173,27 @@
           },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true
+        },
+        {
+          "id": "subordinate-roles-after-names",
+          "question": "نقش هرکدوم چیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^subordinate:\\d+:(?:name|role)$"],
+          "expectedTools": ["conversation.context", "sql.organization.people", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-roster-followup"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
         }
       ]
     },
     {
       "id": "latest-ipo",
+      "minimumTurns": 2,
       "turns": [
         {
           "id": "independent-question",
@@ -187,6 +208,22 @@
           "expectedTools": ["sql.company.ipo", "reflection.review", "answer.validate"],
           "traceDetailContains": {
             "structured.reference": ["kind=company_aggregate"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "symbol-follow-up",
+          "question": "نمادش چیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["نماد بورسی"],
+          "mustNotContain": ["فملی", "خساپا", "نماد موردنظر را مشخص کنید"],
+          "minimumEvidenceClaims": 1,
+          "answerContainsEvidenceClaimPatterns": ["^linked_symbol$"],
+          "maxAnswerChars": 180,
+          "expectedTools": ["conversation.context", "sql.company.lookup", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "company-followup-with-active-reference"]
           },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true
@@ -210,10 +247,51 @@
           "minimumEvidenceClaims": 2,
           "answerContainsEvidenceClaimPatterns": ["^board_member:\\d+:name$"],
           "maxAnswerChars": 1300,
-          "expectedTools": ["sql.organization.people", "knowledge.retrieve.multi", "reflection.review", "answer.validate"],
+          "expectedTools": ["sql.organization.people", "knowledge.retrieve.multi", "answer.compose.canonical", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["answer.synthesize"],
           "traceDetailContains": {
             "structured.reference": ["kind=organization_board", "member_history", "representing_company"],
+            "capability.route": ["planner=False", "deterministic-canonical-route"],
+            "reflection.review": ["mode=deterministic-canonical", "action=accept"],
             "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "organization-person-evidence-follow-up",
+      "minimumTurns": 2,
+      "turns": [
+        {
+          "id": "chairperson",
+          "question": "رئیس هیئت مدیره بورس تهران کیه؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["رئیس هیئت‌مدیره بورس تهران است"],
+          "mustNotContain": ["فملی", "خساپا"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^person_(?:name|role)$"],
+          "maxAnswerChars": 180,
+          "expectedTools": ["sql.organization.people", "reflection.review", "answer.validate"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "representation-follow-up",
+          "question": "نماینده کدوم شرکته؟",
+          "expectedTypes": ["knowledge"],
+          "mustContain": ["برای شرکتِ نمایندگی‌شده", "چیزی حدس نمی‌زنم"],
+          "mustNotContain": ["فملی", "خساپا", "محمد ابراهیم محمد پورزرندی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^person_(?:name|role)$"],
+          "maxAnswerChars": 500,
+          "expectedTools": ["conversation.context", "sql.organization.people", "knowledge.retrieve.multi", "answer.compose.canonical", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["answer.synthesize"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "organization-followup-with-active-reference"],
+            "capability.route": ["planner=False", "deterministic-canonical-route"],
+            "reflection.review": ["mode=deterministic-canonical", "action=accept"]
           },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true

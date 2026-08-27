@@ -28,6 +28,9 @@ services:
       Knowledge__MaxDocumentsPerSourceRun: 100000
   ai-engine:
     container_name: tseai-rc31-ai
+    environment:
+      EMBEDDING_MAX_CONCURRENCY: 1
+      EMBEDDING_INDEX_BATCH_SIZE: 4
   local-llm:
     container_name: tseai-rc31-local-llm
     restart: "no"

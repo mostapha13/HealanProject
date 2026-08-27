@@ -3,6 +3,7 @@ import asyncio
 from collections import Counter
 from datetime import datetime, timezone
 import math
+import os
 import re
 from .models import KnowledgeDocument
 from .chunking import chunk_document
@@ -149,8 +150,63 @@ def _merge_document_chunks(chunks:list[dict])->str:
         if suffix: merged=merged.rstrip()+("" if overlap else "\n")+suffix
     return merged.strip()
 
+class _EmbeddingPriorityGate:
+    """Bound embedding work while always admitting queued chat retrieval before indexing."""
+    def __init__(self,capacity:int):
+        self._capacity=max(1,capacity)
+        self._active=0
+        self._waiting_high=0
+        self._condition=asyncio.Condition()
+
+    async def high(self,operation):
+        async with self._condition:
+            self._waiting_high+=1
+            try:
+                await self._condition.wait_for(lambda:self._active<self._capacity)
+                self._active+=1
+            finally:
+                self._waiting_high-=1
+        try:
+            return await operation()
+        finally:
+            await self._release()
+
+    async def low(self,operation):
+        async with self._condition:
+            await self._condition.wait_for(
+                lambda:self._active<self._capacity and self._waiting_high==0)
+            self._active+=1
+        try:
+            return await operation()
+        finally:
+            await self._release()
+
+    async def _release(self):
+        async with self._condition:
+            self._active-=1
+            self._condition.notify_all()
+
 class KnowledgeService:
-    def __init__(self,store:QdrantKnowledgeStore,embeddings:EmbeddingProvider): self.store=store; self.embeddings=embeddings
+    def __init__(self,store:QdrantKnowledgeStore,embeddings:EmbeddingProvider):
+        self.store=store
+        self.embeddings=embeddings
+        concurrency=int(os.getenv("EMBEDDING_MAX_CONCURRENCY","1"))
+        self._embedding_gate=_EmbeddingPriorityGate(concurrency)
+        self._index_embedding_batch_size=max(1,min(32,int(os.getenv("EMBEDDING_INDEX_BATCH_SIZE","8"))))
+
+    async def _embed_for_retrieval(self,texts:list[str])->list[list[float]]:
+        return await self._embedding_gate.high(lambda:self.embeddings.embed(texts))
+
+    async def _embed_for_indexing(self,texts:list[str],batch_size:int=8)->list[list[float]]:
+        vectors=[]
+        for start in range(0,len(texts),batch_size):
+            batch=texts[start:start+batch_size]
+            vectors.extend(await self._embedding_gate.low(lambda batch=batch:self.embeddings.embed(batch)))
+            # Give an arriving high-priority retrieval coroutine a scheduling
+            # opportunity before the next ingestion batch asks for the gate.
+            await asyncio.sleep(0)
+        return vectors
+
     async def index(self,docs:list[KnowledgeDocument])->dict:
         await self.store.ensure_collection(self.embeddings.dimension)
         prepared=[]; skipped=deleted=0; skip_reasons=Counter(); routes=Counter()
@@ -184,17 +240,19 @@ class KnowledgeService:
                 pending_chunks.extend(chunks)
                 document_count+=1; chunk_count+=len(chunks)
         if pending_chunks:
-            vectors=await self.embeddings.embed_batched([f"{c.title}\n{c.text}" for c in pending_chunks],batch_size=8)
+            vectors=await self._embed_for_indexing(
+                [f"{c.title}\n{c.text}" for c in pending_chunks],
+                batch_size=self._index_embedding_batch_size)
             await self.store.upsert(pending_chunks,vectors)
         return {"documents":document_count,"chunks":chunk_count,"unchanged":unchanged,"policy_skipped":policy_skipped,"skipped":skipped,"deleted":deleted,"routes":dict(routes),"skip_reasons":dict(skip_reasons)}
 
-    async def retrieve(self,query:str,limit:int=8,source_type:str|None=None,symbol:str|None=None,category:str|None=None,route:str|None=None,content_type_id:int|None=None,language_id:int|None=None,date_from:str|None=None,date_to:str|None=None,latest_first:bool|None=None,topic:str|None=None,company:str|None=None,current_only:bool|None=None)->dict:
-        await self.store.ensure_collection(self.embeddings.dimension)
+    async def retrieve(self,query:str,limit:int=8,source_type:str|None=None,symbol:str|None=None,category:str|None=None,route:str|None=None,content_type_id:int|None=None,language_id:int|None=None,date_from:str|None=None,date_to:str|None=None,latest_first:bool|None=None,topic:str|None=None,company:str|None=None,current_only:bool|None=None,_query_vector:list[float]|None=None,_collection_ready:bool=False)->dict:
+        if not _collection_ready: await self.store.ensure_collection(self.embeddings.dimension)
         norm=normalize_for_search(query)
         if latest_first is None: latest_first=any(x in norm for x in LATEST_TERMS)
         if content_type_id is None and any(x in norm for x in NEWS_TERMS): content_type_id=1
         if current_only is None: current_only=not any(x in norm for x in HISTORY_TERMS)
-        qvec=(await self.embeddings.embed([query]))[0]
+        qvec=_query_vector if _query_vector is not None else (await self._embed_for_retrieval([query]))[0]
         filters={"source_type":source_type,"symbol":symbol,"category":category,"route":route,"content_type_id":content_type_id,"language_id":language_id,"date_from":date_from,"date_to":date_to,"topic":topic,"company":company,"current_only":current_only}
         # Latest queries need a wider semantic candidate set; otherwise a highly
         # similar but very old article can hide the newest relevant document.
@@ -306,3 +364,14 @@ class KnowledgeService:
             meta=payload.get("metadata") or {}
             items.append({"chunk_id":cid,"score":round(score,6),"vector_score":round(vector,6),"bm25_score":round(lexical,6),"keyword_score":round(lexical,6),"phrase_score":round(phrase,6),"entity_score":round(entity,6),"freshness_score":round(freshness,6),"title":payload.get("title"),"text":parent_text,"source":{"document_id":payload.get("document_id"),"source_type":payload.get("source_type"),"source_id":payload.get("source_id"),"url":payload.get("url"),"published_at":payload.get("published_at")},"metadata":{"symbol":payload.get("symbol"),"category":payload.get("category"),**meta,"retrieval_scope":"parent_document","document_chunk_count":len(chunks),"matched_chunk_ordinal":int(payload.get("ordinal") or 0)}})
         return {"query":query,"count":len(items),"strategy":"dense+bm25-like+metadata+freshness+parent-document-v2","latest_first":bool(latest_first),"filters":{k:v for k,v in filters.items() if v is not None},"items":items}
+
+    async def retrieve_many(self,queries:list[str],limit:int=8,source_type:str|None=None,symbol:str|None=None,category:str|None=None,route:str|None=None,content_type_id:int|None=None,language_id:int|None=None,date_from:str|None=None,date_to:str|None=None,latest_first:bool|None=None,topic:str|None=None,company:str|None=None,current_only:bool|None=None)->list[dict]:
+        bounded=list(dict.fromkeys(query.strip() for query in queries if query and query.strip()))[:8]
+        if not bounded: return []
+        await self.store.ensure_collection(self.embeddings.dimension)
+        vectors=await self._embed_for_retrieval(bounded)
+        return await asyncio.gather(*(
+            self.retrieve(query,limit,source_type,symbol,category,route,content_type_id,language_id,
+                          date_from,date_to,latest_first,topic,company,current_only,vector,True)
+            for query,vector in zip(bounded,vectors)
+        ))

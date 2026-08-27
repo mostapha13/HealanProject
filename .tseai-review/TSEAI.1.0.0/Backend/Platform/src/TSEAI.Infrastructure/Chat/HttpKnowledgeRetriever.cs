@@ -27,6 +27,39 @@ public sealed class HttpKnowledgeRetriever(HttpClient http,ILogger<HttpKnowledge
             return new([],query);
         }
     }
+
+    public async Task<IReadOnlyList<KnowledgeSearchResult>> RetrieveManyAsync(
+        IReadOnlyList<string> queries,int limit,KnowledgeRetrievalContext context,CancellationToken ct)
+    {
+        if(queries.Count==0) return [];
+        if(queries.Count==1) return [await RetrieveAsync(queries[0],limit,context,ct)];
+        try
+        {
+            using var response=await http.PostAsJsonAsync("knowledge/retrieve-batch",new {
+                queries,limit,source_type=context.SourceType,symbol=context.Symbol,date_from=context.DateFrom,date_to=context.DateTo,
+                latest_first=context.LatestFirst,content_type_id=context.ContentTypeId,route=context.Route,language_id=context.LanguageId,
+                current_only=context.CurrentOnly
+            },ct);
+            if(!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Batch knowledge retrieval returned HTTP {Status}; using bounded individual fallback.",(int)response.StatusCode);
+                return await Task.WhenAll(queries.Take(8).Select(query=>RetrieveAsync(query,limit,context,ct)));
+            }
+            using var doc=JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            if(!doc.RootElement.TryGetProperty("results",out var rows) || rows.ValueKind!=JsonValueKind.Array)
+                return await Task.WhenAll(queries.Take(8).Select(query=>RetrieveAsync(query,limit,context,ct)));
+            var results=rows.EnumerateArray().Select((row,index)=>Parse(row,index<queries.Count?queries[index]:string.Empty)).ToArray();
+            return results.Length==queries.Count
+                ? results
+                : await Task.WhenAll(queries.Take(8).Select(query=>RetrieveAsync(query,limit,context,ct)));
+        }
+        catch(OperationCanceledException) when(ct.IsCancellationRequested) { throw; }
+        catch(Exception ex)
+        {
+            logger.LogWarning(ex,"Batch knowledge retrieval is unavailable; using bounded individual fallback.");
+            return await Task.WhenAll(queries.Take(8).Select(query=>RetrieveAsync(query,limit,context,ct)));
+        }
+    }
     private static KnowledgeSearchResult Parse(JsonElement root,string query)
     {
         var hits=new List<KnowledgeHit>();

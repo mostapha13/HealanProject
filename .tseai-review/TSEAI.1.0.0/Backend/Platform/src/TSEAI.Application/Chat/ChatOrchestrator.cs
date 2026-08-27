@@ -101,7 +101,18 @@ public sealed class ChatOrchestrator(
         }
 
         toolPolicy.Demand("capability.route");
-        var routeDecision=await Timed("capability.route",()=>capabilityRouter.RouteWithContextAsync(effectiveQuestion,request.PageSize,turnContext.RouteHint,ct),trace, d=>d.AuditSummary);
+        CapabilityRouteDecision routeDecision;
+        if(CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonicalAnswer))
+        {
+            var canonicalPlan=new ChatPlan(ChatIntent.Knowledge,null,effectiveQuestion,canonicalAnswer!.Confidence,null,
+                ["canonical-organization-evidence"]);
+            routeDecision=new(ChatCapabilityRoute.Knowledge,ChatIntent.Knowledge,canonicalAnswer.Confidence,
+                ["canonical-organization-evidence","deterministic-canonical-route"],
+                [new("knowledge.retrieve","qdrant-grounded-evidence")],canonicalPlan,PlannerUsed:false);
+            trace.Add(new ChatToolTrace("capability.route","ok",0,routeDecision.AuditSummary));
+        }
+        else
+            routeDecision=await Timed("capability.route",()=>capabilityRouter.RouteWithContextAsync(effectiveQuestion,request.PageSize,turnContext.RouteHint,ct),trace, d=>d.AuditSummary);
 
         if(routeDecision.Route==ChatCapabilityRoute.FilterAssets)
         {
@@ -326,9 +337,8 @@ public sealed class ChatOrchestrator(
                 // Composite/person-facet questions must use the scope of the full
                 // effective question for every focused query. A bare person name
                 // must not silently fall back to current-only retrieval.
-                var searches=queries.Select(query=>knowledge.RetrieveAsync(query,8,
-                    BuildKnowledgeContext(effectiveQuestion,resolvedSymbol,temporalContext),ct)).ToArray();
-                var results=await Task.WhenAll(searches);
+                var results=await knowledge.RetrieveManyAsync(queries,8,
+                    BuildKnowledgeContext(effectiveQuestion,resolvedSymbol,temporalContext),ct);
                 sw.Stop();
                 // Preserve the best few hits from every focused person query before
                 // global ranking. Otherwise six high-scoring current profiles can
@@ -361,15 +371,9 @@ public sealed class ChatOrchestrator(
         string answer;
         if(canonicalAnswer is not null)
         {
-            toolPolicy.Demand("answer.synthesize");
             var synthesisEvidence=BuildGroundedSynthesisEvidence(canonicalAnswer,hits);
-            var synthesized=await Timed("answer.synthesize",()=>answerSynthesizer.SynthesizeAsync(
-                new GroundedAnswerSynthesisRequest(effectiveQuestion,canonicalAnswer.Answer,canonicalAnswer.Facts,synthesisEvidence,
-                    canonicalAnswer.MissingFacets,turnContext.Previous.RecentTurns??[]),ct),trace);
-            answer=synthesized??ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
-            answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)
-                ??ComposeBoardHistorySummary(canonicalAnswer,synthesisEvidence)
-                ??answer;
+            answer=await ComposeCanonicalAnswerAsync(effectiveQuestion,canonicalAnswer,synthesisEvidence,
+                turnContext.Previous.RecentTurns??[],trace,ct);
             if(HasUnsafeRepresentationClaim(answer,canonicalAnswer,synthesisEvidence))
                 answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
         }
@@ -396,9 +400,13 @@ public sealed class ChatOrchestrator(
         {
             toolPolicy.Demand("reflection.review");
             var failed=trace.Where(x=>x.Status=="failed").Select(x=>x.Tool).Distinct().ToArray();
-            var review=await Timed("reflection.review",()=>reflector.ReviewAsync(
-                new ChatReflectionRequest(effectiveQuestion,answer,plan.Intent,plan.Confidence,
-                    hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits)),ct),trace);
+            var deterministicCanonical=CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonicalAnswer);
+            var review=deterministicCanonical
+                ? await Timed("reflection.review",()=>Task.FromResult(ReviewDeterministicCanonicalAnswer(answer,canonicalAnswer!,hits)),trace,
+                    result=>$"mode=deterministic-canonical;action={result.Action};reasons={string.Join('|',result.Reasons)}")
+                : await Timed("reflection.review",()=>reflector.ReviewAsync(
+                    new ChatReflectionRequest(effectiveQuestion,answer,plan.Intent,plan.Confidence,
+                        hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits)),ct),trace);
             var activeSubject=canonicalAnswer?.Reference.SubjectName??turnContext.Previous.ActiveReference?.SubjectName;
             if(review.Action=="accept" && turnContext.RouteHint.ContextApplied && !CoversSubject(answer,activeSubject))
                 review=new ChatReflectionResult("retrieve_more",BuildFocusedFollowUpQuery(effectiveQuestion,activeSubject),null,["active_subject_missing_from_answer"]);
@@ -416,15 +424,9 @@ public sealed class ChatOrchestrator(
                     .Select(x=>x.OrderByDescending(hit=>hit.Score).First()).OrderByDescending(x=>x.Score).Take(32).ToArray();
                 if(canonicalAnswer is not null)
                 {
-                    toolPolicy.Demand("answer.synthesize");
                     var synthesisEvidence=BuildGroundedSynthesisEvidence(canonicalAnswer,hits);
-                    var synthesized=await Timed("answer.synthesize",()=>answerSynthesizer.SynthesizeAsync(
-                        new GroundedAnswerSynthesisRequest(effectiveQuestion,canonicalAnswer.Answer,canonicalAnswer.Facts,synthesisEvidence,
-                            canonicalAnswer.MissingFacets,turnContext.Previous.RecentTurns??[]),ct),trace);
-                    answer=synthesized??ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
-                    answer=ComposeBoardRepresentationSummary(canonicalAnswer,synthesisEvidence)
-                        ??ComposeBoardHistorySummary(canonicalAnswer,synthesisEvidence)
-                        ??answer;
+                    answer=await ComposeCanonicalAnswerAsync(effectiveQuestion,canonicalAnswer,synthesisEvidence,
+                        turnContext.Previous.RecentTurns??[],trace,ct);
                     if(HasUnsafeRepresentationClaim(answer,canonicalAnswer,synthesisEvidence))
                         answer=ComposeCanonicalFallback(canonicalAnswer,synthesisEvidence);
                 }
@@ -472,6 +474,35 @@ public sealed class ChatOrchestrator(
             ? await conversationContext.RecordReferenceAsync(subject,request.ConversationId,request.Question,effectiveQuestion,answer,canonicalAnswer,temporalContext,ct)
             : await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,plan.Intent,routeDecision.Route,temporalContext,entityContext,null,ct,answer,plan.Intent.ToString().ToLowerInvariant());
         return new(plan.Intent.ToString().ToLowerInvariant(),answer,request.ConversationId,plan.Intent,plan.Confidence,snapshot,filterResult,hits,citations,trace,null,temporalContext,entityContext,qualityReport,analytics,null,null,savedContext,Evidence:evidence,EvidenceValidation:evidenceValidation,AnswerValidation:answerValidation);
+    }
+
+    private async Task<string> ComposeCanonicalAnswerAsync(
+        string question,
+        CanonicalReferenceAnswer canonical,
+        IReadOnlyList<GroundedSynthesisEvidence> evidence,
+        IReadOnlyList<ConversationMemoryTurn> recentTurns,
+        List<ChatToolTrace> trace,
+        CancellationToken ct)
+    {
+        if(CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonical))
+        {
+            toolPolicy.Demand("answer.compose.canonical");
+            var sw=Stopwatch.StartNew();
+            var deterministic=ComposeCanonicalFallback(canonical,evidence);
+            sw.Stop();
+            trace.Add(new ChatToolTrace("answer.compose.canonical","ok",(int)sw.ElapsedMilliseconds,
+                $"kind={canonical.Reference.Kind};evidence={evidence.Count};missing={string.Join('|',canonical.MissingFacets)}"));
+            return deterministic;
+        }
+
+        toolPolicy.Demand("answer.synthesize");
+        var synthesized=await Timed("answer.synthesize",()=>answerSynthesizer.SynthesizeAsync(
+            new GroundedAnswerSynthesisRequest(question,canonical.Answer,canonical.Facts,evidence,
+                canonical.MissingFacets,recentTurns),ct),trace);
+        return ComposeBoardRepresentationSummary(canonical,evidence)
+            ??ComposeBoardHistorySummary(canonical,evidence)
+            ??synthesized
+            ??ComposeCanonicalFallback(canonical,evidence);
     }
 
     private static string BuildRejectedMarketMessage(MarketDataQualityReport? report, MarketSymbolSnapshot? snapshot)
@@ -529,7 +560,7 @@ public sealed class ChatOrchestrator(
         {
             "قیمت","نرخ","پایانی","حجم","ارزش","تعداد","معاملات","معامله","دادوستد","سهم","نماد","شرکت",
             "مبنا","مبنای","اولین","آخرین","بالاترین","کمترین","سقف","کف","فاصله","درصد","تغییر","ریال",
-            "بازار","تابلو","صنعت","زیرصنعت","وضعیت","معاملاتی","شاخص","اثر","واحد","ثبت","داده","تاریخ",
+            "بازار","تابلو","صنعت","زیرصنعت","وضعیت","معاملاتی","شاخص","اثر","واحد","ثبت","داده","تاریخ","تاریخی","زمان",
             "میانگین","متوسط","وزنی","نسبت","گردش","بهترین","سفارش","سفارشات","خرید","فروش","cashmarket","orderbook","جدول",
             "اردربوک","اوردر","بوک","دفتر","عمق","تقاضا","عرضه","مظنه","سطح","ردیف","سرخط","اسپرد","میانی","ایمبالانس","عدم","تعادل","صف","یکطرفه","یک","طرفه","کل","مجموع","جمع",
             "instrumentid","inscode","bestlimitcounter","شناسه","ابزار","اینس","کد","کانتر","شمارنده","نسخه",
@@ -631,7 +662,22 @@ public sealed class ChatOrchestrator(
     private static IReadOnlyList<string> ReflectionEvidence(CanonicalReferenceAnswer? canonical,IReadOnlyList<KnowledgeHit> hits)
         => (canonical is null?Enumerable.Empty<string>():CanonicalEvidenceText(canonical))
             .Concat(hits.Take(12).Select(x=>$"source={x.Citation.SourceId}; published={x.Citation.PublishedAt}; {Trim(x.Text,3500)}"))
+            .Take(20)
             .ToArray();
+
+    private static ChatReflectionResult ReviewDeterministicCanonicalAnswer(
+        string answer,CanonicalReferenceAnswer canonical,IReadOnlyList<KnowledgeHit> hits)
+    {
+        var missingSubjects=CanonicalSubjects(canonical)
+            .Where(subject=>!ContainsNormalized(answer,subject)).ToArray();
+        if(missingSubjects.Length>0)
+            return new("clarify",null,"پاسخ نهایی همه اشخاص مرجع را پوشش نداد؛ لطفاً دوباره تلاش کنید.",
+                ["canonical_subject_omitted:"+string.Join(',',missingSubjects)]);
+        var evidence=BuildGroundedSynthesisEvidence(canonical,hits);
+        if(HasUnsafeRepresentationClaim(answer,canonical,evidence))
+            return new("clarify",null,"ادعای نمایندگی با شواهد موجود قابل تأیید نبود.",["unsupported_representation_claim"]);
+        return new("accept",null,null,["canonical_subjects_covered","representation_claims_evidence_checked"]);
+    }
 
     private static IReadOnlyList<ChatEvidenceItem> BuildCanonicalEvidence(CanonicalReferenceAnswer answer)
         => answer.Facts.Select((fact,index)=>new ChatEvidenceItem(

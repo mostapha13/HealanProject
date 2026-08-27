@@ -1,18 +1,19 @@
 {
   "mode": "live",
-  "generatedAtUtc": "2026-08-27T17:18:08.218417+00:00",
-  "runId": "642ecc7f8cf0",
+  "generatedAtUtc": "2026-08-27T18:02:37.157737+00:00",
+  "runId": "4dc0522b20f6",
   "version": "1.0.0-rc.31",
-  "suiteVersion": "1.0",
-  "suiteSha256": "c2ac815b0d728c70e6bd527a8df869506e627f01bc84a0f25781c5786690ac5f",
-  "flowCount": 7,
-  "total": 13,
-  "passed": 13,
+  "suiteVersion": "1.1",
+  "suiteSha256": "3b27c01577c9e7cf36fa49ba09769e3dab0ab03854c7623026a3b09b6de07171",
+  "flowCount": 8,
+  "total": 17,
+  "passed": 17,
   "failed": 0,
   "passRate": 1.0,
   "minimumPassRate": 1.0,
-  "p50LatencyMs": 49.02,
-  "p95LatencyMs": 8423.84,
+  "p50LatencyMs": 73.49,
+  "p95LatencyMs": 1685.11,
+  "maxP95LatencyMs": 5000.0,
   "gatePassed": true,
   "structuralIssues": [],
   "failureReasons": {},
@@ -41,9 +42,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -52,19 +55,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 3,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 9,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -88,7 +91,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 99.1
+      "latencyMs": 139.09
     },
     {
       "id": "board-roster-memory:names-only-follow-up",
@@ -113,9 +116,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -124,19 +129,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 3,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 2,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 10,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -160,7 +165,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 25.45
+      "latencyMs": 53.86
     },
     {
       "id": "board-roster-memory:roles-follow-up",
@@ -185,9 +190,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -196,19 +203,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 3,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 9,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -232,7 +239,7 @@
       ],
       "conversationRevision": 3,
       "httpStatus": 200,
-      "latencyMs": 36.78
+      "latencyMs": 74.46
     },
     {
       "id": "board-roster-memory:history-follow-up",
@@ -257,9 +264,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "knowledge",
@@ -268,19 +277,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 3,
           "detail": "kind=organization_board;complete=False;facts=12;missing=member_history"
         },
         {
@@ -292,26 +301,26 @@
         {
           "tool": "capability.route",
           "status": "ok",
-          "durationMs": 3108,
-          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.92;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
         },
         {
           "tool": "knowledge.retrieve.multi",
           "status": "ok",
-          "durationMs": 3622,
-          "detail": "queries=7;hits=22"
+          "durationMs": 4951,
+          "detail": "queries=7;hits=20"
         },
         {
-          "tool": "answer.synthesize",
+          "tool": "answer.compose.canonical",
           "status": "ok",
-          "durationMs": 4808,
-          "detail": null
+          "durationMs": 0,
+          "detail": "kind=organization_board;evidence=0;missing=member_history"
         },
         {
           "tool": "reflection.review",
           "status": "ok",
-          "durationMs": 7,
-          "detail": null
+          "durationMs": 18,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
         },
         {
           "tool": "answer.validate",
@@ -322,7 +331,7 @@
       ],
       "conversationRevision": 4,
       "httpStatus": 200,
-      "latencyMs": 11595.1
+      "latencyMs": 5050.94
     },
     {
       "id": "organization-parent-memory:market-operations-manager",
@@ -347,9 +356,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -394,7 +405,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 49.02
+      "latencyMs": 31.77
     },
     {
       "id": "organization-parent-memory:parent-follow-up",
@@ -419,9 +430,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -430,13 +443,13 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 2,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 2,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
         },
         {
@@ -466,7 +479,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 29.24
+      "latencyMs": 46.54
     },
     {
       "id": "executive-subordinates-memory:executive-manager",
@@ -491,9 +504,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -502,7 +517,7 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
@@ -514,7 +529,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 6,
           "detail": "kind=organization_person;complete=True;facts=2;missing="
         },
         {
@@ -538,7 +553,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 30.31
+      "latencyMs": 66.13
     },
     {
       "id": "executive-subordinates-memory:subordinate-list",
@@ -563,9 +578,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -574,19 +591,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 2,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 3,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 6,
+          "durationMs": 7,
           "detail": "kind=organization_unit;complete=True;facts=10;missing="
         },
         {
@@ -610,7 +627,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 55.36
+      "latencyMs": 73.49
     },
     {
       "id": "executive-subordinates-memory:subordinate-names-only",
@@ -635,9 +652,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -646,19 +665,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 3,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 2,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 7,
           "detail": "kind=organization_unit;complete=True;facts=10;missing="
         },
         {
@@ -682,7 +701,81 @@
       ],
       "conversationRevision": 3,
       "httpStatus": 200,
-      "latencyMs": 48.17
+      "latencyMs": 80.8
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-roles-after-names",
+      "flowId": "executive-subordinates-memory",
+      "turn": 4,
+      "question": "نقش هرکدوم چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران:\n\n1. اسماعیل رازقی — مدیر اداری\n2. سعید رضایی — مدیر سرمایه‌های انسانی\n3. سید احسان عدل — مدیر توسعه ساختمان\n4. رضا قلیچ‌خانی — مدیر امور مالی\n5. محمدحسین نوری‌زاده — مدیر مرکز داده، زیرساخت و شبکه",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 83.5
     },
     {
       "id": "latest-ipo:independent-question",
@@ -707,9 +800,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -718,7 +813,7 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
@@ -730,7 +825,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 49,
+          "durationMs": 26,
           "detail": "kind=company_aggregate;complete=True;facts=2;missing="
         },
         {
@@ -754,7 +849,81 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 93.27
+      "latencyMs": 60.74
+    },
+    {
+      "id": "latest-ipo:symbol-follow-up",
+      "flowId": "latest-ipo",
+      "turn": 2,
+      "question": "نمادش چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فرآورده‌های دامی ولبنی دالاهو (نماد غانیزان): نماد بورسی غانیزان است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 32,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت فرآورده‌های دامی ولبنی دالاهو;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 56.23
     },
     {
       "id": "board-composite-question:history-and-representation",
@@ -779,9 +948,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "knowledge",
@@ -802,7 +973,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 6,
+          "durationMs": 3,
           "detail": "kind=organization_board;complete=False;facts=12;missing=member_history|representing_company"
         },
         {
@@ -814,25 +985,99 @@
         {
           "tool": "capability.route",
           "status": "ok",
-          "durationMs": 3270,
-          "detail": "route=Knowledge;intent=Knowledge;confidence=0.95;planner=True;reasons=bounded-ai-planner,llm-semantic-plan"
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.92;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
         },
         {
           "tool": "knowledge.retrieve.multi",
           "status": "ok",
-          "durationMs": 966,
-          "detail": "queries=7;hits=22"
+          "durationMs": 1542,
+          "detail": "queries=7;hits=21"
         },
         {
-          "tool": "answer.synthesize",
+          "tool": "answer.compose.canonical",
           "status": "ok",
-          "durationMs": 4088,
-          "detail": null
+          "durationMs": 3,
+          "detail": "kind=organization_board;evidence=4;missing=member_history|representing_company"
         },
         {
           "tool": "reflection.review",
           "status": "ok",
-          "durationMs": 5,
+          "durationMs": 42,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 1685.11
+    },
+    {
+      "id": "organization-person-evidence-follow-up:chairperson",
+      "flowId": "organization-person-evidence-follow-up",
+      "turn": 1,
+      "question": "رئیس هیئت مدیره بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "بهروز خالق‌ویردی، رئیس هیئت‌مدیره بورس تهران است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=رئیس هیئت‌مدیره;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
           "detail": null
         },
         {
@@ -844,7 +1089,99 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 8423.84
+      "latencyMs": 52.75
+    },
+    {
+      "id": "organization-person-evidence-follow-up:representation-follow-up",
+      "flowId": "organization-person-evidence-follow-up",
+      "turn": 2,
+      "question": "نماینده کدوم شرکته؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "بهروز خالق‌ویردی، رئیس هیئت‌مدیره بورس تهران است.\n\nبرای شرکتِ نمایندگی‌شده، مدرک قابل اتکای کافی در داده‌های فعلی پیدا نشد؛ بنابراین چیزی حدس نمی‌زنم.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=organization_person;complete=False;facts=2;missing=representing_company"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=رئیس هیئت‌مدیره;facts=2"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.94;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 744,
+          "detail": "queries=2;hits=4"
+        },
+        {
+          "tool": "answer.compose.canonical",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;evidence=0;missing=representing_company"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 790.27
     },
     {
       "id": "jalali-clock:today",
@@ -869,9 +1206,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "structured_reference",
@@ -880,19 +1219,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=2026-08-27;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 4,
+          "durationMs": 0,
           "detail": "kind=clock;complete=True;facts=1;missing="
         },
         {
@@ -916,7 +1255,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 44.69
+      "latencyMs": 28.03
     },
     {
       "id": "stale-market-fail-closed:latest-price-date",
@@ -941,9 +1280,11 @@
         "normalizedEqualsEvidenceClaims": true,
         "jalaliEvidenceDatesInAnswer": true,
         "expectedTools": true,
+        "forbiddenTools": true,
         "traceDetail": true,
         "answerValidation": true,
-        "conversationRevision": true
+        "conversationRevision": true,
+        "latency": true
       },
       "issues": [],
       "actualType": "data_quality_unavailable",
@@ -958,37 +1299,37 @@
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 2,
           "detail": "no-match"
         },
         {
           "tool": "capability.route",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
         },
         {
           "tool": "entity.resolve",
           "status": "ok",
-          "durationMs": 218,
-          "detail": "status=Resolved;input=فملی تاریخی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+          "durationMs": 32,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
         },
         {
           "tool": "structured.market.symbol",
           "status": "ok",
-          "durationMs": 53,
+          "durationMs": 40,
           "detail": null
         }
       ],
       "conversationRevision": null,
       "httpStatus": 200,
-      "latencyMs": 315.79
+      "latencyMs": 124.92
     }
   ]
 }

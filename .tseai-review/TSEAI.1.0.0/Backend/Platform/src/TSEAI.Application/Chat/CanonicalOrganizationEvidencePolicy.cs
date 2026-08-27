@@ -4,6 +4,13 @@ namespace TSEAI.Application.Chat;
 
 public static class CanonicalOrganizationEvidencePolicy
 {
+    private static readonly IReadOnlySet<string> DeterministicFacets = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "member_history",
+        "person_history",
+        "representing_company"
+    };
+
     private static readonly string[] ProfessionalHistoryCues =
     [
         "سابقه", "سوابق", "رزومه", "پیشینه", "تحصیل", "دانش‌آموخته", "دانش آموخته",
@@ -32,6 +39,13 @@ public static class CanonicalOrganizationEvidencePolicy
         }
         return false;
     }
+
+    public static bool ShouldUseDeterministicKnowledgeRoute(CanonicalReferenceAnswer? answer)
+        => answer is { IsComplete: false }
+            && answer.Reference.Kind is "organization_person" or "organization_board" or "organization_unit"
+            && answer.MissingFacets.Count>0
+            && answer.KnowledgeQueries.Count>0
+            && answer.MissingFacets.All(DeterministicFacets.Contains);
 
     private static string Compact(string? value)
         => Regex.Replace(PersianDisplayText.Normalize(value??string.Empty),@"[^\p{L}\p{Nd}]",string.Empty);

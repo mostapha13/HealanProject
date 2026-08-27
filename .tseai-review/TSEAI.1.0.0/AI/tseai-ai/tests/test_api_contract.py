@@ -56,3 +56,13 @@ def test_invalid_json_has_safe_bounded_error():
         "code": "invalid_json",
         "detail": "Request body must be valid JSON.",
     }
+
+
+def test_batch_retrieval_contract_rejects_unbounded_queries_before_execution():
+    response = request(
+        "POST",
+        "/knowledge/retrieve-batch",
+        json={"queries": [f"query {index}" for index in range(9)]},
+    )
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_error"

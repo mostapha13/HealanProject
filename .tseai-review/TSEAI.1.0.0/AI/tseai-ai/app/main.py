@@ -1,6 +1,7 @@
 import json
 import os
 import asyncio
+from typing import Annotated
 
 from pydantic import BaseModel, Field, ValidationError
 from starlette.applications import Starlette
@@ -53,6 +54,23 @@ class KnowledgeIndexRequest(BaseModel):
 
 class KnowledgeRetrieveRequest(BaseModel):
     query: str = Field(min_length=2, max_length=2000)
+    limit: int = Field(default=8, ge=1, le=30)
+    source_type: str | None = None
+    symbol: str | None = None
+    category: str | None = None
+    route: str | None = None
+    content_type_id: int | None = None
+    language_id: int | None = None
+    date_from: str | None = None
+    date_to: str | None = None
+    latest_first: bool | None = None
+    topic: str | None = None
+    company: str | None = None
+    current_only: bool | None = None
+
+
+class KnowledgeRetrieveBatchRequest(BaseModel):
+    queries: list[Annotated[str, Field(min_length=2, max_length=2000)]] = Field(min_length=1, max_length=8)
     limit: int = Field(default=8, ge=1, le=30)
     source_type: str | None = None
     symbol: str | None = None
@@ -265,6 +283,16 @@ async def knowledge_retrieve(request: Request) -> JSONResponse:
     return JSONResponse(result)
 
 
+async def knowledge_retrieve_batch(request: Request) -> JSONResponse:
+    req = await body(request, KnowledgeRetrieveBatchRequest)
+    results = await knowledge_service.retrieve_many(
+        req.queries, req.limit, req.source_type, req.symbol, req.category, req.route,
+        req.content_type_id, req.language_id, req.date_from, req.date_to,
+        req.latest_first, req.topic, req.company, req.current_only,
+    )
+    return JSONResponse({"count": len(results), "results": results})
+
+
 allowed_hosts = [value.strip() for value in os.getenv(
     "AI_ALLOWED_HOSTS", "ai-engine,localhost,127.0.0.1,testserver"
 ).split(",") if value.strip()]
@@ -279,6 +307,7 @@ routes = [
     Route("/filter/conversation/interpret", filter_conversation_interpret, methods=["POST"]),
     Route("/knowledge/index", knowledge_index, methods=["POST"]),
     Route("/knowledge/retrieve", knowledge_retrieve, methods=["POST"]),
+    Route("/knowledge/retrieve-batch", knowledge_retrieve_batch, methods=["POST"]),
 ]
 app = Starlette(
     routes=routes,

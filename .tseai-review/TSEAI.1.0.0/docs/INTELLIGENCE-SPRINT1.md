@@ -59,7 +59,7 @@ python scripts/evaluate-table-chat-suite.py --source company --ids CO-051,CO-052
 
 ## Conversation Golden Suite
 
-مجموعه `tests/conversation-golden-suite.v1.json` شکاف میان تست سؤال‌های منفرد و رفتار واقعی چت را می‌بندد. هفت جریان و سیزده نوبت فعلی موارد زیر را انتها‌به‌انتها، از HTTP تا SQL/Retrieval/Reflection، کنترل می‌کنند:
+مجموعه `tests/conversation-golden-suite.v1.json` شکاف میان تست سؤال‌های منفرد و رفتار واقعی چت را می‌بندد. نسخه ۱.۱ آن شامل هشت جریان و هفده نوبت است و موارد زیر را انتها‌به‌انتها، از HTTP تا SQL/Retrieval/Reflection، کنترل می‌کند:
 
 - حفظ هویت کاربر و `ConversationId` در تمام نوبت‌های یک جریان؛
 - ارجاع‌های فارسی مانند «اسمشون»، «سمت‌هاشون» و «زیر مجموعه چه معاونتیه؟»؛
@@ -69,6 +69,7 @@ python scripts/evaluate-table-chat-suite.py --source company --ids CO-051,CO-052
 - تطبیق نام‌ها، سمت‌ها و عرضه اولیه با Claimهای Evidence همان پاسخ؛ بنابراین به‌روزرسانی درست SQL به‌عنوان Regression کاذب گزارش نمی‌شود؛
 - منع پاسخ نامرتبط، HTML/JSON transport error و تاریخ نمایشی میلادی؛
 - پاسخ شمسی ساعت سیستم و توقف نمایش عدد بازار هنگام stale بودن منبع.
+- سقف ۵ ثانیه برای P95 مجموعه و سقف ۶.۵ ثانیه برای هر نوبت.
 
 پیش‌بررسی و اجرای زنده:
 

@@ -21,6 +21,15 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SUITE = ROOT / "tests" / "conversation-golden-suite.v1.json"
 
 
+def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError(f"duplicate JSON key: {key}")
+        value[key] = item
+    return value
+
+
 def normalize(value: object) -> str:
     text = str(value or "").replace("ي", "ی").replace("ك", "ک").replace("ۀ", "ه")
     text = text.replace("\u200c", " ")
@@ -108,6 +117,7 @@ def validate_suite(suite: dict[str, Any]) -> list[str]:
                 "expectedTypes", "mustContain", "mustContainAny", "mustNotContain",
                 "answerRegex", "answerNotRegex", "expectedTools", "answerValidationStatuses",
                 "answerContainsEvidenceClaimPatterns", "answerContainsJalaliEvidenceDateClaimPatterns",
+                "forbiddenTools",
             ):
                 if field in turn and not isinstance(turn[field], list):
                     issues.append(f"{scoped_id}:{field}_not_list")
@@ -184,6 +194,7 @@ def evaluate_turn(
     output: dict[str, Any],
     error: str | None,
     expected_revision: int,
+    latency_ms: float,
 ) -> tuple[bool, dict[str, bool], list[str]]:
     answer = str(output.get("answer") or "")
     normalized_answer = normalize(answer)
@@ -249,6 +260,7 @@ def evaluate_turn(
             for values in jalali_claim_dates
         ),
         "expectedTools": all(tool in tools for tool in turn.get("expectedTools", [])),
+        "forbiddenTools": all(tool not in tools for tool in turn.get("forbiddenTools", [])),
         "traceDetail": all(
             all(normalize(fragment) in normalize(trace_by_tool.get(tool, "")) for fragment in fragments)
             for tool, fragments in turn.get("traceDetailContains", {}).items()
@@ -256,6 +268,7 @@ def evaluate_turn(
         "answerValidation": not expected_statuses or normalize(validation_status) in {normalize(value) for value in expected_statuses},
         "conversationRevision": not turn.get("requireConversationRevision")
         or int(context.get("revision") or 0) >= expected_revision,
+        "latency": latency_ms <= float(turn.get("maxLatencyMs", suite.get("maxTurnLatencyMs", 120000))),
     }
     issues = [name for name, passed in checks.items() if not passed]
     if error:
@@ -283,7 +296,22 @@ def main() -> int:
     args = parser.parse_args()
 
     suite_path = Path(args.suite).resolve()
-    suite = json.loads(suite_path.read_text(encoding="utf-8"))
+    try:
+        suite = json.loads(suite_path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+        output_path = ROOT / args.out
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        report = {
+            "mode": "structural-preflight" if args.validate_only else "live",
+            "generatedAtUtc": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "version": (ROOT / "VERSION").read_text(encoding="utf-8").strip(),
+            "passed": False,
+            "gatePassed": False,
+            "issues": [f"suite:invalid_json:{error}"],
+        }
+        output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 2
     structural_issues = validate_suite(suite)
     selected_flows = set(args.flow or [])
     flows = [flow for flow in suite.get("flows", []) if not selected_flows or flow.get("id") in selected_flows]
@@ -333,7 +361,7 @@ def main() -> int:
                 args.timeout,
                 args.rate_limit_retries,
             )
-            passed, checks, issues = evaluate_turn(suite, turn, output, error, revision)
+            passed, checks, issues = evaluate_turn(suite, turn, output, error, revision, latency_ms)
             latencies.append(latency_ms)
             row = {
                 "id": f"{flow_id}:{turn['id']}",
@@ -363,7 +391,15 @@ def main() -> int:
     passed_count = sum(bool(row["passed"]) for row in rows)
     pass_rate = passed_count / max(1, len(rows))
     minimum_pass_rate = float(suite.get("minimumPassRate", 1.0))
-    gate_passed = not structural_issues and len(rows) == total_turns and pass_rate >= minimum_pass_rate
+    p95_latency_ms = percentile(latencies, 0.95)
+    max_p95_latency_ms = float(suite.get("maxP95LatencyMs", 120000))
+    gate_passed = (
+        not structural_issues
+        and len(rows) == total_turns
+        and pass_rate >= minimum_pass_rate
+        and p95_latency_ms is not None
+        and p95_latency_ms <= max_p95_latency_ms
+    )
     report = {
         "mode": "live",
         "generatedAtUtc": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -374,7 +410,8 @@ def main() -> int:
         "passRate": pass_rate,
         "minimumPassRate": minimum_pass_rate,
         "p50LatencyMs": round(statistics.median(latencies), 2) if latencies else None,
-        "p95LatencyMs": percentile(latencies, 0.95),
+        "p95LatencyMs": p95_latency_ms,
+        "maxP95LatencyMs": max_p95_latency_ms,
         "gatePassed": gate_passed,
         "structuralIssues": structural_issues,
         "failureReasons": dict(Counter(issue for row in rows for issue in row["issues"])),

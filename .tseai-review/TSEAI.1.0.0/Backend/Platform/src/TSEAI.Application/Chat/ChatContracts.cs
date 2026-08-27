@@ -32,6 +32,8 @@ public sealed record KnowledgeRetrievalContext(string? Symbol=null,string? DateF
 public interface IKnowledgeRetriever
 {
     Task<KnowledgeSearchResult> RetrieveAsync(string query,int limit,KnowledgeRetrievalContext context,CancellationToken ct);
+    Task<IReadOnlyList<KnowledgeSearchResult>> RetrieveManyAsync(
+        IReadOnlyList<string> queries,int limit,KnowledgeRetrievalContext context,CancellationToken ct);
 }
 
 public sealed record ChatOrchestrationRequest(

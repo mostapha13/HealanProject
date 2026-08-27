@@ -1,8 +1,11 @@
 using TSEAI.Application.Chat;
+using TSEAI.Application.Chat.Agentic;
 using TSEAI.Application.StructuredQuery;
 using TSEAI.Shared.Application.Market;
 
 var engine=new ChatEvidenceEngine();
+var marketEntityCleaner=typeof(ChatOrchestrator).GetMethod("CleanMarketEntityInput",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static);
+Must((string?)marketEntityCleaner?.Invoke(null,["فملی تاریخی"])=="فملی","temporal qualifiers must not force a fuzzy full-catalog entity lookup");
 var snapshot=new MarketSymbolSnapshot{InsCode=123,SymbolCode="IRO1TEST0001",Symbol="تست",SymbolName="نماد تست",CompanyName="شرکت تست",LastPrice=1200,ClosingPrice=1180,YesterdayPrice=1100,FirstPrice=1110,MinPrice=1090,MaxPrice=1230,PriceChange=100,SourceLastPricePercent=9.09m,SourceClosingPriceChange=80,SourceClosingPricePercent=7.27m,TradeVolume=5000,TradeValue=6000000,TradeCount=42,MarketValue=120000000,PE=7.5m,Eps=160,EffectOnIndex=12.5m,MarketName="بورس",MarketTypeName="نرمال",BoardName="بازار اول - اصلی",IndustryName="فلزات اساسی",StateName="مجاز",SourceLastModified=new DateTime(2026,8,11,11,29,22),SnapshotUpdatedAtUtc=new DateTime(2026,8,11,8,30,0,DateTimeKind.Utc)};
 var hit=new KnowledgeHit("متن خبر معتبر",0.91,new KnowledgeCitation("Content","42","خبر تست","https://example.test/news/42","تست","2026-08-11"),new Dictionary<string,object?>{{"bm25_score",0.7}});
 var evidence=engine.Build(ChatIntent.Hybrid,snapshot,null,null,[hit]);
@@ -76,6 +79,14 @@ Must(!CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(
 Must(!CanonicalOrganizationEvidencePolicy.IsProfessionalHistoryExcerpt(
         "مطابق آیین‌نامه راهبری شرکتی، هیئت‌مدیره سه کمیته تخصصی تشکیل می‌دهد.",["بهروز خالق‌ویردی"]),
     "generic governance documents must not pass as a current member's professional history");
+var incompleteBoardEvidence=new CanonicalReferenceAnswer("اعضای فعلی",new("organization_board","هیئت‌مدیره بورس تهران",null,null,[]),
+    [new("board_member:0:name","بهروز خالق‌ویردی","TsePerson:1")],false,["member_history","representing_company"],["سوابق بهروز خالق‌ویردی"]);
+Must(CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(incompleteBoardEvidence),
+    "bounded organization facets must bypass the AI planner and use deterministic evidence composition");
+Must(!CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(incompleteBoardEvidence with { MissingFacets=["unknown_facet"] }),
+    "unknown canonical facets must not silently bypass the bounded planner");
+Must(new ChatToolPolicy().IsAllowed("answer.compose.canonical"),
+    "deterministic canonical composition must remain explicitly allow-listed");
 var namesOnly=CanonicalBoardMemberAnswer.Compose(namesIntent,boardMembers);
 Must(namesOnly=="بهروز خالق‌ویردی، عسگر نوربخش، مجتبی افشاری، حامد شادکام، میلاد فروغی، عباس نعیمی","names-only answer must contain no narrative or roles");
 var boardAnswer=CanonicalBoardMemberAnswer.Compose(CanonicalBoardMemberAnswer.Parse("اعضای هیئت مدیره بورس تهران کیا هستند؟"),boardMembers);
