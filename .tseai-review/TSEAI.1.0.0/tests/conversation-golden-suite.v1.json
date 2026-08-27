@@ -193,7 +193,7 @@
     },
     {
       "id": "latest-ipo",
-      "minimumTurns": 2,
+      "minimumTurns": 3,
       "turns": [
         {
           "id": "independent-question",
@@ -221,6 +221,22 @@
           "minimumEvidenceClaims": 1,
           "answerContainsEvidenceClaimPatterns": ["^linked_symbol$"],
           "maxAnswerChars": 180,
+          "expectedTools": ["conversation.context", "sql.company.lookup", "reflection.review", "answer.validate"],
+          "traceDetailContains": {
+            "conversation.context": ["applied=True", "company-followup-with-active-reference"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "province-follow-up",
+          "question": "این شرکت متعلق به کدام استان است؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["فرآورده‌های دامی ولبنی دالاهو", "تالار کرمانشاه"],
+          "mustNotContain": ["پالایش نفت بندرعباس", "شرکت ملی پالایش و پخش", "داده قابل اتکایی"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$", "^hall$"],
+          "maxAnswerChars": 260,
           "expectedTools": ["conversation.context", "sql.company.lookup", "reflection.review", "answer.validate"],
           "traceDetailContains": {
             "conversation.context": ["applied=True", "company-followup-with-active-reference"]

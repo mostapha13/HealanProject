@@ -18,7 +18,9 @@ public sealed class ConversationContextService(
     [
         "نمادش", "نماد آن شرکت", "نماد این شرکت", "اسم نماد", "کد نماد",
         "سایتش", "وب سایتش", "وب‌سایتش", "تلفنش", "شماره تماسش", "مدیرعاملش", "مدیر عاملش",
-        "تالارش", "تاریخ عرضه اش", "تاریخ عرضه‌اش", "کی عرضه شده", "چه زمانی عرضه شده"
+        "تالارش", "استانش", "استان آن شرکت", "استان این شرکت", "کدام استان", "کدوم استان", "چه استانی",
+        "در چه استان", "متعلق به کدام استان", "متعلق به کدوم استان", "مربوط به کدام استان", "مربوط به کدوم استان",
+        "تاریخ عرضه اش", "تاریخ عرضه‌اش", "کی عرضه شده", "چه زمانی عرضه شده"
     ];
     private static readonly string[] HybridFollowUps = ["چرا افت","چرا رشد","چرا منفی","چرا مثبت","دلیل افت","دلیل رشد","علتش"];
     private static readonly string[] ReferentialCues = ["همون","همان","اون","آن سهم","این سهم","این نماد","همین نماد","همین سهم"];
@@ -241,6 +243,7 @@ public sealed class ConversationContextService(
         if(normalized.Contains("سایت",StringComparison.Ordinal)) return $"وب‌سایت شرکت {subject} چیست؟";
         if(normalized.Contains("تلفن",StringComparison.Ordinal)||normalized.Contains("تماس",StringComparison.Ordinal)) return $"شماره تماس شرکت {subject} چیست؟";
         if(normalized.Contains("مدیرعامل",StringComparison.Ordinal)||normalized.Contains("مدیر عامل",StringComparison.Ordinal)) return $"مدیرعامل شرکت {subject} کیست؟";
+        if(normalized.Contains("استان",StringComparison.Ordinal)) return $"تالار منطقه‌ای شرکت {subject} در کدام استان ثبت شده است؟";
         if(normalized.Contains("تالار",StringComparison.Ordinal)) return $"شرکت {subject} در کدام تالار است؟";
         return $"تاریخ عرضه اولیه شرکت {subject} چیست؟";
     }

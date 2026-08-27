@@ -70,6 +70,10 @@ var ipoSymbol=await svc.PrepareAsync("u1","c1","نمادش چیه؟",temporal,Ca
 Assert(ipoSymbol.RouteHint.ContextApplied
     &&ipoSymbol.EffectiveQuestion=="نماد شرکت فرآورده‌های دامی ولبنی دالاهو چیست؟",
     "a company IPO follow-up must inherit the exact company subject");
+var ipoProvince=await svc.PrepareAsync("u1","c1","این شرکت متعلق به کدام استان است؟",temporal,CancellationToken.None);
+Assert(ipoProvince.RouteHint.ContextApplied
+    &&ipoProvince.EffectiveQuestion=="تالار منطقه‌ای شرکت فرآورده‌های دامی ولبنی دالاهو در کدام استان ثبت شده است؟",
+    "a company IPO province follow-up must bind the active company before canonical lookup");
 
 var resolvedMarket=await new FakeResolver().ResolveAsync("خساپا",new EntityResolveOptions([EntityKind.Instrument]),CancellationToken.None);
 await svc.RecordAsync("u1","c1","قیمت نماد خساپا",ChatIntent.MarketSymbol,ChatCapabilityRoute.MarketSymbol,temporal,resolvedMarket,null,CancellationToken.None,"خساپا ۵۸۰ ریال است.");
