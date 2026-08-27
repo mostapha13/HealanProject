@@ -1,18 +1,18 @@
 {
   "mode": "live",
-  "generatedAtUtc": "2026-08-27T18:02:37.157737+00:00",
-  "runId": "4dc0522b20f6",
+  "generatedAtUtc": "2026-08-27T18:52:48.320532+00:00",
+  "runId": "d5e2757e568e",
   "version": "1.0.0-rc.31",
-  "suiteVersion": "1.1",
-  "suiteSha256": "3b27c01577c9e7cf36fa49ba09769e3dab0ab03854c7623026a3b09b6de07171",
-  "flowCount": 8,
-  "total": 17,
-  "passed": 17,
+  "suiteVersion": "1.2",
+  "suiteSha256": "9dd31642411c0a9e4815325a56b1197c9c452e675aee1db555cef3c85b6d04a7",
+  "flowCount": 12,
+  "total": 22,
+  "passed": 22,
   "failed": 0,
   "passRate": 1.0,
   "minimumPassRate": 1.0,
-  "p50LatencyMs": 73.49,
-  "p95LatencyMs": 1685.11,
+  "p50LatencyMs": 68.24,
+  "p95LatencyMs": 1131.21,
   "maxP95LatencyMs": 5000.0,
   "gatePassed": true,
   "structuralIssues": [],
@@ -55,7 +55,7 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
@@ -67,7 +67,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 9,
+          "durationMs": 2,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -91,7 +91,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 139.09
+      "latencyMs": 110.97
     },
     {
       "id": "board-roster-memory:names-only-follow-up",
@@ -129,19 +129,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 1,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 10,
+          "durationMs": 5,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -165,7 +165,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 53.86
+      "latencyMs": 58.29
     },
     {
       "id": "board-roster-memory:roles-follow-up",
@@ -203,19 +203,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 3,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 2,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 9,
+          "durationMs": 4,
           "detail": "kind=organization_board;complete=True;facts=12;missing="
         },
         {
@@ -239,7 +239,7 @@
       ],
       "conversationRevision": 3,
       "httpStatus": 200,
-      "latencyMs": 74.46
+      "latencyMs": 56.97
     },
     {
       "id": "board-roster-memory:history-follow-up",
@@ -283,13 +283,13 @@
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 4,
           "detail": "kind=organization_board;complete=False;facts=12;missing=member_history"
         },
         {
@@ -307,7 +307,7 @@
         {
           "tool": "knowledge.retrieve.multi",
           "status": "ok",
-          "durationMs": 4951,
+          "durationMs": 3607,
           "detail": "queries=7;hits=20"
         },
         {
@@ -319,7 +319,7 @@
         {
           "tool": "reflection.review",
           "status": "ok",
-          "durationMs": 18,
+          "durationMs": 29,
           "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
         },
         {
@@ -331,7 +331,7 @@
       ],
       "conversationRevision": 4,
       "httpStatus": 200,
-      "latencyMs": 5050.94
+      "latencyMs": 3731.54
     },
     {
       "id": "organization-parent-memory:market-operations-manager",
@@ -381,7 +381,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 4,
           "detail": "kind=organization_person;complete=True;facts=2;missing="
         },
         {
@@ -405,7 +405,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 31.77
+      "latencyMs": 62.57
     },
     {
       "id": "organization-parent-memory:parent-follow-up",
@@ -443,19 +443,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 0,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 7,
           "detail": "kind=organization_person;complete=True;facts=5;missing="
         },
         {
@@ -479,7 +479,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 46.54
+      "latencyMs": 69.31
     },
     {
       "id": "executive-subordinates-memory:executive-manager",
@@ -523,13 +523,13 @@
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 3,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 6,
+          "durationMs": 11,
           "detail": "kind=organization_person;complete=True;facts=2;missing="
         },
         {
@@ -553,7 +553,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 66.13
+      "latencyMs": 67.16
     },
     {
       "id": "executive-subordinates-memory:subordinate-list",
@@ -591,19 +591,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 0,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 7,
+          "durationMs": 4,
           "detail": "kind=organization_unit;complete=True;facts=10;missing="
         },
         {
@@ -627,7 +627,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 73.49
+      "latencyMs": 36.3
     },
     {
       "id": "executive-subordinates-memory:subordinate-names-only",
@@ -665,19 +665,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 1,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 7,
+          "durationMs": 2,
           "detail": "kind=organization_unit;complete=True;facts=10;missing="
         },
         {
@@ -701,7 +701,7 @@
       ],
       "conversationRevision": 3,
       "httpStatus": 200,
-      "latencyMs": 80.8
+      "latencyMs": 48.37
     },
     {
       "id": "executive-subordinates-memory:subordinate-roles-after-names",
@@ -739,7 +739,7 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 9,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
@@ -751,7 +751,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 12,
+          "durationMs": 15,
           "detail": "kind=organization_unit;complete=True;facts=10;missing="
         },
         {
@@ -775,7 +775,7 @@
       ],
       "conversationRevision": 4,
       "httpStatus": 200,
-      "latencyMs": 83.5
+      "latencyMs": 130.59
     },
     {
       "id": "latest-ipo:independent-question",
@@ -813,19 +813,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 26,
+          "durationMs": 24,
           "detail": "kind=company_aggregate;complete=True;facts=2;missing="
         },
         {
@@ -849,7 +849,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 60.74
+      "latencyMs": 50.72
     },
     {
       "id": "latest-ipo:symbol-follow-up",
@@ -899,7 +899,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 32,
+          "durationMs": 167,
           "detail": "kind=company;complete=True;facts=10;missing="
         },
         {
@@ -923,7 +923,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 56.23
+      "latencyMs": 200.55
     },
     {
       "id": "board-composite-question:history-and-representation",
@@ -961,19 +961,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 4,
           "detail": "kind=organization_board;complete=False;facts=12;missing=member_history|representing_company"
         },
         {
@@ -991,19 +991,19 @@
         {
           "tool": "knowledge.retrieve.multi",
           "status": "ok",
-          "durationMs": 1542,
+          "durationMs": 1018,
           "detail": "queries=7;hits=21"
         },
         {
           "tool": "answer.compose.canonical",
           "status": "ok",
-          "durationMs": 3,
+          "durationMs": 2,
           "detail": "kind=organization_board;evidence=4;missing=member_history|representing_company"
         },
         {
           "tool": "reflection.review",
           "status": "ok",
-          "durationMs": 42,
+          "durationMs": 38,
           "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
         },
         {
@@ -1015,7 +1015,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 1685.11
+      "latencyMs": 1131.21
     },
     {
       "id": "organization-person-evidence-follow-up:chairperson",
@@ -1053,19 +1053,19 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 4,
+          "durationMs": 3,
           "detail": "kind=organization_person;complete=True;facts=2;missing="
         },
         {
@@ -1089,7 +1089,7 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 52.75
+      "latencyMs": 29.61
     },
     {
       "id": "organization-person-evidence-follow-up:representation-follow-up",
@@ -1127,13 +1127,13 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
         },
         {
@@ -1157,7 +1157,7 @@
         {
           "tool": "knowledge.retrieve.multi",
           "status": "ok",
-          "durationMs": 744,
+          "durationMs": 717,
           "detail": "queries=2;hits=4"
         },
         {
@@ -1181,7 +1181,7 @@
       ],
       "conversationRevision": 2,
       "httpStatus": 200,
-      "latencyMs": 790.27
+      "latencyMs": 760.19
     },
     {
       "id": "jalali-clock:today",
@@ -1231,7 +1231,7 @@
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "kind=clock;complete=True;facts=1;missing="
         },
         {
@@ -1255,7 +1255,443 @@
       ],
       "conversationRevision": 1,
       "httpStatus": 200,
-      "latencyMs": 28.03
+      "latencyMs": 30.05
+    },
+    {
+      "id": "canonical-market-composite:issuer-ceo-and-price",
+      "flowId": "canonical-market-composite",
+      "turn": 1,
+      "question": "مدیرعامل فولاد مبارکه کیست و آخرین قیمت نماد فولاد چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_market",
+      "answer": "فولاد — فولاد مبارکه اصفهان: مدیرعامل ثبت‌شده سعید زرندی است.\n\nبرای «فولاد مبارکه اصفهان» داده بازار قابل اتکایی در Snapshot فعلی موجود نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 41,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=وضعیت نماد فولاد;facts=11"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=canonical-market-composite,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 134,
+          "detail": "status=Resolved;input=فولاد;match=فولاد مبارکه اصفهان"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 45,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company_state;marketFields=last_price;qualityRejected=False"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 248.42
+    },
+    {
+      "id": "canonical-market-composite:company-name-and-pe",
+      "flowId": "canonical-market-composite",
+      "turn": 2,
+      "question": "نام شرکت و نسبت P/E نماد فملی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_market",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است\n\nآخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1169,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 271,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=canonical-market-composite,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 67,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 63,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company;marketFields=pe;qualityRejected=True"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 1604.85
+    },
+    {
+      "id": "targeted-news-composite:symbol-news-and-volume",
+      "flowId": "targeted-news-composite",
+      "turn": 1,
+      "question": "آخرین خبر فملی چیست و حجم معاملاتش چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "hybrid",
+      "answer": "برای نماد «فملی» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.\n\nآخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Hybrid;intent=Hybrid;confidence=0.99;planner=False;reasons=targeted-news,deterministic-composite-route"
+        },
+        {
+          "tool": "hybrid.plan",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "entity:entity.resolve[];market:structured.market.symbol[entity];knowledge:knowledge.retrieve[entity];analytics:analytics.symbol[market]"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 63,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "failed",
+          "durationMs": 161,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 161,
+          "detail": "hits=0"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 267.26
+    },
+    {
+      "id": "latest-ipo-with-symbol:latest-company-and-ticker",
+      "flowId": "latest-ipo-with-symbol",
+      "turn": 1,
+      "question": "آخرین عرضه اولیه چه شرکتی بود و نمادش چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است. نماد بورسی آن غانیزان است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "kind=company_aggregate;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 44.85
+    },
+    {
+      "id": "issuer-role-fail-closed:missing-company-state",
+      "flowId": "issuer-role-fail-closed",
+      "turn": 1,
+      "question": "مدیرعامل خودرو کیست و دلیل وضعیت فعلی نمادش چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در Snapshot فعلی جدول Companystate رکوردی برای «خودرو» وجود ندارد؛ بنابراین مدیرعامل و دلیل وضعیت و وضعیت معاملاتی از این منبع قابل تأیید نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": "kind=company_state;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 46.39
     },
     {
       "id": "stale-market-fail-closed:latest-price-date",
@@ -1293,43 +1729,43 @@
         {
           "tool": "temporal.resolve",
           "status": "ok",
-          "durationMs": 0,
+          "durationMs": 1,
           "detail": "context=False;source=clock;primary=;comparison=;reasons="
         },
         {
           "tool": "conversation.context",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "applied=False;kind=None;primary=;secondary=;reasons="
         },
         {
           "tool": "structured.reference",
           "status": "ok",
-          "durationMs": 2,
+          "durationMs": 6,
           "detail": "no-match"
         },
         {
           "tool": "capability.route",
           "status": "ok",
-          "durationMs": 1,
+          "durationMs": 0,
           "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
         },
         {
           "tool": "entity.resolve",
           "status": "ok",
-          "durationMs": 32,
+          "durationMs": 71,
           "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
         },
         {
           "tool": "structured.market.symbol",
           "status": "ok",
-          "durationMs": 40,
+          "durationMs": 77,
           "detail": null
         }
       ],
       "conversationRevision": null,
       "httpStatus": 200,
-      "latencyMs": 124.92
+      "latencyMs": 194.08
     }
   ]
 }

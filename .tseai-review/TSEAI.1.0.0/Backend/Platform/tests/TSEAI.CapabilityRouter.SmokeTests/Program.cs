@@ -39,9 +39,18 @@ Assert(persianDigitBond.Route==ChatCapabilityRoute.Knowledge && !persianDigitBon
 var reportValue=await router.RouteAsync("ارزش بازار سایپا در گزارش مراسم چند همت اعلام شده بود؟",100,CancellationToken.None);
 Assert(reportValue.Route==ChatCapabilityRoute.Knowledge && !reportValue.PlannerUsed,"historical report metrics must not route to current market tools");
 var h=await router.RouteAsync("قیمت فولاد و آخرین خبرش رو بگو",100,CancellationToken.None);
-Assert(h.Route==ChatCapabilityRoute.Hybrid && h.PlannerUsed,"hybrid fallback route failed");
+Assert(h.Route==ChatCapabilityRoute.Hybrid && !h.PlannerUsed && h.Plan?.Symbol=="فولاد",
+    $"targeted hybrid route failed: route={h.Route};planner={h.PlannerUsed};symbol={h.Plan?.Symbol}");
 Assert(h.Capabilities.Any(x=>x.Name=="structured.market.symbol") && h.Capabilities.Any(x=>x.Name=="knowledge.retrieve"),"hybrid capabilities incomplete");
-Assert(h.AuditSummary.Contains("route=Hybrid") && h.AuditSummary.Contains("planner=True"),"audit summary missing");
+Assert(h.AuditSummary.Contains("route=Hybrid") && h.AuditSummary.Contains("planner=False"),"audit summary missing");
+var targetedNews=await router.RouteAsync("آخرین خبر فملی چیست؟",100,CancellationToken.None);
+Assert(targetedNews.Route==ChatCapabilityRoute.Knowledge&&!targetedNews.PlannerUsed
+       &&targetedNews.Plan?.Symbol=="فملی","symbol-specific latest news must use deterministic filtered retrieval");
+var targetedComposite=await router.RouteAsync("آخرین خبر خودرو چیست و حجم معاملاتش چقدر است؟",100,CancellationToken.None);
+Assert(targetedComposite.Route==ChatCapabilityRoute.Hybrid&&!targetedComposite.PlannerUsed
+       &&targetedComposite.Plan?.Symbol=="خودرو"
+       &&targetedComposite.Plan.RequestedFields?.Contains("trade_volume")==true,
+    "targeted news plus market metric must execute a deterministic hybrid plan");
 var ipoPlannerTrap=await router.RouteAsync("آخرین عرضه اولیه بورس چیه؟",100,CancellationToken.None);
 Assert(ipoPlannerTrap.Route==ChatCapabilityRoute.Knowledge && ipoPlannerTrap.Plan?.Symbol is null
        && ipoPlannerTrap.ReasonCodes.Contains("deterministic-knowledge-evidence-route"),

@@ -50,6 +50,28 @@ public sealed class DeterministicCapabilityRouter(
 
         var ownership=CanonicalQuestionOwnership.Detect(question);
         var requestedFields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
+        var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(question);
+        if(!string.IsNullOrWhiteSpace(targetedNewsEntity))
+        {
+            var targetedMarketFields=requestedFields.ToList();
+            if(targetedMarketFields.Count==0
+               &&question.Contains("قیمت",StringComparison.Ordinal)
+               &&question.Contains(" و ",StringComparison.Ordinal))
+                targetedMarketFields.Add("last_price");
+            if(targetedMarketFields.Count>0)
+                return FromPlan(ChatCapabilityRoute.Hybrid,
+                    new ChatPlan(ChatIntent.Hybrid,targetedNewsEntity,question,0.99,null,
+                        ["targeted-news","deterministic-composite-route"],targetedMarketFields),
+                    [new("entity.resolve","sql-ai-reference"),new("structured.market.symbol","canonical-market-snapshot"),
+                     new("knowledge.retrieve","qdrant-symbol-grounded-evidence"),new("analytics.symbol","deterministic-calculation",false)],
+                    ["targeted-news","deterministic-composite-route"]);
+
+            return FromPlan(ChatCapabilityRoute.Knowledge,
+                new ChatPlan(ChatIntent.Knowledge,targetedNewsEntity,question,0.99,null,
+                    ["targeted-news","deterministic-knowledge-route"]),
+                [new("entity.resolve","sql-ai-reference",false),new("knowledge.retrieve","qdrant-symbol-grounded-evidence")],
+                ["targeted-news","deterministic-knowledge-route"]);
+        }
         if(ownership!=CanonicalQuestionDomain.Knowledge && requestedFields.Count>0&&!PersianMarketQuestionSemantics.IsScreeningQuestion(question)&&!PersianMarketQuestionSemantics.HasKnowledgeFacet(question))
             return FromPlan(ChatCapabilityRoute.MarketSymbol,
                 new ChatPlan(ChatIntent.MarketSymbol,question,null,0.99,null,["deterministic-market-ontology"],requestedFields),

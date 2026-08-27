@@ -61,7 +61,10 @@ public static class CanonicalQuestionOwnership
         // An explicitly named Company table was already handled above, so a
         // natural CEO question must not fall through to Company.CEO (which is
         // nullable in the landing data and is not the current-role authority).
-        if(HasWord(q,"ceo")) return CanonicalQuestionDomain.CompanyState;
+        if(HasWord(q,"ceo")
+           ||(ContainsAny(q,"مدیرعامل","مدیر عامل")
+              &&!ContainsAny(q,"بورس تهران","بورس اوراق بهادار تهران")))
+            return CanonicalQuestionDomain.CompanyState;
         if(ContainsAny(q,"نهاد مالی","نهادهای مالی","کارگزاری","سبدگردان","تامین سرمایه","تأمین سرمایه","مشاور سرمایه گذاری","مشاور سرمایه‌گذاری")&&
            ContainsAny(q,"شعبه","تالار","شماره تماس","آدرس","فهرست","لیست","چند","تعداد","نوع نهاد"))
             return CanonicalQuestionDomain.FinancialInstitution;

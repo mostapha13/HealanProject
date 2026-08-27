@@ -40,7 +40,7 @@ public static class CanonicalCompanyStateQuestion
         "تعلیق","تعلیقش","تعلیقی","شده","است","هست","هستش","میباشد","می باشد","مشمول","فرایند","فرآیند",
         "علت","دلیل","دلایل","چرا","تاریخ","آخرین","تغییر","زمان","از","چه","کی","موقع","کد","سامانه",
         "مدیرعامل","مدیر","عامل","ceo","اعضای","عضو","هیئت","هیات","مدیره","board","member","members",
-        "نام","اسم","کامل","اطلاعات","مشخصات","فقط","را","رو","بگو","بده","نمایش","کن","کنید","لطفا","لطفاً",
+        "نام","اسم","کامل","اطلاعات","مشخصات","فعلی","نمادش","شرکتی","چیست","کیست","فقط","را","رو","بگو","بده","نمایش","کن","کنید","لطفا","لطفاً",
         "کدام","کدوم","کیا","کیان","چه کسانی","چه","کسی","هستند","هستن","هستند؟","مربوط","در","طبق","برای",
         "sourcecollectedat","statuscode","laststate","lastdatechange","kodnamaddarsamane","داده","منبع","جمع","آوری"
     };
@@ -83,7 +83,7 @@ public static class CanonicalCompanyStateQuestion
         var isMatch=explicitContext||stateCue||companyPersonCue||detailCue||aggregate!=CompanyStateAggregateKind.None;
         return new(isMatch,aggregate,fields.ToArray(),DetectLimit(q),year,
             ContainsAny(q,"فقط اسم","فقط نام","فقط نماد","صرفا اسم","صرفاً اسم","اسامی را","نام ها","نام‌ها"),
-            explicitContext||stateCue,ExtractLookupHint(q));
+            explicitContext||stateCue||companyPersonCue,ExtractLookupHint(q));
     }
 
     private static CompanyStateAggregateKind DetectAggregate(string q,HashSet<string> fields,out int? year)

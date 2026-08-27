@@ -39,10 +39,13 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         var companyStateIntent = CanonicalCompanyStateQuestion.Parse(q);
         var contentIntent = CanonicalContentQuestion.Parse(q);
         var financialInstitutionIntent = CanonicalFinancialInstitutionQuestion.Parse(q);
+        var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(q);
         clientTypeIntent=clientTypeIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.ClientType && clientTypeIntent.IsMatch };
         companyIntent=companyIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Company && companyIntent.IsMatch };
         companyStateIntent=companyStateIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.CompanyState && companyStateIntent.IsMatch };
         contentIntent=contentIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Content && contentIntent.IsMatch };
+        if(!string.IsNullOrWhiteSpace(targetedNewsEntity))
+            contentIntent=contentIntent with { IsMatch=false };
         financialInstitutionIntent=financialInstitutionIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.FinancialInstitution && financialInstitutionIntent.IsMatch };
         var isOrderBookQuestion=PersianMarketQuestionSemantics.IsOrderBookQuestion(q);
         if(isOrderBookQuestion)
@@ -65,8 +68,11 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         var personFacets = currentScope ? CanonicalBoardMemberAnswer.AdditionalPersonFacets(q) : default;
         var symbol = SymbolAfter(q, "نماد");
         var aboutSymbol = SymbolAfter(q, "در مورد");
-        var allowOrganizationReference=ownership!=CanonicalQuestionDomain.Knowledge;
-        var isNews = currentScope && ownership!=CanonicalQuestionDomain.Knowledge && ContainsAny(q,"آخرین خبر","جدیدترین خبر","تازه ترین خبر","تازه‌ترین خبر","خبر آخر","خبر تازه","تازه ترین خبری","تازه‌ترین خبری");
+        var allowOrganizationReference=ownership!=CanonicalQuestionDomain.Knowledge
+            &&!companyStateIntent.IsMatch&&!companyIntent.IsMatch;
+        var isNews = currentScope && ownership!=CanonicalQuestionDomain.Knowledge
+            &&string.IsNullOrWhiteSpace(targetedNewsEntity)
+            &&ContainsAny(q,"آخرین خبر","جدیدترین خبر","تازه ترین خبر","تازه‌ترین خبر","خبر آخر","خبر تازه","تازه ترین خبری","تازه‌ترین خبری");
         var isLatestInstrument = currentScope && (q.Contains("آخرین نماد", StringComparison.Ordinal) || q.Contains("جدیدترین نماد", StringComparison.Ordinal));
         var isHall = q.Contains("تالار", StringComparison.Ordinal) &&
             (q.Contains("خوزستان", StringComparison.Ordinal) || q.Contains("اهواز", StringComparison.Ordinal));
@@ -582,7 +588,13 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             if(!intent.ExplicitStateContext) return null;
             var lookup=Display(intent.LookupHint);
             if(string.IsNullOrWhiteSpace(lookup)) return null;
-            var answer=$"در Snapshot فعلی جدول Companystate رکوردی برای «{lookup}» وجود ندارد؛ بنابراین از این جدول نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.";
+            var missing=new List<string>();
+            if(intent.Fields.Contains("ceo",StringComparer.Ordinal)) missing.Add("مدیرعامل");
+            if(intent.Fields.Contains("board_members",StringComparer.Ordinal)) missing.Add("اعضای هیئت‌مدیره");
+            if(intent.Fields.Contains("reason",StringComparer.Ordinal)) missing.Add("دلیل وضعیت");
+            if(intent.Fields.Contains("status",StringComparer.Ordinal)) missing.Add("وضعیت معاملاتی");
+            var requested=missing.Count==0?"فعال یا متوقف بودن آن":string.Join(" و ",missing);
+            var answer=$"در Snapshot فعلی جدول Companystate رکوردی برای «{lookup}» وجود ندارد؛ بنابراین {requested} از این منبع قابل تأیید نیست.";
             return CanonicalReferenceAnswer.Exact(answer,"company_state","نبود رکورد در Snapshot وضعیت ناشران",confidence:1);
         }
         if(references.Count>1) return null;
@@ -869,9 +881,9 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             case CompanyAggregateKind.HallCompanies:
                 return Wrap(await CompanyHallCompanies(connection,normalizedQuestion,intent,ct),"company_aggregate","شرکت‌های تالار");
             case CompanyAggregateKind.LatestIpo:
-                return await CompanyIpoRanking(connection,intent.Limit,latest:true,ct);
+                return await CompanyIpoRanking(connection,intent.Limit,latest:true,intent.Fields.Contains("symbol",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.EarliestIpo:
-                return await CompanyIpoRanking(connection,intent.Limit,latest:false,ct);
+                return await CompanyIpoRanking(connection,intent.Limit,latest:false,intent.Fields.Contains("symbol",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.IpoYear when intent.JalaliYear is not null:
                 return Wrap(await CompanyIpoYear(connection,intent.JalaliYear.Value,intent.Limit,intent.NamesOnly,ct),"company_aggregate",$"عرضه‌های اولیه سال {intent.JalaliYear}");
             case CompanyAggregateKind.Schema:
@@ -1096,7 +1108,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.Title)}"));
     }
 
-    private static async Task<CanonicalReferenceAnswer> CompanyIpoRanking(SqlConnection connection,int limit,bool latest,CancellationToken ct)
+    private async Task<CanonicalReferenceAnswer> CompanyIpoRanking(
+        SqlConnection connection,int limit,bool latest,bool includeSymbol,CancellationToken ct)
     {
         var direction=latest?"DESC":"ASC";
         var sql=$"SELECT TOP (@Limit) Id,Title,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL AND Ipo_Date IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
@@ -1105,22 +1118,40 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         if(rows.Length==0)
             return CanonicalReferenceAnswer.Exact("تاریخ عرضه اولیه‌ای در جدول Company ثبت نشده است.","company_aggregate",topic,
                 sourceTool:CanonicalReferenceToolNames.CompanyIpo);
+        var symbols=new Dictionary<Guid,string?>();
+        if(includeSymbol)
+            foreach(var row in rows)
+                symbols[row.Id]=await SymbolForCompany(connection,row,ct);
         string answer;
         if(limit==1)
         {
             var row=rows[0];
             var prefix=latest?"آخرین":"اولین";
-            answer=$"{prefix} عرضه اولیه ثبت‌شده مربوط به {Display(row.Title)} در تاریخ {PersianDisplayText.FormatPersianDate(row.IpoDate!.Value)} است.";
+            answer=$"{prefix} عرضه اولیه ثبت‌شده مربوط به {Display(row.Title)} در تاریخ {PersianDisplayText.FormatPersianDate(row.IpoDate!.Value)} است."
+                +(includeSymbol
+                    ? string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(row.Id))
+                        ? " نماد بورسی آن از ارتباط قابل اتکای فعلی پیدا نشد."
+                        : $" نماد بورسی آن {symbols[row.Id]} است."
+                    : string.Empty);
         }
         else
         {
             var title=latest?"جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company":"قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company";
-            answer=title+":\n"+string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"));
+            answer=title+":\n"+string.Join("\n",rows.Select((x,i)=>
+                $"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"
+                +(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id))?$" — نماد {symbols[x.Id]}":string.Empty)));
         }
-        var facts=rows.SelectMany(x=>new[]
+        var facts=rows.SelectMany(x=>
         {
-            new CanonicalReferenceFact("company_title",Display(x.Title),$"Company:{x.Id}"),
-            new CanonicalReferenceFact("ipo_date",x.IpoDate!.Value.ToString("O",CultureInfo.InvariantCulture),$"Company:{x.Id}",AsOffset(x.IpoDate))
+            var source=$"Company:{x.Id}";
+            var rowFacts=new List<CanonicalReferenceFact>
+            {
+                new("company_title",Display(x.Title),source),
+                new("ipo_date",x.IpoDate!.Value.ToString("O",CultureInfo.InvariantCulture),source,AsOffset(x.IpoDate))
+            };
+            if(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id)))
+                rowFacts.Add(new("linked_symbol",symbols[x.Id]!,source));
+            return rowFacts;
         }).ToArray();
         return CanonicalReferenceAnswer.Exact(answer,"company_aggregate",topic,facts,
             subjectName:Display(rows[0].Title),relatedSubjects:rows.Skip(1).Select(x=>Display(x.Title)).ToArray(),

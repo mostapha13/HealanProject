@@ -238,5 +238,29 @@ var summarized=composer.Compose(new AnswerComposeContext("مدیرعامل جد�
 Must(summarized.Contains("مصطفی مهدوی") && summarized.Length<parentText.Length,"answer must summarize the full parent document around the question");
 var full=composer.Compose(new AnswerComposeContext("کل متن سند مدیرعامل جدید را بده",ChatIntent.Knowledge,AnswerVerbosity.Analytical),null,null,[parentHit]);
 Must(full.Contains(parentText,StringComparison.Ordinal),"explicit full-text request must return the complete parent document");
+var ipoWithSymbol=CanonicalCompanyQuestion.Parse("آخرین عرضه اولیه چه شرکتی بود و نمادش چیست؟");
+Must(ipoWithSymbol.Aggregate==CompanyAggregateKind.LatestIpo&&ipoWithSymbol.Lookups.Count==0
+     &&ipoWithSymbol.Fields.Contains("symbol"),"latest IPO plus ticker must remain one canonical Company query");
+var compoundCompanyState=CanonicalCompanyStateQuestion.Parse("مدیرعامل خودرو کیست و دلیل وضعیت فعلی نمادش چیست؟");
+Must(compoundCompanyState.IsMatch&&compoundCompanyState.ExplicitStateContext&&compoundCompanyState.LookupHint=="خودرو"
+     &&compoundCompanyState.Fields.Contains("ceo")&&compoundCompanyState.Fields.Contains("reason"),
+    "compound current-company question must keep only its actual symbol as lookup");
+Must(CanonicalQuestionOwnership.Detect("مدیرعامل خودرو کیست و دلیل وضعیت نمادش چیست؟")==CanonicalQuestionDomain.CompanyState,
+    "natural Persian issuer CEO questions must use Companystate, not the exchange organization chart");
+var canonicalCompany=new CanonicalReferenceAnswer("مدیرعامل ثبت‌شده سعید زرندی است.",
+    new("company_state","وضعیت فولاد","فولاد مبارکه",null,[]),
+    [new("ceo","سعید زرندی","Companystate:1"),new("symbol","فولاد","Companystate:1")],true,[],[]);
+var composite=PersianQuestionFacetAnalysis.AnalyzeCanonicalMarket(
+    "مدیرعامل فولاد مبارکه کیست و آخرین قیمت نماد فولاد چقدر است؟",canonicalCompany);
+Must(composite.IsComposite&&composite.Symbol=="فولاد"&&composite.MarketFields.SequenceEqual(["last_price"]),
+    "canonical CEO plus market price must execute both bounded facets");
+Must(!PersianQuestionFacetAnalysis.AnalyzeCanonicalMarket("مدیرعامل فولاد مبارکه کیست؟",canonicalCompany).IsComposite,
+    "a canonical-only question must not invoke market tools");
+Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("آخرین خبر فملی چیست و حجم معاملاتش چقدر است؟")=="فملی",
+    "symbol-specific news extraction must preserve an arbitrary ticker");
+Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("جدیدترین خبر نماد خودرو را بگو")=="خودرو",
+    "targeted-news extraction must not be hard-coded to one example symbol");
+Must(new ChatToolPolicy().IsAllowed("answer.compose.composite"),
+    "deterministic composite composition must remain explicitly allow-listed");
 Console.WriteLine("TSEAI evidence/citation smoke PASS");
 static void Must(bool ok,string msg){if(!ok)throw new Exception(msg);}

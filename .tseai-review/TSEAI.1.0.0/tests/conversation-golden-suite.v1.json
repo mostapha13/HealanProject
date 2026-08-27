@@ -1,7 +1,7 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding, response shape and bounded latency.",
-  "minimumTotalTurns": 17,
+  "minimumTotalTurns": 22,
   "minimumPassRate": 1.0,
   "maxTurnLatencyMs": 6500,
   "maxP95LatencyMs": 5000,
@@ -313,6 +313,105 @@
           "traceDetailContains": {
             "structured.reference": ["kind=clock"]
           },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "canonical-market-composite",
+      "minimumTurns": 2,
+      "turns": [
+        {
+          "id": "issuer-ceo-and-price",
+          "question": "مدیرعامل فولاد مبارکه کیست و آخرین قیمت نماد فولاد چقدر است؟",
+          "expectedTypes": ["composite_reference_market"],
+          "mustContain": ["مدیرعامل ثبت‌شده", "فولاد", "داده بازار قابل اتکایی"],
+          "mustNotContain": ["محمود گودرزی", "نماد موردنظر را مشخص کنید"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^ceo$", "^symbol$"],
+          "expectedTools": ["sql.company.state", "structured.market.symbol", "answer.compose.composite", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "answer.synthesize"],
+          "traceDetailContains": {
+            "capability.route": ["planner=False", "canonical-market-composite"],
+            "answer.compose.composite": ["marketFields=last_price"],
+            "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "company-name-and-pe",
+          "question": "نام شرکت و نسبت P/E نماد فملی را بگو",
+          "expectedTypes": ["composite_reference_market"],
+          "mustContain": ["ملی صنایع مس ایران", "آخرین داده ثبت‌شده بازار مربوط به", "عدد قدیمی نمایش داده نشد"],
+          "mustNotContain": ["داده قابل اتکایی برای پاسخ پیدا نشد"],
+          "minimumEvidenceClaims": 2,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$", "^linked_symbol$"],
+          "expectedTools": ["sql.company.lookup", "structured.market.symbol", "answer.compose.composite", "answer.validate"],
+          "forbiddenTools": ["planner", "answer.synthesize"],
+          "traceDetailContains": {
+            "answer.compose.composite": ["marketFields=pe", "qualityRejected=True"],
+            "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "targeted-news-composite",
+      "turns": [
+        {
+          "id": "symbol-news-and-volume",
+          "question": "آخرین خبر فملی چیست و حجم معاملاتش چقدر است؟",
+          "expectedTypes": ["hybrid"],
+          "mustContain": ["فملی", "خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد", "آخرین داده ثبت‌شده بازار مربوط به"],
+          "mustNotContain": ["بخشی از ابزار‌های لازم", "آخرین خبر بورس تهران"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["entity.resolve", "structured.market.symbol", "knowledge.retrieve", "answer.validate"],
+          "forbiddenTools": ["planner", "reflection.review"],
+          "traceDetailContains": {
+            "capability.route": ["route=Hybrid", "planner=False", "targeted-news"],
+            "knowledge.retrieve": ["hits=0"],
+            "answer.validate": ["status=Grounded"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "latest-ipo-with-symbol",
+      "turns": [
+        {
+          "id": "latest-company-and-ticker",
+          "question": "آخرین عرضه اولیه چه شرکتی بود و نمادش چیست؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["فرآورده‌های دامی ولبنی دالاهو", "1403/10/24", "نماد بورسی آن غانیزان است"],
+          "mustNotContain": ["عبارت «اولیه» مبهم است", "وفیروزه"],
+          "minimumEvidenceClaims": 3,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$", "^linked_symbol$"],
+          "answerContainsJalaliEvidenceDateClaimPatterns": ["^ipo_date$"],
+          "expectedTools": ["sql.company.ipo", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "issuer-role-fail-closed",
+      "turns": [
+        {
+          "id": "missing-company-state",
+          "question": "مدیرعامل خودرو کیست و دلیل وضعیت فعلی نمادش چیست؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["Companystate", "خودرو", "مدیرعامل و دلیل وضعیت و وضعیت معاملاتی", "قابل تأیید نیست"],
+          "mustNotContain": ["محمود گودرزی", "فملی", "سرویس هوش مصنوعی"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["sql.company.state", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true
         }
