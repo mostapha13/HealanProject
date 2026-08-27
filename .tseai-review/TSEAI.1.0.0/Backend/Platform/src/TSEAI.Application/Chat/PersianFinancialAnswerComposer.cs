@@ -49,6 +49,32 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
 
     public string ComposeComparison(string question, MarketComparisonResult c)
     {
+        var requested=PersianMarketQuestionSemantics.DetectRequestedFields(question)
+            .Where(x=>x is "last_price" or "closing_price" or "trade_volume" or "trade_value" or "trade_count" or "market_value" or "pe" or "eps")
+            .Distinct(StringComparer.Ordinal).Take(4).ToArray();
+        if(requested.Length>0)
+        {
+            var lines=new List<string> { $"مقایسه {c.Primary.Symbol} و {c.Secondary.Symbol} بر پایه Snapshot معتبر:" };
+            foreach(var field in requested)
+            {
+                var metric=ComparisonMetric(field,c.Primary,c.Secondary);
+                if(metric is null) continue;
+                var (label,left,right,format,unit)=metric.Value;
+                if(left is null||right is null)
+                {
+                    lines.Add($"{label}: برای مقایسه هر دو نماد داده کافی وجود ندارد.");
+                    continue;
+                }
+                var winner=left==right?"برابر":left>right?c.Primary.Symbol:c.Secondary.Symbol;
+                var difference=Math.Abs(left.Value-right.Value);
+                lines.Add($"{label}: {c.Primary.Symbol} {left.Value.ToString(format,CultureInfo.InvariantCulture)}{unit}؛ {c.Secondary.Symbol} {right.Value.ToString(format,CultureInfo.InvariantCulture)}{unit}.");
+                lines.Add(winner=="برابر"
+                    ? $"{label} دو نماد برابر است."
+                    : $"{winner} {label} بیشتری دارد؛ اختلاف {difference.ToString(format,CultureInfo.InvariantCulture)}{unit} است.");
+            }
+            if(lines.Count>1) return string.Join("\n",lines);
+        }
+
         static string Signed(decimal v)=>v>=0?$"+{v:0.##}":$"{v:0.##}";
         static string Metric(AnalyticsMetric<decimal> m)=>m.Availability==AnalyticsAvailability.Available&&m.Value is not null?m.Value.Value.ToString("0.##",CultureInfo.InvariantCulture):"ناموجود";
         var a=c.Primary; var b=c.Secondary;
@@ -60,6 +86,20 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
             $"{b.Symbol}: قدرت خریدار {Metric(c.SecondaryAnalytics.TradingPower.BuyerPower)}، عدم‌تعادل اردربوک {Metric(c.SecondaryAnalytics.OrderBook.Imbalance)}."
         });
     }
+
+    private static (string Label,decimal? Left,decimal? Right,string Format,string Unit)? ComparisonMetric(
+        string field,MarketSymbolSnapshot left,MarketSymbolSnapshot right)=>field switch
+    {
+        "last_price"=>("آخرین قیمت",left.LastPrice,right.LastPrice,"N0"," ریال"),
+        "closing_price"=>("قیمت پایانی",left.ClosingPrice,right.ClosingPrice,"N0"," ریال"),
+        "trade_volume"=>("حجم معاملات",left.TradeVolume,right.TradeVolume,"N0"," سهم"),
+        "trade_value"=>("ارزش معاملات",left.TradeValue,right.TradeValue,"N0"," ریال"),
+        "trade_count"=>("تعداد معاملات",left.TradeCount,right.TradeCount,"N0",""),
+        "market_value"=>("ارزش بازار",left.MarketValue,right.MarketValue,"N0"," ریال"),
+        "pe"=>("P/E",left.PE,right.PE,"N2",""),
+        "eps"=>("EPS",left.Eps,right.Eps,"N0"," ریال"),
+        _=>null
+    };
 
     public string ComposeStructured(string question, StructuredQueryExecutionResult result)
     {
@@ -109,10 +149,53 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
             _ => ""
         };
         var lines=result.Results.Take(10).Select((x,i)=>$"{i+1}. {x.Symbol} — {x.SymbolName}{Metric(x)}").ToList();
+        if(ContainsAny(PersianDisplayText.Normalize(question).Replace('‌',' '),
+               "برای اولی","برای اولین مورد","برای مورد اول","مورد اولش","نفر اولش","رتبه اولش"))
+        {
+            var first=result.Results[0];
+            var sortField=displayMetric switch
+            {
+                StructuredQueryMetric.TradeVolume=>"trade_volume",
+                StructuredQueryMetric.TradeValue=>"trade_value",
+                StructuredQueryMetric.TradeCount=>"trade_count",
+                StructuredQueryMetric.LastPrice=>"last_price",
+                StructuredQueryMetric.ClosingPrice=>"closing_price",
+                StructuredQueryMetric.PE=>"pe",
+                StructuredQueryMetric.EPS=>"eps",
+                StructuredQueryMetric.MarketValue=>"market_value",
+                _=>null
+            };
+            var projections=PersianMarketQuestionSemantics.DetectRequestedFields(question)
+                .Where(x=>x!=sortField)
+                .Select(x=>ProjectedStructuredMetric(first,x))
+                .Where(x=>!string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.Ordinal).ToArray();
+            if(projections.Length>0)
+                lines.Add($"برای رتبه اول، {first.Symbol}: {string.Join("، ",projections)}.");
+        }
         if(displayMetric is StructuredQueryMetric.BuyQueueVolume or StructuredQueryMetric.SellQueueVolume)
             lines.Add("این رتبه‌بندی فقط یک‌طرفه‌بودن سطح اول اردربوک را نشان می‌دهد؛ به‌دلیل نبود دامنه مجاز قیمت، صف رسمی تأیید نمی‌شود.");
         if(result.Plan.Conditions.Count>0&&result.Matched>result.Results.Count) lines.Add($"{result.Results.Count:N0} نتیجه اول از {result.Matched:N0} نماد منطبق نمایش داده شد.");
         return string.Join("\n",lines);
+    }
+
+    private static string? ProjectedStructuredMetric(StructuredQueryRow row,string field)
+    {
+        var descriptor=field switch
+        {
+            "pe"=>(nameof(StructuredQueryMetric.PE),"P/E","N2",""),
+            "eps"=>(nameof(StructuredQueryMetric.EPS),"EPS","N0"," ریال"),
+            "trade_volume"=>(nameof(StructuredQueryMetric.TradeVolume),"حجم معاملات","N0"," سهم"),
+            "trade_value"=>(nameof(StructuredQueryMetric.TradeValue),"ارزش معاملات","N0"," ریال"),
+            "trade_count"=>(nameof(StructuredQueryMetric.TradeCount),"تعداد معاملات","N0",""),
+            "last_price"=>(nameof(StructuredQueryMetric.LastPrice),"آخرین قیمت","N0"," ریال"),
+            "closing_price"=>(nameof(StructuredQueryMetric.ClosingPrice),"قیمت پایانی","N0"," ریال"),
+            "market_value"=>(nameof(StructuredQueryMetric.MarketValue),"ارزش بازار","N0"," ریال"),
+            _=>default
+        };
+        if(string.IsNullOrWhiteSpace(descriptor.Item1)) return null;
+        if(!row.Metrics.TryGetValue(descriptor.Item1,out var value)||value is null)
+            return $"{descriptor.Item2} موجود نیست";
+        return $"{descriptor.Item2} {value.Value.ToString(descriptor.Item3,CultureInfo.InvariantCulture)}{descriptor.Item4}";
     }
 
     public static AnswerVerbosity DetectVerbosity(string q)

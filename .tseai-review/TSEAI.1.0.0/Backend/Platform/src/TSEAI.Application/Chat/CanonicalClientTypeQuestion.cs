@@ -122,6 +122,25 @@ public static class CanonicalClientTypeQuestion
         if(ContainsAny(q,"درصد","چه سهمی","سهم چند درصد")&&q.Contains("فروش",StringComparison.Ordinal)&&q.Contains("حقیقی",StringComparison.Ordinal)) fields.Add("individual_sell_share");
         if(ContainsAny(q,"درصد","چه سهمی","سهم چند درصد")&&q.Contains("فروش",StringComparison.Ordinal)&&q.Contains("حقوقی",StringComparison.Ordinal)) fields.Add("legal_sell_share");
 
+        // In natural ranking questions «خرید حقیقی» is often expressed with
+        // the participant before the action (for example «حقیقی‌ها ... خرید»).
+        // Bind that semantic frame to volume unless the user explicitly asks
+        // for participant count, per-capita value, net flow or buyer power.
+        var rankingCue=ContainsAny(q,"بیشترین","بالاترین","کمترین","برتر")
+            &&ContainsAny(q,"کدام نماد","کدوم نماد","چه نمادی","نمادها","نماد های","سهم ها","سهم‌ها");
+        if(rankingCue&&q.Contains("خرید",StringComparison.Ordinal)&&q.Contains("حقیقی",StringComparison.Ordinal)
+           &&!fields.Overlaps(["individual_buy_count","individual_buy_per_capita","individual_net_volume","buyer_power"]))
+            fields.Add("individual_buy_volume");
+        if(rankingCue&&q.Contains("خرید",StringComparison.Ordinal)&&q.Contains("حقوقی",StringComparison.Ordinal)
+           &&!fields.Overlaps(["legal_buy_count","legal_net_volume"]))
+            fields.Add("legal_buy_volume");
+        if(rankingCue&&q.Contains("فروش",StringComparison.Ordinal)&&q.Contains("حقیقی",StringComparison.Ordinal)
+           &&!fields.Overlaps(["individual_sell_count","individual_sell_per_capita","individual_net_volume"]))
+            fields.Add("individual_sell_volume");
+        if(rankingCue&&q.Contains("فروش",StringComparison.Ordinal)&&q.Contains("حقوقی",StringComparison.Ordinal)
+           &&!fields.Overlaps(["legal_sell_count","legal_net_volume"]))
+            fields.Add("legal_sell_volume");
+
         if(q.Contains("حقیقی",StringComparison.Ordinal)&&q.Contains("حقوقی",StringComparison.Ordinal))
         {
             if(q.Contains("خرید",StringComparison.Ordinal)) { fields.Add("individual_buy_volume"); fields.Add("legal_buy_volume"); }

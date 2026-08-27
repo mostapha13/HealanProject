@@ -50,6 +50,15 @@ public sealed class DeterministicCapabilityRouter(
 
         var ownership=CanonicalQuestionOwnership.Detect(question);
         var requestedFields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
+        var comparison=PersianQuestionFacetAnalysis.TryExtractMarketComparisonEntities(question);
+        if(comparison is not null&&requestedFields.Count>0)
+        {
+            var comparisonPlan=new ChatPlan(ChatIntent.MarketComparison,comparison.Primary,null,0.99,null,
+                ["explicit-market-comparison","deterministic-multi-entity-route"],requestedFields,comparison.Secondary);
+            return FromPlan(ChatCapabilityRoute.MarketComparison,comparisonPlan,
+                [new("structured.market.symbol","canonical-market-snapshot"),new("analytics.symbol","deterministic-calculation")],
+                ["explicit-market-comparison","deterministic-multi-entity-route"]);
+        }
         var descriptiveEntity=PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity(question);
         if(!string.IsNullOrWhiteSpace(descriptiveEntity))
         {

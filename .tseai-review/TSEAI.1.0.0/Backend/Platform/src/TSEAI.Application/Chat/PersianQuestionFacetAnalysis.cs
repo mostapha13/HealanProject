@@ -7,6 +7,8 @@ public sealed record CanonicalMarketCompositeAnalysis(
     string? Symbol,
     IReadOnlyList<string> MarketFields);
 
+public sealed record MarketComparisonEntities(string Primary,string Secondary);
+
 /// <summary>
 /// Deterministic facet analysis for questions that need more than one bounded
 /// data source. It prevents a complete canonical SQL answer from hiding an
@@ -22,10 +24,10 @@ public static class PersianQuestionFacetAnalysis
 
     private static readonly HashSet<string> TargetNoise = new(StringComparer.Ordinal)
     {
-        "آخرین","جدیدترین","تازه","تازهترین","خبر","اخبار","خبرش","نام","اسم","نماد","شرکت","بورسی",
+        "آخرین","جدیدترین","جدید","جدیدی","تازه","تازهترین","خبر","اخبار","خبرش","نام","اسم","نماد","شرکت","بورسی",
         "چیست","چیه","کدام","کدوم","بگو","بده","را","رو","لطفا","لطفاً","مربوط","به",
         "و","همچنین","حجم","ارزش","تعداد","معاملات","معامله","قیمت","پایانی","بازار","چقدر",
-        "است","هست","هستش","میباشد","می","باشد","آن","اون","این","اش","اشو"
+        "است","هست","هستش","داری","دارید","داره","اگر","خلاصه","خطی","یک","میباشد","می","باشد","آن","اون","این","اش","اشو"
     };
 
     public static CanonicalMarketCompositeAnalysis AnalyzeCanonicalMarket(
@@ -54,6 +56,8 @@ public static class PersianQuestionFacetAnalysis
     {
         var q=Normalize(question);
         if(!ContainsAny(q,"آخرین خبر","جدیدترین خبر","تازه ترین خبر","خبر آخر","خبر تازه")
+           &&!Regex.IsMatch(q,@"(?:خبر|اخبار)\s+(?:جدید|جدیدی|تازه)(?:\s+از\s+|\s+(?:نماد|شرکت)\s+)")
+           &&!Regex.IsMatch(q,@"(?:از|درباره)\s+.+?\s+چه\s+خبر")
            && !(q.Contains("خبر",StringComparison.Ordinal)&&q.Contains("نماد",StringComparison.Ordinal)))
             return null;
 
@@ -63,9 +67,15 @@ public static class PersianQuestionFacetAnalysis
         var direct=Regex.Match(q,
             @"(?:آخرین|جدیدترین|تازه\s*ترین)\s+خبر(?:\s+(?:نماد|شرکت))?\s+(?<after>.+)$");
         var reverse=Regex.Match(q,@"خبر\s+(?:آخر|تازه)(?:\s+(?:نماد|شرکت))?\s+(?<after>.+)$");
+        var natural=Regex.Match(q,
+            @"(?:خبر|اخبار)\s+(?:جدید|جدیدی|تازه)\s+از\s+(?<after>.+?)(?=\s+(?:داری|دارید|داره|هست|منتشر|اگر|و\s+(?:حجم|ارزش|قیمت|تعداد))|$)");
+        var whatNews=Regex.Match(q,
+            @"(?:از|درباره)\s+(?<after>.+?)\s+چه\s+خبر(?:ی)?(?:\s|$)");
         var value=possessive.Success?possessive.Groups["before"].Value
             :direct.Success?direct.Groups["after"].Value
             :reverse.Success?reverse.Groups["after"].Value
+            :natural.Success?natural.Groups["after"].Value
+            :whatNews.Success?whatNews.Groups["after"].Value
             :q;
         string[] phrases=
         [
@@ -88,6 +98,31 @@ public static class PersianQuestionFacetAnalysis
         if(!explicitSymbol&&candidate is "بورس" or "بورس تهران" or "تهران" or "بازار سرمایه")
             return null;
         return candidate;
+    }
+
+    public static MarketComparisonEntities? TryExtractMarketComparisonEntities(string? question)
+    {
+        var q=Normalize(question);
+        if(!ContainsAny(q,"مقایسه","بین","کدام بیشتر","کدوم بیشتر","اختلافشان","اختلاف شون"))
+            return null;
+
+        var match=Regex.Match(q,
+            @"(?:^|\s)بین\s+(?:نماد\s+)?(?<left>.+?)\s+و\s+(?:نماد\s+)?(?<right>.+?)(?=\s+(?:کدام|کدوم|از\s+نظر|چه\s+تفاوت|اختلاف|را\s+مقایسه|رو\s+مقایسه)|$)");
+        if(!match.Success)
+            match=Regex.Match(q,
+                @"(?:نماد\s+)?(?<left>[^\s]+)\s+(?:را\s+با|رو\s+با|با)\s+(?:نماد\s+)?(?<right>[^\s]+)\s+(?:از\s+نظر|مقایسه)");
+        if(!match.Success) return null;
+
+        static string Clean(Group group)
+        {
+            var value=Regex.Replace(group.Value,@"^(?:نماد|سهم|شرکت)\s+"," ").Trim();
+            value=Regex.Replace(value,@"\s+(?:نماد|سهم|شرکت)$"," ").Trim();
+            return value;
+        }
+        var left=Clean(match.Groups["left"]);
+        var right=Clean(match.Groups["right"]);
+        return left.Length<2||right.Length<2||string.Equals(left,right,StringComparison.Ordinal)
+            ?null:new(left,right);
     }
 
     public static IReadOnlyList<string> SplitIndependentClauses(string? question)

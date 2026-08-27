@@ -82,6 +82,11 @@ var staleMarketStore=new MemoryStore
 var isolated=new ConversationContextService(staleMarketStore,new FakeResolver(),new FakeRewriter());
 var explicitOrganization=await isolated.PrepareAsync("u1","c2","ناصر جعفری زیرمجموعه کدوم معاونته؟",temporal,CancellationToken.None);
 Assert(explicitOrganization.PrimaryEntity is null && !explicitOrganization.EffectiveQuestion.Contains("فملی"),"an explicit organization question must never inherit an unrelated old symbol");
+var standaloneRewriter=new FakeRewriter();
+var standaloneService=new ConversationContextService(staleMarketStore,new FakeResolver(),standaloneRewriter);
+var standaloneCompound=await standaloneService.PrepareAsync("u1","c2","نام شرکت فملی چیست و آخرین خبرش را بگو",temporal,CancellationToken.None);
+Assert(!standaloneCompound.RouteHint.ContextApplied&&standaloneRewriter.Calls==0,
+    "an explicit standalone compound question must not wait for semantic conversation rewriting");
 
 var router=new ContextRouterPlanner();
 var d=await router.Router.RouteWithContextAsync(compare.EffectiveQuestion,100,compare.RouteHint,CancellationToken.None);
@@ -109,8 +114,10 @@ sealed class FakeResolver:IPersianEntityResolver
 }
 sealed class FakeRewriter:IConversationQueryRewriter
 {
+    public int Calls { get; private set; }
     public Task<ConversationRewriteResult?> RewriteAsync(ConversationRewriteRequest request,CancellationToken ct)
     {
+        Calls++;
         var subject=request.ActiveReference?.SubjectName;
         ConversationRewriteResult? result=string.IsNullOrWhiteSpace(subject)?null:new($"{request.Question} درباره {subject}",true,"fake-context");
         return Task.FromResult(result);

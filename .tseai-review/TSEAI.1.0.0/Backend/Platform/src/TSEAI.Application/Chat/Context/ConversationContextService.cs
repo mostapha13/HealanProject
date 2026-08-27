@@ -54,6 +54,7 @@ public sealed class ConversationContextService(
     {
         var state=await store.GetAsync(subject,conversationId,ct);
         var q=Normalize(question);
+        var standaloneQuestion=LooksLikeStandaloneQuestion(q);
         if(ClearCues.Any(x=>q.Contains(x,StringComparison.Ordinal)))
         {
             await store.ClearAsync(subject,conversationId,ct);
@@ -126,7 +127,7 @@ public sealed class ConversationContextService(
                 new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
         }
 
-        if(primary is not null)
+        if(primary is not null&&!standaloneQuestion)
         {
             if(HybridFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
             {
@@ -145,7 +146,7 @@ public sealed class ConversationContextService(
             }
         }
 
-        if(recent.Count>0)
+        if(recent.Count>0&&RequiresSemanticRewrite(q)&&!standaloneQuestion)
         {
             var rewritten=await rewriter.RewriteAsync(new(question,state.ActiveReference,recent.TakeLast(12).ToArray()),ct);
             if(rewritten?.ContextApplied==true && IsSafeRewrite(question,rewritten.StandaloneQuestion))
@@ -301,6 +302,30 @@ public sealed class ConversationContextService(
             || normalized.Contains("اردربوک",StringComparison.Ordinal)
             || normalized.Contains("سفارش خرید",StringComparison.Ordinal)
             || normalized.Contains("سفارش فروش",StringComparison.Ordinal);
+
+    private static bool LooksLikeStandaloneQuestion(string normalized)
+        => LooksLikeExplicitMarketQuestion(normalized)
+            ||CanonicalCompanyQuestion.Parse(normalized).IsMatch
+            ||CanonicalCompanyStateQuestion.Parse(normalized).IsMatch
+            ||CanonicalClientTypeQuestion.Parse(normalized).IsMatch
+            ||CanonicalContentQuestion.Parse(normalized).IsMatch
+            ||CanonicalFinancialInstitutionQuestion.Parse(normalized).IsMatch
+            ||CanonicalBoardMemberAnswer.Parse(normalized).IsMemberList
+            ||PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(normalized) is not null
+            ||PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity(normalized) is not null
+            ||PersianQuestionFacetAnalysis.TryExtractMarketComparisonEntities(normalized) is not null
+            ||normalized.Contains("آخرین خبر بورس تهران",StringComparison.Ordinal)
+            ||normalized.Contains("امروز",StringComparison.Ordinal)
+            ||normalized.Contains("فردا",StringComparison.Ordinal)
+            ||normalized.Contains("دیروز",StringComparison.Ordinal);
+
+    private static bool RequiresSemanticRewrite(string normalized)
+    {
+        if(normalized.Length>240) return false;
+        if(Regex.IsMatch(normalized,@"^(?:حالا|پس|خب|خوب|و|اما|بعد|بعدش)\s+")) return true;
+        if(Regex.IsMatch(normalized,@"(?:^|\s)(?:آن|اون|این|همان|همون|قبلی|بعدی|اولی|دومی|سومی|وی|او|ایشان)(?:\s|$)")) return true;
+        return Regex.IsMatch(normalized,@"(?:خبرش|اخبارش|قیمتش|حجمش|ارزشش|نمادش|شرکتش|مدیرعاملش|سمتش|نقشش|تاریخش|دلیلش|علتش|وضعیتش|سابقه(?:‌|\s)?اش)(?:\s|$)");
+    }
 
     private static bool ContainsWholeCue(string normalized,string cue)
         => Regex.IsMatch(normalized,$@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(cue)}(?![\p{{L}}\p{{N}}])",RegexOptions.CultureInvariant);

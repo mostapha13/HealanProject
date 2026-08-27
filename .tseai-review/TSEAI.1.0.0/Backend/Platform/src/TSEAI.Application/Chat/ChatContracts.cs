@@ -17,7 +17,8 @@ public sealed record ChatPlan(
     double Confidence,
     string? Clarification,
     IReadOnlyList<string> Reasons,
-    IReadOnlyList<string>? RequestedFields = null);
+    IReadOnlyList<string>? RequestedFields = null,
+    string? SecondarySymbol = null);
 
 public interface IAiChatPlanner
 {

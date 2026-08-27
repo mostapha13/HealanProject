@@ -254,13 +254,15 @@ public sealed class ChatOrchestrator(
 
         if(plan.Intent==ChatIntent.MarketComparison)
         {
-            if(turnContext.PrimaryEntity is null || turnContext.SecondaryEntity is null)
+            var primaryLookup=turnContext.PrimaryEntity?.BestLookup??plan.Symbol;
+            var secondaryLookup=turnContext.SecondaryEntity?.BestLookup??plan.SecondarySymbol;
+            if(string.IsNullOrWhiteSpace(primaryLookup)||string.IsNullOrWhiteSpace(secondaryLookup))
                 return new("clarification","برای مقایسه، دو نماد مشخص لازم است.",request.ConversationId,ChatIntent.Clarification,plan.Confidence,null,null,[],[],trace,"دو نماد را مشخص کنید.",temporalContext);
 
             toolPolicy.Demand("structured.market.symbol");
             var sw1=Stopwatch.StartNew(); var sw2=Stopwatch.StartNew();
-            var leftTask=structuredTools.ExecuteAsync(new StructuredToolCall(StructuredToolNames.GetSymbolSnapshot,turnContext.PrimaryEntity.BestLookup),ct);
-            var rightTask=structuredTools.ExecuteAsync(new StructuredToolCall(StructuredToolNames.GetSymbolSnapshot,turnContext.SecondaryEntity.BestLookup),ct);
+            var leftTask=structuredTools.ExecuteAsync(new StructuredToolCall(StructuredToolNames.GetSymbolSnapshot,primaryLookup),ct);
+            var rightTask=structuredTools.ExecuteAsync(new StructuredToolCall(StructuredToolNames.GetSymbolSnapshot,secondaryLookup),ct);
             await Task.WhenAll(leftTask,rightTask); sw1.Stop(); sw2.Stop();
             var left=await leftTask; var right=await rightTask;
             trace.Add(new ChatToolTrace("structured.market.symbol.primary",left.Success?"ok":"failed",(int)sw1.ElapsedMilliseconds,left.Error));
@@ -268,7 +270,13 @@ public sealed class ChatOrchestrator(
             if(!left.Success || !right.Success || left.Data is not MarketSymbolSnapshot ls || right.Data is not MarketSymbolSnapshot rs)
             {
                 var error=!left.Success?left.Error:right.Error;
-                return new("market_comparison_unavailable",$"مقایسه با داده معتبر هر دو نماد ممکن نشد ({error}).",request.ConversationId,ChatIntent.MarketComparison,plan.Confidence,null,null,[],[],trace,null,temporalContext,left.Entity??right.Entity,left.Quality??right.Quality);
+                var unavailable=$"مقایسه با داده معتبر هر دو نماد ممکن نشد ({error}).";
+                var savedUnavailable=await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,
+                    ChatIntent.MarketComparison,ChatCapabilityRoute.MarketComparison,temporalContext,left.Entity,right.Entity,ct,
+                    unavailable,"market_comparison_unavailable");
+                return new("market_comparison_unavailable",unavailable,request.ConversationId,ChatIntent.MarketComparison,plan.Confidence,
+                    null,null,[],[],trace,null,temporalContext,left.Entity??right.Entity,left.Quality??right.Quality,
+                    ConversationContext:savedUnavailable);
             }
 
             toolPolicy.Demand("analytics.symbol");

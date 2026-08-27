@@ -225,6 +225,13 @@ var datedPrice=composer.Compose(new AnswerComposeContext("آخرین قیمت ت
 Must(datedPrice.Contains("1,200") && datedPrice.Contains("1405/05/20") && !datedPrice.Contains("2026/08/11") && !datedPrice.Contains("قیمت پایانی"),"focused market answer must return only requested price and Jalali observation date");
 var volumeAndValue=composer.Compose(new AnswerComposeContext("حجم و ارزش معاملات تست",ChatIntent.MarketSymbol,AnswerVerbosity.Compact,["trade_volume","trade_value"]),snapshot,null,[]);
 Must(volumeAndValue.Contains("5,000 سهم") && volumeAndValue.Contains("6,000,000 ریال") && !volumeAndValue.Contains("آخرین قیمت"),"focused market answer must preserve multiple requested fields");
+var ordinalPlan=new StructuredQueryPlan([],StructuredQueryMetric.TradeValue,true,5,null,null,0.99,"رتبه ارزش معاملات",[]);
+var ordinalRow=new StructuredQueryRow(123,null,"تست","نماد تست","شرکت تست",20,null,
+    new Dictionary<string,decimal?>{{nameof(StructuredQueryMetric.TradeValue),6_000_000m},{nameof(StructuredQueryMetric.PE),7.5m}},"Valid");
+var ordinalAnswer=composer.ComposeStructured("پنج نماد اول از نظر ارزش معاملات را بگو و برای اولی P/E را اضافه کن",
+    new StructuredQueryExecutionResult(true,ordinalPlan,1,0,1,[ordinalRow],null));
+Must(ordinalAnswer.Contains("ارزش معاملات 6,000,000 ریال")&&ordinalAnswer.Contains("برای رتبه اول، تست: P/E 7.50"),
+    "ordinal result projection must be bound to the first structured row");
 var highLow=composer.Compose(new AnswerComposeContext("سقف و کف قیمت تست",ChatIntent.MarketSymbol,AnswerVerbosity.Compact,["high_price","low_price"]),snapshot,null,[]);
 Must(highLow.Contains("1,230 ریال") && highLow.Contains("1,090 ریال") && !highLow.Contains("آخرین قیمت"),"high/low answer must use Cashmarket session range");
 var classification=composer.Compose(new AnswerComposeContext("بازار، تابلو و صنعت تست چیست؟",ChatIntent.MarketSymbol,AnswerVerbosity.Compact,["market","board","industry","state"]),snapshot,null,[]);
@@ -260,6 +267,8 @@ Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("آخرین خب�
     "symbol-specific news extraction must preserve an arbitrary ticker");
 Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("جدیدترین خبر نماد خودرو را بگو")=="خودرو",
     "targeted-news extraction must not be hard-coded to one example symbol");
+Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("خبر جدیدی از خودرو داری؟ اگر هست خلاصه یک خطی بده")=="خودرو",
+    "natural from-entity news wording must preserve the target symbol");
 Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("نام شرکت فملی چیست و آخرین خبرش را بگو")=="فملی",
     "a possessive news facet must inherit the entity from the preceding clause");
 Must(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity("امروز چندمه و آخرین خبر بورس تهران چیست؟") is null,
@@ -268,15 +277,32 @@ Must(PersianQuestionFacetAnalysis.SplitIndependentClauses("امروز چندمه
     "independent clock and news clauses must be decomposed before routing");
 Must(PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity("درباره فملی چه میدانی و قیمت پایانی آن چقدر است؟")=="فملی",
     "descriptive compound questions must retain their arbitrary entity");
+var comparisonEntities=PersianQuestionFacetAnalysis.TryExtractMarketComparisonEntities(
+    "بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟");
+Must(comparisonEntities is { Primary:"فملی",Secondary:"فولاد" },
+    "fresh-turn comparison must bind both entities without prior conversation state");
 var latestIpoCeo=CanonicalCompanyQuestion.Parse("آخرین عرضه اولیه چه زمانی بوده و مدیرعامل آن شرکت کیست؟");
 Must(latestIpoCeo.Aggregate==CompanyAggregateKind.LatestIpo&&latestIpoCeo.Lookups.Count==0
      &&latestIpoCeo.Fields.Contains("ceo"),"IPO pronouns must retain the aggregate and requested CEO facet");
+var latestIpoBoundFacets=CanonicalCompanyQuestion.Parse("آخرین شرکتی که عرضه اولیه شده متعلق به کدام تالار است و مدیرعاملش کیست؟");
+Must(latestIpoBoundFacets.Aggregate==CompanyAggregateKind.LatestIpo&&latestIpoBoundFacets.Lookups.Count==0
+     &&latestIpoBoundFacets.Fields.Contains("hall")&&latestIpoBoundFacets.Fields.Contains("ceo"),
+    $"relative-clause IPO wording must bind hall and CEO to the ranked company: aggregate={latestIpoBoundFacets.Aggregate};lookups={string.Join('|',latestIpoBoundFacets.Lookups)};fields={string.Join('|',latestIpoBoundFacets.Fields)}");
 var absentIssuerComposite=CanonicalCompanyStateQuestion.Parse("مدیرعامل فملی کیست و نسبت P/E آن چقدر است؟");
 Must(absentIssuerComposite.LookupHint=="فملی"&&absentIssuerComposite.Fields.Contains("ceo"),
     "market metric words and pronouns must not contaminate issuer lookup extraction");
+var stateBoundFacets=CanonicalCompanyStateQuestion.Parse("وضعیت خساپا را بگو، سپس دلیلش و مدیرعامل شرکت را هم اضافه کن");
+Must(stateBoundFacets.LookupHint=="خساپا"&&stateBoundFacets.Fields.Contains("status")
+     &&stateBoundFacets.Fields.Contains("reason")&&stateBoundFacets.Fields.Contains("ceo"),
+    "same-subject state facets must not contaminate the issuer lookup");
+var clientTypeRanking=CanonicalClientTypeQuestion.Parse("اگر فقط حقیقی‌ها را در نظر بگیریم کدام نماد بیشترین خرید را داشته است؟");
+Must(clientTypeRanking.Aggregate==ClientTypeAggregateKind.Ranking&&clientTypeRanking.RankingField=="individual_buy_volume",
+    "participant-first ranking wording must bind to individual buy volume");
 Must(new ChatToolPolicy().IsAllowed("answer.compose.composite"),
     "deterministic composite composition must remain explicitly allow-listed");
 Must(new ChatToolPolicy().IsAllowed("structured.reference.facets"),
     "bounded clause-level canonical lookup must remain explicitly allow-listed");
+Must(CanonicalReferenceToolRegistry.Resolve("client_type_aggregate","رتبه‌بندی حقیقی")==CanonicalReferenceToolNames.ClientType,
+    "ClientType aggregates must retain their typed SQL audit tool");
 Console.WriteLine("TSEAI evidence/citation smoke PASS");
 static void Must(bool ok,string msg){if(!ok)throw new Exception(msg);}

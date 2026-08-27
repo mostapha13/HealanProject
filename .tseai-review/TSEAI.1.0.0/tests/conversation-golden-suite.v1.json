@@ -1,7 +1,7 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "description": "Strict end-to-end golden conversations for Persian answer quality, deterministic tools, memory, grounding, response shape and bounded latency.",
-  "minimumTotalTurns": 27,
+  "minimumTotalTurns": 33,
   "minimumPassRate": 1.0,
   "maxTurnLatencyMs": 6500,
   "maxP95LatencyMs": 5000,
@@ -493,6 +493,90 @@
           "forbiddenTools": ["planner", "reflection.review", "answer.synthesize"],
           "traceDetailContains": {
             "capability.route": ["descriptive-entity", "planner=False"]
+          },
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        }
+      ]
+    },
+    {
+      "id": "semantic-binding",
+      "minimumTurns": 6,
+      "turns": [
+        {
+          "id": "ordinal-ranking-projection",
+          "question": "پنج نماد اول از نظر ارزش معاملات را نام ببر و برای اولی نسبت P/E را هم اضافه کن",
+          "expectedTypes": ["structured_query"],
+          "mustContain": ["هیچ نمادی با شرایط", "TradeValue", "Quality Gate"],
+          "mustNotContain": ["درخواست ویرایش فیلتر", "عبارت «اولی» مبهم است"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["structured.query"],
+          "forbiddenTools": ["filter.chat", "planner", "answer.synthesize"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "rank-result-hall-and-ceo",
+          "question": "آخرین شرکتی که عرضه اولیه شده متعلق به کدام تالار است و مدیرعاملش کیست؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["فرآورده‌های دامی ولبنی دالاهو", "1403/10/24", "نام مدیرعامل در جدول Company ثبت نشده است", "تالار منطقه‌ای ثبت‌شده آن کرمانشاه است"],
+          "mustNotContain": ["مدیرعاملش» وجود ندارد", "عبارت «اولیه» مبهم است"],
+          "minimumEvidenceClaims": 3,
+          "answerContainsEvidenceClaimPatterns": ["^company_title$", "^hall$"],
+          "answerContainsJalaliEvidenceDateClaimPatterns": ["^ipo_date$"],
+          "expectedTools": ["sql.company.ipo", "structured.reference.facets", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "fresh-turn-two-symbol-comparison",
+          "question": "بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟",
+          "maxLatencyMs": 12000,
+          "expectedTypes": ["market_comparison_unavailable"],
+          "mustContain": ["مقایسه با داده معتبر هر دو نماد ممکن نشد", "market_data_quality_rejected"],
+          "mustNotContain": ["عبارت «فملی و فولاد", "دو نماد مشخص لازم است"],
+          "expectedTools": ["structured.market.symbol.primary", "structured.market.symbol.secondary"],
+          "forbiddenTools": ["filter.chat", "planner", "answer.synthesize"],
+          "traceDetailContains": {
+            "capability.route": ["explicit-market-comparison", "planner=False"]
+          },
+          "requireConversationRevision": true
+        },
+        {
+          "id": "participant-first-ranking",
+          "question": "اگر فقط حقیقی‌ها را در نظر بگیریم کدام نماد بیشترین خرید را داشته است؟",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["بیشترین حجم خرید حقیقی", "خودرو"],
+          "mustNotContain": ["اگر فقط نظر بگیریم", "نماد دقیق‌تری وارد کنید"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["sql.market.clienttype", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "filter.chat", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "same-subject-state-facets",
+          "question": "وضعیت خساپا را بگو، سپس دلیلش و مدیرعامل شرکت را هم اضافه کن",
+          "expectedTypes": ["structured_reference"],
+          "mustContain": ["Companystate", "خساپا", "مدیرعامل و دلیل وضعیت و وضعیت معاملاتی", "قابل تأیید نیست"],
+          "mustNotContain": ["خساپا سپس دلیلش", "فملی"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["sql.company.state", "structured.reference.facets", "reflection.review", "answer.validate"],
+          "forbiddenTools": ["planner", "knowledge.retrieve", "answer.synthesize"],
+          "answerValidationStatuses": ["Grounded"],
+          "requireConversationRevision": true
+        },
+        {
+          "id": "natural-targeted-news-and-volume",
+          "question": "خبر جدیدی از خودرو داری؟ اگر هست خلاصه یک‌خطی و حجم آخرین معامله‌اش را هم بگو",
+          "expectedTypes": ["hybrid"],
+          "mustContain": ["خودرو", "آخرین داده ثبت‌شده بازار مربوط به", "عدد قدیمی نمایش داده نشد"],
+          "mustNotContain": ["تغییر در مدیریت بورس", "نماد یا شاخص", "Internal Server Error"],
+          "minimumEvidenceClaims": 1,
+          "expectedTools": ["entity.resolve", "structured.market.symbol", "knowledge.retrieve", "answer.validate"],
+          "forbiddenTools": ["planner", "sql.content.latest_news", "answer.synthesize"],
+          "traceDetailContains": {
+            "capability.route": ["targeted-news", "planner=False"]
           },
           "answerValidationStatuses": ["Grounded"],
           "requireConversationRevision": true

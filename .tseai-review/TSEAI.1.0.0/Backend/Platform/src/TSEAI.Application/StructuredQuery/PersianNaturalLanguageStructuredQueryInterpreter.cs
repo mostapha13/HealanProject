@@ -122,7 +122,7 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
 
     private static (StructuredQueryMetric? Metric, bool Desc) DetectSort(string q, List<string> rules, ref double confidence)
     {
-        bool desc = ContainsAny(q, "بیشترین", "بالاترین", "بزرگترین", "برتر", "بالا", "زیاد", "پرحجم", "top", "تاپ");
+        bool desc = ContainsAny(q, "بیشترین", "بالاترین", "بزرگترین", "برتر", "بالا", "زیاد", "پرحجم", "اول از نظر", "top", "تاپ");
         bool asc = ContainsAny(q, "کمترین", "پایین ترین", "پایین‌ترین", "کوچکترین");
         if (!desc && !asc) return (null, true);
         StructuredQueryMetric? metric = null;

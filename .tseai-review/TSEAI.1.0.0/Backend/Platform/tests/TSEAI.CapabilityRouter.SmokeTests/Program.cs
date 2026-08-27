@@ -51,6 +51,19 @@ Assert(targetedComposite.Route==ChatCapabilityRoute.Hybrid&&!targetedComposite.P
        &&targetedComposite.Plan?.Symbol=="خودرو"
        &&targetedComposite.Plan.RequestedFields?.Contains("trade_volume")==true,
     "targeted news plus market metric must execute a deterministic hybrid plan");
+var naturalTargetedComposite=await router.RouteAsync("خبر جدیدی از خودرو داری؟ اگر هست خلاصه یک‌خطی و حجم آخرین معامله‌اش را هم بگو",100,CancellationToken.None);
+Assert(naturalTargetedComposite.Route==ChatCapabilityRoute.Hybrid&&!naturalTargetedComposite.PlannerUsed
+       &&naturalTargetedComposite.Plan?.Symbol=="خودرو"
+       &&naturalTargetedComposite.Plan.RequestedFields?.Contains("trade_volume")==true,
+    $"natural targeted-news wording must bind the symbol before the market facet: route={naturalTargetedComposite.Route};symbol={naturalTargetedComposite.Plan?.Symbol};fields={string.Join('|',naturalTargetedComposite.Plan?.RequestedFields??[])}");
+var explicitComparison=await router.RouteAsync("بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟",100,CancellationToken.None);
+Assert(explicitComparison.Route==ChatCapabilityRoute.MarketComparison&&!explicitComparison.PlannerUsed
+       &&explicitComparison.Plan?.Symbol=="فملی"&&explicitComparison.Plan.SecondarySymbol=="فولاد"
+       &&explicitComparison.Plan.RequestedFields?.Contains("trade_value")==true,
+    "fresh-turn market comparison must bind both arbitrary symbols deterministically");
+var nonMarketComparison=await router.RouteAsync("بین مدیرعامل و رئیس هیئت مدیره چه تفاوتی وجود دارد؟",100,CancellationToken.None);
+Assert(nonMarketComparison.Route!=ChatCapabilityRoute.MarketComparison,
+    "generic two-subject language must not be mistaken for a market-symbol comparison");
 var globalExchangeNews=await router.RouteAsync("آخرین خبر بورس تهران چیست؟",100,CancellationToken.None);
 Assert(globalExchangeNews.Route==ChatCapabilityRoute.Knowledge&&!globalExchangeNews.PlannerUsed
        &&globalExchangeNews.Plan?.Symbol is null,

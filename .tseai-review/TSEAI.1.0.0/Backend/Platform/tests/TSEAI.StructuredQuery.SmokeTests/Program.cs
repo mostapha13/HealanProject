@@ -34,6 +34,9 @@ var p12=parser.Interpret("پنج نماد با بیشترین عدم تعادل 
 Assert(p12.Success && p12.Plan?.SortBy==StructuredQueryMetric.OrderBookImbalance && !p12.Plan.SortDescending,"negative order-book imbalance must sort ascending");
 var p13=parser.Interpret("نمادهایی که عمق خرید بیشتر از 100 میلیون دارند");
 Assert(p13.Success && p13.Plan!.Conditions.Any(x=>x.Metric==StructuredQueryMetric.TotalBidVolume && x.Value==100_000_000m),"bid depth condition parse failed");
+var p14=parser.Interpret("پنج نماد اول از نظر ارزش معاملات را نام ببر و برای اولی نسبت P/E را هم اضافه کن");
+Assert(p14.Success&&p14.Plan?.SortBy==StructuredQueryMetric.TradeValue&&p14.Plan.Take==5&&p14.Plan.SortDescending,
+    "ordinal ranking wording must bind to a descending structured query");
 
 var now=DateTime.UtcNow;
 MarketSymbolSnapshot Snap(long id,string symbol,long volume,decimal pe,long buyCount=10,long sellCount=10)=>new()

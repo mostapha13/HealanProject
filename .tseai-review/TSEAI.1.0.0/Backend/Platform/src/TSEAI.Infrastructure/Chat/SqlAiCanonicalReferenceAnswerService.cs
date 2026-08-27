@@ -43,6 +43,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
         clientTypeIntent=clientTypeIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.ClientType && clientTypeIntent.IsMatch };
         companyIntent=companyIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Company && companyIntent.IsMatch };
         companyStateIntent=companyStateIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.CompanyState && companyStateIntent.IsMatch };
+        if(companyIntent.Aggregate!=CompanyAggregateKind.None)
+            companyStateIntent=companyStateIntent with { IsMatch=false };
         contentIntent=contentIntent with { IsMatch=ownership is CanonicalQuestionDomain.None or CanonicalQuestionDomain.Content && contentIntent.IsMatch };
         if(!string.IsNullOrWhiteSpace(targetedNewsEntity))
             contentIntent=contentIntent with { IsMatch=false };
@@ -884,10 +886,12 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                 return Wrap(await CompanyHallCompanies(connection,normalizedQuestion,intent,ct),"company_aggregate","شرکت‌های تالار");
             case CompanyAggregateKind.LatestIpo:
                 return await CompanyIpoRanking(connection,intent.Limit,latest:true,
-                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),ct);
+                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),
+                    intent.Fields.Contains("hall",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.EarliestIpo:
                 return await CompanyIpoRanking(connection,intent.Limit,latest:false,
-                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),ct);
+                    intent.Fields.Contains("symbol",StringComparer.Ordinal),intent.Fields.Contains("ceo",StringComparer.Ordinal),
+                    intent.Fields.Contains("hall",StringComparer.Ordinal),ct);
             case CompanyAggregateKind.IpoYear when intent.JalaliYear is not null:
                 return Wrap(await CompanyIpoYear(connection,intent.JalaliYear.Value,intent.Limit,intent.NamesOnly,ct),"company_aggregate",$"عرضه‌های اولیه سال {intent.JalaliYear}");
             case CompanyAggregateKind.Schema:
@@ -1113,10 +1117,15 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
     }
 
     private async Task<CanonicalReferenceAnswer> CompanyIpoRanking(
-        SqlConnection connection,int limit,bool latest,bool includeSymbol,bool includeCeo,CancellationToken ct)
+        SqlConnection connection,int limit,bool latest,bool includeSymbol,bool includeCeo,bool includeHall,CancellationToken ct)
     {
         var direction=latest?"DESC":"ASC";
-        var sql=$"SELECT TOP (@Limit) Id,Title,Ceo,Ipo_Date IpoDate FROM dbo.Company WHERE NULLIF(LTRIM(RTRIM(Title)),N'') IS NOT NULL AND Ipo_Date IS NOT NULL ORDER BY Ipo_Date {direction},Id;";
+        var sql=$"""
+            SELECT TOP (@Limit) c.Id,c.Title,c.Ceo,c.Ipo_Date IpoDate,t.Talar_Name HallName
+            FROM dbo.Company c LEFT JOIN dbo.Talar t ON t.Id=c.Talar_Id
+            WHERE NULLIF(LTRIM(RTRIM(c.Title)),N'') IS NOT NULL AND c.Ipo_Date IS NOT NULL
+            ORDER BY c.Ipo_Date {direction},c.Id;
+            """;
         var rows=(await connection.QueryAsync<CompanyRow>(new CommandDefinition(sql,new{Limit=limit},cancellationToken:ct,commandTimeout:20))).ToArray();
         var topic=latest?"جدیدترین عرضه‌های اولیه Company":"قدیمی‌ترین عرضه‌های اولیه Company";
         if(rows.Length==0)
@@ -1141,6 +1150,11 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                     ? string.IsNullOrWhiteSpace(CleanOptional(row.Ceo))
                         ? " نام مدیرعامل در جدول Company ثبت نشده است."
                         : $" مدیرعامل ثبت‌شده آن {Display(row.Ceo)} است."
+                    : string.Empty)
+                +(includeHall
+                    ? string.IsNullOrWhiteSpace(CleanOptional(row.HallName))
+                        ? " تالار منطقه‌ای آن در جدول Company ثبت نشده است."
+                        : $" تالار منطقه‌ای ثبت‌شده آن {Display(row.HallName)} است."
                     : string.Empty);
         }
         else
@@ -1149,7 +1163,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
             answer=title+":\n"+string.Join("\n",rows.Select((x,i)=>
                 $"{i+1}. {Display(x.Title)} — {PersianDisplayText.FormatPersianDate(x.IpoDate!.Value)}"
                 +(includeSymbol&&!string.IsNullOrWhiteSpace(symbols.GetValueOrDefault(x.Id))?$" — نماد {symbols[x.Id]}":string.Empty)
-                +(includeCeo&&!string.IsNullOrWhiteSpace(CleanOptional(x.Ceo))?$" — مدیرعامل {Display(x.Ceo)}":string.Empty)));
+                +(includeCeo&&!string.IsNullOrWhiteSpace(CleanOptional(x.Ceo))?$" — مدیرعامل {Display(x.Ceo)}":string.Empty)
+                +(includeHall&&!string.IsNullOrWhiteSpace(CleanOptional(x.HallName))?$" — تالار {Display(x.HallName)}":string.Empty)));
         }
         var facts=rows.SelectMany(x=>
         {
@@ -1163,6 +1178,8 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService(
                 rowFacts.Add(new("linked_symbol",symbols[x.Id]!,source));
             if(includeCeo)
                 rowFacts.Add(new("ceo",CleanOptional(x.Ceo)??"",source));
+            if(includeHall)
+                rowFacts.Add(new("hall",CleanOptional(x.HallName)??"",source));
             return rowFacts;
         }).ToArray();
         return CanonicalReferenceAnswer.Exact(answer,"company_aggregate",topic,facts,
