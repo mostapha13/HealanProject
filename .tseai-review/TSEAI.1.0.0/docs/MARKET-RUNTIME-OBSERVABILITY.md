@@ -26,6 +26,12 @@ GET /api/admin/operations/health
 Authorization: Bearer <token with Operations.Read>
 ```
 
+## نمایش در پنل وب
+
+بخش «تازگی داده بازار» در «مرکز مدیریت AI» همین قرارداد را مصرف می‌کند. وضعیت کلی و کارت مستقل هر Feed شامل سلامت Worker، تازگی Source، امکان ارائه، تعداد رکورد Full، آخرین زمان Source، Watermark، آخرین Sync موفق و سن Source است. تمام زمان‌ها با timezone صریح از API ارسال و در UI به تقویم شمسی و منطقه زمانی تهران نمایش داده می‌شوند.
+
+دکمه‌ی بروزرسانی، داده‌های Operations، Runtime و Semantic Registry را دوباره می‌خواند. خطای قدیمی پنل که پاسخ Semantic Registry را دریافت ولی ذخیره نمی‌کرد نیز اصلاح شده است.
+
 ## قواعد وضعیت
 
 - State مفقود یا JSON خراب: Worker ناسالم و وضعیت `Invalid`؛

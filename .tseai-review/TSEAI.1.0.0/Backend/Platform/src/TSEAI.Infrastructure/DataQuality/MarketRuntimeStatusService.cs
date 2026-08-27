@@ -149,8 +149,8 @@ public sealed class MarketRuntimeStatusService(
 
         var status = !workerHealthy ? DataQualityStatus.Invalid : freshnessStatus;
         return new(feed, state.Status, status, workerHealthy, sourceFresh,
-            state.Watermark, state.LatestSourceCollectedAt, state.LastAttemptAtUtc,
-            state.LastSuccessAtUtc, state.LastFailureAtUtc, state.LastReadRowCount,
+            ToSourceUtc(state.Watermark), ToSourceUtc(state.LatestSourceCollectedAt), ToUtc(state.LastAttemptAtUtc),
+            ToUtc(state.LastSuccessAtUtc), ToUtc(state.LastFailureAtUtc), state.LastReadRowCount,
             state.LastFullRowCount, state.LastAttemptWasFull, sourceAge, maximumAge,
             state.LastError, issues);
     }
@@ -191,6 +191,9 @@ public sealed class MarketRuntimeStatusService(
         if (value.Kind == DateTimeKind.Local) return new(value.ToUniversalTime());
         return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TehranOffset).ToUniversalTime();
     }
+
+    private static DateTimeOffset? ToUtc(DateTime? value) => value.HasValue ? AsUtc(value.Value) : null;
+    private static DateTimeOffset? ToSourceUtc(DateTime? value) => value.HasValue ? AsSourceUtc(value.Value) : null;
 
     private sealed class FeedState
     {
