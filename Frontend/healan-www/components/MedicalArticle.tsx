@@ -11,7 +11,7 @@ export type MedicalArticleContent = {
   faq: { question: string; answer: string }[];
 };
 
-export function MedicalArticle({ content }: { content: MedicalArticleContent }) {
+export function MedicalArticle({ content, doctorName, doctorBoard }: { content: MedicalArticleContent; doctorName: string; doctorBoard: string }) {
   return (
     <main className="article-page">
       <div className="container article-page__grid">
@@ -23,6 +23,10 @@ export function MedicalArticle({ content }: { content: MedicalArticleContent }) 
             <span className="section-badge">راهنمای پزشکی</span>
             <h1>{content.title}</h1>
             <p>{content.intro}</p>
+            <div className="article-review-meta">
+              <span>بازبینی پزشکی: <strong>{doctorName}</strong></span>
+              <span>آخرین بازبینی: ۶ شهریور ۱۴۰۵</span>
+            </div>
           </header>
           <div className="medical-warning"><strong>توجه:</strong> این مطلب برای آگاهی عمومی است و تشخیص قطعی فقط با ارزیابی پزشک امکان‌پذیر است.</div>
           {content.sections.map((section) => (
@@ -35,6 +39,10 @@ export function MedicalArticle({ content }: { content: MedicalArticleContent }) 
           <section className="article-faq">
             <h2>پرسش‌های پرتکرار</h2>
             {content.faq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}
+          </section>
+          <section className="medical-reviewer">
+            <span className="medical-reviewer__mark" aria-hidden>♥</span>
+            <div><strong>بازبینی‌شده توسط {doctorName}</strong><p>{doctorBoard}</p><Link href="/#about">درباره پزشک و سوابق حرفه‌ای ←</Link></div>
           </section>
         </article>
         <aside className="article-sidebar">

@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { fetchSite } from '@/lib/api';
 import { varicoseArticles } from '@/lib/medical-articles';
-import { buildMedicalPageJsonLd, buildMetadata } from '@/lib/seo';
+import { buildMedicalArticleJsonLd, buildMetadata } from '@/lib/seo';
 import { buildLandingModel } from '@/lib/site';
 
 type Props = { params: Promise<{ topic: string }> };
@@ -26,6 +26,6 @@ export default async function VaricoseArticlePage({ params }: Props) {
   if (!content) notFound();
   const site = await fetchSite();
   const model = buildLandingModel(site);
-  const jsonLd = buildMedicalPageJsonLd({ site, path: `/varicose-veins/${topic}`, title: content.title, description: content.description, serviceName: content.title, faq: content.faq });
-  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
+  const jsonLd = buildMedicalArticleJsonLd({ site, path: `/varicose-veins/${topic}`, title: content.title, description: content.description, parentPath: '/varicose-veins', parentName: 'درمان واریس', faq: content.faq });
+  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} doctorName={model.doctor.name} doctorBoard={model.doctor.board} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
 }

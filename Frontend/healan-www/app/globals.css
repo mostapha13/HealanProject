@@ -1697,6 +1697,20 @@ html[dir='rtl'] .nav-drawer {
 
 @media (max-width: 900px) { .article-page__grid { grid-template-columns: 1fr; } .article-sidebar { position: static; } }
 
+.article-review-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; color: var(--muted); font-size: 13px; }
+.medical-reviewer { display: flex; gap: 18px; align-items: flex-start; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.medical-reviewer__mark { flex: 0 0 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; background: var(--primary-soft); color: var(--accent); font-size: 22px; }
+.medical-reviewer p { margin: 5px 0; color: var(--muted); font-size: 14px; }
+.medical-reviewer a { color: var(--accent); font-weight: 700; font-size: 14px; }
+.policy-page { padding-block: clamp(38px, 7vw, 76px); }
+.policy-card { max-width: 850px; }
+.policy-card h1 { color: var(--text-dark); font-size: clamp(30px, 5vw, 48px); line-height: 1.4; }
+.policy-lead { color: var(--muted); font-size: 19px; }
+.policy-card section { margin-top: 38px; }
+.policy-card h2 { color: var(--text-dark); font-size: clamp(22px, 3vw, 29px); }
+.policy-card section p { font-size: 17px; }
+.policy-updated { margin-top: 42px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+
 .not-found {
   min-height: 70vh;
   display: grid;

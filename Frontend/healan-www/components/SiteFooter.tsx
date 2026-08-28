@@ -22,6 +22,7 @@ export function SiteFooter({ name, specialty, city }: Props) {
           <Link href="/cardiology">متخصص قلب و عروق در شوشتر</Link>
           <Link href="/varicose-veins">تشخیص و درمان واریس</Link>
           <Link href="/blog">بلاگ</Link>
+          <Link href="/editorial-policy">سیاست تحریریه پزشکی</Link>
           <a href="/assistant">دستیار هوشمند</a>
           <a href="/booking">رزرو نوبت</a>
           <a href="/patient">ورود بیمار</a>

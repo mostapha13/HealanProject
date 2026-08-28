@@ -288,3 +288,46 @@ export function buildMedicalPageJsonLd(opts: {
     },
   ];
 }
+
+export function buildMedicalArticleJsonLd(opts: {
+  site: PublishedPortalSite | null | undefined;
+  path: string;
+  title: string;
+  description: string;
+  parentPath: string;
+  parentName: string;
+  faq: { question: string; answer: string }[];
+}): Record<string, unknown>[] {
+  const doctor = doctorFromSettings(opts.site);
+  const base = SITE_URL.replace(/\/$/, '');
+  const url = `${base}${normalizePath(opts.path)}`;
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': ['MedicalWebPage', 'Article'],
+      headline: opts.title,
+      name: opts.title,
+      description: opts.description,
+      url,
+      mainEntityOfPage: url,
+      inLanguage: 'fa-IR',
+      datePublished: '2026-08-28',
+      dateModified: '2026-08-28',
+      author: { '@type': 'Person', name: doctor.name, jobTitle: doctor.specialty },
+      reviewedBy: { '@type': 'Physician', name: doctor.name, medicalSpecialty: 'Cardiovascular' },
+      publisher: { '@type': 'MedicalClinic', name: `مطب ${doctor.name}`, url: SITE_URL },
+    },
+    {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: opts.faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })),
+    },
+    {
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'خانه', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: opts.parentName, item: `${base}${opts.parentPath}` },
+        { '@type': 'ListItem', position: 3, name: opts.title, item: url },
+      ],
+    },
+  ];
+}
