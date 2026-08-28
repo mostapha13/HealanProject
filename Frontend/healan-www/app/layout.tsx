@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     template: '%s | دکتر شهرویی',
   },
   description: 'سایت رسمی دکتر معصومه شهرویی؛ متخصص قلب و عروق و درمان واریس در شوشتر',
+  alternates: {
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
+  },
 };
 
 const themeBootScript = `
