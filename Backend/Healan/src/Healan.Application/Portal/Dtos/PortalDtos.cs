@@ -88,6 +88,7 @@ public class BlogPostSummaryDto
     public bool IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
 }
 
 public class BlogPostDetailDto : BlogPostSummaryDto

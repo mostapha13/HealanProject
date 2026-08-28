@@ -15,7 +15,7 @@ public static class BlogPostImageResolver
 
         var fileInfo = await fileManagerTool.GetFileReplyInfo(item.CoverImageFileId.Value);
         if (!string.IsNullOrWhiteSpace(fileInfo.Link))
-            item.CoverImageUrl = fileInfo.Link.Trim();
+            item.CoverImageUrl = PortalPublicUrl.NormalizeAssetUrl(fileInfo.Link);
     }
 
     public static async Task ApplyCoverLinksAsync(

@@ -12,7 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     {
       url: base,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
@@ -24,7 +23,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   entries.push({
     url: `${base}/blog`,
-    lastModified: new Date(),
     changeFrequency: 'daily',
     priority: 0.8,
   });
@@ -38,11 +36,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const post of list.items) {
         entries.push({
           url: `${base}/blog/${post.slug}`,
-          lastModified: post.publishedAt
-            ? new Date(post.publishedAt)
-            : post.createdAt
-              ? new Date(post.createdAt)
-              : new Date(),
+          lastModified: post.lastModifiedAt
+            ? new Date(post.lastModifiedAt)
+            : post.publishedAt
+              ? new Date(post.publishedAt)
+              : post.createdAt
+                ? new Date(post.createdAt)
+                : undefined,
           changeFrequency: 'weekly',
           priority: 0.7,
         });

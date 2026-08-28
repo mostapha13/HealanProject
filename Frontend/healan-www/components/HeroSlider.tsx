@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PortalContentItem } from '@/lib/api';
+import { publicAssetUrl } from '@/lib/seo';
 
 const INTERVAL_MS = 5000;
 
@@ -128,7 +129,7 @@ export function HeroSlider({ slides: slidesProp, floatTitle, floatSubtitle }: Pr
                 <div className="hero-slide hero-slide--photo">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={slide.imageUrl}
+                    src={publicAssetUrl(slide.imageUrl)}
                     alt={slide.body || slide.title || 'اسلاید'}
                     className="hero-slide__photo"
                     loading={index === 0 ? 'eager' : 'lazy'}

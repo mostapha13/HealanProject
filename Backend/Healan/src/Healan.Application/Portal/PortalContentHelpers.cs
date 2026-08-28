@@ -27,8 +27,27 @@ public static class PortalContentImageResolver
                 continue;
 
             if (linkById.TryGetValue(fileId, out var link) && !string.IsNullOrWhiteSpace(link))
-                item.ImageUrl = link;
+                item.ImageUrl = PortalPublicUrl.NormalizeAssetUrl(link);
         }
+    }
+}
+
+public static class PortalPublicUrl
+{
+    public static string? NormalizeAssetUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        var trimmed = url.Trim();
+        if (trimmed.StartsWith("http://clinic.drshahrooei.ir", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("http://drshahrooei.ir", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("http://www.drshahrooei.ir", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"https://{trimmed[7..]}";
+        }
+
+        return trimmed;
     }
 }
 

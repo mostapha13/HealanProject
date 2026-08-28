@@ -80,6 +80,7 @@ export interface BlogPostSummary {
   isPublished: boolean;
   publishedAt?: string;
   createdAt?: string;
+  lastModifiedAt?: string;
 }
 
 export interface BlogPostDetail extends BlogPostSummary {

@@ -70,9 +70,12 @@ public class PublishedBlogPostListQueryHandler : IRequestHandler<PublishedBlogPo
                 IsPublished = x.IsPublished,
                 PublishedAt = x.PublishedAt,
                 CreatedAt = x.CreatedAt,
+                LastModifiedAt = x.LastModifiedAt,
             });
 
         var page = await projected.PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        foreach (var item in page.Items)
+            item.OgImageUrl = PortalPublicUrl.NormalizeAssetUrl(item.OgImageUrl);
         await BlogPostImageResolver.ApplyCoverLinksAsync(page.Items, _fileManagerTool, cancellationToken);
         return page;
     }

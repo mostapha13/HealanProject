@@ -15,6 +15,7 @@ import {
   buildBlogPostingJsonLd,
   buildMetadata,
   doctorFromSettings,
+  publicAssetUrl,
 } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -97,7 +98,7 @@ export default async function BlogPostPage({ params }: Props) {
           {post.coverImageUrl ? (
             <div className="article__cover">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={post.coverImageUrl} alt={post.title} />
+              <img src={publicAssetUrl(post.coverImageUrl)} alt={post.title} />
             </div>
           ) : null}
           <header className="article__header">

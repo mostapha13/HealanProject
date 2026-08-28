@@ -60,6 +60,8 @@ public class PublishedPortalSiteQueryHandler : IRequestHandler<PublishedPortalSi
             .ToList();
 
         await PortalContentImageResolver.ApplyFileLinksAsync(contentItems, _fileManagerTool, cancellationToken);
+        foreach (var item in contentItems)
+            item.ImageUrl = PortalPublicUrl.NormalizeAssetUrl(item.ImageUrl);
 
         var reviews = PortalSectionVisibility.IsEnabled(settingsMap, "reviews")
             ? await _db.PatientReviews
@@ -105,6 +107,9 @@ public class PublishedPortalSiteQueryHandler : IRequestHandler<PublishedPortalSi
                 SortOrder = x.SortOrder,
             })
             .ToListAsync(cancellationToken);
+
+        foreach (var seoPage in seoPages)
+            seoPage.OgImageUrl = PortalPublicUrl.NormalizeAssetUrl(seoPage.OgImageUrl);
 
         return new PublishedPortalSiteDto
         {

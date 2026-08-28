@@ -54,11 +54,15 @@ public class PublishedBlogPostBySlugQueryHandler : IRequestHandler<PublishedBlog
                 IsPublished = x.IsPublished,
                 PublishedAt = x.PublishedAt,
                 CreatedAt = x.CreatedAt,
+                LastModifiedAt = x.LastModifiedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (post != null)
+        {
+            post.OgImageUrl = PortalPublicUrl.NormalizeAssetUrl(post.OgImageUrl);
             await BlogPostImageResolver.ApplyCoverLinkAsync(post, _fileManagerTool, cancellationToken);
+        }
 
         return post;
     }

@@ -50,11 +50,30 @@ export function doctorFromSettings(site: PublishedPortalSite | null | undefined)
   };
 }
 
-function absoluteUrl(url?: string | null): string | undefined {
+export function publicAssetUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const trimmed = url.trim();
+  if (!trimmed) return undefined;
+
+  // FileManager historically returned absolute HTTP links for the public
+  // domains. Never expose those insecure URLs in HTML, social metadata or
+  // structured data on the HTTPS-only public site.
+  if (/^http:\/\/(?:www\.)?drshahrooei\.ir(?:\/|$)/i.test(trimmed)) {
+    return trimmed.replace(/^http:\/\//i, 'https://');
+  }
+  if (/^http:\/\/clinic\.drshahrooei\.ir(?:\/|$)/i.test(trimmed)) {
+    return trimmed.replace(/^http:\/\//i, 'https://');
+  }
+
+  return trimmed;
+}
+
+function absoluteUrl(url?: string | null): string | undefined {
+  const normalized = publicAssetUrl(url);
+  if (!normalized) return undefined;
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) return normalized;
   const base = SITE_URL.replace(/\/$/, '');
-  return `${base}${url.startsWith('/') ? url : `/${url}`}`;
+  return `${base}${normalized.startsWith('/') ? normalized : `/${normalized}`}`;
 }
 
 export function buildMetadata(opts: {
@@ -186,7 +205,7 @@ export function buildBlogPostingJsonLd(
     description: post.metaDescription || post.excerpt || undefined,
     image: absoluteUrl(post.ogImageUrl || post.coverImageUrl),
     datePublished: post.publishedAt || post.createdAt,
-    dateModified: post.publishedAt || post.createdAt,
+    dateModified: post.lastModifiedAt || post.publishedAt || post.createdAt,
     author: {
       '@type': 'Person',
       name: doctor.name,

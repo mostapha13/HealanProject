@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { fetchBlogList, fetchSite, portalSectionEnabled } from '@/lib/api';
-import { buildMetadata, doctorFromSettings } from '@/lib/seo';
+import { buildMetadata, doctorFromSettings, publicAssetUrl } from '@/lib/seo';
 import { portalSetting } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -80,7 +80,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                     <div className="blog-card__cover">
                       {post.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={post.coverImageUrl} alt={post.title} />
+                        <img src={publicAssetUrl(post.coverImageUrl)} alt={post.title} />
                       ) : null}
                     </div>
                     <div className="blog-card__body">
