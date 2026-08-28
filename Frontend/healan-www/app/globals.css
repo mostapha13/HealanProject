@@ -1646,6 +1646,9 @@ html[dir='rtl'] .nav-drawer {
 .medical-card { padding: 25px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
 .medical-card h3, .medical-steps h3 { margin: 0 0 8px; color: var(--text-dark); }
 .medical-card p, .medical-steps p { margin: 0; color: var(--muted); }
+.medical-guide { transition: transform .2s ease, border-color .2s ease; }
+.medical-guide:hover { transform: translateY(-3px); border-color: var(--primary); }
+.medical-guide strong { display: inline-block; margin-top: 14px; color: var(--accent); }
 .medical-steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
 .medical-steps li { display: flex; gap: 18px; align-items: flex-start; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .medical-steps li > span { flex: 0 0 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: var(--text-dark); background: var(--primary); font-weight: 800; }
@@ -1673,6 +1676,26 @@ html[dir='rtl'] .nav-drawer {
 .specialty-route strong { color: var(--accent); font-size: 14px; }
 
 @media (max-width: 700px) { .specialty-routes { grid-template-columns: 1fr; } }
+
+.article-page { padding-block: clamp(38px, 6vw, 72px); }
+.article-page__grid { display: grid; grid-template-columns: minmax(0, 760px) minmax(240px, 320px); justify-content: space-between; gap: clamp(30px, 6vw, 70px); align-items: start; }
+.article-header h1 { margin: 12px 0 14px; color: var(--text-dark); font-size: clamp(29px, 4.5vw, 46px); line-height: 1.4; }
+.article-header > p { color: var(--muted); font-size: 18px; }
+.article-body > section { margin-top: 42px; }
+.article-body h2 { color: var(--text-dark); font-size: clamp(23px, 3vw, 31px); line-height: 1.5; }
+.article-body p, .article-body li { font-size: 17px; }
+.article-body li { margin-block: 7px; }
+.medical-warning { margin-top: 30px; padding: 16px 18px; border-inline-start: 5px solid #e6a700; border-radius: 10px; background: #fff8dc; color: #4d3a00; }
+[data-night='true'] .medical-warning { background: #3b3217; color: #fff1b0; }
+.article-faq details { margin-bottom: 12px; padding: 17px 19px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.article-faq summary { cursor: pointer; font-weight: 800; color: var(--text-dark); }
+.article-sidebar { position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 14px; }
+.article-sidebar > div, .article-sidebar > a { padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
+.article-sidebar p { color: var(--muted); }
+.article-sidebar .btn { width: 100%; }
+.article-sidebar > a { color: var(--accent); font-weight: 800; }
+
+@media (max-width: 900px) { .article-page__grid { grid-template-columns: 1fr; } .article-sidebar { position: static; } }
 
 .not-found {
   min-height: 70vh;

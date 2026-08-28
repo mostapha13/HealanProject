@@ -25,6 +25,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    ...[
+      '/cardiology/chest-pain',
+      '/cardiology/palpitations',
+      '/varicose-veins/symptoms',
+      '/varicose-veins/treatment',
+    ].map((path) => ({
+      url: `${base}${path}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    })),
   ];
 
   if (!blogEnabled) {

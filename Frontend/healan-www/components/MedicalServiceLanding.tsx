@@ -15,6 +15,7 @@ export type MedicalLandingContent = {
   processTitle: string;
   process: { title: string; description: string }[];
   faq: { question: string; answer: string }[];
+  guides: { href: string; title: string; description: string }[];
   relatedHref: string;
   relatedLabel: string;
 };
@@ -109,6 +110,15 @@ export function MedicalServiceLanding({
           {content.faq.map((item) => (
             <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>
           ))}
+        </div>
+      </section>
+
+      <section className="section section--muted">
+        <div className="container">
+          <div className="section-head"><h2>راهنماهای مرتبط</h2><p>پاسخ‌های دقیق‌تر برای پرسش‌های رایج بیماران</p></div>
+          <div className="medical-card-grid">
+            {content.guides.map((guide) => <Link className="medical-card medical-guide" href={guide.href} key={guide.href}><h3>{guide.title}</h3><p>{guide.description}</p><strong>مطالعه راهنما ←</strong></Link>)}
+          </div>
         </div>
       </section>
 
