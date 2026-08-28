@@ -33,6 +33,8 @@ export const cardiologyContent: MedicalLandingContent = {
   guides: [
     { href: '/cardiology/chest-pain', title: 'راهنمای درد قفسه سینه', description: 'نشانه‌های خطر و زمان مراجعه فوری را بشناسید.' },
     { href: '/cardiology/palpitations', title: 'راهنمای تپش قلب', description: 'علت‌های احتمالی و روش بررسی تپش قلب.' },
+    { href: '/cardiology/high-blood-pressure', title: 'راهنمای فشار خون بالا', description: 'اندازه‌گیری صحیح، پیگیری و نشانه‌های هشدار.' },
+    { href: '/cardiology/shortness-of-breath', title: 'تنگی نفس و سلامت قلب', description: 'الگوهای مهم تنگی نفس و زمان ارزیابی فوری.' },
   ],
   relatedHref: '/varicose-veins',
   relatedLabel: 'خدمات تشخیص و درمان واریس',
@@ -71,6 +73,8 @@ export const varicoseContent: MedicalLandingContent = {
   guides: [
     { href: '/varicose-veins/symptoms', title: 'علائم واریس پا', description: 'نشانه‌های اولیه، پیشرفته و موارد نیازمند بررسی فوری.' },
     { href: '/varicose-veins/treatment', title: 'روش‌های درمان واریس', description: 'نحوه انتخاب درمان بر اساس شرایط هر بیمار.' },
+    { href: '/varicose-veins/causes', title: 'علت واریس پا', description: 'نقش دریچه‌های وریدی و عوامل افزایش‌دهنده احتمال واریس.' },
+    { href: '/varicose-veins/prevention', title: 'پیشگیری از واریس', description: 'راهکارهای روزانه برای کاهش علائم و بی‌حرکتی طولانی.' },
   ],
   relatedHref: '/cardiology',
   relatedLabel: 'خدمات تخصصی قلب و عروق',

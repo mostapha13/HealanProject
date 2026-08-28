@@ -38,8 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...[
       '/cardiology/chest-pain',
       '/cardiology/palpitations',
+      '/cardiology/high-blood-pressure',
+      '/cardiology/shortness-of-breath',
       '/varicose-veins/symptoms',
       '/varicose-veins/treatment',
+      '/varicose-veins/causes',
+      '/varicose-veins/prevention',
     ].map((path) => ({
       url: `${base}${path}`,
       changeFrequency: 'monthly' as const,
