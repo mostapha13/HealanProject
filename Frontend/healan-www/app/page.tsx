@@ -15,7 +15,15 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await fetchSite();
-  return buildMetadata({ site, path: '/' });
+  return buildMetadata({
+    site,
+    path: '/',
+    overrides: {
+      title: 'دکتر معصومه شهرویی | متخصص قلب و عروق و درمان واریس در شوشتر',
+      description:
+        'سایت رسمی دکتر معصومه شهرویی؛ متخصص قلب و عروق در شوشتر برای بررسی بیماری‌های قلبی، فشار خون و تشخیص و درمان واریس پا.',
+    },
+  });
 }
 
 export default async function HomePage() {

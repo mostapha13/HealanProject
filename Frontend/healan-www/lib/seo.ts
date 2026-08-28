@@ -162,7 +162,14 @@ export function buildHomeJsonLd(
     '@context': 'https://schema.org',
     '@type': 'Physician',
     name: doctor.name,
-    medicalSpecialty: doctor.specialty,
+    medicalSpecialty: ['Cardiovascular', 'Vascular'],
+    knowsAbout: [
+      'بیماری‌های قلب و عروق',
+      'فشار خون',
+      'تپش قلب',
+      'واریس پا',
+      'نارسایی وریدی',
+    ],
     description: seo?.description || doctor.board,
     url: SITE_URL,
     telephone: doctor.phone,
@@ -187,7 +194,8 @@ export function buildHomeJsonLd(
       addressLocality: doctor.city,
       addressCountry: 'IR',
     },
-    medicalSpecialty: doctor.specialty,
+    medicalSpecialty: ['Cardiovascular', 'Vascular'],
+    areaServed: doctor.city,
   };
   return [physician, clinic, ...parseJsonLdExtra(seo?.jsonLdExtra)];
 }

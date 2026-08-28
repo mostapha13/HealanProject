@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { PortalContentItem } from '@/lib/api';
 import { BookingCta, PatientCta } from './CtaLinks';
 import { HeroSlider } from './HeroSlider';
@@ -185,6 +186,20 @@ export function LandingView({
             <div className="section-head">
               <h2>{sections.servicesTitle}</h2>
               <p>{sections.servicesSubtitle}</p>
+            </div>
+            <div className="specialty-routes" aria-label="حوزه‌های تخصصی مطب">
+              <Link href="/cardiology" className="specialty-route">
+                <span>خدمات تخصصی</span>
+                <h3>قلب و عروق</h3>
+                <p>بررسی درد قفسه سینه، تپش قلب، فشار خون و عوامل خطر بیماری‌های قلبی</p>
+                <strong>مشاهده خدمات قلب و عروق ←</strong>
+              </Link>
+              <Link href="/varicose-veins" className="specialty-route">
+                <span>ارزیابی عروق پا</span>
+                <h3>تشخیص و درمان واریس</h3>
+                <p>بررسی رگ‌های برجسته، درد، سنگینی و ورم پا و انتخاب روش درمان مناسب</p>
+                <strong>مشاهده خدمات واریس ←</strong>
+              </Link>
             </div>
             <div className="services">
               {serviceList.map((item) => (

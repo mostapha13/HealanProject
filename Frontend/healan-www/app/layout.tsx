@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || 'https://www.drshahrooei.ir'
   ),
   title: {
-    default: 'مطب تخصصی قلب و عروق',
+    default: 'متخصص قلب و عروق و درمان واریس در شوشتر',
     template: '%s | دکتر شهرویی',
   },
-  description: 'سایت رسمی مطب تخصصی قلب و عروق',
+  description: 'سایت رسمی دکتر معصومه شهرویی؛ متخصص قلب و عروق و درمان واریس در شوشتر',
 };
 
 const themeBootScript = `
