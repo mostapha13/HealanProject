@@ -35,6 +35,8 @@ const SiteContentBlogPage = lazy(() => import('../pages/SiteContent/Blog'));
 const SiteContentRagPage = lazy(() => import('../pages/SiteContent/Rag'));
 const SiteContentRagLogsPage = lazy(() => import('../pages/SiteContent/RagLogs'));
 const SiteContentSeoPage = lazy(() => import('../pages/SiteContent/Seo'));
+const SiteContentVaricoseCasesPage = lazy(() => import('../pages/SiteContent/VaricoseCases'));
+const SiteContentContactMessagesPage = lazy(() => import('../pages/SiteContent/ContactMessages'));
 const ReportsPage = lazy(() => import('../pages/Reports'));
 const ReportsLayout = lazy(() => import('../pages/Reports/Layout'));
 const SmsOutboxPage = lazy(() => import('../pages/Reports/SmsOutbox'));
@@ -81,6 +83,7 @@ export default function AppRoutes() {
           <Route path="booking/schedules" element={guarded('/booking/schedules', <BookingSchedulesPage />)} />
           <Route path="booking/reservations" element={guarded('/booking/reservations', <BookingReservationsPage />)} />
           <Route path="patients" element={guarded('/patients', <PatientsPage />)} />
+          <Route path="patients/questions" element={guarded('/patients/questions', <SiteContentRagLogsPage />)} />
           <Route path="blood-pressure" element={guarded('/blood-pressure', <BloodPressurePage />)} />
           <Route path="doctors" element={guarded('/doctors', <DoctorsPage />)} />
           <Route path="prescriptions" element={guarded('/prescriptions', <PrescriptionsPage />)} />
@@ -107,6 +110,8 @@ export default function AppRoutes() {
             <Route path="rag" element={guarded('/site-content/rag', <SiteContentRagPage />)} />
             <Route path="rag-logs" element={guarded('/site-content/rag-logs', <SiteContentRagLogsPage />)} />
             <Route path="reviews" element={guarded('/site-content/reviews', <SiteContentReviewsPage />)} />
+            <Route path="varicose-cases" element={guarded('/site-content', <SiteContentVaricoseCasesPage />)} />
+            <Route path="contact-messages" element={guarded('/site-content/reviews', <SiteContentContactMessagesPage />)} />
           </Route>
           <Route path="reports" element={guarded('/reports', <ReportsLayout />)}>
             <Route index element={guarded('/reports', <ReportsPage />)} />

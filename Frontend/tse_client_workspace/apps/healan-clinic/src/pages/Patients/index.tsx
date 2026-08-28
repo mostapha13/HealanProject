@@ -10,8 +10,11 @@ import { PatientVisitHistoryDrawer } from '../../components/PatientVisitHistoryD
 import { JalaliDateInput } from '../../components/JalaliDateInput';
 import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../components/ListPagination';
 import { useAsyncSubmit } from '../../hooks/useAsyncSubmit';
+import { Link } from '@tse/utils';
+import { useUserAccess } from '../../context/UserAccessContext';
 
 function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const { canAccess } = useUserAccess();
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const { page, pageSize, setPage, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
   const { submitting, guard } = useAsyncSubmit();
@@ -114,6 +117,8 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         title="مدیریت بیماران"
         subtitle="ثبت، ویرایش و مشاهده سوابق ویزیت"
         action={
+          <div className="healan-actions">
+          {canAccess('/patients/questions') && <Link to="/patients/questions" className="healan-btn healan-btn--outline">پرسش و پاسخ بیماران</Link>}
           <button
             type="button"
             className="healan-btn healan-btn--primary"
@@ -123,7 +128,7 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             }}
           >
             + بیمار جدید
-          </button>
+          </button></div>
         }
       />
 
@@ -215,6 +220,11 @@ function PatientsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
                         <button type="button" className="healan-btn healan-btn--primary healan-btn--sm" onClick={() => setHistoryPatient(p)}>
                           سوابق
                         </button>
+                        {canAccess('/patients/questions') && p.phoneNumber && (
+                          <Link to={`/patients/questions?phone=${encodeURIComponent(p.phoneNumber)}`} className="healan-btn healan-btn--outline healan-btn--sm">
+                            پرسش و پاسخ
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>

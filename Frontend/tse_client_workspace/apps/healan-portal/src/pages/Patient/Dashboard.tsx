@@ -34,8 +34,8 @@ export default function PatientDashboard() {
           <span>انتخاب زمان مراجعه</span>
         </Link>
         <Link to="/assistant" className="portal-patient__tile">
-          <strong>چت‌بات</strong>
-          <span>سوال از دستیار مطب</span>
+          <strong>پرسش و پاسخ</strong>
+          <span>پرسیدن سوال از دستیار هوشمند مطب</span>
         </Link>
       </div>
 

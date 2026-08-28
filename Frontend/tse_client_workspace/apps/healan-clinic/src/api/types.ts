@@ -448,6 +448,33 @@ export interface PatientReviewItem {
   createdAt?: string;
 }
 
+export interface VaricoseCaseItem {
+  varicoseCaseId: number;
+  title: string;
+  description?: string;
+  beforeImageFileId: string;
+  beforeImageUrl: string;
+  afterImageFileId: string;
+  afterImageUrl: string;
+  treatmentLabel?: string;
+  sortOrder: number;
+  hasPublicationConsent: boolean;
+  isPublished: boolean;
+  createdAt?: string;
+}
+
+export interface PortalContactMessageItem {
+  portalContactMessageId: number;
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  message: string;
+  isRead: boolean;
+  adminNote?: string;
+  readAt?: string;
+  createdAt?: string;
+}
+
 export interface BlogPostSummary {
   blogPostId: number;
   title: string;

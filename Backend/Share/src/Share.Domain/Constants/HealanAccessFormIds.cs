@@ -52,4 +52,6 @@ public static class HealanAccessFormIds
     public const int PortalSiteSettings = 5038;
     /// <summary>کلینیک — مدیریت SEO صفحات سایت عمومی</summary>
     public const int PortalSeo = 5039;
+    /// <summary>کلینیک — مشاهده پرسش و پاسخ‌های ثبت‌شده برای بیماران</summary>
+    public const int PatientQuestions = 5040;
 }

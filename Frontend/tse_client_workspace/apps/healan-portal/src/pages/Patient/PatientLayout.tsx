@@ -14,7 +14,7 @@ const NAV = [
   { to: '/patient/history', label: 'سوابق' },
   { to: '/patient/blood-pressure', label: 'فشار خون' },
   { to: '/patient/medications', label: 'یادآوری دارو' },
-  { to: '/assistant', label: 'چت‌بات' },
+  { to: '/assistant', label: 'پرسش و پاسخ' },
   { to: '/booking', label: 'رزرو نوبت' },
 ] as const;
 

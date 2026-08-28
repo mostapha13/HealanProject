@@ -36,6 +36,8 @@ using Healan.Application.Portal.Queries.RagKnowledgeInfo;
 using Healan.Application.Portal.Queries.RagKnowledgeList;
 using Healan.Application.Portal.Queries.RagQuotaStatus;
 using Healan.Application.Portal.Queries.RagSettingGet;
+using Healan.Application.Portal.VaricoseCases;
+using Healan.Application.Portal.ContactMessages;
 using Healan.Domain.Portal.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -179,12 +181,12 @@ public class RagKnowledgeController : ApiControllerBase
         Ok(await Mediator.Send(request));
 
     [HttpGet("[action]")]
-    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
+    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings, HealanAccessFormIds.PatientQuestions)]
     public async Task<IActionResult> ChatLogList([FromQuery] RagChatLogListQuery query) =>
         Ok(await Mediator.Send(query));
 
     [HttpPost("[action]")]
-    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings)]
+    [AccessForm(HealanAccessFormIds.PortalRagLogs, HealanAccessFormIds.PortalRag, HealanAccessFormIds.AssistantSettings, HealanAccessFormIds.PatientQuestions)]
     public Task<IActionResult> ChatLogDelete([FromBody] RagChatLogDeleteCommand request) =>
         SendCommand(request);
 }
@@ -214,6 +216,31 @@ public class PatientReviewController : ApiControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> Restore([FromBody] MasterDataItemRequest request) =>
         Ok(await Mediator.Send(new MasterDataRestoreCommand { Type = MasterDataType.PatientReview, Id = request.Id }));
+}
+
+/// <summary>مدیریت نمونه‌کارهای قبل و بعد واریس</summary>
+[AccessForm(HealanAccessFormIds.PortalContent)]
+public class VaricoseCaseController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> List() => Ok(await Mediator.Send(new VaricoseCaseListQuery()));
+    [HttpPost("[action]")]
+    public Task<IActionResult> Save([FromBody] VaricoseCaseSaveCommand request) => SendCommand(request);
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] VaricoseCaseDeleteCommand request) => SendCommand(request);
+}
+
+/// <summary>مدیریت پیام‌های فرم تماس سایت</summary>
+[AccessForm(HealanAccessFormIds.PortalReviews)]
+public class PortalContactMessageController : ApiControllerBase
+{
+    [HttpGet("[action]")]
+    public async Task<IActionResult> List([FromQuery] bool? isRead) =>
+        Ok(await Mediator.Send(new PortalContactMessageListQuery { IsRead = isRead }));
+    [HttpPost("[action]")]
+    public Task<IActionResult> Update([FromBody] PortalContactMessageUpdateCommand request) => SendCommand(request);
+    [HttpPost("[action]")]
+    public Task<IActionResult> Delete([FromBody] PortalContactMessageDeleteCommand request) => SendCommand(request);
 }
 
 /// <summary>
@@ -263,6 +290,14 @@ public class PortalPublicController : ControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> BlogPost([FromQuery] string slug) =>
         Ok(await Mediator.Send(new PublishedBlogPostBySlugQuery { Slug = slug }));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> VaricoseCases() =>
+        Ok(await Mediator.Send(new PublishedVaricoseCaseListQuery()));
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> SubmitContactMessage([FromBody] PortalContactMessageSubmitCommand request) =>
+        Ok(await Mediator.Send(request));
 
     [HttpPost("[action]")]
     public async Task<IActionResult> RagAsk([FromBody] RagAskQuery query)

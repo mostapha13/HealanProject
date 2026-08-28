@@ -52,6 +52,8 @@ public interface IApplicationDbContext : IDisposable
      DbSet<PatientReview> PatientReviews { get; set; }
      DbSet<BlogPost> BlogPosts { get; set; }
      DbSet<PortalSeoPage> PortalSeoPages { get; set; }
+     DbSet<VaricoseCase> VaricoseCases { get; set; }
+     DbSet<PortalContactMessage> PortalContactMessages { get; set; }
      DbSet<RagKnowledgeItem> RagKnowledgeItems { get; set; }
      DbSet<RagSetting> RagSettings { get; set; }
      DbSet<RagChatLog> RagChatLogs { get; set; }

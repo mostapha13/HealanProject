@@ -96,6 +96,16 @@ export interface PaginatedBlogPosts {
   hasNextPage: boolean;
 }
 
+export interface VaricoseCasePublic {
+  varicoseCaseId: number;
+  title: string;
+  description?: string;
+  beforeImageUrl: string;
+  afterImageUrl: string;
+  treatmentLabel?: string;
+  sortOrder: number;
+}
+
 const REVALIDATE = 60; // kept for docs; fetches use cache: 'no-store' for Docker SSR
 
 function serverApiBase(): string {
@@ -167,6 +177,15 @@ export async function fetchBlogPost(slug: string): Promise<BlogPostDetail | null
   } catch (err) {
     console.error('[healan-www] PortalPublic/BlogPost failed', err);
     return null;
+  }
+}
+
+export async function fetchVaricoseCases(): Promise<VaricoseCasePublic[]> {
+  try {
+    return await getJson<VaricoseCasePublic[]>(`${portalPublicBase()}VaricoseCases`);
+  } catch (err) {
+    console.error('[healan-www] PortalPublic/VaricoseCases failed', err);
+    return [];
   }
 }
 

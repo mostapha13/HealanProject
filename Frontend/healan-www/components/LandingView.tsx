@@ -3,6 +3,7 @@ import type { PortalContentItem } from '@/lib/api';
 import { BookingCta, PatientCta } from './CtaLinks';
 import { HeroSlider } from './HeroSlider';
 import { ReviewsSection } from './ReviewsSection';
+import { ContactForm } from './ContactForm';
 
 const FALLBACK_SERVICES = [
   { title: 'معاینه تخصصی قلب', body: 'ارزیابی جامع علائم و وضعیت قلب و عروق', color: '#b91c1c' },
@@ -229,8 +230,9 @@ export function LandingView({
 
       {showContact && (
         <section id="contact" className="section section--muted">
-          <div className="container contact">
-            <div>
+          <div className="container">
+            <div className="contact">
+              <div>
               <h2>{sections.contactTitle}</h2>
               <p className="contact__lead">{sections.contactLead}</p>
               <div className="info-cards">
@@ -252,7 +254,7 @@ export function LandingView({
                 <PatientCta className="btn btn--patient btn--lg" />
               </div>
             </div>
-            <div className="map-card">
+              <div className="map-card">
               <div className="map-card__header">{map.header}</div>
               <div className="map-card__body">
                 <p>{map.building}</p>
@@ -266,7 +268,9 @@ export function LandingView({
               >
                 مشاهده در نقشه
               </a>
+              </div>
             </div>
+            <ContactForm />
           </div>
         </section>
       )}

@@ -92,9 +92,10 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PatientHistory, "سوابق بیمار", "/patient/history"),
             new FormDef(HealanAccessFormIds.PatientBloodPressure, "ثبت فشار خون", "/patient/blood-pressure"),
             new FormDef(HealanAccessFormIds.PatientMedications, "یادآوری داروها", "/patient/medications"),
-            new FormDef(HealanAccessFormIds.PatientAssistant, "چت‌بات بیمار", "/assistant"),
+            new FormDef(HealanAccessFormIds.PatientAssistant, "پرسش و پاسخ بیمار", "/assistant"),
             new FormDef(HealanAccessFormIds.PatientBooking, "رزرو نوبت بیمار", "/booking"),
             new FormDef(HealanAccessFormIds.ClinicBloodPressure, "فشار خون", "/blood-pressure"),
+            new FormDef(HealanAccessFormIds.PatientQuestions, "پرسش و پاسخ بیماران", "/patients/questions"),
         };
 
         var formIds = forms.Select(f => f.Id).ToArray();
@@ -154,8 +155,9 @@ public static class HealanAccessSeed
             new MenuDef(5104, HealanAccessFormIds.Appointments, 5102, 2, "پذیرش و نوبت"),
             new MenuDef(5105, HealanAccessFormIds.Patients, 5102, 3, "بیماران"),
             new MenuDef(5142, HealanAccessFormIds.ClinicBloodPressure, 5102, 4, "فشار خون"),
-            new MenuDef(5106, HealanAccessFormIds.Doctors, 5102, 5, "پزشکان"),
-            new MenuDef(5107, HealanAccessFormIds.Prescriptions, 5102, 6, "نسخه‌ها"),
+            new MenuDef(5148, HealanAccessFormIds.PatientQuestions, 5102, 5, "پرسش و پاسخ بیماران"),
+            new MenuDef(5106, HealanAccessFormIds.Doctors, 5102, 6, "پزشکان"),
+            new MenuDef(5107, HealanAccessFormIds.Prescriptions, 5102, 7, "نسخه‌ها"),
             new MenuDef(5133, null, null, 3, "نوبت‌دهی"),
             new MenuDef(5134, HealanAccessFormIds.BookingSchedules, 5133, 1, "برنامه حضور"),
             new MenuDef(5135, HealanAccessFormIds.BookingReservations, 5133, 2, "رزروهای نوبت"),
@@ -193,7 +195,7 @@ public static class HealanAccessSeed
             new MenuDef(5137, HealanAccessFormIds.PatientHistory, 5136, 1, "سوابق بیمار"),
             new MenuDef(5138, HealanAccessFormIds.PatientBloodPressure, 5136, 2, "ثبت فشار خون"),
             new MenuDef(5139, HealanAccessFormIds.PatientMedications, 5136, 3, "یادآوری داروها"),
-            new MenuDef(5140, HealanAccessFormIds.PatientAssistant, 5136, 4, "چت‌بات بیمار"),
+            new MenuDef(5140, HealanAccessFormIds.PatientAssistant, 5136, 4, "پرسش و پاسخ بیمار"),
             new MenuDef(5141, HealanAccessFormIds.PatientBooking, 5136, 5, "رزرو نوبت بیمار"),
         };
 
@@ -244,8 +246,9 @@ public static class HealanAccessSeed
             [5104] = (5102, 2, "پذیرش و نوبت", HealanAccessFormIds.Appointments),
             [5105] = (5102, 3, "بیماران", HealanAccessFormIds.Patients),
             [5142] = (5102, 4, "فشار خون", HealanAccessFormIds.ClinicBloodPressure),
-            [5106] = (5102, 5, "پزشکان", HealanAccessFormIds.Doctors),
-            [5107] = (5102, 6, "نسخه‌ها", HealanAccessFormIds.Prescriptions),
+            [5148] = (5102, 5, "پرسش و پاسخ بیماران", HealanAccessFormIds.PatientQuestions),
+            [5106] = (5102, 6, "پزشکان", HealanAccessFormIds.Doctors),
+            [5107] = (5102, 7, "نسخه‌ها", HealanAccessFormIds.Prescriptions),
             [5133] = (null, 3, "نوبت‌دهی", null),
             [5134] = (5133, 1, "برنامه حضور", HealanAccessFormIds.BookingSchedules),
             [5135] = (5133, 2, "رزروهای نوبت", HealanAccessFormIds.BookingReservations),
@@ -283,7 +286,7 @@ public static class HealanAccessSeed
             [5137] = (5136, 1, "سوابق بیمار", HealanAccessFormIds.PatientHistory),
             [5138] = (5136, 2, "ثبت فشار خون", HealanAccessFormIds.PatientBloodPressure),
             [5139] = (5136, 3, "یادآوری داروها", HealanAccessFormIds.PatientMedications),
-            [5140] = (5136, 4, "چت‌بات بیمار", HealanAccessFormIds.PatientAssistant),
+            [5140] = (5136, 4, "پرسش و پاسخ بیمار", HealanAccessFormIds.PatientAssistant),
             [5141] = (5136, 5, "رزرو نوبت بیمار", HealanAccessFormIds.PatientBooking),
         };
 

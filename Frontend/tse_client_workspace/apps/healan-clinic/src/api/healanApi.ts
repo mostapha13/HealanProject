@@ -27,6 +27,8 @@ import type {
   PortalContentItem,
   PortalSiteSetting,
   PatientReviewItem,
+  VaricoseCaseItem,
+  PortalContactMessageItem,
   BlogPostSummary,
   BlogPostDetail,
   PortalSeoPage,
@@ -341,6 +343,14 @@ export const healanApi = {
     reviewDelete: (patientReviewId: number) => post('PatientReview/Delete', { patientReviewId }),
     reviewDeletedList: () => get<MasterDataDeletedItem[]>('PatientReview/DeletedList'),
     reviewRestore: (id: number) => post('PatientReview/Restore', { id }),
+    varicoseCaseList: () => get<VaricoseCaseItem[]>('VaricoseCase/List'),
+    varicoseCaseSave: (data: Record<string, unknown>) => post('VaricoseCase/Save', data),
+    varicoseCaseDelete: (varicoseCaseId: number) => post('VaricoseCase/Delete', { varicoseCaseId }),
+    contactMessageList: (isRead?: boolean) =>
+      get<PortalContactMessageItem[]>('PortalContactMessage/List', isRead === undefined ? {} : { isRead }),
+    contactMessageUpdate: (data: Record<string, unknown>) => post('PortalContactMessage/Update', data),
+    contactMessageDelete: (portalContactMessageId: number) =>
+      post('PortalContactMessage/Delete', { portalContactMessageId }),
     blogList: (params?: { filterText?: string; isPublished?: boolean; pageNumber?: number; pageSize?: number }) =>
       get<PaginatedResponse<BlogPostSummary>>('BlogPost/List', pagedParams(params)),
     blogInfo: (blogPostId: number) =>

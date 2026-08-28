@@ -7,9 +7,11 @@ import { HEALAN_LIST_PAGE_SIZE, ListPagination, useListPagination } from '../../
 import { convertDateAndTimeToJalali } from '@tse/tools';
 
 function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
+  const patientMode = window.location.pathname.startsWith('/patients/questions');
+  const initialPhone = new URLSearchParams(window.location.search).get('phone') ?? '';
   const [items, setItems] = useState<RagChatLogItem[]>([]);
   const [filterText, setFilterText] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(initialPhone);
   const [authFilter, setAuthFilter] = useState<'all' | 'auth' | 'guest'>('all');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -50,6 +52,8 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   }, [filterText, phone, authFilter, setPage]);
 
   const pageIds = useMemo(() => items.map((x) => x.ragChatLogId), [items]);
+  const answeredCount = useMemo(() => items.filter((x) => x.wasAnswered || Boolean(x.answer)).length, [items]);
+  const authenticatedCount = useMemo(() => items.filter((x) => x.isAuthenticated).length, [items]);
   const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
 
   const toggleOne = (id: number) => {
@@ -106,8 +110,8 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
   return (
     <>
       <PageHeader
-        title="گفتگوهای دستیار"
-        subtitle="سوالات کاربران سایت و پاسخ‌های ربات — برای بهبود دانش پایه"
+        title={patientMode ? 'پرسش و پاسخ بیماران' : 'گفتگوهای دستیار'}
+        subtitle={patientMode ? 'مشاهده سوال‌های بیماران و پاسخ دستیار؛ جستجو بر اساس شماره موبایل' : 'سوالات کاربران سایت و پاسخ‌های ربات — برای بهبود دانش پایه'}
         action={
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {selected.size > 0 && (
@@ -127,7 +131,23 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
         }
       />
 
-      <div className="healan-search-bar" style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+      {patientMode && (
+        <section className="patient-qa-hero" aria-label="خلاصه پرسش و پاسخ">
+          <div className="patient-qa-hero__intro">
+            <span className="patient-qa-hero__eyebrow">مرکز ارتباط با بیمار</span>
+            <strong>گفتگوهای بیماران، یک‌جا و قابل پیگیری</strong>
+            <p>برای مشاهده مکالمات یک بیمار، شماره موبایل او را جستجو کنید.</p>
+          </div>
+          <div className="patient-qa-hero__stats">
+            <div><span>کل گفتگوها</span><strong>{totalCount.toLocaleString('fa-IR')}</strong></div>
+            <div><span>پاسخ‌داده‌شده در این صفحه</span><strong>{answeredCount.toLocaleString('fa-IR')}</strong></div>
+            <div><span>بیماران احراز‌شده</span><strong>{authenticatedCount.toLocaleString('fa-IR')}</strong></div>
+          </div>
+        </section>
+      )}
+
+      <div className={patientMode ? 'patient-qa-filters' : 'healan-search-bar'} style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        {patientMode && <span className="patient-qa-filters__icon" aria-hidden>⌕</span>}
         <input
           placeholder="جستجو در سوال یا جواب..."
           value={filterText}
@@ -159,6 +179,35 @@ function RagLogsPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
             <div className="healan-empty">در حال بارگذاری…</div>
           ) : items.length === 0 ? (
             <div className="healan-empty">گفتگویی ثبت نشده است.</div>
+          ) : patientMode ? (
+            <div className="patient-qa-list">
+              {items.map((row) => {
+                const expanded = expandedId === row.ragChatLogId;
+                const answer = row.answer || 'برای این پرسش پاسخی ثبت نشده است.';
+                const shortAnswer = answer.length > 240 && !expanded ? `${answer.slice(0, 240)}…` : answer;
+                return <article className="patient-qa-card" key={row.ragChatLogId}>
+                  <div className="patient-qa-card__rail" aria-hidden />
+                  <header className="patient-qa-card__header">
+                    <div className="patient-qa-card__patient">
+                      <span className="patient-qa-card__avatar">{row.isAuthenticated ? 'ب' : 'م'}</span>
+                      <div><strong dir="ltr">{row.phoneNumber || 'کاربر مهمان'}</strong><span>{row.isAuthenticated ? 'بیمار احراز‌شده' : 'کاربر مهمان'}</span></div>
+                    </div>
+                    <div className="patient-qa-card__meta">
+                      <span className={`patient-qa-status ${row.wasAnswered || row.answer ? 'is-answered' : 'is-pending'}`}>{row.wasAnswered || row.answer ? 'پاسخ داده شده' : 'بدون پاسخ'}</span>
+                      <time>{row.createdAt ? convertDateAndTimeToJalali(row.createdAt) : '—'}</time>
+                    </div>
+                  </header>
+                  <div className="patient-qa-card__conversation">
+                    <div className="patient-qa-bubble patient-qa-bubble--question"><span>پرسش بیمار</span><p>{row.question}</p></div>
+                    <div className="patient-qa-bubble patient-qa-bubble--answer"><span>پاسخ دستیار</span><p>{shortAnswer}</p>{answer.length > 240 && <button type="button" onClick={() => setExpandedId(expanded ? null : row.ragChatLogId)}>{expanded ? 'نمایش کمتر' : 'مشاهده پاسخ کامل'}</button>}</div>
+                  </div>
+                  <footer className="patient-qa-card__footer">
+                    <div><span>منبع: {row.sourceType || (row.wasAnswered ? 'دانش پایه' : '—')}</span>{row.similarityScore != null && <span>اطمینان پاسخ: {Math.round(row.similarityScore)}٪</span>}</div>
+                    <button type="button" className="patient-qa-delete" disabled={deleting} onClick={() => void deleteOne(row.ragChatLogId)}>حذف گفتگو</button>
+                  </footer>
+                </article>;
+              })}
+            </div>
           ) : (
             <table className="healan-table">
               <thead>
