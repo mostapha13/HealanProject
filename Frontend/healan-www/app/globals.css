@@ -22,7 +22,7 @@
   --radius: 14px;
   --radius-lg: 22px;
   --header-h: 72px;
-  --font: 'Vazirmatn', 'Tahoma', 'Segoe UI', sans-serif;
+  --font: var(--font-vazirmatn), 'Tahoma', 'Segoe UI', sans-serif;
   --font-scale: 1;
 }
 

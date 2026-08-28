@@ -1,7 +1,16 @@
 import type { Metadata } from 'next';
+import { Vazirmatn } from 'next/font/google';
 import { DisplayControls } from '@/components/DisplayControls';
 import { FloatingAssistantButton } from '@/components/FloatingAssistantButton';
 import './globals.css';
+
+const vazirmatn = Vazirmatn({
+  subsets: ['arabic'],
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-vazirmatn',
+  preload: true,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -50,20 +59,8 @@ export default function RootLayout({
       data-night="false"
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
+      <head><script dangerouslySetInnerHTML={{ __html: themeBootScript }} /></head>
+      <body className={vazirmatn.variable}>
         {children}
         <DisplayControls />
         <FloatingAssistantButton />
