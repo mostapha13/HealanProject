@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { BookingCta } from './CtaLinks';
 
 export type MedicalLandingContent = {
@@ -26,6 +27,7 @@ type Props = {
   city: string;
   phone: string;
   phoneDisplay: string;
+  featuredContent?: ReactNode;
 };
 
 export function MedicalServiceLanding({
@@ -34,6 +36,7 @@ export function MedicalServiceLanding({
   city,
   phone,
   phoneDisplay,
+  featuredContent,
 }: Props) {
   return (
     <main className="medical-landing">
@@ -53,6 +56,8 @@ export function MedicalServiceLanding({
           </div>
         </div>
       </section>
+
+      {featuredContent}
 
       <section className="section">
         <div className="container medical-copy-grid">

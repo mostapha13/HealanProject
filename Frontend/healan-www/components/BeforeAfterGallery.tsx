@@ -1,26 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { VaricoseCasePublic } from '@/lib/api';
 import { publicAssetUrl } from '@/lib/seo';
 
-function BeforeAfterCard({ item }: { item: VaricoseCasePublic }) {
-  const [position, setPosition] = useState(50);
+type Preview = { src: string; alt: string; label: string };
+
+function BeforeAfterCard({ item, onPreview }: { item: VaricoseCasePublic; onPreview: (image: Preview) => void }) {
   const before = publicAssetUrl(item.beforeImageUrl) || item.beforeImageUrl;
   const after = publicAssetUrl(item.afterImageUrl) || item.afterImageUrl;
+  const images = [
+    { src: before, label: 'قبل از درمان', alt: `پیش از درمان: ${item.title}` },
+    { src: after, label: 'بعد از درمان', alt: `نتیجه بعد از درمان: ${item.title}` },
+  ];
+
   return (
     <article className="ba-card">
-      <div className="ba-compare" style={{ '--ba-position': `${position}%` } as React.CSSProperties}>
-        <img src={after} alt={`نتیجه بعد از درمان: ${item.title}`} loading="lazy" />
-        <div className="ba-before"><img src={before} alt={`پیش از درمان: ${item.title}`} loading="lazy" /></div>
-        <span className="ba-label ba-label--before">قبل از درمان</span>
-        <span className="ba-label ba-label--after">بعد از درمان</span>
-        <span className="ba-divider" aria-hidden><i>↔</i></span>
-        <input
-          type="range" min="0" max="100" value={position}
-          onChange={(event) => setPosition(Number(event.target.value))}
-          aria-label={`مقایسه تصویر قبل و بعد ${item.title}`}
-        />
+      <div className="ba-pair">
+        {images.map((image) => (
+          <button className="ba-image" type="button" onClick={() => onPreview(image)} key={image.label} aria-label={`نمایش بزرگ ${image.label} ${item.title}`}>
+            <img src={image.src} alt={image.alt} loading="lazy" />
+            <span>{image.label}</span>
+            <i aria-hidden>↗</i>
+          </button>
+        ))}
       </div>
       <div className="ba-card__body">
         {item.treatmentLabel && <span>{item.treatmentLabel}</span>}
@@ -32,14 +35,39 @@ function BeforeAfterCard({ item }: { item: VaricoseCasePublic }) {
 }
 
 export function BeforeAfterGallery({ items }: { items: VaricoseCasePublic[] }) {
+  const [preview, setPreview] = useState<Preview | null>(null);
+
+  useEffect(() => {
+    if (!preview) return;
+    const close = (event: KeyboardEvent) => event.key === 'Escape' && setPreview(null);
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', close);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', close);
+    };
+  }, [preview]);
+
   if (!items.length) return null;
   return (
     <section className="section ba-section" id="before-after">
       <div className="container">
-        <div className="section-head"><span className="section-badge">نتایج درمان</span><h2>نمونه‌کارهای قبل و بعد درمان واریس</h2><p>دسته مقایسه را حرکت دهید تا نتیجه را مشاهده کنید.</p></div>
-        <div className="ba-grid">{items.map((item) => <BeforeAfterCard item={item} key={item.varicoseCaseId} />)}</div>
+        <div className="section-head"><span className="section-badge">نتایج واقعی درمان</span><h2>نمونه‌کارهای قبل و بعد درمان واریس</h2><p>برای مشاهده جزئیات، روی هر تصویر کلیک کنید.</p></div>
+        <div className="ba-scroll" role="region" aria-label="نمونه‌کارهای درمان واریس" tabIndex={0}>
+          {items.map((item) => <BeforeAfterCard item={item} onPreview={setPreview} key={item.varicoseCaseId} />)}
+        </div>
         <p className="ba-disclaimer">نتیجه درمان در افراد مختلف متفاوت است و تصاویر، تضمین‌کننده نتیجه مشابه برای همه بیماران نیستند.</p>
       </div>
+
+      {preview && (
+        <div className="ba-lightbox" role="dialog" aria-modal="true" aria-label={preview.alt} onMouseDown={(event) => event.target === event.currentTarget && setPreview(null)}>
+          <div className="ba-lightbox__panel">
+            <button className="ba-lightbox__close" type="button" onClick={() => setPreview(null)} aria-label="بستن تصویر">×</button>
+            <img src={preview.src} alt={preview.alt} />
+            <strong>{preview.label}</strong>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
