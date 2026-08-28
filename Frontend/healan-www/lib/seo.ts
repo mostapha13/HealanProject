@@ -221,3 +221,62 @@ export function buildBlogPostingJsonLd(
   // Do not merge /blog index jsonLdExtra onto every article.
   return [posting];
 }
+
+export function buildMedicalPageJsonLd(opts: {
+  site: PublishedPortalSite | null | undefined;
+  path: string;
+  title: string;
+  description: string;
+  serviceName: string;
+  faq: { question: string; answer: string }[];
+}): Record<string, unknown>[] {
+  const doctor = doctorFromSettings(opts.site);
+  const url = `${SITE_URL.replace(/\/$/, '')}${normalizePath(opts.path)}`;
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'MedicalWebPage',
+      name: opts.title,
+      description: opts.description,
+      url,
+      inLanguage: 'fa-IR',
+      about: {
+        '@type': 'MedicalCondition',
+        name: opts.serviceName,
+      },
+      reviewedBy: {
+        '@type': 'Physician',
+        name: doctor.name,
+        medicalSpecialty: 'Cardiovascular',
+      },
+      mainEntity: {
+        '@type': 'MedicalBusiness',
+        name: `مطب ${doctor.name}`,
+        telephone: doctor.phone,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: doctor.address,
+          addressLocality: doctor.city,
+          addressCountry: 'IR',
+        },
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: opts.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'خانه', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: opts.serviceName, item: url },
+      ],
+    },
+  ];
+}

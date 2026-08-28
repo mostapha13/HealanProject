@@ -19,6 +19,8 @@ export function SiteFooter({ name, specialty, city }: Props) {
           </span>
         </div>
         <div className="footer__links">
+          <Link href="/cardiology">متخصص قلب و عروق در شوشتر</Link>
+          <Link href="/varicose-veins">تشخیص و درمان واریس</Link>
           <Link href="/blog">بلاگ</Link>
           <a href="/assistant">دستیار هوشمند</a>
           <a href="/booking">رزرو نوبت</a>

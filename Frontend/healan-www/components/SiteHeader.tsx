@@ -20,8 +20,8 @@ type NavItem = {
 
 const NAV_LINKS: NavItem[] = [
   { href: '/#about', label: 'درباره پزشک', kind: 'anchor' },
-  { href: '/#services', label: 'خدمات', kind: 'anchor' },
-  { href: '/#reviews', label: 'نظرات', kind: 'anchor' },
+  { href: '/cardiology', label: 'قلب و عروق', kind: 'next' },
+  { href: '/varicose-veins', label: 'واریس', kind: 'next' },
   { href: '/#contact', label: 'تماس', kind: 'anchor' },
   { href: '/blog', label: 'بلاگ', kind: 'next' },
   { href: '/assistant', label: 'دستیار', kind: 'spa' },

@@ -15,6 +15,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 1,
     },
+    {
+      url: `${base}/cardiology`,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${base}/varicose-veins`,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
   ];
 
   if (!blogEnabled) {
