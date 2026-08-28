@@ -62,7 +62,8 @@
     {"id":"CM-048","cluster":"missing-source-field","question":"حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["بهترین سفارش فروش","ثبت نشده"],"mustNotContain":["583,222,314"],"maxAnswerChars":250},
 
     {"id":"CM-049","cluster":"screening","question":"نمادهایی که P/E کمتر از ۶ دارند را پیدا کن","expectedType":"structured_query","mustContain":["آردینه","5.93","آسیا","1.69","253 نماد منطبق"],"maxAnswerChars":1500},
-    {"id":"CM-050","cluster":"screening","question":"پنج نماد با ارزش معاملات بیشتر از ۳ همت را از بیشترین به کمترین بده","expectedType":"structured_query","mustContain":["فملی","وبملت","وغدیر","خودرو","پخش","ارزش معاملات"],"maxAnswerChars":1200}
+    {"id":"CM-050","cluster":"screening","question":"پنج نماد با ارزش معاملات بیشتر از ۳ همت را از بیشترین به کمترین بده","expectedType":"structured_query","mustContain":["فملی","وبملت","وغدیر","خودرو","پخش","ارزش معاملات"],"maxAnswerChars":1200},
+    {"id":"CM-051","cluster":"typo-ranking","question":"15 نماد با بیشترین ارز معامالات چیا هستند؟","expectedType":"structured_query","mustContain":["1. فملی","15.","ارزش معاملات"],"mustNotContain":["جدول Instrument","رکورد","Quality Gate"],"maxAnswerChars":2200}
   ],
   "globalMustNotContain": [
     "داده قابل اتکایی برای پاسخ پیدا نشد",

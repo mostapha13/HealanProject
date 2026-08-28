@@ -11,7 +11,8 @@ public enum CanonicalQuestionDomain
     CompanyState,
     Content,
     FinancialInstitution,
-    Instrument
+    Instrument,
+    Organization
 }
 
 /// <summary>
@@ -53,9 +54,18 @@ public static class CanonicalQuestionOwnership
             return CanonicalQuestionDomain.Content;
         if(RequiresDocumentEvidence(q)) return CanonicalQuestionDomain.Knowledge;
 
+        // Natural questions about the exchange itself belong to the current
+        // organization graph, not Company.CEO / Companystate issuer fields.
+        var referencesExchange=ContainsAny(q,"بورس تهران","بورس اوراق بهادار تهران");
+        if(referencesExchange&&ContainsAny(q,"مدیرعامل","مدیر عامل","هیئت مدیره","هیأت مدیره","هیات مدیره"))
+            return CanonicalQuestionDomain.Organization;
+
         // Semantic ownership where the Persian wording names a source concept.
         if(ContainsAny(q,"عرضه اولیه","عرضه شده")||
-           (q.Contains("تالار",StringComparison.Ordinal)&&ContainsAny(q,"شرکت ها","شرکت های","شرکت‌ها","شرکت‌های","توزیع شرکت","شرکت اول","شرکت منتسب")))
+           (q.Contains("تالار",StringComparison.Ordinal)&&
+            (ContainsAny(q,"شرکت ها","شرکت های","شرکت‌ها","شرکت‌های","شرکتای","شرکتا","شرکتاش","اسم شرکت","چندتا شرکت","چنتا شرکت","توزیع شرکت","شرکت اول","شرکت منتسب")
+             ||ContainsAny(q,"زیر مجموع","منتسب به تالار","وابسته به تالار")
+                &&!ContainsAny(q,"کدام معاونت","کدوم معاونت","چه معاونتی","بالادست"))))
             return CanonicalQuestionDomain.Company;
         // The current executive name is maintained by Companystate.Modiramel.
         // An explicitly named Company table was already handled above, so a

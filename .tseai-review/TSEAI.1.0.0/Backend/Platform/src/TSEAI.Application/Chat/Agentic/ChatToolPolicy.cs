@@ -6,6 +6,9 @@ public sealed class ChatToolPolicy : IChatToolPolicy
     {
         "planner",
         "capability.route",
+        "semantic.compile",
+        "semantic.materialize",
+        "semantic.guard",
         "conversation.context",
         "temporal.resolve",
         "entity.resolve",
@@ -21,6 +24,7 @@ public sealed class ChatToolPolicy : IChatToolPolicy
         "filter.conversation","filter.chat","filter.assets",
         "structured.query",
         "structured.reference",
+        "structured.reference.semantic",
         "structured.reference.facets",
         CanonicalReferenceToolNames.ClockCurrent,
         CanonicalReferenceToolNames.ContentLookup,

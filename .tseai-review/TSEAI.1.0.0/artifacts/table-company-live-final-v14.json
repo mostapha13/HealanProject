@@ -1,0 +1,4018 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:33:45.107515+00:00",
+  "runId": "677de161dbd1",
+  "manifestVersion": "2.0",
+  "datasetSha256": "05d46f39e2233773702bcf9ed521c5fee0b6816651c922f949ba1afbe1cc6992",
+  "caseCount": 54,
+  "sources": {
+    "company": {
+      "total": 54,
+      "passed": 21
+    }
+  },
+  "total": 54,
+  "passed": 21,
+  "failed": 33,
+  "passRate": 0.3888888888888889,
+  "p50LatencyMs": 31.94,
+  "p95LatencyMs": 43304.71,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "transport": 33,
+    "nonEmptyAnswer": 33,
+    "type": 33,
+    "mustContain": 33,
+    "trace": 33,
+    "authority": 33,
+    "TimeoutError: timed out": 3,
+    "HTTP 500: {\"type\":\"https://httpstatuses.com/500\",\"title\":\"An unexpected error occurred.\",\"status\":500,\"code\":\"internal_error\",\"correlationId\":\"table-eval-677de161dbd1-company:CO-004\"}": 1,
+    "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n": 29
+  },
+  "clusters": {
+    "company:ceo-safety": {
+      "total": 2,
+      "passed": 0
+    },
+    "company:comparison": {
+      "total": 1,
+      "passed": 0
+    },
+    "company:contact": {
+      "total": 6,
+      "passed": 1
+    },
+    "company:full": {
+      "total": 1,
+      "passed": 0
+    },
+    "company:hall": {
+      "total": 3,
+      "passed": 0
+    },
+    "company:hall-aggregate": {
+      "total": 5,
+      "passed": 5
+    },
+    "company:identity": {
+      "total": 2,
+      "passed": 1
+    },
+    "company:ipo": {
+      "total": 3,
+      "passed": 0
+    },
+    "company:ipo-aggregate": {
+      "total": 4,
+      "passed": 4
+    },
+    "company:ipo-semantic-regression": {
+      "total": 4,
+      "passed": 4
+    },
+    "company:metadata": {
+      "total": 3,
+      "passed": 0
+    },
+    "company:quality": {
+      "total": 7,
+      "passed": 0
+    },
+    "company:schema": {
+      "total": 5,
+      "passed": 5
+    },
+    "company:statistics": {
+      "total": 6,
+      "passed": 0
+    },
+    "company:strict-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:website-coverage": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "failures": [
+    {
+      "id": "company:CO-002",
+      "caseId": "CO-002",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نماد بورسی شرکت ملی صنایع مس ایران چیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45032.08
+    },
+    {
+      "id": "company:CO-004",
+      "caseId": "CO-004",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "شماره تماس شرکت ایران خودرو را بده",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 500: {\"type\":\"https://httpstatuses.com/500\",\"title\":\"An unexpected error occurred.\",\"status\":500,\"code\":\"internal_error\",\"correlationId\":\"table-eval-677de161dbd1-company:CO-004\"}"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 500,
+      "latencyMs": 21640.43
+    },
+    {
+      "id": "company:CO-005",
+      "caseId": "CO-005",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "تلفن خساپا چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45011.35
+    },
+    {
+      "id": "company:CO-006",
+      "caseId": "CO-006",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "وب‌سایت رسمی فولاد مبارکه چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45017.22
+    },
+    {
+      "id": "company:CO-007",
+      "caseId": "CO-007",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "سایت شرکت ملی صنایع مس ایران را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 43304.71
+    },
+    {
+      "id": "company:CO-008",
+      "caseId": "CO-008",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "آدرس سایت دانش بنیان پویا نیرو چیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 1037.75
+    },
+    {
+      "id": "company:CO-009",
+      "caseId": "CO-009",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "فملی در کدام تالار منطقه‌ای ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 18.64
+    },
+    {
+      "id": "company:CO-010",
+      "caseId": "CO-010",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "تالار شرکت فولاد مبارکه کجاست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 14.07
+    },
+    {
+      "id": "company:CO-011",
+      "caseId": "CO-011",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "استان شرکت ایران خودرو در Company چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 14.01
+    },
+    {
+      "id": "company:CO-012",
+      "caseId": "CO-012",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "تاریخ عرضه اولیه فملی چه روزی بوده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.72
+    },
+    {
+      "id": "company:CO-013",
+      "caseId": "CO-013",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "فولاد مبارکه چه تاریخی وارد بورس شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.32
+    },
+    {
+      "id": "company:CO-014",
+      "caseId": "CO-014",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "Ipo_Date خودرو چنده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 12.71
+    },
+    {
+      "id": "company:CO-015",
+      "caseId": "CO-015",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 8.64
+    },
+    {
+      "id": "company:CO-016",
+      "caseId": "CO-016",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "CEO فولاد مبارکه چه کسی است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 11.39
+    },
+    {
+      "id": "company:CO-017",
+      "caseId": "CO-017",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری رکورد Company فملی چه موقع بوده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.64
+    },
+    {
+      "id": "company:CO-018",
+      "caseId": "CO-018",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "Company ID شرکت ملی صنایع مس ایران چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.45
+    },
+    {
+      "id": "company:CO-019",
+      "caseId": "CO-019",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "شناسه منبع Instrument فملی در Company را بده",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.16
+    },
+    {
+      "id": "company:CO-020",
+      "caseId": "CO-020",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "full",
+      "question": "اطلاعات کامل Company فملی را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.08
+    },
+    {
+      "id": "company:CO-021",
+      "caseId": "CO-021",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "comparison",
+      "question": "تاریخ عرضه اولیه فملی را با فولاد مقایسه کن",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.89
+    },
+    {
+      "id": "company:CO-022",
+      "caseId": "CO-022",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "جدول Company چند رکورد دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.69
+    },
+    {
+      "id": "company:CO-023",
+      "caseId": "CO-023",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "در Company چند عنوان شرکت متمایز داریم؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.74
+    },
+    {
+      "id": "company:CO-024",
+      "caseId": "CO-024",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "تعداد InstrumentId متمایز جدول Company چندتاست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 11.21
+    },
+    {
+      "id": "company:CO-025",
+      "caseId": "CO-025",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "Company چند تالار متمایز دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.66
+    },
+    {
+      "id": "company:CO-026",
+      "caseId": "CO-026",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "بازه تاریخ عرضه اولیه در کل جدول Company چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 8.22
+    },
+    {
+      "id": "company:CO-027",
+      "caseId": "CO-027",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل Company را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.57
+    },
+    {
+      "id": "company:CO-028",
+      "caseId": "CO-028",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند رکورد Company عنوان خالی دارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 12.28
+    },
+    {
+      "id": "company:CO-029",
+      "caseId": "CO-029",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند شرکت در Company وب‌سایت معتبر ندارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.27
+    },
+    {
+      "id": "company:CO-030",
+      "caseId": "CO-030",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "مدیرعامل چند شرکت در جدول Company ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.51
+    },
+    {
+      "id": "company:CO-031",
+      "caseId": "CO-031",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "در Company چند شماره تلفن خالی است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.05
+    },
+    {
+      "id": "company:CO-032",
+      "caseId": "CO-032",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند گروه InstrumentId تکراری در Company وجود دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.71
+    },
+    {
+      "id": "company:CO-033",
+      "caseId": "CO-033",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "تعداد عنوان‌های تکراری Company چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 18.68
+    },
+    {
+      "id": "company:CO-034",
+      "caseId": "CO-034",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "Company رکوردی با Talar_Id یتیم دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.32
+    },
+    {
+      "id": "company:CO-035",
+      "caseId": "CO-035",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "website-coverage",
+      "question": "چند شرکت وب‌سایت قابل استفاده دارند و چندتا ندارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.08
+    }
+  ],
+  "results": [
+    {
+      "id": "company:CO-001",
+      "caseId": "CO-001",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نام شرکت مربوط به نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 77,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 195.16
+    },
+    {
+      "id": "company:CO-002",
+      "caseId": "CO-002",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "identity",
+      "question": "نماد بورسی شرکت ملی صنایع مس ایران چیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45032.08
+    },
+    {
+      "id": "company:CO-003",
+      "caseId": "CO-003",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "شماره تلفن فملی چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): تلفن ثبت‌شده 02188724410 است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 305,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 327.79
+    },
+    {
+      "id": "company:CO-004",
+      "caseId": "CO-004",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "شماره تماس شرکت ایران خودرو را بده",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 500: {\"type\":\"https://httpstatuses.com/500\",\"title\":\"An unexpected error occurred.\",\"status\":500,\"code\":\"internal_error\",\"correlationId\":\"table-eval-677de161dbd1-company:CO-004\"}"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 500,
+      "latencyMs": 21640.43
+    },
+    {
+      "id": "company:CO-005",
+      "caseId": "CO-005",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "تلفن خساپا چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45011.35
+    },
+    {
+      "id": "company:CO-006",
+      "caseId": "CO-006",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "وب‌سایت رسمی فولاد مبارکه چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "TimeoutError: timed out"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": null,
+      "latencyMs": 45017.22
+    },
+    {
+      "id": "company:CO-007",
+      "caseId": "CO-007",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "سایت شرکت ملی صنایع مس ایران را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 43304.71
+    },
+    {
+      "id": "company:CO-008",
+      "caseId": "CO-008",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "contact",
+      "question": "آدرس سایت دانش بنیان پویا نیرو چیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 1037.75
+    },
+    {
+      "id": "company:CO-009",
+      "caseId": "CO-009",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "فملی در کدام تالار منطقه‌ای ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 18.64
+    },
+    {
+      "id": "company:CO-010",
+      "caseId": "CO-010",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "تالار شرکت فولاد مبارکه کجاست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 14.07
+    },
+    {
+      "id": "company:CO-011",
+      "caseId": "CO-011",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall",
+      "question": "استان شرکت ایران خودرو در Company چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 14.01
+    },
+    {
+      "id": "company:CO-012",
+      "caseId": "CO-012",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "تاریخ عرضه اولیه فملی چه روزی بوده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.72
+    },
+    {
+      "id": "company:CO-013",
+      "caseId": "CO-013",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "فولاد مبارکه چه تاریخی وارد بورس شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.32
+    },
+    {
+      "id": "company:CO-014",
+      "caseId": "CO-014",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo",
+      "question": "Ipo_Date خودرو چنده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 12.71
+    },
+    {
+      "id": "company:CO-015",
+      "caseId": "CO-015",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 8.64
+    },
+    {
+      "id": "company:CO-016",
+      "caseId": "CO-016",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "CEO فولاد مبارکه چه کسی است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 11.39
+    },
+    {
+      "id": "company:CO-017",
+      "caseId": "CO-017",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری رکورد Company فملی چه موقع بوده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.64
+    },
+    {
+      "id": "company:CO-018",
+      "caseId": "CO-018",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "Company ID شرکت ملی صنایع مس ایران چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.45
+    },
+    {
+      "id": "company:CO-019",
+      "caseId": "CO-019",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "metadata",
+      "question": "شناسه منبع Instrument فملی در Company را بده",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.16
+    },
+    {
+      "id": "company:CO-020",
+      "caseId": "CO-020",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "full",
+      "question": "اطلاعات کامل Company فملی را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 13.08
+    },
+    {
+      "id": "company:CO-021",
+      "caseId": "CO-021",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "comparison",
+      "question": "تاریخ عرضه اولیه فملی را با فولاد مقایسه کن",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.89
+    },
+    {
+      "id": "company:CO-022",
+      "caseId": "CO-022",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "جدول Company چند رکورد دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.69
+    },
+    {
+      "id": "company:CO-023",
+      "caseId": "CO-023",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "در Company چند عنوان شرکت متمایز داریم؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.74
+    },
+    {
+      "id": "company:CO-024",
+      "caseId": "CO-024",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "تعداد InstrumentId متمایز جدول Company چندتاست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 11.21
+    },
+    {
+      "id": "company:CO-025",
+      "caseId": "CO-025",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "Company چند تالار متمایز دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.66
+    },
+    {
+      "id": "company:CO-026",
+      "caseId": "CO-026",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "بازه تاریخ عرضه اولیه در کل جدول Company چیست؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 8.22
+    },
+    {
+      "id": "company:CO-027",
+      "caseId": "CO-027",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل Company را بگو",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.57
+    },
+    {
+      "id": "company:CO-028",
+      "caseId": "CO-028",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند رکورد Company عنوان خالی دارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 12.28
+    },
+    {
+      "id": "company:CO-029",
+      "caseId": "CO-029",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند شرکت در Company وب‌سایت معتبر ندارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 10.27
+    },
+    {
+      "id": "company:CO-030",
+      "caseId": "CO-030",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "مدیرعامل چند شرکت در جدول Company ثبت شده؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.51
+    },
+    {
+      "id": "company:CO-031",
+      "caseId": "CO-031",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "در Company چند شماره تلفن خالی است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.05
+    },
+    {
+      "id": "company:CO-032",
+      "caseId": "CO-032",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند گروه InstrumentId تکراری در Company وجود دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.71
+    },
+    {
+      "id": "company:CO-033",
+      "caseId": "CO-033",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "تعداد عنوان‌های تکراری Company چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 18.68
+    },
+    {
+      "id": "company:CO-034",
+      "caseId": "CO-034",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "Company رکوردی با Talar_Id یتیم دارد؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 7.32
+    },
+    {
+      "id": "company:CO-035",
+      "caseId": "CO-035",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "website-coverage",
+      "question": "چند شرکت وب‌سایت قابل استفاده دارند و چندتا ندارند؟",
+      "passed": false,
+      "checks": {
+        "transport": false,
+        "nonEmptyAnswer": false,
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": false,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": false
+      },
+      "issues": [
+        "transport",
+        "nonEmptyAnswer",
+        "type",
+        "mustContain",
+        "trace",
+        "authority",
+        "HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+      ],
+      "actualType": null,
+      "actualEntity": "",
+      "answer": null,
+      "trace": null,
+      "httpStatus": 502,
+      "latencyMs": 9.08
+    },
+    {
+      "id": "company:CO-036",
+      "caseId": "CO-036",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "پنج مورد اول توزیع شرکت‌ها به تفکیک تالار را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "تالار‌های دارای بیشترین رکورد Company:\n1. تهران: 176 شرکت\n2. اصفهان: 28 شرکت\n3. آذربایجان شرقی (تبریز): 21 شرکت\n4. فارس (شیراز): 17 شرکت\n5. خراسان رضوی (مشهد): 15 شرکت",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 101,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 73,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 32030,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=توزیع شرکت‌ها بر اساس تالار;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33992.76
+    },
+    {
+      "id": "company:CO-037",
+      "caseId": "CO-037",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "چند شرکت Company به تالار تهران منتسب‌اند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در جدول Company، 176 شرکت به تالار تهران منتسب‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9025,
+          "detail": "kind=company_hall;complete=True;facts=21;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار تهران;facts=21"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9168.12
+    },
+    {
+      "id": "company:CO-038",
+      "caseId": "CO-038",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "تعداد شرکت‌های تالار خوزستان چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در جدول Company، 11 شرکت به تالار خوزستان (اهواز) منتسب‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9729,
+          "detail": "kind=company_hall;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار خوزستان (اهواز);facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9778.13
+    },
+    {
+      "id": "company:CO-039",
+      "caseId": "CO-039",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "پنج شرکت اول تالار کرمان را فقط نام ببر",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "5 شرکت اول از 7 شرکت منتسب به تالار کرمان:\n1. سرمایه‌گذاری استان کرمان\n2. صنایع سیمان کرمان\n3. صنایع مس شهید باهنر\n4. فولاد سیرجان ایرانیان\n5. گروه صنعتی بارز\n… 2 شرکت دیگر نمایش داده نشد؛ تعداد موردنظر یا نام دقیق‌تر را بنویسید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9763,
+          "detail": "kind=company_hall;complete=True;facts=6;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار کرمان;facts=6"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9809.21
+    },
+    {
+      "id": "company:CO-040",
+      "caseId": "CO-040",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "hall-aggregate",
+      "question": "سه شرکت اول منتسب به تالار اهواز را فهرست کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "3 شرکت اول از 11 شرکت منتسب به تالار خوزستان (اهواز):\n1. پتروشیمی بوعلی سینا\n2. پتروشیمی غدیر\n3. پتروشیمی فن آوران\n… 8 شرکت دیگر نمایش داده نشد؛ تعداد موردنظر یا نام دقیق‌تر را بنویسید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9751,
+          "detail": "kind=company_hall;complete=True;facts=4;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار خوزستان (اهواز);facts=4"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9802.41
+    },
+    {
+      "id": "company:CO-041",
+      "caseId": "CO-041",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با جدیدترین تاریخ عرضه اولیه در Company کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. فرآورده‌های دامی ولبنی دالاهو — 1403/10/24\n2. فولاد سیرجان ایرانیان — 1403/10/12\n3. دانش‌بنیان پویا نیرو — 1403/09/28",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9784,
+          "detail": "kind=company_aggregate;complete=True;facts=6;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=6"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9838.85
+    },
+    {
+      "id": "company:CO-042",
+      "caseId": "CO-042",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "سه شرکت با قدیمی‌ترین عرضه اولیه ثبت‌شده را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "قدیمی‌ترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. نفت پارس — 1346/11/01\n2. سیمان تهران — 1347/09/01\n3. قند نیشابور — 1347/11/01",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9740,
+          "detail": "kind=company_aggregate;complete=True;facts=6;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=قدیمی‌ترین عرضه‌های اولیه Company;facts=6"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9780.62
+    },
+    {
+      "id": "company:CO-043",
+      "caseId": "CO-043",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "چند شرکت در سال ۱۴۰۲ عرضه اولیه شدند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در سال 1402، 6 رکورد عرضه اولیه در Company ثبت شده است:\n1. تامین سرمایه کاردان — 1402/06/08\n2. بیمه کارآفرین — 1402/04/17\n3. پالایش نفت شیراز — 1402/04/17\n4. گروه مالی شهر — 1402/03/21\n5. پرداخت الکترونیک پاسارگاد — 1402/01/16",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9763,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=عرضه‌های اولیه سال 1402;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9800.01
+    },
+    {
+      "id": "company:CO-044",
+      "caseId": "CO-044",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-aggregate",
+      "question": "فقط اسم شرکت‌های عرضه‌شده در سال 1403 را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فرآورده‌های دامی ولبنی دالاهو، فولاد سیرجان ایرانیان، دانش‌بنیان پویا نیرو",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9789,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=عرضه‌های اولیه سال 1403;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9831.87
+    },
+    {
+      "id": "company:CO-045",
+      "caseId": "CO-045",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "InstrumentId جدول Company مستقیم به Instrument وصل می‌شود؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.InstrumentId یک شناسه GUID منبع است؛ در Schema فعلی Foreign Key مستقیمی به dbo.Instrument ندارد و با Instrument.InstrumentID از نوع nvarchar نیز هم‌نوع نیست. اتصال نماد به شرکت باید با نام ناشر و تطبیق کنترل‌شده انجام شود، نه Join مستقیم این دو ستون.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 48.98
+    },
+    {
+      "id": "company:CO-046",
+      "caseId": "CO-046",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "رابطه Talar_Id در Company با جدول Talar چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.Talar_Id از نوع uniqueidentifier است و به‌صورت منطقی با Talar.Id تطبیق داده می‌شود؛ هر 403 رکورد فعلی دارای تالار قابل تطبیق‌اند، هرچند Foreign Key فیزیکی در Schema تعریف نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 45.2
+    },
+    {
+      "id": "company:CO-047",
+      "caseId": "CO-047",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "معنی ستون Ipo_Date در Company چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.Ipo_Date تاریخ عرضه اولیه ثبت‌شده شرکت است؛ برای نمایش کاربر به تقویم شمسی تبدیل می‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 52.78
+    },
+    {
+      "id": "company:CO-048",
+      "caseId": "CO-048",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "SourceCollectedAt جدول Company چه مفهومی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Company.SourceCollectedAt زمان جمع‌آوری و ثبت Snapshot منبع در SQL است و تاریخ عرضه اولیه شرکت نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 71.17
+    },
+    {
+      "id": "company:CO-049",
+      "caseId": "CO-049",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "schema",
+      "question": "آیا جدول Company قیمت و حجم معاملات هم دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Company قیمت، حجم و ارزش معاملات یا صورت مالی ندارد؛ این جدول فقط اطلاعات مرجع هویتی، تماس، تالار، تاریخ عرضه اولیه و زمان جمع‌آوری شرکت را نگهداری می‌کند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=company_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_schema;topic=تعریف ستون‌های Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 63.04
+    },
+    {
+      "id": "company:CO-050",
+      "caseId": "CO-050",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "strict-safety",
+      "question": "سایت فملی چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): وب‌سایتی در Company ثبت نشده است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8478,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 8547.53
+    },
+    {
+      "id": "company:CO-051",
+      "caseId": "CO-051",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "آخرین عرضه اولیه بورس چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 103,
+          "detail": "kind=company_aggregate;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 146.43
+    },
+    {
+      "id": "company:CO-052",
+      "caseId": "CO-052",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "تازه‌ترین IPO بورس تهران چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "kind=company_aggregate;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 68.49
+    },
+    {
+      "id": "company:CO-053",
+      "caseId": "CO-053",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "سه عرضه اولیه اخیر بورس را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدیدترین تاریخ‌های عرضه اولیه ثبت‌شده در Company:\n1. فرآورده‌های دامی ولبنی دالاهو — 1403/10/24\n2. فولاد سیرجان ایرانیان — 1403/10/12\n3. دانش‌بنیان پویا نیرو — 1403/09/28",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9107,
+          "detail": "kind=company_aggregate;complete=True;facts=6;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=6"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9173.77
+    },
+    {
+      "id": "company:CO-054",
+      "caseId": "CO-054",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ipo-semantic-regression",
+      "question": "آخرین تاریخ عرضه اولیه فملی چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ملی صنایع مس ایران (نماد فملی): تاریخ عرضه اولیه ثبت‌شده 1385/11/15 است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 9779,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 9841.11
+    }
+  ]
+}

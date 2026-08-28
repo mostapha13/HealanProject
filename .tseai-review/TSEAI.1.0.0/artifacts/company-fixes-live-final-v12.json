@@ -1,0 +1,170 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:25:50.012623+00:00",
+  "runId": "0bbe0cc591a8",
+  "manifestVersion": "2.0",
+  "datasetSha256": "814a9d1944ab7725b472220841ff1b981f33e5f74e9b56aaed7348632aa9808d",
+  "caseCount": 2,
+  "sources": {
+    "company": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "total": 2,
+  "passed": 2,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 117.91,
+  "p95LatencyMs": 80.28,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "company:ceo-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:quality": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "company:CO-015",
+      "caseId": "CO-015",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «ملی صنایع مس ایران» وجود ندارد؛ بنابراین مدیرعامل قابل تأیید نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 155.54
+    },
+    {
+      "id": "company:CO-034",
+      "caseId": "CO-034",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "Company رکوردی با Talar_Id یتیم دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "تعداد Talar_Id یتیم 0 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": "kind=company_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_quality;topic=کیفیت جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 80.28
+    }
+  ]
+}

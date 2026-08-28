@@ -1,0 +1,393 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T12:47:18.574976+00:00",
+  "runId": "cacf223c7f1a",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.5",
+  "suiteSha256": "f2829cd2a2e49fae02ed716530c39981c2466e3f6611e1940c9bcde5044b5f3e",
+  "flowCount": 1,
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "passRate": 1.0,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 97.58,
+  "p95LatencyMs": 102.84,
+  "maxP95LatencyMs": 5000.0,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "failures": [],
+  "results": [
+    {
+      "id": "regional-hall-edge-and-domain-transfer:zero-company-roster",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 1,
+      "question": "شرکت‌های تالار چهارمحال و بختیاری را نام ببر",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company هیچ شرکتی به تالار چهارمحال و بختیاری منتسب نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 404,
+          "detail": "kind=company_hall;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار چهارمحال و بختیاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 494.6
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:company-to-financial-anaphora",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 2,
+      "question": "نهادهاش چیا هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فهرست نهاد‌های مالی ثبت‌شده در تالار چهارمحال و بختیاری (10 نام):\n1. آتیه\n2. آگاه\n3. بانک تجارت\n4. بانک رفاه\n5. بانک صادرات\n6. سهم آشنا\n7. مبین سرمایه\n8. مفید\n9. مهر آفرین\n10. نهایت نگر",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-cross-domain-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 23,
+          "detail": "kind=financial_institution_hall;complete=True;facts=13;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار چهارمحال و بختیاری;facts=13"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 102.84
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:financial-to-company-anaphora",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 3,
+      "question": "شرکتاش رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company هیچ شرکتی به تالار چهارمحال و بختیاری منتسب نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-cross-domain-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=company_hall;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار چهارمحال و بختیاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 91.1
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:large-company-roster-truncation",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 4,
+      "question": "شرکت‌های تالار تهران را نام ببر",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "20 شرکت اول از 176 شرکت منتسب به تالار تهران:\n1. توسعه معادن وص.معدنی خاورمیانه\n2. آبسال\n3. آسان پرداخت پرشین\n4. ارتباطات سیار ایران\n5. افست\n6. انتقال داده‌های آسیاتک\n7. ایران ترانسفو\n8. ایران خودرو\n9. ایران دارو\n10. بانک اقتصاد نوین\n11. بانک پارسیان\n12. بانک پاسارگاد\n13. بانک تجارت\n14. بانک خاورمیانه\n15. بانک سینا\n16. بانک صادرات ایران\n17. بانک کار آفرین\n18. بانک ملت\n19. بورس انرژی ایران\n20. بورس اوراق بهادار تهران\n… 156 شرکت دیگر نمایش داده نشد؛ تعداد موردنظر یا نام دقیق‌تر را بنویسید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": "kind=company_hall;complete=True;facts=21;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار تهران;facts=21"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 97.58
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:zero-financial-roster-overrides-company",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 5,
+      "question": "نهادهای مالی تالار تهران کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "هیچ نهاد مالی برای تالار تهران ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "kind=financial_institution_hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار تهران;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 60.01
+    }
+  ]
+}

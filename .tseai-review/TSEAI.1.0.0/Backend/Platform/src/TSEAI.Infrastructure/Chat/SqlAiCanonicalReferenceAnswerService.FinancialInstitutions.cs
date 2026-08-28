@@ -32,7 +32,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService
             case FinancialInstitutionAggregateKind.HallDistribution:
                 return Wrap(await FinancialInstitutionHallDistribution(connection,intent.Limit,ct),"financial_institution_aggregate","توزیع نهادهای مالی بر اساس تالار");
             case FinancialInstitutionAggregateKind.HallInstitutions:
-                return Wrap(await FinancialInstitutionsByHall(connection,normalizedQuestion,intent,ct),"financial_institution_aggregate","نهادهای مالی تالار منطقه‌ای");
+                return await FinancialInstitutionsByHall(connection,normalizedQuestion,intent,ct);
             case FinancialInstitutionAggregateKind.TypeInstitutions:
                 return Wrap(await FinancialInstitutionsByType(connection,intent,ct),"financial_institution_aggregate","نهادهای مالی بر اساس نوع");
             case FinancialInstitutionAggregateKind.DataQuality:
@@ -127,28 +127,52 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService
             string.Join("\n",rows.Select((x,i)=>$"{i+1}. {Display(x.HallName)} (کد {x.HallCode}): {x.RecordCount:N0} رکورد؛ {x.DistinctTitles:N0} نام متمایز"));
     }
 
-    private async Task<string?> FinancialInstitutionsByHall(
+    private async Task<CanonicalReferenceAnswer?> FinancialInstitutionsByHall(
         SqlConnection connection,string question,CanonicalFinancialInstitutionQuestionIntent intent,CancellationToken ct)
     {
         var hall=await ResolveFinancialInstitutionHall(connection,question,ct);
-        if(hall is null) return "نام تالار یا استان موردنظر در سؤال مشخص نیست؛ لطفاً نام تالار منطقه‌ای را بنویسید.";
+        if(hall is null) return CanonicalReferenceAnswer.Exact(
+            "نام تالار یا استان موردنظر در سؤال مشخص نیست؛ لطفاً نام تالار منطقه‌ای را بنویسید.",
+            "financial_institution_hall","ابهام در تالار نهادهای مالی",sourceTool:CanonicalReferenceToolNames.FinancialInstitution);
         var catalog=await FinancialInstitutionCatalog(connection,ct);
         var rows=catalog.Where(x=>x.TalarId==hall.Id).ToArray();
         if(intent.TypeHint is not null) rows=rows.Where(x=>InstitutionTypeMatches(x.TypeName,intent.TypeHint)).ToArray();
-        var distinct=rows.GroupBy(x=>CanonicalFinancialInstitutionQuestion.MatchKey(x.Title),StringComparer.Ordinal).Select(x=>x.First()).OrderBy(x=>x.Title).ToArray();
+        // Type is part of identity.  Without it, for example «ایساتیس پویا»
+        // and «صندوق سرمایه‌گذاری مشترک ایساتیس پویا» collapse after the
+        // lookup-oriented prefix normalization even though they are separate
+        // records of different institution types.
+        var distinct=rows.GroupBy(x=>(x.TypeId,CanonicalFinancialInstitutionQuestion.MatchKey(x.Title)))
+            .Select(x=>x.First()).OrderBy(x=>x.Title).ToArray();
         var label=intent.TypeHint is null?"نهاد مالی":DisplayInstitutionType(intent.TypeHint);
-        if(ContainsAny(question,"چند نهاد","تعداد نهاد","چند کارگزاری","تعداد کارگزاری","چند سبدگردان","تعداد سبدگردان","چند رکورد","تعداد رکورد"))
-            return $"در تالار {Display(hall.HallName)}، {rows.Length:N0} رکورد {label} با {distinct.Length:N0} نام متمایز ثبت شده است.";
-        var listNames=intent.NamesOnly||
-            (ContainsAny(question,"فهرست","لیست","کدام نهاد","کدوم نهاد","چه نهاد")&&!ContainsAny(question,"تلفن","تماس","آدرس","نشانی"));
+        var pluralLabel=intent.TypeHint is null?"نهادهای مالی":$"{label}‌های";
+        var asksCount=ContainsAny(question,"چند نهاد","چندتا نهاد","چنتا نهاد","تعداد نهاد","چند کارگزاری","چندتا کارگزاری","چنتا کارگزاری","تعداد کارگزاری","چند سبدگردان","تعداد سبدگردان","چند رکورد","تعداد رکورد","شمارش","تعدادش");
+        string answer;
+        if(asksCount)
+            answer=$"در تالار {Display(hall.HallName)}، {rows.Length:N0} رکورد {label} با {distinct.Length:N0} نام متمایز ثبت شده است.";
+        else
+        {
+        var listNames=intent.NamesOnly||!ContainsAny(question,"تلفن","تماس","آدرس","نشانی","نشونی");
         var take=listNames?Math.Min(25,distinct.Length):Math.Min(intent.Limit,rows.Length);
         if(listNames)
-            return distinct.Length==0?$"هیچ {label}ی برای تالار {Display(hall.HallName)} ثبت نشده است.":
-                $"نام‌های {label} ثبت‌شده در تالار {Display(hall.HallName)} ({distinct.Length:N0} نام):\n"+string.Join("\n",distinct.Take(take).Select((x,i)=>$"{i+1}. {Display(x.Title)}"))+
+            answer=distinct.Length==0?$"هیچ {label} برای تالار {Display(hall.HallName)} ثبت نشده است.":
+                $"فهرست {pluralLabel} ثبت‌شده در تالار {Display(hall.HallName)} ({distinct.Length:N0} نام):\n"+string.Join("\n",distinct.Take(take).Select((x,i)=>$"{i+1}. {Display(x.Title)}"))+
                 (take<distinct.Length?$"\n… {distinct.Length-take:N0} نام دیگر نمایش داده نشد.":string.Empty);
-        return rows.Length==0?$"هیچ {label}ی برای تالار {Display(hall.HallName)} ثبت نشده است.":
+        else answer=rows.Length==0?$"هیچ {label} برای تالار {Display(hall.HallName)} ثبت نشده است.":
             $"{Math.Min(intent.Limit,rows.Length):N0} رکورد اول از {rows.Length:N0} رکورد {label} در تالار {Display(hall.HallName)}:\n"+
             string.Join("\n",rows.Take(intent.Limit).Select((x,i)=>$"{i+1}. {Display(x.Title)} — {Display(x.TelNo)} — {Display(x.Address)}"));
+        }
+        var hallName=Display(hall.HallName);
+        var facts=new List<CanonicalReferenceFact>
+        {
+            new("institution_record_count",rows.Length.ToString(CultureInfo.InvariantCulture),$"Talar:{hall.Id}"),
+            new("institution_distinct_count",distinct.Length.ToString(CultureInfo.InvariantCulture),$"Talar:{hall.Id}"),
+            new("hall_name",hallName,$"Talar:{hall.Id}")
+        };
+        facts.AddRange(distinct.Take(25).Select((row,index)=>new CanonicalReferenceFact(
+            $"institution:{index+1}:title",Display(row.Title),$"Nahad_Mali:{row.Id}")));
+        return CanonicalReferenceAnswer.Exact(answer,"financial_institution_hall",$"{pluralLabel} تالار {hallName}",facts,
+            subjectName:hallName,subjectRole:intent.TypeHint,relatedSubjects:distinct.Select(x=>Display(x.Title)).ToArray(),
+            sourceTool:CanonicalReferenceToolNames.FinancialInstitution);
     }
 
     private async Task<string> FinancialInstitutionsByType(
@@ -300,20 +324,7 @@ public sealed partial class SqlAiCanonicalReferenceAnswerService
     }
 
     private async Task<CompanyHallRow?> ResolveFinancialInstitutionHall(SqlConnection connection,string question,CancellationToken ct)
-    {
-        if(string.IsNullOrWhiteSpace(question)) return null;
-        var q=CanonicalFinancialInstitutionQuestion.Normalize(question);
-        var matches=new List<(CompanyHallRow Hall,string Alias)>();
-        foreach(var hall in await HallCatalog(connection,ct))
-        {
-            var full=CanonicalFinancialInstitutionQuestion.Normalize(hall.HallName);
-            var baseName=CanonicalFinancialInstitutionQuestion.Normalize(Regex.Replace(hall.HallName??string.Empty,@"\s*\([^)]*\)\s*"," "));
-            var city=CanonicalFinancialInstitutionQuestion.Normalize(Regex.Match(hall.HallName??string.Empty,@"\((?<city>[^)]+)\)").Groups["city"].Value);
-            foreach(var alias in new[]{full,baseName,city}.Where(x=>x.Length>=2).Distinct(StringComparer.Ordinal))
-                if(q.Contains(alias,StringComparison.Ordinal)) matches.Add((hall,alias));
-        }
-        return matches.OrderByDescending(x=>x.Alias.Length).Select(x=>x.Hall).FirstOrDefault();
-    }
+        => string.IsNullOrWhiteSpace(question)?null:await ResolveRegionalHall(connection,question,ct);
 
     private static string ComposeFinancialInstitutionDetails(
         FinancialInstitutionResolution resolution,IReadOnlySet<string> fields,

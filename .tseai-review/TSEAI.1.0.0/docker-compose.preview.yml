@@ -33,8 +33,8 @@ services:
       EMBEDDING_INDEX_BATCH_SIZE: 4
   local-llm:
     container_name: tseai-rc31-local-llm
-    restart: "no"
-    command: !override ["-m", "/models/Qwen3.5-4B-UD-Q4_K_XL.gguf", "--alias", "qwen3.5-4b-fa", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--flash-attn", "on", "-c", "4096", "-np", "1", "--cont-batching", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "6"]
+    restart: unless-stopped
+    command: !override ["-m", "/models/Qwen3.5-4B-UD-Q4_K_XL.gguf", "--alias", "qwen3.5-4b-fa", "--host", "0.0.0.0", "--port", "8080", "-ngl", "99", "--flash-attn", "on", "--cache-type-k", "q8_0", "--cache-type-v", "q8_0", "-c", "4096", "-np", "1", "--cont-batching", "--metrics", "--no-webui", "--cors-origins", "localhost", "--threads", "6"]
     volumes: !override
       - tseai_rc31_models:/models:ro
   local-embedding:

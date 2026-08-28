@@ -54,7 +54,7 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
             .Distinct(StringComparer.Ordinal).Take(4).ToArray();
         if(requested.Length>0)
         {
-            var lines=new List<string> { $"مقایسه {c.Primary.Symbol} و {c.Secondary.Symbol} بر پایه Snapshot معتبر:" };
+            var lines=new List<string> { $"مقایسه {c.Primary.Symbol} و {c.Secondary.Symbol}:" };
             foreach(var field in requested)
             {
                 var metric=ComparisonMetric(field,c.Primary,c.Secondary);
@@ -79,7 +79,7 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         static string Metric(AnalyticsMetric<decimal> m)=>m.Availability==AnalyticsAvailability.Available&&m.Value is not null?m.Value.Value.ToString("0.##",CultureInfo.InvariantCulture):"ناموجود";
         var a=c.Primary; var b=c.Secondary;
         return string.Join("\n",new[]{
-            $"مقایسه {a.Symbol} و {b.Symbol} بر پایه Snapshot جاری معتبر:",
+            $"مقایسه {a.Symbol} و {b.Symbol}:",
             $"{a.Symbol}: آخرین قیمت {a.LastPrice:N0} ({Signed(a.LastPricePercent)}٪)، حجم {a.TradeVolume:N0}.",
             $"{b.Symbol}: آخرین قیمت {b.LastPrice:N0} ({Signed(b.LastPricePercent)}٪)، حجم {b.TradeVolume:N0}.",
             $"{a.Symbol}: قدرت خریدار {Metric(c.PrimaryAnalytics.TradingPower.BuyerPower)}، عدم‌تعادل اردربوک {Metric(c.PrimaryAnalytics.OrderBook.Imbalance)}.",
@@ -103,8 +103,8 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
 
     public string ComposeStructured(string question, StructuredQueryExecutionResult result)
     {
-        if(!result.Success||result.Plan is null) return "Query ساختاریافته قابل اجرا نبود.";
-        if(result.Results.Count==0) return $"هیچ نمادی با شرایط «{result.Plan.Explanation}» پیدا نشد. {result.Scanned:N0} نماد بررسی شد و {result.QualityRejected:N0} نماد به‌دلیل Quality Gate کنار گذاشته شد.";
+        if(!result.Success||result.Plan is null) return "نتوانستم شرط‌های این پرسش را با اطمینان اجرا کنم؛ لطفاً معیار را کمی روشن‌تر بنویسید.";
+        if(result.Results.Count==0) return "در آخرین داده قابل استفاده بازار، نمادی مطابق شرایط سؤال پیدا نشد.";
         var displayMetric=result.Plan.SortBy??result.Plan.Conditions.FirstOrDefault()?.Metric;
         string Metric(StructuredQueryRow row) => displayMetric switch
         {
@@ -148,7 +148,10 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
             StructuredQueryMetric.SellQueueVolume => $": حجم سمت فروش یک‌طرفه {row.Metrics[nameof(StructuredQueryMetric.SellQueueVolume)]:N0} سهم",
             _ => ""
         };
-        var lines=result.Results.Take(10).Select((x,i)=>$"{i+1}. {x.Symbol} — {x.SymbolName}{Metric(x)}").ToList();
+        // Evidence validation currently carries up to twenty ranked rows. Keep the
+        // displayed count aligned with the user's requested plan instead of silently
+        // truncating every answer to ten rows.
+        var lines=result.Results.Take(Math.Min(result.Plan.Take,20)).Select((x,i)=>$"{i+1}. {x.Symbol} — {x.SymbolName}{Metric(x)}").ToList();
         if(ContainsAny(PersianDisplayText.Normalize(question).Replace('‌',' '),
                "برای اولی","برای اولین مورد","برای مورد اول","مورد اولش","نفر اولش","رتبه اولش"))
         {
@@ -175,7 +178,10 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         if(displayMetric is StructuredQueryMetric.BuyQueueVolume or StructuredQueryMetric.SellQueueVolume)
             lines.Add("این رتبه‌بندی فقط یک‌طرفه‌بودن سطح اول اردربوک را نشان می‌دهد؛ به‌دلیل نبود دامنه مجاز قیمت، صف رسمی تأیید نمی‌شود.");
         if(result.Plan.Conditions.Count>0&&result.Matched>result.Results.Count) lines.Add($"{result.Results.Count:N0} نتیجه اول از {result.Matched:N0} نماد منطبق نمایش داده شد.");
-        return string.Join("\n",lines);
+        var prefix=result.UsedLatestAvailableSnapshot&&result.ObservedAtUtc.HasValue
+            ? $"بر اساس آخرین داده ثبت‌شده در {PersianDisplayText.FormatPersianDate(result.ObservedAtUtc.Value.ToOffset(TimeSpan.FromHours(3.5)).DateTime)}:\n"
+            : string.Empty;
+        return prefix+string.Join("\n",lines);
     }
 
     private static string? ProjectedStructuredMetric(StructuredQueryRow row,string field)
@@ -303,9 +309,18 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
                 "individual_net_volume","buyer_power","updated_at","source_collected_at"]);
         var clientTypeRequested=fields.Any(PersianMarketQuestionSemantics.IsClientTypeField);
         if(clientTypeRequested&&!s.ClientType.HasData)
-            return $"برای {s.Symbol} در Snapshot جاری ClientType داده‌ای ثبت نشده است.";
+            return $"برای {s.Symbol} در آخرین داده ثبت‌شده، اطلاعات تفکیک حقیقی و حقوقی موجود نیست.";
+        if(orderBookRequested&&question.Contains("cashmarket",StringComparison.OrdinalIgnoreCase))
+        {
+            var label=fields.Any(x=>x is "best_bid" or "best_bid_price" or "best_bid_volume" or "best_bid_count")
+                ?"بهترین سفارش خرید"
+                :fields.Any(x=>x is "best_ask" or "best_ask_price" or "best_ask_volume" or "best_ask_count")
+                    ?"بهترین سفارش فروش"
+                    :"اطلاعات دفتر سفارش";
+            return $"برای {s.Symbol}، {label} در داده‌های معاملات ثبت نشده است؛ این اطلاعات از دفتر سفارش خوانده می‌شود.";
+        }
         if(orderBookRequested&&s.OrderBookUpdatedAt is null)
-            return $"برای {s.Symbol} در جدول OrderBookCurrent رکوردی ثبت نشده است.";
+            return $"برای {s.Symbol} اطلاعات دفتر سفارش ثبت نشده است.";
         var levels=s.OrderBook.Where(x=>x.Level is >=1 and <=5).OrderBy(x=>x.Level).ToArray();
         var best=levels.FirstOrDefault(x=>x.Level==1);
         if(fields.Contains("identity")) values.Add($"نام شرکت/نماد «{Clean(s.CompanyName??s.SymbolName)}»");
@@ -327,9 +342,9 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         if(fields.Contains("trade_count")) values.Add($"تعداد معاملات {s.TradeCount:N0}");
         if(fields.Contains("pe")) values.Add(s.PE is null?"P/E ناموجود":$"P/E برابر {s.PE:0.##}");
         if(fields.Contains("eps")) values.Add(s.Eps is null?"EPS ناموجود":$"EPS برابر {s.Eps:N0} ریال");
-        if(fields.Contains("effect_on_index")) values.Add(s.EffectOnIndex is null?"اثر بر شاخص در Cashmarket ثبت نشده":$"اثر بر شاخص {SignedNumber(s.EffectOnIndex.Value)} واحد");
-        if(fields.Contains("raw_min_value")) values.Add(s.RawMinValue is null?"حداقل مقدار ثبت نشده":$"حداقل مقدار ثبت‌شده در Cashmarket {s.RawMinValue.Value:N0}");
-        if(fields.Contains("raw_max_value")) values.Add(s.RawMaxValue is null?"حداکثر مقدار ثبت نشده":$"حداکثر مقدار ثبت‌شده در Cashmarket {s.RawMaxValue.Value:N0}");
+        if(fields.Contains("effect_on_index")) values.Add(s.EffectOnIndex is null?"اثر بر شاخص در داده‌های معاملات ثبت نشده":$"اثر بر شاخص {SignedNumber(s.EffectOnIndex.Value)} واحد");
+        if(fields.Contains("raw_min_value")) values.Add(s.RawMinValue is null?"حداقل مقدار ثبت نشده":$"حداقل مقدار ثبت‌شده {s.RawMinValue.Value:N0}");
+        if(fields.Contains("raw_max_value")) values.Add(s.RawMaxValue is null?"حداکثر مقدار ثبت نشده":$"حداکثر مقدار ثبت‌شده {s.RawMaxValue.Value:N0}");
         if(fields.Contains("best_bid")) values.Add(QuoteSide("بهترین سفارش خرید",best,true));
         if(fields.Contains("best_bid_price")) values.Add(BidAvailable(best)?$"بهترین قیمت خرید {best!.BuyPrice:N0} ریال":"در سمت خرید سفارش فعالی ثبت نشده");
         if(fields.Contains("best_bid_volume")) values.Add(BidAvailable(best)?$"حجم بهترین سفارش خرید {best!.BuyVolume:N0} سهم":"در سمت خرید سفارش فعالی ثبت نشده");
@@ -370,9 +385,9 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
             values.Add(counters.Length switch {0=>"BestLimitCounter ثبت نشده",1=>$"BestLimitCounter برابر {counters[0]:N0}",_=>$"BestLimitCounterهای ثبت‌شده {string.Join("، ",counters.Select(x=>x.ToString("N0",CultureInfo.InvariantCulture)))}"});
         }
         if(fields.Contains("market")) values.Add(DescribeMarket(s));
-        if(fields.Contains("board")) values.Add(string.IsNullOrWhiteSpace(s.BoardName)?"تابلوی معاملاتی در Cashmarket ثبت نشده":$"تابلوی معاملاتی «{Clean(s.BoardName)}»");
-        if(fields.Contains("industry")) values.Add(string.IsNullOrWhiteSpace(s.IndustryName)?"صنعت در Cashmarket ثبت نشده":$"صنعت «{Clean(s.IndustryName)}»"+(string.IsNullOrWhiteSpace(s.IndustrySubName)?"":$"، زیرصنعت «{Clean(s.IndustrySubName)}»"));
-        if(fields.Contains("state")) values.Add(string.IsNullOrWhiteSpace(s.StateName)?"وضعیت معاملاتی در Cashmarket ثبت نشده":$"وضعیت معاملاتی «{Clean(s.StateName)}»");
+        if(fields.Contains("board")) values.Add(string.IsNullOrWhiteSpace(s.BoardName)?"تابلوی معاملاتی ثبت نشده":$"تابلوی معاملاتی «{Clean(s.BoardName)}»");
+        if(fields.Contains("industry")) values.Add(string.IsNullOrWhiteSpace(s.IndustryName)?"صنعت ثبت نشده":$"صنعت «{Clean(s.IndustryName)}»"+(string.IsNullOrWhiteSpace(s.IndustrySubName)?"":$"، زیرصنعت «{Clean(s.IndustrySubName)}»"));
+        if(fields.Contains("state")) values.Add(string.IsNullOrWhiteSpace(s.StateName)?"وضعیت معاملاتی ثبت نشده":$"وضعیت معاملاتی «{Clean(s.StateName)}»");
         if(fields.Contains("intraday_range")) values.Add($"فاصله کمترین تا بیشترین قیمت روز {(s.MaxPrice-s.MinPrice):N0} ریال ({s.MinPrice:N0} تا {s.MaxPrice:N0})");
         if(fields.Contains("average_trade_price")) values.Add(s.TradeVolume<=0?"میانگین قیمت معامله قابل محاسبه نیست":$"میانگین وزنی قیمت معامله حدود {(s.TradeValue/s.TradeVolume):N2} ریال");
         if(fields.Contains("average_trade_value")) values.Add(s.TradeCount<=0?"میانگین ارزش هر معامله قابل محاسبه نیست":$"میانگین ارزش هر معامله حدود {(s.TradeValue/s.TradeCount):N0} ریال");
@@ -404,10 +419,10 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         if(fields.Contains("legal_buy_share")) values.Add(buyTotal>0?$"سهم حقوقی از حجم خرید {(decimal)ct.BuyNVolume*100m/buyTotal:N2}٪":"سهم حقوقی از خرید قابل محاسبه نیست");
         if(fields.Contains("individual_sell_share")) values.Add(sellTotal>0?$"سهم حقیقی از حجم فروش {(decimal)ct.SellIVolume*100m/sellTotal:N2}٪":"سهم حقیقی از فروش قابل محاسبه نیست");
         if(fields.Contains("legal_sell_share")) values.Add(sellTotal>0?$"سهم حقوقی از حجم فروش {(decimal)ct.SellNVolume*100m/sellTotal:N2}٪":"سهم حقوقی از فروش قابل محاسبه نیست");
-        if(fields.Contains("counter")) values.Add($"شمارنده منبع ClientType {ct.Counter:N0} (تعداد معامله نیست)");
-        if(fields.Contains("updated_at")) values.Add($"زمان Snapshot منبع {FormatTimestamp(ct.UpdatedAt)}");
-        if(fields.Contains("source_collected_at")) values.Add($"زمان دریافت ClientType در SQL {FormatTimestamp(ct.SourceCollectedAt)}");
-        if(fields.Contains("money_value_unavailable")) values.Add($"ارزش ریالی حقیقی/حقوقی در ClientType وجود ندارد؛ خالص حجم حقیقی {SignedNumber(ct.BuyIVolume-ct.SellIVolume)} سهم است");
+        if(fields.Contains("counter")) values.Add($"شمارنده منبع اطلاعات حقیقی و حقوقی {ct.Counter:N0} (تعداد معامله نیست)");
+        if(fields.Contains("updated_at")) values.Add($"زمان به‌روزرسانی منبع {FormatTimestamp(ct.UpdatedAt)}");
+        if(fields.Contains("source_collected_at")) values.Add($"زمان دریافت اطلاعات حقیقی و حقوقی در سامانه {FormatTimestamp(ct.SourceCollectedAt)}");
+        if(fields.Contains("money_value_unavailable")) values.Add($"ارزش ریالی تفکیکی حقیقی و حقوقی موجود نیست؛ خالص حجم حقیقی {SignedNumber(ct.BuyIVolume-ct.SellIVolume)} سهم است");
         if(fields.Contains("observed_at")) values.Add($"زمان داده {observed}");
         if(orderBookRequested&&!fields.Contains("orderbook_observed_at")) values.Add($"زمان به‌روزرسانی اردربوک {FormatTimestamp(s.OrderBookUpdatedAt)}");
         return values.Count==0?null:$"{s.Symbol}: {string.Join("، ",values)} است.";
@@ -481,7 +496,7 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
         return 1;
     }
     private static string FormatOrderBookObservedAt(MarketSymbolSnapshot s)
-        => $"آخرین زمان اعلام‌شده توسط منبع اردربوک {FormatTimestamp(s.OrderBookUpdatedAt)} و زمان جمع‌آوری آن در SQL {FormatTimestamp(s.OrderBookSourceCollectedAt)}";
+        => $"آخرین زمان اعلام‌شده دفتر سفارش {FormatTimestamp(s.OrderBookUpdatedAt)} و زمان دریافت آن در سامانه {FormatTimestamp(s.OrderBookSourceCollectedAt)}";
     private static string FormatTimestamp(DateTime? value)
     {
         if(value is null) return "نامشخص";
@@ -489,7 +504,7 @@ public sealed class PersianFinancialAnswerComposer : IPersianFinancialAnswerComp
     }
     private static string DescribeMarket(MarketSymbolSnapshot s)
     {
-        if(string.IsNullOrWhiteSpace(s.MarketName)&&string.IsNullOrWhiteSpace(s.MarketTypeName)) return "بازار در Cashmarket ثبت نشده";
+        if(string.IsNullOrWhiteSpace(s.MarketName)&&string.IsNullOrWhiteSpace(s.MarketTypeName)) return "بازار در داده‌های فعلی ثبت نشده";
         var value=string.IsNullOrWhiteSpace(s.MarketName)?Clean(s.MarketTypeName):Clean(s.MarketName);
         var result=$"بازار «{value}»";
         if(!string.IsNullOrWhiteSpace(s.MarketTypeName)&&!string.Equals(Clean(s.MarketName),Clean(s.MarketTypeName),StringComparison.Ordinal)) result+=$" با نوع «{Clean(s.MarketTypeName)}»";

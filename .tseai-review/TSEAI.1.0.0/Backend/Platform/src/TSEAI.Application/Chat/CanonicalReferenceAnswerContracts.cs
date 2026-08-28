@@ -89,14 +89,14 @@ public static class CanonicalReferenceToolRegistry
             "clock" => CanonicalReferenceToolNames.ClockCurrent,
             "content_reference" => CanonicalReferenceToolNames.ContentLookup,
             "company" or "company_comparison" or "company_aggregate" when ContainsIpo(topic) => CanonicalReferenceToolNames.CompanyIpo,
-            "company" or "company_comparison" or "company_aggregate" => CanonicalReferenceToolNames.CompanyLookup,
+            "company" or "company_comparison" or "company_aggregate" or "company_hall" => CanonicalReferenceToolNames.CompanyLookup,
             "company_state" or "company_state_comparison" or "company_state_aggregate" => CanonicalReferenceToolNames.CompanyState,
             "organization_person" or "organization_unit" or "organization_board" => CanonicalReferenceToolNames.OrganizationPeople,
             "client_type" or "client_type_aggregate" or "client_type_schema" => CanonicalReferenceToolNames.ClientType,
             "instrument" or "instrument_aggregate" or "instrument_schema" => CanonicalReferenceToolNames.Instrument,
-            "financial_institution" or "financial_institution_comparison" or "financial_institution_aggregate" => CanonicalReferenceToolNames.FinancialInstitution,
+            "financial_institution" or "financial_institution_comparison" or "financial_institution_aggregate" or "financial_institution_hall" => CanonicalReferenceToolNames.FinancialInstitution,
             "news" => CanonicalReferenceToolNames.NewsLatest,
-            "hall" => CanonicalReferenceToolNames.RegionHall,
+            "hall" or "hall_address_catalog" => CanonicalReferenceToolNames.RegionHall,
             "market_reference" => CanonicalReferenceToolNames.MarketReference,
             _ => CanonicalReferenceToolNames.GenericReference
         };

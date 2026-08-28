@@ -1,0 +1,58 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-28T14:26:07.184168+00:00",
+  "total": 2,
+  "passed": 2,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 11118.81,
+  "p95LatencyMs": 1626.07,
+  "clusters": {
+    "missing-source-field": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "CM-047",
+      "cluster": "missing-source-field",
+      "question": "بهترین قیمت خرید فملی در Cashmarket چیست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین سفارش خرید",
+        "ثبت نشده"
+      ],
+      "mustNotContain": [
+        "21,680"
+      ],
+      "maxAnswerChars": 230,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای فملی، بهترین سفارش خرید در داده‌های معاملات ثبت نشده است؛ این اطلاعات از دفتر سفارش خوانده می‌شود.",
+      "actualType": "marketsymbol",
+      "latencyMs": 20611.54
+    },
+    {
+      "id": "CM-048",
+      "cluster": "missing-source-field",
+      "question": "حجم بهترین سفارش فروش فملی در جدول Cashmarket چقدر است؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "بهترین سفارش فروش",
+        "ثبت نشده"
+      ],
+      "mustNotContain": [
+        "583,222,314"
+      ],
+      "maxAnswerChars": 250,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای فملی، بهترین سفارش فروش در داده‌های معاملات ثبت نشده است؛ این اطلاعات از دفتر سفارش خوانده می‌شود.",
+      "actualType": "marketsymbol",
+      "latencyMs": 1626.07
+    }
+  ]
+}

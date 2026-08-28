@@ -1,0 +1,153 @@
+{
+  "version": "instrument-1.0",
+  "generatedAtUtc": "2026-08-28T14:59:04.607536+00:00",
+  "total": 8,
+  "passed": 8,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 185.0,
+  "p95LatencyMs": 3590.52,
+  "clusters": {
+    "capital": {
+      "total": 1,
+      "passed": 1
+    },
+    "classification": {
+      "total": 1,
+      "passed": 1
+    },
+    "statistics": {
+      "total": 6,
+      "passed": 6
+    }
+  },
+  "results": [
+    {
+      "id": "INS-017",
+      "cluster": "capital",
+      "question": "تعداد کل سهام منتشره فملی چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,440,000,000,000 سهم"
+      ],
+      "mustNotContain": [
+        "حجم معاملات"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد سهام منتشره 1,440,000,000,000 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 11157.44
+    },
+    {
+      "id": "INS-035",
+      "cluster": "classification",
+      "question": "ضتاص9017 در کدام گروه ابزار است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "tradeoption",
+        "اختیار معامله"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "ضتاص9017: گروه ابزار tradeoption (اختیار معامله) است.",
+      "actualType": "structured_reference",
+      "latencyMs": 222.74
+    },
+    {
+      "id": "INS-036",
+      "cluster": "statistics",
+      "question": "جدول Instrument در مجموع چند رکورد دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "75,238 رکورد",
+        "12,834 معتبر",
+        "62,404 نامعتبر",
+        "1405/05/20"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 3590.52
+    },
+    {
+      "id": "INS-037",
+      "cluster": "statistics",
+      "question": "چند ابزار معتبر و فعال در Instrument داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "12,834 ابزار معتبر/فعال"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 142.57
+    },
+    {
+      "id": "INS-038",
+      "cluster": "statistics",
+      "question": "تعداد ابزارهای نامعتبر جدول Instrument چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "62,404 ابزار نامعتبر/غیرفعال"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Instrument، 62,404 ابزار نامعتبر/غیرفعال ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 77.86
+    },
+    {
+      "id": "INS-039",
+      "cluster": "statistics",
+      "question": "چند ناشر متمایز بین ابزارهای معتبر وجود دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2,261 نام شرکت/ناشر متمایز"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 2,261 نام شرکت/ناشر متمایز ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 336.3
+    },
+    {
+      "id": "INS-040",
+      "cluster": "statistics",
+      "question": "چند صنعت در ابزارهای معتبر Instrument ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "59 کد صنعت متمایز"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 59 کد صنعت متمایز وجود دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 147.26
+    },
+    {
+      "id": "INS-041",
+      "cluster": "statistics",
+      "question": "تعداد زیرصنعت‌های متمایز ابزارهای فعال چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "157 کد زیرصنعت متمایز"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 157 کد زیرصنعت متمایز وجود دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 122.91
+    }
+  ]
+}

@@ -27,21 +27,30 @@ public sealed class StructuredQueryService(
         var universe = await market.GetActiveAsync(30000, ct);
         var scanned = universe.Count;
         var rejected = 0;
-        var rows = new List<(StructuredQueryRow Row, decimal? SortValue)>();
+        var freshRows = new List<(StructuredQueryRow Row, decimal? SortValue, DateTimeOffset? ObservedAt)>();
+        var staleRows = new List<(StructuredQueryRow Row, decimal? SortValue, DateTimeOffset? ObservedAt)>();
 
         foreach (var s in universe)
         {
             if (plan.MarketTypeId is not null && s.MarketTypeId != plan.MarketTypeId) continue;
             if (!string.IsNullOrWhiteSpace(plan.IndustryCode) && !string.Equals(s.IndustryCode, plan.IndustryCode, StringComparison.OrdinalIgnoreCase)) continue;
             var q = quality.EvaluateMarketSnapshot(s);
-            if (!q.CanUseForAnswer) { rejected++; continue; }
+            var usableLatestAvailable=q.Status==DataQualityStatus.Stale
+                &&q.Issues.Where(x=>x.Severity==DataQualitySeverity.Error)
+                    .All(x=>x.Code=="freshness.stale");
+            if (!q.CanUseForAnswer&&!usableLatestAvailable) { rejected++; continue; }
             var package = analytics.AnalyzeSymbol(s);
             if (!Matches(plan.Conditions, s, package)) continue;
             var metrics = BuildMetrics(s, package);
-            rows.Add((new StructuredQueryRow(s.InsCode, s.SymbolCode, s.Symbol, s.SymbolName, s.CompanyName, s.MarketTypeId, s.IndustryCode, metrics, q.Status.ToString()), plan.SortBy is null ? null : MetricValue(plan.SortBy.Value, s, package)));
+            var row=(new StructuredQueryRow(s.InsCode, s.SymbolCode, s.Symbol, s.SymbolName, s.CompanyName, s.MarketTypeId, s.IndustryCode, metrics, q.Status.ToString()),
+                plan.SortBy is null ? null : MetricValue(plan.SortBy.Value, s, package),q.Freshness.ObservedAtUtc);
+            if(q.CanUseForAnswer) freshRows.Add(row); else staleRows.Add(row);
         }
 
-        IEnumerable<(StructuredQueryRow Row, decimal? SortValue)> ordered = rows;
+        var useLatestAvailable=freshRows.Count==0&&staleRows.Count>0;
+        var rows=useLatestAvailable?staleRows:freshRows;
+        if(!useLatestAvailable) rejected+=staleRows.Count;
+        IEnumerable<(StructuredQueryRow Row, decimal? SortValue, DateTimeOffset? ObservedAt)> ordered = rows;
         if (plan.SortBy is not null)
             ordered = plan.SortDescending
                 ? rows.OrderByDescending(x => x.SortValue.HasValue).ThenByDescending(x => x.SortValue).ThenBy(x => x.Row.Symbol)
@@ -49,7 +58,8 @@ public sealed class StructuredQueryService(
         else ordered = rows.OrderBy(x => x.Row.Symbol);
 
         var results = ordered.Take(plan.Take).Select(x => x.Row).ToArray();
-        return new(true, plan, scanned, rejected, rows.Count, results, null);
+        var observedAt=rows.Where(x=>x.ObservedAt.HasValue).Select(x=>x.ObservedAt).Max();
+        return new(true, plan, scanned, rejected, rows.Count, results, null,observedAt,useLatestAvailable);
     }
 
     private static string? Validate(StructuredQueryPlan p)

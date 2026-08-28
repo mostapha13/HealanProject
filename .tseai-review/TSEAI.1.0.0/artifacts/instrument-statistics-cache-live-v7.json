@@ -1,0 +1,111 @@
+{
+  "version": "instrument-1.0",
+  "generatedAtUtc": "2026-08-28T15:09:19.624119+00:00",
+  "total": 6,
+  "passed": 6,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 233.82,
+  "p95LatencyMs": 604.97,
+  "clusters": {
+    "statistics": {
+      "total": 6,
+      "passed": 6
+    }
+  },
+  "results": [
+    {
+      "id": "INS-036",
+      "cluster": "statistics",
+      "question": "جدول Instrument در مجموع چند رکورد دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "75,238 رکورد",
+        "12,834 معتبر",
+        "62,404 نامعتبر",
+        "1405/05/20"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 2398.49
+    },
+    {
+      "id": "INS-037",
+      "cluster": "statistics",
+      "question": "چند ابزار معتبر و فعال در Instrument داریم؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "12,834 ابزار معتبر/فعال"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 604.97
+    },
+    {
+      "id": "INS-038",
+      "cluster": "statistics",
+      "question": "تعداد ابزارهای نامعتبر جدول Instrument چنده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "62,404 ابزار نامعتبر/غیرفعال"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Instrument، 62,404 ابزار نامعتبر/غیرفعال ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 169.22
+    },
+    {
+      "id": "INS-039",
+      "cluster": "statistics",
+      "question": "چند ناشر متمایز بین ابزارهای معتبر وجود دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2,261 نام شرکت/ناشر متمایز"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 2,261 نام شرکت/ناشر متمایز ثبت شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 290.36
+    },
+    {
+      "id": "INS-040",
+      "cluster": "statistics",
+      "question": "چند صنعت در ابزارهای معتبر Instrument ثبت شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "59 کد صنعت متمایز"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 59 کد صنعت متمایز وجود دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 177.28
+    },
+    {
+      "id": "INS-041",
+      "cluster": "statistics",
+      "question": "تعداد زیرصنعت‌های متمایز ابزارهای فعال چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "157 کد زیرصنعت متمایز"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در میان ابزار‌های معتبر Instrument، 157 کد زیرصنعت متمایز وجود دارد.",
+      "actualType": "structured_reference",
+      "latencyMs": 158.71
+    }
+  ]
+}

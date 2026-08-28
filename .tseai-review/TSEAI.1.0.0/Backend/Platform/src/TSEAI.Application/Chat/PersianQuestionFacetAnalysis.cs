@@ -36,6 +36,12 @@ public static class PersianQuestionFacetAnalysis
         if(canonical is null)
             return new(false,null,[]);
 
+        // ClientType already owns its raw/derived حقیقی-حقوقی fields and any
+        // bounded market facet it deliberately includes. A second market pass
+        // would only duplicate the answer and may mix observation times.
+        if(canonical.Reference.Kind=="client_type")
+            return new(false,null,[]);
+
         var fields=PersianMarketQuestionSemantics.DetectRequestedFields(question)
             .Where(x=>!CanonicalOwnedMarketFields.Contains(x))
             .Distinct(StringComparer.Ordinal)

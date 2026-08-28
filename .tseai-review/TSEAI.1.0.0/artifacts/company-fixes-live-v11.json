@@ -1,0 +1,244 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:24:27.523518+00:00",
+  "runId": "f8d36ffed76b",
+  "manifestVersion": "2.0",
+  "datasetSha256": "a99d7c4688b4248284ea66a5704caea8d4a8dea3fa68632e752515239baee2d9",
+  "caseCount": 2,
+  "sources": {
+    "company": {
+      "total": 2,
+      "passed": 1
+    }
+  },
+  "total": 2,
+  "passed": 1,
+  "failed": 1,
+  "passRate": 0.5,
+  "p50LatencyMs": 1046.93,
+  "p95LatencyMs": 144.27,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "mustContain": 1
+  },
+  "clusters": {
+    "company:ceo-safety": {
+      "total": 1,
+      "passed": 0
+    },
+    "company:quality": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [
+    {
+      "id": "company:CO-015",
+      "caseId": "CO-015",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «ملی صنایع مس ایران» وجود ندارد؛ بنابراین مدیرعامل قابل تأیید نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 98,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 78,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 739,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1949.59
+    }
+  ],
+  "results": [
+    {
+      "id": "company:CO-015",
+      "caseId": "CO-015",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "ceo-safety",
+      "question": "مدیرعامل شرکت ملی صنایع مس ایران کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «ملی صنایع مس ایران» وجود ندارد؛ بنابراین مدیرعامل قابل تأیید نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 98,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 78,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 739,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1949.59
+    },
+    {
+      "id": "company:CO-034",
+      "caseId": "CO-034",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "Company رکوردی با Talar_Id یتیم دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "تعداد Talar_Id یتیم 0 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 55,
+          "detail": "kind=company_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_quality;topic=کیفیت جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 144.27
+    }
+  ]
+}

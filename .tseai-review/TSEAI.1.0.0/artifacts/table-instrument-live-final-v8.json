@@ -1,0 +1,3446 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:10:23.637890+00:00",
+  "runId": "e2fea24c8c41",
+  "manifestVersion": "2.0",
+  "datasetSha256": "b93a32c1d0e2a9017c12bbfee19dbc34582aa59d4c5b0a8d88e135ae2a8d48f5",
+  "caseCount": 50,
+  "sources": {
+    "instrument": {
+      "total": 50,
+      "passed": 50
+    }
+  },
+  "total": 50,
+  "passed": 50,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 91.8,
+  "p95LatencyMs": 269.01,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "instrument:allowed-price": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:capital": {
+      "total": 3,
+      "passed": 3
+    },
+    "instrument:catalog-analysis": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:categories": {
+      "total": 5,
+      "passed": 5
+    },
+    "instrument:classification": {
+      "total": 10,
+      "passed": 10
+    },
+    "instrument:compound": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:cross-table": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:data-quality": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:dates": {
+      "total": 3,
+      "passed": 3
+    },
+    "instrument:full": {
+      "total": 1,
+      "passed": 1
+    },
+    "instrument:identifier": {
+      "total": 3,
+      "passed": 3
+    },
+    "instrument:identity": {
+      "total": 4,
+      "passed": 4
+    },
+    "instrument:issuer": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:order-limits": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:reverse-lookup": {
+      "total": 2,
+      "passed": 2
+    },
+    "instrument:statistics": {
+      "total": 6,
+      "passed": 6
+    },
+    "instrument:validity": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "instrument:INS-001",
+      "caseId": "INS-001",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "نام کامل نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 236,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 383.99
+    },
+    {
+      "id": "instrument:INS-002",
+      "caseId": "INS-002",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "اسم کامل سهم خودرو رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "خودرو: نام کامل «ایران‌ خودرو» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 32,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات خودرو;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 64.85
+    },
+    {
+      "id": "instrument:INS-003",
+      "caseId": "INS-003",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identifier",
+      "question": "InstrumentID فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: InstrumentID برابر IRO1MSMI0001 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 18,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 78.92
+    },
+    {
+      "id": "instrument:INS-004",
+      "caseId": "INS-004",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identifier",
+      "question": "InsCode نماد فملی را اعلام کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: InsCode برابر 35425587644337450 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 68.7
+    },
+    {
+      "id": "instrument:INS-005",
+      "caseId": "INS-005",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identifier",
+      "question": "کد ISIN فملی چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: ISIN برابر IRO1MSMI0000 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 80.95
+    },
+    {
+      "id": "instrument:INS-006",
+      "caseId": "INS-006",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "نماد انگلیسی فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نماد انگلیسی MSMI1 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 19,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 69.28
+    },
+    {
+      "id": "instrument:INS-007",
+      "caseId": "INS-007",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "identity",
+      "question": "نام انگلیسی فملی را بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام انگلیسی S*I. N. C. Ind. است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 13,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 44.28
+    },
+    {
+      "id": "instrument:INS-008",
+      "caseId": "INS-008",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "issuer",
+      "question": "ناشر فملی کدام شرکت است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 100,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 153.32
+    },
+    {
+      "id": "instrument:INS-009",
+      "caseId": "INS-009",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "issuer",
+      "question": "کد ناشر فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌»، نماد ناشر MSMI است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 27,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 70.33
+    },
+    {
+      "id": "instrument:INS-010",
+      "caseId": "INS-010",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "نوع ابزار فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: گروه ابزار cash (بازار نقدی) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 58.45
+    },
+    {
+      "id": "instrument:INS-011",
+      "caseId": "INS-011",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "MarketCateryId فملی چند است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: گروه ابزار cash (بازار نقدی)، شناسه دسته بازار 1 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 19,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 61.62
+    },
+    {
+      "id": "instrument:INS-012",
+      "caseId": "INS-012",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "کد صنعت فملی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: کد صنعت 27 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 19,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 53.96
+    },
+    {
+      "id": "instrument:INS-013",
+      "caseId": "INS-013",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "شناسه زیرصنعت فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: کد زیرصنعت 2720 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.79
+    },
+    {
+      "id": "instrument:INS-014",
+      "caseId": "INS-014",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "reverse-lookup",
+      "question": "InstrumentID IRO1MSMI0001 متعلق به کدام نماد است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InstrumentID برابر IRO1MSMI0001 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1453,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 1502.99
+    },
+    {
+      "id": "instrument:INS-015",
+      "caseId": "INS-015",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "reverse-lookup",
+      "question": "InsCode 35425587644337450 مال کدوم نماده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InsCode برابر 35425587644337450 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 34,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 63.72
+    },
+    {
+      "id": "instrument:INS-016",
+      "caseId": "INS-016",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "capital",
+      "question": "حجم مبنای فملی چند است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم مبنا 1 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 50,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 102.49
+    },
+    {
+      "id": "instrument:INS-017",
+      "caseId": "INS-017",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "capital",
+      "question": "تعداد کل سهام منتشره فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد سهام منتشره 1,440,000,000,000 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 139,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 183.91
+    },
+    {
+      "id": "instrument:INS-018",
+      "caseId": "INS-018",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "capital",
+      "question": "ارزش اسمی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: ارزش اسمی 1,000 ریال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 41,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 87.93
+    },
+    {
+      "id": "instrument:INS-019",
+      "caseId": "INS-019",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "allowed-price",
+      "question": "حداقل قیمت مجاز فملی در Instrument چند است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 36,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 94.69
+    },
+    {
+      "id": "instrument:INS-020",
+      "caseId": "INS-020",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "allowed-price",
+      "question": "دامنه قیمت مجاز فملی در جدول Instrument چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 42,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 86.65
+    },
+    {
+      "id": "instrument:INS-021",
+      "caseId": "INS-021",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "order-limits",
+      "question": "حداقل حجم هر سفارش فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حداقل حجم هر سفارش 1 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 346,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 403.44
+    },
+    {
+      "id": "instrument:INS-022",
+      "caseId": "INS-022",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "order-limits",
+      "question": "حداکثر حجم سفارش فملی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حداکثر حجم هر سفارش 100,000 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 45,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 79.31
+    },
+    {
+      "id": "instrument:INS-023",
+      "caseId": "INS-023",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "validity",
+      "question": "آیا ابزار فملی معتبر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: وضعیت ابزار معتبر/فعال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 79,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 123.23
+    },
+    {
+      "id": "instrument:INS-024",
+      "caseId": "INS-024",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "dates",
+      "question": "تاریخ رویداد ابزار فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تاریخ رویداد منبع 1405/05/10 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 37,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 88.91
+    },
+    {
+      "id": "instrument:INS-025",
+      "caseId": "INS-025",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "dates",
+      "question": "تاریخ ورود به بازار فملی در DInMar چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: فیلد DInMar مقدار پیش‌فرض دارد و تاریخ درج واقعی از آن قابل تأیید نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 54,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 98.16
+    },
+    {
+      "id": "instrument:INS-026",
+      "caseId": "INS-026",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "dates",
+      "question": "زمان جمع‌آوری داده Instrument فملی چه موقع بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: زمان جمع‌آوری داده 1405/05/20 ساعت 11:13:13 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 100,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 128.45
+    },
+    {
+      "id": "instrument:INS-027",
+      "caseId": "INS-027",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "compound",
+      "question": "InstrumentID، InsCode و ISIN فملی را یکجا بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: InstrumentID برابر IRO1MSMI0001، InsCode برابر 35425587644337450، ISIN برابر IRO1MSMI0000 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 156,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 196.5
+    },
+    {
+      "id": "instrument:INS-028",
+      "caseId": "INS-028",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "compound",
+      "question": "تعداد سهام، ارزش اسمی و حجم مبنای خودرو را خلاصه بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "خودرو: ارزش اسمی 1,000 ریال، تعداد سهام منتشره 2,563,746,068,000 سهم، حجم مبنا 1 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 71,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات خودرو;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 119.39
+    },
+    {
+      "id": "instrument:INS-029",
+      "caseId": "INS-029",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "full",
+      "question": "مشخصات کامل ابزار فملی را بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: نام کامل «ملی‌ صنایع‌ مس‌ ایران‌»، InstrumentID برابر IRO1MSMI0001، InsCode برابر 35425587644337450، ISIN برابر IRO1MSMI0000، ناشر «ملی‌ صنایع‌ مس‌ ایران‌‌»، گروه ابزار cash (بازار نقدی)، کد صنعت 27، کد زیرصنعت 2720، ارزش اسمی 1,000 ریال، تعداد سهام منتشره 1,440,000,000,000 سهم، حجم مبنا 1 سهم، حداقل و حداکثر قیمت مجاز در Instrument هر دو صفر ثبت شده‌اند و برای تأیید دامنه یا صف رسمی قابل اتکا نیستند، حداقل حجم هر سفارش 1، حداکثر حجم هر سفارش 100,000، وضعیت ابزار معتبر/فعال است، تاریخ رویداد منبع 1405/05/10، فیلد DInMar مقدار پیش‌فرض دارد و تاریخ درج واقعی از آن قابل تأیید نیست، زمان جمع‌آوری داده 1405/05/20 ساعت 11:13:13 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات فملی;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 53.26
+    },
+    {
+      "id": "instrument:INS-030",
+      "caseId": "INS-030",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "نوع نماد اتوکار چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "اتوکار: گروه ابزار ETF (صندوق قابل معامله) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 93,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات اتوکار;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 139.53
+    },
+    {
+      "id": "instrument:INS-031",
+      "caseId": "INS-031",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "ارزش اسمی صندوق اتوکار چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "اتوکار: ارزش اسمی 10,000 ریال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 79,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات اتوکار;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 118.04
+    },
+    {
+      "id": "instrument:INS-032",
+      "caseId": "INS-032",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "اگ060459 چه نوع ابزاریه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "اگ060459: گروه ابزار debt (اوراق بدهی) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 87,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات اگ060459;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 125.42
+    },
+    {
+      "id": "instrument:INS-033",
+      "caseId": "INS-033",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "ارزش اسمی اگ060459 چند ریاله؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "اگ060459: ارزش اسمی 1,000,000 ریال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 71,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات اگ060459;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 113.13
+    },
+    {
+      "id": "instrument:INS-034",
+      "caseId": "INS-034",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "نوع ابزار جهرم0507 را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جهرم0507: گروه ابزار future (قرارداد آتی) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات جهرم0507;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.22
+    },
+    {
+      "id": "instrument:INS-035",
+      "caseId": "INS-035",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "classification",
+      "question": "ضتاص9017 در کدام گروه ابزار است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ضتاص9017: گروه ابزار tradeoption (اختیار معامله) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "kind=instrument;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument;topic=مشخصات ضتاص9017;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 73.76
+    },
+    {
+      "id": "instrument:INS-036",
+      "caseId": "INS-036",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "جدول Instrument در مجموع چند رکورد دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Instrument دارای 75,238 رکورد است: 12,834 معتبر و 62,404 نامعتبر. آخرین زمان جمع‌آوری کل جدول 1405/05/20 ساعت 11:13:13 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 46.56
+    },
+    {
+      "id": "instrument:INS-037",
+      "caseId": "INS-037",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "چند ابزار معتبر و فعال در Instrument داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در جدول Instrument، 12,834 ابزار معتبر/فعال ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 57.07
+    },
+    {
+      "id": "instrument:INS-038",
+      "caseId": "INS-038",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "تعداد ابزارهای نامعتبر جدول Instrument چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در جدول Instrument، 62,404 ابزار نامعتبر/غیرفعال ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 44.28
+    },
+    {
+      "id": "instrument:INS-039",
+      "caseId": "INS-039",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "چند ناشر متمایز بین ابزارهای معتبر وجود دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در میان ابزار‌های معتبر Instrument، 2,261 نام شرکت/ناشر متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 37.74
+    },
+    {
+      "id": "instrument:INS-040",
+      "caseId": "INS-040",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "چند صنعت در ابزارهای معتبر Instrument ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در میان ابزار‌های معتبر Instrument، 59 کد صنعت متمایز وجود دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 35.73
+    },
+    {
+      "id": "instrument:INS-041",
+      "caseId": "INS-041",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "statistics",
+      "question": "تعداد زیرصنعت‌های متمایز ابزارهای فعال چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در میان ابزار‌های معتبر Instrument، 157 کد زیرصنعت متمایز وجود دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.69
+    },
+    {
+      "id": "instrument:INS-042",
+      "caseId": "INS-042",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "categories",
+      "question": "تعداد ابزارهای معتبر را به تفکیک دسته‌بندی بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "تعداد ابزار‌های معتبر به تفکیک گروه:\n- ثبت‌نشده: 8,055\n- cash (بازار نقدی): 2,719\n- tradeoption (اختیار معامله): 829\n- debt (اوراق بدهی): 776\n- ETF (صندوق قابل معامله): 362\n- option (اختیار معامله): 85\n- future (قرارداد آتی): 8",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 119,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 160.61
+    },
+    {
+      "id": "instrument:INS-043",
+      "caseId": "INS-043",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "categories",
+      "question": "چند ابزار ETF معتبر داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در Instrument، 362 ابزار معتبر از گروه ETF (صندوق قابل معامله) ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 143.91
+    },
+    {
+      "id": "instrument:INS-044",
+      "caseId": "INS-044",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "categories",
+      "question": "تعداد اوراق بدهی فعال در Instrument چندتاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در Instrument، 776 ابزار معتبر از گروه debt (اوراق بدهی) ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 68,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 102.28
+    },
+    {
+      "id": "instrument:INS-045",
+      "caseId": "INS-045",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "categories",
+      "question": "چه تعداد قرارداد آتی معتبر ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در Instrument، 8 ابزار معتبر از گروه future (قرارداد آتی) ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 93,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 145.32
+    },
+    {
+      "id": "instrument:INS-046",
+      "caseId": "INS-046",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "categories",
+      "question": "چند ابزار اختیار معامله فعال داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در Instrument، 914 ابزار معتبر از گروه اختیار معامله ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 78,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 115.06
+    },
+    {
+      "id": "instrument:INS-047",
+      "caseId": "INS-047",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "data-quality",
+      "question": "چند ابزار معتبر در Instrument قیمت مجاز صفر دارند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در Instrument، 4,819 ابزار معتبر حداقل و حداکثر قیمت مجاز صفر دارند؛ هر 516 ابزار دارای تطبیق مستقیم با Cashmarket نیز در همین وضعیت‌اند. این فیلد‌ها برای تأیید صف رسمی قابل اتکا نیستند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 235,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 269.01
+    },
+    {
+      "id": "instrument:INS-048",
+      "caseId": "INS-048",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument به Cashmarket وصل است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از ابزار‌های معتبر Instrument، 516 ابزار با InstrumentID یکسان به Cashmarket متصل‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 88,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 121.7
+    },
+    {
+      "id": "instrument:INS-049",
+      "caseId": "INS-049",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "cross-table",
+      "question": "چند ابزار معتبر Instrument در OrderBookCurrent رکورد دارند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از ابزار‌های معتبر Instrument، 513 ابزار با InstrumentID یکسان در OrderBookCurrent رکورد دارند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 79,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 114.18
+    },
+    {
+      "id": "instrument:INS-050",
+      "caseId": "INS-050",
+      "sourceCode": "instrument",
+      "table": "Instrument",
+      "cluster": "catalog-analysis",
+      "question": "۵ نماد معتبر با بیشترین حجم مبنا را فهرست کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "بیشترین حجم مبنای ثبت‌شده میان ابزار‌های معتبر:\n1. دی — بانک دی: 247,858,644 سهم\n2. جوین — کشت و صنعت جوین: 28,115,119 سهم\n3. واحیا — م .صنایع و معادن احیاء سپاهان: 26,637,494 سهم\n4. لکما — کارخانجات‌مخابراتی‌ایران‌: 17,757,813 سهم\n5. شگستر — گسترش سوخت سبززاگرس(سهامی عام): 16,393,788 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 126,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 170.27
+    }
+  ]
+}

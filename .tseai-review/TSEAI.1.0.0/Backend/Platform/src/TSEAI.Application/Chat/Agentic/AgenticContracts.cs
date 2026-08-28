@@ -11,7 +11,10 @@ public sealed record ChatReflectionRequest(
     int EvidenceCount,
     IReadOnlyList<string> FailedTools,
     IReadOnlyList<string>? Evidence = null,
-    bool ExactCanonical = false);
+    bool ExactCanonical = false,
+    string? SemanticDomain = null,
+    string? SemanticOperation = null,
+    string? ResponseShape = null);
 
 public sealed record ChatReflectionResult(
     string Action,

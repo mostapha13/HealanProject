@@ -43,6 +43,8 @@ Must(CanonicalReferenceToolRegistry.Resolve("organization_board","هیئت‌م�
 Must(CanonicalReferenceToolNames.Allowed.Contains(CanonicalReferenceToolRegistry.Resolve("content_reference","جدول Content")),
     "every mapped reference operation must be allow-listed");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("مدیر فناوری بورس تهران کیه؟"),"colloquial role question should also route to person lookup");
+Must(CanonicalQuestionOwnership.Detect("چه فردی مدیر عامل بورس تهران است؟")==CanonicalQuestionDomain.Organization,
+    "exchange CEO wording must be owned by the organization graph, not issuer company fields");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟"),"person wording variants must route to person lookup");
 Must(CanonicalPersonRoleMatcher.Match("مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟",people)?.FullName=="آرش جدیری‌سلیمی","role meaning must resolve independently of manager/responsible wording");
 Must(CanonicalPersonRoleMatcher.IsPersonRoleQuestion("مدیر واحد فناوری چه کسی است؟"),"mentioning an organizational unit must not hide a person question");
@@ -62,6 +64,8 @@ Must(CanonicalBoardMemberAnswer.Parse("اعضای هیئت مدیره بورس �
 Must(CanonicalBoardMemberAnswer.Parse("هیئت مدیره بورس کیا هستن؟").IsMemberList,"colloquial board-member question must use structured membership");
 Must(CanonicalBoardMemberAnswer.Parse("چه افرادی در هیأت‌مدیره بورس حضور دارند؟").IsMemberList,"board spelling and person-list variants must use structured membership");
 Must(CanonicalBoardMemberAnswer.Parse("کلیه اعضای هیئت مدیره رو بهم بگو").IsMemberList,"contextual board-member list wording must use structured membership");
+Must(CanonicalCompanyStateQuestion.Parse("کلیه اعضای هیئت مدیره رو بهم بگو").LookupHint is null,
+    "generic exchange board wording must not fabricate an issuer lookup from conversational filler");
 Must(CanonicalBoardMemberAnswer.Parse("آخرین اعضای هیئت مدیره بورس کیا هستند؟").IsMemberList,"latest board-member wording must use current structured membership");
 var compositeBoard=CanonicalBoardMemberAnswer.Parse("سابقه اعضای هیئت مدیره و از طرف کدام شرکت هستند؟");
 Must(compositeBoard.IsMemberList && compositeBoard.WantsHistory && compositeBoard.WantsRepresentation && compositeBoard.NeedsKnowledge,"compound board question must request structured roster plus knowledge evidence");
@@ -174,6 +178,7 @@ Must(companyYear.Aggregate==CompanyAggregateKind.IpoYear&&companyYear.JalaliYear
 var companyCompare=CanonicalCompanyQuestion.Parse("تاریخ عرضه اولیه فملی را با فولاد مقایسه کن");
 Must(companyCompare.Aggregate==CompanyAggregateKind.Comparison&&companyCompare.Lookups.Count==2,"Company IPO comparison must preserve two entities");
 Must(!CanonicalCompanyQuestion.Parse("ارزش بازار شرکت فملی چقدر است؟").IsMatch,"Company reference parser must not steal a market-value question");
+Must(CanonicalCompanyQuestion.Parse("در بررسی کیفیت داده").Aggregate==CompanyAggregateKind.None,"a generic quality fragment must not be stolen by Company");
 Must(CanonicalCompanyQuestion.MatchKey("شرکت فولاد مباركه اصفهان (سهامی عام)")=="فولادمبارکهاصفهان","Company matching must normalize Arabic characters and corporate suffixes");
 var stateStatus=CanonicalCompanyStateQuestion.Parse("وضعیت نماد جم چیه؟");
 Must(stateStatus.IsMatch&&stateStatus.Fields.Contains("status")&&stateStatus.LookupHint=="جم","Companystate status question must preserve the symbol lookup");
@@ -189,6 +194,11 @@ Must(CanonicalCompanyStateQuestion.Parse("تعداد شرکت‌های مشمو�
 Must(CanonicalCompanyStateQuestion.Parse("فقط نمادهایی را بگو که آخرین تغییر وضعیتشان در سال 1401 بوده").Aggregate==CompanyStateAggregateKind.ChangeYear,"Companystate year list must be detected");
 Must(CanonicalCompanyStateQuestion.Parse("چند رکورد به عدم ارائه صورت مالی اشاره دارند؟").Aggregate==CompanyStateAggregateKind.ReasonAnalysis,"Companystate reason counts must be detected");
 Must(CanonicalCompanyStateQuestion.Parse("چند شرکت در Companystate بدون اعضای هیئت مدیره هستند؟").Aggregate==CompanyStateAggregateKind.DataQuality,"Companystate missing-board count must be detected");
+Must(CanonicalCompanyStateQuestion.Parse("آخرین زمان جمع‌آوری کل جدول Companystate را بگو").Aggregate==CompanyStateAggregateKind.Statistics,"Companystate collection timestamp must remain a table statistic");
+Must(CanonicalCompanyStateQuestion.Parse("کیفیت داده جدول Companystate را خلاصه کن").Aggregate==CompanyStateAggregateKind.DataQuality,"Companystate quality summary must remain source-owned");
+Must(CanonicalCompanyStateQuestion.Parse("در بررسی کیفیت داده").Aggregate==CompanyStateAggregateKind.None,"a generic quality fragment must not be stolen by Companystate");
+Must(CanonicalCompanyStateQuestion.Parse("Companystate نماد یا کد سامانه تکراری دارد؟").Aggregate==CompanyStateAggregateKind.DataQuality,"Companystate duplicate audit must remain source-owned");
+Must(CanonicalCompanyStateQuestion.Parse("آیا Companystate قیمت و حجم معاملات هم دارد؟").Aggregate==CompanyStateAggregateKind.Schema,"Companystate market-field question must be treated as a schema boundary");
 Must(CanonicalCompanyStateQuestion.Parse("Lastdatechange جدول Companystate شمسی است یا میلادی؟").Aggregate==CompanyStateAggregateKind.Schema,"Companystate date schema must be detected");
 Must(CanonicalCompanyStateQuestion.Parse("زمان جمع‌آوری وضعیت جم چه موقع بوده؟").IsMatch,"Companystate source timestamp must route to canonical state data");
 Must(CanonicalCompanyStateQuestion.Parse("آبادا الان چه وضعیتی دارد؟").IsMatch,"natural state-detail wording must route to Companystate when the symbol exists there");
@@ -206,6 +216,7 @@ Must(institutionPhone.IsMatch&&institutionPhone.Fields.Contains("phone")&&instit
 var institutionBranches=CanonicalFinancialInstitutionQuestion.Parse("کارگزاری آگاه چند شعبه دارد؟");
 Must(institutionBranches.Aggregate==FinancialInstitutionAggregateKind.Branches&&institutionBranches.Lookups.Single()=="آگاه","financial-institution branch question must retain the institution name");
 Must(CanonicalFinancialInstitutionQuestion.Parse("نهادهای مالی تالار خوزستان را فقط اسم بگو").Aggregate==FinancialInstitutionAggregateKind.HallInstitutions,"hall institution list must be detected");
+Must(CanonicalFinancialInstitutionQuestion.Parse("تالار کرمان شمارش چنده؟").Aggregate==FinancialInstitutionAggregateKind.HallInstitutions,"colloquial hall count must route to the typed financial-institution aggregate");
 Must(CanonicalFinancialInstitutionQuestion.Parse("کارگزاری‌ها را به تفکیک تالار رتبه‌بندی کن").Aggregate==FinancialInstitutionAggregateKind.HallDistribution,"institution hall distribution must be detected");
 Must(CanonicalFinancialInstitutionQuestion.Parse("تعداد هر نوع نهاد مالی را بگو").Aggregate==FinancialInstitutionAggregateKind.TypeDistribution,"institution type distribution must be detected");
 Must(CanonicalFinancialInstitutionQuestion.Parse("جدول Nahad_Mali چند رکورد، نام، نوع و تالار دارد؟").Aggregate==FinancialInstitutionAggregateKind.Statistics,"institution statistics must win over a hall-list interpretation");

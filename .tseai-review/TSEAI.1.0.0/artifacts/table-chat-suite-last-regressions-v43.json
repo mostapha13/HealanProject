@@ -1,0 +1,261 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T18:04:31.651294+00:00",
+  "runId": "9a4768f5fa44",
+  "manifestVersion": "2.0",
+  "datasetSha256": "41228c1da20c884622817807af4893802d5499bdeb0124dbad6e72485754017a",
+  "caseCount": 3,
+  "sources": {
+    "client-type": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state": {
+      "total": 1,
+      "passed": 1
+    },
+    "content": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "total": 3,
+  "passed": 3,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 728.24,
+  "p95LatencyMs": 728.24,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "client-type:schema": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state:people": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:delta-fund": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "client-type:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "Buy_CountI یعنی چه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Buy_CountI تعداد کدهای خریدار حقیقی است، نه تعداد معاملات.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 48,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 499,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 970.43
+    },
+    {
+      "id": "company-state:CS-015",
+      "caseId": "CS-015",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "people",
+      "question": "مدیر عامل نماد آبادا چه کسی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "آبادا — تولید نیروی برق آبادان: مدیرعامل ثبت‌شده امیرعباس مطلبی فینی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 182,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=وضعیت نماد آبادا;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 266.15
+    },
+    {
+      "id": "content:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "مدیر صندوق دلتا کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "مدیر: شرکت تامین سرمایه تمدن.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 35,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 602,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 728.24
+    }
+  ]
+}

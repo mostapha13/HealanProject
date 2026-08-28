@@ -1,0 +1,2165 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T18:02:41.303951+00:00",
+  "runId": "85a64f2bde4b",
+  "manifestVersion": "2.0",
+  "datasetSha256": "41228c1da20c884622817807af4893802d5499bdeb0124dbad6e72485754017a",
+  "caseCount": 26,
+  "sources": {
+    "cash-market": {
+      "total": 3,
+      "passed": 3
+    },
+    "client-type": {
+      "total": 2,
+      "passed": 2
+    },
+    "company": {
+      "total": 7,
+      "passed": 7
+    },
+    "company-state": {
+      "total": 2,
+      "passed": 1
+    },
+    "content": {
+      "total": 2,
+      "passed": 1
+    },
+    "financial-institution": {
+      "total": 10,
+      "passed": 10
+    }
+  },
+  "total": 26,
+  "passed": 24,
+  "failed": 2,
+  "passRate": 0.9230769230769231,
+  "p50LatencyMs": 80.6,
+  "p95LatencyMs": 2209.41,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "mustContain": 2
+  },
+  "clusters": {
+    "cash-market:classification": {
+      "total": 2,
+      "passed": 2
+    },
+    "cash-market:session-price": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:comparison": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:schema": {
+      "total": 1,
+      "passed": 1
+    },
+    "company-state:people": {
+      "total": 1,
+      "passed": 0
+    },
+    "company-state:reason-analysis": {
+      "total": 1,
+      "passed": 1
+    },
+    "company:quality": {
+      "total": 3,
+      "passed": 3
+    },
+    "company:statistics": {
+      "total": 3,
+      "passed": 3
+    },
+    "company:website-coverage": {
+      "total": 1,
+      "passed": 1
+    },
+    "content:delta-fund": {
+      "total": 1,
+      "passed": 0
+    },
+    "content:trading-microstructure": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:direct-type": {
+      "total": 2,
+      "passed": 2
+    },
+    "financial-institution:hall-count": {
+      "total": 3,
+      "passed": 3
+    },
+    "financial-institution:hall-distribution": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:quality": {
+      "total": 2,
+      "passed": 2
+    },
+    "financial-institution:statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "financial-institution:type-list": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [
+    {
+      "id": "company-state:CS-015",
+      "caseId": "CS-015",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "people",
+      "question": "مدیر عامل نماد آبادا چه کسی است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "semantic.compile",
+          "status": "ok",
+          "durationMs": 3678,
+          "detail": "domain=Organization;operation=Lookup;shape=Short;confidence=0.95;applied=True;clarify=False;entities=symbol:آبادا;metrics=person_name;reasons=User explicitly asks for the name of the CEO (مدیر عامل) of a specific symbol (آبادا)."
+        },
+        {
+          "tool": "semantic.materialize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "domain=Organization;operation=Lookup;shape=Short"
+        },
+        {
+          "tool": "structured.reference.semantic",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "semantic=true;kind=organization_person;topic=مدیرعامل بورس تهران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3749.23
+    },
+    {
+      "id": "content:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "مدیر صندوق دلتا کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بر اساس مستندات موجود، مدیر صندوق سرمایه‌گذاری بخشی صنایع تمدن (بانک‌ها و موسسات اعتباری) با نماد «دلتا» مشخص نشده است. مستندات موجود تنها به معرفی ارکان دیگر صندوق شامل «بازارگردان» و «کارگزار بازارگردان» پرداخته‌اند.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 668,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 3227,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2012,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5994.34
+    }
+  ],
+  "results": [
+    {
+      "id": "cash-market:CM-016",
+      "caseId": "CM-016",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "session-price",
+      "question": "فملی با چه قیمتی باز شد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "marketsymbol",
+      "actualEntity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: قیمت اولین معامله 22,060 ریال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 155,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 1419,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 65,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-market;action=accept;reasons=deterministic_structured_market_answer"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2209.41
+    },
+    {
+      "id": "cash-market:CM-028",
+      "caseId": "CM-028",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "classification",
+      "question": "تابلوی معاملاتی ملی صنایع مس ایران چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "marketsymbol",
+      "actualEntity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: تابلوی معاملاتی «بازار اول - اصلی» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 42,
+          "detail": "status=Resolved;input=ملی صنایع مس ایران;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 44,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-market;action=accept;reasons=deterministic_structured_market_answer"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 159.9
+    },
+    {
+      "id": "cash-market:CM-030",
+      "caseId": "CM-030",
+      "sourceCode": "cash-market",
+      "table": "Cashmarket",
+      "cluster": "classification",
+      "question": "وضعیت معاملاتی نماد فملی چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "marketsymbol",
+      "actualEntity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: وضعیت معاملاتی «مجاز» است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 12,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-market;action=accept;reasons=deterministic_structured_market_answer"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 77.87
+    },
+    {
+      "id": "client-type:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "Buy_CountI یعنی چه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Buy_CountI تعداد کدهای خریدار حقیقی است، نه تعداد معاملات.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 18,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 111.81
+    },
+    {
+      "id": "client-type:CT-031",
+      "caseId": "CT-031",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "comparison",
+      "question": "در فملی حقیقی‌ها بیشتر خریده‌اند یا حقوقی‌ها؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 98,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 131.32
+    },
+    {
+      "id": "company:CO-023",
+      "caseId": "CO-023",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "در Company چند عنوان شرکت متمایز داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 67,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=آمار جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 117.44
+    },
+    {
+      "id": "company:CO-025",
+      "caseId": "CO-025",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "Company چند تالار متمایز دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=آمار جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 65.41
+    },
+    {
+      "id": "company:CO-027",
+      "caseId": "CO-027",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل Company را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Company دارای 403 رکورد، 388 عنوان غیرخالی متمایز، 386 شناسه منبع Instrument و 31 تالار متمایز است. بازه تاریخ عرضه اولیه ثبت‌شده از 1346/11/01 تا 1403/10/24 است؛ آخرین جمع‌آوری داده 1405/05/20 ساعت 14:34:17 بوده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=آمار جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 86.17
+    },
+    {
+      "id": "company:CO-029",
+      "caseId": "CO-029",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "چند شرکت در Company وب‌سایت معتبر ندارند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 403 رکورد Company، 88 رکورد وب‌سایت قابل استفاده دارند و 315 رکورد فاقد وب‌سایت معتبرند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=پوشش وب‌سایت شرکت‌ها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.89
+    },
+    {
+      "id": "company:CO-031",
+      "caseId": "CO-031",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "در Company چند شماره تلفن خالی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "kind=company_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_quality;topic=کیفیت جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 125.79
+    },
+    {
+      "id": "company:CO-033",
+      "caseId": "CO-033",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "quality",
+      "question": "تعداد عنوان‌های تکراری Company چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "کیفیت Company: از 403 رکورد، 13 عنوان خالی، 315 وب‌سایت خالی/نامعتبر، 403 مدیرعامل خالی و 2 تلفن خالی است. 17 گروه InstrumentId و 2 گروه عنوان تکراری وجود دارد؛ تعداد Talar_Id یتیم 0 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 44,
+          "detail": "kind=company_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_quality;topic=کیفیت جدول Company;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 74.95
+    },
+    {
+      "id": "company:CO-035",
+      "caseId": "CO-035",
+      "sourceCode": "company",
+      "table": "Company",
+      "cluster": "website-coverage",
+      "question": "چند شرکت وب‌سایت قابل استفاده دارند و چندتا ندارند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 403 رکورد Company، 88 رکورد وب‌سایت قابل استفاده دارند و 315 رکورد فاقد وب‌سایت معتبرند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "kind=company_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=پوشش وب‌سایت شرکت‌ها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.09
+    },
+    {
+      "id": "company-state:CS-015",
+      "caseId": "CS-015",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "people",
+      "question": "مدیر عامل نماد آبادا چه کسی است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "no-match"
+        },
+        {
+          "tool": "semantic.compile",
+          "status": "ok",
+          "durationMs": 3678,
+          "detail": "domain=Organization;operation=Lookup;shape=Short;confidence=0.95;applied=True;clarify=False;entities=symbol:آبادا;metrics=person_name;reasons=User explicitly asks for the name of the CEO (مدیر عامل) of a specific symbol (آبادا)."
+        },
+        {
+          "tool": "semantic.materialize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "domain=Organization;operation=Lookup;shape=Short"
+        },
+        {
+          "tool": "structured.reference.semantic",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "semantic=true;kind=organization_person;topic=مدیرعامل بورس تهران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 3749.23
+    },
+    {
+      "id": "company-state:CS-041",
+      "caseId": "CS-041",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "reason-analysis",
+      "question": "رایج‌ترین دسته دلایل وضعیت شرکت‌ها را با تعداد بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فراوانی چند دسته پرتکرار در 58 رکورد Companystate: عدم ارائه صورت‌های مالی 38 رکورد، گزارش تفسیری مدیریت 38، بررسی شفافیت ناشر 33، گزارش فعالیت ماهانه 18 و گزارش کنترل داخلی 4 رکورد. یک رکورد ممکن است در چند دسته شمرده شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 172,
+          "detail": "kind=company_state_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state_aggregate;topic=تحلیل دلایل وضعیت ناشران;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 206.54
+    },
+    {
+      "id": "content:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "delta-fund",
+      "question": "مدیر صندوق دلتا کیه؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [
+        "mustContain"
+      ],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "بر اساس مستندات موجود، مدیر صندوق سرمایه‌گذاری بخشی صنایع تمدن (بانک‌ها و موسسات اعتباری) با نماد «دلتا» مشخص نشده است. مستندات موجود تنها به معرفی ارکان دیگر صندوق شامل «بازارگردان» و «کارگزار بازارگردان» پرداخته‌اند.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 668,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 3227,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2012,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 5994.34
+    },
+    {
+      "id": "content:CT-031",
+      "caseId": "CT-031",
+      "sourceCode": "content",
+      "table": "Content",
+      "cluster": "trading-microstructure",
+      "question": "اصلاح طبقات حجمی سفارش چه آثار مثبتی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "actualEntity": "",
+      "answer": "از جمله نتایج قابل توجه آن می‌توان به کاهش اثر بازاری (market impact) سفارش‌های با ارزش بالا بر تابلوی معاملات، تسهیل انجام معاملات در سهام با قیمت‌های پایین و نیز کاهش اثرات ناشی از اشتباهات معاملاتی در سهام با قیمت‌های بالا اشاره کرد بر این اساس به طور کلی این تغییرات می‌تواند به بهبود نظم معاملاتی، افزایش انعطاف‌پذیری در ثبت سفارش‌ها و ارتقای کیفیت اجرای معاملات کمک کند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=deterministic-knowledge-evidence-route"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 522,
+          "detail": null
+        },
+        {
+          "tool": "answer.synthesize",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1623,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 2203.96
+    },
+    {
+      "id": "financial-institution:NM-002",
+      "caseId": "NM-002",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "statistics",
+      "question": "آمار کلی نهادهای مالی ثبت‌شده در SQL را خلاصه بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول Nahad_Mali دارای 807 رکورد شعبه/دفتر، 807 شناسه یکتا و 287 نام متمایز است. این رکورد‌ها در 31 تالار منطقه‌ای و 4 نوع استفاده‌شده قرار دارند. Broker_TypeId در هر 807 رکورد خالی است؛ زمان جمع‌آوری Snapshot 1405/05/20 ساعت 14:33:43 است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 94,
+          "detail": "kind=financial_institution_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_aggregate;topic=آمار جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 160.2
+    },
+    {
+      "id": "financial-institution:NM-006",
+      "caseId": "NM-006",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "hall-count",
+      "question": "در تالار اصفهان چند نهاد مالی ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در تالار اصفهان، 105 رکورد نهاد مالی با 66 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 35,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار اصفهان;facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 70.02
+    },
+    {
+      "id": "financial-institution:NM-007",
+      "caseId": "NM-007",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "hall-count",
+      "question": "تعداد نهادهای مالی تالار خوزستان چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در تالار خوزستان (اهواز)، 21 رکورد نهاد مالی با 15 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=financial_institution_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار خوزستان (اهواز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 48.56
+    },
+    {
+      "id": "financial-institution:NM-011",
+      "caseId": "NM-011",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "hall-count",
+      "question": "در یزد چند نهاد مالی و چند نام متمایز داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در تالار یزد، 30 رکورد نهاد مالی با 21 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=financial_institution_hall;complete=True;facts=24;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار یزد;facts=24"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 30.3
+    },
+    {
+      "id": "financial-institution:NM-012",
+      "caseId": "NM-012",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "hall-distribution",
+      "question": "کدام تالار بیشترین نهاد مالی ثبت‌شده را دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "10 تالار اول از نظر تعداد رکورد نهاد مالی:\n1. اصفهان (کد 6): 105 رکورد؛ 66 نام متمایز\n2. خراسان رضوی (مشهد) (کد 9): 81 رکورد؛ 64 نام متمایز\n3. آذربایجان شرقی (تبریز) (کد 2): 66 رکورد؛ 46 نام متمایز\n4. البرز (کرج) (کد 22): 66 رکورد؛ 53 نام متمایز\n5. فارس (شیراز) (کد 13): 48 رکورد؛ 37 نام متمایز\n6. زنجان (کد 10): 41 رکورد؛ 37 نام متمایز\n7. مازندران (ساری) (کد 19): 33 رکورد؛ 26 نام متمایز\n8. یزد (کد 21): 30 رکورد؛ 21 نام متمایز\n9. آذربایجان غربی (ارومیه) (کد 3): 28 رکورد؛ 21 نام متمایز\n10. کرمانشاه (کد 1): 27 رکورد؛ 25 نام متمایز",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 47,
+          "detail": "kind=financial_institution_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_aggregate;topic=توزیع نهادهای مالی بر اساس تالار;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 83.33
+    },
+    {
+      "id": "financial-institution:NM-016",
+      "caseId": "NM-016",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "type-list",
+      "question": "کدام نهاد مالی از نوع تأمین سرمایه ثبت شده است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نهاد‌های نوع تأمین سرمایه: 1 رکورد و 1 نام متمایز.\n1. صندوق سرمایه‌گذاری مشترک ایساتیس پویا — 1 رکورد در 1 تالار",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": "kind=financial_institution_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_aggregate;topic=نهادهای مالی بر اساس نوع;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 35.89
+    },
+    {
+      "id": "financial-institution:NM-017",
+      "caseId": "NM-017",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "direct-type",
+      "question": "سبدگردان هدف چه نوع نهاد مالی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "«سبدگردان هدف» در Nahad_Mali از نوع سبدگردان ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "kind=financial_institution;complete=True;facts=35;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution;topic=اطلاعات نهاد مالی سبدگردان هدف;facts=35"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 44.86
+    },
+    {
+      "id": "financial-institution:NM-031",
+      "caseId": "NM-031",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "direct-type",
+      "question": "صندوق سرمایه‌گذاری مشترک ایساتیس پویا چه نوع نهاد مالی و مربوط به کدام تالار است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "صندوق سرمایه‌گذاری مشترک ایساتیس پویا — نوع: تأمین سرمایه؛ تالار: یزد (کد 21).",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 18,
+          "detail": "kind=financial_institution;complete=True;facts=7;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution;topic=اطلاعات نهاد مالی صندوق سرمایه‌گذاری مشترک ایساتیس پویا;facts=7"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 56.77
+    },
+    {
+      "id": "financial-institution:NM-039",
+      "caseId": "NM-039",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "quality",
+      "question": "تکرار نام یک نهاد در یک تالار چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "kind=financial_institution_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_quality;topic=کیفیت جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 35.86
+    },
+    {
+      "id": "financial-institution:NM-040",
+      "caseId": "NM-040",
+      "sourceCode": "financial-institution",
+      "table": "Nahad_Mali",
+      "cluster": "quality",
+      "question": "آیا نهاد مالی بدون نوع یا بدون تالار داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=financial_institution_quality;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.reference.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_quality;topic=کیفیت جدول Nahad_Mali;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 33.79
+    }
+  ]
+}

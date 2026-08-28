@@ -24,6 +24,7 @@ Rules:
 - Do not answer or rewrite the answer.
 - Treat an explicit statement that reliable data was not found as valid when evidence truly lacks that fact.
 - A concise answer is correct when the user requested only names or one fact.
+- required_response_shape is binding: names_only must contain only names, short must avoid unrelated background, and list/table requests must be complete enough for the evidence supplied.
 - Historical evidence must not be presented as current fact.
 - Output strict JSON only.
 """
@@ -79,6 +80,9 @@ async def reflect_chat_with_llm(request: dict[str, Any]) -> ReflectionDecision |
         "intent": request.get("intent"),
         "confidence": request.get("confidence"),
         "failed_tools": request.get("failedTools") or [],
+        "semantic_domain": request.get("semanticDomain"),
+        "semantic_operation": request.get("semanticOperation"),
+        "required_response_shape": request.get("responseShape"),
         # The preview model has a 4096-token context. A previous 12x3500
         # character envelope could exceed it, return 503 and open the shared
         # circuit breaker. Four focused excerpts are enough for bounded review.

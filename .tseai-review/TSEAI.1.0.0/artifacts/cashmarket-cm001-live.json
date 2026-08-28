@@ -1,0 +1,40 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-28T13:45:06.903933+00:00",
+  "total": 1,
+  "passed": 0,
+  "passRate": 0.0,
+  "allPassed": false,
+  "p50LatencyMs": 448.63,
+  "p95LatencyMs": 448.63,
+  "clusters": {
+    "last-price": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CM-001",
+      "cluster": "last-price",
+      "question": "آخرین قیمت فملی چقدره؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "21,680 ریال"
+      ],
+      "mustNotContain": [
+        "قیمت پایانی"
+      ],
+      "maxAnswerChars": 180,
+      "passed": false,
+      "issues": [
+        "type:data_quality_unavailable",
+        "missing:21,680 ریال"
+      ],
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "actualType": "data_quality_unavailable",
+      "latencyMs": 448.63
+    }
+  ]
+}

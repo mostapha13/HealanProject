@@ -1,0 +1,393 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T12:27:50.289500+00:00",
+  "runId": "272cdbdf5cbb",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.4",
+  "suiteSha256": "ebc5c20e91a5be3a8ff669e1dd0b46902b76df393df7f2beabdd40d942aba28a",
+  "flowCount": 1,
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "passRate": 1.0,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 93.42,
+  "p95LatencyMs": 113.12,
+  "maxP95LatencyMs": 5000.0,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "failures": [],
+  "results": [
+    {
+      "id": "financial-hall-context-boundary:financial-institutions-after-company-context",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 1,
+      "question": "نهادهای مالی تالار شیراز کیا هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام‌های نهاد مالی ثبت‌شده در تالار فارس (شیراز) (37 نام):\n1. آتی ساز بازار\n2. آتیه\n3. آگاه\n4. آیده ال کوشا\n5. اردیبهشت ایرانیان\n6. اعتبار تابان\n7. اقتصاد بیدار\n8. بانک آینده\n9. بانک انصار\n10. بانک پارسیان\n11. بانک رفاه\n12. بانک سپه\n13. بانک صنعت و معدن\n14. بانک کشاورزی\n15. بانک مسکن\n16. بانک ملی\n17. بورس بیمه ایران\n18. پویان\n19. تامین سرمایه تمدن\n20. تامین سرمایه نوین\n21. توسعه سرمایه دنیا\n22. حافظ\n23. دانایان\n24. رایا سهم\n25. سامان\n… 12 نام دیگر نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 175,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهاد مالیهای تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 315.35
+    },
+    {
+      "id": "financial-hall-context-boundary:financial-count-follow-up",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 2,
+      "question": "تعدادشون چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در تالار فارس (شیراز)، 48 رکورد نهاد مالی با 37 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 19,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهاد مالیهای تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 113.12
+    },
+    {
+      "id": "financial-hall-context-boundary:broker-roster",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 3,
+      "question": "کارگزاری های تالار شیراز رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام‌های کارگزاری ثبت‌شده در تالار فارس (شیراز) (36 نام):\n1. آتی ساز بازار\n2. آتیه\n3. آگاه\n4. آیده ال کوشا\n5. اردیبهشت ایرانیان\n6. اعتبار تابان\n7. اقتصاد بیدار\n8. بانک آینده\n9. بانک انصار\n10. بانک پارسیان\n11. بانک رفاه\n12. بانک سپه\n13. بانک صنعت و معدن\n14. بانک کشاورزی\n15. بانک مسکن\n16. بانک ملی\n17. بورس بیمه ایران\n18. پویان\n19. تامین سرمایه تمدن\n20. تامین سرمایه نوین\n21. توسعه سرمایه دنیا\n22. حافظ\n23. دانایان\n24. سامان\n25. سپهر باستان\n… 11 نام دیگر نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=کارگزاریهای تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 68.71
+    },
+    {
+      "id": "financial-hall-context-boundary:broker-count-follow-up",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 4,
+      "question": "چندتاشون هست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در تالار فارس (شیراز)، 47 رکورد کارگزاری با 36 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=کارگزاریهای تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 83.11
+    },
+    {
+      "id": "financial-hall-context-boundary:company-overrides-financial-context",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 5,
+      "question": "شرکتای تالار شیراز رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "17 شرکت اول از 17 رکورد منتسب به تالار فارس (شیراز):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 93.42
+    }
+  ]
+}

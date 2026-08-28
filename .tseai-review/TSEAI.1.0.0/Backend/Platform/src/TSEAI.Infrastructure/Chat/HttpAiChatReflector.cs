@@ -20,6 +20,7 @@ public sealed class HttpAiChatReflector(HttpClient http, ILogger<HttpAiChatRefle
            && request.EvidenceCount>0
            && request.FailedTools.Count==0
            && request.Evidence is { Count:>0 }
+           && MatchesResponseShape(request.Answer,request.ResponseShape)
            && !string.IsNullOrWhiteSpace(request.Answer))
             return Accept("deterministic_exact_evidence");
 
@@ -36,7 +37,7 @@ public sealed class HttpAiChatReflector(HttpClient http, ILogger<HttpAiChatRefle
 
         try
         {
-            var payload = new { request.Question, request.Answer, Intent=request.Intent.ToString(), request.Confidence, request.EvidenceCount, request.FailedTools, Evidence=request.Evidence??[], request.ExactCanonical };
+            var payload = new { request.Question, request.Answer, Intent=request.Intent.ToString(), request.Confidence, request.EvidenceCount, request.FailedTools, Evidence=request.Evidence??[], request.ExactCanonical, request.SemanticDomain, request.SemanticOperation, request.ResponseShape };
             using var response = await http.PostAsJsonAsync("chat/reflect", payload, ct);
             if (!response.IsSuccessStatusCode)
             {
@@ -82,5 +83,17 @@ public sealed class HttpAiChatReflector(HttpClient http, ILogger<HttpAiChatRefle
             .Replace('٠','0').Replace('١','1').Replace('٢','2').Replace('٣','3').Replace('٤','4')
             .Replace('٥','5').Replace('٦','6').Replace('٧','7').Replace('٨','8').Replace('٩','9');
         return Regex.Replace(normalized,@"[^\p{L}\p{Nd}]",string.Empty);
+    }
+
+    private static bool MatchesResponseShape(string answer,string? responseShape)
+    {
+        if(string.IsNullOrWhiteSpace(answer)) return false;
+        return responseShape?.ToLowerInvariant() switch
+        {
+            "namesonly" or "names_only" => answer.Length<=700
+                && !Regex.IsMatch(answer,@"(?:رئیس|نایب\s*رئیس|عضو\s+هیئت|نماینده|مدیرعامل|مدیر\s+عامل)"),
+            "short" => answer.Length<=900,
+            _ => true
+        };
     }
 }

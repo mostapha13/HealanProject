@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "generatedAtUtc": "2026-08-28T16:16:21.795955+00:00",
+  "total": 3,
+  "passed": 2,
+  "passRate": 0.6666666666666666,
+  "allPassed": false,
+  "p50LatencyMs": 2900.53,
+  "p95LatencyMs": 10022.64,
+  "clusters": {
+    "market-value": {
+      "total": 1,
+      "passed": 0
+    },
+    "price-time": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "SE-052",
+      "cluster": "market-value",
+      "question": "ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 10022.64,
+      "type": "clarification",
+      "entity": "فملی",
+      "answer": "پاسخ نهایی همه اشخاص مرجع را پوشش نداد؛ لطفاً دوباره تلاش کنید.",
+      "error": null
+    },
+    {
+      "id": "SE-070",
+      "cluster": "price-time",
+      "question": "آخرین نرخ فملی مال چه روزیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2900.53,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: آخرین قیمت 21,680 ریال است.",
+      "error": null
+    },
+    {
+      "id": "SE-071",
+      "cluster": "price-time",
+      "question": "قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 1510.72,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nآخرین قیمت فملی، 21,680 ریال است و به داده ثبت‌شده در 1405/05/20 ساعت 11:29:22 مربوط می‌شود.",
+      "error": null
+    }
+  ],
+  "failures": [
+    {
+      "id": "SE-052",
+      "cluster": "market-value",
+      "question": "ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟",
+      "passed": false,
+      "checks": {
+        "type": false,
+        "entity": true,
+        "mustContain": false,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 10022.64,
+      "type": "clarification",
+      "entity": "فملی",
+      "answer": "پاسخ نهایی همه اشخاص مرجع را پوشش نداد؛ لطفاً دوباره تلاش کنید.",
+      "error": null
+    }
+  ]
+}

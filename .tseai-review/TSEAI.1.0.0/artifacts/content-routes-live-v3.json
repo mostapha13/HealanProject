@@ -1,0 +1,476 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-28T14:20:02.531697+00:00",
+  "total": 25,
+  "passed": 23,
+  "passRate": 0.92,
+  "allPassed": false,
+  "p50LatencyMs": 1708.81,
+  "p95LatencyMs": 8748.62,
+  "clusters": {
+    "latest-news": {
+      "total": 6,
+      "passed": 4
+    },
+    "irandar-bond": {
+      "total": 6,
+      "passed": 6
+    },
+    "green-fund": {
+      "total": 5,
+      "passed": 5
+    },
+    "delta-fund": {
+      "total": 2,
+      "passed": 2
+    },
+    "trading-microstructure": {
+      "total": 1,
+      "passed": 1
+    },
+    "private-market": {
+      "total": 2,
+      "passed": 2
+    },
+    "saipa-history": {
+      "total": 3,
+      "passed": 3
+    }
+  },
+  "results": [
+    {
+      "id": "CT-001",
+      "cluster": "latest-news",
+      "question": "آخرین خبر ثبت‌شده بورس تهران چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16",
+        "اوراق گواهی اعتبار مولد",
+        "بانک ملت",
+        "اگ050512"
+      ],
+      "mustNotContain": [
+        "2026/07/07",
+        "<p>"
+      ],
+      "maxAnswerChars": 800,
+      "passed": false,
+      "issues": [
+        "type:knowledge",
+        "missing:1405/04/16",
+        "missing:اوراق گواهی اعتبار مولد",
+        "missing:بانک ملت",
+        "missing:اگ050512"
+      ],
+      "answer": "آخرین خبر ثبت‌شده در بورس تهران مربوط به شنبه 1404/07/05 است که در آن 150,772,854 سهم معادل 1.96 درصد از سهام شرکت انتقال داده‌های آسیاتک به قیمت هر سهم 3.975 ریال، پس از احراز شرایط قطعی شد. این خبر بر اساس گزارش معاونت عملیات بازار شرکت بورس اوراق بهادار تهران است.",
+      "actualType": "knowledge",
+      "latencyMs": 10085.27
+    },
+    {
+      "id": "CT-002",
+      "cluster": "latest-news",
+      "question": "آخرین خبر بورس تهران در چه تاریخی منتشر شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 260,
+      "passed": false,
+      "issues": [
+        "type:clarification",
+        "missing:1405/04/16"
+      ],
+      "answer": "بخشی از ابزار‌های لازم برای پاسخ در دسترس نبود. لطفاً دوباره تلاش کنید یا سؤال را محدودتر کنید.",
+      "actualType": "clarification",
+      "latencyMs": 7712.82
+    },
+    {
+      "id": "CT-003",
+      "cluster": "latest-news",
+      "question": "نماد اوراقی که در جدیدترین خبر آمده چیست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "اگ050512"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "در آخرین خبر ثبت‌شده، نماد «اگ050512» است.",
+      "actualType": "structured_reference",
+      "latencyMs": 130.67
+    },
+    {
+      "id": "CT-005",
+      "cluster": "latest-news",
+      "question": "سررسید اوراق آخرین خبر چه روزی است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405",
+        "05",
+        "31"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 280,
+      "passed": true,
+      "issues": [],
+      "answer": "در آخرین خبر ثبت‌شده، سررسید 31 / 05 / 1405 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 58.92
+    },
+    {
+      "id": "CT-006",
+      "cluster": "latest-news",
+      "question": "ضمانت و عاملیت اوراق خبر آخر با کدام بانک است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "بانک ملت"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "در آخرین خبر ثبت‌شده، ضمانت و عاملیت بر عهده بانک ملت است.",
+      "actualType": "structured_reference",
+      "latencyMs": 75.97
+    },
+    {
+      "id": "CT-007",
+      "cluster": "latest-news",
+      "question": "توی خبر تازه بورس چه نوع اوراقی درج شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "اوراق گام",
+        "بانک ملت"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "در آخرین خبر ثبت‌شده، اوراق گام بانک ملت (گواهی اعتبار مولد) درج شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 99.84
+    },
+    {
+      "id": "CT-009",
+      "cluster": "irandar-bond",
+      "question": "ارزش و نرخ سود اوراق ایراندار را خلاصه بگو",
+      "mustContain": [
+        "میلیارد ریال",
+        "درصد"
+      ],
+      "mustContainAny": [
+        [
+          "3,000",
+          "۳,۰۰۰",
+          "3000",
+          "۳۰۰۰"
+        ],
+        [
+          "23",
+          "۲۳"
+        ]
+      ],
+      "maxAnswerChars": 550,
+      "passed": true,
+      "issues": [],
+      "answer": "به گزارش مدیریت ارتباطات بورس تهران، طبق مجوز پذیره‌نویسی شماره 198135 / 122 مورخ 09 / 04 / 1405 سازمان بورس و اوراق بهادار، از تاریخ 10 / 04 / 1405 اوراق مرابحه شرکت ایراندار به مبلغ 3,000 میلیارد ریال، با نرخ سود 23 درصد سالانه، با هدف خرید مواد اولیه مورد نیاز با نماد \"صدار704\" در فهرست نرخ‌های بازار اوراق بدهی بورس تهران درج شد.",
+      "actualType": "knowledge",
+      "latencyMs": 2050.63
+    },
+    {
+      "id": "CT-011",
+      "cluster": "irandar-bond",
+      "question": "دوره عمر و فاصله پرداخت سود صدار۷۰۴ چقدر است؟",
+      "mustContain": [
+        "سال",
+        "ماه"
+      ],
+      "mustContainAny": [
+        [
+          "2",
+          "۲"
+        ],
+        [
+          "3",
+          "۳"
+        ]
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "دوره عمر این اوراق 2 سال و مواعد پرداخت آن هر 3 ماه یک بار از تاریخ انتشار اوراق است.",
+      "actualType": "knowledge",
+      "latencyMs": 1258.83
+    },
+    {
+      "id": "CT-012",
+      "cluster": "irandar-bond",
+      "question": "ناشر اوراق مرابحه ایراندار چه شرکتی است؟",
+      "mustContain": [
+        "شرکت واسط مالی اسفند پنجم"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "ناشر: شرکت واسط مالی اسفند پنجم.",
+      "actualType": "knowledge",
+      "latencyMs": 1028.92
+    },
+    {
+      "id": "CT-014",
+      "cluster": "irandar-bond",
+      "question": "بازارگردان صدار704 کدام صندوق است؟",
+      "mustContain": [
+        "صندوق سرمایه‌گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار"
+      ],
+      "maxAnswerChars": 550,
+      "passed": true,
+      "issues": [],
+      "answer": "بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی الگوریتم سرآمد بازار.",
+      "actualType": "knowledge",
+      "latencyMs": 1201.02
+    },
+    {
+      "id": "CT-016",
+      "cluster": "irandar-bond",
+      "question": "حسابرس اوراق صدار 704 را نام ببر",
+      "mustContain": [
+        "موسسه حسابرسی بیات رایان"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "حسابرس: موسسه حسابرسی بیات رایان.",
+      "actualType": "knowledge",
+      "latencyMs": 734.24
+    },
+    {
+      "id": "CT-017",
+      "cluster": "irandar-bond",
+      "question": "عامل فروش و عامل پرداخت اوراق ایراندار چه نهادهایی هستند؟",
+      "mustContain": [
+        "شرکت کارگزاری کارآمد",
+        "شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه"
+      ],
+      "maxAnswerChars": 700,
+      "passed": true,
+      "issues": [],
+      "answer": "عامل پرداخت: شرکت سپرده‌گذاری مرکزی اوراق بهادار و تسویه وجوه؛ عامل فروش: شرکت کارگزاری کارآمد.",
+      "actualType": "knowledge",
+      "latencyMs": 3874.86
+    },
+    {
+      "id": "CT-019",
+      "cluster": "green-fund",
+      "question": "مؤسسین صندوق مسیر سبز آبنوس چه کسانی‌اند؟",
+      "mustContain": [
+        "شرکت سبدگردان آبنوس",
+        "محمد صدرائی",
+        "مجتبی حسن پور",
+        "مسعود الفتی",
+        "امین امیری"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "موسسین: شرکت سبدگردان آبنوس، محمد صدرائی، مجتبی حسن پور، مسعود الفتی و امین امیری.",
+      "actualType": "knowledge",
+      "latencyMs": 1018.48
+    },
+    {
+      "id": "CT-020",
+      "cluster": "green-fund",
+      "question": "مدیریت صندوق سبز آبنوس بر عهده کدام شرکت است؟",
+      "mustContain": [
+        "شرکت سبدگردان آبنوس"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "مدیر: شرکت سبدگردان آبنوس.",
+      "actualType": "knowledge",
+      "latencyMs": 1126.56
+    },
+    {
+      "id": "CT-021",
+      "cluster": "green-fund",
+      "question": "متولی و حسابرس صندوق مسیر سبز آبنوس را بگو",
+      "mustContain": [
+        "اوراق بهادار پاداش",
+        "ارقام نگر آریا"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "حسابرس: موسسه حسابرسی ارقام نگر آریا؛ متولی: شرکت مشاور سرمایه‌گذاری اوراق بهادار پاداش.",
+      "actualType": "knowledge",
+      "latencyMs": 7092.38
+    },
+    {
+      "id": "CT-022",
+      "cluster": "green-fund",
+      "question": "بازارگردان و کارگزار بازارگردان سبز آبنوس کیا هستند؟",
+      "mustContain": [
+        "گسترش نوویرا",
+        "کارگزاری پارسیان"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کارگزار بازارگردان: شرکت کارگزاری پارسیان؛ بازارگردان: صندوق سرمایه‌گذاری اختصاصی بازارگردانی گسترش نوویرا.",
+      "actualType": "knowledge",
+      "latencyMs": 6089.76
+    },
+    {
+      "id": "CT-023",
+      "cluster": "green-fund",
+      "question": "برای اطلاعات بیشتر صندوق سبز آبنوس باید به چه سایتی مراجعه کنم؟",
+      "mustContain": [
+        "green.abnouspmc.ir"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "برای اطلاعات بیشتر به green.abnouspmc.ir مراجعه کنید.",
+      "actualType": "knowledge",
+      "latencyMs": 4702.72
+    },
+    {
+      "id": "CT-025",
+      "cluster": "delta-fund",
+      "question": "بنیان‌گذاران صندوق دلتا چه شرکت‌هایی هستند؟",
+      "mustContain": [
+        "آسان سرمایه گستر ایرانیان",
+        "رهپویان پردازش گستر صحرا",
+        "تامین سرمایه تمدن"
+      ],
+      "maxAnswerChars": 750,
+      "passed": true,
+      "issues": [],
+      "answer": "موسسین: شرکت آسان سرمایه گستر ایرانیان، رهپویان پردازش گستر صحرا و شرکت تامین سرمایه تمدن.",
+      "actualType": "knowledge",
+      "latencyMs": 1776.51
+    },
+    {
+      "id": "CT-026",
+      "cluster": "delta-fund",
+      "question": "مدیر صندوق دلتا کیه؟",
+      "mustContain": [
+        "شرکت تامین سرمایه تمدن"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "مدیر: شرکت تامین سرمایه تمدن.",
+      "actualType": "knowledge",
+      "latencyMs": 1321.34
+    },
+    {
+      "id": "CT-030",
+      "cluster": "trading-microstructure",
+      "question": "چه کسی تغییرات جدید سفارش‌گذاری بورس تهران را توضیح داده؟",
+      "mustContain": [
+        "سید ناصر جعفری",
+        "مدیر عملیات بازار سهام"
+      ],
+      "maxAnswerChars": 500,
+      "passed": true,
+      "issues": [],
+      "answer": "سید ناصر جعفری، مدیر عملیات بازار سهام است.",
+      "actualType": "knowledge",
+      "latencyMs": 8748.62
+    },
+    {
+      "id": "CT-033",
+      "cluster": "private-market",
+      "question": "بازار خصوصی بورس تهران برای چه شرکت‌هایی و با چه هدفی طراحی می‌شود؟",
+      "mustContain": [
+        "شرکت‌های سهامی خاص",
+        "حاکمیت شرکتی",
+        "تامین مالی"
+      ],
+      "mustContainAny": [
+        [
+          "بازارهای اصلی",
+          "بازار‌های اصلی"
+        ]
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "بازاری که در آن شرکت‌های سهامی خاص، بدون تبدیل فوری به سهامی عام، بتوانند با اصول حاکمیت شرکتی، اصلاح ساختار مالکیت و تامین مالی از طریق بازار سرمایه آشنا شوند و به تدریج برای پذیرش در بازار‌های اصلی آماده شوند.",
+      "actualType": "knowledge",
+      "latencyMs": 1708.81
+    },
+    {
+      "id": "CT-034",
+      "cluster": "private-market",
+      "question": "گودرزی چه شرکت‌هایی را در اولویت پذیرش بورس اعلام کرده؟",
+      "mustContain": [
+        "سود خالص",
+        "میلیارد تومان",
+        "اولویت پذیرش"
+      ],
+      "mustContainAny": [
+        [
+          "100",
+          "۱۰۰"
+        ]
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "مدیرعامل بورس تهران با اشاره به تغییر رویکرد این بورس طی دو سال گذشته تصریح کرد: سیاست ما این است که هر شرکتی با سود خالص بیش از 100 میلیارد تومان، در اولویت پذیرش قرار گیرد و بورس تهران برای ورود چنین شرکت‌هایی فرش قرمز پهن خواهد کرد.",
+      "actualType": "knowledge",
+      "latencyMs": 1373.0
+    },
+    {
+      "id": "CT-036",
+      "cluster": "saipa-history",
+      "question": "مدیرعامل گروه خودروسازی سایپا در مراسم بورس چه کسی بود؟",
+      "mustContain": [
+        "علی شیخ زاده"
+      ],
+      "maxAnswerChars": 450,
+      "passed": true,
+      "issues": [],
+      "answer": "علی شیخ زاده، مدیرعامل گروه خودروسازی سایپا بود.",
+      "actualType": "knowledge",
+      "latencyMs": 6354.82
+    },
+    {
+      "id": "CT-037",
+      "cluster": "saipa-history",
+      "question": "سایپا در چه سالی تأسیس شد؟",
+      "mustContain": [
+        "1345"
+      ],
+      "mustNotContain": [
+        "1375"
+      ],
+      "maxAnswerChars": 350,
+      "passed": true,
+      "issues": [],
+      "answer": "سایپا در سال 1345 تأسیس شد.",
+      "actualType": "knowledge",
+      "latencyMs": 12801.37
+    },
+    {
+      "id": "CT-038",
+      "cluster": "saipa-history",
+      "question": "خساپا چه سالی به جمع ناشران بورسی پیوست؟",
+      "mustContain": [
+        "1375"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "سایپا در سال 1375 به جمع ناشران بورسی پیوست.",
+      "actualType": "knowledge",
+      "latencyMs": 3562.64
+    }
+  ]
+}

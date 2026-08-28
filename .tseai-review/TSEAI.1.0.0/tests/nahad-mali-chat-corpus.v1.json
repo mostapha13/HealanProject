@@ -12,7 +12,7 @@
     {"id":"NM-008","cluster":"hall-list","question":"نهادهای مالی تالار خوزستان را فقط اسم بگو","expectedType":"structured_reference","mustContain":["آگاه","فارابی","مفید"],"mustNotContain":["فملی"],"maxAnswerChars":900},
     {"id":"NM-009","cluster":"hall-list","question":"فهرست کارگزاری‌های تالار خوزستان را بده","expectedType":"structured_reference","mustContain":["آگاه","بانک تجارت","مفید","کارگزاری"],"mustNotContain":["سبدگردان"],"maxAnswerChars":1800},
     {"id":"NM-010","cluster":"hall-count","question":"تالار مشهد چند رکورد نهاد مالی دارد؟","expectedType":"structured_reference","mustContain":["خراسان رضوی (مشهد)","81 رکورد"],"maxAnswerChars":400},
-    {"id":"NM-011","cluster":"hall-count","question":"در یزد چند نهاد مالی و چند نام متمایز داریم؟","expectedType":"structured_reference","mustContain":["تالار یزد","30 رکورد","20 نام متمایز"],"maxAnswerChars":400},
+    {"id":"NM-011","cluster":"hall-count","question":"در یزد چند نهاد مالی و چند نام متمایز داریم؟","expectedType":"structured_reference","mustContain":["تالار یزد","30 رکورد","21 نام متمایز"],"maxAnswerChars":400},
     {"id":"NM-012","cluster":"hall-distribution","question":"کدام تالار بیشترین نهاد مالی ثبت‌شده را دارد؟","expectedType":"structured_reference","mustContain":["اصفهان","105 رکورد"],"maxAnswerChars":1500},
     {"id":"NM-013","cluster":"hall-distribution","question":"سه تالار اول از نظر تعداد شعب نهادهای مالی کدام‌اند؟","expectedType":"structured_reference","mustContain":["اصفهان","خراسان رضوی (مشهد)","آذربایجان شرقی (تبریز)"],"maxAnswerChars":1500},
     {"id":"NM-014","cluster":"type-list","question":"فهرست سبدگردان‌های ثبت‌شده را فقط با نام بده","expectedType":"structured_reference","mustContain":["رایا سهم","ایساتیس پویا کیش","برلیان","هدف"],"maxAnswerChars":800},

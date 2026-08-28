@@ -1,0 +1,110 @@
+{
+  "version": "clienttype-1.0",
+  "generatedAtUtc": "2026-08-28T14:13:41.352443+00:00",
+  "total": 4,
+  "passed": 4,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 9888.52,
+  "p95LatencyMs": 9892.28,
+  "clusters": {
+    "raw-volume": {
+      "total": 1,
+      "passed": 1
+    },
+    "full": {
+      "total": 1,
+      "passed": 1
+    },
+    "cross-table": {
+      "total": 1,
+      "passed": 1
+    },
+    "variant-symbol": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CT-001",
+      "cluster": "raw-volume",
+      "question": "حجم خرید حقیقی فملی چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "فملی",
+        "حجم خرید حقیقی 366,725,759 سهم"
+      ],
+      "mustNotContain": [
+        "حجم معاملات 583,222,314",
+        "ریال"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 9391.6
+    },
+    {
+      "id": "CT-021",
+      "cluster": "full",
+      "question": "اطلاعات حقیقی و حقوقی فملی را کامل بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1,565 کد معاملاتی",
+        "61 کد معاملاتی",
+        "366,725,759 سهم",
+        "377,963,817 سهم",
+        "13.4717",
+        "1405/05/11",
+        "1405/05/20"
+      ],
+      "mustNotContain": [
+        "2026/08/"
+      ],
+      "maxAnswerChars": 1200,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: تعداد خریداران حقیقی 1,565 کد معاملاتی، تعداد خریداران حقوقی 61 کد معاملاتی، تعداد فروشندگان حقیقی 1,165 کد معاملاتی، تعداد فروشندگان حقوقی 9 کد معاملاتی، حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم، حجم فروش حقیقی 20,264,230 سهم، حجم فروش حقوقی 377,963,817 سهم، خالص حجم حقیقی +346,461,529 سهم، قدرت خریدار حقیقی 13.4717، زمان Snapshot منبع 1405/05/11 ساعت 12:58:46، زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 9892.28
+    },
+    {
+      "id": "CT-032",
+      "cluster": "cross-table",
+      "question": "قیمت پایانی و قدرت خریدار فملی را باهم بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قدرت خریدار حقیقی 13.4717",
+        "قیمت پایانی 21,660 ریال",
+        "زمان Snapshot بازار و ClientType یکسان نیست"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، قیمت پایانی 21,660 ریال، زمان داده Cashmarket 1405/05/20 ساعت 11:29:22 است. توجه: زمان Snapshot بازار و ClientType یکسان نیست و اعداد هم‌زمان فرض نشده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 9884.76
+    },
+    {
+      "id": "CT-050",
+      "cluster": "variant-symbol",
+      "question": "نسبت قدرت خریدار سهم خساپا الان چقدره؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "خساپا",
+        "قدرت خریدار حقیقی 1.2191"
+      ],
+      "mustNotContain": [
+        "ویرایش فیلتر"
+      ],
+      "maxAnswerChars": 300,
+      "passed": true,
+      "issues": [],
+      "answer": "خساپا: قدرت خریدار حقیقی 1.2191 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 9901.96
+    }
+  ]
+}

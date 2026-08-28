@@ -1,0 +1,99 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:25:50.905452+00:00",
+  "runId": "5a0d298318df",
+  "manifestVersion": "2.0",
+  "datasetSha256": "3e27465310727f32b41304b51b749445b133751a0947ed4f5d442b19eb0e7165",
+  "caseCount": 1,
+  "sources": {
+    "company-state": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 139.27,
+  "p95LatencyMs": 139.27,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "company-state:safe-absence": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "company-state:CS-023",
+      "caseId": "CS-023",
+      "sourceCode": "company-state",
+      "table": "Companystate",
+      "cluster": "safe-absence",
+      "question": "وضعیت نماد فملی در Companystate چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «فملی» وجود ندارد؛ بنابراین نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 139.27
+    }
+  ]
+}

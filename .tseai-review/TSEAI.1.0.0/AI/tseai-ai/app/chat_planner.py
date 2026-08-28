@@ -223,4 +223,11 @@ def plan_chat(question:str)->ChatPlan:
         return ChatPlan("marketsymbol", symbol, None, 0.84, None, ["market-language","entity-hint-detected"],_requested_market_fields(q))
     if m:
         return ChatPlan("clarification", None, None, 0.65, "نماد موردنظر را مشخص کنید.", ["market-language","entity-hint-missing"])
-    return ChatPlan("knowledge", None, q, 0.58, None, ["knowledge-safe-default"])
+    return ChatPlan(
+        "clarification",
+        None,
+        None,
+        0.42,
+        "منظور سؤال را با اطمینان کافی تشخیص ندادم؛ لطفاً موضوع یا موجودیت موردنظر را کمی دقیق‌تر بنویسید.",
+        ["semantic-intent-uncertain"],
+    )

@@ -1,0 +1,39 @@
+{
+  "version": "orderbookcurrent-1.0",
+  "generatedAtUtc": "2026-08-28T14:34:07.886719+00:00",
+  "total": 1,
+  "passed": 1,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 12185.0,
+  "p95LatencyMs": 12185.0,
+  "clusters": {
+    "source-metadata": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "OB-036",
+      "cluster": "source-metadata",
+      "question": "زمان به‌روزرسانی منبع و زمان جمع‌آوری اردربوک فملی را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "1405/04/03",
+        "1405/05/20",
+        "زمان دریافت آن در سامانه"
+      ],
+      "mustNotContain": [
+        "در SQL"
+      ],
+      "maxAnswerChars": 380,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: آخرین زمان اعلام‌شده دفتر سفارش 1405/04/03 ساعت 16:59:58 و زمان دریافت آن در سامانه 1405/05/20 ساعت 12:18:59 است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 12185.0
+    }
+  ]
+}

@@ -1,0 +1,924 @@
+{
+  "generatedAtUtc": "2026-08-28T13:38:35.883080+00:00",
+  "hallCount": 32,
+  "cityAliasCount": 18,
+  "total": 114,
+  "passed": 114,
+  "failed": 0,
+  "gatePassed": true,
+  "failures": [],
+  "results": [
+    {
+      "hall": "آذربایجان شرقی (تبریز)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار آذربایجان شرقی (تبریز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 21 شرکت به تالار آذربایجان شرقی (تبریز) منتسب‌اند."
+    },
+    {
+      "hall": "آذربایجان شرقی (تبریز)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار آذربایجان شرقی (تبریز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار آذربایجان شرقی (تبریز)، 66 رکورد نهاد مالی با 46 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "آذربایجان شرقی (تبریز)",
+      "dimension": "hall_code",
+      "question": "کد تالار آذربایجان شرقی (تبریز) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «آذربایجان شرقی (تبریز)» با کد 2 ثبت شده است."
+    },
+    {
+      "hall": "آذربایجان غربی (ارومیه)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار آذربایجان غربی (ارومیه) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار آذربایجان غربی (ارومیه) منتسب‌اند."
+    },
+    {
+      "hall": "آذربایجان غربی (ارومیه)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار آذربایجان غربی (ارومیه) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار آذربایجان غربی (ارومیه)، 28 رکورد نهاد مالی با 21 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "آذربایجان غربی (ارومیه)",
+      "dimension": "hall_code",
+      "question": "کد تالار آذربایجان غربی (ارومیه) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «آذربایجان غربی (ارومیه)» با کد 3 ثبت شده است."
+    },
+    {
+      "hall": "اردبیل",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار اردبیل چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 3 شرکت به تالار اردبیل منتسب‌اند."
+    },
+    {
+      "hall": "اردبیل",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار اردبیل چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار اردبیل، 12 رکورد نهاد مالی با 12 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "اردبیل",
+      "dimension": "hall_code",
+      "question": "کد تالار اردبیل چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «اردبیل» با کد 5 ثبت شده است."
+    },
+    {
+      "hall": "اصفهان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار اصفهان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 28 شرکت به تالار اصفهان منتسب‌اند."
+    },
+    {
+      "hall": "اصفهان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار اصفهان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار اصفهان، 105 رکورد نهاد مالی با 66 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "اصفهان",
+      "dimension": "hall_code",
+      "question": "کد تالار اصفهان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «اصفهان» با کد 6 ثبت شده است."
+    },
+    {
+      "hall": "البرز (کرج)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار البرز (کرج) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 7 شرکت به تالار البرز (کرج) منتسب‌اند."
+    },
+    {
+      "hall": "البرز (کرج)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار البرز (کرج) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار البرز (کرج)، 66 رکورد نهاد مالی با 53 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "البرز (کرج)",
+      "dimension": "hall_code",
+      "question": "کد تالار البرز (کرج) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «البرز (کرج)» با کد 22 ثبت شده است."
+    },
+    {
+      "hall": "ایلام",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار ایلام چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 2 شرکت به تالار ایلام منتسب‌اند."
+    },
+    {
+      "hall": "ایلام",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار ایلام چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار ایلام، 3 رکورد نهاد مالی با 3 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "ایلام",
+      "dimension": "hall_code",
+      "question": "کد تالار ایلام چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «ایلام» با کد 23 ثبت شده است."
+    },
+    {
+      "hall": "بوشهر",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار بوشهر چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 8 شرکت به تالار بوشهر منتسب‌اند."
+    },
+    {
+      "hall": "بوشهر",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار بوشهر چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار بوشهر، 6 رکورد نهاد مالی با 6 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "بوشهر",
+      "dimension": "hall_code",
+      "question": "کد تالار بوشهر چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «بوشهر» با کد 24 ثبت شده است."
+    },
+    {
+      "hall": "تهران",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار تهران چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 176 شرکت به تالار تهران منتسب‌اند."
+    },
+    {
+      "hall": "تهران",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار تهران چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار تهران، 0 رکورد نهاد مالی با 0 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "تهران",
+      "dimension": "hall_code",
+      "question": "کد تالار تهران چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «تهران» با کد 25 ثبت شده است."
+    },
+    {
+      "hall": "چهارمحال و بختیاری",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار چهارمحال و بختیاری چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 0 شرکت به تالار چهارمحال و بختیاری منتسب‌اند."
+    },
+    {
+      "hall": "چهارمحال و بختیاری",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار چهارمحال و بختیاری چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار چهارمحال و بختیاری، 11 رکورد نهاد مالی با 10 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "چهارمحال و بختیاری",
+      "dimension": "hall_code",
+      "question": "کد تالار چهارمحال و بختیاری چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «چهارمحال و بختیاری» با کد 26 ثبت شده است."
+    },
+    {
+      "hall": "خراسان جنوبی (بیرجند)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار خراسان جنوبی (بیرجند) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 4 شرکت به تالار خراسان جنوبی (بیرجند) منتسب‌اند."
+    },
+    {
+      "hall": "خراسان جنوبی (بیرجند)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار خراسان جنوبی (بیرجند) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار خراسان جنوبی (بیرجند)، 8 رکورد نهاد مالی با 8 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "خراسان جنوبی (بیرجند)",
+      "dimension": "hall_code",
+      "question": "کد تالار خراسان جنوبی (بیرجند) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان جنوبی (بیرجند)» با کد 8 ثبت شده است."
+    },
+    {
+      "hall": "خراسان رضوی (مشهد)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار خراسان رضوی (مشهد) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 15 شرکت به تالار خراسان رضوی (مشهد) منتسب‌اند."
+    },
+    {
+      "hall": "خراسان رضوی (مشهد)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار خراسان رضوی (مشهد) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار خراسان رضوی (مشهد)، 81 رکورد نهاد مالی با 64 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "خراسان رضوی (مشهد)",
+      "dimension": "hall_code",
+      "question": "کد تالار خراسان رضوی (مشهد) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان رضوی (مشهد)» با کد 9 ثبت شده است."
+    },
+    {
+      "hall": "خراسان شمالی",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار خراسان شمالی چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 3 شرکت به تالار خراسان شمالی منتسب‌اند."
+    },
+    {
+      "hall": "خراسان شمالی",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار خراسان شمالی چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار خراسان شمالی، 7 رکورد نهاد مالی با 7 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "خراسان شمالی",
+      "dimension": "hall_code",
+      "question": "کد تالار خراسان شمالی چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان شمالی» با کد 27 ثبت شده است."
+    },
+    {
+      "hall": "خوزستان (اهواز)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار خوزستان (اهواز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 11 شرکت به تالار خوزستان (اهواز) منتسب‌اند."
+    },
+    {
+      "hall": "خوزستان (اهواز)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار خوزستان (اهواز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار خوزستان (اهواز)، 21 رکورد نهاد مالی با 15 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "خوزستان (اهواز)",
+      "dimension": "hall_code",
+      "question": "کد تالار خوزستان (اهواز) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خوزستان (اهواز)» با کد 4 ثبت شده است."
+    },
+    {
+      "hall": "زنجان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار زنجان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 10 شرکت به تالار زنجان منتسب‌اند."
+    },
+    {
+      "hall": "زنجان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار زنجان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار زنجان، 41 رکورد نهاد مالی با 37 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "زنجان",
+      "dimension": "hall_code",
+      "question": "کد تالار زنجان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «زنجان» با کد 10 ثبت شده است."
+    },
+    {
+      "hall": "سمنان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار سمنان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار سمنان منتسب‌اند."
+    },
+    {
+      "hall": "سمنان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار سمنان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار سمنان، 15 رکورد نهاد مالی با 15 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "سمنان",
+      "dimension": "hall_code",
+      "question": "کد تالار سمنان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «سمنان» با کد 11 ثبت شده است."
+    },
+    {
+      "hall": "سیستان و بلوچستان (زاهدان)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار سیستان و بلوچستان (زاهدان) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 2 شرکت به تالار سیستان و بلوچستان (زاهدان) منتسب‌اند."
+    },
+    {
+      "hall": "سیستان و بلوچستان (زاهدان)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار سیستان و بلوچستان (زاهدان) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار سیستان و بلوچستان (زاهدان)، 6 رکورد نهاد مالی با 6 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "سیستان و بلوچستان (زاهدان)",
+      "dimension": "hall_code",
+      "question": "کد تالار سیستان و بلوچستان (زاهدان) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «سیستان و بلوچستان (زاهدان)» با کد 12 ثبت شده است."
+    },
+    {
+      "hall": "فارس (شیراز)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار فارس (شیراز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 17 شرکت به تالار فارس (شیراز) منتسب‌اند."
+    },
+    {
+      "hall": "فارس (شیراز)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار فارس (شیراز) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار فارس (شیراز)، 48 رکورد نهاد مالی با 37 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "فارس (شیراز)",
+      "dimension": "hall_code",
+      "question": "کد تالار فارس (شیراز) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «فارس (شیراز)» با کد 13 ثبت شده است."
+    },
+    {
+      "hall": "قزوین",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار قزوین چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 15 شرکت به تالار قزوین منتسب‌اند."
+    },
+    {
+      "hall": "قزوین",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار قزوین چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار قزوین، 24 رکورد نهاد مالی با 24 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "قزوین",
+      "dimension": "hall_code",
+      "question": "کد تالار قزوین چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «قزوین» با کد 14 ثبت شده است."
+    },
+    {
+      "hall": "قم",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار قم چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 2 شرکت به تالار قم منتسب‌اند."
+    },
+    {
+      "hall": "قم",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار قم چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار قم، 20 رکورد نهاد مالی با 19 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "قم",
+      "dimension": "hall_code",
+      "question": "کد تالار قم چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «قم» با کد 15 ثبت شده است."
+    },
+    {
+      "hall": "کردستان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار کردستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 2 شرکت به تالار کردستان منتسب‌اند."
+    },
+    {
+      "hall": "کردستان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار کردستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار کردستان، 11 رکورد نهاد مالی با 8 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "کردستان",
+      "dimension": "hall_code",
+      "question": "کد تالار کردستان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کردستان» با کد 28 ثبت شده است."
+    },
+    {
+      "hall": "کرمان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار کرمان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 7 شرکت به تالار کرمان منتسب‌اند."
+    },
+    {
+      "hall": "کرمان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار کرمان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "کرمان",
+      "dimension": "hall_code",
+      "question": "کد تالار کرمان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کرمان» با کد 16 ثبت شده است."
+    },
+    {
+      "hall": "کرمانشاه",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار کرمانشاه چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 6 شرکت به تالار کرمانشاه منتسب‌اند."
+    },
+    {
+      "hall": "کرمانشاه",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار کرمانشاه چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار کرمانشاه، 27 رکورد نهاد مالی با 25 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "کرمانشاه",
+      "dimension": "hall_code",
+      "question": "کد تالار کرمانشاه چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کرمانشاه» با کد 1 ثبت شده است."
+    },
+    {
+      "hall": "کهگیلویه و بویراحمد",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار کهگیلویه و بویراحمد چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 1 شرکت به تالار کهگیلویه و بویراحمد منتسب‌اند."
+    },
+    {
+      "hall": "کهگیلویه و بویراحمد",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار کهگیلویه و بویراحمد چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار کهگیلویه و بویراحمد، 2 رکورد نهاد مالی با 2 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "کهگیلویه و بویراحمد",
+      "dimension": "hall_code",
+      "question": "کد تالار کهگیلویه و بویراحمد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کهگیلویه و بویراحمد» با کد 29 ثبت شده است."
+    },
+    {
+      "hall": "کیش",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار کیش چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 3 شرکت به تالار کیش منتسب‌اند."
+    },
+    {
+      "hall": "کیش",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار کیش چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار کیش، 21 رکورد نهاد مالی با 21 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "کیش",
+      "dimension": "hall_code",
+      "question": "کد تالار کیش چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کیش» با کد 17 ثبت شده است."
+    },
+    {
+      "hall": "گلستان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار گلستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 2 شرکت به تالار گلستان منتسب‌اند."
+    },
+    {
+      "hall": "گلستان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار گلستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار گلستان، 12 رکورد نهاد مالی با 12 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "گلستان",
+      "dimension": "hall_code",
+      "question": "کد تالار گلستان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «گلستان» با کد 30 ثبت شده است."
+    },
+    {
+      "hall": "گیلان (رشت)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار گیلان (رشت) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 7 شرکت به تالار گیلان (رشت) منتسب‌اند."
+    },
+    {
+      "hall": "گیلان (رشت)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار گیلان (رشت) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار گیلان (رشت)، 21 رکورد نهاد مالی با 21 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "گیلان (رشت)",
+      "dimension": "hall_code",
+      "question": "کد تالار گیلان (رشت) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «گیلان (رشت)» با کد 18 ثبت شده است."
+    },
+    {
+      "hall": "لرستان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار لرستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار لرستان منتسب‌اند."
+    },
+    {
+      "hall": "لرستان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار لرستان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار لرستان، 15 رکورد نهاد مالی با 12 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "لرستان",
+      "dimension": "hall_code",
+      "question": "کد تالار لرستان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «لرستان» با کد 31 ثبت شده است."
+    },
+    {
+      "hall": "مازندران (ساری)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار مازندران (ساری) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار مازندران (ساری) منتسب‌اند."
+    },
+    {
+      "hall": "مازندران (ساری)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار مازندران (ساری) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار مازندران (ساری)، 33 رکورد نهاد مالی با 26 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "مازندران (ساری)",
+      "dimension": "hall_code",
+      "question": "کد تالار مازندران (ساری) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «مازندران (ساری)» با کد 19 ثبت شده است."
+    },
+    {
+      "hall": "مرکزی",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار مرکزی چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 13 شرکت به تالار مرکزی منتسب‌اند."
+    },
+    {
+      "hall": "مرکزی",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار مرکزی چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار مرکزی، 18 رکورد نهاد مالی با 18 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "مرکزی",
+      "dimension": "hall_code",
+      "question": "کد تالار مرکزی چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «مرکزی» با کد 32 ثبت شده است."
+    },
+    {
+      "hall": "هرمزگان (بندرعباس)",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار هرمزگان (بندرعباس) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار هرمزگان (بندرعباس) منتسب‌اند."
+    },
+    {
+      "hall": "هرمزگان (بندرعباس)",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار هرمزگان (بندرعباس) چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار هرمزگان (بندرعباس)، 9 رکورد نهاد مالی با 9 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "هرمزگان (بندرعباس)",
+      "dimension": "hall_code",
+      "question": "کد تالار هرمزگان (بندرعباس) چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «هرمزگان (بندرعباس)» با کد 7 ثبت شده است."
+    },
+    {
+      "hall": "همدان",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار همدان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 5 شرکت به تالار همدان منتسب‌اند."
+    },
+    {
+      "hall": "همدان",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار همدان چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار همدان، 19 رکورد نهاد مالی با 17 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "همدان",
+      "dimension": "hall_code",
+      "question": "کد تالار همدان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «همدان» با کد 20 ثبت شده است."
+    },
+    {
+      "hall": "یزد",
+      "dimension": "company_count",
+      "question": "تعداد شرکت‌های تالار یزد چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در جدول Company، 8 شرکت به تالار یزد منتسب‌اند."
+    },
+    {
+      "hall": "یزد",
+      "dimension": "institution_count",
+      "question": "تعداد نهادهای مالی تالار یزد چقدر است؟",
+      "passed": true,
+      "issues": [],
+      "answer": "در تالار یزد، 30 رکورد نهاد مالی با 21 نام متمایز ثبت شده است."
+    },
+    {
+      "hall": "یزد",
+      "dimension": "hall_code",
+      "question": "کد تالار یزد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «یزد» با کد 21 ثبت شده است."
+    },
+    {
+      "hall": "آذربایجان شرقی (تبریز)",
+      "dimension": "city_alias",
+      "question": "کد تالار تبریز چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «آذربایجان شرقی (تبریز)» با کد 2 ثبت شده است."
+    },
+    {
+      "hall": "آذربایجان غربی (ارومیه)",
+      "dimension": "city_alias",
+      "question": "کد تالار ارومیه چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «آذربایجان غربی (ارومیه)» با کد 3 ثبت شده است."
+    },
+    {
+      "hall": "البرز (کرج)",
+      "dimension": "city_alias",
+      "question": "کد تالار کرج چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «البرز (کرج)» با کد 22 ثبت شده است."
+    },
+    {
+      "hall": "چهارمحال و بختیاری",
+      "dimension": "city_alias",
+      "question": "کد تالار شهرکرد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «چهارمحال و بختیاری» با کد 26 ثبت شده است."
+    },
+    {
+      "hall": "خراسان جنوبی (بیرجند)",
+      "dimension": "city_alias",
+      "question": "کد تالار بیرجند چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان جنوبی (بیرجند)» با کد 8 ثبت شده است."
+    },
+    {
+      "hall": "خراسان رضوی (مشهد)",
+      "dimension": "city_alias",
+      "question": "کد تالار مشهد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان رضوی (مشهد)» با کد 9 ثبت شده است."
+    },
+    {
+      "hall": "خراسان شمالی",
+      "dimension": "city_alias",
+      "question": "کد تالار بجنورد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خراسان شمالی» با کد 27 ثبت شده است."
+    },
+    {
+      "hall": "خوزستان (اهواز)",
+      "dimension": "city_alias",
+      "question": "کد تالار اهواز چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «خوزستان (اهواز)» با کد 4 ثبت شده است."
+    },
+    {
+      "hall": "سیستان و بلوچستان (زاهدان)",
+      "dimension": "city_alias",
+      "question": "کد تالار زاهدان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «سیستان و بلوچستان (زاهدان)» با کد 12 ثبت شده است."
+    },
+    {
+      "hall": "فارس (شیراز)",
+      "dimension": "city_alias",
+      "question": "کد تالار شیراز چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «فارس (شیراز)» با کد 13 ثبت شده است."
+    },
+    {
+      "hall": "کردستان",
+      "dimension": "city_alias",
+      "question": "کد تالار سنندج چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کردستان» با کد 28 ثبت شده است."
+    },
+    {
+      "hall": "کهگیلویه و بویراحمد",
+      "dimension": "city_alias",
+      "question": "کد تالار یاسوج چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «کهگیلویه و بویراحمد» با کد 29 ثبت شده است."
+    },
+    {
+      "hall": "گلستان",
+      "dimension": "city_alias",
+      "question": "کد تالار گرگان چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «گلستان» با کد 30 ثبت شده است."
+    },
+    {
+      "hall": "گیلان (رشت)",
+      "dimension": "city_alias",
+      "question": "کد تالار رشت چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «گیلان (رشت)» با کد 18 ثبت شده است."
+    },
+    {
+      "hall": "لرستان",
+      "dimension": "city_alias",
+      "question": "کد تالار خرم آباد چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «لرستان» با کد 31 ثبت شده است."
+    },
+    {
+      "hall": "مازندران (ساری)",
+      "dimension": "city_alias",
+      "question": "کد تالار ساری چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «مازندران (ساری)» با کد 19 ثبت شده است."
+    },
+    {
+      "hall": "مرکزی",
+      "dimension": "city_alias",
+      "question": "کد تالار اراک چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «مرکزی» با کد 32 ثبت شده است."
+    },
+    {
+      "hall": "هرمزگان (بندرعباس)",
+      "dimension": "city_alias",
+      "question": "کد تالار بندرعباس چیست؟",
+      "passed": true,
+      "issues": [],
+      "answer": "تالار منطقه‌ای «هرمزگان (بندرعباس)» با کد 7 ثبت شده است."
+    }
+  ]
+}

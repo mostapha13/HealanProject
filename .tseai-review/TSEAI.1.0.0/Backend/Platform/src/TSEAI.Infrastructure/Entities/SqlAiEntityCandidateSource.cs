@@ -17,6 +17,10 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
             throw new InvalidOperationException("ConnectionStrings:SqlAi is not configured.");
 
         var expected = request.ExpectedKinds.Count == 0 ? null : request.ExpectedKinds.ToHashSet();
+        var instrumentOnly=expected is not null&&expected.All(x=>x is EntityKind.Instrument or EntityKind.MarketIndex);
+        if(instrumentOnly&&cache.TryGetValue(InstrumentCatalogCacheKey(),out IReadOnlyList<CachedInstrument>? instrumentCatalog)
+           &&instrumentCatalog is not null)
+            return RankInstrumentCatalog(instrumentCatalog,request);
         var rows = new List<EntitySourceCandidate>();
         await using var connection = CreateConnection();
         await connection.OpenAsync(ct);
@@ -43,60 +47,10 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
 
     private async Task<IReadOnlyList<EntitySourceCandidate>> SearchInstrumentsAsync(SqlConnection connection, EntitySearchRequest request, CancellationToken ct)
     {
-        // Once the catalog is warm, resolve entirely in memory. Re-running an
-        // exact-miss SQL query for every colloquial variation (for example
-        // «فملی مال») needlessly scans/blocks the source database before the
-        // same cached catalog is consulted.
-        if(cache.TryGetValue(InstrumentCatalogCacheKey(),out IReadOnlyList<CachedInstrument>? cached)&&cached is not null)
-            return RankInstrumentCatalog(cached,request);
-
-        var looksNumeric=long.TryParse(request.CompactText,out _);
-        var looksLikeIsin=request.OriginalText.StartsWith("IR",StringComparison.OrdinalIgnoreCase);
-        var looksLikeCanonicalId=request.OriginalText.Length>24 || request.OriginalText.Contains('-',StringComparison.Ordinal);
-        var predicate=looksNumeric
-            ? "(i.InsCode=TRY_CONVERT(bigint,@Compact) OR i.InstrumentID=@Original)"
-            : looksLikeIsin
-                ? "i.CIsin=@Original"
-                : looksLikeCanonicalId
-                    ? "i.InstrumentID=@Original"
-                    : "(i.LVal18AFC=@Original OR i.LVal30=@Original)";
-        var sql=$$"""
-            SELECT TOP (@Limit)
-                CASE WHEN EXISTS (SELECT 1 FROM dbo.IndexLastLive ix WHERE ix.Instrumentid = i.InstrumentID) THEN 2 ELSE 1 END AS Kind,
-                CONVERT(nvarchar(128), i.InstrumentID) AS CanonicalId,
-                COALESCE(NULLIF(i.LVal30,N''), NULLIF(i.LVal18AFC,N''), CONVERT(nvarchar(128),i.InstrumentID)) AS DisplayName,
-                i.LVal18AFC AS Symbol,
-                CONVERT(nvarchar(128), i.InstrumentID) AS InstrumentId,
-                TRY_CONVERT(bigint, i.InsCode) AS InsCode,
-                i.CIsin AS Isin,
-                i.LVal30 AS Alias1,
-                i.CSocCSAC AS Alias2,
-                i.LSoc30 AS Alias3,
-                i.marketcatery AS Meta1,
-                CONVERT(nvarchar(64), i.MarketCateryId) AS Meta2,
-                CONVERT(nvarchar(64), i.Industryid) AS Meta3,
-                CONVERT(nvarchar(16), i.Valid) AS Meta4
-            FROM dbo.Instrument i
-            WHERE {{predicate}}
-            ORDER BY i.Valid DESC,
-                CASE WHEN i.marketcatery=N'cash' AND i.InstrumentID LIKE N'%0001' THEN 0 ELSE 1 END,
-                i.SourceCollectedAt DESC,i.DInMar DESC,i.InsCode DESC;
-            """;
-
-        // Keep the indexed exact path separate from normalized contains matching. When both
-        // branches share one OR predicate SQL Server scans the full instrument catalog even
-        // for an exact symbol/id lookup.
-        var rows = (await connection.QueryAsync<CandidateRow>(new CommandDefinition(
-            sql, Params(request, allowFuzzy: false), cancellationToken: ct, commandTimeout: 15))).AsList();
-        if (rows.Count == 0 && request.CompactText.Length >= 2)
-            return await SearchCachedInstrumentsAsync(connection,request,ct);
-        return rows.Select(x => x.ToCandidate(new Dictionary<string, string?>
-        {
-            ["marketCategory"] = x.Meta1,
-            ["marketCategoryId"] = x.Meta2,
-            ["industryId"] = x.Meta3,
-            ["valid"] = x.Meta4
-        })).ToArray();
+        // One catalog load resolves symbols, names, ISINs, InsCodes and canonical ids
+        // in memory. The former exact-first path scanned dbo.Instrument again for every
+        // question about the same symbol and became the dominant latency under load.
+        return await SearchCachedInstrumentsAsync(connection,request,ct);
     }
 
     private async Task<IReadOnlyList<EntitySourceCandidate>> SearchCachedInstrumentsAsync(SqlConnection connection,EntitySearchRequest request,CancellationToken ct)
@@ -130,7 +84,7 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
             if(cache.TryGetValue(cacheKey,out hit)&&hit is not null) return hit;
             const string sql="""
                 SELECT
-                    CASE WHEN EXISTS (SELECT 1 FROM dbo.IndexLastLive ix WHERE ix.Instrumentid=i.InstrumentID) THEN 2 ELSE 1 END AS Kind,
+                    CASE WHEN ix.Instrumentid IS NOT NULL THEN 2 ELSE 1 END AS Kind,
                     CONVERT(nvarchar(128),i.InstrumentID) AS CanonicalId,
                     COALESCE(NULLIF(i.LVal30,N''),NULLIF(i.LVal18AFC,N''),CONVERT(nvarchar(128),i.InstrumentID)) AS DisplayName,
                     i.LVal18AFC AS Symbol,
@@ -145,6 +99,8 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
                     CONVERT(nvarchar(64),i.Industryid) AS Meta3,
                     CONVERT(nvarchar(16),i.Valid) AS Meta4
                 FROM dbo.Instrument i
+                LEFT JOIN (SELECT DISTINCT Instrumentid FROM dbo.IndexLastLive) ix ON ix.Instrumentid=i.InstrumentID
+                WHERE i.Valid=1
                 UNION ALL
                 SELECT
                     1 AS Kind,
@@ -161,8 +117,7 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
                     c.Markettypeid AS Meta2,
                     CONVERT(nvarchar(64),c.Industryid) AS Meta3,
                     N'1' AS Meta4
-                FROM dbo.Cashmarket c
-                WHERE NOT EXISTS(SELECT 1 FROM dbo.Instrument i WHERE i.InstrumentID=c.Instrumentid);
+                FROM dbo.Cashmarket c;
                 """;
             var rows=(await connection.QueryAsync<CandidateRow>(new CommandDefinition(sql,cancellationToken:ct,commandTimeout:30))).AsList();
             hit=rows.Select(x=>new CachedInstrument(x.ToCandidate(new Dictionary<string,string?>
@@ -174,8 +129,8 @@ public sealed class SqlAiEntityCandidateSource(IConfiguration configuration,IMem
             }))).ToArray();
             cache.Set(cacheKey,hit,new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow=TimeSpan.FromMinutes(30),
-                SlidingExpiration=TimeSpan.FromMinutes(10)
+                AbsoluteExpirationRelativeToNow=TimeSpan.FromHours(1),
+                SlidingExpiration=TimeSpan.FromMinutes(30)
             });
             return hit;
         }

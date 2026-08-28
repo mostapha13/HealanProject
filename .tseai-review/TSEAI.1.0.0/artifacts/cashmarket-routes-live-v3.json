@@ -1,0 +1,76 @@
+{
+  "version": "cashmarket-1.0",
+  "generatedAtUtc": "2026-08-28T14:11:55.630104+00:00",
+  "total": 3,
+  "passed": 3,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 379.12,
+  "p95LatencyMs": 379.12,
+  "clusters": {
+    "classification": {
+      "total": 1,
+      "passed": 1
+    },
+    "ranking": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "CM-030",
+      "cluster": "classification",
+      "question": "وضعیت معاملاتی نماد فملی چیست؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "مجاز"
+      ],
+      "maxAnswerChars": 180,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: وضعیت معاملاتی «مجاز» است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 23660.47
+    },
+    {
+      "id": "CM-044",
+      "cluster": "ranking",
+      "question": "پنج نماد با بیشترین اثر مثبت روی شاخص را بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "فملی",
+        "شپنا",
+        "شبندر",
+        "وپاسار",
+        "شستا",
+        "اثر بر شاخص"
+      ],
+      "maxAnswerChars": 1000,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: اثر بر شاخص 22,074.17 واحد\n2. شپنا — پالایش نفت اصفهان: اثر بر شاخص 6,555.72 واحد\n3. شبندر — پالایش نفت بندرعباس: اثر بر شاخص 4,853.55 واحد\n4. وپاسار — بانک پاسارگاد: اثر بر شاخص 4,416.25 واحد\n5. شستا — سرمایه‌گذاری تامین اجتماعی: اثر بر شاخص 3,818.84 واحد",
+      "actualType": "structured_query",
+      "latencyMs": 379.12
+    },
+    {
+      "id": "CM-046",
+      "cluster": "ranking",
+      "question": "پنج سهم با بیشترین افت قیمت را نشان بده",
+      "expectedType": "structured_query",
+      "mustContain": [
+        "واتی",
+        "-3.37٪",
+        "-3.00٪",
+        "تغییر آخرین قیمت"
+      ],
+      "maxAnswerChars": 1000,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. واتی — سرمایه‌ گذاری‌ آتیه‌ دماوند: تغییر آخرین قیمت -3.37٪\n2. اروند — پتروشیمی اروند: تغییر آخرین قیمت -3.00٪\n3. تماوند — تامین سرمایه دماوند: تغییر آخرین قیمت -3.00٪\n4. خراسان — پتروشیمی خراسان: تغییر آخرین قیمت -3.00٪\n5. داوه — داروسازی آوه سینا: تغییر آخرین قیمت -3.00٪",
+      "actualType": "structured_query",
+      "latencyMs": 198.78
+    }
+  ]
+}

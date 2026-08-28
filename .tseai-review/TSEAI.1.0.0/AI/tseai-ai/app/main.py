@@ -22,6 +22,7 @@ from .llm_chat_planner import plan_chat_with_llm
 from .llm_conversation_rewriter import rewrite_conversation_with_llm
 from .llm_grounded_answer import synthesize_grounded_answer
 from .llm_chat_reflection import reflect_chat_with_llm
+from .semantic_compiler import compile_semantic
 
 knowledge_service = KnowledgeService(QdrantKnowledgeStore(), create_embedding_provider())
 knowledge_index_lock = asyncio.Lock()
@@ -96,6 +97,10 @@ class ChatPlanRequest(BaseModel):
     question: str = Field(min_length=2, max_length=4000)
 
 
+class SemanticCompileRequest(BaseModel):
+    question: str = Field(min_length=2, max_length=4000)
+
+
 class ChatReflectionRequest(BaseModel):
     question: str = Field(min_length=2, max_length=4000)
     answer: str = Field(min_length=1, max_length=20000)
@@ -104,6 +109,9 @@ class ChatReflectionRequest(BaseModel):
     evidenceCount: int = Field(default=0, ge=0, le=100)
     failedTools: list[str] = Field(default_factory=list, max_length=20)
     evidence: list[str] = Field(default_factory=list, max_length=20)
+    semanticDomain: str | None = Field(default=None, max_length=100)
+    semanticOperation: str | None = Field(default=None, max_length=100)
+    responseShape: str | None = Field(default=None, max_length=100)
 
 
 class ConversationRewriteRequest(BaseModel):
@@ -173,6 +181,27 @@ async def chat_plan(request: Request) -> JSONResponse:
         "intent": plan.intent, "symbol": plan.symbol, "knowledge_query": plan.knowledge_query,
         "confidence": plan.confidence, "clarification": plan.clarification,
         "reasons": plan.reasons, "requested_fields": plan.requested_fields or [], "planner": planner_name,
+    })
+
+
+async def chat_semantic_compile(request: Request) -> JSONResponse:
+    req = await body(request, SemanticCompileRequest)
+    frame, compiler_name = await compile_semantic(req.question)
+    if frame is None:
+        return JSONResponse({"code": "semantic_compile_unavailable"}, status_code=503)
+    return JSONResponse({
+        "domain": frame.domain,
+        "operation": frame.operation,
+        "entities": frame.entities,
+        "metrics": frame.metrics,
+        "temporalExpression": frame.temporal_expression,
+        "responseShape": frame.response_shape,
+        "canonicalQuestion": frame.canonical_question,
+        "confidence": frame.confidence,
+        "requiresClarification": frame.requires_clarification,
+        "clarification": frame.clarification,
+        "reasons": frame.reasons,
+        "compiler": compiler_name,
     })
 
 
@@ -300,6 +329,7 @@ routes = [
     Route("/", root, methods=["GET"]),
     Route("/health", health, methods=["GET"]),
     Route("/chat/plan", chat_plan, methods=["POST"]),
+    Route("/chat/semantic-compile", chat_semantic_compile, methods=["POST"]),
     Route("/chat/reflect", chat_reflect, methods=["POST"]),
     Route("/chat/rewrite", chat_rewrite, methods=["POST"]),
     Route("/chat/synthesize", chat_synthesize, methods=["POST"]),

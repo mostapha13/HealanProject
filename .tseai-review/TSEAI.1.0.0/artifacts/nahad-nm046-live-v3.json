@@ -1,0 +1,39 @@
+{
+  "version": "nahad-mali-1.0",
+  "generatedAtUtc": "2026-08-28T14:14:59.861671+00:00",
+  "total": 1,
+  "passed": 0,
+  "passRate": 0.0,
+  "allPassed": false,
+  "p50LatencyMs": 356.72,
+  "p95LatencyMs": 356.72,
+  "clusters": {
+    "quality": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "NM-046",
+      "cluster": "quality",
+      "question": "در بررسی کیفیت داده، آیا هر نام تکراری در Nahad_Mali خطاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "لزوماً خطا نیست",
+        "شعب متعدد",
+        "97 گروه"
+      ],
+      "maxAnswerChars": 850,
+      "passed": false,
+      "issues": [
+        "missing:لزوماً خطا نیست",
+        "missing:شعب متعدد",
+        "missing:97 گروه"
+      ],
+      "answer": "کیفیت Companystate: از 58 رکورد، نماد، نام شرکت، تاریخ تغییر و دلیلِ خالی هرکدام 0، 0، 0 و 0 رکورد است؛ 28 مدیرعامل و 6 هیئت‌مدیره خالی‌اند. گروه نماد و کد تکراری به‌ترتیب 0 و 0 است.\n\nنهاد مالی «آیا هر تکراری خطاست» در جدول Nahad_Mali پیدا نشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 356.72
+    }
+  ]
+}

@@ -75,6 +75,56 @@ Assert(ipoProvince.RouteHint.ContextApplied
     &&ipoProvince.EffectiveQuestion=="تالار منطقه‌ای شرکت فرآورده‌های دامی ولبنی دالاهو در کدام استان ثبت شده است؟",
     "a company IPO province follow-up must bind the active company before canonical lookup");
 
+var hallCompanies=CanonicalReferenceAnswer.Exact("17 شرکت به تالار فارس (شیراز) منتسب‌اند.","company_hall","شرکت‌های تالار فارس (شیراز)",
+    [new("company_count","17","Talar:1"),new("company:1:title","پالایش نفت شیراز","Company:1")],
+    "فارس (شیراز)",relatedSubjects:["پالایش نفت شیراز"]);
+await svc.RecordReferenceAsync("u1","c1","تالار شیراز کیا زیر مجموعشن؟","تالار شیراز کیا زیر مجموعشن؟",hallCompanies.Answer,hallCompanies,temporal,CancellationToken.None);
+Assert(store.State.ActiveReference?.Kind=="company_hall"&&store.State.ActiveReference.SubjectName=="فارس (شیراز)"
+       &&store.State.PrimaryEntity is null,
+    "a hall-company answer must retain the hall as active context and clear an unrelated market symbol");
+var hallNames=await svc.PrepareAsync("u1","c1","اسمشون چیه؟",temporal,CancellationToken.None);
+Assert(hallNames.RouteHint.ContextApplied
+       &&hallNames.EffectiveQuestion=="فهرست شرکت‌های منتسب به تالار فارس (شیراز) را فقط نام‌ها بگو.",
+    "a names-only follow-up must bind the active regional hall");
+var possessiveHallNames=await svc.PrepareAsync("u1","c1","اسم شرکتاش؟",temporal,CancellationToken.None);
+Assert(possessiveHallNames.RouteHint.ContextApplied
+       &&possessiveHallNames.EffectiveQuestion=="فهرست شرکت‌های منتسب به تالار فارس (شیراز) را فقط نام‌ها بگو.",
+    "a possessive colloquial company-list follow-up must not fall into symbol resolution");
+var hallCount=await svc.PrepareAsync("u1","c1","چند شرکت هستن؟",temporal,CancellationToken.None);
+Assert(hallCount.RouteHint.ContextApplied
+       &&hallCount.EffectiveQuestion=="تعداد شرکت‌های منتسب به تالار فارس (شیراز) چقدر است؟",
+    "a count follow-up must bind the active regional hall");
+var explicitHallRoster=await svc.PrepareAsync("u1","c1","شرکت های زیر مجموعه تالار شیراز",temporal,CancellationToken.None);
+Assert(!explicitHallRoster.RouteHint.ContextApplied
+       &&explicitHallRoster.EffectiveQuestion=="شرکت های زیر مجموعه تالار شیراز"
+       &&!explicitHallRoster.EffectiveQuestion.Contains("بورس تهران"),
+    "an explicit hall-company question must override the prior hall and never become organization hierarchy");
+var explicitFinancialHall=await svc.PrepareAsync("u1","c1","نهادهای مالی تالار شیراز کیا هستن؟",temporal,CancellationToken.None);
+Assert(!explicitFinancialHall.RouteHint.ContextApplied&&explicitFinancialHall.EffectiveQuestion=="نهادهای مالی تالار شیراز کیا هستن؟",
+    "an explicit financial-institution question must override active Company hall context");
+var anaphoricFinancialHall=await svc.PrepareAsync("u1","c1","کارگزاری‌هاش رو بگو",temporal,CancellationToken.None);
+Assert(anaphoricFinancialHall.RouteHint.ContextApplied
+       &&anaphoricFinancialHall.EffectiveQuestion=="فهرست کارگزاری‌های تالار فارس (شیراز) را فقط نام‌ها بگو."
+       &&anaphoricFinancialHall.RouteHint.Reasons.Contains("financial-hall-cross-domain-followup"),
+    "an anaphoric financial-institution request must reuse the active Company hall");
+
+var financialHall=CanonicalReferenceAnswer.Exact("نام‌های کارگزاری ثبت‌شده در تالار فارس (شیراز)","financial_institution_hall","کارگزاری‌های تالار فارس (شیراز)",
+    [new("institution_record_count","47","Talar:1"),new("institution_distinct_count","36","Talar:1")],
+    "فارس (شیراز)","کارگزاری",["آگاه"]);
+await svc.RecordReferenceAsync("u1","c1","کارگزاری‌های تالار شیراز کیا هستند؟","کارگزاری‌های تالار شیراز کیا هستند؟",financialHall.Answer,financialHall,temporal,CancellationToken.None);
+var financialCount=await svc.PrepareAsync("u1","c1","چندتاشون هست؟",temporal,CancellationToken.None);
+Assert(financialCount.RouteHint.ContextApplied&&financialCount.EffectiveQuestion.Contains("تعداد کارگزاری‌های تالار فارس (شیراز)"),
+    "financial-hall count follow-ups must preserve both hall and institution type");
+var financialAddresses=await svc.PrepareAsync("u1","c1","آدرسشون رو بگو",temporal,CancellationToken.None);
+Assert(financialAddresses.RouteHint.ContextApplied&&financialAddresses.EffectiveQuestion.Contains("کارگزاری‌های تالار فارس (شیراز)")
+       &&financialAddresses.EffectiveQuestion.Contains("همراه آدرس"),
+    "financial-hall address follow-ups must preserve both hall and institution type");
+var anaphoricCompanies=await svc.PrepareAsync("u1","c1","شرکتاش رو بگو",temporal,CancellationToken.None);
+Assert(anaphoricCompanies.RouteHint.ContextApplied
+       &&anaphoricCompanies.EffectiveQuestion=="فهرست شرکت‌های منتسب به تالار فارس (شیراز) را فقط نام‌ها بگو."
+       &&anaphoricCompanies.RouteHint.Reasons.Contains("company-hall-cross-domain-followup"),
+    "an anaphoric company request must reuse the active financial-institution hall");
+
 var resolvedMarket=await new FakeResolver().ResolveAsync("خساپا",new EntityResolveOptions([EntityKind.Instrument]),CancellationToken.None);
 await svc.RecordAsync("u1","c1","قیمت نماد خساپا",ChatIntent.MarketSymbol,ChatCapabilityRoute.MarketSymbol,temporal,resolvedMarket,null,CancellationToken.None,"خساپا ۵۸۰ ریال است.");
 Assert(store.State.ActiveReference is null && store.State.PrimaryEntity?.Symbol=="خساپا","a new market subject must clear stale organization references");
@@ -91,6 +141,27 @@ var standaloneService=new ConversationContextService(staleMarketStore,new FakeRe
 var standaloneCompound=await standaloneService.PrepareAsync("u1","c2","نام شرکت فملی چیست و آخرین خبرش را بگو",temporal,CancellationToken.None);
 Assert(!standaloneCompound.RouteHint.ContextApplied&&standaloneRewriter.Calls==0,
     "an explicit standalone compound question must not wait for semantic conversation rewriting");
+
+var hallStore=new MemoryStore();
+var hallService=new ConversationContextService(hallStore,new FakeResolver(),new FakeRewriter());
+var zanjanHall=CanonicalReferenceAnswer.Exact("تالار منطقه‌ای زنجان با کد 10 ثبت شده است.","hall","تالار منطقه‌ای زنجان",
+    [new("hall_name","زنجان","Talar:1"),new("hall_code","10","Talar:1")],subjectName:"زنجان");
+await hallService.RecordReferenceAsync("u1","hall-c","تالار زنجان","تالار زنجان",zanjanHall.Answer,zanjanHall,temporal,CancellationToken.None);
+var hallAddress=await hallService.PrepareAsync("u1","hall-c","آدرسش",temporal,CancellationToken.None);
+Assert(hallAddress.RouteHint.ContextApplied&&hallAddress.EffectiveQuestion=="آدرس فیزیکی تالار زنجان کجاست؟"
+       &&hallAddress.RouteHint.Reasons.Contains("regional-hall-detail-followup"),
+    "a short physical-address follow-up must retain the active regional hall");
+
+var hallCatalog=CanonicalReferenceAnswer.Exact("در داده‌های فعلی آدرس فیزیکی هیچ‌یک از تالارها ثبت نشده است.",
+    "hall_address_catalog","پوشش آدرس فیزیکی تالارهای منطقه‌ای",
+    [new("physical_address_count","0","Talar")],subjectName:"تالارهای منطقه‌ای");
+await hallService.RecordReferenceAsync("u1","hall-c","آدرس کدوم تالارها رو داری؟","آدرس کدوم تالارها رو داری؟",hallCatalog.Answer,hallCatalog,temporal,CancellationToken.None);
+var physicalPlaces=await hallService.PrepareAsync("u1","hall-c","مکان های فیزیکی",temporal,CancellationToken.None);
+Assert(physicalPlaces.RouteHint.ContextApplied&&physicalPlaces.EffectiveQuestion.Contains("آدرس فیزیکی کدام تالارهای منطقه‌ای",StringComparison.Ordinal),
+    "a physical-place clarification must remain bound to hall-address coverage");
+var complaintRepair=await hallService.PrepareAsync("u1","hall-c","چرا اینقد خنگی؟",temporal,CancellationToken.None);
+Assert(complaintRepair.RouteHint.ContextApplied&&complaintRepair.EffectiveQuestion.Contains("آدرس فیزیکی کدام تالارهای منطقه‌ای",StringComparison.Ordinal),
+    "a complaint after a hall-address answer must repair the last topic instead of entering entity resolution");
 
 var router=new ContextRouterPlanner();
 var d=await router.Router.RouteWithContextAsync(compare.EffectiveQuestion,100,compare.RouteHint,CancellationToken.None);

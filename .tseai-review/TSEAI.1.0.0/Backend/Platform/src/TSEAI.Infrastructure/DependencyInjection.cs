@@ -91,6 +91,7 @@ public static class DependencyInjection
         services.AddHttpClient<IConversationQueryRewriter, HttpAiConversationQueryRewriter>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(12); });
         services.AddScoped<IConversationContextService, ConversationContextService>();
         services.AddScoped<IConversationTemporalContextResolver, ConversationTemporalContextResolver>();
+        services.AddHttpClient<ISemanticQuestionCompiler, HttpAiSemanticQuestionCompiler>(c => { c.BaseAddress = new Uri(cfg["AI:BaseUrl"] ?? "http://ai-engine:8000/"); c.Timeout=TimeSpan.FromSeconds(Math.Clamp(cfg.GetValue("AI:SemanticCompilerTimeoutSeconds",25),5,60)); });
         services.AddScoped<IChatCapabilityRouter, DeterministicCapabilityRouter>();
         services.AddSingleton<IMultiToolHybridPlanner, DeterministicMultiToolHybridPlanner>();
         services.AddSingleton<IChatEvidenceEngine, ChatEvidenceEngine>();

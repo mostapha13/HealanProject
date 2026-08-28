@@ -171,6 +171,13 @@ public sealed class PersianNaturalLanguageStructuredQueryInterpreter : INaturalL
 
     private static int? DetectTake(string q)
     {
+        if(ContainsAny(q,"چه نمادی","کدام نماد","کدوم نماد","چه سهمی","کدام سهم","کدوم سهم")
+           &&ContainsAny(q,"بیشترین","کمترین","بالاترین","پایین ترین","پایین‌ترین","برتر","پرحجم")) return 1;
+        var leadingCount=Regex.Match(q,@"(?:^|\s)(?<n>[0-9۰-۹٠-٩]{1,3})\s*(?:نماد|سهم|شرکت|مورد|تا)(?:\s|$)");
+        if(leadingCount.Success
+           &&ContainsAny(q,"بیشترین","کمترین","بالاترین","پایین ترین","پایین‌ترین","برتر","تاپ","top")
+           &&int.TryParse(NormalizeDigits(leadingCount.Groups["n"].Value),out var requestedCount))
+            return requestedCount;
         foreach (Match m in NumberRx.Matches(q))
         {
             var tail = q[Math.Min(q.Length, m.Index + m.Length)..];

@@ -1,0 +1,38 @@
+{
+  "version": "instrument-1.0",
+  "generatedAtUtc": "2026-08-28T14:18:32.297053+00:00",
+  "total": 1,
+  "passed": 1,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 9304.23,
+  "p95LatencyMs": 9304.23,
+  "clusters": {
+    "compound": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "INS-028",
+      "cluster": "compound",
+      "question": "تعداد سهام، ارزش اسمی و حجم مبنای خودرو را خلاصه بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "2,563,746,068,000 سهم",
+        "1,000 ریال",
+        "حجم مبنا 1 سهم"
+      ],
+      "mustNotContain": [
+        "قیمت پایانی"
+      ],
+      "maxAnswerChars": 420,
+      "passed": true,
+      "issues": [],
+      "answer": "خودرو: ارزش اسمی 1,000 ریال، تعداد سهام منتشره 2,563,746,068,000 سهم، حجم مبنا 1 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 9304.23
+    }
+  ]
+}

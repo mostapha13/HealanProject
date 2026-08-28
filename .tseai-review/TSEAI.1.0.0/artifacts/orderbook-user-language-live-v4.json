@@ -1,0 +1,65 @@
+{
+  "version": "orderbookcurrent-1.0",
+  "generatedAtUtc": "2026-08-28T14:27:02.567475+00:00",
+  "total": 2,
+  "passed": 1,
+  "passRate": 0.5,
+  "allPassed": false,
+  "p50LatencyMs": 16027.49,
+  "p95LatencyMs": 16027.49,
+  "clusters": {
+    "missing-book": {
+      "total": 1,
+      "passed": 1
+    },
+    "source-metadata": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "OB-035",
+      "cluster": "missing-book",
+      "question": "بهترین سفارش خرید رانیز چیه؟",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "رانیز",
+      "mustContain": [
+        "اطلاعات دفتر سفارش ثبت نشده"
+      ],
+      "mustNotContain": [
+        "قیمت 0",
+        "OrderBookCurrent"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای رانیز اطلاعات دفتر سفارش ثبت نشده است.",
+      "actualType": "marketsymbol",
+      "latencyMs": 16027.49
+    },
+    {
+      "id": "OB-036",
+      "cluster": "source-metadata",
+      "question": "زمان به‌روزرسانی منبع و زمان جمع‌آوری اردربوک فملی را بگو",
+      "expectedType": "marketsymbol",
+      "expectedEntity": "فملی",
+      "mustContain": [
+        "1405/04/03",
+        "1405/05/20",
+        "زمان دریافت آن در سامانه"
+      ],
+      "mustNotContain": [
+        "در SQL"
+      ],
+      "maxAnswerChars": 380,
+      "passed": false,
+      "issues": [
+        "request:HTTPError:HTTP Error 500: Internal Server Error"
+      ],
+      "answer": null,
+      "actualType": null,
+      "latencyMs": null
+    }
+  ]
+}

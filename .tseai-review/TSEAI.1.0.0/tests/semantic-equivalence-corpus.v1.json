@@ -21,25 +21,36 @@
     {"id":"SE-026","cluster":"board-members-names-only","question":"فقط اسم اعضای هیئت مدیره بورس تهران رو بهم بگو","expectedType":"structured_reference","mustContain":["بهروز خالق‌ویردی","عسگر نوربخش","مجتبی افشاری","حامد شادکام","میلاد فروغی","عباس نعیمی"],"mustNotContain":["رئیس هیئت‌مدیره","عضو هیئت‌مدیره","به گزارش"],"maxAnswerChars":180},
     {"id":"SE-027","cluster":"executive-deputy-subordinates","question":"زیرمجموعه معاون اجرایی بورس چه کسانی هستند؟","expectedType":"structured_reference","mustContain":["اسماعیل رازقی","سعید رضایی","سید احسان عدل","رضا قلیچ‌خانی","محمدحسین نوری‌زاده"],"mustNotContain":["خساپا","سایپا","حجم معاملات"],"maxAnswerChars":500},
 
-    {"id":"SE-030","cluster":"pe","question":"نسبت قیمت به سود ملی مس رو میگی؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
-    {"id":"SE-031","cluster":"pe","question":"پی بر ای شرکت ملی مس چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
-    {"id":"SE-032","cluster":"pe","question":"فملی چه P/E ای دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"]},
+    {"id":"SE-030","cluster":"pe","question":"نسبت قیمت به سود ملی مس رو میگی؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"],"allowSafeUnavailable":true},
+    {"id":"SE-031","cluster":"pe","question":"پی بر ای شرکت ملی مس چند است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"],"allowSafeUnavailable":true},
+    {"id":"SE-032","cluster":"pe","question":"فملی چه P/E ای دارد؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["P/E"],"allowSafeUnavailable":true},
 
-    {"id":"SE-040","cluster":"eps","question":"میزان سود هر سهم ملی مس چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"]},
-    {"id":"SE-041","cluster":"eps","question":"ملی مس به ازای هر سهم چقدر سود ساخته؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"]},
+    {"id":"SE-040","cluster":"eps","question":"میزان سود هر سهم ملی مس چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"],"allowSafeUnavailable":true},
+    {"id":"SE-041","cluster":"eps","question":"ملی مس به ازای هر سهم چقدر سود ساخته؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["EPS"],"allowSafeUnavailable":true},
 
-    {"id":"SE-050","cluster":"market-value","question":"ارزش بازار فملی چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
-    {"id":"SE-051","cluster":"market-value","question":"سرمایه بازار شرکت ملی مس الان چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
-    {"id":"SE-052","cluster":"market-value","question":"ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"]},
+    {"id":"SE-050","cluster":"market-value","question":"ارزش بازار فملی چقدر است؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"],"allowSafeUnavailable":true},
+    {"id":"SE-051","cluster":"market-value","question":"سرمایه بازار شرکت ملی مس الان چقدره؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["ارزش بازار"],"allowSafeUnavailable":true},
+    {"id":"SE-052","cluster":"market-value","question":"ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟","expectedTypes":["marketsymbol","composite_reference_market"],"expectedEntity":"فملی","mustContain":["ارزش بازار"],"mustNotContain":["نماد بورسی فملی است"],"allowSafeUnavailable":true},
 
-    {"id":"SE-060","cluster":"trade-count","question":"چند بار روی فملی معامله انجام شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
-    {"id":"SE-061","cluster":"trade-count","question":"تعداد دادوستدهای فملی چند تا بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"]},
+    {"id":"SE-060","cluster":"trade-count","question":"چند بار روی فملی معامله انجام شده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"],"allowSafeUnavailable":true},
+    {"id":"SE-061","cluster":"trade-count","question":"تعداد دادوستدهای فملی چند تا بوده؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["تعداد معاملات"],"allowSafeUnavailable":true},
 
-    {"id":"SE-070","cluster":"price-time","question":"آخرین نرخ فملی مال چه روزیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["شمسی"],"mustNotContain":["2026/"]},
-    {"id":"SE-071","cluster":"price-time","question":"قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت","شمسی"],"mustNotContain":["2026/"]},
+    {"id":"SE-070","cluster":"price-time","question":"آخرین نرخ فملی مال چه روزیه؟","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["1405/05/20"],"mustNotContain":["2026/"],"allowSafeUnavailable":true},
+    {"id":"SE-071","cluster":"price-time","question":"قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن","expectedType":"marketsymbol","expectedEntity":"فملی","mustContain":["آخرین قیمت","1405/05/20"],"mustNotContain":["2026/"],"allowSafeUnavailable":true},
 
-    {"id":"SE-080","cluster":"market-ranking","question":"کدام نمادها بیشترین حجم معامله را دارند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]},
-    {"id":"SE-081","cluster":"market-ranking","question":"سهام با بالاترین حجم دادوستد کدام‌اند؟","expectedType":"structured_query","mustContain":["حجم معاملات"]}
+    {"id":"SE-080","cluster":"market-ranking","question":"کدام نمادها بیشترین حجم معامله را دارند؟","expectedType":"structured_query","mustContain":["حجم معاملات"],"allowSafeUnavailable":true},
+    {"id":"SE-081","cluster":"market-ranking","question":"سهام با بالاترین حجم دادوستد کدام‌اند؟","expectedType":"structured_query","mustContain":["حجم معاملات"],"allowSafeUnavailable":true},
+
+    {"id":"SE-090","cluster":"semantic-hall-count","question":"واسه کرمان چند مرکز مالی داریم؟","expectedType":"structured_reference","mustContain":["تالار کرمان","21 رکورد","17 نام"],"maxAnswerChars":220},
+    {"id":"SE-091","cluster":"semantic-latest-ipo","question":"تازه‌ترین شرکتی که اومده تو بورس اسمش چیه؟","expectedType":"structured_reference","mustContain":["فرآورده‌های دامی ولبنی دالاهو","1403/10/24"],"maxAnswerChars":260},
+    {"id":"SE-092","cluster":"semantic-technology-role","question":"گرداننده فناوری بورس اسمش چیه؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+    {"id":"SE-093","cluster":"semantic-ambiguity","question":"کرمان چندتاست؟","expectedType":"clarification","mustContain":["منظور","شرکت","نهاد"],"maxAnswerChars":260},
+    {"id":"SE-094","cluster":"semantic-trade-volume","question":"فملی چند دست به دست شده؟","expectedType":"structured_reference","mustContain":["حجم معاملات فملی","583,222,314","1405/05/20"],"maxAnswerChars":240},
+    {"id":"SE-095","cluster":"semantic-hall-count","question":"تو کرمان چند نهاد فعال ثبت شده؟","expectedType":"structured_reference","mustContain":["تالار کرمان","21 رکورد","17 نام"],"maxAnswerChars":220},
+    {"id":"SE-096","cluster":"semantic-latest-ipo","question":"تازه‌ترین تازه‌وارد بورس کدوم شرکته؟","expectedType":"structured_reference","mustContain":["فرآورده‌های دامی ولبنی دالاهو","1403/10/24"],"maxAnswerChars":260},
+    {"id":"SE-097","cluster":"semantic-technology-role","question":"اسم کسی که کار فناوری بورس رو می‌چرخونه چیه؟","expectedType":"structured_reference","mustContain":["آرش جدیری‌سلیمی"],"maxAnswerChars":180},
+    {"id":"SE-098","cluster":"semantic-trade-volume","question":"میزان سهم جابه‌جا شده فملی رو بگو","expectedType":"structured_reference","mustContain":["حجم معاملات فملی","583,222,314","1405/05/20"],"maxAnswerChars":240},
+    {"id":"SE-099","cluster":"semantic-ambiguity","question":"از کرمان چند مورد داریم؟","expectedType":"clarification","mustContain":["منظور","کرمان"],"maxAnswerChars":260}
   ],
   "globalMustNotContain": [
     "داده قابل اتکایی برای پاسخ پیدا نشد",

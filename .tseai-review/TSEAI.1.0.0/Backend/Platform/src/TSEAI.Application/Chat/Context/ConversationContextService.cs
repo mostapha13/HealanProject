@@ -11,8 +11,9 @@ public sealed class ConversationContextService(
     IConversationQueryRewriter rewriter) : IConversationContextService
 {
     private static readonly string[] ClearCues = ["موضوع جدید","مکالمه جدید","کانتکست رو پاک کن","کانتکست را پاک کن","زمینه رو پاک کن","زمینه را پاک کن"];
+    private static readonly string[] ComplaintCues = ["خنگ","احمق","جواب بی ربط","جواب بی‌ربط","نامرتبط","اشتباه جواب","غلط جواب","درست جواب بده","دقیق جواب بده"];
     private static readonly string[] ComparisonCues = ["مقایسه","مقایسه کن","مقایسه‌شون","مقایسه شون","در مقایسه با","نسبت به"];
-    private static readonly string[] MarketFollowUps = ["حقیقی حقوقی","حقیقی‌حقوقی","اردربوک","اوردر بوک","سفارش خرید","سفارش فروش","قیمتش","حجمش","پایانیش","صف خریدش","صف فروشش","وضعیتش","تابلوش"];
+    private static readonly string[] MarketFollowUps = ["حقیقی حقوقی","حقیقی‌حقوقی","اردربوک","اوردر بوک","سفارش خرید","سفارش فروش","قیمتش","آخرین قیمتش","حجمش","حجم معاملاتش","ارزش معاملاتش","ارزش بازارش","پایانیش","قیمت پایانیش","صف خریدش","صف فروشش","وضعیتش","تابلوش"];
     private static readonly string[] KnowledgeFollowUps = ["خبرش","اخبارش","اطلاعیه‌ش","اطلاعیه اش","اطلاعیه‌اش","گزارشش","آخرین خبرش","خبر جدیدش"];
     private static readonly string[] CompanyReferenceFollowUps =
     [
@@ -50,6 +51,24 @@ public sealed class ConversationContextService(
     [
         "شون", "شان", "آنها", "اونا", "ایشان", "اینها", "همشون",
         "هرکدام", "هر کدام", "هرکدوم", "هر کدوم", "تک تک", "اعضا", "مدیران", "افراد"
+    ];
+    private static readonly string[] CompanyHallFollowUps =
+    [
+        "اسم", "نام", "اسامی", "کیا", "چه شرکت", "کدام شرکت", "کدوم شرکت", "شرکتاش", "شرکت هاش",
+        "فهرست", "لیست", "همه", "همشون", "چند", "چندتا", "چنتا", "تعداد", "شرکت ها", "شرکت‌های", "شرکت های", "شرکتای"
+    ];
+    private static readonly string[] FinancialHallFollowUps =
+    [
+        "اسم", "نام", "اسامی", "کیا", "نهادها", "نهاداش", "نهادهاش", "نهادای مالی",
+        "کارگزاری ها", "کارگزاریهاش", "کارگزاری هاش", "کارگزاریاش",
+        "سبدگردان ها", "سبدگرداناش", "سبدگردان هاش", "مشاوراش",
+        "فهرست", "لیست", "همه", "همشون", "چند", "چندتا", "چنتا", "تعداد", "آدرس", "نشانی", "نشونی", "تلفن", "تماس"
+    ];
+    private static readonly string[] RegionalHallDetailFollowUps =
+    [
+        "آدرسش", "نشونیش", "نشانیش", "مکانش", "کجاست", "کجا قرار", "شماره تماسش", "تلفنش",
+        "کدش", "چه کدی", "آخرین بروزرسانی", "آخرین به روزرسانی", "کی آپدیت", "چه زمانی جمع",
+        "زیر مجموعه کجاست", "زیرمجموعه کجاست", "کدام معاونت", "کدوم معاونت", "بالادستش"
     ];
 
     public async Task<ConversationTurnContext> PrepareAsync(string subject,string conversationId,string question,TemporalResolution temporal,CancellationToken ct)
@@ -101,8 +120,85 @@ public sealed class ConversationContextService(
         }
 
         var recent=state.RecentTurns??[];
+        if(state.ActiveReference is { Kind: "hall", SubjectName.Length: > 0 } regionalHall
+           &&!q.Contains("تالار",StringComparison.Ordinal)
+           &&RegionalHallDetailFollowUps.Any(cue=>q.Contains(cue,StringComparison.Ordinal)))
+        {
+            var effective=BuildRegionalHallFollowUp(q,regionalHall.SubjectName);
+            reasons.Add("regional-hall-detail-followup");
+            return new(question,effective,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { Kind: "hall_address_catalog" }
+           &&(ContainsAny(q,"مکان فیزیکی","مکان های فیزیکی","مکان‌های فیزیکی","آدرس فیزیکی","نشانی فیزیکی")
+              ||ComplaintCues.Any(cue=>q.Contains(cue,StringComparison.Ordinal))))
+        {
+            reasons.Add("regional-hall-address-catalog-followup");
+            if(ComplaintCues.Any(cue=>q.Contains(cue,StringComparison.Ordinal)))
+                reasons.Add("repair-request-retry-previous-question");
+            return new(question,"آدرس فیزیکی کدام تالارهای منطقه‌ای در داده‌های فعلی موجود است؟",state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(ComplaintCues.Any(cue=>q.Contains(cue,StringComparison.Ordinal))&&recent.Count>0)
+        {
+            reasons.Add("repair-request-retry-previous-question");
+            return new(question,recent[^1].EffectiveQuestion,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { SubjectName.Length: > 0 } companyHall
+           &&companyHall.Kind is "company_hall" or "hall"
+           &&!q.Contains("تالار",StringComparison.Ordinal)
+           &&IsFinancialHallCrossDomainFollowUp(q))
+        {
+            var effective=BuildFinancialHallFollowUp(q,companyHall.SubjectName,CanonicalFinancialInstitutionQuestion.DetectType(q));
+            reasons.Add("financial-hall-cross-domain-followup");
+            return new(question,effective,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { Kind: "financial_institution_hall", SubjectName.Length: > 0 } institutionHall
+           &&!q.Contains("تالار",StringComparison.Ordinal)
+           &&IsCompanyHallCrossDomainFollowUp(q))
+        {
+            var asksCount=ContainsAny(q,"چند","چندتا","چنتا","تعداد","شمارش");
+            var effective=asksCount
+                ? $"تعداد شرکت‌های منتسب به تالار {institutionHall.SubjectName} چقدر است؟"
+                : $"فهرست شرکت‌های منتسب به تالار {institutionHall.SubjectName} را فقط نام‌ها بگو.";
+            reasons.Add("company-hall-cross-domain-followup");
+            return new(question,effective,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { SubjectName.Length: > 0 } hallReference
+           &&hallReference.Kind is "company_hall" or "hall"
+           &&!q.Contains("تالار",StringComparison.Ordinal)
+           &&IsCompanyHallFollowUp(hallReference,q,standaloneQuestion))
+        {
+            var asksCount=ContainsAny(q,"چند","چندتا","چنتا","تعداد","شمارش");
+            var effective=asksCount
+                ? $"تعداد شرکت‌های منتسب به تالار {hallReference.SubjectName} چقدر است؟"
+                : $"فهرست شرکت‌های منتسب به تالار {hallReference.SubjectName} را فقط نام‌ها بگو.";
+            reasons.Add("company-hall-followup-with-active-reference");
+            return new(question,effective,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
+        if(state.ActiveReference is { Kind: "financial_institution_hall", SubjectName.Length: > 0 } financialHall
+           &&!q.Contains("تالار",StringComparison.Ordinal)
+           &&IsFinancialHallFollowUp(q,standaloneQuestion))
+        {
+            var effective=BuildFinancialHallFollowUp(q,financialHall.SubjectName,financialHall.SubjectRole);
+            reasons.Add("financial-hall-followup-with-active-reference");
+            return new(question,effective,state,
+                new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
+        }
+
         var rosterFollowUp=state.ActiveReference is not null&&IsOrganizationRosterFollowUp(state.ActiveReference,q);
-        if(state.ActiveReference is not null
+        if(state.ActiveReference is { Kind: var activeKind }
+            &&activeKind.StartsWith("organization",StringComparison.Ordinal)
             && !LooksLikeExplicitMarketQuestion(q)
             && (OrganizationFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal))
                 || rosterFollowUp))
@@ -121,6 +217,7 @@ public sealed class ConversationContextService(
 
         if(state.ActiveReference is { SubjectName.Length: > 0 } companyReference
             &&companyReference.Kind.StartsWith("company",StringComparison.Ordinal)
+            &&companyReference.Kind!="company_hall"
             &&CompanyReferenceFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
         {
             reasons.Add("company-followup-with-active-reference");
@@ -129,7 +226,9 @@ public sealed class ConversationContextService(
                 new(ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,null,null,true,reasons),null,null,false,false);
         }
 
-        if(primary is not null&&!standaloneQuestion)
+        var isReferentialMarketFollowUp=MarketFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal))
+            ||ReferentialCues.Any(x=>ContainsWholeCue(q,x));
+        if(primary is not null&&(!standaloneQuestion||isReferentialMarketFollowUp))
         {
             if(HybridFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)))
             {
@@ -141,7 +240,7 @@ public sealed class ConversationContextService(
                 reasons.Add("knowledge-followup-with-primary-entity");
                 return Applied(question,state,primary,ConversationFollowUpKind.Knowledge,ChatIntent.Knowledge,reasons);
             }
-            if(MarketFollowUps.Any(x=>q.Contains(x,StringComparison.Ordinal)) || ReferentialCues.Any(x=>ContainsWholeCue(q,x)))
+            if(isReferentialMarketFollowUp)
             {
                 reasons.Add("market-followup-with-primary-entity");
                 return Applied(question,state,primary,ConversationFollowUpKind.Market,ChatIntent.MarketSymbol,reasons);
@@ -203,7 +302,8 @@ public sealed class ConversationContextService(
         var active=new ConversationReference(reference.Reference.Kind,reference.Reference.Topic,reference.Reference.SubjectName,
             reference.Reference.SubjectRole,reference.Reference.RelatedSubjects);
         var turns=AppendTurn(current.RecentTurns,originalQuestion,effectiveQuestion,answer,"structured_reference",active.SubjectName??active.Topic);
-        var clearsMarketContext=reference.Reference.Kind.StartsWith("organization",StringComparison.Ordinal);
+        var clearsMarketContext=reference.Reference.Kind.StartsWith("organization",StringComparison.Ordinal)
+            ||reference.Reference.Kind is "company_hall" or "financial_institution_hall" or "hall" or "hall_address_catalog";
         var next=new ConversationContextState(conversationId,clearsMarketContext?null:current.PrimaryEntity,clearsMarketContext?null:current.SecondaryEntity,ChatIntent.Knowledge,
             ChatCapabilityRoute.Knowledge,temporalRef,originalQuestion,current.Revision+1,DateTimeOffset.UtcNow,active,turns);
         await store.SaveAsync(subject,next,ct);
@@ -332,6 +432,58 @@ public sealed class ConversationContextService(
 
     private static bool ContainsWholeCue(string normalized,string cue)
         => Regex.IsMatch(normalized,$@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(cue)}(?![\p{{L}}\p{{N}}])",RegexOptions.CultureInvariant);
+
+    private static bool ContainsAny(string value,params string[] candidates)
+        => candidates.Any(x=>value.Contains(x,StringComparison.Ordinal));
+
+    private static bool IsCompanyHallFollowUp(ConversationReference reference,string normalized,bool standalone)
+    {
+        if(CanonicalFinancialInstitutionQuestion.Parse(normalized).IsMatch
+           ||CanonicalContentQuestion.Parse(normalized).IsMatch
+           ||LooksLikeExplicitMarketQuestion(normalized)) return false;
+        var companyAnaphora=ContainsAny(normalized,"شرکتاش","شرکتاشون","شرکت هاش","شرکتهاش","شرکت ها","شرکت های","شرکتای","اسمشون","نامشون","اسامی شون","تعدادشون","چندتاشون","چنتاشون","همشون","فقط اسامی","فقط نام");
+        if(reference.Kind=="hall"&&!ContainsAny(normalized,"شرکتاش","شرکت هاش","شرکتهاش","شرکتای","شرکت ها","شرکت های","شرکت‌های")) return false;
+        return CompanyHallFollowUps.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal))&&(companyAnaphora||!standalone);
+    }
+
+    private static bool IsFinancialHallFollowUp(string normalized,bool standalone)
+    {
+        if(CanonicalCompanyQuestion.Parse(normalized).IsMatch
+           ||CanonicalContentQuestion.Parse(normalized).IsMatch
+           ||LooksLikeExplicitMarketQuestion(normalized)) return false;
+        var anaphora=ContainsAny(normalized,"نهادها","نهاداش","نهادهاش","نهاد هاش","نهادای مالی","کارگزاری ها","کارگزاریهاش","کارگزاری هاش","کارگزاریاش","سبدگردان ها","سبدگرداناش","سبدگردان هاش","مشاوراش","اسمشون","نامشون","اسامی شون","تعدادشون","چندتاشون","چنتاشون","همشون","فقط اسامی","فقط نام","آدرسشون","نشونیشون","تلفنشون");
+        return FinancialHallFollowUps.Any(cue=>normalized.Contains(cue,StringComparison.Ordinal))&&(anaphora||!standalone);
+    }
+
+    private static bool IsFinancialHallCrossDomainFollowUp(string normalized)
+        =>ContainsAny(normalized,"نهادها","نهاداش","نهادهاش","نهاد هاش","نهادای مالی",
+            "کارگزاری","کارگزاریاش","سبدگردان","مشاوراش","مشاوران","تامین سرمایه","تأمین سرمایه");
+
+    private static bool IsCompanyHallCrossDomainFollowUp(string normalized)
+        =>ContainsAny(normalized,"شرکتاش","شرکتاشون","شرکت هاش","شرکتهاش","شرکت ها","شرکت های","شرکتای","کمپانیاش");
+
+    private static string BuildFinancialHallFollowUp(string normalized,string hallName,string? type)
+    {
+        var entity=string.IsNullOrWhiteSpace(type)?"نهادهای مالی":$"{type}‌های";
+        return ContainsAny(normalized,"چند","چندتا","چنتا","تعداد","شمارش")
+            ? $"تعداد {entity} تالار {hallName} چقدر است؟"
+            : ContainsAny(normalized,"آدرس","نشانی","نشونی")
+                ? $"فهرست {entity} تالار {hallName} را همراه آدرس بگو."
+                : ContainsAny(normalized,"تلفن","تماس")
+                    ? $"فهرست {entity} تالار {hallName} را همراه شماره تماس بگو."
+                    : $"فهرست {entity} تالار {hallName} را فقط نام‌ها بگو.";
+    }
+
+    private static string BuildRegionalHallFollowUp(string normalized,string hallName)
+        => ContainsAny(normalized,"آدرس","نشانی","نشونی","مکان","کجاست","کجا قرار")
+            ? $"آدرس فیزیکی تالار {hallName} کجاست؟"
+            : ContainsAny(normalized,"تلفن","شماره تماس")
+                ? $"شماره تماس تالار {hallName} چیست؟"
+                : ContainsAny(normalized,"کد")
+                    ? $"کد تالار {hallName} چیست؟"
+                    : ContainsAny(normalized,"معاونت","بالادست","زیر مجموعه","زیرمجموعه")
+                        ? $"تالار {hallName} زیرمجموعه کدام معاونت است؟"
+                        : $"آخرین بروزرسانی تالار {hallName} چه زمانی بوده است؟";
 
     private static bool IsOrganizationRosterFollowUp(ConversationReference reference,string normalized)
         => reference.Kind is "organization_board" or "organization_unit"

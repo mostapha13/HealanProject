@@ -1,0 +1,467 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T12:02:47.711504+00:00",
+  "runId": "7ce2145342ad",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.4",
+  "suiteSha256": "3bfab9f7c6daa9c0cb353d5babcde69bac582997bfb01437ff2eb3969aa4ed66",
+  "flowCount": 1,
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "passRate": 1.0,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 203.94,
+  "p95LatencyMs": 620.45,
+  "maxP95LatencyMs": 5000.0,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "failures": [],
+  "results": [
+    {
+      "id": "regional-hall-company-roster:hall-address-schema-boundary",
+      "flowId": "regional-hall-company-roster",
+      "turn": 1,
+      "question": "تالار یاسوج آدرسش کجاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "تالار منطقه‌ای مرتبط با این شهر در داده مرجع با نام «کهگیلویه و بویراحمد» ثبت شده است؛ اما جدول Talar نشانی پستی ندارد، بنابراین آدرس دقیق خود تالار در SQL فعلی موجود نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 64,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 257,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 606,
+          "detail": "kind=hall;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای کهگیلویه و بویراحمد;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 13,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 3235.72
+    },
+    {
+      "id": "regional-hall-company-roster:colloquial-roster",
+      "flowId": "regional-hall-company-roster",
+      "turn": 2,
+      "question": "تالار شیراز کیا زیر مجموعشن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "17 شرکت اول از 17 رکورد منتسب به تالار فارس (شیراز):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 31,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 401,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 620.45
+    },
+    {
+      "id": "regional-hall-company-roster:names-follow-up",
+      "flowId": "regional-hall-company-roster",
+      "turn": 3,
+      "question": "اسمشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "17 شرکت اول از 17 رکورد منتسب به تالار فارس (شیراز):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 148.11
+    },
+    {
+      "id": "regional-hall-company-roster:count-follow-up",
+      "flowId": "regional-hall-company-roster",
+      "turn": 4,
+      "question": "چند شرکت هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company، 17 شرکت به تالار فارس (شیراز) منتسب‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 22,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 44,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 166.16
+    },
+    {
+      "id": "regional-hall-company-roster:typo-roster",
+      "flowId": "regional-hall-company-roster",
+      "turn": 5,
+      "question": "تالار شیراز کیت زیر مجموعشن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "17 شرکت اول از 17 رکورد منتسب به تالار فارس (شیراز):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 63,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 209.38
+    },
+    {
+      "id": "regional-hall-company-roster:explicit-roster-after-context",
+      "flowId": "regional-hall-company-roster",
+      "turn": 6,
+      "question": "شرکت های زیر مجموعه تالار شیراز",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "17 شرکت اول از 17 رکورد منتسب به تالار فارس (شیراز):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 58,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 6,
+      "httpStatus": 200,
+      "latencyMs": 198.5
+    }
+  ]
+}

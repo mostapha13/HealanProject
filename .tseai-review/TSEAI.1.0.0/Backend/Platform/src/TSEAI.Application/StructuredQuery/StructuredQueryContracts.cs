@@ -80,7 +80,9 @@ public sealed record StructuredQueryExecutionResult(
     int QualityRejected,
     int Matched,
     IReadOnlyList<StructuredQueryRow> Results,
-    string? Error);
+    string? Error,
+    DateTimeOffset? ObservedAtUtc = null,
+    bool UsedLatestAvailableSnapshot = false);
 
 public interface INaturalLanguageStructuredQueryInterpreter
 {

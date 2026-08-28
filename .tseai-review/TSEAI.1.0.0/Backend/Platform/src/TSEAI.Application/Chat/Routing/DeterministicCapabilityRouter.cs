@@ -126,11 +126,24 @@ public sealed class DeterministicCapabilityRouter(
         var plan=await planner.PlanAsync(question,ct);
         if(PlannerEntityHintGuard.IsUnsafe(question,plan))
         {
-            var safePlan=new ChatPlan(ChatIntent.Knowledge,null,question,
-                Math.Min(plan.Confidence,0.85),null,[..plan.Reasons,"unsafe-generic-entity-hint-rejected"]);
-            return FromPlan(ChatCapabilityRoute.Knowledge,safePlan,
-                [new("knowledge.retrieve","qdrant-grounded-evidence")],
-                ["unsafe-generic-entity-hint-rejected","bounded-ai-planner"]);
+            var clarification=new ChatPlan(ChatIntent.Clarification,null,null,
+                Math.Min(plan.Confidence,0.49),
+                "منظور سؤال را با اطمینان کافی تشخیص ندادم؛ لطفاً موضوع یا موجودیت موردنظر را کمی دقیق‌تر بنویسید.",
+                [..plan.Reasons,"unsafe-generic-entity-hint-rejected"]);
+            return FromPlan(ChatCapabilityRoute.Clarification,clarification,[]);
+        }
+
+        // An unavailable or uncertain semantic planner must never turn an arbitrary
+        // question into an unrestricted vector search. That failure mode can return
+        // a fluent but unrelated document. Fail closed and ask for one precise detail.
+        if(plan.Intent==ChatIntent.Knowledge
+           && plan.Confidence<0.70
+           && plan.Reasons.Contains("knowledge-safe-default",StringComparer.OrdinalIgnoreCase))
+        {
+            var clarification=new ChatPlan(ChatIntent.Clarification,null,null,plan.Confidence,
+                "منظور سؤال را با اطمینان کافی تشخیص ندادم؛ لطفاً موضوع یا موجودیت موردنظر را کمی دقیق‌تر بنویسید.",
+                [..plan.Reasons,"low-confidence-knowledge-fallback-rejected"]);
+            return FromPlan(ChatCapabilityRoute.Clarification,clarification,[]);
         }
         return plan.Intent switch
         {

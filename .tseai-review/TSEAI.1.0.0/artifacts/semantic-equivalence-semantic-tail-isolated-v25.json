@@ -1,0 +1,215 @@
+{
+  "version": "1.0",
+  "generatedAtUtc": "2026-08-28T16:09:37.092863+00:00",
+  "total": 10,
+  "passed": 10,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 3954.12,
+  "p95LatencyMs": 5711.06,
+  "clusters": {
+    "semantic-ambiguity": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-hall-count": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-latest-ipo": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-technology-role": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-trade-volume": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "SE-090",
+      "cluster": "semantic-hall-count",
+      "question": "واسه کرمان چند مرکز مالی داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 5711.06,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "SE-091",
+      "cluster": "semantic-latest-ipo",
+      "question": "تازه‌ترین شرکتی که اومده تو بورس اسمش چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4104.28,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "error": null
+    },
+    {
+      "id": "SE-092",
+      "cluster": "semantic-technology-role",
+      "question": "گرداننده فناوری بورس اسمش چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3572.83,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-093",
+      "cluster": "semantic-ambiguity",
+      "question": "کرمان چندتاست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4890.36,
+      "type": "clarification",
+      "entity": "",
+      "answer": "آیا منظور شما تعداد شرکت‌های منتسب به تالار کرمان است یا تعداد شعب/نهاد‌های مالی در آن تالار؟",
+      "error": null
+    },
+    {
+      "id": "SE-094",
+      "cluster": "semantic-trade-volume",
+      "question": "فملی چند دست به دست شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3879.58,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "حجم معاملات فملی در آخرین داده ثبت‌شده (1405/05/20)، 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "SE-095",
+      "cluster": "semantic-hall-count",
+      "question": "تو کرمان چند نهاد فعال ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 47.16,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "SE-096",
+      "cluster": "semantic-latest-ipo",
+      "question": "تازه‌ترین تازه‌وارد بورس کدوم شرکته؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3616.74,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "error": null
+    },
+    {
+      "id": "SE-097",
+      "cluster": "semantic-technology-role",
+      "question": "اسم کسی که کار فناوری بورس رو می‌چرخونه چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3473.33,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-098",
+      "cluster": "semantic-trade-volume",
+      "question": "میزان سهم جابه‌جا شده فملی رو بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4028.66,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "حجم معاملات فملی در آخرین داده ثبت‌شده (1405/05/20)، 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "SE-099",
+      "cluster": "semantic-ambiguity",
+      "question": "از کرمان چند مورد داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 5268.56,
+      "type": "clarification",
+      "entity": "",
+      "answer": "«چند مورد» به چه چیزی اشاره دارد؟ آیا منظور تعداد شرکت‌های منتسب به تالار کرمان است یا تعداد نهاد‌های مالی در آن تالار؟",
+      "error": null
+    }
+  ],
+  "failures": []
+}

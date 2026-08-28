@@ -1,0 +1,13 @@
+{
+  "generatedAtUtc": "2026-08-28T17:17:38.161951+00:00",
+  "version": "1.0.0-rc.31",
+  "runId": "686d92dd4ff5407e91e94dbf5f4c0cda",
+  "requests": 20,
+  "concurrency": 20,
+  "errors": 0,
+  "p50Ms": 353.46,
+  "p95Ms": 525.74,
+  "maxP95Ms": 5000.0,
+  "passed": true,
+  "errorSamples": []
+}

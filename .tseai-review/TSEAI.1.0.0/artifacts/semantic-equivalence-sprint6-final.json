@@ -1,0 +1,785 @@
+{
+  "version": "1.0",
+  "generatedAtUtc": "2026-08-28T08:03:53.989099+00:00",
+  "total": 39,
+  "passed": 39,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 165.88,
+  "p95LatencyMs": 4563.47,
+  "clusters": {
+    "board-members": {
+      "total": 3,
+      "passed": 3
+    },
+    "board-members-names-only": {
+      "total": 1,
+      "passed": 1
+    },
+    "ceo-role": {
+      "total": 3,
+      "passed": 3
+    },
+    "current-date": {
+      "total": 3,
+      "passed": 3
+    },
+    "eps": {
+      "total": 2,
+      "passed": 2
+    },
+    "executive-deputy-subordinates": {
+      "total": 1,
+      "passed": 1
+    },
+    "market-ranking": {
+      "total": 2,
+      "passed": 2
+    },
+    "market-value": {
+      "total": 3,
+      "passed": 3
+    },
+    "pe": {
+      "total": 3,
+      "passed": 3
+    },
+    "price-time": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-ambiguity": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-hall-count": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-latest-ipo": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-technology-role": {
+      "total": 2,
+      "passed": 2
+    },
+    "semantic-trade-volume": {
+      "total": 2,
+      "passed": 2
+    },
+    "technology-role": {
+      "total": 4,
+      "passed": 4
+    },
+    "trade-count": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "SE-001",
+      "cluster": "current-date",
+      "question": "امروز چندمه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 30.74,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "امروز جمعه، 1405/06/06 شمسی است.",
+      "error": null
+    },
+    {
+      "id": "SE-002",
+      "cluster": "current-date",
+      "question": "الان چه تاریخی است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 11.27,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "امروز جمعه، 1405/06/06 شمسی است.",
+      "error": null
+    },
+    {
+      "id": "SE-003",
+      "cluster": "current-date",
+      "question": "تاریخ امروز را می‌گویی؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 11.89,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "امروز جمعه، 1405/06/06 شمسی است.",
+      "error": null
+    },
+    {
+      "id": "SE-010",
+      "cluster": "technology-role",
+      "question": "مدیر فناوری بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.04,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-011",
+      "cluster": "technology-role",
+      "question": "چه کسی مدیر فناوری بورس تهران است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.57,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-012",
+      "cluster": "technology-role",
+      "question": "مسئول فناوری و توسعه نرم افزاری بورس تهران چه فردیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.8,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-013",
+      "cluster": "technology-role",
+      "question": "مدیر واحد فناوری بورس تهران چه کسی می‌باشد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.77,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-020",
+      "cluster": "ceo-role",
+      "question": "مدیرعامل بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 10.35,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-021",
+      "cluster": "ceo-role",
+      "question": "چه فردی مدیر عامل بورس تهران است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.99,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-022",
+      "cluster": "ceo-role",
+      "question": "نام مدیرعامل فعلی بورس تهران چیست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12.33,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "محمود گودرزی، مدیرعامل بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-023",
+      "cluster": "board-members",
+      "question": "هیئت مدیره بورس کیا هستن؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9.32,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "error": null
+    },
+    {
+      "id": "SE-024",
+      "cluster": "board-members",
+      "question": "کلیه اعضای هیئت مدیره رو بهم بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 32.87,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "error": null
+    },
+    {
+      "id": "SE-025",
+      "cluster": "board-members",
+      "question": "آخرین اعضای هیئت مدیره بورس کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 26.36,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "error": null
+    },
+    {
+      "id": "SE-026",
+      "cluster": "board-members-names-only",
+      "question": "فقط اسم اعضای هیئت مدیره بورس تهران رو بهم بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12.74,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "بهروز خالق‌ویردی، عسگر نوربخش، مجتبی افشاری، حامد شادکام، میلاد فروغی، عباس نعیمی",
+      "error": null
+    },
+    {
+      "id": "SE-027",
+      "cluster": "executive-deputy-subordinates",
+      "question": "زیرمجموعه معاون اجرایی بورس چه کسانی هستند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 12.46,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران:\n\n1. اسماعیل رازقی — مدیر اداری\n2. سعید رضایی — مدیر سرمایه‌های انسانی\n3. سید احسان عدل — مدیر توسعه ساختمان\n4. رضا قلیچ‌خانی — مدیر امور مالی\n5. محمدحسین نوری‌زاده — مدیر مرکز داده، زیرساخت و شبکه",
+      "error": null
+    },
+    {
+      "id": "SE-030",
+      "cluster": "pe",
+      "question": "نسبت قیمت به سود ملی مس رو میگی؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 165.88,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-031",
+      "cluster": "pe",
+      "question": "پی بر ای شرکت ملی مس چند است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 180.83,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-032",
+      "cluster": "pe",
+      "question": "فملی چه P/E ای دارد؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 127.88,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-040",
+      "cluster": "eps",
+      "question": "میزان سود هر سهم ملی مس چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 172.33,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-041",
+      "cluster": "eps",
+      "question": "ملی مس به ازای هر سهم چقدر سود ساخته؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4563.47,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-050",
+      "cluster": "market-value",
+      "question": "ارزش بازار فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 80.74,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-051",
+      "cluster": "market-value",
+      "question": "سرمایه بازار شرکت ملی مس الان چقدره؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 472.59,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-052",
+      "cluster": "market-value",
+      "question": "ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 4118.97,
+      "type": "composite_reference_market",
+      "entity": "فملی",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نماد بورسی فملی است\n\nآخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-060",
+      "cluster": "trade-count",
+      "question": "چند بار روی فملی معامله انجام شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3628.24,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-061",
+      "cluster": "trade-count",
+      "question": "تعداد دادوستدهای فملی چند تا بوده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 186.77,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-070",
+      "cluster": "price-time",
+      "question": "آخرین نرخ فملی مال چه روزیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 206.55,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-071",
+      "cluster": "price-time",
+      "question": "قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 250.91,
+      "type": "data_quality_unavailable",
+      "entity": "فملی",
+      "answer": "آخرین داده ثبت‌شده بازار مربوط به 1405/05/20 ساعت 11:29:22 است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.",
+      "error": null
+    },
+    {
+      "id": "SE-080",
+      "cluster": "market-ranking",
+      "question": "کدام نمادها بیشترین حجم معامله را دارند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 446.73,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "هیچ نمادی با شرایط «مرتب‌سازی نزولی بر اساس TradeVolume؛ حداکثر 10 نتیجه» پیدا نشد. 567 نماد بررسی شد و 567 نماد به‌دلیل Quality Gate کنار گذاشته شد.",
+      "error": null
+    },
+    {
+      "id": "SE-081",
+      "cluster": "market-ranking",
+      "question": "سهام با بالاترین حجم دادوستد کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 42.75,
+      "type": "structured_query",
+      "entity": "",
+      "answer": "هیچ نمادی با شرایط «مرتب‌سازی نزولی بر اساس TradeVolume؛ حداکثر 10 نتیجه» پیدا نشد. 567 نماد بررسی شد و 567 نماد به‌دلیل Quality Gate کنار گذاشته شد.",
+      "error": null
+    },
+    {
+      "id": "SE-090",
+      "cluster": "semantic-hall-count",
+      "question": "واسه کرمان چند مرکز مالی داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3443.49,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "SE-091",
+      "cluster": "semantic-latest-ipo",
+      "question": "تازه‌ترین شرکتی که اومده تو بورس اسمش چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3034.66,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "error": null
+    },
+    {
+      "id": "SE-092",
+      "cluster": "semantic-technology-role",
+      "question": "گرداننده فناوری بورس اسمش چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3074.41,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-093",
+      "cluster": "semantic-ambiguity",
+      "question": "کرمان چندتاست؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3586.88,
+      "type": "clarification",
+      "entity": "",
+      "answer": "آیا منظور تعداد شرکت‌های منتسب به تالار کرمان است یا تعداد شعب/نهاد‌های مالی در آن تالار؟",
+      "error": null
+    },
+    {
+      "id": "SE-094",
+      "cluster": "semantic-trade-volume",
+      "question": "فملی چند دست به دست شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3249.24,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "حجم معاملات فملی در آخرین داده ثبت‌شده (1405/05/20)، 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "SE-095",
+      "cluster": "semantic-hall-count",
+      "question": "تو کرمان چند نهاد فعال ثبت شده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 28.33,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است.",
+      "error": null
+    },
+    {
+      "id": "SE-096",
+      "cluster": "semantic-latest-ipo",
+      "question": "تازه‌ترین تازه‌وارد بورس کدوم شرکته؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3260.82,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "error": null
+    },
+    {
+      "id": "SE-097",
+      "cluster": "semantic-technology-role",
+      "question": "اسم کسی که کار فناوری بورس رو می‌چرخونه چیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3063.03,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "آرش جدیری‌سلیمی، مدیر فناوری و توسعه نرم‌افزاری بورس تهران است.",
+      "error": null
+    },
+    {
+      "id": "SE-098",
+      "cluster": "semantic-trade-volume",
+      "question": "میزان سهم جابه‌جا شده فملی رو بگو",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 3015.03,
+      "type": "structured_reference",
+      "entity": "",
+      "answer": "حجم معاملات فملی در آخرین داده ثبت‌شده (1405/05/20)، 583,222,314 سهم است.",
+      "error": null
+    },
+    {
+      "id": "SE-099",
+      "cluster": "semantic-ambiguity",
+      "question": "از کرمان چند مورد داریم؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 5006.38,
+      "type": "clarification",
+      "entity": "",
+      "answer": "لطفاً مشخص کنید منظور از «کرمان» چیست (مثلاً: تعداد شرکت‌ها، تعداد نهاد‌های مالی، تعداد اخبار، یا تعداد نماد‌ها)؟",
+      "error": null
+    }
+  ],
+  "failures": []
+}

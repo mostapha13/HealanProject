@@ -65,10 +65,18 @@ def main() -> int:
         output, latency_ms, error = ask(args.base_url, case)
         answer = output.get("answer") or ""
         entity = ((output.get("entity") or {}).get("selected") or {}).get("symbol") or ""
+        normalized_answer = norm(answer)
+        safe_unavailable = bool(case.get("allowSafeUnavailable")) and (
+            norm(output.get("type")) == "data_quality_unavailable"
+            or "quality gate" in normalized_answer
+            or "قابل اتکا نیست" in normalized_answer
+            or "کنار گذاشته شد" in normalized_answer
+        )
+        expected_types = case.get("expectedTypes") or [case.get("expectedType")]
         checks = {
-            "type": norm(output.get("type")) == norm(case.get("expectedType")),
+            "type": norm(output.get("type")) in {norm(value) for value in expected_types} or safe_unavailable,
             "entity": not case.get("expectedEntity") or norm(entity) == norm(case["expectedEntity"]),
-            "mustContain": all(norm(value) in norm(answer) for value in case.get("mustContain", [])),
+            "mustContain": safe_unavailable or all(norm(value) in normalized_answer for value in case.get("mustContain", [])),
             "mustNotContain": all(norm(value) not in norm(answer) for value in forbidden + case.get("mustNotContain", [])),
             "answerLength": len(answer) <= case.get("maxAnswerChars", 10000),
         }

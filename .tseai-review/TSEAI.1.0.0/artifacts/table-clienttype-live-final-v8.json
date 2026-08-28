@@ -1,0 +1,3458 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T15:10:42.604394+00:00",
+  "runId": "a91de3a82c3e",
+  "manifestVersion": "2.0",
+  "datasetSha256": "67ad5a89dd8f21c6f851e50fc9efec27030f0d278a5dc203e4d0d04620643903",
+  "caseCount": 50,
+  "sources": {
+    "client-type": {
+      "total": 50,
+      "passed": 50
+    }
+  },
+  "total": 50,
+  "passed": 50,
+  "failed": 0,
+  "passRate": 1.0,
+  "p50LatencyMs": 73.87,
+  "p95LatencyMs": 147.3,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "clusters": {
+    "client-type:buyer-power": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:comparison": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:coverage": {
+      "total": 3,
+      "passed": 3
+    },
+    "client-type:cross-table": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:data-quality": {
+      "total": 3,
+      "passed": 3
+    },
+    "client-type:entity-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:full": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:metadata": {
+      "total": 3,
+      "passed": 3
+    },
+    "client-type:money-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:net-flow": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:participant-count": {
+      "total": 4,
+      "passed": 4
+    },
+    "client-type:per-capita": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:ranking": {
+      "total": 7,
+      "passed": 7
+    },
+    "client-type:raw-volume": {
+      "total": 4,
+      "passed": 4
+    },
+    "client-type:schema": {
+      "total": 4,
+      "passed": 4
+    },
+    "client-type:share-percent": {
+      "total": 4,
+      "passed": 4
+    },
+    "client-type:statistics": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:temporal-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "client-type:totals": {
+      "total": 2,
+      "passed": 2
+    },
+    "client-type:variant-symbol": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "failures": [],
+  "results": [
+    {
+      "id": "client-type:CT-001",
+      "caseId": "CT-001",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "حجم خرید حقیقی فملی چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 79,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 173.94
+    },
+    {
+      "id": "client-type:CT-002",
+      "caseId": "CT-002",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "حقوقی‌ها چند سهم فملی خریده‌اند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقوقی 31,502,288 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 38,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 69.1
+    },
+    {
+      "id": "client-type:CT-003",
+      "caseId": "CT-003",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "حجم فروش افراد حقیقی در فملی رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم فروش حقیقی 20,264,230 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 52.23
+    },
+    {
+      "id": "client-type:CT-004",
+      "caseId": "CT-004",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "raw-volume",
+      "question": "فروش حقوقی فملی چه حجمی بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم فروش حقوقی 377,963,817 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 53.5
+    },
+    {
+      "id": "client-type:CT-005",
+      "caseId": "CT-005",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "participant-count",
+      "question": "تعداد خریداران حقیقی فملی چند نفر بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد خریداران حقیقی 1,565 کد معاملاتی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 23,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 74.83
+    },
+    {
+      "id": "client-type:CT-006",
+      "caseId": "CT-006",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "participant-count",
+      "question": "تعداد خریداران حقوقی فملی چندتاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد خریداران حقوقی 61 کد معاملاتی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 31,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 75.99
+    },
+    {
+      "id": "client-type:CT-007",
+      "caseId": "CT-007",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "participant-count",
+      "question": "چند فروشنده حقیقی روی فملی بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد فروشندگان حقیقی 1,165 کد معاملاتی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 79.87
+    },
+    {
+      "id": "client-type:CT-008",
+      "caseId": "CT-008",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "participant-count",
+      "question": "Sell_CountN فملی چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد فروشندگان حقوقی 9 کد معاملاتی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 31,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 77.65
+    },
+    {
+      "id": "client-type:CT-009",
+      "caseId": "CT-009",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "totals",
+      "question": "مجموع حجم خرید فملی در ClientType چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: مجموع حجم خرید 398,228,047 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 27,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 75.03
+    },
+    {
+      "id": "client-type:CT-010",
+      "caseId": "CT-010",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "totals",
+      "question": "کل حجم فروش حقیقی و حقوقی فملی روی هم چند سهم است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم فروش حقیقی 20,264,230 سهم، حجم فروش حقوقی 377,963,817 سهم، مجموع حجم فروش 398,228,047 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 46,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 83.54
+    },
+    {
+      "id": "client-type:CT-011",
+      "caseId": "CT-011",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "net-flow",
+      "question": "خالص خرید حقیقی فملی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: خالص حجم حقیقی +346,461,529 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 63.15
+    },
+    {
+      "id": "client-type:CT-012",
+      "caseId": "CT-012",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "net-flow",
+      "question": "خالص حجم حقوقی فملی چقدر شده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: خالص حجم حقوقی -346,461,529 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 64.78
+    },
+    {
+      "id": "client-type:CT-013",
+      "caseId": "CT-013",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "per-capita",
+      "question": "سرانه خرید حقیقی فملی چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سرانه خرید حقیقی 234,329.56 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 31,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 95.6
+    },
+    {
+      "id": "client-type:CT-014",
+      "caseId": "CT-014",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "per-capita",
+      "question": "میانگین فروش هر حقیقی فملی چند سهم است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سرانه فروش حقیقی 17,394.19 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 68.2
+    },
+    {
+      "id": "client-type:CT-015",
+      "caseId": "CT-015",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "buyer-power",
+      "question": "قدرت خریدار فملی چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 61.51
+    },
+    {
+      "id": "client-type:CT-016",
+      "caseId": "CT-016",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "buyer-power",
+      "question": "وضعیت قدرت خریدار حقیقی فملی رو تفسیر کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، سرانه خرید حقیقی 13.47 برابر سرانه فروش است و سمت خرید حقیقی قوی‌تر است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 42,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 75.6
+    },
+    {
+      "id": "client-type:CT-017",
+      "caseId": "CT-017",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "share-percent",
+      "question": "درصد خرید حقیقی فملی از کل خرید چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سهم حقیقی از حجم خرید 92.09٪ است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 26,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 71.42
+    },
+    {
+      "id": "client-type:CT-018",
+      "caseId": "CT-018",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "share-percent",
+      "question": "سهم حقوقی از خرید فملی چند درصده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سهم حقوقی از حجم خرید 7.91٪ است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 36,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 66.17
+    },
+    {
+      "id": "client-type:CT-019",
+      "caseId": "CT-019",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "share-percent",
+      "question": "چه درصدی از فروش فملی متعلق به حقیقی‌هاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سهم حقیقی از حجم فروش 5.09٪ است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 26,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 71.77
+    },
+    {
+      "id": "client-type:CT-020",
+      "caseId": "CT-020",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "share-percent",
+      "question": "درصد فروش حقوقی فملی رو حساب کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: سهم حقوقی از حجم فروش 94.91٪ است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 38,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 63.08
+    },
+    {
+      "id": "client-type:CT-021",
+      "caseId": "CT-021",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "full",
+      "question": "اطلاعات حقیقی و حقوقی فملی را کامل بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: تعداد خریداران حقیقی 1,565 کد معاملاتی، تعداد خریداران حقوقی 61 کد معاملاتی، تعداد فروشندگان حقیقی 1,165 کد معاملاتی، تعداد فروشندگان حقوقی 9 کد معاملاتی، حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم، حجم فروش حقیقی 20,264,230 سهم، حجم فروش حقوقی 377,963,817 سهم، خالص حجم حقیقی +346,461,529 سهم، قدرت خریدار حقیقی 13.4717، زمان Snapshot منبع 1405/05/11 ساعت 12:58:46، زمان دریافت در سامانه 1405/05/20 ساعت 13:28:05 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 56.55
+    },
+    {
+      "id": "client-type:CT-022",
+      "caseId": "CT-022",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "metadata",
+      "question": "ClientType_counter فملی چند است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: شمارنده منبع ClientType برابر 2,638,624 (این مقدار تعداد معامله نیست) است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 77.59
+    },
+    {
+      "id": "client-type:CT-023",
+      "caseId": "CT-023",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "metadata",
+      "question": "زمان Snapshot منبع ClientType فملی چه موقع است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: زمان Snapshot منبع 1405/05/11 ساعت 12:58:46 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 49,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 88.27
+    },
+    {
+      "id": "client-type:CT-024",
+      "caseId": "CT-024",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "metadata",
+      "question": "زمان جمع‌آوری ClientType فملی در SQL را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: زمان دریافت در سامانه 1405/05/20 ساعت 13:28:05 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 50,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 76.25
+    },
+    {
+      "id": "client-type:CT-025",
+      "caseId": "CT-025",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "فرق creationTime و SourceCollectedAt در ClientType چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "creationTime زمان Snapshot اعلام‌شده توسط منبع است؛ SourceCollectedAt زمان دریافت و ثبت رکورد در SQL است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 44.18
+    },
+    {
+      "id": "client-type:CT-026",
+      "caseId": "CT-026",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "Buy_CountI یعنی چه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Buy_CountI تعداد کدهای خریدار حقیقی است، نه تعداد معاملات.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 34.86
+    },
+    {
+      "id": "client-type:CT-027",
+      "caseId": "CT-027",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "ستون Buy_I_Volume چه مفهومی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "Buy_I_Volume حجم خرید حقیقی بر حسب سهم/واحد است، نه ریال.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 40.57
+    },
+    {
+      "id": "client-type:CT-028",
+      "caseId": "CT-028",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "schema",
+      "question": "فیلد ClientType_counter چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "ClientType_counter شمارنده/نسخه منبع است و تعداد معامله نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=client_type_schema;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_schema;topic=تعریف ستون‌های ClientType;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 43.81
+    },
+    {
+      "id": "client-type:CT-029",
+      "caseId": "CT-029",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "money-safety",
+      "question": "ورود پول حقیقی فملی چقدر بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: ارزش ریالی تفکیکی خرید و فروش حقیقی موجود نیست؛ خالص ورود پول ریالی قابل محاسبه نیست، اما خالص حجم حقیقی +346,461,529 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 109,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 139.19
+    },
+    {
+      "id": "client-type:CT-030",
+      "caseId": "CT-030",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "comparison",
+      "question": "قدرت خریدار فملی را با خودرو مقایسه کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "مقایسه بر اساس آخرین اطلاعات حقیقی و حقوقی ثبت‌شده:\n- فملی: قدرت خریدار حقیقی 13.4717\n- خودرو: قدرت خریدار حقیقی 1.1593",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 295,
+          "detail": "kind=client_type;complete=True;facts=22;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی و خودرو;facts=22"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 336.87
+    },
+    {
+      "id": "client-type:CT-031",
+      "caseId": "CT-031",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "comparison",
+      "question": "در فملی حقیقی‌ها بیشتر خریده‌اند یا حقوقی‌ها؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: حجم خرید حقیقی 366,725,759 سهم، حجم خرید حقوقی 31,502,288 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 40,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 68.31
+    },
+    {
+      "id": "client-type:CT-032",
+      "caseId": "CT-032",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "cross-table",
+      "question": "قیمت پایانی و قدرت خریدار فملی را باهم بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، قیمت پایانی 21,660 ریال، زمان داده Cashmarket 1405/05/20 ساعت 11:29:22 است. توجه: زمان داده بازار و اطلاعات حقیقی و حقوقی یکسان نیست و اعداد هم‌زمان فرض نشده‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 29,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی فملی;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 50.02
+    },
+    {
+      "id": "client-type:CT-033",
+      "caseId": "CT-033",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "temporal-safety",
+      "question": "قدرت خریدار فملی در 10 تیر 1405 چند بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول ClientType فعلی فقط یک Snapshot جاری دارد و تاریخچه روزانه در آن نگهداری نشده است؛ بنابراین پاسخ قابل اتکا برای تاریخ درخواستی وجود ندارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "context=False;source=clock;primary=2026-07-01;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=نبود تاریخچه حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 38.5
+    },
+    {
+      "id": "client-type:CT-034",
+      "caseId": "CT-034",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "entity-safety",
+      "question": "حجم خرید حقیقی نماد خیالی‌تست چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد یا ابزار «خیالی تست» در اطلاعات حقیقی و حقوقی پیدا نشد؛ نماد دقیق‌تری وارد کنید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 54,
+          "detail": "kind=client_type;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=نماد ناشناخته در اطلاعات حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 87.24
+    },
+    {
+      "id": "client-type:CT-035",
+      "caseId": "CT-035",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "statistics",
+      "question": "جدول ClientType چند رکورد دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول ClientType دارای 1,880 رکورد برای 1,880 InsCode متمایز است. آخرین زمان Snapshot منبع 1405/05/11 ساعت 12:58:46 و زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است؛ 1 مقدار متمایز برای شمارنده منبع ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 45,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 80.58
+    },
+    {
+      "id": "client-type:CT-036",
+      "caseId": "CT-036",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "statistics",
+      "question": "در ClientType تعداد InsCode متمایز چندتاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "جدول ClientType دارای 1,880 رکورد برای 1,880 InsCode متمایز است. آخرین زمان Snapshot منبع 1405/05/11 ساعت 12:58:46 و زمان دریافت در SQL 1405/05/20 ساعت 13:28:05 است؛ 1 مقدار متمایز برای شمارنده منبع ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 32.18
+    },
+    {
+      "id": "client-type:CT-037",
+      "caseId": "CT-037",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "coverage",
+      "question": "پوشش ClientType در Instrument چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 1,880 رکورد ClientType، تعداد 1,729 رکورد به Instrument متصل و 151 رکورد فاقد تطبیق است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 294,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 331.48
+    },
+    {
+      "id": "client-type:CT-038",
+      "caseId": "CT-038",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "coverage",
+      "question": "چند رکورد یتیم ClientType بدون Instrument داریم؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در ClientType، 151 رکورد به هیچ InsCode در Instrument متصل نمی‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 27,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 75.01
+    },
+    {
+      "id": "client-type:CT-039",
+      "caseId": "CT-039",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "coverage",
+      "question": "پوشش Cashmarket برای ClientType چند رکورد است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "از 1,880 رکورد ClientType، تعداد 516 رکورد از مسیر InsCode و InstrumentID به Cashmarket متصل می‌شود. زمان Snapshot دو جدول باید جداگانه بررسی شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 114,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 147.3
+    },
+    {
+      "id": "client-type:CT-040",
+      "caseId": "CT-040",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "data-quality",
+      "question": "در ClientType چند رکورد مقدار منفی دارد؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در ClientType، 0 رکورد دارای مقدار منفی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 28,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 67.83
+    },
+    {
+      "id": "client-type:CT-041",
+      "caseId": "CT-041",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "data-quality",
+      "question": "آیا مجموع خرید و فروش در ClientType نامتوازن است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "در ClientType، 0 رکورد مجموع حجم خریدی نابرابر با مجموع حجم فروش دارد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 13,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 45.81
+    },
+    {
+      "id": "client-type:CT-042",
+      "caseId": "CT-042",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "data-quality",
+      "question": "کیفیت داده جدول ClientType و تعدادهای صفر را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "کنترل کیفیت ClientType: رکورد منفی 0، رکورد نامتوازن 0؛ تعداد خریدار حقیقی صفر 173، خریدار حقوقی صفر 762، فروشنده حقیقی صفر 198 و فروشنده حقوقی صفر 594 رکورد است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 13,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 47.02
+    },
+    {
+      "id": "client-type:CT-043",
+      "caseId": "CT-043",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "نمادهای دارای بیشترین خالص خرید حقیقی کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین خالص حجم حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. وتجارت3 — بانک تجارت: 1,823,000,000 سهم\n2. وتجارت — بانک تجارت: 1,483,330,037 سهم\n3. خودرو — ایران‌ خودرو: 658,564,053 سهم\n4. خساپا — سایپا: 569,121,536 سهم\n5. وهامونح — ح . سرمایه‌گذاری هامون صبا: 423,867,747 سهم\n6. وبصادر — بانک صادرات ایران: 423,167,664 سهم\n7. اخابر — مخابرات ایران: 374,374,876 سهم\n8. کرازیح — ح . ‌تولیدی‌شیشه‌رازی‌: 349,085,845 سهم\n9. فملی — ملی‌ صنایع‌ مس‌ ایران‌: 346,461,529 سهم\n10. ومعادن — توسعه‌معادن‌وفلزات‌: 330,417,627 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 80,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 117.03
+    },
+    {
+      "id": "client-type:CT-044",
+      "caseId": "CT-044",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "نمادهای با بالاترین قدرت خریدار حقیقی را لیست کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین قدرت خریدار حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. ومعادن3 — توسعه‌معادن‌وفلزات‌: 1,750.4581\n2. وپارس3 — بانک‌پارسیان‌: 1,550.9203\n3. ضبساما726 — اختیارخ بساما-9000-14050726: 1,428.8571\n4. ضبساما727 — اختیارخ بساما-9500-14050726: 982.5556\n5. رادان — صندوق س در سهام راد-سهام: 757.1168\n6. الکترومادح — ح . صنایع الکترونیک مادیران: 332.3347\n7. خبهمن3 — گروه‌بهمن‌: 326.9020\n8. ولکار — لیزینگ کارآفرین: 283.2332\n9. آوید — صندوق س. مشترک امین آوید-س: 264.4005\n10. الماس — صندوق س.امین تدبیرگران فردا-س: 235.4533\nاین رتبه‌بندی خام است و آستانه حداقل حجم یا تعداد مشارکت‌کننده روی آن اعمال نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 72,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 112.95
+    },
+    {
+      "id": "client-type:CT-045",
+      "caseId": "CT-045",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "5 نماد با بیشترین حجم خرید حقیقی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین حجم خرید حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 6,373,916,772 سهم\n2. وتجارت — بانک تجارت: 3,587,925,244 سهم\n3. خساپا — سایپا: 2,759,068,013 سهم\n4. وتجارت3 — بانک تجارت: 1,824,687,815 سهم\n5. های وب — داده گسترعصرنوین-های وب: 988,671,568 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 57.38
+    },
+    {
+      "id": "client-type:CT-046",
+      "caseId": "CT-046",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین حجم خرید حقوقی کدام‌اند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین حجم خرید حقوقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. کارین2 — صندوق س نگین سامان-ثابت: 2,160,242,971 سهم\n2. خودرو — ایران‌ خودرو: 786,457,010 سهم\n3. پترول2 — گ.س.وت.ص.پتروشیمی خلیج فارس: 735,000,000 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 38,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 72.92
+    },
+    {
+      "id": "client-type:CT-047",
+      "caseId": "CT-047",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "3 نماد با بالاترین حجم فروش حقیقی را بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین حجم فروش حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 5,715,352,719 سهم\n2. خساپا — سایپا: 2,189,946,477 سهم\n3. وتجارت — بانک تجارت: 2,104,595,207 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 36,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 84.19
+    },
+    {
+      "id": "client-type:CT-048",
+      "caseId": "CT-048",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین سرانه خرید حقیقی را رتبه‌بندی کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین سرانه خرید حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. ومدیر2 — گ.مدیریت ارزش سرمایه ص ب کشوری: 30,000,000.00 سهم\n2. کرازیح — ح . ‌تولیدی‌شیشه‌رازی‌: 9,186,469.61 سهم\n3. وتجارت3 — بانک تجارت: 7,540,032.29 سهم\nاین رتبه‌بندی خام است و آستانه حداقل حجم یا تعداد مشارکت‌کننده روی آن اعمال نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 53,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 92.75
+    },
+    {
+      "id": "client-type:CT-049",
+      "caseId": "CT-049",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "ranking",
+      "question": "3 نماد با بیشترین تعداد خریدار حقیقی را نشان بده",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "نماد‌های دارای بیشترین تعداد خریداران حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. عیار — صندوق طلای عیار مفید: 14,065 کد معاملاتی\n2. فزر — پویا زرکان آق دره: 9,822 کد معاملاتی\n3. سینرژی — ص.س. مبتنی بر کالای فارابی: 4,569 کد معاملاتی",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 48,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 87.82
+    },
+    {
+      "id": "client-type:CT-050",
+      "caseId": "CT-050",
+      "sourceCode": "client-type",
+      "table": "ClientType",
+      "cluster": "variant-symbol",
+      "question": "نسبت قدرت خریدار سهم خساپا الان چقدره؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerLength": true,
+        "trace": true,
+        "expectedTools": true,
+        "jalaliDisplay": true,
+        "authority": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "actualEntity": "",
+      "answer": "خساپا: قدرت خریدار حقیقی 1.2191 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 76,
+          "detail": "kind=client_type;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type;topic=اطلاعات حقیقی و حقوقی خساپا;facts=11"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "httpStatus": 200,
+      "latencyMs": 107.19
+    }
+  ]
+}

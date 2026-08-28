@@ -1,0 +1,92 @@
+{
+  "version": "clienttype-1.0",
+  "generatedAtUtc": "2026-08-28T14:28:22.637487+00:00",
+  "total": 3,
+  "passed": 2,
+  "passRate": 0.6666666666666666,
+  "allPassed": false,
+  "p50LatencyMs": 9457.86,
+  "p95LatencyMs": 9048.36,
+  "clusters": {
+    "money-safety": {
+      "total": 1,
+      "passed": 1
+    },
+    "cross-table": {
+      "total": 1,
+      "passed": 1
+    },
+    "entity-safety": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CT-029",
+      "cluster": "money-safety",
+      "question": "ورود پول حقیقی فملی چقدر بوده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "ارزش ریالی تفکیکی خرید و فروش حقیقی موجود نیست",
+        "خالص ورود پول ریالی قابل محاسبه نیست",
+        "+346,461,529 سهم"
+      ],
+      "mustNotContain": [
+        "است است",
+        "ClientType",
+        "SQL"
+      ],
+      "maxAnswerChars": 460,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: ارزش ریالی تفکیکی خرید و فروش حقیقی موجود نیست؛ خالص ورود پول ریالی قابل محاسبه نیست، اما خالص حجم حقیقی +346,461,529 سهم است.",
+      "actualType": "structured_reference",
+      "latencyMs": 9048.36
+    },
+    {
+      "id": "CT-032",
+      "cluster": "cross-table",
+      "question": "قیمت پایانی و قدرت خریدار فملی را باهم بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قدرت خریدار حقیقی 13.4717",
+        "قیمت پایانی 21,660 ریال",
+        "زمان داده بازار و اطلاعات حقیقی و حقوقی یکسان نیست"
+      ],
+      "mustNotContain": [
+        "ClientType",
+        "SQL"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "فملی: قدرت خریدار حقیقی 13.4717، قیمت پایانی 21,660 ریال، زمان داده Cashmarket 1405/05/20 ساعت 11:29:22 است. توجه: زمان داده بازار و اطلاعات حقیقی و حقوقی یکسان نیست و اعداد هم‌زمان فرض نشده‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 9867.35
+    },
+    {
+      "id": "CT-034",
+      "cluster": "entity-safety",
+      "question": "حجم خرید حقیقی نماد خیالی‌تست چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "در اطلاعات حقیقی و حقوقی پیدا نشد",
+        "نماد دقیق‌تری"
+      ],
+      "mustNotContain": [
+        "فملی",
+        "ClientType",
+        "SQL"
+      ],
+      "maxAnswerChars": 380,
+      "passed": false,
+      "issues": [
+        "request:HTTPError:HTTP Error 504: Gateway Time-out"
+      ],
+      "answer": null,
+      "actualType": null,
+      "latencyMs": null
+    }
+  ]
+}

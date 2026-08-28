@@ -1,0 +1,41 @@
+{
+  "version": "clienttype-1.0",
+  "generatedAtUtc": "2026-08-28T14:33:55.206700+00:00",
+  "total": 1,
+  "passed": 0,
+  "passRate": 0.0,
+  "allPassed": false,
+  "p50LatencyMs": null,
+  "p95LatencyMs": null,
+  "clusters": {
+    "entity-safety": {
+      "total": 1,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "CT-034",
+      "cluster": "entity-safety",
+      "question": "حجم خرید حقیقی نماد خیالی‌تست چقدر است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "در اطلاعات حقیقی و حقوقی پیدا نشد",
+        "نماد دقیق‌تری"
+      ],
+      "mustNotContain": [
+        "فملی",
+        "ClientType",
+        "SQL"
+      ],
+      "maxAnswerChars": 380,
+      "passed": false,
+      "issues": [
+        "request:TimeoutError:timed out"
+      ],
+      "answer": null,
+      "actualType": null,
+      "latencyMs": null
+    }
+  ]
+}

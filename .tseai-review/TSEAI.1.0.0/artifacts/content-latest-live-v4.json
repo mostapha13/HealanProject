@@ -1,0 +1,58 @@
+{
+  "version": "content-1.0",
+  "generatedAtUtc": "2026-08-28T14:25:44.186223+00:00",
+  "total": 2,
+  "passed": 2,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 1362.77,
+  "p95LatencyMs": 184.53,
+  "clusters": {
+    "latest-news": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "CT-001",
+      "cluster": "latest-news",
+      "question": "آخرین خبر ثبت‌شده بورس تهران چیه؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16",
+        "اوراق گواهی اعتبار مولد",
+        "بانک ملت",
+        "اگ050512"
+      ],
+      "mustNotContain": [
+        "2026/07/07",
+        "<p>"
+      ],
+      "maxAnswerChars": 800,
+      "passed": true,
+      "issues": [],
+      "answer": "آخرین خبر ثبت‌شده در 1405/04/16: به گزارش مدیریت ارتباطات بورس تهران؛ با توجه به موافقت هیئت ‌پذیرش بورس تهران در جلسه مورخ 08 / 02/ 1405 با پذیرش اوراق گواهی اعتبار مولد (گام) بانک ملت در بورس تهران، از تاریخ 16/ 04 / 1405 مبلغ 1686.5 میلیارد ریال اوراق گام با سررسید 31 / 05 / 1405 با نماد \" اگ050512\" در بازار اوراق بدهی بورس تهران درج گردید. ضمانت و عاملیت این اوراق بر عهده بانک ملت می‌باشد. شایان ذکر است مجوز بانک مرکزی جمهوری اسلامی ایران و مجوز معاف از ثبت سازمان بورس و اوراق بهادار از فایل‌های مرتبط دریافت است.",
+      "actualType": "structured_reference",
+      "latencyMs": 2541.02
+    },
+    {
+      "id": "CT-002",
+      "cluster": "latest-news",
+      "question": "آخرین خبر بورس تهران در چه تاریخی منتشر شده؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/04/16"
+      ],
+      "mustNotContain": [
+        "2026/"
+      ],
+      "maxAnswerChars": 260,
+      "passed": true,
+      "issues": [],
+      "answer": "در آخرین خبر ثبت‌شده، تاریخ انتشار 1405/04/16 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 184.53
+    }
+  ]
+}

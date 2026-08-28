@@ -26,6 +26,17 @@ def test_chat_plan_contract():
     assert response.json()["planner"] == "deterministic-allowlist-v1"
 
 
+def test_semantic_compile_contract_has_bounded_typed_frame(monkeypatch):
+    monkeypatch.setenv("LLM_SEMANTIC_COMPILER_ENABLED", "false")
+    response = request("POST", "/chat/semantic-compile", json={"question": "تالار کرمان شمارش چنده؟"})
+    assert response.status_code == 200
+    value = response.json()
+    assert value["domain"] == "financial_institution"
+    assert value["operation"] == "count"
+    assert value["entities"] == [{"kind": "regional_hall", "value": "کرمان"}]
+    assert value["canonicalQuestion"] == "تعداد نهادهای مالی تالار کرمان چقدر است؟"
+
+
 def test_validation_is_bounded_and_does_not_echo_input():
     secret = "SENSITIVE-" + "x" * 5000
     response = request("POST", "/chat/plan", json={"question": secret})

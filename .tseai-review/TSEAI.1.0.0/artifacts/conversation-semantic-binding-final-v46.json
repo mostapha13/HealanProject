@@ -1,0 +1,497 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T18:09:30.986494+00:00",
+  "runId": "319f30fcd52c",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.6",
+  "suiteSha256": "a7ed4286d52f886b2f72d763fda37ff74d287fb530274c4e609759a19f77b524",
+  "flowCount": 1,
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "passRate": 1.0,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 452.67,
+  "p95LatencyMs": 729.32,
+  "maxP95LatencyMs": 5000.0,
+  "gatePassed": true,
+  "structuralIssues": [],
+  "failureReasons": {},
+  "failures": [],
+  "results": [
+    {
+      "id": "semantic-binding:ordinal-ranking-projection",
+      "flowId": "semantic-binding",
+      "turn": 1,
+      "question": "پنج نماد اول از نظر ارزش معاملات را نام ببر و برای اولی نسبت P/E را هم اضافه کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_query",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: ارزش معاملات 12,630,826,540,900 ریال\n2. وبملت — بانک ملت: ارزش معاملات 12,520,769,000,526 ریال\n3. وغدیر — سرمایه‌گذاری‌غدیر(هلدینگ‌: ارزش معاملات 4,948,285,897,640 ریال\n4. خودرو — ایران‌ خودرو: ارزش معاملات 4,394,039,140,773 ریال\n5. پخش — پخش البرز: ارزش معاملات 3,967,159,106,010 ریال\nبرای رتبه اول، فملی: P/E 15.35.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 20,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 55,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 75,
+          "detail": "route=StructuredQuery;intent=StructuredQuery;confidence=0.71;planner=False;reasons=deterministic-structured-query,sort:TradeValue:desc"
+        },
+        {
+          "tool": "structured.query",
+          "status": "ok",
+          "durationMs": 169,
+          "detail": null
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 729.32
+    },
+    {
+      "id": "semantic-binding:rank-result-hall-and-ceo",
+      "flowId": "semantic-binding",
+      "turn": 2,
+      "question": "آخرین شرکتی که عرضه اولیه شده متعلق به کدام تالار است و مدیرعاملش کیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است. نام مدیرعامل در داده‌های فعلی ثبت نشده است. تالار منطقه‌ای ثبت‌شده آن کرمانشاه است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 506,
+          "detail": "kind=company_aggregate;complete=True;facts=4;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=4"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 590.99
+    },
+    {
+      "id": "semantic-binding:fresh-turn-two-symbol-comparison",
+      "flowId": "semantic-binding",
+      "turn": 3,
+      "question": "بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "market_comparison_unavailable",
+      "answer": "مقایسه با داده معتبر هر دو نماد ممکن نشد (market_data_quality_rejected).",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=MarketComparison;intent=MarketComparison;confidence=0.99;planner=False;reasons=explicit-market-comparison,deterministic-multi-entity-route"
+        },
+        {
+          "tool": "structured.market.symbol.primary",
+          "status": "latest_available",
+          "durationMs": 860,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "structured.market.symbol.secondary",
+          "status": "failed",
+          "durationMs": 860,
+          "detail": "market_snapshot_not_found"
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 906.08
+    },
+    {
+      "id": "semantic-binding:participant-first-ranking",
+      "flowId": "semantic-binding",
+      "turn": 4,
+      "question": "اگر فقط حقیقی‌ها را در نظر بگیریم کدام نماد بیشترین خرید را داشته است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نماد‌های دارای بیشترین حجم خرید حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 6,373,916,772 سهم\n2. وتجارت — بانک تجارت: 3,587,925,244 سهم\n3. خساپا — سایپا: 2,759,068,013 سهم\n4. وتجارت3 — بانک تجارت: 1,824,687,815 سهم\n5. های وب — داده گسترعصرنوین-های وب: 988,671,568 سهم\n6. وبصادر — بانک صادرات ایران: 905,768,576 سهم\n7. اخابر — مخابرات ایران: 705,872,606 سهم\n8. وپارس — بانک‌پارسیان‌: 672,019,143 سهم\n9. شپاکسا — پاکسان‌: 555,296,630 سهم\n10. دی — بانک دی: 507,009,327 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 47,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 85.02
+    },
+    {
+      "id": "semantic-binding:same-subject-state-facets",
+      "flowId": "semantic-binding",
+      "turn": 5,
+      "question": "وضعیت خساپا را بگو، سپس دلیلش و مدیرعامل شرکت را هم اضافه کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «خساپا» وجود ندارد؛ بنابراین نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 14,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 31.88
+    },
+    {
+      "id": "semantic-binding:natural-targeted-news-and-volume",
+      "flowId": "semantic-binding",
+      "turn": 6,
+      "question": "خبر جدیدی از خودرو داری؟ اگر هست خلاصه یک‌خطی و حجم آخرین معامله‌اش را هم بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "hybrid",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای نماد «خودرو» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.\n\nخودرو: حجم معاملات 7,553,067,214 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "clauses=2;answers=0"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Hybrid;intent=Hybrid;confidence=0.99;planner=False;reasons=targeted-news,deterministic-composite-route"
+        },
+        {
+          "tool": "hybrid.plan",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "entity:entity.resolve[];market:structured.market.symbol[entity];knowledge:knowledge.retrieve[entity];analytics:analytics.symbol[market]"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "status=Resolved;input=خودرو;match=ایران‌ خودرو"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "latest_available",
+          "durationMs": 225,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 225,
+          "detail": "hits=0"
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-knowledge-miss;action=accept;reasons=deterministic_knowledge_miss_with_grounded_market"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 6,
+      "httpStatus": 200,
+      "latencyMs": 314.35
+    }
+  ]
+}

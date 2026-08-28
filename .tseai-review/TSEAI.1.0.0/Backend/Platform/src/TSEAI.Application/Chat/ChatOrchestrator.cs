@@ -23,6 +23,7 @@ namespace TSEAI.Application.Chat;
 public sealed class ChatOrchestrator(
     IChatCapabilityRouter capabilityRouter,
     IConversationContextService conversationContext,
+    ISemanticQuestionCompiler semanticCompiler,
     IConversationTemporalContextResolver conversationTemporal,
     IMultiToolHybridPlanner hybridPlanner,
     IKnowledgeRetriever knowledge,
@@ -51,12 +52,15 @@ public sealed class ChatOrchestrator(
         CancellationToken ct)
     {
         var trace=new List<ChatToolTrace>();
+        var normalizedQuestion=PersianFinancialQueryNormalizer.Normalize(request.Question);
+        if(!string.Equals(normalizedQuestion,request.Question,StringComparison.Ordinal))
+            trace.Add(new ChatToolTrace("question.normalize","ok",0,"high-confidence Persian financial typo corrected"));
         toolPolicy.Demand("temporal.resolve");
-        var temporalTurn=await Timed("temporal.resolve",()=>conversationTemporal.ResolveAsync(subject,request.ConversationId,request.Question,ct),trace,t=>t.AuditSummary);
+        var temporalTurn=await Timed("temporal.resolve",()=>conversationTemporal.ResolveAsync(subject,request.ConversationId,normalizedQuestion,ct),trace,t=>t.AuditSummary);
         var temporalContext=temporalTurn.Primary;
 
         toolPolicy.Demand("conversation.context");
-        var turnContext=await Timed("conversation.context",()=>conversationContext.PrepareAsync(subject,request.ConversationId,request.Question,temporalContext,ct),trace,c=>c.AuditSummary);
+        var turnContext=await Timed("conversation.context",()=>conversationContext.PrepareAsync(subject,request.ConversationId,normalizedQuestion,temporalContext,ct),trace,c=>c.AuditSummary);
         var effectiveQuestion=turnContext.EffectiveQuestion;
 
         toolPolicy.Demand("structured.reference");
@@ -68,10 +72,44 @@ public sealed class ChatOrchestrator(
             trace.Add(new ChatToolTrace(canonicalAnswer.ToolName,"ok",0,
                 $"kind={canonicalAnswer.Reference.Kind};topic={canonicalAnswer.Reference.Topic};facts={canonicalAnswer.Facts.Count}"));
         }
-        var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(effectiveQuestion);
-        if(!turnContext.RouteHint.ContextApplied)
+        SemanticQuestionFrame? semanticFrame=null;
+        if(canonicalAnswer is null&&ShouldUseSemanticCompiler(effectiveQuestion))
         {
-            var clauses=PersianQuestionFacetAnalysis.SplitIndependentClauses(effectiveQuestion);
+            toolPolicy.Demand("semantic.compile");
+            semanticFrame=await Timed("semantic.compile",()=>semanticCompiler.CompileAsync(effectiveQuestion,ct),trace,
+                x=>x?.AuditSummary??"unavailable");
+            if(semanticFrame?.RequiresClarification==true)
+            {
+                var clarification=semanticFrame.Clarification??"برای پاسخ دقیق‌تر، موضوع یا موجودیت موردنظر را مشخص کنید.";
+                return new("clarification",clarification,request.ConversationId,ChatIntent.Clarification,semanticFrame.Confidence,
+                    null,null,[],[],trace,clarification,temporalContext);
+            }
+            if(semanticFrame?.IsApplied==true)
+            {
+                effectiveQuestion=SemanticQuestionMaterializer.Materialize(semanticFrame);
+                toolPolicy.Demand("semantic.materialize");
+                trace.Add(new ChatToolTrace("semantic.materialize","ok",0,
+                    $"domain={semanticFrame.Domain};operation={semanticFrame.Operation};shape={semanticFrame.ResponseShape}"));
+                toolPolicy.Demand("structured.reference.semantic");
+                canonicalAnswer=await Timed("structured.reference.semantic",()=>canonicalReferenceAnswers.TryAnswerAsync(effectiveQuestion,temporalContext,ct),trace,
+                    x=>x is null?"no-match":$"kind={x.Reference.Kind};complete={x.IsComplete};facts={x.Facts.Count};missing={string.Join('|',x.MissingFacets)}");
+                if(canonicalAnswer is not null)
+                {
+                    toolPolicy.Demand(canonicalAnswer.ToolName);
+                    trace.Add(new ChatToolTrace(canonicalAnswer.ToolName,"ok",0,
+                        $"semantic=true;kind={canonicalAnswer.Reference.Kind};topic={canonicalAnswer.Reference.Topic};facts={canonicalAnswer.Facts.Count}"));
+                }
+            }
+        }
+        var targetedNewsEntity=PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(effectiveQuestion);
+        var independentClauses=PersianQuestionFacetAnalysis.SplitIndependentClauses(effectiveQuestion);
+        var shouldDecomposeCanonicalFacets=canonicalAnswer is null
+            ||!canonicalAnswer.IsComplete
+            ||canonicalAnswer.Reference.Kind=="clock"
+            ||(independentClauses.Count>1&&canonicalAnswer.Reference.Kind is "news" or "content_reference");
+        if(!turnContext.RouteHint.ContextApplied&&shouldDecomposeCanonicalFacets)
+        {
+            var clauses=independentClauses;
             if(clauses.Count>1)
             {
                 toolPolicy.Demand("structured.reference.facets");
@@ -99,6 +137,28 @@ public sealed class ChatOrchestrator(
                     canonicalAnswer=distinctFacets[0];
             }
         }
+        if(canonicalAnswer is not null
+           &&turnContext.RouteHint.Reasons.Contains("repair-request-retry-previous-question",StringComparer.Ordinal))
+        {
+            canonicalAnswer=canonicalAnswer with
+            {
+                Answer="حق با شماست؛ پاسخ قبلی باید دقیق‌تر و متناسب با موضوع گفته می‌شد.\n\n"+canonicalAnswer.Answer
+            };
+        }
+        if(canonicalAnswer is not null)
+            canonicalAnswer=canonicalAnswer with
+            {
+                Answer=PersianUserFacingAnswerPolicy.Sanitize(request.Question,canonicalAnswer.Answer)
+            };
+        if(canonicalAnswer is null&&semanticFrame is { IsApplied:true,RequiresAuthoritativeStructuredAnswer:true }&&semanticFrame.Confidence>=0.78)
+        {
+            toolPolicy.Demand("semantic.guard");
+            var message=BuildSemanticStructuredMiss(semanticFrame);
+            trace.Add(new ChatToolTrace("semantic.guard","blocked",0,
+                $"structured-domain={semanticFrame.Domain};operation={semanticFrame.Operation};rag-fallback=denied"));
+            return new("clarification",message,request.ConversationId,ChatIntent.Clarification,semanticFrame.Confidence,
+                null,null,[],[],trace,message,temporalContext);
+        }
         var canonicalKnowledgeComposite=canonicalAnswer is not null
             &&!string.IsNullOrWhiteSpace(targetedNewsEntity)
             &&canonicalAnswer.Reference.Kind is not "news" and not "content_reference";
@@ -113,7 +173,8 @@ public sealed class ChatOrchestrator(
                     result=>$"mode=deterministic-composite-reference;action={result.Action};reasons={string.Join('|',result.Reasons)}")
                 : await Timed("reflection.review",()=>reflector.ReviewAsync(
                     new ChatReflectionRequest(effectiveQuestion,canonicalAnswer.Answer,ChatIntent.Knowledge,canonicalAnswer.Confidence,
-                        canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer),ExactCanonical:true),ct),trace);
+                        canonicalAnswer.Facts.Count,[],CanonicalEvidenceText(canonicalAnswer),ExactCanonical:true,
+                        SemanticDomain:semanticFrame?.Domain.ToString(),SemanticOperation:semanticFrame?.Operation.ToString(),ResponseShape:semanticFrame?.ResponseShape.ToString()),ct),trace);
             if(review.Action=="clarify")
                 return new("clarification",review.Clarification??"برای پاسخ دقیق‌تر، سؤال را کمی مشخص‌تر بیان کنید.",request.ConversationId,
                     ChatIntent.Clarification,canonicalAnswer.Confidence,null,null,[],[],trace,review.Clarification,temporalContext);
@@ -206,7 +267,7 @@ public sealed class ChatOrchestrator(
             var filterEvidence=evidenceEngine.Build(ChatIntent.MarketFilter,null,null,null,[],null,null,r,null);
             var filterValidation=evidenceEngine.Validate(ChatIntent.MarketFilter,filterEvidence,false,false,false,false,filterAnswer);
             var filterAnswerValidation=answerValidationGuard.Validate(filterAnswer,ChatIntent.MarketFilter,filterEvidence,filterValidation);
-            if(!filterAnswerValidation.IsValid) return new("answer_validation_blocked","پاسخ فیلتر توسط Hallucination Guard متوقف شد.",request.ConversationId,ChatIntent.MarketFilter,0,null,r,[],[],trace,string.Join(",",filterAnswerValidation.Issues),temporalContext,Evidence:filterEvidence,EvidenceValidation:filterValidation,AnswerValidation:filterAnswerValidation);
+            if(!filterAnswerValidation.IsValid) return new("answer_validation_blocked","نتیجه این درخواست در بررسی نهایی تأیید نشد؛ لطفاً معیار را کمی دقیق‌تر بنویسید.",request.ConversationId,ChatIntent.MarketFilter,0,null,r,[],[],trace,string.Join(",",filterAnswerValidation.Issues),temporalContext,Evidence:filterEvidence,EvidenceValidation:filterValidation,AnswerValidation:filterAnswerValidation);
             return new("market_filter",filterAnswer,request.ConversationId,ChatIntent.MarketFilter,r.Confidence,null,r,[],[],trace,null,temporalContext,ConversationContext:savedFilterContext,Evidence:filterEvidence,EvidenceValidation:filterValidation,AnswerValidation:filterAnswerValidation);
         }
 
@@ -229,7 +290,7 @@ public sealed class ChatOrchestrator(
                 var structuredEvidence=evidenceEngine.Build(ChatIntent.StructuredQuery,null,null,null,[],structuredResult,null,null,null);
                 var structuredValidation=evidenceEngine.Validate(ChatIntent.StructuredQuery,structuredEvidence,false,false,true,false,structuredAnswer);
                 var structuredAnswerValidation=answerValidationGuard.Validate(structuredAnswer,ChatIntent.StructuredQuery,structuredEvidence,structuredValidation);
-                if(!structuredAnswerValidation.IsValid) return new("answer_validation_blocked","نتیجه Query توسط Hallucination Guard متوقف شد.",request.ConversationId,ChatIntent.StructuredQuery,0,null,null,[],[],trace,string.Join(",",structuredAnswerValidation.Issues),temporalContext,Evidence:structuredEvidence,EvidenceValidation:structuredValidation,AnswerValidation:structuredAnswerValidation);
+                if(!structuredAnswerValidation.IsValid) return new("answer_validation_blocked","نتیجه این درخواست در بررسی نهایی تأیید نشد؛ لطفاً معیار را کمی دقیق‌تر بنویسید.",request.ConversationId,ChatIntent.StructuredQuery,0,null,null,[],[],trace,string.Join(",",structuredAnswerValidation.Issues),temporalContext,Evidence:structuredEvidence,EvidenceValidation:structuredValidation,AnswerValidation:structuredAnswerValidation);
                 return new("structured_query", structuredAnswer, request.ConversationId, ChatIntent.StructuredQuery, structuredInterpretation.Plan.Confidence, null, null, [], [], trace, null, temporalContext, null, null, null, structuredResult,ConversationContext:savedStructuredContext,Evidence:structuredEvidence,EvidenceValidation:structuredValidation,AnswerValidation:structuredAnswerValidation);
             }
         }
@@ -265,9 +326,12 @@ public sealed class ChatOrchestrator(
             var rightTask=structuredTools.ExecuteAsync(new StructuredToolCall(StructuredToolNames.GetSymbolSnapshot,secondaryLookup),ct);
             await Task.WhenAll(leftTask,rightTask); sw1.Stop(); sw2.Stop();
             var left=await leftTask; var right=await rightTask;
-            trace.Add(new ChatToolTrace("structured.market.symbol.primary",left.Success?"ok":"failed",(int)sw1.ElapsedMilliseconds,left.Error));
-            trace.Add(new ChatToolTrace("structured.market.symbol.secondary",right.Success?"ok":"failed",(int)sw2.ElapsedMilliseconds,right.Error));
-            if(!left.Success || !right.Success || left.Data is not MarketSymbolSnapshot ls || right.Data is not MarketSymbolSnapshot rs)
+            var leftLatestAvailable=CanUseLatestAvailableMarketSnapshot(left.Quality,left.Data as MarketSymbolSnapshot);
+            var rightLatestAvailable=CanUseLatestAvailableMarketSnapshot(right.Quality,right.Data as MarketSymbolSnapshot);
+            trace.Add(new ChatToolTrace("structured.market.symbol.primary",left.Success?"ok":leftLatestAvailable?"latest_available":"failed",(int)sw1.ElapsedMilliseconds,left.Error));
+            trace.Add(new ChatToolTrace("structured.market.symbol.secondary",right.Success?"ok":rightLatestAvailable?"latest_available":"failed",(int)sw2.ElapsedMilliseconds,right.Error));
+            if((!left.Success&&!leftLatestAvailable) || (!right.Success&&!rightLatestAvailable)
+               || left.Data is not MarketSymbolSnapshot ls || right.Data is not MarketSymbolSnapshot rs)
             {
                 var error=!left.Success?left.Error:right.Error;
                 var unavailable=$"مقایسه با داده معتبر هر دو نماد ممکن نشد ({error}).";
@@ -284,11 +348,13 @@ public sealed class ChatOrchestrator(
             trace.Add(new ChatToolTrace("analytics.symbol.comparison","ok",0,$"{ls.Symbol},{rs.Symbol}"));
             var comparison=new MarketComparisonResult(ls,rs,la,ra);
             var comparisonAnswer=answerComposer.ComposeComparison(request.Question,comparison);
+            if(leftLatestAvailable||rightLatestAvailable)
+                comparisonAnswer=BuildLatestAvailableComparisonNotice(ls,rs)+"\n\n"+comparisonAnswer;
             var saved=await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,ChatIntent.MarketComparison,ChatCapabilityRoute.MarketComparison,temporalContext,left.Entity,right.Entity,ct);
             var comparisonEvidence=evidenceEngine.Build(ChatIntent.MarketComparison,ls,left.Quality,la,[],null,comparison,null,left.Entity);
             var comparisonValidation=evidenceEngine.Validate(ChatIntent.MarketComparison,comparisonEvidence,true,false,false,true,comparisonAnswer);
             var comparisonAnswerValidation=answerValidationGuard.Validate(comparisonAnswer,ChatIntent.MarketComparison,comparisonEvidence,comparisonValidation);
-            if(!comparisonAnswerValidation.IsValid) return new("answer_validation_blocked","مقایسه توسط Hallucination Guard متوقف شد.",request.ConversationId,ChatIntent.MarketComparison,0,null,null,[],[],trace,string.Join(",",comparisonAnswerValidation.Issues),temporalContext,Evidence:comparisonEvidence,EvidenceValidation:comparisonValidation,AnswerValidation:comparisonAnswerValidation);
+            if(!comparisonAnswerValidation.IsValid) return new("answer_validation_blocked","این مقایسه در بررسی نهایی تأیید نشد؛ لطفاً دو نماد و معیار مقایسه را دقیق‌تر بنویسید.",request.ConversationId,ChatIntent.MarketComparison,0,null,null,[],[],trace,string.Join(",",comparisonAnswerValidation.Issues),temporalContext,Evidence:comparisonEvidence,EvidenceValidation:comparisonValidation,AnswerValidation:comparisonAnswerValidation);
             return new("market_comparison",comparisonAnswer,request.ConversationId,ChatIntent.MarketComparison,plan.Confidence,ls,null,[],[],trace,null,temporalContext,left.Entity,left.Quality,la,null,comparison,saved,Evidence:comparisonEvidence,EvidenceValidation:comparisonValidation,AnswerValidation:comparisonAnswerValidation);
         }
 
@@ -316,7 +382,7 @@ public sealed class ChatOrchestrator(
 
             if(entityContext.Selected.Kind==EntityKind.MarketIndex && plan.Intent is ChatIntent.MarketSymbol or ChatIntent.Hybrid)
             {
-                var message=$"«{entityContext.Selected.DisplayName}» به‌عنوان شاخص بازار شناسایی شد، اما Tool اختصاصی IndexLastLive هنوز به Chat Structured Tools متصل نشده است؛ برای جلوگیری از پاسخ حدسی داده نماد جایگزین نمی‌کنم.";
+                var message=$"«{entityContext.Selected.DisplayName}» شاخص بازار است؛ داده لحظه‌ای این شاخص در حال حاضر به چت متصل نیست، بنابراین عدد حدسی نمایش نمی‌دهم.";
                 return new("capability_unavailable",message,request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,entityContext);
             }
 
@@ -333,6 +399,7 @@ public sealed class ChatOrchestrator(
         object? filterResult=null;
         SymbolMarketAnalytics? analytics=null;
         var marketQualityRejected=false;
+        var marketUsingLatestAvailableSnapshot=false;
         string? marketUnavailableMessage=null;
 
         if(plan.Intent==ChatIntent.Hybrid)
@@ -347,7 +414,12 @@ public sealed class ChatOrchestrator(
             await Task.WhenAll(marketTask,knowledgeTask);
             marketSw.Stop(); knowledgeSw.Stop();
             var sr=await marketTask; retrieved=await knowledgeTask;
-            trace.Add(new ChatToolTrace("structured.market.symbol",sr.Success?"ok":"failed",(int)marketSw.ElapsedMilliseconds,sr.Error));
+            var hybridLatestAvailable=!sr.Success
+                &&sr.Error=="market_data_quality_rejected"
+                &&CanUseLatestAvailableMarketSnapshot(sr.Quality,sr.Data as MarketSymbolSnapshot);
+            trace.Add(new ChatToolTrace("structured.market.symbol",
+                sr.Success?"ok":hybridLatestAvailable?"latest_available":"failed",
+                (int)marketSw.ElapsedMilliseconds,sr.Error));
             trace.Add(new ChatToolTrace("knowledge.retrieve","ok",(int)knowledgeSw.ElapsedMilliseconds,$"hits={retrieved.Hits.Count}"));
             if(!sr.Success)
             {
@@ -356,7 +428,8 @@ public sealed class ChatOrchestrator(
                     snapshot=sr.Data as MarketSymbolSnapshot;
                     qualityReport=sr.Quality;
                     entityContext=sr.Entity??entityContext;
-                    marketQualityRejected=true;
+                    marketUsingLatestAvailableSnapshot=hybridLatestAvailable;
+                    marketQualityRejected=!marketUsingLatestAvailableSnapshot;
                 }
                 else
                 {
@@ -389,9 +462,10 @@ public sealed class ChatOrchestrator(
                     snapshot=structuredResult.Data as MarketSymbolSnapshot;
                     qualityReport=structuredResult.Quality;
                     entityContext=structuredResult.Entity??entityContext;
-                    if(!compositeAnalysis.IsComposite)
+                    marketUsingLatestAvailableSnapshot=CanUseLatestAvailableMarketSnapshot(qualityReport,snapshot);
+                    if(!marketUsingLatestAvailableSnapshot&&!compositeAnalysis.IsComposite)
                         return new("data_quality_unavailable",BuildRejectedMarketMessage(qualityReport,snapshot),request.ConversationId,plan.Intent,plan.Confidence,null,null,[],[],trace,null,temporalContext,entityContext,qualityReport);
-                    marketQualityRejected=true;
+                    marketQualityRejected=!marketUsingLatestAvailableSnapshot;
                 }
                 else
                 {
@@ -474,7 +548,7 @@ public sealed class ChatOrchestrator(
                 ? BuildRejectedMarketMessage(qualityReport,snapshot)
                 : marketUnavailableMessage??answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,
                     PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,[]);
-            answer=canonicalAnswer.Answer+"\n\n"+marketAnswer;
+            answer=ComposeCanonicalMarketAnswer(request.Question,canonicalAnswer,marketAnswer);
             trace.Add(new ChatToolTrace("answer.compose.composite","ok",0,
                 $"canonical={canonicalAnswer.Reference.Kind};marketFields={string.Join('|',compositeAnalysis.MarketFields)};qualityRejected={marketQualityRejected}"));
         }
@@ -501,9 +575,13 @@ public sealed class ChatOrchestrator(
         {
             var answerSnapshot=marketQualityRejected||marketUnavailableMessage is not null?null:snapshot;
             var deterministicAnswer=plan.Reasons.Contains("targeted-news",StringComparer.Ordinal)&&hits.Count==0
-                ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                ? ComposeKnowledgeMissWithMarket(
+                    $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.",
+                    effectiveQuestion,request.Question,plan,answerSnapshot,analytics)
                 : plan.Reasons.Contains("descriptive-entity",StringComparer.Ordinal)&&hits.Count==0
-                    ? $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                    ? ComposeKnowledgeMissWithMarket(
+                        $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد.",
+                        effectiveQuestion,request.Question,plan,answerSnapshot,analytics)
                 : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),answerSnapshot,analytics,hits);
             if((plan.Intent is ChatIntent.Knowledge or ChatIntent.Hybrid)&&hits.Count>0)
             {
@@ -520,8 +598,15 @@ public sealed class ChatOrchestrator(
             else if(marketUnavailableMessage is not null)
                 answer+="\n\n"+marketUnavailableMessage;
         }
-        if(qualityReport?.Status==DataQualityStatus.Warning)
-            answer="⚠️ برخی شاخص‌های کیفیت داده نیازمند توجه هستند؛ اعداد زیر از Snapshot معتبر ولی دارای Warning استخراج شده‌اند.\n\n"+answer;
+        if(marketUsingLatestAvailableSnapshot&&snapshot is not null&&!OnlyRequestsMarketObservationTime(effectiveQuestion))
+            answer=BuildLatestAvailableMarketNotice(snapshot)+"\n\n"+answer;
+        else if(qualityReport?.Status==DataQualityStatus.Warning)
+            answer="⚠️ بخشی از داده‌های بازار نیازمند بررسی است؛ اعداد زیر از آخرین داده قابل استفاده استخراج شده‌اند.\n\n"+answer;
+
+        var explicitKnowledgeMiss=plan.Intent==ChatIntent.Hybrid
+            &&hits.Count==0
+            &&(plan.Reasons.Contains("targeted-news",StringComparer.Ordinal)
+               ||plan.Reasons.Contains("descriptive-entity",StringComparer.Ordinal));
 
         // Bounded reflection: at most one review and at most one additional retrieval.
         // Reflection cannot call arbitrary tools and cannot mutate filter/market execution.
@@ -532,12 +617,26 @@ public sealed class ChatOrchestrator(
             var failed=trace.Where(x=>x.Status=="failed").Select(x=>x.Tool).Distinct().ToArray();
             var deterministicCanonical=compositeAnalysis.IsComposite||canonicalKnowledgeComposite
                 ||CanonicalOrganizationEvidencePolicy.ShouldUseDeterministicKnowledgeRoute(canonicalAnswer);
-            var review=deterministicCanonical
+            var deterministicMarketAnswer=canonicalAnswer is null
+                &&plan.Intent==ChatIntent.MarketSymbol
+                &&snapshot is not null
+                &&!marketQualityRejected
+                &&marketUnavailableMessage is null;
+            var review=explicitKnowledgeMiss
+                ? await Timed("reflection.review",()=>Task.FromResult(
+                    new ChatReflectionResult("accept",null,null,["deterministic_knowledge_miss_with_grounded_market"])),trace,
+                    result=>$"mode=deterministic-knowledge-miss;action={result.Action};reasons={string.Join('|',result.Reasons)}")
+                :deterministicMarketAnswer
+                ? await Timed("reflection.review",()=>Task.FromResult(
+                    new ChatReflectionResult("accept",null,null,["deterministic_structured_market_answer"])),trace,
+                    result=>$"mode=deterministic-market;action={result.Action};reasons={string.Join('|',result.Reasons)}")
+                :deterministicCanonical
                 ? await Timed("reflection.review",()=>Task.FromResult(ReviewDeterministicCanonicalAnswer(answer,canonicalAnswer!,hits)),trace,
                     result=>$"mode=deterministic-canonical;action={result.Action};reasons={string.Join('|',result.Reasons)}")
                 : await Timed("reflection.review",()=>reflector.ReviewAsync(
                     new ChatReflectionRequest(effectiveQuestion,answer,plan.Intent,plan.Confidence,
-                        hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits)),ct),trace);
+                        hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits),
+                        SemanticDomain:semanticFrame?.Domain.ToString(),SemanticOperation:semanticFrame?.Operation.ToString(),ResponseShape:semanticFrame?.ResponseShape.ToString()),ct),trace);
             var activeSubject=canonicalAnswer?.Reference.SubjectName??turnContext.Previous.ActiveReference?.SubjectName;
             if(review.Action=="accept" && turnContext.RouteHint.ContextApplied && !CoversSubject(answer,activeSubject))
                 review=new ChatReflectionResult("retrieve_more",BuildFocusedFollowUpQuery(effectiveQuestion,activeSubject),null,["active_subject_missing_from_answer"]);
@@ -559,7 +658,7 @@ public sealed class ChatOrchestrator(
                         ? BuildRejectedMarketMessage(qualityReport,snapshot)
                         : marketUnavailableMessage??answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,
                             PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),snapshot,analytics,[]);
-                    answer=canonicalAnswer.Answer+"\n\n"+marketAnswer;
+                    answer=ComposeCanonicalMarketAnswer(request.Question,canonicalAnswer,marketAnswer);
                 }
                 else if(canonicalAnswer is not null&&canonicalKnowledgeComposite)
                 {
@@ -581,9 +680,13 @@ public sealed class ChatOrchestrator(
                 {
                     var answerSnapshot=marketQualityRejected||marketUnavailableMessage is not null?null:snapshot;
                     var deterministicAnswer=plan.Reasons.Contains("targeted-news",StringComparer.Ordinal)&&hits.Count==0
-                        ? $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                        ? ComposeKnowledgeMissWithMarket(
+                            $"برای نماد «{resolvedSymbol??plan.Symbol}» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.",
+                            effectiveQuestion,request.Question,plan,answerSnapshot,analytics)
                         : plan.Reasons.Contains("descriptive-entity",StringComparer.Ordinal)&&hits.Count==0
-                            ? $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد."
+                            ? ComposeKnowledgeMissWithMarket(
+                                $"برای نماد «{resolvedSymbol??plan.Symbol}» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد.",
+                                effectiveQuestion,request.Question,plan,answerSnapshot,analytics)
                         : answerComposer.Compose(new AnswerComposeContext(effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(request.Question),plan.RequestedFields),answerSnapshot,analytics,hits);
                     if((plan.Intent is ChatIntent.Knowledge or ChatIntent.Hybrid)&&hits.Count>0)
                     {
@@ -600,13 +703,16 @@ public sealed class ChatOrchestrator(
                     else if(marketUnavailableMessage is not null)
                         answer+="\n\n"+marketUnavailableMessage;
                 }
-                if(qualityReport?.Status==DataQualityStatus.Warning)
-                    answer="⚠️ برخی شاخص‌های کیفیت داده نیازمند توجه هستند؛ اعداد زیر از Snapshot معتبر ولی دارای Warning استخراج شده‌اند.\n\n"+answer;
+                if(marketUsingLatestAvailableSnapshot&&snapshot is not null&&!OnlyRequestsMarketObservationTime(effectiveQuestion))
+                    answer=BuildLatestAvailableMarketNotice(snapshot)+"\n\n"+answer;
+                else if(qualityReport?.Status==DataQualityStatus.Warning)
+                    answer="⚠️ بخشی از داده‌های بازار نیازمند بررسی است؛ اعداد زیر از آخرین داده قابل استفاده استخراج شده‌اند.\n\n"+answer;
 
                 toolPolicy.Demand("reflection.review.final");
                 var secondReview=await Timed("reflection.review.final",()=>reflector.ReviewAsync(
                     new ChatReflectionRequest(effectiveQuestion,answer,plan.Intent,plan.Confidence,
-                        hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits)),ct),trace);
+                        hits.Count+(canonicalAnswer?.Facts.Count??0),failed,ReflectionEvidence(canonicalAnswer,hits),
+                        SemanticDomain:semanticFrame?.Domain.ToString(),SemanticOperation:semanticFrame?.Operation.ToString(),ResponseShape:semanticFrame?.ResponseShape.ToString()),ct),trace);
                 if(secondReview.Action=="clarify")
                     return new("clarification",secondReview.Clarification??"برای پاسخ دقیق‌تر، سؤال را کمی مشخص‌تر بیان کنید.",request.ConversationId,
                         ChatIntent.Clarification,plan.Confidence,snapshot,filterResult,hits,hits.Select(x=>x.Citation).Distinct().Take(8).ToArray(),trace,
@@ -618,10 +724,13 @@ public sealed class ChatOrchestrator(
             }
         }
 
+        answer=PersianUserFacingAnswerPolicy.Sanitize(request.Question,answer);
         var citations=hits.Select(x=>x.Citation).Distinct().Take(8).ToArray();
         var evidence=evidenceEngine.Build(plan.Intent,snapshot,qualityReport,analytics,hits,null,null,filterResult,entityContext)
             .Concat(canonicalAnswer is null?[]:BuildCanonicalEvidence(canonicalAnswer)).ToArray();
-        var validationIntent=marketUnavailableMessage is not null
+        var validationIntent=explicitKnowledgeMiss&&snapshot is not null&&!marketQualityRejected
+            ? ChatIntent.MarketSymbol
+            :marketUnavailableMessage is not null
             ? ChatIntent.Knowledge
             : marketQualityRejected&&plan.Intent==ChatIntent.Hybrid&&hits.Count==0
                 ? ChatIntent.MarketSymbol
@@ -630,7 +739,7 @@ public sealed class ChatOrchestrator(
         var answerValidation=answerValidationGuard.Validate(answer,validationIntent,evidence,evidenceValidation);
         trace.Add(new ChatToolTrace("answer.validate",answerValidation.IsValid?"ok":"failed",0,$"status={answerValidation.Status};issues={string.Join('|',answerValidation.Issues)}"));
         if(!answerValidation.IsValid)
-            return new("answer_validation_blocked","پاسخ بالقوه توسط Answer Validation / Hallucination Guard مسدود شد؛ Evidence برای ادعاهای پاسخ کافی نبود.",request.ConversationId,plan.Intent,0,snapshot,filterResult,hits,citations,trace,string.Join(",",answerValidation.Issues),temporalContext,entityContext,qualityReport,analytics,Evidence:evidence,EvidenceValidation:evidenceValidation,AnswerValidation:answerValidation);
+            return new("answer_validation_blocked","پاسخ در بررسی نهایی تأیید نشد؛ برای جلوگیری از ارائه اطلاعات نادرست، نتیجه‌ای نمایش داده نشد.",request.ConversationId,plan.Intent,0,snapshot,filterResult,hits,citations,trace,string.Join(",",answerValidation.Issues),temporalContext,entityContext,qualityReport,analytics,Evidence:evidence,EvidenceValidation:evidenceValidation,AnswerValidation:answerValidation);
         var savedContext=canonicalAnswer is not null
             ? await conversationContext.RecordReferenceAsync(subject,request.ConversationId,request.Question,effectiveQuestion,answer,canonicalAnswer,temporalContext,ct)
             : await conversationContext.RecordAsync(subject,request.ConversationId,request.Question,plan.Intent,routeDecision.Route,temporalContext,entityContext,null,ct,answer,plan.Intent.ToString().ToLowerInvariant());
@@ -669,18 +778,125 @@ public sealed class ChatOrchestrator(
             ??ComposeCanonicalFallback(canonical,evidence);
     }
 
+    private static bool ShouldIncludeCanonicalIdentityFacet(
+        string originalQuestion,
+        CanonicalReferenceAnswer canonical)
+    {
+        if(canonical.Reference.Kind!="company") return true;
+        if(!canonical.Answer.Contains("نماد بورسی",StringComparison.Ordinal)) return true;
+
+        var normalized=PersianDisplayText.Normalize(originalQuestion).Replace('‌',' ');
+        return Regex.IsMatch(normalized,
+            @"(?:نام|اسم)\s+(?:کامل\s+)?شرکت|نماد\s+(?:بورسی\s+)?(?:این\s+)?شرکت|چه\s+شرکتی|کدام\s+شرکت|کدوم\s+شرکت|نماد\s+بورسی");
+    }
+
+    private static string ComposeCanonicalMarketAnswer(
+        string originalQuestion,
+        CanonicalReferenceAnswer canonical,
+        string marketAnswer)
+    {
+        if(ShouldIncludeCanonicalIdentityFacet(originalQuestion,canonical))
+            return canonical.Answer+"\n\n"+marketAnswer;
+
+        var subject=canonical.Reference.SubjectName?.Trim();
+        var symbol=canonical.Facts
+            .Where(x=>x.Key is "linked_symbol" or "symbol")
+            .Select(x=>x.Value?.Trim())
+            .FirstOrDefault(x=>!string.IsNullOrWhiteSpace(x));
+        if(string.IsNullOrWhiteSpace(subject)||string.IsNullOrWhiteSpace(symbol)) return marketAnswer;
+
+        var symbolPrefix=symbol+":";
+        return marketAnswer.StartsWith(symbolPrefix,StringComparison.Ordinal)
+            ? $"{subject} ({symbol}):"+marketAnswer[symbolPrefix.Length..]
+            : $"{subject} ({symbol}): {marketAnswer}";
+    }
+
+    private string ComposeKnowledgeMissWithMarket(
+        string knowledgeMessage,
+        string effectiveQuestion,
+        string originalQuestion,
+        ChatPlan plan,
+        MarketSymbolSnapshot? snapshot,
+        SymbolMarketAnalytics? analytics)
+    {
+        if(snapshot is null) return knowledgeMessage;
+        var marketAnswer=answerComposer.Compose(new AnswerComposeContext(
+            effectiveQuestion,plan.Intent,PersianFinancialAnswerComposer.DetectVerbosity(originalQuestion),
+            plan.RequestedFields),snapshot,analytics,[]);
+        return string.IsNullOrWhiteSpace(marketAnswer)
+            ? knowledgeMessage
+            : knowledgeMessage+"\n\n"+marketAnswer;
+    }
+
     private static string BuildRejectedMarketMessage(MarketDataQualityReport? report, MarketSymbolSnapshot? snapshot)
     {
         if(report?.Status==DataQualityStatus.Stale && snapshot?.SourceLastModified is DateTime sourceTime)
             return $"آخرین داده ثبت‌شده بازار مربوط به {PersianDisplayText.FormatPersianDate(sourceTime,true)} است و برای پاسخ جاری قابل اتکا نیست؛ بنابراین عدد قدیمی نمایش داده نشد.";
-        return "داده بازار در کنترل کیفیت معتبر شناخته نشد؛ برای جلوگیری از ارائه عدد نادرست، پاسخی از این Snapshot نمایش داده نشد.";
+        return "اطلاعات ثبت‌شده بازار ناسازگار است؛ برای جلوگیری از ارائه عدد نادرست، عددی نمایش داده نشد.";
+    }
+
+    private static bool CanUseLatestAvailableMarketSnapshot(MarketDataQualityReport? report,MarketSymbolSnapshot? snapshot)
+        => snapshot is not null
+           &&report?.Status==DataQualityStatus.Stale
+           &&report.Issues.Where(x=>x.Severity==DataQualitySeverity.Error)
+               .All(x=>x.Code=="freshness.stale");
+
+    private static bool OnlyRequestsMarketObservationTime(string question)
+    {
+        var fields=PersianMarketQuestionSemantics.DetectRequestedFields(question);
+        return fields.Count==1&&fields.Contains("observed_at",StringComparer.Ordinal);
+    }
+
+    private static string BuildLatestAvailableMarketNotice(MarketSymbolSnapshot snapshot)
+    {
+        var observed=snapshot.SourceLastModified??snapshot.SnapshotUpdatedAtUtc;
+        return $"بر اساس آخرین داده ثبت‌شده در {PersianDisplayText.FormatPersianDate(observed,true)}:";
+    }
+
+    private static string BuildLatestAvailableComparisonNotice(MarketSymbolSnapshot left,MarketSymbolSnapshot right)
+    {
+        var leftObserved=left.SourceLastModified??left.SnapshotUpdatedAtUtc;
+        var rightObserved=right.SourceLastModified??right.SnapshotUpdatedAtUtc;
+        if(leftObserved==rightObserved)
+            return $"بر اساس آخرین داده ثبت‌شده در {PersianDisplayText.FormatPersianDate(leftObserved,true)}:";
+        return $"بر اساس آخرین داده‌های ثبت‌شده: {left.Symbol} در {PersianDisplayText.FormatPersianDate(leftObserved,true)} و {right.Symbol} در {PersianDisplayText.FormatPersianDate(rightObserved,true)}:";
+    }
+
+    private static string BuildSemanticStructuredMiss(SemanticQuestionFrame frame)
+    {
+        var source=frame.Domain switch
+        {
+            SemanticQuestionDomain.Company=>"اطلاعات شرکت‌ها",
+            SemanticQuestionDomain.CompanyState=>"وضعیت ناشران",
+            SemanticQuestionDomain.ClientType=>"داده حقیقی و حقوقی",
+            SemanticQuestionDomain.FinancialInstitution=>"نهادهای مالی و تالارهای منطقه‌ای",
+            SemanticQuestionDomain.Organization=>"ساختار سازمانی و مدیران بورس تهران",
+            SemanticQuestionDomain.Content=>"محتوای منتشرشده بورس تهران",
+            _=>"منبع ساختاریافته مربوط"
+        };
+        var entity=frame.PrimaryEntity;
+        return string.IsNullOrWhiteSpace(entity)
+            ? $"در {source} پاسخ قابل اتکایی برای این درخواست پیدا نشد؛ لطفاً موضوع یا معیار موردنظر را دقیق‌تر مشخص کنید."
+            : $"در {source} اطلاعات قابل اتکایی برای «{entity}» پیدا نشد؛ لطفاً نام، نماد یا عنوان دقیق‌تری وارد کنید.";
+    }
+
+    private static bool ShouldUseSemanticCompiler(string question)
+    {
+        // Known deterministic ontology stays on the fast path. The compiler is
+        // reserved for questions that otherwise have no typed interpretation.
+        if(CanonicalQuestionOwnership.RequiresDocumentEvidence(question)) return false;
+        if(PersianMarketQuestionSemantics.DetectRequestedFields(question).Count>0) return false;
+        if(PersianQuestionFacetAnalysis.TryExtractMarketComparisonEntities(question) is not null) return false;
+        if(PersianQuestionFacetAnalysis.TryExtractTargetedNewsEntity(question) is not null) return false;
+        if(PersianQuestionFacetAnalysis.TryExtractDescriptiveEntity(question) is not null) return false;
+        return true;
     }
 
     private static string BuildMarketUnavailableMessage(string? displayName,string? error)
     {
         var subject=string.IsNullOrWhiteSpace(displayName)?"نماد موردنظر":displayName.Trim();
         return error=="market_snapshot_not_found"
-            ? $"برای «{subject}» داده بازار قابل اتکایی در Snapshot فعلی موجود نیست."
+            ? $"برای «{subject}» در داده‌های فعلی بازار اطلاعات قابل اتکایی پیدا نشد."
             : $"داده بازار «{subject}» موقتاً در دسترس نیست؛ برای جلوگیری از ارائه عدد نادرست، عددی نمایش داده نشد.";
     }
 
@@ -820,12 +1036,12 @@ public sealed class ChatOrchestrator(
         }
 
         if (temporal.Kind is TemporalIntentKind.DateRange or TemporalIntentKind.RelativeRange)
-            return $"بازه تاریخی {temporal.Start.JalaliDate} تا {temporal.End?.JalaliDate} شناسایی شد، اما MarketDailyHistory هنوز به فاز جاری متصل نیست؛ برای جلوگیری از پاسخ نادرست از Snapshot امروز استفاده نمی‌کنم.";
+            return $"بازه تاریخی {temporal.Start.JalaliDate} تا {temporal.End?.JalaliDate} شناسایی شد، اما تاریخچه روزانه این بازه در حال حاضر به چت متصل نیست؛ بنابراین عدد امروز را جایگزین نمی‌کنم.";
 
         if (temporal.Start.MarketDayKind == MarketDayKind.WeekendClosed)
-            return $"تاریخ {temporal.Start.JalaliDate} در تعطیلی هفتگی بازار قرار دارد و داده معاملاتی روزانه برای آن نباید از Snapshot امروز جایگزین شود.";
+            return $"تاریخ {temporal.Start.JalaliDate} در تعطیلی هفتگی بازار قرار دارد و نباید داده امروز را جایگزین اطلاعات آن روز کرد.";
 
-        return $"تاریخ {temporal.Start.JalaliDate} شناسایی شد، اما MarketDailyHistory هنوز به فاز جاری متصل نیست؛ برای جلوگیری از پاسخ نادرست از Snapshot امروز استفاده نمی‌کنم.";
+        return $"تاریخ {temporal.Start.JalaliDate} شناسایی شد، اما تاریخچه روزانه آن هنوز به چت متصل نیست؛ بنابراین عدد امروز را جایگزین نمی‌کنم.";
     }
 
     private static IReadOnlyList<string> CanonicalEvidenceText(CanonicalReferenceAnswer answer)
@@ -1123,7 +1339,7 @@ public sealed class ChatOrchestrator(
         var a=c.Primary; var b=c.Secondary;
         var lines=new List<string>
         {
-            $"مقایسه {a.Symbol} با {b.Symbol} بر اساس Snapshot جاری معتبر:",
+            $"مقایسه {a.Symbol} با {b.Symbol} بر اساس آخرین داده قابل استفاده:",
             $"• آخرین قیمت: {a.Symbol} {a.LastPrice:N0} ({Signed(a.LastPricePercent)}٪) | {b.Symbol} {b.LastPrice:N0} ({Signed(b.LastPricePercent)}٪)",
             $"• قیمت پایانی: {a.Symbol} {a.ClosingPrice:N0} | {b.Symbol} {b.ClosingPrice:N0}",
             $"• حجم معاملات: {a.Symbol} {a.TradeVolume:N0} | {b.Symbol} {b.TradeVolume:N0}",
@@ -1136,25 +1352,25 @@ public sealed class ChatOrchestrator(
 
     private static string ComposeChatFilter(ConversationFilterResult result,FilterTemporalDecision temporal)
     {
-        var matched=result.Matched??0; var scanned=result.Scanned??0;
-        var head=$"فیلتر TSETMC با موفقیت اعتبارسنجی و اجرا شد. {matched:N0} نماد از {scanned:N0} نماد واجد شرایط بودند.";
-        if(string.IsNullOrWhiteSpace(result.Code)) return head;
+        var matched=result.Matched??0;
+        var head=$"{matched:N0} نماد با شرایط شما مطابقت دارد.";
+        if(string.IsNullOrWhiteSpace(result.Explanation)) return head+"\n"+temporal.Message;
         var details=string.IsNullOrWhiteSpace(result.Explanation)?string.Empty:"\n"+result.Explanation;
-        return head+details+"\n"+temporal.Message+"\nکد Canonical: "+result.Code;
+        return head+details+"\n"+temporal.Message;
     }
 
     private static string ComposeStructuredQuery(StructuredQueryExecutionResult result)
     {
-        if (!result.Success || result.Plan is null) return "Query ساختاریافته قابل اجرا نبود.";
+        if (!result.Success || result.Plan is null) return "نتوانستم شرط‌های این پرسش را با اطمینان اجرا کنم؛ لطفاً معیار را کمی روشن‌تر بنویسید.";
         if (result.Results.Count == 0)
-            return $"هیچ نمادی با شرایط «{result.Plan.Explanation}» پیدا نشد. {result.Scanned:N0} نماد بررسی شد و {result.QualityRejected:N0} نماد به‌دلیل Quality Gate کنار گذاشته شد.";
+            return "در آخرین داده قابل استفاده بازار، نمادی مطابق شرایط سؤال پیدا نشد.";
         var lines = result.Results.Select((x,i) =>
         {
             var key = result.Plan.SortBy?.ToString();
             decimal? value = key is not null && x.Metrics.TryGetValue(key, out var v) ? v : null;
             return value is null ? $"{i+1}. {x.Symbol} — {x.SymbolName}" : $"{i+1}. {x.Symbol} — {x.SymbolName}: {key}={value:0.####}";
         });
-        return $"نتیجه Query ساختاریافته: {result.Plan.Explanation}\n" + string.Join("\n", lines) + $"\n\nتعداد تطابق: {result.Matched:N0} از {result.Scanned:N0}؛ ردشده توسط Quality Gate: {result.QualityRejected:N0}.";
+        return string.Join("\n",lines);
     }
 
     private static string Trim(string value,int max)=>value.Length<=max?value:value[..max]+"…";

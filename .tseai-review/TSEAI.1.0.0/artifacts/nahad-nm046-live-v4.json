@@ -1,0 +1,35 @@
+{
+  "version": "nahad-mali-1.0",
+  "generatedAtUtc": "2026-08-28T14:18:33.434902+00:00",
+  "total": 1,
+  "passed": 1,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 300.75,
+  "p95LatencyMs": 300.75,
+  "clusters": {
+    "quality": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "NM-046",
+      "cluster": "quality",
+      "question": "در بررسی کیفیت داده، آیا هر نام تکراری در Nahad_Mali خطاست؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "لزوماً خطا نیست",
+        "شعب متعدد",
+        "97 گروه"
+      ],
+      "maxAnswerChars": 850,
+      "passed": true,
+      "issues": [],
+      "answer": "از 807 رکورد Nahad_Mali، عنوان، تلفن و نشانی خالی نداریم و رکورد یتیم نسبت به نوع یا تالار نیز صفر است. 12 شماره از نظر طول یا نویسه‌های غیردیجیت مشکوک‌اند. Broker_TypeId در هر 807 رکورد خالی است. 2 گروه تکراری کاملاً یکسان با 2 ردیف اضافه وجود دارد. همچنین 97 گروه نام یکسان در یک تالار با 149 ردیف اضافه دیده می‌شود؛ این مورد لزوماً خطا نیست، چون می‌تواند شعب متعدد در یک استان باشد.",
+      "actualType": "structured_reference",
+      "latencyMs": 300.75
+    }
+  ]
+}

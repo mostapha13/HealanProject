@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "generatedAtUtc": "2026-08-28T16:18:58.662436+00:00",
+  "total": 3,
+  "passed": 3,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 2645.77,
+  "p95LatencyMs": 9088.56,
+  "clusters": {
+    "market-value": {
+      "total": 1,
+      "passed": 1
+    },
+    "price-time": {
+      "total": 2,
+      "passed": 2
+    }
+  },
+  "results": [
+    {
+      "id": "SE-052",
+      "cluster": "market-value",
+      "question": "ارزش کل شرکت ملی صنایع مس ایران در بورس الان چنده؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 9088.56,
+      "type": "composite_reference_market",
+      "entity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nملی صنایع مس ایران (فملی): ارزش بازار 31,219,200,000,000,000 ریال است.",
+      "error": null
+    },
+    {
+      "id": "SE-070",
+      "cluster": "price-time",
+      "question": "آخرین نرخ فملی مال چه روزیه؟",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 2645.77,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nفملی: آخرین قیمت 21,680 ریال است.",
+      "error": null
+    },
+    {
+      "id": "SE-071",
+      "cluster": "price-time",
+      "question": "قیمت آخر معامله فملی و زمان ثبتش رو اعلام کن",
+      "passed": true,
+      "checks": {
+        "type": true,
+        "entity": true,
+        "mustContain": true,
+        "mustNotContain": true,
+        "answerLength": true
+      },
+      "latencyMs": 1555.92,
+      "type": "marketsymbol",
+      "entity": "فملی",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nآخرین قیمت فملی، 21,680 ریال است و به داده ثبت‌شده در 1405/05/20 ساعت 11:29:22 مربوط می‌شود.",
+      "error": null
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,5363 @@
+{
+  "mode": "live",
+  "generatedAtUtc": "2026-08-28T18:07:37.902906+00:00",
+  "runId": "b43aea2a6919",
+  "version": "1.0.0-rc.31",
+  "suiteVersion": "1.6",
+  "suiteSha256": "a7ed4286d52f886b2f72d763fda37ff74d287fb530274c4e609759a19f77b524",
+  "flowCount": 19,
+  "total": 66,
+  "passed": 65,
+  "failed": 1,
+  "passRate": 0.9848484848484849,
+  "minimumPassRate": 1.0,
+  "p50LatencyMs": 47.85,
+  "p95LatencyMs": 158.42,
+  "maxP95LatencyMs": 5000.0,
+  "gatePassed": false,
+  "structuralIssues": [],
+  "failureReasons": {
+    "type": 1,
+    "mustContain": 1,
+    "expectedTools": 1,
+    "traceDetail": 1
+  },
+  "failures": [
+    {
+      "id": "semantic-binding:fresh-turn-two-symbol-comparison",
+      "flowId": "semantic-binding",
+      "turn": 3,
+      "question": "بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": false,
+        "forbiddenTools": true,
+        "traceDetail": false,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [
+        "type",
+        "mustContain",
+        "expectedTools",
+        "traceDetail"
+      ],
+      "actualType": "structured_reference",
+      "answer": "برای این سؤال، پاسخ قابل اتکایی از داده‌های فعلی پیدا نشد.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 45.63
+    }
+  ],
+  "results": [
+    {
+      "id": "board-roster-memory:current-members",
+      "flowId": "board-roster-memory",
+      "turn": 1,
+      "question": "اعضای هیئت مدیره بورس تهران کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 48,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 135.0
+    },
+    {
+      "id": "board-roster-memory:names-only-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 2,
+      "question": "فقط اسم اعضا را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "بهروز خالق‌ویردی، عسگر نوربخش، مجتبی افشاری، حامد شادکام، میلاد فروغی، عباس نعیمی",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 59.24
+    },
+    {
+      "id": "board-roster-memory:roles-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 3,
+      "question": "سمت‌هاشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_board;complete=True;facts=12;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 52.49
+    },
+    {
+      "id": "board-roster-memory:history-follow-up",
+      "flowId": "board-roster-memory",
+      "turn": 4,
+      "question": "پیشینه‌شون رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره\n3. مجتبی افشاری — عضو هیئت‌مدیره\n4. حامد شادکام — عضو هیئت‌مدیره\n5. میلاد فروغی — عضو هیئت‌مدیره\n6. عباس نعیمی — عضو هیئت‌مدیره\n\nبرای سوابق حرفه‌ای کامل اعضا، داده قابل اتکای کافی در منابع فعلی پیدا نشد؛ بنابراین سابقه‌ای حدس زده نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_board;complete=False;facts=12;missing=member_history"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.92;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 2646,
+          "detail": "queries=7;hits=20"
+        },
+        {
+          "tool": "answer.compose.canonical",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_board;evidence=0;missing=member_history"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 9,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 2724.04
+    },
+    {
+      "id": "organization-parent-memory:market-operations-manager",
+      "flowId": "organization-parent-memory",
+      "turn": 1,
+      "question": "مدیر عملیات بازار بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "سید ناصر جعفری، مدیر عملیات بازار سهام بورس تهران است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=مدیر عملیات بازار سهام;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 34.92
+    },
+    {
+      "id": "organization-parent-memory:parent-follow-up",
+      "flowId": "organization-parent-memory",
+      "turn": 2,
+      "question": "زیر مجموعه چه معاونتیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "سید ناصر جعفری، مدیر عملیات بازار سهام، زیرمجموعه معاونت عملیات بازار است؛ معاون عملیات بازار مهدی زمانی سبزی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "kind=organization_person;complete=True;facts=5;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=مدیر عملیات بازار سهام;facts=5"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 35.68
+    },
+    {
+      "id": "executive-subordinates-memory:executive-manager",
+      "flowId": "executive-subordinates-memory",
+      "turn": 1,
+      "question": "معاون اجرایی بورس کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "حمیدرضا اسمعیلی گیوی، معاون اجرایی بورس تهران است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=معاون اجرایی;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 23.95
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-list",
+      "flowId": "executive-subordinates-memory",
+      "turn": 2,
+      "question": "زیر مجموعه معاون اجرایی بورس کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران:\n\n1. اسماعیل رازقی — مدیر اداری\n2. سعید رضایی — مدیر سرمایه‌های انسانی\n3. سید احسان عدل — مدیر توسعه ساختمان\n4. رضا قلیچ‌خانی — مدیر امور مالی\n5. محمدحسین نوری‌زاده — مدیر مرکز داده، زیرساخت و شبکه",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 32,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 66.28
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-names-only",
+      "flowId": "executive-subordinates-memory",
+      "turn": 3,
+      "question": "اسمشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "اسماعیل رازقی، سعید رضایی، سید احسان عدل، رضا قلیچ‌خانی، محمدحسین نوری‌زاده",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 55.46
+    },
+    {
+      "id": "executive-subordinates-memory:subordinate-roles-after-names",
+      "flowId": "executive-subordinates-memory",
+      "turn": 4,
+      "question": "نقش هرکدوم چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "مدیران ثبت‌شده زیرمجموعه معاون اجرایی بورس تهران:\n\n1. اسماعیل رازقی — مدیر اداری\n2. سعید رضایی — مدیر سرمایه‌های انسانی\n3. سید احسان عدل — مدیر توسعه ساختمان\n4. رضا قلیچ‌خانی — مدیر امور مالی\n5. محمدحسین نوری‌زاده — مدیر مرکز داده، زیرساخت و شبکه",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference,organization-roster-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_unit;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_unit;topic=معاون اجرایی;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 46.91
+    },
+    {
+      "id": "latest-ipo:independent-question",
+      "flowId": "latest-ipo",
+      "turn": 1,
+      "question": "آخرین عرضه اولیه بورس چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": "kind=company_aggregate;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 49.81
+    },
+    {
+      "id": "latest-ipo:symbol-follow-up",
+      "flowId": "latest-ipo",
+      "turn": 2,
+      "question": "نمادش چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فرآورده‌های دامی ولبنی دالاهو (نماد غانیزان): نماد بورسی غانیزان است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 35,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت فرآورده‌های دامی ولبنی دالاهو;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 51.96
+    },
+    {
+      "id": "latest-ipo:province-follow-up",
+      "flowId": "latest-ipo",
+      "turn": 3,
+      "question": "این شرکت متعلق به کدام استان است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فرآورده‌های دامی ولبنی دالاهو (نماد غانیزان): در Company به تالار کرمانشاه منتسب است",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت فرآورده‌های دامی ولبنی دالاهو;facts=10"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 24.42
+    },
+    {
+      "id": "board-composite-question:history-and-representation",
+      "flowId": "board-composite-question",
+      "turn": 1,
+      "question": "سابقه اعضای هیئت مدیره بورس تهران و از طرف کدام شرکت هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "اعضای فعلی ثبت‌شده هیئت‌مدیره بورس تهران و شواهد نمایندگی هرکدام:\n\n1. بهروز خالق‌ویردی — رئیس هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n2. عسگر نوربخش — نائب رئیس هیئت‌مدیره: طبق سند مورخ 1403/10/01، به نمایندگی از سرمایه‌گذاری تدبیر معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n3. مجتبی افشاری — عضو هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n4. حامد شادکام — عضو هیئت‌مدیره: مدرک قابل اتکایی برای شرکت نمایندگی پیدا نشد.\n5. میلاد فروغی — عضو هیئت‌مدیره: طبق سند مورخ 1401/05/30، به نمایندگی از شرکت‌های گسترش صنعت نوین ایرانیان معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n6. عباس نعیمی — عضو هیئت‌مدیره: طبق سند مورخ 1397/06/21، به نمایندگی از شرکت سرمایه‌گذاری توسعه ملی معرفی شده بود؛ وضعیت جاری این نمایندگی تأیید نشده است.\n\nبرای سوابق حرفه‌ای کامل اعضا، داده قابل اتکای کافی در منابع فعلی پیدا نشد؛ بنابراین سابقه‌ای حدس زده نشده است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_board;complete=False;facts=12;missing=member_history|representing_company"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_board;topic=هیئت‌مدیره بورس تهران;facts=12"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.92;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 699,
+          "detail": "queries=7;hits=21"
+        },
+        {
+          "tool": "answer.compose.canonical",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=organization_board;evidence=4;missing=member_history|representing_company"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 15,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 758.17
+    },
+    {
+      "id": "organization-person-evidence-follow-up:chairperson",
+      "flowId": "organization-person-evidence-follow-up",
+      "turn": 1,
+      "question": "رئیس هیئت مدیره بورس تهران کیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "بهروز خالق‌ویردی، رئیس هیئت‌مدیره بورس تهران است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_person;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=رئیس هیئت‌مدیره;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 23.23
+    },
+    {
+      "id": "organization-person-evidence-follow-up:representation-follow-up",
+      "flowId": "organization-person-evidence-follow-up",
+      "turn": 2,
+      "question": "نماینده کدوم شرکته؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "knowledge",
+      "answer": "بهروز خالق‌ویردی، رئیس هیئت‌مدیره بورس تهران است.\n\nبرای شرکتِ نمایندگی‌شده، مدرک قابل اتکای کافی در داده‌های فعلی پیدا نشد؛ بنابراین چیزی حدس نمی‌زنم.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=organization-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=organization_person;complete=False;facts=2;missing=representing_company"
+        },
+        {
+          "tool": "sql.organization.people",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;topic=رئیس هیئت‌مدیره;facts=2"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.94;planner=False;reasons=canonical-organization-evidence,deterministic-canonical-route"
+        },
+        {
+          "tool": "knowledge.retrieve.multi",
+          "status": "ok",
+          "durationMs": 353,
+          "detail": "queries=2;hits=4"
+        },
+        {
+          "tool": "answer.compose.canonical",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=organization_person;evidence=0;missing=representing_company"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 393.44
+    },
+    {
+      "id": "jalali-clock:today",
+      "flowId": "jalali-clock",
+      "turn": 1,
+      "question": "امروز چندمه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "امروز جمعه، 1405/06/06 شمسی است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=2026-08-28;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=clock;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.clock.current",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=clock;topic=تاریخ و زمان جاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 14.39
+    },
+    {
+      "id": "canonical-market-composite:issuer-ceo-and-price",
+      "flowId": "canonical-market-composite",
+      "turn": 1,
+      "question": "مدیرعامل فولاد مبارکه کیست و آخرین قیمت نماد فولاد چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_market",
+      "answer": "فولاد — فولاد مبارکه اصفهان: مدیرعامل ثبت‌شده سعید زرندی است.\n\nبرای «فولاد مبارکه اصفهان» در داده‌های فعلی بازار اطلاعات قابل اتکایی پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=company_state;complete=True;facts=11;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=وضعیت نماد فولاد;facts=11"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=canonical-market-composite,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 20,
+          "detail": "status=Resolved;input=فولاد;match=فولاد مبارکه اصفهان"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company_state;marketFields=last_price;qualityRejected=False"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 40.93
+    },
+    {
+      "id": "canonical-market-composite:company-name-and-pe",
+      "flowId": "canonical-market-composite",
+      "turn": 2,
+      "question": "نام شرکت و نسبت P/E نماد فملی را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_market",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است\n\nفملی: نام شرکت/نماد «ملی‌ صنایع‌ مس‌ ایران‌»، P/E برابر 15.35 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 19,
+          "detail": "kind=company;complete=True;facts=10;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company;topic=اطلاعات شرکت ملی صنایع مس ایران;facts=10"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=canonical-market-composite,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company;marketFields=pe;qualityRejected=False"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 60.0
+    },
+    {
+      "id": "targeted-news-composite:symbol-news-and-volume",
+      "flowId": "targeted-news-composite",
+      "turn": 1,
+      "question": "آخرین خبر فملی چیست و حجم معاملاتش چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "hybrid",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای نماد «فملی» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.\n\nفملی: حجم معاملات 583,222,314 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "clauses=2;answers=0"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Hybrid;intent=Hybrid;confidence=0.99;planner=False;reasons=targeted-news,deterministic-composite-route"
+        },
+        {
+          "tool": "hybrid.plan",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "entity:entity.resolve[];market:structured.market.symbol[entity];knowledge:knowledge.retrieve[entity];analytics:analytics.symbol[market]"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "latest_available",
+          "durationMs": 41,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 41,
+          "detail": "hits=0"
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-knowledge-miss;action=accept;reasons=deterministic_knowledge_miss_with_grounded_market"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 79.97
+    },
+    {
+      "id": "latest-ipo-with-symbol:latest-company-and-ticker",
+      "flowId": "latest-ipo-with-symbol",
+      "turn": 1,
+      "question": "آخرین عرضه اولیه چه شرکتی بود و نمادش چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است. نماد بورسی آن غانیزان است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": "kind=company_aggregate;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 29.35
+    },
+    {
+      "id": "issuer-role-fail-closed:missing-company-state",
+      "flowId": "issuer-role-fail-closed",
+      "turn": 1,
+      "question": "مدیرعامل خودرو کیست و دلیل وضعیت فعلی نمادش چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «خودرو» وجود ندارد؛ بنابراین نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 18.53
+    },
+    {
+      "id": "general-facet-decomposition:absent-issuer-ceo-and-pe",
+      "flowId": "general-facet-decomposition",
+      "turn": 1,
+      "question": "مدیرعامل فملی کیست و نسبت P/E آن چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_market",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nدر اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «فملی» وجود ندارد؛ بنابراین مدیرعامل قابل تأیید نیست.\n\nفملی: P/E برابر 15.35 است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=canonical-market-composite,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 5,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company_state;marketFields=pe;qualityRejected=False"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 30.89
+    },
+    {
+      "id": "general-facet-decomposition:company-name-and-targeted-news",
+      "flowId": "general-facet-decomposition",
+      "turn": 2,
+      "question": "نام شرکت فملی چیست و آخرین خبرش را بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "composite_reference_knowledge",
+      "answer": "ملی صنایع مس ایران (نماد فملی): نام ثبت‌شده شرکت «ملی صنایع مس ایران» است\n\nبرای نماد «فملی» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "facet=نام شرکت فملی چیست;kind=company;facts=10"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 25,
+          "detail": "clauses=2;answers=1"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Knowledge;intent=Knowledge;confidence=0.99;planner=False;reasons=canonical-knowledge-composite,targeted-news,deterministic-composite-route"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 101,
+          "detail": null
+        },
+        {
+          "tool": "answer.compose.composite",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "canonical=company;knowledgeHits=0;target=فملی"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-canonical;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 148.0
+    },
+    {
+      "id": "general-facet-decomposition:latest-ipo-and-ceo",
+      "flowId": "general-facet-decomposition",
+      "turn": 3,
+      "question": "آخرین عرضه اولیه چه زمانی بوده و مدیرعامل آن شرکت کیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است. نام مدیرعامل در داده‌های فعلی ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "kind=company_aggregate;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 31.15
+    },
+    {
+      "id": "general-facet-decomposition:clock-and-global-news",
+      "flowId": "general-facet-decomposition",
+      "turn": 4,
+      "question": "امروز چندمه و آخرین خبر بورس تهران چیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "امروز جمعه، 1405/06/06 شمسی است.\n\nآخرین خبر ثبت‌شده در 1405/04/16: به گزارش مدیریت ارتباطات بورس تهران؛ با توجه به موافقت هیئت ‌پذیرش بورس تهران در جلسه مورخ 08 / 02/ 1405 با پذیرش اوراق گواهی اعتبار مولد (گام) بانک ملت در بورس تهران، از تاریخ 16/ 04 / 1405 مبلغ 1686.5 میلیارد ریال اوراق گام با سررسید 31 / 05 / 1405 با نماد \" اگ050512\" در بازار اوراق بدهی بورس تهران درج گردید. ضمانت و عاملیت این اوراق بر عهده بانک ملت می‌باشد. شایان ذکر است مجوز بانک مرکزی جمهوری اسلامی ایران و مجوز معاف از ثبت سازمان بورس و اوراق بهادار از فایل‌های مرتبط دریافت است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=2026-08-28;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=news;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.content.latest_news",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=news;topic=آخرین خبر بورس تهران;facts=1"
+        },
+        {
+          "tool": "sql.clock.current",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "facet=امروز چندمه;kind=clock;facts=1"
+        },
+        {
+          "tool": "sql.content.latest_news",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "facet=آخرین خبر بورس تهران چیست;kind=news;facts=1"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "clauses=2;answers=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-composite-reference;action=accept;reasons=canonical_subjects_covered|representation_claims_evidence_checked"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 27.68
+    },
+    {
+      "id": "general-facet-decomposition:description-and-closing-price",
+      "flowId": "general-facet-decomposition",
+      "turn": 5,
+      "question": "درباره فملی چه میدانی و قیمت پایانی آن چقدر است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "hybrid",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای نماد «فملی» توضیح مستند قابل اتکایی در اسناد نمایه‌شده پیدا نشد.\n\nفملی: قیمت پایانی 21,660 ریال است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "clauses=2;answers=0"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=Hybrid;intent=Hybrid;confidence=0.99;planner=False;reasons=descriptive-entity,deterministic-composite-route"
+        },
+        {
+          "tool": "hybrid.plan",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "entity:entity.resolve[];market:structured.market.symbol[entity];knowledge:knowledge.retrieve[entity];analytics:analytics.symbol[market]"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "latest_available",
+          "durationMs": 133,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 133,
+          "detail": "hits=0"
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-knowledge-miss;action=accept;reasons=deterministic_knowledge_miss_with_grounded_market"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 158.42
+    },
+    {
+      "id": "semantic-binding:ordinal-ranking-projection",
+      "flowId": "semantic-binding",
+      "turn": 1,
+      "question": "پنج نماد اول از نظر ارزش معاملات را نام ببر و برای اولی نسبت P/E را هم اضافه کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_query",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. فملی — ملی‌ صنایع‌ مس‌ ایران‌: ارزش معاملات 12,630,826,540,900 ریال\n2. وبملت — بانک ملت: ارزش معاملات 12,520,769,000,526 ریال\n3. وغدیر — سرمایه‌گذاری‌غدیر(هلدینگ‌: ارزش معاملات 4,948,285,897,640 ریال\n4. خودرو — ایران‌ خودرو: ارزش معاملات 4,394,039,140,773 ریال\n5. پخش — پخش البرز: ارزش معاملات 3,967,159,106,010 ریال\nبرای رتبه اول، فملی: P/E 15.35.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=StructuredQuery;intent=StructuredQuery;confidence=0.71;planner=False;reasons=deterministic-structured-query,sort:TradeValue:desc"
+        },
+        {
+          "tool": "structured.query",
+          "status": "ok",
+          "durationMs": 21,
+          "detail": null
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 40.88
+    },
+    {
+      "id": "semantic-binding:rank-result-hall-and-ceo",
+      "flowId": "semantic-binding",
+      "turn": 2,
+      "question": "آخرین شرکتی که عرضه اولیه شده متعلق به کدام تالار است و مدیرعاملش کیست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین عرضه اولیه ثبت‌شده مربوط به فرآورده‌های دامی ولبنی دالاهو در تاریخ 1403/10/24 است. نام مدیرعامل در داده‌های فعلی ثبت نشده است. تالار منطقه‌ای ثبت‌شده آن کرمانشاه است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "kind=company_aggregate;complete=True;facts=4;missing="
+        },
+        {
+          "tool": "sql.company.ipo",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_aggregate;topic=جدیدترین عرضه‌های اولیه Company;facts=4"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 28.83
+    },
+    {
+      "id": "semantic-binding:fresh-turn-two-symbol-comparison",
+      "flowId": "semantic-binding",
+      "turn": 3,
+      "question": "بین فملی و فولاد کدام ارزش معاملات بیشتری دارد و اختلافشان چقدر است؟",
+      "passed": false,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": false,
+        "mustContain": false,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": false,
+        "forbiddenTools": true,
+        "traceDetail": false,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [
+        "type",
+        "mustContain",
+        "expectedTools",
+        "traceDetail"
+      ],
+      "actualType": "structured_reference",
+      "answer": "برای این سؤال، پاسخ قابل اتکایی از داده‌های فعلی پیدا نشد.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=instrument_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.instrument",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=instrument_aggregate;topic=اطلاعات مرجع ابزارها;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 45.63
+    },
+    {
+      "id": "semantic-binding:participant-first-ranking",
+      "flowId": "semantic-binding",
+      "turn": 4,
+      "question": "اگر فقط حقیقی‌ها را در نظر بگیریم کدام نماد بیشترین خرید را داشته است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نماد‌های دارای بیشترین حجم خرید حقیقی میان رکورد‌های ClientType قابل اتصال به Instrument:\n1. خودرو — ایران‌ خودرو: 6,373,916,772 سهم\n2. وتجارت — بانک تجارت: 3,587,925,244 سهم\n3. خساپا — سایپا: 2,759,068,013 سهم\n4. وتجارت3 — بانک تجارت: 1,824,687,815 سهم\n5. های وب — داده گسترعصرنوین-های وب: 988,671,568 سهم\n6. وبصادر — بانک صادرات ایران: 905,768,576 سهم\n7. اخابر — مخابرات ایران: 705,872,606 سهم\n8. وپارس — بانک‌پارسیان‌: 672,019,143 سهم\n9. شپاکسا — پاکسان‌: 555,296,630 سهم\n10. دی — بانک دی: 507,009,327 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 42,
+          "detail": "kind=client_type_aggregate;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.market.clienttype",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=client_type_aggregate;topic=آمار مرجع حقیقی و حقوقی;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 80.48
+    },
+    {
+      "id": "semantic-binding:same-subject-state-facets",
+      "flowId": "semantic-binding",
+      "turn": 5,
+      "question": "وضعیت خساپا را بگو، سپس دلیلش و مدیرعامل شرکت را هم اضافه کن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در اطلاعات فعلی وضعیت شرکت‌ها، رکوردی برای «خساپا» وجود ندارد؛ بنابراین نمی‌توان فعال یا متوقف بودن آن را نتیجه گرفت.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=company_state;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.company.state",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_state;topic=نبود رکورد در Snapshot وضعیت ناشران;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 23.14
+    },
+    {
+      "id": "semantic-binding:natural-targeted-news-and-volume",
+      "flowId": "semantic-binding",
+      "turn": 6,
+      "question": "خبر جدیدی از خودرو داری؟ اگر هست خلاصه یک‌خطی و حجم آخرین معامله‌اش را هم بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "hybrid",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nبرای نماد «خودرو» خبر قابل اتکایی در اسناد نمایه‌شده پیدا نشد.\n\nخودرو: حجم معاملات 7,553,067,214 سهم است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "no-match"
+        },
+        {
+          "tool": "structured.reference.facets",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "clauses=2;answers=0"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "route=Hybrid;intent=Hybrid;confidence=0.99;planner=False;reasons=targeted-news,deterministic-composite-route"
+        },
+        {
+          "tool": "hybrid.plan",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "entity:entity.resolve[];market:structured.market.symbol[entity];knowledge:knowledge.retrieve[entity];analytics:analytics.symbol[market]"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "status=Resolved;input=خودرو;match=ایران‌ خودرو"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "latest_available",
+          "durationMs": 168,
+          "detail": "market_data_quality_rejected"
+        },
+        {
+          "tool": "knowledge.retrieve",
+          "status": "ok",
+          "durationMs": 168,
+          "detail": "hits=0"
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-knowledge-miss;action=accept;reasons=deterministic_knowledge_miss_with_grounded_market"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 6,
+      "httpStatus": 200,
+      "latencyMs": 224.81
+    },
+    {
+      "id": "stale-market-fail-closed:latest-price-date",
+      "flowId": "stale-market-fail-closed",
+      "turn": 1,
+      "question": "آخرین قیمت نماد فملی مربوط به چه تاریخی است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "marketsymbol",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20 ساعت 11:29:22:\n\nآخرین قیمت فملی، 21,680 ریال است و به داده ثبت‌شده در 1405/05/20 ساعت 11:29:22 مربوط می‌شود.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=MarketSymbol;intent=MarketSymbol;confidence=0.99;planner=False;reasons=deterministic-market-ontology"
+        },
+        {
+          "tool": "entity.resolve",
+          "status": "ok",
+          "durationMs": 10,
+          "detail": "status=Resolved;input=فملی;match=ملی‌ صنایع‌ مس‌ ایران‌"
+        },
+        {
+          "tool": "structured.market.symbol",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": null
+        },
+        {
+          "tool": "analytics.symbol",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "mode=deterministic-market;action=accept;reasons=deterministic_structured_market_answer"
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 54.39
+    },
+    {
+      "id": "colloquial-hall-count:kerman-count",
+      "flowId": "colloquial-hall-count",
+      "turn": 1,
+      "question": "تالار کرمان شمارش چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در تالار کرمان، 21 رکورد نهاد مالی با 17 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=financial_institution_hall;complete=True;facts=20;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار کرمان;facts=20"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 56.33
+    },
+    {
+      "id": "regional-hall-company-roster:hall-address-schema-boundary",
+      "flowId": "regional-hall-company-roster",
+      "turn": 1,
+      "question": "تالار یاسوج آدرسش کجاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام این تالار در داده‌های فعلی «کهگیلویه و بویراحمد» است، اما آدرس فیزیکی آن ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 6,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای کهگیلویه و بویراحمد;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 34.32
+    },
+    {
+      "id": "regional-hall-company-roster:hall-colloquial-location",
+      "flowId": "regional-hall-company-roster",
+      "turn": 2,
+      "question": "تالار یاسوج کجاست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام این تالار در داده‌های فعلی «کهگیلویه و بویراحمد» است، اما آدرس فیزیکی آن ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای کهگیلویه و بویراحمد;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 30.12
+    },
+    {
+      "id": "regional-hall-company-roster:hall-phone-schema-boundary",
+      "flowId": "regional-hall-company-roster",
+      "turn": 3,
+      "question": "شماره تماس تالار یاسوج چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شماره تماس تالار منطقه‌ای «کهگیلویه و بویراحمد» در داده‌های فعلی موجود نیست.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای کهگیلویه و بویراحمد;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 52.78
+    },
+    {
+      "id": "regional-hall-company-roster:hall-hierarchy-schema-boundary",
+      "flowId": "regional-hall-company-roster",
+      "turn": 4,
+      "question": "تالار شیراز زیر مجموعه کدام معاونت است؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "واحد بالادست تالار منطقه‌ای «فارس (شیراز)» در داده‌های فعلی ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 7,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای فارس (شیراز);facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 68.75
+    },
+    {
+      "id": "regional-hall-company-roster:hall-source-timestamp",
+      "flowId": "regional-hall-company-roster",
+      "turn": 5,
+      "question": "آخرین بروزرسانی تالار شیراز چه زمانی بوده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "آخرین بروزرسانی اطلاعات تالار منطقه‌ای «فارس (شیراز)»، 1405/05/20 ساعت 14:26:42 بوده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای فارس (شیراز);facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 33.51
+    },
+    {
+      "id": "regional-hall-company-roster:colloquial-roster",
+      "flowId": "regional-hall-company-roster",
+      "turn": 6,
+      "question": "تالار شیراز کیا زیر مجموعشن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 37,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 6,
+      "httpStatus": 200,
+      "latencyMs": 83.61
+    },
+    {
+      "id": "regional-hall-company-roster:possessive-company-names-follow-up",
+      "flowId": "regional-hall-company-roster",
+      "turn": 7,
+      "question": "اسم شرکتاش؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 11,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 7,
+      "httpStatus": 200,
+      "latencyMs": 44.85
+    },
+    {
+      "id": "regional-hall-company-roster:names-follow-up",
+      "flowId": "regional-hall-company-roster",
+      "turn": 8,
+      "question": "اسمشون چیه؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 8,
+      "httpStatus": 200,
+      "latencyMs": 58.32
+    },
+    {
+      "id": "regional-hall-company-roster:count-follow-up",
+      "flowId": "regional-hall-company-roster",
+      "turn": 9,
+      "question": "چند شرکت هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company، 17 شرکت به تالار فارس (شیراز) منتسب‌اند.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 17,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 9,
+      "httpStatus": 200,
+      "latencyMs": 48.4
+    },
+    {
+      "id": "regional-hall-company-roster:typo-roster",
+      "flowId": "regional-hall-company-roster",
+      "turn": 10,
+      "question": "تالار شیراز کیت زیر مجموعشن",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 23,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 10,
+      "httpStatus": 200,
+      "latencyMs": 58.74
+    },
+    {
+      "id": "regional-hall-company-roster:explicit-roster-after-context",
+      "flowId": "regional-hall-company-roster",
+      "turn": 11,
+      "question": "شرکت های زیر مجموعه تالار شیراز",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 13,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 11,
+      "httpStatus": 200,
+      "latencyMs": 37.37
+    },
+    {
+      "id": "regional-hall-company-roster:colloquial-company-morphology",
+      "flowId": "regional-hall-company-roster",
+      "turn": 12,
+      "question": "شرکتای تالار شیراز رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 12,
+      "httpStatus": 200,
+      "latencyMs": 38.45
+    },
+    {
+      "id": "financial-hall-context-boundary:financial-institutions-after-company-context",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 1,
+      "question": "نهادهای مالی تالار شیراز کیا هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فهرست نهاد‌های مالی ثبت‌شده در تالار فارس (شیراز) (37 نام):\n1. آتی ساز بازار\n2. آتیه\n3. آگاه\n4. آیده ال کوشا\n5. اردیبهشت ایرانیان\n6. اعتبار تابان\n7. اقتصاد بیدار\n8. بانک آینده\n9. بانک انصار\n10. بانک پارسیان\n11. بانک رفاه\n12. بانک سپه\n13. بانک صنعت و معدن\n14. بانک کشاورزی\n15. بانک مسکن\n16. بانک ملی\n17. بورس بیمه ایران\n18. پویان\n19. تامین سرمایه تمدن\n20. تامین سرمایه نوین\n21. توسعه سرمایه دنیا\n22. حافظ\n23. دانایان\n24. رایا سهم\n25. سامان\n… 12 نام دیگر نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 38.29
+    },
+    {
+      "id": "financial-hall-context-boundary:financial-count-follow-up",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 2,
+      "question": "تعدادشون چنده؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در تالار فارس (شیراز)، 48 رکورد نهاد مالی با 37 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 26.53
+    },
+    {
+      "id": "financial-hall-context-boundary:broker-roster",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 3,
+      "question": "کارگزاری های تالار شیراز رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فهرست کارگزاری‌های ثبت‌شده در تالار فارس (شیراز) (36 نام):\n1. آتی ساز بازار\n2. آتیه\n3. آگاه\n4. آیده ال کوشا\n5. اردیبهشت ایرانیان\n6. اعتبار تابان\n7. اقتصاد بیدار\n8. بانک آینده\n9. بانک انصار\n10. بانک پارسیان\n11. بانک رفاه\n12. بانک سپه\n13. بانک صنعت و معدن\n14. بانک کشاورزی\n15. بانک مسکن\n16. بانک ملی\n17. بورس بیمه ایران\n18. پویان\n19. تامین سرمایه تمدن\n20. تامین سرمایه نوین\n21. توسعه سرمایه دنیا\n22. حافظ\n23. دانایان\n24. سامان\n25. سپهر باستان\n… 11 نام دیگر نمایش داده نشد.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 8,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=کارگزاری‌های تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 63.15
+    },
+    {
+      "id": "financial-hall-context-boundary:broker-count-follow-up",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 4,
+      "question": "چندتاشون هست؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در تالار فارس (شیراز)، 47 رکورد کارگزاری با 36 نام متمایز ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-followup-with-active-reference"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=financial_institution_hall;complete=True;facts=28;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=کارگزاری‌های تالار فارس (شیراز);facts=28"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 31.75
+    },
+    {
+      "id": "financial-hall-context-boundary:company-overrides-financial-context",
+      "flowId": "financial-hall-context-boundary",
+      "turn": 5,
+      "question": "شرکتای تالار شیراز رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "شرکت‌های منتسب به تالار فارس (شیراز) (17 شرکت):\n1. پالایش نفت شیراز\n2. پتروشیمی شیراز\n3. پشم ششیشه ایران\n4. دشت مرغاب\n5. سرمایه‌گذاری استان فارس\n6. سیمان داراب\n7. سیمان فارس\n8. سیمان فارس نو\n9. سیمان‌ سفید نی‌ریز\n10. سیمان فارس و خوزستان\n11. صنایع شیمیایی سینا\n12. صنایع شیمیایی فارس\n13. عمران و توسعه فارس\n14. قند مرودشت\n15. کارخانجات کاشی و سرامیک حافظ\n16. لعابیران\n17. نیرو ترانس",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 37,
+          "detail": "kind=company_hall;complete=True;facts=18;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار فارس (شیراز);facts=18"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 66.17
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:zero-company-roster",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 1,
+      "question": "شرکت‌های تالار چهارمحال و بختیاری را نام ببر",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company هیچ شرکتی به تالار چهارمحال و بختیاری منتسب نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": "kind=company_hall;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار چهارمحال و بختیاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 68.68
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:company-to-financial-anaphora",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 2,
+      "question": "نهادهاش چیا هستن؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "فهرست نهاد‌های مالی ثبت‌شده در تالار چهارمحال و بختیاری (10 نام):\n1. آتیه\n2. آگاه\n3. بانک تجارت\n4. بانک رفاه\n5. بانک صادرات\n6. سهم آشنا\n7. مبین سرمایه\n8. مفید\n9. مهر آفرین\n10. نهایت نگر",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=financial-hall-cross-domain-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=financial_institution_hall;complete=True;facts=13;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار چهارمحال و بختیاری;facts=13"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 32.21
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:financial-to-company-anaphora",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 3,
+      "question": "شرکتاش رو بگو",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در جدول Company هیچ شرکتی به تالار چهارمحال و بختیاری منتسب نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=company-hall-cross-domain-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 49,
+          "detail": "kind=company_hall;complete=True;facts=1;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار چهارمحال و بختیاری;facts=1"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 88.56
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:large-company-roster-truncation",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 4,
+      "question": "شرکت‌های تالار تهران را نام ببر",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "20 شرکت اول از 176 شرکت منتسب به تالار تهران:\n1. توسعه معادن وص.معدنی خاورمیانه\n2. آبسال\n3. آسان پرداخت پرشین\n4. ارتباطات سیار ایران\n5. افست\n6. انتقال داده‌های آسیاتک\n7. ایران ترانسفو\n8. ایران خودرو\n9. ایران دارو\n10. بانک اقتصاد نوین\n11. بانک پارسیان\n12. بانک پاسارگاد\n13. بانک تجارت\n14. بانک خاورمیانه\n15. بانک سینا\n16. بانک صادرات ایران\n17. بانک کار آفرین\n18. بانک ملت\n19. بورس انرژی ایران\n20. بورس اوراق بهادار تهران\n… 156 شرکت دیگر نمایش داده نشد؛ تعداد موردنظر یا نام دقیق‌تر را بنویسید.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 36,
+          "detail": "kind=company_hall;complete=True;facts=21;missing="
+        },
+        {
+          "tool": "sql.company.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=company_hall;topic=شرکت‌های تالار تهران;facts=21"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 86.87
+    },
+    {
+      "id": "regional-hall-edge-and-domain-transfer:zero-financial-roster-overrides-company",
+      "flowId": "regional-hall-edge-and-domain-transfer",
+      "turn": 5,
+      "question": "نهادهای مالی تالار تهران کیا هستند؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "هیچ نهاد مالی برای تالار تهران ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=financial_institution_hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.financial_institution.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=financial_institution_hall;topic=نهادهای مالی تالار تهران;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 38.36
+    },
+    {
+      "id": "reported-hall-and-market-repair:bare-hall-establishes-context",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 1,
+      "question": "تالار زنجان",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "تالار منطقه‌ای «زنجان» با کد 10 ثبت شده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای زنجان;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 1,
+      "httpStatus": 200,
+      "latencyMs": 47.29
+    },
+    {
+      "id": "reported-hall-and-market-repair:short-hall-address-follow-up",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 2,
+      "question": "آدرسش",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام این تالار در داده‌های فعلی «زنجان» است، اما آدرس فیزیکی آن ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=regional-hall-detail-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای زنجان;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 2,
+      "httpStatus": 200,
+      "latencyMs": 28.35
+    },
+    {
+      "id": "reported-hall-and-market-repair:explicit-zanjan-address",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 3,
+      "question": "آدرس تالار زنجان کجاست",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام این تالار در داده‌های فعلی «زنجان» است، اما آدرس فیزیکی آن ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای زنجان;facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 3,
+      "httpStatus": 200,
+      "latencyMs": 30.73
+    },
+    {
+      "id": "reported-hall-and-market-repair:explicit-shiraz-address",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 4,
+      "question": "آدرس تالار شیراز کجاست",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "نام این تالار در داده‌های فعلی «فارس (شیراز)» است، اما آدرس فیزیکی آن ثبت نشده است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=hall;complete=True;facts=3;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall;topic=تالار منطقه‌ای فارس (شیراز);facts=3"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 4,
+      "httpStatus": 200,
+      "latencyMs": 36.56
+    },
+    {
+      "id": "reported-hall-and-market-repair:hall-address-coverage",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 5,
+      "question": "آدرس کدوم تالارها رو داری؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در داده‌های فعلی، آدرس فیزیکی هیچ‌یک از تالار‌های منطقه‌ای ثبت نشده است؛ فقط نام و کد تالار‌ها موجود است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "kind=hall_address_catalog;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall_address_catalog;topic=پوشش آدرس فیزیکی تالارهای منطقه‌ای;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 5,
+      "httpStatus": 200,
+      "latencyMs": 42.49
+    },
+    {
+      "id": "reported-hall-and-market-repair:physical-place-clarification",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 6,
+      "question": "مکان های فیزیکی",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "در داده‌های فعلی، آدرس فیزیکی هیچ‌یک از تالار‌های منطقه‌ای ثبت نشده است؛ فقط نام و کد تالار‌ها موجود است.",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 3,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=regional-hall-address-catalog-followup"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 4,
+          "detail": "kind=hall_address_catalog;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall_address_catalog;topic=پوشش آدرس فیزیکی تالارهای منطقه‌ای;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 6,
+      "httpStatus": 200,
+      "latencyMs": 59.34
+    },
+    {
+      "id": "reported-hall-and-market-repair:complaint-repairs-last-topic",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 7,
+      "question": "چرا اینقد خنگی؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_reference",
+      "answer": "حق با شماست؛ پاسخ قبلی باید دقیق‌تر و متناسب با موضوع گفته می‌شد.\n\nدر داده‌های فعلی، آدرس فیزیکی هیچ‌یک از تالار‌های منطقه‌ای ثبت نشده است؛ فقط نام و کد تالار‌ها موجود است.",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 2,
+          "detail": "applied=True;kind=Knowledge;primary=;secondary=;reasons=regional-hall-address-catalog-followup,repair-request-retry-previous-question"
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "kind=hall_address_catalog;complete=True;facts=2;missing="
+        },
+        {
+          "tool": "sql.region_hall.lookup",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "kind=hall_address_catalog;topic=پوشش آدرس فیزیکی تالارهای منطقه‌ای;facts=2"
+        },
+        {
+          "tool": "reflection.review",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": null
+        },
+        {
+          "tool": "answer.validate",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "status=Grounded;issues="
+        }
+      ],
+      "conversationRevision": 7,
+      "httpStatus": 200,
+      "latencyMs": 65.37
+    },
+    {
+      "id": "reported-hall-and-market-repair:top-five-trade-volume-latest-available",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 8,
+      "question": "5 تا از نماد های با بیشترین حجم معامله رو بده بهم",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_query",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. وبملت — بانک ملت: حجم معاملات 9,435,728,461 سهم\n2. خودرو — ایران‌ خودرو: حجم معاملات 7,553,067,214 سهم\n3. وتجارت — بانک تجارت: حجم معاملات 4,309,491,482 سهم\n4. وبصادر — بانک صادرات ایران: حجم معاملات 2,722,937,868 سهم\n5. خساپا — سایپا: حجم معاملات 2,605,035,886 سهم",
+      "trace": [
+        {
+          "tool": "question.normalize",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "high-confidence Persian financial typo corrected"
+        },
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 93,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=StructuredQuery;intent=StructuredQuery;confidence=0.71;planner=False;reasons=deterministic-structured-query,sort:TradeVolume:desc"
+        },
+        {
+          "tool": "structured.query",
+          "status": "ok",
+          "durationMs": 24,
+          "detail": null
+        }
+      ],
+      "conversationRevision": 8,
+      "httpStatus": 200,
+      "latencyMs": 141.45
+    },
+    {
+      "id": "reported-hall-and-market-repair:single-top-trade-volume",
+      "flowId": "reported-hall-and-market-repair",
+      "turn": 9,
+      "question": "بیشترین حجم معامله رو چه نمادی داشته؟",
+      "passed": true,
+      "checks": {
+        "transport": true,
+        "httpPayload": true,
+        "nonEmptyAnswer": true,
+        "type": true,
+        "mustContain": true,
+        "mustContainAny": true,
+        "mustNotContain": true,
+        "answerRegex": true,
+        "answerNotRegex": true,
+        "answerLength": true,
+        "normalizedEquals": true,
+        "evidenceClaimCount": true,
+        "evidenceClaimsInAnswer": true,
+        "normalizedEqualsEvidenceClaims": true,
+        "jalaliEvidenceDatesInAnswer": true,
+        "expectedTools": true,
+        "forbiddenTools": true,
+        "traceDetail": true,
+        "answerValidation": true,
+        "conversationRevision": true,
+        "latency": true
+      },
+      "issues": [],
+      "actualType": "structured_query",
+      "answer": "بر اساس آخرین داده ثبت‌شده در 1405/05/20:\n1. وبملت — بانک ملت: حجم معاملات 9,435,728,461 سهم",
+      "trace": [
+        {
+          "tool": "temporal.resolve",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "context=False;source=clock;primary=;comparison=;reasons="
+        },
+        {
+          "tool": "conversation.context",
+          "status": "ok",
+          "durationMs": 1,
+          "detail": "applied=False;kind=None;primary=;secondary=;reasons="
+        },
+        {
+          "tool": "structured.reference",
+          "status": "ok",
+          "durationMs": 26,
+          "detail": "no-match"
+        },
+        {
+          "tool": "capability.route",
+          "status": "ok",
+          "durationMs": 0,
+          "detail": "route=StructuredQuery;intent=StructuredQuery;confidence=0.71;planner=False;reasons=deterministic-structured-query,sort:TradeVolume:desc"
+        },
+        {
+          "tool": "structured.query",
+          "status": "ok",
+          "durationMs": 16,
+          "detail": null
+        }
+      ],
+      "conversationRevision": 9,
+      "httpStatus": 200,
+      "latencyMs": 64.93
+    }
+  ]
+}

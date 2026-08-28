@@ -106,7 +106,8 @@ public sealed class ChatEvidenceEngine : IChatEvidenceEngine
             q++;
             list.Add(new("structured-query:execution","Q1",EvidenceKind.StructuredQuery,EvidenceAuthority.CanonicalQueryResult,
                 "TSEAI.StructuredQuery","current-market-universe","اجرای Query ساختاریافته",null,null,null,null,null,null,
-                new Dictionary<string, object?>{{"explanation",structuredQuery.Plan.Explanation},{"scanned",structuredQuery.Scanned},{"quality_rejected",structuredQuery.QualityRejected},{"matched",structuredQuery.Matched}}));
+                new Dictionary<string, object?>{{"explanation",structuredQuery.Plan.Explanation},{"scanned",structuredQuery.Scanned},{"quality_rejected",structuredQuery.QualityRejected},{"matched",structuredQuery.Matched},
+                    {"observed_at_utc",structuredQuery.ObservedAtUtc},{"used_latest_available_snapshot",structuredQuery.UsedLatestAvailableSnapshot}}));
             foreach (var row in structuredQuery.Results.Take(20))
             {
                 q++;

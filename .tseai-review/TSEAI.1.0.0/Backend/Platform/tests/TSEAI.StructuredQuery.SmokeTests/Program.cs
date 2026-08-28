@@ -1,4 +1,5 @@
 using TSEAI.Application.Analytics;
+using TSEAI.Application.Chat;
 using TSEAI.Application.Data.Canonical;
 using TSEAI.Application.DataQuality;
 using TSEAI.Application.Market;
@@ -37,6 +38,12 @@ Assert(p13.Success && p13.Plan!.Conditions.Any(x=>x.Metric==StructuredQueryMetri
 var p14=parser.Interpret("پنج نماد اول از نظر ارزش معاملات را نام ببر و برای اولی نسبت P/E را هم اضافه کن");
 Assert(p14.Success&&p14.Plan?.SortBy==StructuredQueryMetric.TradeValue&&p14.Plan.Take==5&&p14.Plan.SortDescending,
     "ordinal ranking wording must bind to a descending structured query");
+var p15=parser.Interpret("بیشترین حجم معامله را چه نمادی داشته؟");
+Assert(p15.Success&&p15.Plan?.SortBy==StructuredQueryMetric.TradeVolume&&p15.Plan.Take==1,
+    "a singular superlative question must return exactly one ranked symbol");
+var p16=parser.Interpret("15 نماد با بیشترین ارزش معاملات چیا هستند؟");
+Assert(p16.Success&&p16.Plan?.SortBy==StructuredQueryMetric.TradeValue&&p16.Plan.Take==15,
+    "a leading two-digit count must be preserved in the ranking plan");
 
 var now=DateTime.UtcNow;
 MarketSymbolSnapshot Snap(long id,string symbol,long volume,decimal pe,long buyCount=10,long sellCount=10)=>new()
@@ -58,6 +65,20 @@ var effect=await service.ExecuteAsync("۲ نماد با بیشترین اثر ر
 Assert(effect.Success && effect.Results.Select(x=>x.Symbol).SequenceEqual(["ج","ب"]),"effect-on-index execution failed");
 var bidDepth=await service.ExecuteAsync("۲ نماد با بیشترین عمق خرید را بده",2,CancellationToken.None);
 Assert(bidDepth.Success && bidDepth.Results.Select(x=>x.Symbol).SequenceEqual(["ج","ب"]),"order-book depth execution failed");
+var staleService=new StructuredQueryService(parser,new FakeMarket(rows),new FakeStaleQuality(),new DeterministicMarketAnalyticsEngine());
+var staleRank=await staleService.ExecuteAsync("۲ نماد با بیشترین حجم معاملات را بده",2,CancellationToken.None);
+Assert(staleRank.Success&&staleRank.UsedLatestAvailableSnapshot&&staleRank.Results.Select(x=>x.Symbol).SequenceEqual(["ب","ج"]),
+    "a structurally valid stale universe must be ranked as the explicitly dated latest available snapshot");
+var staleAnswer=new PersianFinancialAnswerComposer().ComposeStructured("۲ نماد با بیشترین حجم معاملات را بده",staleRank);
+Assert(staleAnswer.Contains("بر اساس آخرین داده ثبت‌شده در",StringComparison.Ordinal)
+       &&!staleAnswer.Contains("Quality Gate",StringComparison.Ordinal)&&!staleAnswer.Contains("رکورد",StringComparison.Ordinal),
+    "user-facing structured answers must disclose the observation date without internal diagnostics");
+var manyRows=Enumerable.Range(1,15).Select(i=>Snap(i,$"نماد{i}",20_000-i,5)).ToArray();
+var manyService=new StructuredQueryService(parser,new FakeMarket(manyRows),new FakeQuality(),new DeterministicMarketAnalyticsEngine());
+var manyRank=await manyService.ExecuteAsync("15 نماد با بیشترین ارزش معاملات را بده",100,CancellationToken.None);
+var manyAnswer=new PersianFinancialAnswerComposer().ComposeStructured("15 نماد با بیشترین ارزش معاملات را بده",manyRank);
+Assert(manyRank.Plan?.Take==15&&manyRank.Results.Count==15&&manyAnswer.Contains("15. ",StringComparison.Ordinal),
+    "the answer composer must not silently truncate a fifteen-row request to ten rows");
 Console.WriteLine("TSEAI Structured Query smoke PASS");
 
 sealed class FakeMarket(IReadOnlyList<MarketSymbolSnapshot> rows):IMarketSnapshotQuery
@@ -69,4 +90,15 @@ sealed class FakeQuality:IDataQualityService
 {
     public MarketDataQualityReport EvaluateMarketSnapshot(MarketSymbolSnapshot s)=>new(DataQualityStatus.Valid,true,DateTimeOffset.UtcNow,s.InsCode,s.Symbol,new(DataQualityStatus.Valid,DateTimeOffset.UtcNow,TimeSpan.Zero,TimeSpan.FromMinutes(5),true,"test"),[]);
     public Task<CanonicalDataQualityReport> EvaluateCanonicalSourcesAsync(CancellationToken ct)=>Task.FromResult(new CanonicalDataQualityReport(DataQualityStatus.Valid,true,"test",DateTimeOffset.UtcNow,[]));
+}
+sealed class FakeStaleQuality:IDataQualityService
+{
+    public MarketDataQualityReport EvaluateMarketSnapshot(MarketSymbolSnapshot s)
+    {
+        var observed=DateTimeOffset.UtcNow.AddDays(-10);
+        return new(DataQualityStatus.Stale,false,DateTimeOffset.UtcNow,s.InsCode,s.Symbol,
+            new(DataQualityStatus.Stale,observed,TimeSpan.FromDays(10),TimeSpan.FromMinutes(5),false,"test"),
+            [new("freshness.stale",DataQualitySeverity.Error,"قدیمی است")]);
+    }
+    public Task<CanonicalDataQualityReport> EvaluateCanonicalSourcesAsync(CancellationToken ct)=>Task.FromResult(new CanonicalDataQualityReport(DataQualityStatus.Stale,true,"test",DateTimeOffset.UtcNow,[]));
 }

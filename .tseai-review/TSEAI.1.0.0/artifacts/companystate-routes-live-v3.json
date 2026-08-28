@@ -1,0 +1,144 @@
+{
+  "version": "companystate-1.0",
+  "generatedAtUtc": "2026-08-28T14:14:58.858373+00:00",
+  "total": 7,
+  "passed": 7,
+  "passRate": 1.0,
+  "allPassed": true,
+  "p50LatencyMs": 66.92,
+  "p95LatencyMs": 203.53,
+  "clusters": {
+    "statistics": {
+      "total": 1,
+      "passed": 1
+    },
+    "quality": {
+      "total": 5,
+      "passed": 5
+    },
+    "schema": {
+      "total": 1,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "CS-028",
+      "cluster": "statistics",
+      "question": "آخرین زمان جمع‌آوری کل جدول Companystate را بگو",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "1405/05/20",
+        "13:46:46"
+      ],
+      "mustNotContain": [
+        "2026/08/11"
+      ],
+      "maxAnswerChars": 520,
+      "passed": true,
+      "issues": [],
+      "answer": "جدول Companystate دارای 58 رکورد، 58 نماد متمایز و 58 کد سامانه متمایز است. بازه آخرین تغییر وضعیت از 1401/03/08 تا 1405/04/17 شمسی است و Snapshot در 1405/05/20 ساعت 13:46:46 جمع‌آوری شده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 4797.5
+    },
+    {
+      "id": "CS-042",
+      "cluster": "quality",
+      "question": "کیفیت داده جدول Companystate را خلاصه کن",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "58 رکورد",
+        "28 مدیرعامل",
+        "6 هیئت‌مدیره",
+        "نماد و کد تکراری به‌ترتیب 0 و 0"
+      ],
+      "maxAnswerChars": 650,
+      "passed": true,
+      "issues": [],
+      "answer": "کیفیت Companystate: از 58 رکورد، نماد، نام شرکت، تاریخ تغییر و دلیلِ خالی هرکدام 0، 0، 0 و 0 رکورد است؛ 28 مدیرعامل و 6 هیئت‌مدیره خالی‌اند. گروه نماد و کد تکراری به‌ترتیب 0 و 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 203.53
+    },
+    {
+      "id": "CS-043",
+      "cluster": "quality",
+      "question": "چند رکورد Companystate مدیرعامل دارند و چندتا فاقد مدیرعامل‌اند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "30 رکورد مدیرعامل دارند",
+        "28 رکورد فاقد مدیرعامل"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "از 58 رکورد Companystate، 30 رکورد مدیرعامل دارند و 28 رکورد فاقد مدیرعامل‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 72.07
+    },
+    {
+      "id": "CS-044",
+      "cluster": "quality",
+      "question": "چند شرکت در Companystate بدون اعضای هیئت مدیره هستند؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "52 رکورد اعضای هیئت‌مدیره دارند",
+        "6 رکورد فاقد آن"
+      ],
+      "maxAnswerChars": 340,
+      "passed": true,
+      "issues": [],
+      "answer": "از 58 رکورد Companystate، 52 رکورد اعضای هیئت‌مدیره دارند و 6 رکورد فاقد آن‌اند.",
+      "actualType": "structured_reference",
+      "latencyMs": 66.43
+    },
+    {
+      "id": "CS-045",
+      "cluster": "quality",
+      "question": "Companystate نماد یا کد سامانه تکراری دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "گروه نماد تکراری 0",
+        "گروه کد سامانه تکراری 0"
+      ],
+      "maxAnswerChars": 320,
+      "passed": true,
+      "issues": [],
+      "answer": "در Companystate تعداد گروه نماد تکراری 0 و تعداد گروه کد سامانه تکراری 0 است.",
+      "actualType": "structured_reference",
+      "latencyMs": 54.56
+    },
+    {
+      "id": "CS-046",
+      "cluster": "quality",
+      "question": "کد سامانه چند رکورد Companystate قابل اتصال به Instrument است؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "55 رکورد از 58 رکورد",
+        "3 رکورد",
+        "Foreign Key فیزیکی"
+      ],
+      "maxAnswerChars": 460,
+      "passed": true,
+      "issues": [],
+      "answer": "کد سامانه 55 رکورد از 58 رکورد با Instrument.InstrumentID تطبیق مستقیم دارد؛ 3 رکورد فعلی تطبیق ندارند. این ارتباط منطقی است و Foreign Key فیزیکی تعریف نشده است.",
+      "actualType": "structured_reference",
+      "latencyMs": 41.04
+    },
+    {
+      "id": "CS-049",
+      "cluster": "schema",
+      "question": "آیا Companystate قیمت و حجم معاملات هم دارد؟",
+      "expectedType": "structured_reference",
+      "mustContain": [
+        "قیمت، حجم یا ارزش معاملات ندارد",
+        "Snapshot وضعیت تعلیق"
+      ],
+      "maxAnswerChars": 400,
+      "passed": true,
+      "issues": [],
+      "answer": "Companystate قیمت، حجم یا ارزش معاملات ندارد؛ این جدول فقط Snapshot وضعیت تعلیق، علت، تاریخ تغییر، مدیرعامل، اعضای هیئت‌مدیره و شناسه‌های ناشر را نگهداری می‌کند.",
+      "actualType": "structured_reference",
+      "latencyMs": 66.92
+    }
+  ]
+}
