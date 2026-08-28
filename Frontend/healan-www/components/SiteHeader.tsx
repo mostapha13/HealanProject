@@ -19,7 +19,7 @@ type NavItem = {
 };
 
 const NAV_LINKS: NavItem[] = [
-  { href: '/#about', label: 'درباره پزشک', kind: 'anchor' },
+  { href: '/about-doctor', label: 'درباره پزشک', kind: 'next' },
   { href: '/cardiology', label: 'قلب و عروق', kind: 'next' },
   { href: '/varicose-veins', label: 'واریس', kind: 'next' },
   { href: '/#contact', label: 'تماس', kind: 'anchor' },

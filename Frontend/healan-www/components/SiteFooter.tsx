@@ -19,6 +19,7 @@ export function SiteFooter({ name, specialty, city }: Props) {
           </span>
         </div>
         <div className="footer__links">
+          <Link href="/about-doctor">درباره دکتر معصومه شهرویی</Link>
           <Link href="/cardiology">متخصص قلب و عروق در شوشتر</Link>
           <Link href="/varicose-veins">تشخیص و درمان واریس</Link>
           <Link href="/blog">بلاگ</Link>

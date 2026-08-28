@@ -42,7 +42,7 @@ export function MedicalArticle({ content, doctorName, doctorBoard }: { content: 
           </section>
           <section className="medical-reviewer">
             <span className="medical-reviewer__mark" aria-hidden>♥</span>
-            <div><strong>بازبینی‌شده توسط {doctorName}</strong><p>{doctorBoard}</p><Link href="/#about">درباره پزشک و سوابق حرفه‌ای ←</Link></div>
+            <div><strong>بازبینی‌شده توسط {doctorName}</strong><p>{doctorBoard}</p><Link href="/about-doctor">درباره پزشک و سوابق حرفه‌ای ←</Link></div>
           </section>
         </article>
         <aside className="article-sidebar">
