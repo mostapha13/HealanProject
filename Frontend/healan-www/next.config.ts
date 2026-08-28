@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         hostname: siteHost,
         pathname: '/File/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'clinic.drshahrooei.ir',
+        pathname: '/File/**',
+      },
     ],
   },
 };

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/JsonLd';
@@ -97,8 +98,15 @@ export default async function BlogPostPage({ params }: Props) {
           </Link>
           {post.coverImageUrl ? (
             <div className="article__cover">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={publicAssetUrl(post.coverImageUrl)} alt={post.title} />
+              <Image
+                src={publicAssetUrl(post.coverImageUrl) || post.coverImageUrl}
+                alt={post.title}
+                fill
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 1180px) 100vw, 1180px"
+                quality={82}
+              />
             </div>
           ) : null}
           <header className="article__header">

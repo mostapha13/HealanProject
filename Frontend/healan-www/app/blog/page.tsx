@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -79,8 +80,13 @@ export default async function BlogListPage({ searchParams }: Props) {
                   >
                     <div className="blog-card__cover">
                       {post.coverImageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={publicAssetUrl(post.coverImageUrl)} alt={post.title} />
+                        <Image
+                          src={publicAssetUrl(post.coverImageUrl) || post.coverImageUrl}
+                          alt={post.title}
+                          fill
+                          sizes="(max-width: 680px) 100vw, (max-width: 980px) 50vw, 33vw"
+                          quality={76}
+                        />
                       ) : null}
                     </div>
                     <div className="blog-card__body">

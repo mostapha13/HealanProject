@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PortalContentItem } from '@/lib/api';
 import { publicAssetUrl } from '@/lib/seo';
@@ -127,12 +128,15 @@ export function HeroSlider({ slides: slidesProp, floatTitle, floatSubtitle }: Pr
                 />
               ) : slide.imageUrl ? (
                 <div className="hero-slide hero-slide--photo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={publicAssetUrl(slide.imageUrl)}
+                  <Image
+                    src={publicAssetUrl(slide.imageUrl) || slide.imageUrl}
                     alt={slide.body || slide.title || 'اسلاید'}
                     className="hero-slide__photo"
-                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fill
+                    priority={index === 0}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                    sizes="(max-width: 900px) 100vw, 50vw"
+                    quality={82}
                   />
                   <div className="hero-slide__caption">
                     <span className="hero-slide__caption-tag">

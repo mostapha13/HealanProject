@@ -1382,6 +1382,8 @@ html[dir='rtl'] .nav-drawer {
 }
 
 .blog-card__cover {
+  position: relative;
+  overflow: hidden;
   aspect-ratio: 16 / 10;
   background: var(--bg-muted);
 }
@@ -1438,6 +1440,7 @@ html[dir='rtl'] .nav-drawer {
 }
 
 .article__cover {
+  position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 24px;
