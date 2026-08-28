@@ -28,5 +28,5 @@ export default async function CardiologyPage() {
   const site = await fetchSite();
   const model = buildLandingModel(site);
   const jsonLd = buildMedicalPageJsonLd({ site, path, title: cardiologyContent.title, description, serviceName: 'قلب و عروق', faq: cardiologyContent.faq });
-  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} topbar={model.contact.topbar} /><MedicalServiceLanding content={cardiologyContent} doctorName={model.doctor.name} city={model.doctor.city} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
+  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.cardiologyPhone} phoneDisplay={model.contact.cardiologyPhoneDisplay} topbar={model.contact.topbar} /><MedicalServiceLanding content={cardiologyContent} doctorName={model.doctor.name} city={model.doctor.city} phone={model.contact.cardiologyPhone} phoneDisplay={model.contact.cardiologyPhoneDisplay} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
 }

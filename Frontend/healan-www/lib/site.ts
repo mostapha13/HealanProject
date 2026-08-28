@@ -8,12 +8,18 @@ const DEFAULT_HERO_DESC =
 export function buildLandingModel(site: PublishedPortalSite) {
   const doctor = doctorFromSettings(site);
   const s = (key: string, fallback = '') => portalSetting(site, key, fallback);
+  const cardiologyPhone = s('contact.phone.cardiology', doctor.phone);
+  const varicosePhone = s('contact.phone.varicose', cardiologyPhone);
 
   return {
     doctor,
     contact: {
-      phone: doctor.phone,
-      phoneDisplay: doctor.phoneDisplay,
+      phone: cardiologyPhone,
+      phoneDisplay: cardiologyPhone,
+      cardiologyPhone,
+      cardiologyPhoneDisplay: cardiologyPhone,
+      varicosePhone,
+      varicosePhoneDisplay: varicosePhone,
       hours: s('contact.hours', 'شنبه تا چهارشنبه — با هماهنگی تلفنی'),
       topbar: s('site.topbar', 'مطب تخصصی قلب و عروق · شوشتر'),
       quote: s(

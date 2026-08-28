@@ -27,5 +27,5 @@ export default async function CardiologyArticlePage({ params }: Props) {
   const site = await fetchSite();
   const model = buildLandingModel(site);
   const jsonLd = buildMedicalArticleJsonLd({ site, path: `/cardiology/${topic}`, title: content.title, description: content.description, parentPath: '/cardiology', parentName: 'قلب و عروق', faq: content.faq });
-  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} doctorName={model.doctor.name} doctorBoard={model.doctor.board} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
+  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.cardiologyPhone} phoneDisplay={model.contact.cardiologyPhoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} doctorName={model.doctor.name} doctorBoard={model.doctor.board} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
 }

@@ -241,8 +241,11 @@ export function LandingView({
                   <p>{doctor.address}</p>
                 </div>
                 <div className="info-card">
-                  <strong>تلفن نوبت</strong>
-                  <a href={`tel:${contact.phone}`}>{contact.phoneDisplay}</a>
+                  <strong>نوبت‌دهی تلفنی</strong>
+                  <div className="contact-phones">
+                    <a href={`tel:${contact.cardiologyPhone}`}><span>قلب</span>{contact.cardiologyPhoneDisplay}</a>
+                    <a href={`tel:${contact.varicosePhone}`}><span>واریس</span>{contact.varicosePhoneDisplay}</a>
+                  </div>
                 </div>
                 <div className="info-card">
                   <strong>ساعات پذیرش</strong>

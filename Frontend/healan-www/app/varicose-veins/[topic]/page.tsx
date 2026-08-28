@@ -27,5 +27,5 @@ export default async function VaricoseArticlePage({ params }: Props) {
   const site = await fetchSite();
   const model = buildLandingModel(site);
   const jsonLd = buildMedicalArticleJsonLd({ site, path: `/varicose-veins/${topic}`, title: content.title, description: content.description, parentPath: '/varicose-veins', parentName: 'درمان واریس', faq: content.faq });
-  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.phone} phoneDisplay={model.contact.phoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} doctorName={model.doctor.name} doctorBoard={model.doctor.board} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
+  return <><JsonLd data={jsonLd} /><SiteHeader brandName={model.doctor.shortName} specialty={model.doctor.specialty} phone={model.contact.varicosePhone} phoneDisplay={model.contact.varicosePhoneDisplay} topbar={model.contact.topbar} /><MedicalArticle content={content} doctorName={model.doctor.name} doctorBoard={model.doctor.board} /><SiteFooter name={model.doctor.name} specialty={model.doctor.specialty} city={model.doctor.city} /></>;
 }

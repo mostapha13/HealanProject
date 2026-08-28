@@ -1627,6 +1627,20 @@ html[dir='rtl'] .nav-drawer {
   }
 }
 
+html,
+body,
+button,
+input,
+textarea,
+select,
+option {
+  font-family: var(--font-vazirmatn), Vazirmatn, Tahoma, 'Segoe UI', sans-serif !important;
+}
+
+.contact-phones { display: grid; gap: 8px; margin-top: 8px; }
+.contact-phones a { display: flex; align-items: center; justify-content: space-between; gap: 16px; direction: ltr; padding: 9px 11px; border-radius: 10px; background: var(--primary-soft); text-decoration: none; }
+.contact-phones a span { direction: rtl; font-size: .78rem; font-weight: 800; color: var(--text-dark); }
+
 /* Search landing pages */
 .medical-hero { background: var(--hero-glow), var(--surface); border-bottom: 1px solid var(--border); }
 .medical-hero__inner { padding-block: clamp(48px, 8vw, 92px); max-width: 980px; }

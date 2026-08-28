@@ -38,6 +38,8 @@ export function pickSeoPage(
 
 export function doctorFromSettings(site: PublishedPortalSite | null | undefined) {
   const s = (key: string, fallback: string) => portalSetting(site, key, fallback);
+  const legacyPhone = s('contact.phone', DEFAULT_DOCTOR.phone);
+  const cardiologyPhone = s('contact.phone.cardiology', legacyPhone);
   return {
     name: s('doctor.name', DEFAULT_DOCTOR.name),
     shortName: s('doctor.shortName', DEFAULT_DOCTOR.shortName),
@@ -45,8 +47,8 @@ export function doctorFromSettings(site: PublishedPortalSite | null | undefined)
     board: s('doctor.board', DEFAULT_DOCTOR.board),
     address: s('contact.address', DEFAULT_DOCTOR.address),
     city: s('contact.city', DEFAULT_DOCTOR.city),
-    phone: s('contact.phone', DEFAULT_DOCTOR.phone),
-    phoneDisplay: s('contact.phoneDisplay', DEFAULT_DOCTOR.phone),
+    phone: cardiologyPhone,
+    phoneDisplay: cardiologyPhone,
   };
 }
 

@@ -52,8 +52,8 @@ const SETTING_GROUPS: { group: string; label: string; fields: { key: string; lab
     fields: [
       { key: 'contact.address', label: 'آدرس', multiline: true },
       { key: 'contact.city', label: 'شهر' },
-      { key: 'contact.phone', label: 'تلفن (لاتین)' },
-      { key: 'contact.phoneDisplay', label: 'نمایش تلفن' },
+      { key: 'contact.phone.cardiology', label: 'شماره نوبت‌دهی قلب (لاتین)' },
+      { key: 'contact.phone.varicose', label: 'شماره نوبت‌دهی واریس (لاتین)' },
       { key: 'contact.hours', label: 'ساعات کاری', multiline: true },
     ],
   },
