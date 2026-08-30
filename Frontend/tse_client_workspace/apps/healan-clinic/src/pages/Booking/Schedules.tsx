@@ -96,6 +96,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
       })),
     [doctors]
   );
+  const selectedDoctor = useMemo(() => doctors.find((doctor) => doctor.doctorId === doctorId), [doctors, doctorId]);
 
   const load = async (id: number) => {
     if (!id) {
@@ -114,10 +115,9 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   };
 
   useEffect(() => {
-    Promise.all([healanApi.doctors.listAll(), healanApi.booking.departmentList()])
-      .then(([list, deps]) => {
+    healanApi.doctors.listAll()
+      .then((list) => {
         setDoctors(list);
-        setDepartments(deps ?? []);
         if (list.length === 1) setDoctorId(list[0].doctorId);
       })
       .catch(onAlert);
@@ -126,6 +126,27 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   useEffect(() => {
     void load(doctorId);
   }, [doctorId]);
+
+  useEffect(() => {
+    const medicalGroupTypeId = Number(selectedDoctor?.medicalGroupTypeId) || 0;
+    if (!doctorId || !medicalGroupTypeId) {
+      setDepartments([]);
+      return;
+    }
+    let cancelled = false;
+    setDepartments([]);
+    healanApi.booking.departmentList(medicalGroupTypeId)
+      .then((list) => {
+        if (cancelled) return;
+        const next = (list ?? []).filter((department) => department.isActive);
+        setDepartments(next);
+        setForm((current) => next.some((department) => department.bookingDepartmentId === current.bookingDepartmentId)
+          ? current
+          : { ...current, bookingDepartmentId: 0, complementaryInsuranceLimit: 0 });
+      })
+      .catch(onAlert);
+    return () => { cancelled = true; };
+  }, [doctorId, selectedDoctor?.medicalGroupTypeId, onAlert]);
 
   const resetForm = () => {
     setEditingId(0);
@@ -252,9 +273,17 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
               <SearchableSelect
                 options={doctorOptions}
                 value={doctorId || null}
-                onChange={(v) => setDoctorId(Number(v) || 0)}
+                onChange={(v) => {
+                  setDoctorId(Number(v) || 0);
+                  resetForm();
+                  setDepartments([]);
+                }}
                 placeholder="انتخاب پزشک"
               />
+            </div>
+            <div className="healan-form-field">
+              <label>گروه پزشک</label>
+              <input className="healan-input" value={selectedDoctor?.medicalGroupTypeName || (doctorId ? 'برای پزشک گروهی ثبت نشده است' : 'ابتدا پزشک را انتخاب کنید')} readOnly />
             </div>
           </div>
         </div>
@@ -280,7 +309,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 ))}
               </select>
             </div>
-            <div className="healan-form-field"><label>دپارتمان این بازه</label><select className="healan-input" value={form.bookingDepartmentId} onChange={(e) => setForm({ ...form, bookingDepartmentId: Number(e.target.value), complementaryInsuranceLimit: 0 })}><option value={0}>انتخاب دپارتمان</option>{departments.filter((d) => d.isActive).map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}</option>)}</select></div>
+            <div className="healan-form-field"><label>دپارتمان این بازه</label><select className="healan-input" disabled={!doctorId || !selectedDoctor?.medicalGroupTypeId} value={form.bookingDepartmentId} onChange={(e) => setForm({ ...form, bookingDepartmentId: Number(e.target.value), complementaryInsuranceLimit: 0 })}><option value={0}>{!doctorId ? 'ابتدا پزشک را انتخاب کنید' : departments.length === 0 ? 'برای گروه این پزشک دپارتمانی تعریف نشده است' : 'انتخاب دپارتمان'}</option>{departments.map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}</option>)}</select><small className="healan-muted">فقط دپارتمان‌های فعالِ گروه پزشک انتخاب‌شده نمایش داده می‌شوند.</small></div>
             <div className="healan-form-field">
               <label>از ساعت (۰–۲۴)</label>
               <select

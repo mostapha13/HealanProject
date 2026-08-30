@@ -387,7 +387,8 @@ export const healanApi = {
   },
 
   booking: {
-    departmentList: () => get<BookingDepartmentItem[]>('BookingSchedule/DepartmentList'),
+    departmentList: (medicalGroupTypeId?: number) =>
+      get<BookingDepartmentItem[]>('BookingSchedule/DepartmentList', medicalGroupTypeId ? { medicalGroupTypeId } : {}),
     departmentSave: (data: Record<string, unknown>) =>
       post<BookingDepartmentItem>('BookingSchedule/DepartmentSave', data),
     departmentDelete: (bookingDepartmentId: number) =>

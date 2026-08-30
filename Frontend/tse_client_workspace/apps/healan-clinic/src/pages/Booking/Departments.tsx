@@ -119,7 +119,7 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
               <input className="healan-input" value={form.title} placeholder="مثلاً واریس یا قلب" onChange={(event) => setForm({ ...form, title: event.target.value })} />
             </div>
             <div className="healan-form-field">
-              <label>تخصص مادر</label>
+              <label>گروه پزشک (تخصص مادر)</label>
               <select className="healan-input" value={form.medicalGroupTypeId} onChange={(event) => setForm({ ...form, medicalGroupTypeId: Number(event.target.value) })}>
                 <option value={0}>انتخاب تخصص</option>
                 {groups.map((group) => <option key={group.key} value={group.key}>{group.displayName || group.name}</option>)}
