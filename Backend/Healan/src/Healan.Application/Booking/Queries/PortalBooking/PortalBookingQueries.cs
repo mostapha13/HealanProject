@@ -88,7 +88,7 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
     {
         var now = DateTime.Now;
         var q = _db.AppointmentSlots.AsNoTracking()
-            .Where(x => x.Status == AppointmentSlotStatus.Open && x.StartAt > now);
+            .Where(x => x.Status != AppointmentSlotStatus.Blocked && x.StartAt > now);
 
         if (request.DoctorId is > 0)
             q = q.Where(x => x.DoctorId == request.DoctorId);
@@ -117,6 +117,8 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
                 BookingDepartmentId = x.BookingDepartmentId,
                 BookingDepartmentTitle = x.BookingDepartment == null ? null : x.BookingDepartment.Title,
                 SupportsComplementaryInsurance = x.BookingDepartment != null && x.BookingDepartment.SupportsComplementaryInsurance,
+                IsAvailable = x.Status == AppointmentSlotStatus.Open,
+                AvailabilityTitle = x.Status == AppointmentSlotStatus.Open ? "آزاد" : "رزرو شده",
                 StartAt = x.StartAt,
                 EndAt = x.EndAt,
             })
@@ -140,7 +142,12 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
         var used = usedRows.ToDictionary(x => (x.DoctorId, x.BookingDepartmentId, x.Day), x => x.Count);
         var allowed = metadata.Where(x => x.Limit is null || x.Limit > 0 && used.GetValueOrDefault((x.DoctorId, x.BookingDepartmentId, x.StartAt.Date)) < x.Limit)
             .Select(x => x.AppointmentSlotId).ToHashSet();
-        return result.Where(x => allowed.Contains(x.AppointmentSlotId)).Take(120).ToList();
+        foreach (var slot in result.Where(x => x.IsAvailable && !allowed.Contains(x.AppointmentSlotId)))
+        {
+            slot.IsAvailable = false;
+            slot.AvailabilityTitle = "ظرفیت بیمه تکمیلی تکمیل است";
+        }
+        return result.Take(120).ToList();
     }
 }
 

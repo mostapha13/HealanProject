@@ -47,7 +47,10 @@ export function normalizeOpenSlots(list: unknown): PortalOpenSlot[] {
       const startAt = String(pickField(raw, 'startAt', 'StartAt') ?? '');
       const endAt = String(pickField(raw, 'endAt', 'EndAt') ?? '');
       const doctorName = String(pickField(raw, 'doctorName', 'DoctorName') ?? '');
-      return { appointmentSlotId, doctorId, startAt, endAt, doctorName } as PortalOpenSlot;
+      const isAvailableValue = pickField(raw, 'isAvailable', 'IsAvailable');
+      const isAvailable = isAvailableValue == null || isAvailableValue === true || String(isAvailableValue).toLowerCase() === 'true';
+      const availabilityTitle = String(pickField(raw, 'availabilityTitle', 'AvailabilityTitle') ?? (isAvailable ? 'آزاد' : 'رزرو شده'));
+      return { appointmentSlotId, doctorId, startAt, endAt, doctorName, isAvailable, availabilityTitle } as PortalOpenSlot;
     })
     .filter((s) => s.appointmentSlotId > 0 && !!s.startAt);
 }

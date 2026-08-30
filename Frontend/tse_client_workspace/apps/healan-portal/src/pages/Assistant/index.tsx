@@ -596,7 +596,7 @@ export default function AssistantPage() {
       fromDate: dayKey,
       toDate: dayKey,
     });
-    return normalizeOpenSlots(list).filter((s) => slotDayKey(s.startAt) === dayKey);
+    return normalizeOpenSlots(list).filter((s) => s.isAvailable && slotDayKey(s.startAt) === dayKey);
   };
 
   const showSlotsForDay = async (dayKey: string, preface?: string, rescheduleBookingId?: number) => {
@@ -765,7 +765,7 @@ export default function AssistantPage() {
         fromDate: toDayKey(todayLocalDate()),
       });
       const slots = normalizeOpenSlots(list).filter(
-        (s) => !booking.doctorId || s.doctorId === booking.doctorId
+        (s) => s.isAvailable && (!booking.doctorId || s.doctorId === booking.doctorId)
       );
       if (slots.length === 0) {
         pushAssistant('نوبت آزادی برای جابجایی پیدا نشد.');

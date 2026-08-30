@@ -95,6 +95,8 @@ public class PortalOpenSlotDto
     public long? BookingDepartmentId { get; set; }
     public string? BookingDepartmentTitle { get; set; }
     public bool SupportsComplementaryInsurance { get; set; }
+    public bool IsAvailable { get; set; }
+    public string AvailabilityTitle { get; set; } = string.Empty;
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
 }

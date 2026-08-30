@@ -73,7 +73,10 @@ function normalizeOpenSlots(list: unknown): PortalOpenSlot[] {
       const startAt = String(pickField(raw, 'startAt', 'StartAt') ?? '');
       const endAt = String(pickField(raw, 'endAt', 'EndAt') ?? '');
       const doctorName = String(pickField(raw, 'doctorName', 'DoctorName') ?? '');
-      return { appointmentSlotId, doctorId, startAt, endAt, doctorName } as PortalOpenSlot;
+      const isAvailableValue = pickField(raw, 'isAvailable', 'IsAvailable');
+      const isAvailable = isAvailableValue == null || isAvailableValue === true || String(isAvailableValue).toLowerCase() === 'true';
+      const availabilityTitle = String(pickField(raw, 'availabilityTitle', 'AvailabilityTitle') ?? (isAvailable ? 'آزاد' : 'رزرو شده'));
+      return { appointmentSlotId, doctorId, startAt, endAt, doctorName, isAvailable, availabilityTitle } as PortalOpenSlot;
     })
     .filter((s) => s.appointmentSlotId > 0 && !!s.startAt)
     .slice(0, 120);
@@ -524,6 +527,7 @@ export default function BookingPage() {
                         {dayOptions.map((day) => (
                           <option key={day} value={day}>
                             {formatSlot(`${day}T12:00:00`).split(/[،,]/)[0] || day}
+                            {slots.some((slot) => slotDayKey(slot.startAt) === day && !slot.isAvailable) ? ' · دارای نوبت رزروشده' : ''}
                           </option>
                         ))}
                       </select>
@@ -539,15 +543,20 @@ export default function BookingPage() {
                               form.appointmentSlotId === Number(slot.appointmentSlotId)
                                 ? ' is-selected'
                                 : ''
+                            }${slot.isAvailable ? '' : ' is-unavailable'
                             }`}
-                            onClick={() =>
+                            disabled={!slot.isAvailable}
+                            aria-readonly={!slot.isAvailable}
+                            title={slot.availabilityTitle}
+                            onClick={() => slot.isAvailable &&
                               setForm({
                                 ...form,
                                 appointmentSlotId: Number(slot.appointmentSlotId) || 0,
                               })
                             }
                           >
-                            {formatSlotTime(slot.startAt)}
+                            <span>{formatSlotTime(slot.startAt)}</span>
+                            {!slot.isAvailable && <small>{slot.availabilityTitle || 'رزرو شده'}</small>}
                           </button>
                         ))}
                       </div>

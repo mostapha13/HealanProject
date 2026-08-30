@@ -290,6 +290,8 @@ export interface PortalOpenSlot {
   bookingDepartmentId?: number | null;
   bookingDepartmentTitle?: string;
   supportsComplementaryInsurance: boolean;
+  isAvailable: boolean;
+  availabilityTitle: string;
 }
 
 export interface PortalBookingDepartment {
