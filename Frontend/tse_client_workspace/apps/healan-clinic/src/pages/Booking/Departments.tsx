@@ -19,6 +19,7 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
   const [services, setServices] = useState<ServiceType[]>([]);
   const [editingId, setEditingId] = useState(0);
   const [form, setForm] = useState(emptyForm);
+  const [serviceToAdd, setServiceToAdd] = useState(0);
   const [saving, setSaving] = useState(false);
 
   const loadDepartments = async () => setDepartments((await healanApi.booking.departmentList()) ?? []);
@@ -40,6 +41,17 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
   const reset = () => {
     setEditingId(0);
     setForm(emptyForm);
+    setServiceToAdd(0);
+  };
+
+  const addService = () => {
+    if (!serviceToAdd || form.serviceTypeIds.includes(serviceToAdd)) return;
+    setForm({ ...form, serviceTypeIds: [...form.serviceTypeIds, serviceToAdd] });
+    setServiceToAdd(0);
+  };
+
+  const removeService = (serviceTypeId: number) => {
+    setForm({ ...form, serviceTypeIds: form.serviceTypeIds.filter((id) => id !== serviceTypeId) });
   };
 
   const save = async () => {
@@ -66,6 +78,7 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
 
   const edit = (department: BookingDepartmentItem) => {
     setEditingId(department.bookingDepartmentId);
+    setServiceToAdd(0);
     setForm({
       title: department.title,
       medicalGroupTypeId: department.medicalGroupTypeId,
@@ -131,10 +144,29 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
             </div>
             <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>
               <label>خدمات زیرمجموعه</label>
-              <select className="healan-input" multiple size={Math.min(10, Math.max(5, services.length))} value={form.serviceTypeIds.map(String)} onChange={(event) => setForm({ ...form, serviceTypeIds: Array.from(event.currentTarget.selectedOptions).map((option) => Number(option.value)) })}>
-                {services.map((service) => <option key={service.serviceTypeId} value={service.serviceTypeId}>{service.title}</option>)}
-              </select>
-              <small className="healan-muted">امکان انتخاب چند خدمت وجود دارد.</small>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'end', flexWrap: 'wrap' }}>
+                <select className="healan-input" style={{ flex: '1 1 280px' }} value={serviceToAdd} onChange={(event) => setServiceToAdd(Number(event.target.value))}>
+                  <option value={0}>انتخاب خدمت برای افزودن</option>
+                  {services.filter((service) => !form.serviceTypeIds.includes(service.serviceTypeId)).map((service) => <option key={service.serviceTypeId} value={service.serviceTypeId}>{service.title}</option>)}
+                </select>
+                <button type="button" className="healan-btn healan-btn--outline" disabled={!serviceToAdd} onClick={addService}>افزودن خدمت</button>
+              </div>
+              {form.serviceTypeIds.length === 0 ? (
+                <div className="healan-empty" style={{ marginTop: 10 }}>هنوز خدمتی به این دپارتمان اضافه نشده است.</div>
+              ) : (
+                <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+                  {form.serviceTypeIds.map((serviceTypeId) => {
+                    const service = services.find((item) => item.serviceTypeId === serviceTypeId);
+                    return (
+                      <div key={serviceTypeId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', border: '1px solid var(--healan-border, #e5e7eb)', borderRadius: 10 }}>
+                        <span>{service?.title || `خدمت ${serviceTypeId}`}</span>
+                        <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => removeService(serviceTypeId)}>حذف از دپارتمان</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <small className="healan-muted">مثلاً برای دپارتمان واریس، «سونوگرافی داپلر عروق» را انتخاب و اضافه کنید. تعریف عنوان خدمت جدید از منوی «اطلاعات پایه ← انواع خدمات» انجام می‌شود.</small>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
