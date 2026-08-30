@@ -287,6 +287,17 @@ export interface PortalOpenSlot {
   doctorName: string;
   startAt: string;
   endAt: string;
+  bookingDepartmentId?: number | null;
+  bookingDepartmentTitle?: string;
+  supportsComplementaryInsurance: boolean;
+}
+
+export interface PortalBookingDepartment {
+  bookingDepartmentId: number;
+  title: string;
+  supportsComplementaryInsurance: boolean;
+  serviceTypeIds: number[];
+  serviceTitles: string[];
 }
 
 export interface PortalBookingService {
@@ -310,12 +321,16 @@ export function bookingDoctors() {
   return request.get({ baseUrl: BASE, url: 'BookingDoctors' }) as Promise<PortalBookingDoctor[]>;
 }
 
-export function bookingOpenSlots(params?: { doctorId?: number; fromDate?: string; toDate?: string }) {
+export function bookingOpenSlots(params?: { doctorId?: number; bookingDepartmentId?: number; serviceTypeId?: number; paymentType?: number; fromDate?: string; toDate?: string }) {
   return request.get({
     baseUrl: BASE,
     url: 'BookingOpenSlots',
     options: params ?? {},
   }) as Promise<PortalOpenSlot[]>;
+}
+
+export function bookingDepartments() {
+  return request.get({ baseUrl: BASE, url: 'BookingDepartments', options: { activeOnly: true } }) as Promise<PortalBookingDepartment[]>;
 }
 
 export function bookingServices() {

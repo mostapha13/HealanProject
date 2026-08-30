@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   bookingCancel,
   bookingCreate,
+  bookingDepartments,
   bookingDoctors,
   bookingMyList,
   bookingOpenSlots,
@@ -10,6 +11,7 @@ import {
   bookingReschedule,
   getPortalRagToken,
   type PortalBookingDoctor,
+  type PortalBookingDepartment,
   type PortalBookingItem,
   type PortalOpenSlot,
 } from '../../api/portalApi';
@@ -167,6 +169,7 @@ export default function BookingPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<PortalAuthModalMode>('register');
   const [doctors, setDoctors] = useState<PortalBookingDoctor[]>([]);
+  const [departments, setDepartments] = useState<PortalBookingDepartment[]>([]);
   const [slots, setSlots] = useState<PortalOpenSlot[]>([]);
   const [myBookings, setMyBookings] = useState<PortalBookingItem[]>([]);
   const [error, setError] = useState('');
@@ -182,6 +185,9 @@ export default function BookingPage() {
   });
   const [form, setForm] = useState({
     doctorId: 0,
+    bookingDepartmentId: 0,
+    serviceTypeId: 0,
+    paymentType: 1,
     appointmentSlotId: 0,
     note: '',
   });
@@ -228,6 +234,11 @@ export default function BookingPage() {
         }
       })
       .catch(() => setError('بارگذاری اطلاعات نوبت‌دهی ناموفق بود.'));
+    void bookingDepartments().then((value) => {
+      const deps = asArray<PortalBookingDepartment>(value);
+      setDepartments(deps);
+      if (deps.length > 0) setForm((prev) => ({ ...prev, bookingDepartmentId: prev.bookingDepartmentId || deps[0].bookingDepartmentId, serviceTypeId: prev.serviceTypeId || deps[0].serviceTypeIds?.[0] || 0 }));
+    }).catch(() => setDepartments([]));
 
     void bookingMyList()
       .then((mine) => setMyBookings(asArray<PortalBookingItem>(mine)))
@@ -239,7 +250,8 @@ export default function BookingPage() {
     setSlots([]);
     setSelectedDay('');
     setSlotsLoading(true);
-    void bookingOpenSlots({ doctorId: form.doctorId || undefined })
+    if (!form.bookingDepartmentId || !form.serviceTypeId) { setSlotsLoading(false); return; }
+    void bookingOpenSlots({ doctorId: form.doctorId || undefined, bookingDepartmentId: form.bookingDepartmentId, serviceTypeId: form.serviceTypeId, paymentType: form.paymentType })
       .then((list) => {
         if (cancelled) return;
         const next = normalizeOpenSlots(list);
@@ -258,7 +270,9 @@ export default function BookingPage() {
     return () => {
       cancelled = true;
     };
-  }, [view, form.doctorId]);
+  }, [view, form.doctorId, form.bookingDepartmentId, form.serviceTypeId, form.paymentType]);
+
+  const selectedDepartment = departments.find((d) => d.bookingDepartmentId === form.bookingDepartmentId);
 
   const dayOptions = useMemo(() => {
     const days: string[] = [];
@@ -291,6 +305,9 @@ export default function BookingPage() {
       } else {
         await bookingCreate({
           appointmentSlotId: form.appointmentSlotId,
+          bookingDepartmentId: form.bookingDepartmentId,
+          serviceTypeId: form.serviceTypeId,
+          paymentType: form.paymentType,
           note: note || undefined,
         });
       }
@@ -335,7 +352,7 @@ export default function BookingPage() {
 
         <header className="portal-booking__hero">
           <span className="portal-booking__eyebrow">نوبت‌دهی آنلاین · build-v19-patient</span>
-          <h1 className="portal-booking__title">انتخاب نوبت قلب</h1>
+          <h1 className="portal-booking__title">رزرو نوبت</h1>
           <p className="portal-booking__lead">
             روز و ساعت مناسب را انتخاب کنید. پرداخت هنگام مراجعه به مطب انجام می‌شود.
           </p>
@@ -419,7 +436,33 @@ export default function BookingPage() {
               )}
 
               <div className="portal-booking__card">
-                <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'انتخاب زمان مراجعه'}</h3>
+                <h3>{rescheduleBookingId ? 'انتخاب نوبت جدید' : 'انتخاب خدمت و زمان مراجعه'}</h3>
+
+                <div style={{ marginBottom: 12 }}>
+                  <label className="portal-booking__label">بخش موردنظر</label>
+                  <select className="portal-booking__input" value={form.bookingDepartmentId} onChange={(e) => {
+                    const id = Number(e.target.value);
+                    const dep = departments.find((d) => d.bookingDepartmentId === id);
+                    setForm({ ...form, bookingDepartmentId: id, serviceTypeId: dep?.serviceTypeIds?.[0] || 0, paymentType: 1, appointmentSlotId: 0 });
+                  }}>
+                    <option value={0}>انتخاب بخش</option>
+                    {departments.map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}</option>)}
+                  </select>
+                </div>
+
+                {selectedDepartment && <div style={{ marginBottom: 12 }}>
+                  <label className="portal-booking__label">خدمت</label>
+                  <select className="portal-booking__input" value={form.serviceTypeId} onChange={(e) => setForm({ ...form, serviceTypeId: Number(e.target.value), appointmentSlotId: 0 })}>
+                    {selectedDepartment.serviceTypeIds.map((id, index) => <option key={id} value={id}>{selectedDepartment.serviceTitles[index] || 'خدمت'}</option>)}
+                  </select>
+                </div>}
+
+                {selectedDepartment?.supportsComplementaryInsurance && <div style={{ marginBottom: 12 }}>
+                  <label className="portal-booking__label">نوع پذیرش</label>
+                  <select className="portal-booking__input" value={form.paymentType} onChange={(e) => setForm({ ...form, paymentType: Number(e.target.value), appointmentSlotId: 0 })}>
+                    <option value={1}>آزاد</option><option value={2}>بیمه تکمیلی</option>
+                  </select>
+                </div>}
 
                 {!rescheduleBookingId && (
                   <div style={{ marginBottom: 12 }}>

@@ -38,6 +38,7 @@ import type {
   SmsOutboxItem,
   SmsSetting,
   ScheduleTemplateItem,
+  BookingDepartmentItem,
   ScheduleExceptionItem,
   AppointmentSlotItem,
   AppointmentBookingItem,
@@ -386,6 +387,11 @@ export const healanApi = {
   },
 
   booking: {
+    departmentList: () => get<BookingDepartmentItem[]>('BookingSchedule/DepartmentList'),
+    departmentSave: (data: Record<string, unknown>) =>
+      post<BookingDepartmentItem>('BookingSchedule/DepartmentSave', data),
+    departmentDelete: (bookingDepartmentId: number) =>
+      post('BookingSchedule/DepartmentDelete', { bookingDepartmentId }),
     templateList: (doctorId?: number) =>
       get<ScheduleTemplateItem[]>('BookingSchedule/TemplateList', doctorId ? { doctorId } : {}),
     templateSave: (data: Record<string, unknown>) =>

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import withAlert from '../../hoc/withAlert';
 import healanApi from '../../api/healanApi';
-import type { DoctorSummary, ScheduleTemplateItem } from '../../api/types';
+import type { BookingDepartmentItem, DoctorSummary, EnumItem, ScheduleTemplateItem, ServiceType } from '../../api/types';
 import { PageHeader } from '../../components/Ui';
 import { SearchableSelect } from '../../components/SearchableSelect';
 import { JalaliDateInput } from '../../components/JalaliDateInput';
@@ -71,6 +71,11 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
   const [doctorId, setDoctorId] = useState(0);
   const [templates, setTemplates] = useState<ScheduleTemplateItem[]>([]);
+  const [departments, setDepartments] = useState<BookingDepartmentItem[]>([]);
+  const [medicalGroups, setMedicalGroups] = useState<EnumItem[]>([]);
+  const [services, setServices] = useState<ServiceType[]>([]);
+  const [departmentEditingId, setDepartmentEditingId] = useState(0);
+  const [departmentForm, setDepartmentForm] = useState({ title: '', medicalGroupTypeId: 0, serviceTypeIds: [] as number[], sortOrder: 0, supportsComplementaryInsurance: false, isActive: true });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(0);
   const [form, setForm] = useState({
@@ -78,6 +83,8 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
     startHour: 17,
     endHour: 21,
     visitDurationMinutes: 30,
+    bookingDepartmentId: 0,
+    complementaryInsuranceLimit: 0,
     isActive: true,
   });
   const [copyTargets, setCopyTargets] = useState<number[]>([]);
@@ -111,10 +118,12 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   };
 
   useEffect(() => {
-    healanApi.doctors
-      .listAll()
-      .then((list) => {
+    Promise.all([healanApi.doctors.listAll(), healanApi.booking.departmentList(), healanApi.doctors.medicalGroups(), healanApi.services.listActive()])
+      .then(([list, deps, groups, activeServices]) => {
         setDoctors(list);
+        setDepartments(deps ?? []);
+        setMedicalGroups(groups ?? []);
+        setServices(activeServices ?? []);
         if (list.length === 1) setDoctorId(list[0].doctorId);
       })
       .catch(onAlert);
@@ -131,6 +140,8 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
       startHour: 17,
       endHour: 21,
       visitDurationMinutes: 30,
+      bookingDepartmentId: 0,
+      complementaryInsuranceLimit: 0,
       isActive: true,
     });
   };
@@ -144,6 +155,10 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
       onAlert({ type: 'error', message: 'ساعت پایان نباید قبل از شروع باشد.' });
       return;
     }
+    if (!form.bookingDepartmentId) {
+      onAlert({ type: 'error', message: 'دپارتمان را انتخاب کنید.' });
+      return;
+    }
     try {
       await healanApi.booking.templateSave({
         doctorScheduleTemplateId: editingId || 0,
@@ -152,6 +167,8 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
         startTime: hourToTime(form.startHour),
         endTime: hourToTime(form.endHour),
         visitDurationMinutes: form.visitDurationMinutes,
+        bookingDepartmentId: form.bookingDepartmentId,
+        complementaryInsuranceLimit: form.complementaryInsuranceLimit,
         isActive: form.isActive,
       });
       onAlert({ type: 'success', message: 'قالب برنامه ذخیره شد.' });
@@ -169,6 +186,8 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
       startHour: timeToHour(t.startTime),
       endHour: timeToHour(t.endTime),
       visitDurationMinutes: t.visitDurationMinutes || 30,
+      bookingDepartmentId: Number(t.bookingDepartmentId) || 0,
+      complementaryInsuranceLimit: Number(t.complementaryInsuranceLimit) || 0,
       isActive: t.isActive,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -224,12 +243,59 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
     );
   };
 
+  const resetDepartmentForm = () => {
+    setDepartmentEditingId(0);
+    setDepartmentForm({ title: '', medicalGroupTypeId: 0, serviceTypeIds: [], sortOrder: 0, supportsComplementaryInsurance: false, isActive: true });
+  };
+
+  const saveDepartment = async () => {
+    if (!departmentForm.title.trim() || !departmentForm.medicalGroupTypeId || departmentForm.serviceTypeIds.length === 0) {
+      onAlert({ type: 'error', message: 'عنوان، تخصص مادر و حداقل یک خدمت را انتخاب کنید.' });
+      return;
+    }
+    try {
+      await healanApi.booking.departmentSave({ bookingDepartmentId: departmentEditingId, ...departmentForm, title: departmentForm.title.trim() });
+      const next = await healanApi.booking.departmentList();
+      setDepartments(next ?? []);
+      resetDepartmentForm();
+      onAlert({ type: 'success', message: 'دپارتمان و خدمات آن ذخیره شد.' });
+    } catch (err) { onAlert(err); }
+  };
+
+  const editDepartment = (d: BookingDepartmentItem) => {
+    setDepartmentEditingId(d.bookingDepartmentId);
+    setDepartmentForm({ title: d.title, medicalGroupTypeId: d.medicalGroupTypeId, serviceTypeIds: d.serviceTypeIds ?? [], sortOrder: d.sortOrder ?? 0, supportsComplementaryInsurance: d.supportsComplementaryInsurance, isActive: d.isActive });
+  };
+
+  const removeDepartment = async (id: number) => {
+    try {
+      await healanApi.booking.departmentDelete(id);
+      setDepartments((prev) => prev.filter((x) => x.bookingDepartmentId !== id));
+      if (departmentEditingId === id) resetDepartmentForm();
+    } catch (err) { onAlert(err); }
+  };
+
   return (
     <>
       <PageHeader
         title="برنامه حضور پزشک"
-        subtitle="قالب هفتگی ساعات حضور (۲۴ ساعته)، کپی به روزهای دیگر، و تولید اسلات با تاریخ شمسی"
+        subtitle="تعریف دپارتمان و خدمات، بازه‌های مستقل حضور و ظرفیت بیمه تکمیلی"
       />
+
+      <div className="healan-card" style={{ marginBottom: '1rem' }}>
+        <div className="healan-card__header"><h3>{departmentEditingId ? 'ویرایش دپارتمان' : 'تعریف دپارتمان و خدمات'}</h3></div>
+        <div className="healan-card__body">
+          <div className="healan-form-grid">
+            <div className="healan-form-field"><label>عنوان دپارتمان</label><input className="healan-input" value={departmentForm.title} placeholder="مثلاً واریس یا قلب" onChange={(e) => setDepartmentForm({ ...departmentForm, title: e.target.value })} /></div>
+            <div className="healan-form-field"><label>تخصص مادر</label><select className="healan-input" value={departmentForm.medicalGroupTypeId} onChange={(e) => setDepartmentForm({ ...departmentForm, medicalGroupTypeId: Number(e.target.value) })}><option value={0}>انتخاب تخصص</option>{medicalGroups.map((g) => <option key={g.key} value={g.key}>{g.displayName || g.name}</option>)}</select></div>
+            <div className="healan-form-field"><label>ترتیب نمایش</label><input className="healan-input" type="number" min={0} value={departmentForm.sortOrder} onChange={(e) => setDepartmentForm({ ...departmentForm, sortOrder: Number(e.target.value) || 0 })} /></div>
+            <div className="healan-form-field"><label>پذیرش بیمه تکمیلی</label><select className="healan-input" value={departmentForm.supportsComplementaryInsurance ? 1 : 0} onChange={(e) => setDepartmentForm({ ...departmentForm, supportsComplementaryInsurance: e.target.value === '1' })}><option value={0}>خیر؛ فقط آزاد</option><option value={1}>بله</option></select></div>
+            <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}><label>خدمات زیرمجموعه</label><select className="healan-input" multiple size={Math.min(8, Math.max(4, services.length))} value={departmentForm.serviceTypeIds.map(String)} onChange={(e) => setDepartmentForm({ ...departmentForm, serviceTypeIds: Array.from(e.currentTarget.selectedOptions).map((o) => Number(o.value)) })}>{services.map((s) => <option key={s.serviceTypeId} value={s.serviceTypeId}>{s.title}</option>)}</select><small className="healan-muted">برای انتخاب چند خدمت از Ctrl یا Command استفاده کنید.</small></div>
+          </div>
+          <div style={{ marginTop: '1rem', display: 'flex', gap: 8 }}><button type="button" className="healan-btn healan-btn--primary" onClick={() => void saveDepartment()}>{departmentEditingId ? 'ذخیره تغییرات' : 'ثبت دپارتمان'}</button>{departmentEditingId > 0 && <button type="button" className="healan-btn healan-btn--muted" onClick={resetDepartmentForm}>انصراف</button>}</div>
+          {departments.length > 0 && <table className="healan-table" style={{ marginTop: '1rem' }}><thead><tr><th>دپارتمان</th><th>خدمات</th><th>بیمه تکمیلی</th><th>عملیات</th></tr></thead><tbody>{departments.map((d) => <tr key={d.bookingDepartmentId}><td>{d.title}</td><td>{d.serviceTitles?.join('، ') || '—'}</td><td>{d.supportsComplementaryInsurance ? 'دارد' : 'ندارد'}</td><td><div style={{ display: 'flex', gap: 8 }}><button type="button" className="healan-btn healan-btn--action healan-btn--edit healan-btn--sm" onClick={() => editDepartment(d)}>ویرایش</button><button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => void removeDepartment(d.bookingDepartmentId)}>حذف</button></div></td></tr>)}</tbody></table>}
+        </div>
+      </div>
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>
         <div className="healan-card__body">
@@ -267,6 +333,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 ))}
               </select>
             </div>
+            <div className="healan-form-field"><label>دپارتمان این بازه</label><select className="healan-input" value={form.bookingDepartmentId} onChange={(e) => setForm({ ...form, bookingDepartmentId: Number(e.target.value), complementaryInsuranceLimit: 0 })}><option value={0}>انتخاب دپارتمان</option>{departments.filter((d) => d.isActive).map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}</option>)}</select></div>
             <div className="healan-form-field">
               <label>از ساعت (۰–۲۴)</label>
               <select
@@ -308,6 +375,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 }
               />
             </div>
+            {departments.find((d) => d.bookingDepartmentId === form.bookingDepartmentId)?.supportsComplementaryInsurance && <div className="healan-form-field"><label>سقف روزانه بیمه تکمیلی</label><input className="healan-input" type="number" min={0} value={form.complementaryInsuranceLimit} onChange={(e) => setForm({ ...form, complementaryInsuranceLimit: Math.max(0, Number(e.target.value) || 0) })} /><small className="healan-muted">صفر یعنی پذیرش تکمیلی در این بازه غیرفعال است.</small></div>}
           </div>
           <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="button" className="healan-btn healan-btn--primary" onClick={() => void saveTemplate()}>
@@ -394,10 +462,12 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
               <thead>
                 <tr>
                   <th>روز</th>
+                  <th>دپارتمان</th>
                   <th>از</th>
                   <th>تا</th>
                   <th>مدت</th>
                   <th>فعال</th>
+                  <th>سقف تکمیلی</th>
                   <th>عملیات</th>
                 </tr>
               </thead>
@@ -408,10 +478,12 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                   .map((t) => (
                   <tr key={t.doctorScheduleTemplateId}>
                     <td>{dayTitle(t.dayOfWeek)}</td>
+                    <td>{t.bookingDepartmentTitle || 'عمومی'}</td>
                     <td>{t.startTime}</td>
                     <td>{t.endTime}</td>
                     <td>{t.visitDurationMinutes} دقیقه</td>
                     <td>{t.isActive ? 'بله' : 'خیر'}</td>
+                    <td>{t.complementaryInsuranceLimit == null ? 'نامحدود' : t.complementaryInsuranceLimit}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button

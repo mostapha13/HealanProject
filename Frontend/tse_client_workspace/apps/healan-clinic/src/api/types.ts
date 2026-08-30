@@ -562,11 +562,25 @@ export interface ScheduleTemplateItem {
   doctorScheduleTemplateId: number;
   doctorId: number;
   doctorName?: string;
+  bookingDepartmentId?: number | null;
+  bookingDepartmentTitle?: string;
   dayOfWeek: number | string;
   startTime: string;
   endTime: string;
   visitDurationMinutes: number;
+  complementaryInsuranceLimit?: number | null;
   isActive: boolean;
+}
+
+export interface BookingDepartmentItem {
+  bookingDepartmentId: number;
+  title: string;
+  medicalGroupTypeId: number;
+  sortOrder: number;
+  supportsComplementaryInsurance: boolean;
+  isActive: boolean;
+  serviceTypeIds: number[];
+  serviceTitles: string[];
 }
 
 export interface ScheduleExceptionItem {
