@@ -358,6 +358,7 @@ public class PortalPublicController : ControllerBase
         Ok(await Mediator.Send(new PortalBookingServicesQuery()));
 
     [HttpGet("[action]")]
+    [AllowAnonymous]
     public async Task<IActionResult> BookingDepartments([FromQuery] BookingDepartmentListQuery query)
     {
         query.ActiveOnly = true;
