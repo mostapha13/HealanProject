@@ -279,7 +279,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
     <>
       <PageHeader
         title="برنامه حضور پزشک"
-        subtitle="تعریف دپارتمان و خدمات، بازه‌های مستقل حضور و ظرفیت بیمه تکمیلی"
+        subtitle="تعریف دپارتمان و خدمات، بازه‌های مستقل حضور و ظرفیت بیمه تکمیلی · نسخه dynamic-booking-v1"
       />
 
       <div className="healan-card" style={{ marginBottom: '1rem' }}>

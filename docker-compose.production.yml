@@ -1,0 +1,5 @@
+services:
+  nginx-gateway:
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./docker/config/nginx/nginx-gateway-ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
