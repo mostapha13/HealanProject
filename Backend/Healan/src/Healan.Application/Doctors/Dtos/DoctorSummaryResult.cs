@@ -19,13 +19,14 @@ public record DoctorSummaryResult:IMapFrom<Doctor>
     public string Mobile { get; set; }
     public DateTime? Birthdate { get; set; }
     public int MedicalSystemNumber { get; set; }
-    public MedicalGroupTypeId MedicalGroupTypeId { get; set; }
+    public int MedicalGroupTypeId { get; set; }
     public string MedicalGroupTypeName { get; set; }
 
     public void Mapping(Profile profile)
     {
 
         profile.CreateMap<Doctor, DoctorSummaryResult>()
+            .ForMember(a => a.MedicalGroupTypeId, b => b.MapFrom(c => (int)c.MedicalGroupTypeId))
             .ForMember(a => a.MedicalGroupTypeName, b => b.MapFrom(c => c.MedicalGroupTypeId.GetDisplayName()))
             .ForMember(a => a.FullName, b => b.MapFrom(c => $"{c.FirstName} {c.LastName}"))
 

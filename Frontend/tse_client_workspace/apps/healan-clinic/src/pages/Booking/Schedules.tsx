@@ -49,6 +49,29 @@ function dayTitle(value: unknown): string {
   return DAY_LABELS[String(n)] ?? String(value ?? '');
 }
 
+function resolveMedicalGroupTypeId(value: unknown, displayName?: string): number {
+  const numeric = Number(value);
+  if (Number.isInteger(numeric) && numeric > 0) return numeric;
+
+  const normalized = String(value ?? '').trim().toLowerCase();
+  const enumValues: Record<string, number> = {
+    general: 1,
+    internal: 2,
+    heart: 3,
+    generalsurgeon: 4,
+  };
+  if (enumValues[normalized]) return enumValues[normalized];
+
+  const title = String(displayName ?? '').trim();
+  const displayValues: Record<string, number> = {
+    'عمومی': 1,
+    'داخلی': 2,
+    'قلب': 3,
+    'جراح عمومی': 4,
+  };
+  return displayValues[title] ?? 0;
+}
+
 const HOUR_OPTIONS = Array.from({ length: 25 }, (_, h) => h); // 0..24
 
 function pad2(n: number) {
@@ -128,7 +151,10 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
   }, [doctorId]);
 
   useEffect(() => {
-    const medicalGroupTypeId = Number(selectedDoctor?.medicalGroupTypeId) || 0;
+    const medicalGroupTypeId = resolveMedicalGroupTypeId(
+      selectedDoctor?.medicalGroupTypeId,
+      selectedDoctor?.medicalGroupTypeName
+    );
     if (!doctorId || !medicalGroupTypeId) {
       setDepartments([]);
       return;
@@ -146,7 +172,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
       })
       .catch(onAlert);
     return () => { cancelled = true; };
-  }, [doctorId, selectedDoctor?.medicalGroupTypeId, onAlert]);
+  }, [doctorId, selectedDoctor?.medicalGroupTypeId, selectedDoctor?.medicalGroupTypeName, onAlert]);
 
   const resetForm = () => {
     setEditingId(0);
