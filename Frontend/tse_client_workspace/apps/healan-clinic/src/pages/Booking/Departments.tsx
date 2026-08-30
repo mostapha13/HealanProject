@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import healanApi from '../../api/healanApi';
-import type { BookingDepartmentItem, EnumItem, ServiceType } from '../../api/types';
+import type { BookingDepartmentItem, EnumItem, MedicalFeeService } from '../../api/types';
 import { MultiSearchableSelect } from '../../components/MultiSearchableSelect';
 import { PageHeader } from '../../components/Ui';
 import withAlert from '../../hoc/withAlert';
@@ -8,7 +8,7 @@ import withAlert from '../../hoc/withAlert';
 const emptyForm = {
   title: '',
   medicalGroupTypeId: 0,
-  serviceTypeIds: [] as number[],
+  medicalFeeServiceIds: [] as number[],
   sortOrder: 0,
   supportsComplementaryInsurance: false,
   isActive: true,
@@ -17,7 +17,7 @@ const emptyForm = {
 function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => void }) {
   const [departments, setDepartments] = useState<BookingDepartmentItem[]>([]);
   const [groups, setGroups] = useState<EnumItem[]>([]);
-  const [services, setServices] = useState<ServiceType[]>([]);
+  const [medicalFees, setMedicalFees] = useState<MedicalFeeService[]>([]);
   const [editingId, setEditingId] = useState(0);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -28,12 +28,12 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
     Promise.all([
       healanApi.booking.departmentList(),
       healanApi.doctors.medicalGroups(),
-      healanApi.services.listActive(),
+      healanApi.medicalFees.listAll({ isActive: true }),
     ])
-      .then(([departmentList, medicalGroups, activeServices]) => {
+      .then(([departmentList, medicalGroups, activeMedicalFees]) => {
         setDepartments(departmentList ?? []);
         setGroups(medicalGroups ?? []);
-        setServices(activeServices ?? []);
+        setMedicalFees((activeMedicalFees ?? []).filter((fee) => fee.isActive));
       })
       .catch(onAlert);
   }, [onAlert]);
@@ -43,12 +43,12 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
     setForm(emptyForm);
   };
 
-  const removeService = (serviceTypeId: number) => {
-    setForm({ ...form, serviceTypeIds: form.serviceTypeIds.filter((id) => id !== serviceTypeId) });
+  const removeService = (medicalFeeServiceId: number) => {
+    setForm({ ...form, medicalFeeServiceIds: form.medicalFeeServiceIds.filter((id) => id !== medicalFeeServiceId) });
   };
 
   const save = async () => {
-    if (!form.title.trim() || !form.medicalGroupTypeId || form.serviceTypeIds.length === 0) {
+    if (!form.title.trim() || !form.medicalGroupTypeId || form.medicalFeeServiceIds.length === 0) {
       onAlert({ type: 'error', message: 'عنوان، تخصص مادر و حداقل یک خدمت را انتخاب کنید.' });
       return;
     }
@@ -56,8 +56,14 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
     try {
       await healanApi.booking.departmentSave({
         bookingDepartmentId: editingId,
-        ...form,
         title: form.title.trim(),
+        medicalGroupTypeId: form.medicalGroupTypeId,
+        sortOrder: form.sortOrder,
+        supportsComplementaryInsurance: form.supportsComplementaryInsurance,
+        isActive: form.isActive,
+        serviceTypeIds: medicalFees
+          .filter((fee) => form.medicalFeeServiceIds.includes(fee.medicalFeeServiceId))
+          .map((fee) => fee.serviceTypeId),
       });
       await loadDepartments();
       reset();
@@ -74,7 +80,9 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
     setForm({
       title: department.title,
       medicalGroupTypeId: department.medicalGroupTypeId,
-      serviceTypeIds: department.serviceTypeIds ?? [],
+      medicalFeeServiceIds: medicalFees
+        .filter((fee) => (department.serviceTypeIds ?? []).includes(fee.serviceTypeId))
+        .map((fee) => fee.medicalFeeServiceId),
       sortOrder: department.sortOrder ?? 0,
       supportsComplementaryInsurance: department.supportsComplementaryInsurance,
       isActive: department.isActive,
@@ -137,27 +145,30 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
             <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>
               <label>خدمات زیرمجموعه</label>
               <MultiSearchableSelect<number>
-                value={form.serviceTypeIds}
-                onChange={(serviceTypeIds) => setForm({ ...form, serviceTypeIds })}
-                options={services.map((service) => ({ value: service.serviceTypeId, label: service.title }))}
-                placeholder="یک یا چند خدمت را انتخاب کنید"
+                value={form.medicalFeeServiceIds}
+                onChange={(medicalFeeServiceIds) => setForm({ ...form, medicalFeeServiceIds })}
+                options={medicalFees.map((fee) => ({
+                  value: fee.medicalFeeServiceId,
+                  label: fee.serviceTypeTitle || fee.serviceTypeName || `تعرفه ${fee.medicalFeeServiceId}`,
+                }))}
+                placeholder="یک یا چند تعرفه خدمت را انتخاب کنید"
               />
-              {form.serviceTypeIds.length === 0 ? (
+              {form.medicalFeeServiceIds.length === 0 ? (
                 <div className="healan-empty" style={{ marginTop: 10 }}>هنوز خدمتی به این دپارتمان اضافه نشده است.</div>
               ) : (
                 <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-                  {form.serviceTypeIds.map((serviceTypeId) => {
-                    const service = services.find((item) => item.serviceTypeId === serviceTypeId);
+                  {form.medicalFeeServiceIds.map((medicalFeeServiceId) => {
+                    const fee = medicalFees.find((item) => item.medicalFeeServiceId === medicalFeeServiceId);
                     return (
-                      <div key={serviceTypeId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', border: '1px solid var(--healan-border, #e5e7eb)', borderRadius: 10 }}>
-                        <span>{service?.title || `خدمت ${serviceTypeId}`}</span>
-                        <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => removeService(serviceTypeId)}>حذف از دپارتمان</button>
+                      <div key={medicalFeeServiceId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', border: '1px solid var(--healan-border, #e5e7eb)', borderRadius: 10 }}>
+                        <span>{fee?.serviceTypeTitle || fee?.serviceTypeName || `تعرفه ${medicalFeeServiceId}`}</span>
+                        <button type="button" className="healan-btn healan-btn--action healan-btn--danger healan-btn--sm" onClick={() => removeService(medicalFeeServiceId)}>حذف از دپارتمان</button>
                       </div>
                     );
                   })}
                 </div>
               )}
-              <small className="healan-muted">مثلاً برای دپارتمان واریس، «سونوگرافی داپلر عروق» را انتخاب و اضافه کنید. تعریف خدمت جدید از منوی «اطلاعات پایه ← تعریف خدمات زیرمجموعه» انجام می‌شود.</small>
+              <small className="healan-muted">فقط خدمات دارای تعرفه فعال قابل انتخاب‌اند. تعریف و ویرایش این فهرست از منوی «اطلاعات پایه ← تعرفه خدمات» انجام می‌شود.</small>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>

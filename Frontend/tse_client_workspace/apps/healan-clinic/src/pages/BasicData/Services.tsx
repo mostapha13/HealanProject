@@ -17,7 +17,7 @@ import { DeletedItemsPanel } from '../../components/DeletedItemsPanel';
 
 const EMPTY_FORM = { serviceTypeId: 0, title: '', code: '', categoryTypeId: 1, description: '', isActive: true };
 
-export function ServicesPage({ onAlert, title = 'انواع خدمات', subtitle }: { onAlert: (msg: unknown) => void; title?: string; subtitle?: string }) {
+function ServicesPage({ onAlert }: { onAlert: (msg: unknown) => void }) {
 
   const [items, setItems] = useState<ServiceType[]>([]);
   const { page, pageSize, onPaginationChange } = useListPagination(HEALAN_LIST_PAGE_SIZE);
@@ -124,7 +124,7 @@ export function ServicesPage({ onAlert, title = 'انواع خدمات', subtitl
 
     <>
 
-      <PageHeader title={title} subtitle={subtitle} action={
+      <PageHeader title="انواع خدمات" action={
 
         <button type="button" className="healan-btn healan-btn--primary" onClick={openCreate}>+ خدمت جدید</button>
 

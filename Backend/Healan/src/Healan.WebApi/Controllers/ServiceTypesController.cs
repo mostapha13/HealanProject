@@ -13,7 +13,7 @@ namespace Healan.WebApi.Controllers;
 /// <summary>
 /// نوع خدمات 
 /// </summary>
-[AccessForm(HealanAccessFormIds.Services, HealanAccessFormIds.BookingSubServices)]
+[AccessForm(HealanAccessFormIds.Services)]
 public class ServiceTypesController : ApiControllerBase
 {
 

@@ -20,6 +20,7 @@ public static class HealanAccessSeed
         await using (var transaction = await dbContext.Database.BeginTransactionAsync())
         {
             await EnsureSystemAsync(dbContext);
+            await RemoveObsoleteBookingServicesFormAsync(dbContext);
             await EnsureFormsAsync(dbContext);
             await EnsureMenusAsync(dbContext);
             await EnsureMenuLayoutAsync(dbContext);
@@ -28,6 +29,32 @@ public static class HealanAccessSeed
 
         await EnsureSystemRolesAsync(dbContext, roleManager);
         await EnsureRolePermissionsAsync(dbContext, roleManager);
+    }
+
+    private static async Task RemoveObsoleteBookingServicesFormAsync(ApplicationDbContext dbContext)
+    {
+        const int obsoleteMenuId = 5150;
+        const int obsoleteFormId = 5042;
+
+        var grants = await dbContext.AccessUserGrants.Where(x => x.AccessMenuId == obsoleteMenuId).ToListAsync();
+        var roles = await dbContext.AccessRoles.Where(x => x.AccessMenuId == obsoleteMenuId).ToListAsync();
+        if (grants.Count > 0) dbContext.AccessUserGrants.RemoveRange(grants);
+        if (roles.Count > 0) dbContext.AccessRoles.RemoveRange(roles);
+        if (grants.Count > 0 || roles.Count > 0) await dbContext.SaveChangesAsync();
+
+        var menu = await dbContext.AccessMenus.FindAsync(obsoleteMenuId);
+        if (menu != null)
+        {
+            dbContext.AccessMenus.Remove(menu);
+            await dbContext.SaveChangesAsync();
+        }
+
+        var form = await dbContext.AccessForms.FindAsync(obsoleteFormId);
+        if (form != null)
+        {
+            dbContext.AccessForms.Remove(form);
+            await dbContext.SaveChangesAsync();
+        }
     }
 
     private static async Task EnsureSystemAsync(ApplicationDbContext dbContext)
@@ -89,7 +116,6 @@ public static class HealanAccessSeed
             new FormDef(HealanAccessFormIds.PortalRagLogs, "گفتگوهای دستیار", "/site-content/rag-logs"),
             new FormDef(HealanAccessFormIds.BookingSchedules, "برنامه حضور", "/booking/schedules"),
             new FormDef(HealanAccessFormIds.BookingDepartments, "دپارتمان‌های نوبت‌دهی", "/booking/departments"),
-            new FormDef(HealanAccessFormIds.BookingSubServices, "خدمات زیرمجموعه نوبت‌دهی", "/basic-data/booking-services"),
             new FormDef(HealanAccessFormIds.BookingReservations, "رزروهای نوبت", "/booking/reservations"),
             new FormDef(HealanAccessFormIds.PatientHistory, "سوابق بیمار", "/patient/history"),
             new FormDef(HealanAccessFormIds.PatientBloodPressure, "ثبت فشار خون", "/patient/blood-pressure"),
@@ -168,9 +194,8 @@ public static class HealanAccessSeed
             new MenuDef(5110, HealanAccessFormIds.Insurance, 5108, 2, "بیمه و قراردادها"),
             new MenuDef(5111, HealanAccessFormIds.Services, 5108, 3, "انواع خدمات"),
             new MenuDef(5112, HealanAccessFormIds.MedicalFees, 5108, 4, "تعرفه خدمات"),
-            new MenuDef(5150, HealanAccessFormIds.BookingSubServices, 5108, 5, "تعریف خدمات زیرمجموعه"),
-            new MenuDef(5149, HealanAccessFormIds.BookingDepartments, 5108, 6, "تعریف دپارتمان و خدمات"),
-            new MenuDef(5131, HealanAccessFormIds.AssistantSettings, 5108, 7, "تنظیمات دستیار هوشمند"),
+            new MenuDef(5149, HealanAccessFormIds.BookingDepartments, 5108, 5, "تعریف دپارتمان و خدمات"),
+            new MenuDef(5131, HealanAccessFormIds.AssistantSettings, 5108, 6, "تنظیمات دستیار هوشمند"),
             new MenuDef(5113, null, null, 5, "سطوح دسترسی"),
             new MenuDef(5114, HealanAccessFormIds.UserDefine, 5113, 1, "تعریف کاربر"),
             new MenuDef(5147, HealanAccessFormIds.AccessAdmin, 5113, 2, "تعریف نقش"),
@@ -261,9 +286,8 @@ public static class HealanAccessSeed
             [5110] = (5108, 2, "بیمه و قراردادها", HealanAccessFormIds.Insurance),
             [5111] = (5108, 3, "انواع خدمات", HealanAccessFormIds.Services),
             [5112] = (5108, 4, "تعرفه خدمات", HealanAccessFormIds.MedicalFees),
-            [5150] = (5108, 5, "تعریف خدمات زیرمجموعه", HealanAccessFormIds.BookingSubServices),
-            [5149] = (5108, 6, "تعریف دپارتمان و خدمات", HealanAccessFormIds.BookingDepartments),
-            [5131] = (5108, 7, "تنظیمات دستیار هوشمند", HealanAccessFormIds.AssistantSettings),
+            [5149] = (5108, 5, "تعریف دپارتمان و خدمات", HealanAccessFormIds.BookingDepartments),
+            [5131] = (5108, 6, "تنظیمات دستیار هوشمند", HealanAccessFormIds.AssistantSettings),
             [5113] = (null, 5, "سطوح دسترسی", null),
             [5114] = (5113, 1, "تعریف کاربر", HealanAccessFormIds.UserDefine),
             [5147] = (5113, 2, "تعریف نقش", HealanAccessFormIds.AccessAdmin),
