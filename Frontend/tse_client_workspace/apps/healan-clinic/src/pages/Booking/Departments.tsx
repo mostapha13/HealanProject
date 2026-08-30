@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import healanApi from '../../api/healanApi';
 import type { BookingDepartmentItem, EnumItem, ServiceType } from '../../api/types';
+import { MultiSearchableSelect } from '../../components/MultiSearchableSelect';
 import { PageHeader } from '../../components/Ui';
 import withAlert from '../../hoc/withAlert';
 
@@ -19,7 +20,6 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
   const [services, setServices] = useState<ServiceType[]>([]);
   const [editingId, setEditingId] = useState(0);
   const [form, setForm] = useState(emptyForm);
-  const [serviceToAdd, setServiceToAdd] = useState(0);
   const [saving, setSaving] = useState(false);
 
   const loadDepartments = async () => setDepartments((await healanApi.booking.departmentList()) ?? []);
@@ -41,13 +41,6 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
   const reset = () => {
     setEditingId(0);
     setForm(emptyForm);
-    setServiceToAdd(0);
-  };
-
-  const addService = () => {
-    if (!serviceToAdd || form.serviceTypeIds.includes(serviceToAdd)) return;
-    setForm({ ...form, serviceTypeIds: [...form.serviceTypeIds, serviceToAdd] });
-    setServiceToAdd(0);
   };
 
   const removeService = (serviceTypeId: number) => {
@@ -78,7 +71,6 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
 
   const edit = (department: BookingDepartmentItem) => {
     setEditingId(department.bookingDepartmentId);
-    setServiceToAdd(0);
     setForm({
       title: department.title,
       medicalGroupTypeId: department.medicalGroupTypeId,
@@ -144,13 +136,12 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
             </div>
             <div className="healan-form-field" style={{ gridColumn: '1 / -1' }}>
               <label>خدمات زیرمجموعه</label>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'end', flexWrap: 'wrap' }}>
-                <select className="healan-input" style={{ flex: '1 1 280px' }} value={serviceToAdd} onChange={(event) => setServiceToAdd(Number(event.target.value))}>
-                  <option value={0}>انتخاب خدمت برای افزودن</option>
-                  {services.filter((service) => !form.serviceTypeIds.includes(service.serviceTypeId)).map((service) => <option key={service.serviceTypeId} value={service.serviceTypeId}>{service.title}</option>)}
-                </select>
-                <button type="button" className="healan-btn healan-btn--outline" disabled={!serviceToAdd} onClick={addService}>افزودن خدمت</button>
-              </div>
+              <MultiSearchableSelect<number>
+                value={form.serviceTypeIds}
+                onChange={(serviceTypeIds) => setForm({ ...form, serviceTypeIds })}
+                options={services.map((service) => ({ value: service.serviceTypeId, label: service.title }))}
+                placeholder="یک یا چند خدمت را انتخاب کنید"
+              />
               {form.serviceTypeIds.length === 0 ? (
                 <div className="healan-empty" style={{ marginTop: 10 }}>هنوز خدمتی به این دپارتمان اضافه نشده است.</div>
               ) : (
