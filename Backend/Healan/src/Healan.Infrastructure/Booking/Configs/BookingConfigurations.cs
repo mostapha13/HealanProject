@@ -4,6 +4,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Healan.Infrastructure.Booking.Configs;
 
+public class BookingDepartmentConfiguration : IEntityTypeConfiguration<BookingDepartment>
+{
+    public void Configure(EntityTypeBuilder<BookingDepartment> builder)
+    {
+        builder.ToTable("BookingDepartments");
+        builder.HasKey(x => x.BookingDepartmentId);
+        builder.Property(x => x.Title).HasMaxLength(150).IsRequired();
+        builder.HasIndex(x => new { x.MedicalGroupTypeId, x.Title }).IsUnique();
+        builder.HasMany(x => x.Services).WithMany().UsingEntity<Dictionary<string, object>>(
+            "BookingDepartmentServices",
+            r => r.HasOne<Healan.Domain.PublicInfos.Entities.ServiceType>().WithMany().HasForeignKey("ServiceTypeId").OnDelete(DeleteBehavior.Cascade),
+            l => l.HasOne<BookingDepartment>().WithMany().HasForeignKey("BookingDepartmentId").OnDelete(DeleteBehavior.Cascade),
+            j => { j.HasKey("BookingDepartmentId", "ServiceTypeId"); j.ToTable("BookingDepartmentServices"); });
+    }
+}
+
 public class DoctorScheduleTemplateConfiguration : IEntityTypeConfiguration<DoctorScheduleTemplate>
 {
     public void Configure(EntityTypeBuilder<DoctorScheduleTemplate> builder)
@@ -13,8 +29,9 @@ public class DoctorScheduleTemplateConfiguration : IEntityTypeConfiguration<Doct
         builder.Property(x => x.DoctorScheduleTemplateId).ValueGeneratedOnAdd();
         builder.Property(x => x.VisitDurationMinutes).HasDefaultValue(30);
         builder.Property(x => x.IsActive).HasDefaultValue(true);
-        builder.HasIndex(x => new { x.DoctorId, x.DayOfWeek }).IsUnique();
+        builder.HasIndex(x => new { x.DoctorId, x.DayOfWeek, x.StartTime, x.BookingDepartmentId }).IsUnique();
         builder.HasOne(x => x.Doctor).WithMany().HasForeignKey(x => x.DoctorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.BookingDepartment).WithMany().HasForeignKey(x => x.BookingDepartmentId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -42,6 +59,8 @@ public class AppointmentSlotConfiguration : IEntityTypeConfiguration<Appointment
         builder.HasIndex(x => new { x.DoctorId, x.StartAt }).IsUnique();
         builder.HasIndex(x => new { x.DoctorId, x.StartAt, x.Status });
         builder.HasOne(x => x.Doctor).WithMany().HasForeignKey(x => x.DoctorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.ScheduleTemplate).WithMany().HasForeignKey(x => x.DoctorScheduleTemplateId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne(x => x.BookingDepartment).WithMany().HasForeignKey(x => x.BookingDepartmentId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -57,6 +76,7 @@ public class AppointmentBookingConfiguration : IEntityTypeConfiguration<Appointm
         builder.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
         builder.Property(x => x.LastName).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Note).HasMaxLength(1000);
+        builder.Property(x => x.PaymentType).HasDefaultValue((byte)1);
         builder.HasIndex(x => x.AppointmentSlotId).IsUnique();
         builder.HasIndex(x => new { x.NationalCode, x.CreatedAt });
         builder.HasIndex(x => new { x.PhoneNumber, x.CreatedAt });
@@ -70,6 +90,8 @@ public class AppointmentBookingConfiguration : IEntityTypeConfiguration<Appointm
         builder.HasOne(x => x.Doctor).WithMany().HasForeignKey(x => x.DoctorId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Patient).WithMany().HasForeignKey(x => x.PatientId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Appointment).WithMany().HasForeignKey(x => x.AppointmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.BookingDepartment).WithMany().HasForeignKey(x => x.BookingDepartmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.SelectedService).WithMany().HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(x => x.RequestedServices)
             .WithMany()
             .UsingEntity<Dictionary<string, object>>(

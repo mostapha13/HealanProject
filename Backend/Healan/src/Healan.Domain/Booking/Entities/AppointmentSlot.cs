@@ -7,6 +7,8 @@ public class AppointmentSlot
 {
     public long AppointmentSlotId { get; set; }
     public long DoctorId { get; set; }
+    public long? DoctorScheduleTemplateId { get; set; }
+    public long? BookingDepartmentId { get; set; }
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
     public AppointmentSlotStatus Status { get; set; } = AppointmentSlotStatus.Open;
@@ -15,5 +17,7 @@ public class AppointmentSlot
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Doctor Doctor { get; set; } = null!;
+    public DoctorScheduleTemplate? ScheduleTemplate { get; set; }
+    public BookingDepartment? BookingDepartment { get; set; }
     public AppointmentBooking? Booking { get; set; }
 }

@@ -12,6 +12,9 @@ namespace Healan.Application.Booking.Commands.BookingMutations;
 public class BookingCreateCommand : IRequest<AppointmentBookingDto>
 {
     public long AppointmentSlotId { get; set; }
+    public long? BookingDepartmentId { get; set; }
+    public long? ServiceTypeId { get; set; }
+    public byte PaymentType { get; set; } = 1;
     public string NationalCode { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
@@ -49,6 +52,8 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
             .Include(x => x.Booking)
             .ThenInclude(b => b!.RequestedServices)
             .Include(x => x.Doctor)
+            .Include(x => x.ScheduleTemplate)
+            .Include(x => x.BookingDepartment).ThenInclude(x => x!.Services)
             .FirstOrDefaultAsync(x => x.AppointmentSlotId == request.AppointmentSlotId, cancellationToken)
             ?? throw new NotFoundExceptions("اسلات یافت نشد.");
 
@@ -56,6 +61,29 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
             throw new BadRequestExceptions("این نوبت قابل رزرو نیست.");
         if (slot.StartAt <= now)
             throw new BadRequestExceptions("نوبت‌های گذشته قابل رزرو نیستند.");
+        if (request.PaymentType is not 1 and not 2)
+            throw new BadRequestExceptions("نوع پرداخت نامعتبر است.");
+        if (request.BookingDepartmentId is > 0 && slot.BookingDepartmentId != request.BookingDepartmentId)
+            throw new BadRequestExceptions("این نوبت متعلق به دپارتمان انتخاب‌شده نیست.");
+        var serviceId = request.ServiceTypeId ?? request.RequestedServiceTypeIds.FirstOrDefault();
+        if (serviceId > 0 && (slot.BookingDepartment == null || !slot.BookingDepartment.Services.Any(x => x.ServiceTypeId == serviceId)))
+            throw new BadRequestExceptions("خدمت انتخاب‌شده در این بازه ارائه نمی‌شود.");
+        if (request.PaymentType == 2)
+        {
+            if (slot.BookingDepartment?.SupportsComplementaryInsurance != true || slot.ScheduleTemplate?.ComplementaryInsuranceLimit == 0)
+                throw new BadRequestExceptions("این خدمت در بازه انتخاب‌شده با بیمه تکمیلی قابل رزرو نیست.");
+            if (slot.ScheduleTemplate?.ComplementaryInsuranceLimit is > 0)
+            {
+                var dayStart = slot.StartAt.Date;
+                var dayEnd = dayStart.AddDays(1);
+                var used = await _db.AppointmentBookings.CountAsync(x => x.DoctorId == slot.DoctorId
+                    && x.BookingDepartmentId == slot.BookingDepartmentId && x.PaymentType == 2
+                    && x.Status != AppointmentBookingStatus.Cancelled && x.Status != AppointmentBookingStatus.NoShow
+                    && x.Slot.StartAt >= dayStart && x.Slot.StartAt < dayEnd, cancellationToken);
+                if (used >= slot.ScheduleTemplate.ComplementaryInsuranceLimit.Value)
+                    throw new BadRequestExceptions("ظرفیت بیمه تکمیلی این روز تکمیل شده است؛ لطفاً روز بعد را انتخاب کنید.");
+            }
+        }
 
         long? patientId = request.PatientId;
         if (patientId is null or <= 0)
@@ -82,6 +110,9 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
         {
             booking = slot.Booking;
             booking.DoctorId = slot.DoctorId;
+            booking.BookingDepartmentId = slot.BookingDepartmentId;
+            booking.ServiceTypeId = serviceId > 0 ? serviceId : null;
+            booking.PaymentType = request.PaymentType;
             booking.PatientId = patientId;
             booking.NationalCode = national;
             booking.PhoneNumber = phone;
@@ -104,6 +135,9 @@ public class BookingCreateCommandHandler : IRequestHandler<BookingCreateCommand,
             {
                 AppointmentSlotId = slot.AppointmentSlotId,
                 DoctorId = slot.DoctorId,
+                BookingDepartmentId = slot.BookingDepartmentId,
+                ServiceTypeId = serviceId > 0 ? serviceId : null,
+                PaymentType = request.PaymentType,
                 PatientId = patientId,
                 NationalCode = national,
                 PhoneNumber = phone,

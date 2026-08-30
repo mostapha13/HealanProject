@@ -14,10 +14,12 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '../../../src/auth/AuthContext';
 import {
   bookingCreate,
+  bookingDepartments,
   bookingDoctors,
   bookingMyList,
   bookingOpenSlots,
   type PortalBookingDoctor,
+  type PortalBookingDepartment,
   type PortalBookingItem,
   type PortalOpenSlot,
 } from '../../../src/api/portal';
@@ -60,6 +62,10 @@ export default function BookingTabScreen() {
   const { getAccessToken, session } = useAuth();
   const [doctors, setDoctors] = useState<PortalBookingDoctor[]>([]);
   const [doctorId, setDoctorId] = useState<number | null>(null);
+  const [departments, setDepartments] = useState<PortalBookingDepartment[]>([]);
+  const [departmentId, setDepartmentId] = useState<number | null>(null);
+  const [serviceId, setServiceId] = useState<number | null>(null);
+  const [paymentType, setPaymentType] = useState<1 | 2>(1);
   const [slots, setSlots] = useState<PortalOpenSlot[]>([]);
   const [mine, setMine] = useState<PortalBookingItem[]>([]);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -73,11 +79,18 @@ export default function BookingTabScreen() {
     setLoading(true);
     try {
       const token = await getAccessToken();
-      const [docs, list] = await Promise.all([
+      const [docs, deps, list] = await Promise.all([
         bookingDoctors(),
+        bookingDepartments(),
         token ? bookingMyList(token) : Promise.resolve([] as PortalBookingItem[]),
       ]);
       setDoctors(docs);
+      const availableDepartments = deps.length > 0 ? deps : [{
+        bookingDepartmentId: -1, title: 'ویزیت عمومی', supportsComplementaryInsurance: false,
+        serviceTypeIds: [0], serviceTitles: ['ویزیت'],
+      }];
+      setDepartments(availableDepartments);
+      setDepartmentId((prev) => prev ?? availableDepartments[0]?.bookingDepartmentId ?? null);
       setMine(list);
       setDoctorId((prev) => prev ?? docs[0]?.doctorId ?? null);
     } catch (err) {
@@ -87,13 +100,16 @@ export default function BookingTabScreen() {
     }
   }, [getAccessToken]);
 
-  const loadSlots = useCallback(async (id: number) => {
+  const loadSlots = useCallback(async (id: number, depId: number, svcId: number, payment: number) => {
     const from = new Date();
     const to = new Date();
     to.setDate(to.getDate() + 14);
     try {
       const list = await bookingOpenSlots({
         doctorId: id,
+        bookingDepartmentId: depId,
+        serviceTypeId: svcId,
+        paymentType: payment,
         fromDate: from.toISOString().slice(0, 10),
         toDate: to.toISOString().slice(0, 10),
       });
@@ -114,8 +130,18 @@ export default function BookingTabScreen() {
   );
 
   useEffect(() => {
-    if (doctorId) void loadSlots(doctorId);
-  }, [doctorId, loadSlots]);
+    if (doctorId && departmentId !== null && serviceId !== null) void loadSlots(doctorId, departmentId, serviceId, paymentType);
+    else setSlots([]);
+  }, [doctorId, departmentId, serviceId, paymentType, loadSlots]);
+
+  const department = departments.find((d) => d.bookingDepartmentId === departmentId);
+
+  useEffect(() => {
+    const first = department?.serviceTypeIds?.[0] ?? null;
+    setServiceId((current) => current && department?.serviceTypeIds.includes(current) ? current : first);
+    if (!department?.supportsComplementaryInsurance) setPaymentType(1);
+    setSelectedSlotId(null);
+  }, [departmentId, department]);
 
   const days = useMemo(() => {
     const keys = [...new Set(slots.map((s) => dayKey(s.startAt)).filter(Boolean))];
@@ -143,13 +169,16 @@ export default function BookingTabScreen() {
       if (!token) throw new Error('نشست منقضی شده');
       await bookingCreate(token, {
         appointmentSlotId: selectedSlotId,
+        bookingDepartmentId: departmentId ?? undefined,
+        serviceTypeId: serviceId ?? undefined,
+        paymentType,
         note: note.trim() || undefined,
       });
       setDone(true);
       setNote('');
       setSelectedSlotId(null);
       await load();
-      if (doctorId) await loadSlots(doctorId);
+      if (doctorId && departmentId !== null && serviceId !== null) await loadSlots(doctorId, departmentId, serviceId, paymentType);
     } catch (err) {
       Alert.alert('خطا', err instanceof Error ? err.message : 'رزرو ناموفق');
     } finally {
@@ -204,7 +233,33 @@ export default function BookingTabScreen() {
         ) : null}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>انتخاب زمان</Text>
+          <Text style={styles.cardTitle}>چه خدمتی نیاز دارید؟</Text>
+
+          <Text style={styles.label}>بخش</Text>
+          <View style={styles.chips}>
+            {departments.map((d) => <Pressable key={d.bookingDepartmentId} onPress={() => setDepartmentId(d.bookingDepartmentId)}
+              style={[styles.docChip, departmentId === d.bookingDepartmentId && styles.docChipActive]}>
+              <Text style={[styles.docText, departmentId === d.bookingDepartmentId && styles.docTextActive]}>{d.title}</Text>
+            </Pressable>)}
+          </View>
+
+          <Text style={styles.label}>خدمت</Text>
+          <View style={styles.chips}>
+            {(department?.serviceTypeIds ?? []).map((id, index) => <Pressable key={id} onPress={() => setServiceId(id)}
+              style={[styles.docChip, serviceId === id && styles.docChipActive]}>
+              <Text style={[styles.docText, serviceId === id && styles.docTextActive]}>{department?.serviceTitles[index] ?? 'خدمت'}</Text>
+            </Pressable>)}
+          </View>
+
+          {department?.supportsComplementaryInsurance ? <>
+            <Text style={styles.label}>نوع پذیرش</Text>
+            <View style={styles.chips}>
+              {([{ id: 1, title: 'آزاد' }, { id: 2, title: 'بیمه تکمیلی' }] as const).map(p => <Pressable key={p.id} onPress={() => setPaymentType(p.id)}
+                style={[styles.docChip, paymentType === p.id && styles.docChipActive]}><Text style={[styles.docText, paymentType === p.id && styles.docTextActive]}>{p.title}</Text></Pressable>)}
+            </View>
+          </> : null}
+
+          <Text style={[styles.cardTitle, { marginTop: 18 }]}>انتخاب زمان</Text>
 
           <Text style={styles.label}>یادداشت (اختیاری)</Text>
           <TextInput

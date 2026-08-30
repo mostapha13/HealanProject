@@ -94,6 +94,7 @@ export function pathForModuleId(moduleId: string): string | null {
     'access-roles': '/basic-data/access-roles',
     assistant: '/basic-data/assistant',
     'booking-schedules': '/booking/schedules',
+    'booking-departments': '/booking/departments',
     'booking-reservations': '/booking/reservations',
     'site-content': '/site-content',
     'site-settings': '/site-content/settings',

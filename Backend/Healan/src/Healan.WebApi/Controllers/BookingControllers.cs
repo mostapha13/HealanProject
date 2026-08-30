@@ -1,4 +1,5 @@
 using Healan.Application.Booking.Commands.BookingMutations;
+using Healan.Application.Booking.Commands;
 using Healan.Application.Booking.Commands.ScheduleTemplateCopy;
 using Healan.Application.Booking.Commands.ScheduleTemplateDelete;
 using Healan.Application.Booking.Commands.ScheduleTemplateSave;
@@ -9,9 +10,17 @@ using Share.Infrastructure.CustomAttributes;
 
 namespace Healan.WebApi.Controllers;
 
-[AccessForm(HealanAccessFormIds.BookingSchedules)]
+[AccessForm(HealanAccessFormIds.BookingSchedules, HealanAccessFormIds.BookingDepartments)]
 public class BookingScheduleController : ApiControllerBase
 {
+    [HttpGet("[action]")]
+    public async Task<IActionResult> DepartmentList([FromQuery] BookingDepartmentListQuery query) => Ok(await Mediator.Send(query));
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> DepartmentSave([FromBody] BookingDepartmentSaveCommand request) => SendCommand(request);
+
+    [HttpPost("[action]")]
+    public Task<IActionResult> DepartmentDelete([FromBody] BookingDepartmentDeleteCommand request) => SendCommand(request);
     [HttpGet("[action]")]
     public async Task<IActionResult> TemplateList([FromQuery] long? doctorId) =>
         Ok(await Mediator.Send(new ScheduleTemplateListQuery { DoctorId = doctorId }));

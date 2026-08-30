@@ -16,6 +16,10 @@ public class AppointmentBooking
     public long AppointmentBookingId { get; set; }
     public long AppointmentSlotId { get; set; }
     public long DoctorId { get; set; }
+    public long? BookingDepartmentId { get; set; }
+    public long? ServiceTypeId { get; set; }
+    /// <summary>1=آزاد، 2=بیمه تکمیلی</summary>
+    public byte PaymentType { get; set; } = 1;
     public long? PatientId { get; set; }
     public string NationalCode { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
@@ -34,5 +38,7 @@ public class AppointmentBooking
     public Doctor Doctor { get; set; } = null!;
     public Patient? Patient { get; set; }
     public Appointment? Appointment { get; set; }
+    public BookingDepartment? BookingDepartment { get; set; }
+    public ServiceType? SelectedService { get; set; }
     public ICollection<ServiceType> RequestedServices { get; set; }
 }

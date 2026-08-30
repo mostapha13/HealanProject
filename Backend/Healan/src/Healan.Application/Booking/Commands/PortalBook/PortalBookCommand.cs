@@ -71,6 +71,9 @@ public class PortalBookCommand : IRequest<AppointmentBookingDto>
     public string? AccessToken { get; set; }
     public string? BookingToken { get; set; }
     public long AppointmentSlotId { get; set; }
+    public long? BookingDepartmentId { get; set; }
+    public long? ServiceTypeId { get; set; }
+    public byte PaymentType { get; set; } = 1;
     public string? NationalCode { get; set; }
     public string? PhoneNumber { get; set; }
     public string? FirstName { get; set; }
@@ -107,12 +110,15 @@ public class PortalBookCommandHandler : IRequestHandler<PortalBookCommand, Appoi
         return await _mediator.Send(new BookingCreateCommand
         {
             AppointmentSlotId = request.AppointmentSlotId,
+            BookingDepartmentId = request.BookingDepartmentId,
+            ServiceTypeId = request.ServiceTypeId,
+            PaymentType = request.PaymentType,
             NationalCode = profile.NationalCode,
             PhoneNumber = profile.Phone,
             FirstName = profile.FirstName,
             LastName = profile.LastName,
             Note = request.Note,
-            RequestedServiceTypeIds = request.RequestedServiceTypeIds,
+            RequestedServiceTypeIds = request.ServiceTypeId is > 0 ? new List<long> { request.ServiceTypeId.Value } : request.RequestedServiceTypeIds,
             BookedByStaff = false,
             PatientId = profile.PatientId,
         }, cancellationToken);

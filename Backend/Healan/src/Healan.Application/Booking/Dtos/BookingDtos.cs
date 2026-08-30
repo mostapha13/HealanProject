@@ -7,10 +7,13 @@ public class ScheduleTemplateDto
     public long DoctorScheduleTemplateId { get; set; }
     public long DoctorId { get; set; }
     public string? DoctorName { get; set; }
+    public long? BookingDepartmentId { get; set; }
+    public string? BookingDepartmentTitle { get; set; }
     public int DayOfWeek { get; set; }
     public string StartTime { get; set; } = "17:00";
     public string EndTime { get; set; } = "21:00";
     public int VisitDurationMinutes { get; set; } = 30;
+    public int? ComplementaryInsuranceLimit { get; set; }
     public bool IsActive { get; set; } = true;
 }
 
@@ -89,8 +92,23 @@ public class PortalOpenSlotDto
     public long AppointmentSlotId { get; set; }
     public long DoctorId { get; set; }
     public string DoctorName { get; set; } = string.Empty;
+    public long? BookingDepartmentId { get; set; }
+    public string? BookingDepartmentTitle { get; set; }
+    public bool SupportsComplementaryInsurance { get; set; }
     public DateTime StartAt { get; set; }
     public DateTime EndAt { get; set; }
+}
+
+public class BookingDepartmentDto
+{
+    public long BookingDepartmentId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public int MedicalGroupTypeId { get; set; }
+    public int SortOrder { get; set; }
+    public bool SupportsComplementaryInsurance { get; set; }
+    public bool IsActive { get; set; }
+    public List<long> ServiceTypeIds { get; set; } = new();
+    public List<string> ServiceTitles { get; set; } = new();
 }
 
 public class BookingLookupPatientDto

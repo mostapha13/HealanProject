@@ -27,7 +27,7 @@ public class PortalHeartDoctorsQueryHandler : IRequestHandler<PortalHeartDoctors
     public async Task<List<PortalDoctorDto>> Handle(PortalHeartDoctorsQuery request, CancellationToken cancellationToken)
     {
         return await _db.Doctors.AsNoTracking()
-            .Where(x => x.MedicalGroupTypeId == MedicalGroupTypeId.Heart)
+            .Where(x => _db.DoctorScheduleTemplates.Any(t => t.DoctorId == x.DoctorId && t.IsActive))
             .OrderBy(x => x.LastName).ThenBy(x => x.FirstName)
             .Select(x => new PortalDoctorDto
             {
@@ -42,6 +42,10 @@ public class PortalHeartDoctorsQueryHandler : IRequestHandler<PortalHeartDoctors
 public class PortalOpenSlotsQuery : IRequest<List<PortalOpenSlotDto>>
 {
     public long? DoctorId { get; set; }
+    public long? BookingDepartmentId { get; set; }
+    public long? ServiceTypeId { get; set; }
+    /// <summary>1=آزاد، 2=بیمه تکمیلی</summary>
+    public byte PaymentType { get; set; } = 1;
     public string? FromDate { get; set; }
     public string? ToDate { get; set; }
 }
@@ -84,12 +88,19 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
     {
         var now = DateTime.Now;
         var q = _db.AppointmentSlots.AsNoTracking()
-            .Where(x => x.Status == AppointmentSlotStatus.Open
-                        && x.StartAt > now
-                        && x.Doctor.MedicalGroupTypeId == MedicalGroupTypeId.Heart);
+            .Where(x => x.Status == AppointmentSlotStatus.Open && x.StartAt > now);
 
         if (request.DoctorId is > 0)
             q = q.Where(x => x.DoctorId == request.DoctorId);
+        if (request.BookingDepartmentId is > 0)
+            q = q.Where(x => x.BookingDepartmentId == request.BookingDepartmentId);
+        if (request.ServiceTypeId is > 0)
+            q = q.Where(x => x.BookingDepartment != null && x.BookingDepartment.Services.Any(s => s.ServiceTypeId == request.ServiceTypeId));
+        if (request.PaymentType == 2)
+        {
+            q = q.Where(x => x.BookingDepartment != null && x.BookingDepartment.SupportsComplementaryInsurance
+                && (x.ScheduleTemplate == null || x.ScheduleTemplate.ComplementaryInsuranceLimit != 0));
+        }
         if (DateOnly.TryParse(request.FromDate, out var from))
             q = q.Where(x => x.StartAt >= from.ToDateTime(TimeOnly.MinValue));
         if (DateOnly.TryParse(request.ToDate, out var to))
@@ -97,16 +108,39 @@ public class PortalOpenSlotsQueryHandler : IRequestHandler<PortalOpenSlotsQuery,
         else
             q = q.Where(x => x.StartAt < now.Date.AddDays(21));
 
-        return await q.OrderBy(x => x.StartAt).Take(120)
+        var result = await q.OrderBy(x => x.StartAt).Take(240)
             .Select(x => new PortalOpenSlotDto
             {
                 AppointmentSlotId = x.AppointmentSlotId,
                 DoctorId = x.DoctorId,
                 DoctorName = (x.Doctor.FirstName + " " + x.Doctor.LastName).Trim(),
+                BookingDepartmentId = x.BookingDepartmentId,
+                BookingDepartmentTitle = x.BookingDepartment == null ? null : x.BookingDepartment.Title,
+                SupportsComplementaryInsurance = x.BookingDepartment != null && x.BookingDepartment.SupportsComplementaryInsurance,
                 StartAt = x.StartAt,
                 EndAt = x.EndAt,
             })
             .ToListAsync(cancellationToken);
+        if (request.PaymentType != 2) return result.Take(120).ToList();
+
+        // Hide days whose complementary-insurance quota is already full, so the patient
+        // is immediately shown the next genuinely selectable day.
+        var slotIds = result.Select(x => x.AppointmentSlotId).ToList();
+        var metadata = await _db.AppointmentSlots.AsNoTracking()
+            .Where(x => slotIds.Contains(x.AppointmentSlotId))
+            .Select(x => new { x.AppointmentSlotId, x.DoctorId, x.BookingDepartmentId, x.StartAt, Limit = x.ScheduleTemplate == null ? null : x.ScheduleTemplate.ComplementaryInsuranceLimit })
+            .ToListAsync(cancellationToken);
+        var dates = metadata.Select(x => x.StartAt.Date).Distinct().ToList();
+        var minDate = dates.Min(); var maxDate = dates.Max().AddDays(1);
+        var usedRows = await _db.AppointmentBookings.AsNoTracking()
+            .Where(x => x.PaymentType == 2 && x.Status != AppointmentBookingStatus.Cancelled && x.Status != AppointmentBookingStatus.NoShow
+                && x.Slot.StartAt >= minDate && x.Slot.StartAt < maxDate)
+            .GroupBy(x => new { x.DoctorId, x.BookingDepartmentId, Day = x.Slot.StartAt.Date })
+            .Select(g => new { g.Key.DoctorId, g.Key.BookingDepartmentId, g.Key.Day, Count = g.Count() }).ToListAsync(cancellationToken);
+        var used = usedRows.ToDictionary(x => (x.DoctorId, x.BookingDepartmentId, x.Day), x => x.Count);
+        var allowed = metadata.Where(x => x.Limit is null || x.Limit > 0 && used.GetValueOrDefault((x.DoctorId, x.BookingDepartmentId, x.StartAt.Date)) < x.Limit)
+            .Select(x => x.AppointmentSlotId).ToHashSet();
+        return result.Where(x => allowed.Contains(x.AppointmentSlotId)).Take(120).ToList();
     }
 }
 

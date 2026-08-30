@@ -33,10 +33,13 @@ public class ScheduleTemplateListQueryHandler : IRequestHandler<ScheduleTemplate
                 x.DoctorScheduleTemplateId,
                 x.DoctorId,
                 DoctorName = (x.Doctor.FirstName + " " + x.Doctor.LastName).Trim(),
+                x.BookingDepartmentId,
+                BookingDepartmentTitle = x.BookingDepartment == null ? null : x.BookingDepartment.Title,
                 x.DayOfWeek,
                 x.StartTime,
                 x.EndTime,
                 x.VisitDurationMinutes,
+                x.ComplementaryInsuranceLimit,
                 x.IsActive,
             })
             .ToListAsync(cancellationToken);
@@ -46,10 +49,13 @@ public class ScheduleTemplateListQueryHandler : IRequestHandler<ScheduleTemplate
             DoctorScheduleTemplateId = x.DoctorScheduleTemplateId,
             DoctorId = x.DoctorId,
             DoctorName = x.DoctorName,
+            BookingDepartmentId = x.BookingDepartmentId,
+            BookingDepartmentTitle = x.BookingDepartmentTitle,
             DayOfWeek = (int)x.DayOfWeek,
             StartTime = Booking.Services.BookingTimeHelper.FormatTime(x.StartTime),
             EndTime = Booking.Services.BookingTimeHelper.FormatTime(x.EndTime),
             VisitDurationMinutes = x.VisitDurationMinutes,
+            ComplementaryInsuranceLimit = x.ComplementaryInsuranceLimit,
             IsActive = x.IsActive,
         }).ToList();
     }

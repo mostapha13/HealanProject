@@ -23,10 +23,11 @@ public class ScheduleTemplateCopyCommandHandler : IRequestHandler<ScheduleTempla
 
     public async Task<object> Handle(ScheduleTemplateCopyCommand request, CancellationToken cancellationToken)
     {
-        var source = await _db.DoctorScheduleTemplates
+        var sources = await _db.DoctorScheduleTemplates
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.DoctorId == request.DoctorId && x.DayOfWeek == request.SourceDayOfWeek, cancellationToken)
-            ?? throw new NotFoundExceptions("قالب مبدأ یافت نشد.");
+            .Where(x => x.DoctorId == request.DoctorId && x.DayOfWeek == request.SourceDayOfWeek)
+            .OrderBy(x => x.StartTime).ToListAsync(cancellationToken);
+        if (sources.Count == 0) throw new NotFoundExceptions("قالب مبدأ یافت نشد.");
 
         var targets = request.TargetDayOfWeeks
             .Where(d => d != request.SourceDayOfWeek)
@@ -38,25 +39,19 @@ public class ScheduleTemplateCopyCommandHandler : IRequestHandler<ScheduleTempla
         var copied = 0;
         foreach (var day in targets)
         {
-            var existing = await _db.DoctorScheduleTemplates
-                .FirstOrDefaultAsync(x => x.DoctorId == request.DoctorId && x.DayOfWeek == day, cancellationToken);
-            if (existing is null)
+            var existing = await _db.DoctorScheduleTemplates.Where(x => x.DoctorId == request.DoctorId && x.DayOfWeek == day).ToListAsync(cancellationToken);
+            _db.DoctorScheduleTemplates.RemoveRange(existing);
+            foreach (var source in sources)
             {
-                existing = new DoctorScheduleTemplate
+                _db.DoctorScheduleTemplates.Add(new DoctorScheduleTemplate
                 {
-                    DoctorId = request.DoctorId,
-                    DayOfWeek = day,
+                    DoctorId = request.DoctorId, DayOfWeek = day, BookingDepartmentId = source.BookingDepartmentId,
+                    StartTime = source.StartTime, EndTime = source.EndTime, VisitDurationMinutes = source.VisitDurationMinutes,
+                    ComplementaryInsuranceLimit = source.ComplementaryInsuranceLimit, IsActive = source.IsActive,
                     CreatedAt = DateTime.UtcNow,
-                };
-                _db.DoctorScheduleTemplates.Add(existing);
+                });
+                copied++;
             }
-
-            existing.StartTime = source.StartTime;
-            existing.EndTime = source.EndTime;
-            existing.VisitDurationMinutes = source.VisitDurationMinutes;
-            existing.IsActive = source.IsActive;
-            existing.UpdatedAt = DateTime.UtcNow;
-            copied++;
         }
 
         await _db.SaveChangesAsync(cancellationToken);

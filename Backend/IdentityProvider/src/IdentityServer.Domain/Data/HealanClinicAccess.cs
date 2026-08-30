@@ -53,6 +53,7 @@ public static class HealanClinicAccess
         public const int BookingFolder = 5133;
         public const int BookingSchedules = 5134;
         public const int BookingReservations = 5135;
+        public const int BookingDepartments = 5149;
         public const int PatientPortalFolder = 5136;
         public const int PatientHistory = 5137;
         public const int PatientBloodPressure = 5138;
@@ -71,7 +72,7 @@ public static class HealanClinicAccess
         5101, 5102, 5103, 5104, 5105, 5106, 5107, 5108, 5109, 5110, 5111, 5112, 5113,
         5114, 5115, 5116, 5117, 5118, 5119, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 5127, 5128,
         5129, 5130, 5131, 5132, 5133, 5134, 5135,
-        5136, 5137, 5138, 5139, 5140, 5141, 5142, 5143, 5144, 5145, 5146, 5147, 5148,
+        5136, 5137, 5138, 5139, 5140, 5141, 5142, 5143, 5144, 5145, 5146, 5147, 5148, 5149,
     };
 
     /// <summary>منشی — پذیرش، ثبت بیمار/بیمه، نوبت، صف و پرداخت.</summary>
@@ -83,7 +84,7 @@ public static class HealanClinicAccess
         Menus.Insurance, Menus.Services, Menus.MedicalFees,
         Menus.PortalContent, Menus.PortalSiteSettings, Menus.PortalSeo, Menus.PortalReviews, Menus.PortalBlog, Menus.PortalRag,
         Menus.AssistantSettings, Menus.PortalRagLogs,
-        Menus.BookingFolder, Menus.BookingSchedules, Menus.BookingReservations,
+        Menus.BookingFolder, Menus.BookingDepartments, Menus.BookingSchedules, Menus.BookingReservations,
     };
 
     /// <summary>پزشک — ویزیت، نسخه، سوابق و صف بیماران.</summary>

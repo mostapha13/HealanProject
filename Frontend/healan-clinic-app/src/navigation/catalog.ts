@@ -22,6 +22,7 @@ export type ClinicModuleId =
   | 'access-roles'
   | 'assistant'
   | 'booking-schedules'
+  | 'booking-departments'
   | 'booking-reservations'
   | 'site-content'
   | 'site-settings'
@@ -64,6 +65,7 @@ const PATH_MAP: { match: RegExp | string; id: ClinicModuleId; icon: IconName }[]
   { match: '/basic-data/access', id: 'access', icon: 'lock-closed-outline' },
   { match: '/basic-data/assistant', id: 'assistant', icon: 'sparkles-outline' },
   { match: '/booking/schedules', id: 'booking-schedules', icon: 'time-outline' },
+  { match: '/booking/departments', id: 'booking-departments', icon: 'git-network-outline' },
   { match: '/booking/reservations', id: 'booking-reservations', icon: 'bookmark-outline' },
   { match: '/site-content/settings', id: 'site-settings', icon: 'settings-outline' },
   { match: '/site-content/seo', id: 'site-seo', icon: 'search-outline' },
@@ -236,6 +238,7 @@ const HOME_PRIORITY: ClinicModuleId[] = [
   'blood-pressure',
   'booking-reservations',
   'booking-schedules',
+  'booking-departments',
   'sms',
   'reports',
   'signature',

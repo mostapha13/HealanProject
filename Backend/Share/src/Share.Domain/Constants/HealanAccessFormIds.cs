@@ -54,4 +54,5 @@ public static class HealanAccessFormIds
     public const int PortalSeo = 5039;
     /// <summary>کلینیک — مشاهده پرسش و پاسخ‌های ثبت‌شده برای بیماران</summary>
     public const int PatientQuestions = 5040;
+    public const int BookingDepartments = 5041;
 }

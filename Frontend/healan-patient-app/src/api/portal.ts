@@ -120,6 +120,17 @@ export type PortalOpenSlot = {
   doctorName: string;
   startAt: string;
   endAt: string;
+  bookingDepartmentId?: number | null;
+  bookingDepartmentTitle?: string | null;
+  supportsComplementaryInsurance: boolean;
+};
+
+export type PortalBookingDepartment = {
+  bookingDepartmentId: number;
+  title: string;
+  supportsComplementaryInsurance: boolean;
+  serviceTypeIds: number[];
+  serviceTitles: string[];
 };
 
 export type PortalBookingService = {
@@ -347,8 +358,12 @@ export function bookingDoctors() {
   return portalFetch<PortalBookingDoctor[]>('GET', 'BookingDoctors');
 }
 
-export function bookingOpenSlots(params?: { doctorId?: number; fromDate?: string; toDate?: string }) {
+export function bookingOpenSlots(params?: { doctorId?: number; bookingDepartmentId?: number; serviceTypeId?: number; paymentType?: number; fromDate?: string; toDate?: string }) {
   return portalFetch<PortalOpenSlot[]>('GET', 'BookingOpenSlots', { params });
+}
+
+export function bookingDepartments() {
+  return portalFetch<PortalBookingDepartment[]>('GET', 'BookingDepartments', { params: { activeOnly: true } });
 }
 
 export function bookingServices() {
@@ -357,7 +372,7 @@ export function bookingServices() {
 
 export function bookingCreate(
   token: string,
-  payload: { appointmentSlotId: number; note?: string; requestedServiceTypeIds?: number[] }
+  payload: { appointmentSlotId: number; bookingDepartmentId?: number; serviceTypeId?: number; paymentType?: number; note?: string; requestedServiceTypeIds?: number[] }
 ) {
   return portalFetch<PortalBookingItem>('POST', 'BookingCreate', { token, body: payload });
 }

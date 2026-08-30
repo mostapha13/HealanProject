@@ -103,52 +103,21 @@ public static class AppointmentSlotGenerator
         var added = 0;
         for (var d = from; d <= to; d = d.AddDays(1))
         {
-            TimeSpan start;
-            TimeSpan end;
-            int duration;
-
             if (exceptions.TryGetValue(d, out var ex))
             {
                 if (ex.IsClosed)
                     continue;
                 if (ex.StartTime is null || ex.EndTime is null)
                     continue;
-                start = ex.StartTime.Value;
-                end = ex.EndTime.Value;
-                duration = ex.VisitDurationMinutes
-                           ?? templates.FirstOrDefault(t => t.DayOfWeek == d.DayOfWeek)?.VisitDurationMinutes
-                           ?? 30;
+                var fallback = templates.FirstOrDefault(t => t.DayOfWeek == d.DayOfWeek);
+                added += AddRange(db, existingSet, doctorId, d, ex.StartTime.Value, ex.EndTime.Value,
+                    ex.VisitDurationMinutes ?? fallback?.VisitDurationMinutes ?? 30, fallback, DateTime.UtcNow);
             }
             else
             {
-                var template = templates.FirstOrDefault(t => t.DayOfWeek == d.DayOfWeek);
-                if (template is null)
-                    continue;
-                start = template.StartTime;
-                end = template.EndTime;
-                duration = template.VisitDurationMinutes <= 0 ? 30 : template.VisitDurationMinutes;
-            }
-
-            if (duration <= 0 || end < start)
-                continue;
-
-            for (var cursor = start; cursor <= end; cursor = cursor.Add(TimeSpan.FromMinutes(duration)))
-            {
-                var startAt = BookingTimeHelper.Combine(d, cursor);
-                if (existingSet.Contains(startAt))
-                    continue;
-
-                db.AppointmentSlots.Add(new AppointmentSlot
-                {
-                    DoctorId = doctorId,
-                    StartAt = startAt,
-                    EndAt = startAt.AddMinutes(duration),
-                    Status = AppointmentSlotStatus.Open,
-                    Source = AppointmentSlotSource.Generated,
-                    CreatedAt = DateTime.UtcNow,
-                });
-                existingSet.Add(startAt);
-                added++;
+                foreach (var template in templates.Where(t => t.DayOfWeek == d.DayOfWeek).OrderBy(t => t.StartTime))
+                    added += AddRange(db, existingSet, doctorId, d, template.StartTime, template.EndTime,
+                        template.VisitDurationMinutes <= 0 ? 30 : template.VisitDurationMinutes, template, DateTime.UtcNow);
             }
         }
 
@@ -156,5 +125,27 @@ public static class AppointmentSlotGenerator
             await db.SaveChangesAsync(cancellationToken);
 
         return added;
+    }
+
+    private static int AddRange(IApplicationDbContext db, HashSet<DateTime> existingSet, long doctorId,
+        DateOnly date, TimeSpan start, TimeSpan end, int duration, DoctorScheduleTemplate? template, DateTime createdAt)
+    {
+        if (duration <= 0 || end <= start) return 0;
+        var count = 0;
+        // EndTime is exclusive: a 30-minute visit in 09:00–12:00 ends at 12:00.
+        for (var cursor = start; cursor.Add(TimeSpan.FromMinutes(duration)) <= end; cursor = cursor.Add(TimeSpan.FromMinutes(duration)))
+        {
+            var startAt = BookingTimeHelper.Combine(date, cursor);
+            if (!existingSet.Add(startAt)) continue;
+            db.AppointmentSlots.Add(new AppointmentSlot
+            {
+                DoctorId = doctorId, DoctorScheduleTemplateId = template?.DoctorScheduleTemplateId,
+                BookingDepartmentId = template?.BookingDepartmentId, StartAt = startAt,
+                EndAt = startAt.AddMinutes(duration), Status = AppointmentSlotStatus.Open,
+                Source = AppointmentSlotSource.Generated, CreatedAt = createdAt,
+            });
+            count++;
+        }
+        return count;
     }
 }

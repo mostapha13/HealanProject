@@ -72,6 +72,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<RagChatLog> RagChatLogs { get; set; }
     public DbSet<SmsSetting> SmsSettings { get; set; }
     public DbSet<DoctorScheduleTemplate> DoctorScheduleTemplates { get; set; }
+    public DbSet<BookingDepartment> BookingDepartments { get; set; }
     public DbSet<DoctorScheduleException> DoctorScheduleExceptions { get; set; }
     public DbSet<AppointmentSlot> AppointmentSlots { get; set; }
     public DbSet<AppointmentBooking> AppointmentBookings { get; set; }

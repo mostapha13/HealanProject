@@ -298,6 +298,43 @@ function mapRag(raw: Record<string, unknown>): EntityRow {
 }
 
 export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
+  'booking-departments': {
+    id: 'booking-departments', canCreate: true, canEdit: true, canDelete: true, canToggleActive: true,
+    fields: [
+      { key: 'title', label: 'عنوان دپارتمان', required: true },
+      { key: 'medicalGroupTypeId', label: 'تخصص مادر', kind: 'select', required: true },
+      { key: 'serviceTypeIds', label: 'خدمات قابل رزرو', kind: 'multi-select', required: true },
+      { key: 'supportsComplementaryInsurance', label: 'پذیرش بیمه تکمیلی', kind: 'select', required: true },
+      { key: 'sortOrder', label: 'ترتیب نمایش', keyboard: 'numeric' },
+    ],
+    emptyForm: { bookingDepartmentId: 0, title: '', medicalGroupTypeId: 0, serviceTypeIds: '', sortOrder: 0, supportsComplementaryInsurance: false, isActive: true },
+    load: async (getToken) => {
+      const rows = await healanGet<Record<string, unknown>[]>(getToken, 'BookingSchedule/DepartmentList');
+      return rows.map((r, i) => ({ id: num(r.bookingDepartmentId, i), title: str(r.title),
+        subtitle: Array.isArray(r.serviceTitles) ? r.serviceTitles.join('، ') : '',
+        meta: bool(r.supportsComplementaryInsurance, false) ? 'پذیرش بیمه تکمیلی' : 'فقط آزاد',
+        badge: activeBadge(bool(r.isActive, true)), isActive: bool(r.isActive, true), raw: r }));
+    },
+    loadOptions: async (getToken) => {
+      const [groups, services] = await Promise.all([
+        loadEnum(getToken, 'Doctor/MedicalGroupType'), listAll(getToken, 'ServiceTypes/List', { onlyActive: true })
+      ]);
+      return { medicalGroupTypeId: groups, serviceTypeIds: services.map(r => ({ key: num(r.serviceTypeId ?? r.id), label: str(r.title, 'خدمت') })),
+        supportsComplementaryInsurance: [{ key: 0, label: 'خیر؛ فقط آزاد' }, { key: 1, label: 'بله' }] };
+    },
+    fromRow: row => ({ bookingDepartmentId: row.id, title: str(row.raw.title), medicalGroupTypeId: num(row.raw.medicalGroupTypeId),
+      serviceTypeIds: Array.isArray(row.raw.serviceTypeIds) ? row.raw.serviceTypeIds.join(',') : '', sortOrder: num(row.raw.sortOrder),
+      supportsComplementaryInsurance: bool(row.raw.supportsComplementaryInsurance, false), isActive: bool(row.raw.isActive, true) }),
+    save: async (getToken, form) => { await healanPost(getToken, 'BookingSchedule/DepartmentSave', {
+      bookingDepartmentId: num(form.bookingDepartmentId), title: str(form.title), medicalGroupTypeId: num(form.medicalGroupTypeId),
+      serviceTypeIds: str(form.serviceTypeIds).split(',').map(Number).filter(Boolean), sortOrder: num(form.sortOrder),
+      supportsComplementaryInsurance: bool(form.supportsComplementaryInsurance, false), isActive: bool(form.isActive, true) }); },
+    remove: async (getToken, row) => { await healanPost(getToken, 'BookingSchedule/DepartmentDelete', { bookingDepartmentId: row.id }); },
+    toggleActive: async (getToken, row) => { await healanPost(getToken, 'BookingSchedule/DepartmentSave', {
+      bookingDepartmentId: row.id, title: str(row.raw.title), medicalGroupTypeId: num(row.raw.medicalGroupTypeId),
+      serviceTypeIds: Array.isArray(row.raw.serviceTypeIds) ? row.raw.serviceTypeIds : [], sortOrder: num(row.raw.sortOrder),
+      supportsComplementaryInsurance: bool(row.raw.supportsComplementaryInsurance, false), isActive: !bool(row.raw.isActive, true) }); },
+  },
   services: {
     id: 'services',
     canCreate: true,
@@ -1176,19 +1213,23 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
     canDelete: true,
     canToggleActive: true,
     fields: [
-      { key: 'doctorId', label: 'شناسه پزشک', keyboard: 'numeric', required: true },
-      { key: 'dayOfWeek', label: 'روز هفته', required: true },
+      { key: 'doctorId', label: 'پزشک', kind: 'select', required: true },
+      { key: 'bookingDepartmentId', label: 'دپارتمان', kind: 'select', required: true },
+      { key: 'dayOfWeek', label: 'روز هفته', kind: 'select', required: true },
       { key: 'startTime', label: 'ساعت شروع', kind: 'time', required: true },
       { key: 'endTime', label: 'ساعت پایان', kind: 'time', required: true },
       { key: 'visitDurationMinutes', label: 'مدت ویزیت (دقیقه)', keyboard: 'numeric', required: true },
+      { key: 'complementaryInsuranceLimit', label: 'سقف روزانه بیمه تکمیلی (۰=غیرفعال)', keyboard: 'numeric' },
     ],
     emptyForm: {
       doctorScheduleTemplateId: 0,
       doctorId: 0,
+      bookingDepartmentId: 0,
       dayOfWeek: 6,
       startTime: '09:00',
       endTime: '13:00',
       visitDurationMinutes: 15,
+      complementaryInsuranceLimit: 0,
       isActive: true,
     },
     load: async (getToken) => {
@@ -1206,24 +1247,32 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
         return {
           id,
           title: str(r.doctorName, `برنامه #${id}`),
-          subtitle: `${dayLabel} · ${str(r.startTime).slice(0, 5)}-${str(r.endTime).slice(0, 5)}`,
-          meta: `${str(r.visitDurationMinutes)} دقیقه`,
+          subtitle: `${str(r.bookingDepartmentTitle, 'عمومی')} · ${dayLabel} · ${str(r.startTime).slice(0, 5)}-${str(r.endTime).slice(0, 5)}`,
+          meta: `${str(r.visitDurationMinutes)} دقیقه · سقف تکمیلی ${str(r.complementaryInsuranceLimit, 'نامحدود')}`,
           badge: activeBadge(isActive),
           isActive,
           raw: r,
         };
       });
     },
-    loadOptions: async () => ({
-      dayOfWeek: WEEKDAY_OPTIONS,
-    }),
+    loadOptions: async (getToken) => {
+      const [doctors, departments] = await Promise.all([
+        listAll(getToken, 'Doctor/DoctorList'),
+        healanGet<Record<string, unknown>[]>(getToken, 'BookingSchedule/DepartmentList'),
+      ]);
+      return { dayOfWeek: WEEKDAY_OPTIONS,
+        doctorId: doctors.map(r => ({ key: num(r.doctorId ?? r.id), label: `${str(r.firstName)} ${str(r.lastName)}`.trim() })),
+        bookingDepartmentId: departments.filter(r => bool(r.isActive, true)).map(r => ({ key: num(r.bookingDepartmentId), label: str(r.title) })) };
+    },
     fromRow: (row) => ({
       doctorScheduleTemplateId: row.id,
       doctorId: num(row.raw.doctorId),
+      bookingDepartmentId: num(row.raw.bookingDepartmentId),
       dayOfWeek: num(row.raw.dayOfWeek, 6),
       startTime: str(row.raw.startTime).slice(0, 5),
       endTime: str(row.raw.endTime).slice(0, 5),
       visitDurationMinutes: num(row.raw.visitDurationMinutes, 15),
+      complementaryInsuranceLimit: num(row.raw.complementaryInsuranceLimit),
       isActive: bool(row.raw.isActive, true),
     }),
     save: async (getToken, form) => {
@@ -1231,10 +1280,12 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       await healanPost(getToken, 'BookingSchedule/TemplateSave', {
         doctorScheduleTemplateId: doctorScheduleTemplateId ?? 0,
         doctorId: num(form.doctorId),
+        bookingDepartmentId: num(form.bookingDepartmentId),
         dayOfWeek: num(form.dayOfWeek, 6),
         startTime: str(form.startTime),
         endTime: str(form.endTime),
         visitDurationMinutes: num(form.visitDurationMinutes, 15),
+        complementaryInsuranceLimit: num(form.complementaryInsuranceLimit),
         isActive: bool(form.isActive, true),
       });
     },
@@ -1247,10 +1298,12 @@ export const CRUD_MODULES: Partial<Record<ClinicModuleId, CrudModuleConfig>> = {
       await healanPost(getToken, 'BookingSchedule/TemplateSave', {
         doctorScheduleTemplateId: row.id,
         doctorId: num(row.raw.doctorId),
+        bookingDepartmentId: num(row.raw.bookingDepartmentId),
         dayOfWeek: num(row.raw.dayOfWeek, 6),
         startTime: str(row.raw.startTime),
         endTime: str(row.raw.endTime),
         visitDurationMinutes: num(row.raw.visitDurationMinutes, 15),
+        complementaryInsuranceLimit: num(row.raw.complementaryInsuranceLimit),
         isActive: !bool(row.raw.isActive, true),
       });
     },

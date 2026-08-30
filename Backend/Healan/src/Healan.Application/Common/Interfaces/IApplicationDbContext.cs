@@ -59,6 +59,7 @@ public interface IApplicationDbContext : IDisposable
      DbSet<RagChatLog> RagChatLogs { get; set; }
      DbSet<SmsSetting> SmsSettings { get; set; }
      DbSet<DoctorScheduleTemplate> DoctorScheduleTemplates { get; set; }
+     DbSet<BookingDepartment> BookingDepartments { get; set; }
      DbSet<DoctorScheduleException> DoctorScheduleExceptions { get; set; }
      DbSet<AppointmentSlot> AppointmentSlots { get; set; }
      DbSet<AppointmentBooking> AppointmentBookings { get; set; }

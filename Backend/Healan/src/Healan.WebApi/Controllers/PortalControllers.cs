@@ -1,4 +1,5 @@
 using Healan.Application.Booking.Commands.PortalBook;
+using Healan.Application.Booking.Commands;
 using Healan.Application.Booking.Commands.PortalPatientRegister;
 using Healan.Application.Booking.Queries.PortalBooking;
 using Healan.Application.Common.MasterData;
@@ -355,6 +356,13 @@ public class PortalPublicController : ControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> BookingServices() =>
         Ok(await Mediator.Send(new PortalBookingServicesQuery()));
+
+    [HttpGet("[action]")]
+    public async Task<IActionResult> BookingDepartments([FromQuery] BookingDepartmentListQuery query)
+    {
+        query.ActiveOnly = true;
+        return Ok(await Mediator.Send(query));
+    }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> BookingLookupPatient([FromQuery] string? phoneNumber, [FromQuery] string? nationalCode) =>
