@@ -19,6 +19,7 @@ const PrescriptionsPage = lazy(() => import('../pages/Prescriptions'));
 const BasicDataLayout = lazy(() => import('../pages/BasicData/Layout'));
 const InsurancePage = lazy(() => import('../pages/BasicData/Insurance'));
 const ServicesPage = lazy(() => import('../pages/BasicData/Services'));
+const BookingServicesPage = lazy(() => import('../pages/BasicData/BookingServices'));
 const MedicalFeesPage = lazy(() => import('../pages/BasicData/MedicalFees'));
 const UsersPage = lazy(() => import('../pages/BasicData/Users'));
 const CompaniesPage = lazy(() => import('../pages/BasicData/Companies'));
@@ -94,6 +95,7 @@ export default function AppRoutes() {
             <Route path="companies" element={guarded('/basic-data/companies', <CompaniesPage />)} />
             <Route path="insurance" element={guarded('/basic-data/insurance', <InsurancePage />)} />
             <Route path="services" element={guarded('/basic-data/services', <ServicesPage />)} />
+            <Route path="booking-services" element={guarded('/basic-data/booking-services', <BookingServicesPage />)} />
             <Route path="fees" element={guarded('/basic-data/fees', <MedicalFeesPage />)} />
             <Route path="users" element={guarded('/basic-data/users', <UsersPage />)} />
             <Route path="assistant" element={guarded('/basic-data/assistant', <AssistantSettingsPage />)} />

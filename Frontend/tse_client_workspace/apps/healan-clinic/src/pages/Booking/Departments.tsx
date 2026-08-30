@@ -166,7 +166,7 @@ function BookingDepartmentsPage({ onAlert }: { onAlert: (message: unknown) => vo
                   })}
                 </div>
               )}
-              <small className="healan-muted">مثلاً برای دپارتمان واریس، «سونوگرافی داپلر عروق» را انتخاب و اضافه کنید. تعریف عنوان خدمت جدید از منوی «اطلاعات پایه ← انواع خدمات» انجام می‌شود.</small>
+              <small className="healan-muted">مثلاً برای دپارتمان واریس، «سونوگرافی داپلر عروق» را انتخاب و اضافه کنید. تعریف خدمت جدید از منوی «اطلاعات پایه ← تعریف خدمات زیرمجموعه» انجام می‌شود.</small>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: '1rem' }}>
