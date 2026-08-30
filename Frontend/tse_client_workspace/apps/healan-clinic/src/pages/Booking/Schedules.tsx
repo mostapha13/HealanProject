@@ -161,10 +161,12 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
     }
     let cancelled = false;
     setDepartments([]);
-    healanApi.booking.departmentList(medicalGroupTypeId)
+    healanApi.booking.departmentList()
       .then((list) => {
         if (cancelled) return;
-        const next = (list ?? []).filter((department) => department.isActive);
+        const next = (list ?? []).filter((department) =>
+          department.isActive && Number(department.medicalGroupTypeId) === medicalGroupTypeId
+        );
         setDepartments(next);
         setForm((current) => next.some((department) => department.bookingDepartmentId === current.bookingDepartmentId)
           ? current
@@ -335,7 +337,7 @@ function BookingSchedulesPage({ onAlert }: { onAlert: (msg: unknown) => void }) 
                 ))}
               </select>
             </div>
-            <div className="healan-form-field"><label>دپارتمان این بازه</label><select className="healan-input" disabled={!doctorId || !selectedDoctor?.medicalGroupTypeId} value={form.bookingDepartmentId} onChange={(e) => setForm({ ...form, bookingDepartmentId: Number(e.target.value), complementaryInsuranceLimit: 0 })}><option value={0}>{!doctorId ? 'ابتدا پزشک را انتخاب کنید' : departments.length === 0 ? 'برای گروه این پزشک دپارتمانی تعریف نشده است' : 'انتخاب دپارتمان'}</option>{departments.map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}</option>)}</select><small className="healan-muted">فقط دپارتمان‌های فعالِ گروه پزشک انتخاب‌شده نمایش داده می‌شوند.</small></div>
+            <div className="healan-form-field"><label>دپارتمان این بازه</label><select className="healan-input" disabled={!doctorId || !selectedDoctor?.medicalGroupTypeId} value={form.bookingDepartmentId} onChange={(e) => setForm({ ...form, bookingDepartmentId: Number(e.target.value), complementaryInsuranceLimit: 0 })}><option value={0}>{!doctorId ? 'ابتدا پزشک را انتخاب کنید' : departments.length === 0 ? 'برای گروه این پزشک دپارتمانی تعریف نشده است' : 'انتخاب دپارتمان'}</option>{departments.map((d) => <option key={d.bookingDepartmentId} value={d.bookingDepartmentId}>{d.title}{d.serviceTitles?.length ? ` (${d.serviceTitles.length} خدمت)` : ''}</option>)}</select><small className="healan-muted">همه دپارتمان‌های فعالِ گروه پزشک انتخاب‌شده نمایش داده می‌شوند.</small></div>
             <div className="healan-form-field">
               <label>از ساعت (۰–۲۴)</label>
               <select
